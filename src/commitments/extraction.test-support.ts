@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import "./extraction.js";
 import type {
   CommitmentCandidate,
@@ -16,7 +16,7 @@ type ValidatedCommitmentCandidate = {
 
 type CommitmentExtractionTestApi = {
   validateCommitmentCandidates(params: {
-    cfg?: OpenClawConfig;
+    cfg?: BotConfig;
     items: CommitmentExtractionItem[];
     result: CommitmentExtractionBatchResult;
     nowMs?: number;
@@ -25,7 +25,7 @@ type CommitmentExtractionTestApi = {
 
 function getTestApi(): CommitmentExtractionTestApi {
   const api = (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.commitmentExtractionTestApi")
+    Symbol.for("bot.commitmentExtractionTestApi")
   ];
   if (!api) {
     throw new Error("commitment extraction test API is unavailable");

@@ -2,10 +2,10 @@
 import {
   createOutboundPayloadPlan,
   projectOutboundPayloadPlanForDelivery,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { getGlobalHookRunner } from "openclaw/plugin-sdk/plugin-runtime";
-import { createSubsystemLogger, danger, logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import { getGlobalHookRunner } from "bot/plugin-sdk/plugin-runtime";
+import { createSubsystemLogger, danger, logVerbose } from "bot/plugin-sdk/runtime-env";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { resolveDispatchTelegramContext } from "./bot-message-dispatch-context.js";
 import { createTelegramDeliveryController } from "./bot-message-dispatch-delivery.js";
 import { createTelegramDraftController } from "./bot-message-dispatch-draft.js";

@@ -1,5 +1,5 @@
-// Provider/account summary helpers for `openclaw agents list`.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+// Provider/account summary helpers for `bot agents list`.
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import { isChannelVisibleInConfiguredLists } from "../channels/plugins/exposure.js";
 import { resolveChannelDefaultAccountId } from "../channels/plugins/helpers.js";
 import { normalizeChannelId } from "../channels/plugins/index.js";
@@ -7,7 +7,7 @@ import { listReadOnlyChannelPluginsForConfig } from "../channels/plugins/read-on
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
 import type { ChannelId } from "../channels/plugins/types.public.js";
 import type { AgentBinding } from "../config/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { listExplicitConfiguredChannelIdsForConfig } from "../plugins/channel-plugin-ids.js";
 import { resolveMissingOfficialExternalChannelPluginRepairHint } from "../plugins/official-external-plugin-repair-hints.js";
 import { DEFAULT_ACCOUNT_ID } from "../routing/session-key.js";
@@ -51,7 +51,7 @@ function resolveProviderChannelId(params: {
 
 /** Build stable provider labels/default accounts without resolving live account state. */
 export function buildProviderSummaryMetadataIndex(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): Map<ChannelId, ProviderSummaryMetadata> {
   const metadata = new Map<ChannelId, ProviderSummaryMetadata>(
     listReadOnlyChannelPluginsForConfig(cfg, {
@@ -121,7 +121,7 @@ function formatProviderState(entry: ProviderAccountStatus): string {
 
 async function resolveReadOnlyAccount(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
 }): Promise<unknown> {
   if (params.plugin.config.inspectAccount) {
@@ -132,7 +132,7 @@ async function resolveReadOnlyAccount(params: {
 
 /** Inspect configured provider accounts and classify their display state. */
 export async function buildProviderStatusIndex(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): Promise<Map<string, ProviderAccountStatus>> {
   const map = new Map<string, ProviderAccountStatus>();
 
@@ -210,7 +210,7 @@ function resolveDefaultAccountId(
 
 function shouldShowProviderEntry(params: {
   entry: ProviderAccountStatus;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   metadataByProvider: ReadonlyMap<ChannelId, ProviderSummaryMetadata>;
 }): boolean {
   const visibleInConfiguredLists =
@@ -251,7 +251,7 @@ function formatMissingProviderEntry(params: {
 
 /** Render the provider/account routes implied by an agent's route bindings. */
 export function summarizeBindings(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   bindings: AgentBinding[],
   metadataByProvider = buildProviderSummaryMetadataIndex(cfg),
 ): string[] {
@@ -285,7 +285,7 @@ export function summarizeBindings(
 /** Render provider status lines relevant to a specific agent summary. */
 export function listProvidersForAgent(params: {
   summaryIsDefault: boolean;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   bindings: AgentBinding[];
   providerStatus: Map<string, ProviderAccountStatus>;
   providerMetadata?: ReadonlyMap<ChannelId, ProviderSummaryMetadata>;

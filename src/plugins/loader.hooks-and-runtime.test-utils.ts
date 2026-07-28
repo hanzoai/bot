@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { withEnv } from "../test-utils/env.js";
 import { createHookRunner } from "./hooks.js";
-import { loadOpenClawPlugins } from "./loader.js";
+import { loadBotPlugins } from "./loader.js";
 import {
   EMPTY_PLUGIN_SCHEMA,
   makeTempDir,
@@ -26,7 +26,7 @@ import { loadPluginManifestRegistry } from "./manifest-registry.js";
 afterEach(globalAfterEach0);
 afterAll(globalAfterAll1);
 
-describe("loadOpenClawPlugins", () => {
+describe("loadBotPlugins", () => {
   it("setup-loads a trusted global channel plugin when the caller scopes to it", () => {
     useNoBundledPlugins();
     const marker = path.join(makeTempDir(), "trusted-global-channel-imported.txt");
@@ -62,7 +62,7 @@ describe("loadOpenClawPlugins", () => {
         "utf-8",
       );
       fs.writeFileSync(
-        path.join(globalDir, "openclaw.plugin.json"),
+        path.join(globalDir, "bot.plugin.json"),
         JSON.stringify(
           {
             id: "trusted-global-channel",
@@ -78,10 +78,10 @@ describe("loadOpenClawPlugins", () => {
         path.join(globalDir, "package.json"),
         JSON.stringify(
           {
-            name: "@openclaw/trusted-global-channel",
+            name: "@hanzo/bot-trusted-global-channel",
             version: "0.0.0-test",
             main: "./index.cjs",
-            openclaw: {
+            bot: {
               extensions: ["./index.cjs"],
             },
           },
@@ -91,7 +91,7 @@ describe("loadOpenClawPlugins", () => {
         "utf-8",
       );
 
-      const scopedSetupRegistry = loadOpenClawPlugins({
+      const scopedSetupRegistry = loadBotPlugins({
         cache: false,
         config: {
           plugins: {
@@ -147,7 +147,7 @@ describe("loadOpenClawPlugins", () => {
   };`,
     });
     fs.writeFileSync(
-      path.join(plugin.dir, "openclaw.plugin.json"),
+      path.join(plugin.dir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "auto-enabled-load-path-channel",
@@ -160,7 +160,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const scopedSetupRegistry = loadOpenClawPlugins({
+    const scopedSetupRegistry = loadBotPlugins({
       cache: false,
       config: {
         channels: {
@@ -191,13 +191,13 @@ describe("loadOpenClawPlugins", () => {
       fixture: {
         id: "setup-entry-test",
         label: "Setup Entry Test",
-        packageName: "@openclaw/setup-entry-test",
+        packageName: "@hanzo/bot-setup-entry-test",
         fullBlurb: "full entry should not run in setup-only mode",
         setupBlurb: "setup entry",
         configured: false,
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           config: {
             plugins: {
@@ -221,14 +221,14 @@ describe("loadOpenClawPlugins", () => {
       fixture: {
         id: "setup-only-bundled-contract-test",
         label: "Setup Only Bundled Contract Test",
-        packageName: "@openclaw/setup-only-bundled-contract-test",
+        packageName: "@hanzo/bot-setup-only-bundled-contract-test",
         fullBlurb: "full entry should not run in setup-only mode",
         setupBlurb: "setup-only bundled contract",
         configured: false,
         useBundledSetupEntryContract: true,
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           config: {
             plugins: {
@@ -252,13 +252,13 @@ describe("loadOpenClawPlugins", () => {
       fixture: {
         id: "setup-runtime-test",
         label: "Setup Runtime Test",
-        packageName: "@openclaw/setup-runtime-test",
+        packageName: "@hanzo/bot-setup-runtime-test",
         fullBlurb: "full entry should not run while unconfigured",
         setupBlurb: "setup runtime",
         configured: false,
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           config: {
             plugins: {
@@ -276,14 +276,14 @@ describe("loadOpenClawPlugins", () => {
       fixture: {
         id: "setup-runtime-bundled-contract-test",
         label: "Setup Runtime Bundled Contract Test",
-        packageName: "@openclaw/setup-runtime-bundled-contract-test",
+        packageName: "@hanzo/bot-setup-runtime-bundled-contract-test",
         fullBlurb: "full entry should not run while unconfigured",
         setupBlurb: "setup runtime bundled contract",
         configured: false,
         useBundledSetupEntryContract: true,
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           config: {
             plugins: {
@@ -301,7 +301,7 @@ describe("loadOpenClawPlugins", () => {
       fixture: {
         id: "setup-runtime-bundled-contract-secrets-test",
         label: "Setup Runtime Bundled Contract Secrets Test",
-        packageName: "@openclaw/setup-runtime-bundled-contract-secrets-test",
+        packageName: "@hanzo/bot-setup-runtime-bundled-contract-secrets-test",
         fullBlurb: "full entry should not run while unconfigured",
         setupBlurb: "setup runtime bundled contract secrets",
         configured: false,
@@ -309,7 +309,7 @@ describe("loadOpenClawPlugins", () => {
         splitBundledSetupSecrets: true,
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           config: {
             plugins: {
@@ -328,7 +328,7 @@ describe("loadOpenClawPlugins", () => {
       fixture: {
         id: "setup-runtime-bundled-contract-runtime-test",
         label: "Setup Runtime Bundled Contract Runtime Test",
-        packageName: "@openclaw/setup-runtime-bundled-contract-runtime-test",
+        packageName: "@hanzo/bot-setup-runtime-bundled-contract-runtime-test",
         fullBlurb: "full entry should not run while unconfigured",
         setupBlurb: "setup runtime bundled contract runtime",
         configured: false,
@@ -336,7 +336,7 @@ describe("loadOpenClawPlugins", () => {
         bundledSetupRuntimeMarker: path.join(makeTempDir(), "setup-runtime-applied.txt"),
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           config: {
             plugins: {
@@ -355,7 +355,7 @@ describe("loadOpenClawPlugins", () => {
       fixture: {
         id: "setup-runtime-bundled-route-test",
         label: "Setup Runtime Bundled Route Test",
-        packageName: "@openclaw/setup-runtime-bundled-route-test",
+        packageName: "@hanzo/bot-setup-runtime-bundled-route-test",
         fullBlurb: "full entry should defer while configured",
         setupBlurb: "setup runtime route",
         configured: true,
@@ -364,7 +364,7 @@ describe("loadOpenClawPlugins", () => {
         bundledSetupRuntimeRoutePath: "/setup-runtime-route",
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           preferSetupRuntimeForChannelPlugins: true,
           config: {
@@ -390,7 +390,7 @@ describe("loadOpenClawPlugins", () => {
       fixture: {
         id: "setup-runtime-bundled-runtime-merge-test",
         label: "Setup Runtime Bundled Runtime Merge Test",
-        packageName: "@openclaw/setup-runtime-bundled-runtime-merge-test",
+        packageName: "@hanzo/bot-setup-runtime-bundled-runtime-merge-test",
         fullBlurb: "full runtime plugin",
         setupBlurb: "setup runtime override",
         configured: false,
@@ -399,7 +399,7 @@ describe("loadOpenClawPlugins", () => {
         bundledFullRuntimeMarker: path.join(makeTempDir(), "bundled-runtime-applied.txt"),
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           config: {
             plugins: {
@@ -418,7 +418,7 @@ describe("loadOpenClawPlugins", () => {
       fixture: {
         id: "setup-runtime-external-deferred-test",
         label: "Setup Runtime External Deferred Test",
-        packageName: "@openclaw/setup-runtime-external-deferred-test",
+        packageName: "@hanzo/bot-setup-runtime-external-deferred-test",
         fullBlurb: "full entry should defer while configured",
         setupBlurb: "setup runtime external deferred",
         configured: true,
@@ -426,7 +426,7 @@ describe("loadOpenClawPlugins", () => {
         bundledSetupRuntimeMarker: path.join(makeTempDir(), "external-setup-runtime-applied.txt"),
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           preferSetupRuntimeForChannelPlugins: true,
           config: {
@@ -452,13 +452,13 @@ describe("loadOpenClawPlugins", () => {
       fixture: {
         id: "setup-runtime-not-preferred-test",
         label: "Setup Runtime Not Preferred Test",
-        packageName: "@openclaw/setup-runtime-not-preferred-test",
+        packageName: "@hanzo/bot-setup-runtime-not-preferred-test",
         fullBlurb: "full entry should still load without explicit startup opt-in",
         setupBlurb: "setup runtime not preferred",
         configured: true,
       },
       load: ({ pluginDir }: { pluginDir: string }) =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           preferSetupRuntimeForChannelPlugins: true,
           config: {
@@ -537,7 +537,7 @@ describe("loadOpenClawPlugins", () => {
     const built = createSetupEntryChannelPluginFixture({
       id: "setup-runtime-order-test",
       label: "Setup Runtime Order Test",
-      packageName: "@openclaw/setup-runtime-order-test",
+      packageName: "@hanzo/bot-setup-runtime-order-test",
       fullBlurb: "full runtime plugin",
       setupBlurb: "setup runtime override",
       configured: false,
@@ -547,7 +547,7 @@ describe("loadOpenClawPlugins", () => {
       requireBundledFullRuntimeBeforeLoad: true,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -567,7 +567,7 @@ describe("loadOpenClawPlugins", () => {
     const built = createSetupEntryChannelPluginFixture({
       id: "setup-runtime-error-test",
       label: "Setup Runtime Error Test",
-      packageName: "@openclaw/setup-runtime-error-test",
+      packageName: "@hanzo/bot-setup-runtime-error-test",
       fullBlurb: "full runtime plugin",
       setupBlurb: "setup runtime override",
       configured: false,
@@ -580,7 +580,7 @@ describe("loadOpenClawPlugins", () => {
       body: `module.exports = { id: "setup-runtime-helper-test", register() {} };`,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -605,7 +605,7 @@ describe("loadOpenClawPlugins", () => {
     const built = createSetupEntryChannelPluginFixture({
       id: "setup-runtime-route-error-test",
       label: "Setup Runtime Route Error Test",
-      packageName: "@openclaw/setup-runtime-route-error-test",
+      packageName: "@hanzo/bot-setup-runtime-route-error-test",
       fullBlurb: "full runtime plugin",
       setupBlurb: "setup runtime route",
       configured: true,
@@ -620,7 +620,7 @@ describe("loadOpenClawPlugins", () => {
       body: `module.exports = { id: "setup-runtime-route-helper-test", register() {} };`,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       preferSetupRuntimeForChannelPlugins: true,
       config: {
@@ -655,7 +655,7 @@ describe("loadOpenClawPlugins", () => {
     const built = createSetupEntryChannelPluginFixture({
       id: "setup-runtime-late-route-test",
       label: "Setup Runtime Late Route Test",
-      packageName: "@openclaw/setup-runtime-late-route-test",
+      packageName: "@hanzo/bot-setup-runtime-late-route-test",
       fullBlurb: "full runtime plugin",
       setupBlurb: "setup runtime route",
       configured: true,
@@ -665,7 +665,7 @@ describe("loadOpenClawPlugins", () => {
       bundledSetupRuntimeLateRoutePath: "/setup-runtime-late-route",
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       preferSetupRuntimeForChannelPlugins: true,
       config: {
@@ -698,7 +698,7 @@ describe("loadOpenClawPlugins", () => {
       id: "setup-runtime-mismatch-test",
       bundledFullEntryId: "wrong-runtime-id",
       label: "Setup Runtime Mismatch Test",
-      packageName: "@openclaw/setup-runtime-mismatch-test",
+      packageName: "@hanzo/bot-setup-runtime-mismatch-test",
       fullBlurb: "full runtime plugin",
       setupBlurb: "setup runtime override",
       configured: false,
@@ -707,7 +707,7 @@ describe("loadOpenClawPlugins", () => {
       bundledFullRuntimeMarker: runtimeMarker,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -733,7 +733,7 @@ describe("loadOpenClawPlugins", () => {
       id: "setup-export-mismatch-test",
       bundledSetupEntryId: "wrong-setup-id",
       label: "Setup Export Mismatch Test",
-      packageName: "@openclaw/setup-export-mismatch-test",
+      packageName: "@hanzo/bot-setup-export-mismatch-test",
       fullBlurb: "full runtime plugin",
       setupBlurb: "setup runtime override",
       configured: false,
@@ -742,7 +742,7 @@ describe("loadOpenClawPlugins", () => {
       bundledFullRuntimeMarker: runtimeMarker,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -772,8 +772,8 @@ describe("loadOpenClawPlugins", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/setup-entry-throws-test",
-          openclaw: {
+          name: "@hanzo/bot-setup-entry-throws-test",
+          bot: {
             extensions: ["./index.cjs"],
             setupEntry: "./setup-entry.cjs",
           },
@@ -784,7 +784,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "setup-entry-throws-test",
@@ -812,7 +812,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -839,8 +839,8 @@ describe("loadOpenClawPlugins", () => {
       path.join(brokenDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/setup-entry-throws-sibling-test",
-          openclaw: {
+          name: "@hanzo/bot-setup-entry-throws-sibling-test",
+          bot: {
             extensions: ["./index.cjs"],
             setupEntry: "./setup-entry.cjs",
           },
@@ -851,7 +851,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(brokenDir, "openclaw.plugin.json"),
+      path.join(brokenDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "setup-entry-throws-sibling-test",
@@ -902,7 +902,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -937,8 +937,8 @@ describe("loadOpenClawPlugins", () => {
       path.join(brokenDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/register-channel-throws-test",
-          openclaw: {
+          name: "@hanzo/bot-register-channel-throws-test",
+          bot: {
             extensions: ["./index.cjs"],
             setupEntry: "./setup-entry.cjs",
           },
@@ -949,7 +949,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(brokenDir, "openclaw.plugin.json"),
+      path.join(brokenDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "register-channel-throws-test",
@@ -1023,7 +1023,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -1061,7 +1061,7 @@ describe("loadOpenClawPlugins", () => {
     mkdirSafe(sourceDir);
     mkdirSafe(runtimeDir);
     fs.writeFileSync(
-      path.join(sourceDir, "openclaw.plugin.json"),
+      path.join(sourceDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "startup-artifact-test",
@@ -1085,12 +1085,12 @@ describe("loadOpenClawPlugins", () => {
 
     const registry = withEnv(
       {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(repoRoot, "extensions"),
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        BOT_BUNDLED_PLUGINS_DIR: path.join(repoRoot, "extensions"),
+        BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+        BOT_DISABLE_BUNDLED_PLUGINS: undefined,
       },
       () =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           preferBuiltPluginArtifacts: true,
           onlyPluginIds: ["startup-artifact-test"],
@@ -1119,7 +1119,7 @@ describe("loadOpenClawPlugins", () => {
     mkdirSafe(sourceDir);
     mkdirSafe(runtimeDir);
     fs.writeFileSync(
-      path.join(sourceDir, "openclaw.plugin.json"),
+      path.join(sourceDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "startup-package-artifact-test",
@@ -1134,7 +1134,7 @@ describe("loadOpenClawPlugins", () => {
       path.join(sourceDir, "package.json"),
       JSON.stringify(
         {
-          openclaw: {
+          bot: {
             extensions: ["./index.ts"],
           },
         },
@@ -1156,12 +1156,12 @@ describe("loadOpenClawPlugins", () => {
 
     const registry = withEnv(
       {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(repoRoot, "extensions"),
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        BOT_BUNDLED_PLUGINS_DIR: path.join(repoRoot, "extensions"),
+        BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+        BOT_DISABLE_BUNDLED_PLUGINS: undefined,
       },
       () =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           preferBuiltPluginArtifacts: true,
           onlyPluginIds: ["startup-package-artifact-test"],
@@ -1195,7 +1195,7 @@ describe("loadOpenClawPlugins", () => {
     mkdirSafe(builtPluginDir);
     fs.writeFileSync(path.join(repoRoot, "pnpm-workspace.yaml"), "packages: []\n", "utf-8");
     fs.writeFileSync(
-      path.join(sourceDir, "openclaw.plugin.json"),
+      path.join(sourceDir, "bot.plugin.json"),
       JSON.stringify(
         { id: "source-only-artifact-test", configSchema: EMPTY_PLUGIN_SCHEMA },
         null,
@@ -1206,7 +1206,7 @@ describe("loadOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(sourceDir, "package.json"),
       JSON.stringify({
-        openclaw: {
+        bot: {
           extensions: ["./index.ts"],
           build: { bundledDist: false },
         },
@@ -1224,12 +1224,12 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
     fs.copyFileSync(
-      path.join(sourceDir, "openclaw.plugin.json"),
-      path.join(builtPluginDir, "openclaw.plugin.json"),
+      path.join(sourceDir, "bot.plugin.json"),
+      path.join(builtPluginDir, "bot.plugin.json"),
     );
     fs.writeFileSync(
       path.join(builtPluginDir, "package.json"),
-      JSON.stringify({ openclaw: { extensions: ["./index.js"] } }),
+      JSON.stringify({ bot: { extensions: ["./index.js"] } }),
       "utf-8",
     );
     fs.writeFileSync(
@@ -1258,13 +1258,13 @@ describe("loadOpenClawPlugins", () => {
     };
     const registry = withEnv(
       {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.join(repoRoot, "dist", "extensions"),
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        BOT_BUNDLED_PLUGINS_DIR: path.join(repoRoot, "dist", "extensions"),
+        BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+        BOT_DISABLE_BUNDLED_PLUGINS: undefined,
       },
       () => {
         const manifestRegistry = loadPluginManifestRegistry({ config });
-        return loadOpenClawPlugins({
+        return loadBotPlugins({
           cache: false,
           preferBuiltPluginArtifacts: true,
           onlyPluginIds: ["source-only-artifact-test"],
@@ -1289,7 +1289,7 @@ describe("loadOpenClawPlugins", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          openclaw: {
+          bot: {
             extensions: ["./src/index.mts"],
           },
         },
@@ -1299,7 +1299,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "workspace-artifact-test",
@@ -1321,7 +1321,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       preferBuiltPluginArtifacts: true,
       config: {
@@ -1352,7 +1352,7 @@ describe("loadOpenClawPlugins", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          openclaw: {
+          bot: {
             extensions: ["./src/index.ts"],
           },
         },
@@ -1362,7 +1362,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "workspace-artifact-extension-test",
@@ -1384,7 +1384,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       preferBuiltPluginArtifacts: true,
       config: {
@@ -1414,7 +1414,7 @@ describe("loadOpenClawPlugins", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          openclaw: {
+          bot: {
             extensions: ["./index.js"],
           },
         },
@@ -1424,7 +1424,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "workspace-explicit-js-test",
@@ -1446,7 +1446,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       preferBuiltPluginArtifacts: true,
       config: {
@@ -1476,7 +1476,7 @@ describe("loadOpenClawPlugins", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          openclaw: {
+          bot: {
             extensions: ["./src/index.mts"],
           },
         },
@@ -1486,7 +1486,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "workspace-artifact-symlink-test",
@@ -1513,7 +1513,7 @@ describe("loadOpenClawPlugins", () => {
       return;
     }
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       preferBuiltPluginArtifacts: true,
       config: {
@@ -1696,12 +1696,12 @@ describe("loadOpenClawPlugins", () => {
       filename: `${pluginId}.cjs`,
       body: `module.exports = { id: ${JSON.stringify(pluginId)}, register(api) {
     api.registerAgentToolResultMiddleware(() => new Promise(() => {}), {
-      runtimes: ["openclaw"],
+      runtimes: ["bot"],
     });
   } };`,
     });
     updatePluginManifest(plugin, {
-      contracts: { agentToolResultMiddleware: ["openclaw"] },
+      contracts: { agentToolResultMiddleware: ["bot"] },
     });
 
     const registry = loadRegistryFromSinglePlugin({
@@ -1729,7 +1729,7 @@ describe("loadOpenClawPlugins", () => {
           args: {},
           result: { content: [{ type: "text", text: "raw" }], details: {} },
         },
-        { runtime: "openclaw" },
+        { runtime: "bot" },
       );
       const outcome = Promise.resolve(middlewareRun).then(
         () => ({ status: "resolved" as const }),
@@ -1756,12 +1756,12 @@ describe("loadOpenClawPlugins", () => {
       filename: "tool-result-middleware-no-timeout.cjs",
       body: `module.exports = { id: "tool-result-middleware-no-timeout", register(api) {
     api.registerAgentToolResultMiddleware(() => new Promise(() => {}), {
-      runtimes: ["openclaw"],
+      runtimes: ["bot"],
     });
   } };`,
     });
     updatePluginManifest(plugin, {
-      contracts: { agentToolResultMiddleware: ["openclaw"] },
+      contracts: { agentToolResultMiddleware: ["bot"] },
     });
     const registry = loadRegistryFromSinglePlugin({
       plugin,
@@ -1783,7 +1783,7 @@ describe("loadOpenClawPlugins", () => {
             args: {},
             result: { content: [{ type: "text", text: "raw" }], details: {} },
           },
-          { runtime: "openclaw" },
+          { runtime: "bot" },
         ),
       ).finally(() => {
         settled = true;

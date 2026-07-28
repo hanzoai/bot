@@ -1,16 +1,16 @@
 // Telegram plugin module implements account inspect behavior.
-import { resolveAccountWithDefaultFallback } from "openclaw/plugin-sdk/account-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { TelegramAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveDefaultSecretProviderAlias } from "openclaw/plugin-sdk/provider-auth";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/routing";
-import { tryReadSecretFileSync } from "openclaw/plugin-sdk/secret-file-runtime";
+import { resolveAccountWithDefaultFallback } from "bot/plugin-sdk/account-core";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { TelegramAccountConfig } from "bot/plugin-sdk/config-contracts";
+import { resolveDefaultSecretProviderAlias } from "bot/plugin-sdk/provider-auth";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/routing";
+import { tryReadSecretFileSync } from "bot/plugin-sdk/secret-file-runtime";
 import {
   hasConfiguredSecretInput,
   normalizeSecretInputString,
-} from "openclaw/plugin-sdk/secret-input";
-import { coerceSecretRef } from "openclaw/plugin-sdk/secret-input-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/secret-input";
+import { coerceSecretRef } from "bot/plugin-sdk/secret-input-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   mergeTelegramAccountConfig,
   resolveDefaultTelegramAccountId,
@@ -71,7 +71,7 @@ function inspectTokenFile(
 }
 
 function canResolveEnvSecretRefInReadOnlyPath(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   provider: string;
   id: string;
 }): boolean {
@@ -86,7 +86,7 @@ function canResolveEnvSecretRefInReadOnlyPath(params: {
   return !allowlist || allowlist.includes(params.id);
 }
 
-function inspectTokenValue(params: { cfg: OpenClawConfig; value: unknown }): {
+function inspectTokenValue(params: { cfg: BotConfig; value: unknown }): {
   token: string;
   tokenSource: "config" | "env" | "none";
   tokenStatus: TelegramCredentialStatus;
@@ -139,7 +139,7 @@ function inspectTokenValue(params: { cfg: OpenClawConfig; value: unknown }): {
   return null;
 }
 
-function hasConfiguredTelegramAccounts(cfg: OpenClawConfig): boolean {
+function hasConfiguredTelegramAccounts(cfg: BotConfig): boolean {
   const accounts = cfg.channels?.telegram?.accounts;
   return (
     Boolean(accounts) &&
@@ -150,7 +150,7 @@ function hasConfiguredTelegramAccounts(cfg: OpenClawConfig): boolean {
 }
 
 function inspectTelegramAccountPrimary(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   envToken?: string | null;
 }): InspectedTelegramAccount {
@@ -268,7 +268,7 @@ function inspectTelegramAccountPrimary(params: {
 }
 
 export function inspectTelegramAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   envToken?: string | null;
 }): InspectedTelegramAccount {

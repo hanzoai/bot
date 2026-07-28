@@ -15,7 +15,7 @@ import {
 import { withMcpOAuthBearer } from "./mcp-oauth-fetch.js";
 
 const testGlobal = globalThis as Record<string, unknown>;
-const TEST_UNDICI_RUNTIME_DEPS_KEY = "__OPENCLAW_TEST_UNDICI_RUNTIME_DEPS__";
+const TEST_UNDICI_RUNTIME_DEPS_KEY = "__BOT_TEST_UNDICI_RUNTIME_DEPS__";
 const { lookupMock, oauthResolveMock } = vi.hoisted(() => ({
   lookupMock: vi.fn(),
   oauthResolveMock: vi.fn(),

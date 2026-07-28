@@ -1,4 +1,4 @@
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { GatewayClientRequestOptions } from "../gateway/client.js";
 import type { NodeHostClient } from "./client.js";
 import type { NodeInvokeRequestPayload } from "./invoke.js";

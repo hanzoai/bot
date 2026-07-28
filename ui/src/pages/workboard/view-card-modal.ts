@@ -152,10 +152,10 @@ export function renderCardModal(props: WorkboardProps) {
     return true;
   };
   return html`
-    <openclaw-modal-dialog
+    <bot-modal-dialog
       label=${editing ? t("workboard.editCard") : t("workboard.newCard")}
       description=${editing ? t("workboard.editCardHelp") : t("workboard.newCardHelp")}
-      style="--openclaw-modal-width: min(1120px, calc(100vw - 56px)); --openclaw-modal-max-height: calc(100dvh - 56px);"
+      style="--bot-modal-width: min(1120px, calc(100vw - 56px)); --bot-modal-max-height: calc(100dvh - 56px);"
       @modal-cancel=${(event: Event) => {
         if (!dismissDraft()) {
           event.preventDefault();
@@ -189,7 +189,7 @@ export function renderCardModal(props: WorkboardProps) {
               ${editing ? t("workboard.editCardHelp") : t("workboard.newCardHelp")}
             </p>
           </div>
-          <openclaw-tooltip .content=${t("common.cancel")}>
+          <bot-tooltip .content=${t("common.cancel")}>
             <button
               class="btn btn--icon workboard-card__icon"
               type="button"
@@ -203,7 +203,7 @@ export function renderCardModal(props: WorkboardProps) {
             >
               ${icons.x}
             </button>
-          </openclaw-tooltip>
+          </bot-tooltip>
         </div>
         <div class="workboard-draft__body">
           ${!editing
@@ -281,7 +281,7 @@ export function renderCardModal(props: WorkboardProps) {
             })}
             <div class="workboard-field">
               <span>${t("workboard.fieldAgent")}</span>
-              <openclaw-agent-select
+              <bot-agent-select
                 class="workboard-agent-select"
                 .options=${assignableAgentOptions}
                 .value=${state.draftAgentId}
@@ -291,7 +291,7 @@ export function renderCardModal(props: WorkboardProps) {
                   state.draftAgentId = value;
                   props.onRequestUpdate?.();
                 }}
-              ></openclaw-agent-select>
+              ></bot-agent-select>
             </div>
             ${renderWorkboardSelect({
               value: state.draftSessionKey,
@@ -382,6 +382,6 @@ export function renderCardModal(props: WorkboardProps) {
           </button>
         </div>
       </form>
-    </openclaw-modal-dialog>
+    </bot-modal-dialog>
   `;
 }

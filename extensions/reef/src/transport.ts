@@ -1,5 +1,5 @@
-import { buildTimeoutAbortSignal } from "openclaw/plugin-sdk/extension-shared";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+import { buildTimeoutAbortSignal } from "bot/plugin-sdk/extension-shared";
+import { readProviderJsonResponse } from "bot/plugin-sdk/provider-http";
 import WebSocket from "ws";
 import { sha256Hex, signDeviceRequest, utf8 } from "../protocol/index.js";
 import type { Envelope, SignedReceipt } from "../protocol/index.js";

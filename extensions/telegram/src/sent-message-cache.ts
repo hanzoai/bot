@@ -1,17 +1,17 @@
 // Telegram plugin module implements sent message cache behavior.
 import { createHash } from "node:crypto";
 import fs from "node:fs";
-import { resolveDefaultAgentId } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+import { resolveDefaultAgentId } from "bot/plugin-sdk/agent-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
+import { resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
 import { getTelegramRuntime } from "./runtime.js";
 
 const TTL_MS = 24 * 60 * 60 * 1000;
 export const TELEGRAM_SENT_MESSAGE_CACHE_NAMESPACE = "telegram.sent-messages";
 export const TELEGRAM_SENT_MESSAGE_CACHE_MAX_ENTRIES = 10_000;
-const TELEGRAM_SENT_MESSAGES_STATE_KEY = Symbol.for("openclaw.telegramSentMessagesState");
+const TELEGRAM_SENT_MESSAGES_STATE_KEY = Symbol.for("bot.telegramSentMessagesState");
 
 type PersistedSentMessage = {
   scopeKey: string;
@@ -32,7 +32,7 @@ type SentMessageState = {
   bucketsByScope: Map<string, SentMessageBucket>;
 };
 
-type SentMessageConfig = Pick<OpenClawConfig, "agents" | "session">;
+type SentMessageConfig = Pick<BotConfig, "agents" | "session">;
 
 function getSentMessageState(): SentMessageState {
   const globalStore = globalThis as Record<PropertyKey, unknown>;
@@ -52,7 +52,7 @@ function createSentMessageStore(): SentMessageStore {
 }
 
 function resolveSentMessageAgentId(cfg?: SentMessageConfig, agentId?: string): string {
-  return agentId?.trim() || (cfg?.agents ? resolveDefaultAgentId(cfg as OpenClawConfig) : "main");
+  return agentId?.trim() || (cfg?.agents ? resolveDefaultAgentId(cfg as BotConfig) : "main");
 }
 
 function resolveSentMessageStorePath(cfg?: SentMessageConfig, agentId?: string): string {

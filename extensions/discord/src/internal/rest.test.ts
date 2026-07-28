@@ -1,7 +1,7 @@
 // Discord tests cover rest plugin behavior.
 import { createServer, type Server } from "node:http";
 import { gzipSync } from "node:zlib";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "bot/plugin-sdk/number-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { serializeRequestBody } from "./rest-body.js";
 import { DiscordError, RateLimitError, RequestClient } from "./rest.js";

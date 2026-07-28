@@ -45,8 +45,8 @@ describe("notarize-mac-artifact input validation", () => {
   });
 
   it("rejects extra artifact arguments before notarization", () => {
-    const tempRoot = makeTempDir("openclaw-notary-extra-");
-    const artifact = path.join(tempRoot, "OpenClaw.zip");
+    const tempRoot = makeTempDir("bot-notary-extra-");
+    const artifact = path.join(tempRoot, "Bot.zip");
     writeFileSync(artifact, "placeholder", "utf8");
 
     const result = spawnSync("bash", [scriptPath, artifact, "extra"], {
@@ -60,8 +60,8 @@ describe("notarize-mac-artifact input validation", () => {
   });
 
   it("fails before notarization when an explicit staple app path is missing", () => {
-    const tempRoot = makeTempDir("openclaw-notary-staple-");
-    const artifact = path.join(tempRoot, "OpenClaw.zip");
+    const tempRoot = makeTempDir("bot-notary-staple-");
+    const artifact = path.join(tempRoot, "Bot.zip");
     const missingApp = path.join(tempRoot, "Missing.app");
     writeFileSync(artifact, "placeholder", "utf8");
 

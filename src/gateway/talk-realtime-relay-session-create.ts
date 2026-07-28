@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { resolveExpiresAtMsFromDurationMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveExpiresAtMsFromDurationMs } from "@hanzo/bot-normalization-core/number-coercion";
 import { formatErrorMessage } from "../infra/errors.js";
 import { REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME } from "../talk/agent-consult-tool.js";
 import { buildRealtimeVoiceAgentCancelProviderResult } from "../talk/agent-run-control-shared.js";
@@ -262,7 +262,7 @@ export function createTalkRealtimeRelaySession(
           if (forcedConsult.kind === "already_delivered") {
             const result = relay.harness.forcedConsults.isCancelled(forcedConsult.handle)
               ? buildRealtimeVoiceAgentCancelProviderResult(
-                  "OpenClaw cancelled this consult before completion. Do not restart it.",
+                  "Bot cancelled this consult before completion. Do not restart it.",
                 )
               : buildAlreadyDeliveredToolResult();
             return submitForcedConsultProviderResult(

@@ -7,8 +7,8 @@ import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { formatSqliteSessionFileMarker } from "../config/sessions/sqlite-marker.js";
 import type { SessionEntry } from "../config/sessions/types.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import {
   resolveTrajectoryPointerFilePath,
   TRAJECTORY_RUNTIME_FILE_MAX_BYTES,
@@ -40,7 +40,7 @@ function makeEvent(
   params: Partial<TrajectoryEvent> & { type: string; ts: string },
 ): TrajectoryEvent {
   return {
-    traceSchema: "openclaw-trajectory",
+    traceSchema: "bot-trajectory",
     schemaVersion: 1,
     traceId: "trace-1",
     source: "runtime",
@@ -91,9 +91,9 @@ describe("sessionsTailCommand", () => {
 
   beforeEach(() => {
     setSessionsTailFollowIntervalMsForTests(2);
-    previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sessions-tail-"));
-    process.env.OPENCLAW_STATE_DIR = path.join(tmpDir, "state");
+    previousStateDir = process.env.BOT_STATE_DIR;
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-sessions-tail-"));
+    process.env.BOT_STATE_DIR = path.join(tmpDir, "state");
     mocks.getRuntimeConfig.mockReturnValue({
       agents: {
         list: [{ id: "main" }, { id: "ops" }],
@@ -106,12 +106,12 @@ describe("sessionsTailCommand", () => {
   afterEach(() => {
     setSessionsTailFollowIntervalMsForTests();
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.BOT_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.BOT_STATE_DIR = previousStateDir;
     }
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotAgentDatabasesForTest();
+    closeBotStateDatabaseForTest();
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
@@ -233,7 +233,7 @@ describe("sessionsTailCommand", () => {
     fs.writeFileSync(
       resolveTrajectoryPointerFilePath(sessionFile),
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory-pointer",
+        traceSchema: "bot-trajectory-pointer",
         schemaVersion: 1,
         sessionId: "session-one",
         runtimeFile: relocatedTrajectoryPath,
@@ -289,7 +289,7 @@ describe("sessionsTailCommand", () => {
     fs.writeFileSync(
       resolveTrajectoryPointerFilePath(sessionFile),
       `${JSON.stringify({
-        traceSchema: "openclaw-trajectory-pointer",
+        traceSchema: "bot-trajectory-pointer",
         schemaVersion: 1,
         sessionId: "old-session",
         runtimeFile: staleRuntimePath,
@@ -655,7 +655,7 @@ describe("sessionsTailCommand", () => {
   it("resolves the target store from a fully qualified non-default agent session key", async () => {
     const runtime = makeRuntime();
     const opsSessionKey = "agent:ops:telegram:direct:owner";
-    const opsSessionsDir = path.join(process.env.OPENCLAW_STATE_DIR!, "agents", "ops", "sessions");
+    const opsSessionsDir = path.join(process.env.BOT_STATE_DIR!, "agents", "ops", "sessions");
     const opsStorePath = path.join(opsSessionsDir, "sessions.json");
     await replaceSessionEntry(
       { sessionKey: opsSessionKey, storePath: opsStorePath },

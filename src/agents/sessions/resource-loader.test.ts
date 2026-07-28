@@ -15,13 +15,13 @@ type ExtensionCacheTestState = {
 
 function extensionCacheTestState(): ExtensionCacheTestState {
   return (
-    globalThis as typeof globalThis & { openclawExtensionCacheTestState: ExtensionCacheTestState }
-  ).openclawExtensionCacheTestState;
+    globalThis as typeof globalThis & { botExtensionCacheTestState: ExtensionCacheTestState }
+  ).botExtensionCacheTestState;
 }
 
 function extensionSource(command: string): string {
   return `
-const state = (globalThis.openclawExtensionCacheTestState ??= { factoryRuns: 0, moduleLoads: 0 });
+const state = (globalThis.botExtensionCacheTestState ??= { factoryRuns: 0, moduleLoads: 0 });
 state.moduleLoads += 1;
 
 export default function extension(api) {
@@ -36,12 +36,12 @@ export default function extension(api) {
 
 afterEach(() => {
   clearExtensionCache();
-  Reflect.deleteProperty(globalThis, "openclawExtensionCacheTestState");
+  Reflect.deleteProperty(globalThis, "botExtensionCacheTestState");
 });
 
 describe("DefaultResourceLoader", () => {
   it("reuses extension modules between loaders and refreshes them on reload", async () => {
-    const root = tempDirs.make("openclaw-resource-loader-extension-");
+    const root = tempDirs.make("bot-resource-loader-extension-");
     const extensionPath = join(root, "extension.ts");
     await writeFile(extensionPath, extensionSource("before-reload"));
     const createLoader = () =>
@@ -72,7 +72,7 @@ describe("DefaultResourceLoader", () => {
   });
 
   it("does not use unreadable prompt file paths as prompt content", async () => {
-    const root = tempDirs.make("openclaw-resource-loader-");
+    const root = tempDirs.make("bot-resource-loader-");
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       const loader = new DefaultResourceLoader({

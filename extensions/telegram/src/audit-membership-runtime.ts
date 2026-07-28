@@ -1,9 +1,9 @@
 // Telegram plugin module implements audit membership runtime behavior.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { fetchWithTimeout } from "openclaw/plugin-sdk/text-utility-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { resolveTimerTimeoutMs } from "bot/plugin-sdk/number-runtime";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
+import { fetchWithTimeout } from "bot/plugin-sdk/text-utility-runtime";
 import type {
   AuditTelegramGroupMembershipParams,
   TelegramGroupMembershipAudit,

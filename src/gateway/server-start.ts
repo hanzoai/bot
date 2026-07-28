@@ -1,5 +1,5 @@
 import { isNixMode } from "../config/paths.js";
-import { ensureOpenClawCliOnPath } from "../infra/path-env.js";
+import { ensureBotCliOnPath } from "../infra/path-env.js";
 import { createSubsystemLogger, runtimeForLogger } from "../logging/subsystem.js";
 import { createLazyRuntimeModule } from "../shared/lazy-runtime.js";
 import { startGatewayCoreRuntime } from "./server-core-runtime.js";
@@ -28,7 +28,7 @@ export async function resetPreparedModelCatalogForTest(): Promise<void> {
   await resetPreparedModelCatalogForTestLocal();
 }
 
-ensureOpenClawCliOnPath();
+ensureBotCliOnPath();
 
 const loadGatewayStartupEarlyModule = createLazyRuntimeModule(
   () => import("./server-startup-early.js"),
@@ -83,12 +83,12 @@ function formatRuntimeGatewayAuthTokenWarning(): string {
   const base =
     "Gateway auth token was missing. Generated a runtime token for this startup without changing config; restart will generate a different token.";
   if (!isNixMode) {
-    return `${base} Persist one with \`openclaw config set gateway.auth.mode token\` and \`openclaw config set gateway.auth.token <token>\`.`;
+    return `${base} Persist one with \`bot config set gateway.auth.mode token\` and \`bot config set gateway.auth.token <token>\`.`;
   }
   return [
     base,
-    "In Nix mode, set gateway.auth.token in your Nix-managed OpenClaw config and rebuild.",
-    "For the first-party Nix flow, see https://github.com/openclaw/nix-openclaw#quick-start and https://docs.openclaw.ai/install/nix.",
+    "In Nix mode, set gateway.auth.token in your Nix-managed Bot config and rebuild.",
+    "For the first-party Nix flow, see https://github.com/bot/nix-bot#quick-start and https://docs.bot.ai/install/nix.",
   ].join(" ");
 }
 

@@ -30,7 +30,7 @@ export type CreateManagedWorktreeParams = {
   baseRef?: string;
   ownerKind?: ManagedWorktreeOwnerKind;
   ownerId?: string;
-  // Repository checkout hooks and .openclaw/worktree-setup.sh execute repo-local code, so
+  // Repository checkout hooks and .bot/worktree-setup.sh execute repo-local code, so
   // callers reachable from less-privileged surfaces opt out; admin paths keep them on.
   runSetupScript?: boolean;
 };

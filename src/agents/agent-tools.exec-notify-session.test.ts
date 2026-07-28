@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import "./test-helpers/fast-bash-tools.js";
 import "./test-helpers/fast-coding-tools.js";
-import { createOpenClawCodingTools } from "./agent-tools.js";
+import { createBotCodingTools } from "./agent-tools.js";
 
 const createLazyExecToolMock = vi.hoisted(() => vi.fn());
 
@@ -21,19 +21,19 @@ vi.mock("./lazy-exec-tool.js", async (importOriginal) => {
   };
 });
 
-describe("createOpenClawCodingTools exec notification routing", () => {
+describe("createBotCodingTools exec notification routing", () => {
   it("routes detached completions to the live session without changing process scope", () => {
     const liveSessionKey = "agent:main:channel:group:example:thread:25";
     const policySessionKey = "agent:main:runtime-policy";
 
-    createOpenClawCodingTools({
+    createBotCodingTools({
       sessionKey: policySessionKey,
       runSessionKey: liveSessionKey,
       toolConstructionPlan: {
         includeBaseCodingTools: false,
         includeShellTools: true,
         includeChannelTools: false,
-        includeOpenClawTools: false,
+        includeBotTools: false,
         includePluginTools: false,
       },
     });

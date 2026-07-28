@@ -1,4 +1,4 @@
-// OpenClaw assistant planning converts fuzzy user text into one safe command.
+// Bot assistant planning converts fuzzy user text into one safe command.
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
@@ -92,7 +92,7 @@ export async function planSystemAgentCommandWithConfiguredModel(params: {
   const result = await runConfiguredSystemAgentText({
     prompt,
     systemPrompt: SYSTEM_AGENT_ASSISTANT_SYSTEM_PROMPT,
-    runIdPrefix: "openclaw-planner",
+    runIdPrefix: "bot-planner",
     verifiedInference: params.verifiedInference,
     deps: params.deps,
     responseFormat: SYSTEM_AGENT_PLANNER_RESPONSE_SCHEMA,
@@ -112,7 +112,7 @@ export async function planSystemAgentGreetingWithConfiguredModel(params: {
   const result = await runConfiguredSystemAgentText({
     prompt: buildSystemAgentGreetingUserPrompt(params),
     systemPrompt: SYSTEM_AGENT_GREETING_SYSTEM_PROMPT,
-    runIdPrefix: "openclaw-greeting",
+    runIdPrefix: "bot-greeting",
     verifiedInference: params.verifiedInference,
     deps: params.deps,
     timeoutMs: params.timeoutMs,
@@ -149,7 +149,7 @@ async function runConfiguredSystemAgentText(params: {
       (params.deps?.resolveAssistantTimeoutMs ?? resolveSystemAgentAssistantTimeoutMs)(route);
     const shared = {
       sessionId: `${runId}-session`,
-      // OpenClaw is the planner surface, but the configured roster owner supplies runtime policy.
+      // Bot is the planner surface, but the configured roster owner supplies runtime policy.
       agentId: route.agentId,
       trigger: "manual" as const,
       sessionFile: path.join(tempDir, "session.jsonl"),
@@ -165,8 +165,8 @@ async function runConfiguredSystemAgentText(params: {
       runId,
       extraSystemPrompt: params.systemPrompt,
       extraSystemPromptStatic: params.systemPrompt,
-      messageChannel: "openclaw",
-      messageProvider: "openclaw",
+      messageChannel: "bot",
+      messageProvider: "bot",
       disableTools: true,
       disableTrajectory: true,
       ...(params.responseFormat ? { streamParams: { responseFormat: params.responseFormat } } : {}),
@@ -229,7 +229,7 @@ async function requireVerifiedPlannerRoute(
 }
 
 async function createTempPlannerDir(): Promise<string> {
-  return await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-planner-"));
+  return await fs.mkdtemp(path.join(os.tmpdir(), "bot-planner-"));
 }
 
 async function removeTempPlannerDir(dir: string): Promise<void> {

@@ -85,7 +85,7 @@ const mocks = vi.hoisted(() => {
     sourceConfig,
     resolvedConfig,
     loadModelsConfigWithSource: vi.fn(),
-    ensureOpenClawModelsJson: vi.fn(),
+    ensureBotModelsJson: vi.fn(),
     ensureAuthProfileStore: vi.fn(),
     resolveDefaultAgentDir: vi.fn(),
     loadModelRegistry: vi.fn(),
@@ -105,9 +105,9 @@ function resetMocks() {
     resolvedConfig: mocks.resolvedConfig,
     diagnostics: [],
   });
-  mocks.ensureOpenClawModelsJson.mockResolvedValue({ wrote: false });
+  mocks.ensureBotModelsJson.mockResolvedValue({ wrote: false });
   mocks.ensureAuthProfileStore.mockReturnValue({ version: 1, profiles: {}, order: {} });
-  mocks.resolveDefaultAgentDir.mockReturnValue("/tmp/openclaw-agent");
+  mocks.resolveDefaultAgentDir.mockReturnValue("/tmp/bot-agent");
   mocks.loadModelRegistry.mockResolvedValue({
     models: [],
     availableKeys: new Set(),
@@ -261,7 +261,7 @@ function installModelsListCommandForwardCompatMocks() {
 
   vi.doMock("../../agents/agent-scope.js", () => ({
     listAgentEntries: vi.fn(() => []),
-    resolveAgentWorkspaceDir: vi.fn(() => "/tmp/openclaw-workspace"),
+    resolveAgentWorkspaceDir: vi.fn(() => "/tmp/bot-workspace"),
     resolveDefaultAgentDir: mocks.resolveDefaultAgentDir,
     resolveDefaultAgentId: vi.fn(() => "main"),
     resolveSessionAgentIds: vi.fn(() => ({ defaultAgentId: "main", sessionAgentId: "main" })),
@@ -316,7 +316,7 @@ async function buildAllOpenAiCodexRows(opts: { supplementCatalog?: boolean } = {
   const rows: unknown[] = [];
   const context = {
     cfg: mocks.resolvedConfig,
-    agentDir: "/tmp/openclaw-agent",
+    agentDir: "/tmp/bot-agent",
     authIndex: {
       evaluateModelAuth: (provider: string) => ({
         availability: provider === "openai",
@@ -418,7 +418,7 @@ describe("modelsListCommand forward-compat", () => {
             {
               id: "moonshot",
               origin: "bundled",
-              rootDir: "/tmp/openclaw-moonshot",
+              rootDir: "/tmp/bot-moonshot",
               modelCatalog: {
                 aliases: {
                   kimi: { provider: "moonshot" },
@@ -824,7 +824,7 @@ describe("modelsListCommand forward-compat", () => {
         mocks.resolvedConfig,
         expect.objectContaining({
           agentId: "main",
-          agentDir: "/tmp/openclaw-agent",
+          agentDir: "/tmp/bot-agent",
         }),
       );
       expect(mocks.printModelTable).toHaveBeenCalled();
@@ -992,7 +992,7 @@ describe("modelsListCommand forward-compat", () => {
 
       await modelsListCommand({ all: true, provider: "codex", json: true }, runtime as never);
 
-      expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+      expect(mocks.ensureBotModelsJson).not.toHaveBeenCalled();
       expect(mocks.loadModelRegistry).toHaveBeenCalledOnce();
       expect(mocks.loadModelCatalog).toHaveBeenCalledOnce();
       const rows = lastPrintedRows<{ key: string; available: boolean | null }>();

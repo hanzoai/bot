@@ -1,17 +1,17 @@
 // Gateway connection auth facade.
 // Resolves config-backed client credentials with or without async SecretRefs.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveGatewayCredentialsWithSecretInputs } from "./credentials-secret-inputs.js";
 import type { resolveGatewayCredentialsFromConfig } from "./credentials.js";
 
-// Thin public bridge from OpenClawConfig-shaped callers to the lower-level
+// Thin public bridge from BotConfig-shaped callers to the lower-level
 // credential resolver. Keep this file policy-free; precedence lives in
 // credentials-secret-inputs and credentials.
 type GatewayCredentialConfigOptions = Parameters<typeof resolveGatewayCredentialsFromConfig>[0];
 
 /** Connection auth options accepted by gateway clients that already loaded config. */
 type GatewayConnectionAuthOptions = Omit<GatewayCredentialConfigOptions, "cfg"> & {
-  config: OpenClawConfig;
+  config: BotConfig;
 };
 
 function toGatewayCredentialOptions(

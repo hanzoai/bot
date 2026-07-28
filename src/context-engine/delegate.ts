@@ -1,5 +1,5 @@
 // Context-engine delegates bridge custom engines to built-in compaction and memory prompt paths.
-import { normalizeStructuredPromptSection } from "@openclaw/ai/internal/shared";
+import { normalizeStructuredPromptSection } from "@hanzo/bot-ai/internal/shared";
 import { parseSqliteSessionFileMarker } from "../config/sessions/sqlite-marker.js";
 import {
   buildMemoryPromptSection,
@@ -47,7 +47,7 @@ function buildCompactionResultSessionTarget(params: {
 }
 
 /**
- * Delegate a context-engine compaction request to OpenClaw's built-in runtime compaction path.
+ * Delegate a context-engine compaction request to Bot's built-in runtime compaction path.
  *
  * This is the same bridge used by the legacy context engine. Third-party
  * engines can call it from their own `compact()` implementations when they do

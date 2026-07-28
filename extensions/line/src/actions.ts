@@ -1,6 +1,6 @@
 // Line plugin module implements actions behavior.
 import type { messagingApi } from "@line/bot-sdk";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 
 export type Action = messagingApi.Action;
 type Message = messagingApi.Message;

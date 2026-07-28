@@ -1,12 +1,12 @@
-# OpenClaw DeepInfra Provider
+# Bot DeepInfra Provider
 
-Official OpenClaw provider plugin for DeepInfra.
+Official Bot provider plugin for DeepInfra.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/deepinfra-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-deepinfra-provider
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/deepinfra> for setup and configuration.
+See <https://docs.bot.ai/providers/deepinfra> for setup and configuration.

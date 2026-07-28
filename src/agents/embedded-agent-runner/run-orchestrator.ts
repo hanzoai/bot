@@ -1,10 +1,10 @@
 /**
  * Embedded-agent run orchestration implementation.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { SILENT_REPLY_TOKEN } from "../../auto-reply/tokens.js";
 import { getRuntimeConfigSnapshot } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { revokeMessageActionTurnCapability } from "../../gateway/message-action-turn-capability.js";
 import {
   captureAgentRunLifecycleGeneration,
@@ -67,7 +67,7 @@ import { resolveInitialEmbeddedRunModel } from "./run/runtime-resolution.js";
 import { assertAgentHarnessRunAdmission, backfillSessionKey } from "./run/session-bootstrap.js";
 import type { EmbeddedAgentRunResult } from "./types.js";
 
-const EMPTY_EMBEDDED_AGENT_CONFIG: OpenClawConfig = Object.freeze({});
+const EMPTY_EMBEDDED_AGENT_CONFIG: BotConfig = Object.freeze({});
 
 export function runEmbeddedAgent(
   paramsInput: RunEmbeddedAgentParams,

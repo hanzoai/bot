@@ -1,7 +1,7 @@
 /** Recovery helpers for stale ACP persistent session ids and early runtime exits. */
-import { resolveSessionIdentityFromMeta } from "@openclaw/acp-core/runtime/session-identity";
-import type { AcpRuntime } from "@openclaw/acp-core/runtime/types";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { resolveSessionIdentityFromMeta } from "@hanzo/bot-acp-core/runtime/session-identity";
+import type { AcpRuntime } from "@hanzo/bot-acp-core/runtime/types";
+import type { BotConfig } from "../../config/types.bot.js";
 import { logVerbose } from "../../globals.js";
 import { formatErrorMessage, toErrorObject } from "../../infra/errors.js";
 import type { AcpRuntimeError } from "../runtime/errors.js";
@@ -44,7 +44,7 @@ function isRecoverableMissingManagerPersistentSessionError(error: AcpRuntimeErro
 /** Prepares a one-time fresh-handle retry for recoverable pre-output runtime failures. */
 export async function prepareFreshManagerRuntimeHandleRetry(params: {
   attempt: number;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   error: AcpRuntimeError;
   sawTurnOutput: boolean;
@@ -99,7 +99,7 @@ export async function prepareFreshManagerRuntimeHandleRetry(params: {
 }
 
 async function clearPersistedRuntimeResumeState(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   writeSessionMeta: WriteManagerSessionMeta;
 }): Promise<boolean> {
@@ -150,7 +150,7 @@ async function clearPersistedRuntimeResumeState(params: {
 
 /** Clears persisted runtime resume identifiers while preserving the manager session shell. */
 export async function discardPersistedManagerRuntimeState(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   writeSessionMeta: WriteManagerSessionMeta;
 }): Promise<void> {
@@ -193,7 +193,7 @@ export async function discardPersistedManagerRuntimeState(params: {
 
 export async function tryPrepareFreshManagerRuntimeSession(params: {
   deps: Pick<AcpSessionManagerDeps, "getRuntimeBackend">;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   meta: SessionAcpMeta;
   sessionKey: string;
   logPrefix: string;

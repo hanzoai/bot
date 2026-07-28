@@ -348,7 +348,7 @@ describe("channel-streaming", () => {
         name: "exec",
         args: {
           command:
-            "node scripts/check-something-with-a-very-long-path /tmp/openclaw/some/really/deep/path/that/keeps/going/and/going/index.ts --flag value",
+            "node scripts/check-something-with-a-very-long-path /tmp/bot/some/really/deep/path/that/keeps/going/and/going/index.ts --flag value",
         },
       },
       { detailMode: "raw" },

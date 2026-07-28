@@ -1,6 +1,6 @@
 // Matrix plugin module implements thread context behavior.
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
+import { sliceUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { MatrixClient } from "../sdk.js";
 import { summarizeMatrixMessageContextEvent } from "./context-summary.js";
 import type { MatrixRawEvent } from "./types.js";

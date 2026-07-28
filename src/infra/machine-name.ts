@@ -1,6 +1,6 @@
 // Resolves a human-readable machine name for gateway display.
 import os from "node:os";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { runExec } from "../process/exec.js";
 
 // Machine display names prefer macOS ComputerName when available and fall back
@@ -22,7 +22,7 @@ async function tryScutil(key: "ComputerName" | "LocalHostName") {
 
 function fallbackHostName() {
   const trimmed = normalizeOptionalString(os.hostname()) ?? "";
-  return trimmed.replace(/\.local$/i, "") || "openclaw";
+  return trimmed.replace(/\.local$/i, "") || "bot";
 }
 
 /** Resolve a user-facing name for the current machine. */

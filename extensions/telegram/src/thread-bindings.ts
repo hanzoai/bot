@@ -3,8 +3,8 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { readAcpSessionEntry } from "openclaw/plugin-sdk/acp-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { readAcpSessionEntry } from "bot/plugin-sdk/acp-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   formatThreadBindingDurationLabel,
   registerSessionBindingAdapter,
@@ -14,14 +14,14 @@ import {
   type BindingTargetKind,
   type SessionBindingAdapter,
   type SessionBindingRecord,
-} from "openclaw/plugin-sdk/conversation-runtime";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { enqueueKeyedTask } from "openclaw/plugin-sdk/keyed-async-queue";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { normalizeAccountId, isAcpSessionKey } from "openclaw/plugin-sdk/routing";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/conversation-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { enqueueKeyedTask } from "bot/plugin-sdk/keyed-async-queue";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
+import { normalizeAccountId, isAcpSessionKey } from "bot/plugin-sdk/routing";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
+import { resolveStateDir } from "bot/plugin-sdk/state-paths";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { getTelegramRuntime } from "./runtime.js";
 import { loadTelegramSendModule } from "./send-runtime.js";
 import { resolveTelegramToken } from "./token.js";
@@ -89,7 +89,7 @@ type TelegramThreadBindingsState = {
  * Keep Telegram thread binding state shared across bundled chunks so routing,
  * binding lookups, and binding mutations all observe the same live registry.
  */
-const TELEGRAM_THREAD_BINDINGS_STATE_KEY = Symbol.for("openclaw.telegramThreadBindingsState");
+const TELEGRAM_THREAD_BINDINGS_STATE_KEY = Symbol.for("bot.telegramThreadBindingsState");
 let threadBindingsState: TelegramThreadBindingsState | undefined;
 
 function getThreadBindingsState(): TelegramThreadBindingsState {
@@ -494,7 +494,7 @@ function shouldExpireByMaxAge(params: {
 }
 
 export function createTelegramThreadBindingManager(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string;
   persist?: boolean;
   idleTimeoutMs?: number;

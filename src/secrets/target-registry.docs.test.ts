@@ -1,7 +1,7 @@
 /** Verifies docs stay aligned with the secret target registry. */
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   buildSecretRefCredentialMatrix,
@@ -12,22 +12,22 @@ function buildSecretRefCredentialMatrixJson(): string {
   return `${JSON.stringify(buildSecretRefCredentialMatrix(), null, 2)}\n`;
 }
 
-const previousBundledPluginsDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
-const previousTrustBundledPluginsDir = process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+const previousBundledPluginsDir = process.env.BOT_BUNDLED_PLUGINS_DIR;
+const previousTrustBundledPluginsDir = process.env.BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR;
 
-process.env.OPENCLAW_BUNDLED_PLUGINS_DIR ??= "extensions";
-process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR ??= "1";
+process.env.BOT_BUNDLED_PLUGINS_DIR ??= "extensions";
+process.env.BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR ??= "1";
 
 afterAll(() => {
   if (previousBundledPluginsDir === undefined) {
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+    delete process.env.BOT_BUNDLED_PLUGINS_DIR;
   } else {
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = previousBundledPluginsDir;
+    process.env.BOT_BUNDLED_PLUGINS_DIR = previousBundledPluginsDir;
   }
   if (previousTrustBundledPluginsDir === undefined) {
-    delete process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR;
+    delete process.env.BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR;
   } else {
-    process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR = previousTrustBundledPluginsDir;
+    process.env.BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR = previousTrustBundledPluginsDir;
   }
 });
 

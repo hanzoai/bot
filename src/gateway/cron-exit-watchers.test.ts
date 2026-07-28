@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CronJob } from "../cron/types.js";
 import { resolveExitWatchShell } from "./cron-exit-watch-shell.js";

@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { Command } from "commander";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerWikiCli } from "./cli.js";
@@ -17,7 +17,7 @@ import { createMemoryWikiTestHarness } from "./test-helpers.js";
 
 const callGatewayFromCliMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/gateway-runtime", () => ({
+vi.mock("bot/plugin-sdk/gateway-runtime", () => ({
   callGatewayFromCli: callGatewayFromCliMock,
 }));
 
@@ -27,7 +27,7 @@ let caseIndex = 0;
 let stdoutWriteMock: ReturnType<typeof vi.fn>;
 
 function resolveLegacyImportRunRecordPath(vaultRoot: string, runId: string): string {
-  return path.join(vaultRoot, ".openclaw-wiki", "import-runs", `${runId}.json`);
+  return path.join(vaultRoot, ".bot-wiki", "import-runs", `${runId}.json`);
 }
 
 describe("memory-wiki cli", () => {
@@ -440,9 +440,9 @@ Orders join to [customers](/tables/customers.md).
         body: `# Alpha
 
 ## Notes
-<!-- openclaw:human:start -->
+<!-- bot:human:start -->
 cli note
-<!-- openclaw:human:end -->
+<!-- bot:human:end -->
 `,
       }),
       "utf8",

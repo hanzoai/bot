@@ -5,7 +5,7 @@ import { enableCompileCache, getCompileCacheDir } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import {
   isTerminalInteractiveRespawnArgv,
   shouldKeepNativeHookRelayInProcess,
@@ -19,7 +19,7 @@ import {
 // Node 24.0-24.14 can deadlock during ESM module loading when compile cache is
 // enabled on Windows npm-global installs. Keep the skip scoped to that platform.
 const MIN_COMPILE_CACHE_NODE_24_MINOR = 15;
-const COMPILE_CACHE_DISABLED_RESPAWNED_ENV = "OPENCLAW_COMPILE_CACHE_DISABLED_RESPAWNED";
+const COMPILE_CACHE_DISABLED_RESPAWNED_ENV = "BOT_COMPILE_CACHE_DISABLED_RESPAWNED";
 
 export function resolveEntryInstallRoot(entryFile: string): string {
   const entryDir = path.dirname(entryFile);
@@ -58,7 +58,7 @@ function isNodeVersionAffectedByCompileCacheDeadlock(nodeVersion: string | undef
   return minor < MIN_COMPILE_CACHE_NODE_24_MINOR;
 }
 
-function shouldEnableOpenClawCompileCache(params: {
+function shouldEnableBotCompileCache(params: {
   env?: NodeJS.ProcessEnv;
   installRoot: string;
   nodeVersion?: string;
@@ -99,7 +99,7 @@ function readPackageVersion(packageJsonPath: string): string {
   return "unknown";
 }
 
-function resolveOpenClawCompileCacheDirectory(params: {
+function resolveBotCompileCacheDirectory(params: {
   env?: NodeJS.ProcessEnv;
   installRoot: string;
 }): string {
@@ -119,24 +119,24 @@ function resolveOpenClawCompileCacheDirectory(params: {
       : path.join(os.tmpdir(), "node-compile-cache");
   return path.join(
     baseDirectory,
-    "openclaw",
+    "bot",
     version,
     sanitizeCompileCachePathSegment(installMarker),
   );
 }
 
-type OpenClawCompileCacheRespawnPlan = {
+type BotCompileCacheRespawnPlan = {
   command: string;
   args: string[];
   env: NodeJS.ProcessEnv;
   detachForProcessTree: boolean;
 };
 
-type OpenClawCompileCacheRespawnRuntime = RespawnChildRuntime & {
+type BotCompileCacheRespawnRuntime = RespawnChildRuntime & {
   writeError: (message: string) => void;
 };
 
-function buildOpenClawCompileCacheRespawnPlan(params: {
+function buildBotCompileCacheRespawnPlan(params: {
   currentFile: string;
   env?: NodeJS.ProcessEnv;
   execArgv?: string[];
@@ -146,7 +146,7 @@ function buildOpenClawCompileCacheRespawnPlan(params: {
   compileCacheDir?: string;
   nodeVersion?: string;
   platform?: NodeJS.Platform;
-}): OpenClawCompileCacheRespawnPlan | undefined {
+}): BotCompileCacheRespawnPlan | undefined {
   const env = params.env ?? process.env;
   const argv = params.argv ?? process.argv;
   const platform = params.platform ?? process.platform;
@@ -180,12 +180,12 @@ function buildOpenClawCompileCacheRespawnPlan(params: {
   };
 }
 
-export async function respawnWithoutOpenClawCompileCacheIfNeeded(params: {
+export async function respawnWithoutBotCompileCacheIfNeeded(params: {
   currentFile: string;
   installRoot: string;
   prepareWriteError?: () => Promise<(message: string) => void>;
 }): Promise<boolean> {
-  const plan = buildOpenClawCompileCacheRespawnPlan({
+  const plan = buildBotCompileCacheRespawnPlan({
     currentFile: params.currentFile,
     installRoot: params.installRoot,
     compileCacheDir: getCompileCacheDir?.(),
@@ -194,7 +194,7 @@ export async function respawnWithoutOpenClawCompileCacheIfNeeded(params: {
     return false;
   }
   const writeError = await params.prepareWriteError?.();
-  runOpenClawCompileCacheRespawnPlan(
+  runBotCompileCacheRespawnPlan(
     plan,
     writeError
       ? {
@@ -208,9 +208,9 @@ export async function respawnWithoutOpenClawCompileCacheIfNeeded(params: {
   return true;
 }
 
-function runOpenClawCompileCacheRespawnPlan(
-  plan: OpenClawCompileCacheRespawnPlan,
-  runtime: OpenClawCompileCacheRespawnRuntime = {
+function runBotCompileCacheRespawnPlan(
+  plan: BotCompileCacheRespawnPlan,
+  runtime: BotCompileCacheRespawnRuntime = {
     spawn,
     attachChildProcessBridge,
     exit: process.exit.bind(process) as (code?: number) => never,
@@ -225,7 +225,7 @@ function runOpenClawCompileCacheRespawnPlan(
     runtime,
     onError: (error) => {
       runtime.writeError(
-        `[openclaw] Failed to respawn CLI without compile cache: ${
+        `[bot] Failed to respawn CLI without compile cache: ${
           error instanceof Error ? (error.stack ?? error.message) : String(error)
         }\n`,
       );
@@ -233,27 +233,27 @@ function runOpenClawCompileCacheRespawnPlan(
   });
 }
 
-export function enableOpenClawCompileCache(params: {
+export function enableBotCompileCache(params: {
   env?: NodeJS.ProcessEnv;
   installRoot: string;
 }): void {
-  if (!shouldEnableOpenClawCompileCache(params)) {
+  if (!shouldEnableBotCompileCache(params)) {
     return;
   }
   try {
-    enableCompileCache(resolveOpenClawCompileCacheDirectory(params));
+    enableCompileCache(resolveBotCompileCacheDirectory(params));
   } catch {
     // Best-effort only; never block startup.
   }
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.entryCompileCacheTestApi")] = {
-    buildOpenClawCompileCacheRespawnPlan,
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.entryCompileCacheTestApi")] = {
+    buildBotCompileCacheRespawnPlan,
     isNodeVersionAffectedByCompileCacheDeadlock,
     isSourceCheckoutInstallRoot,
-    resolveOpenClawCompileCacheDirectory,
-    runOpenClawCompileCacheRespawnPlan,
-    shouldEnableOpenClawCompileCache,
+    resolveBotCompileCacheDirectory,
+    runBotCompileCacheRespawnPlan,
+    shouldEnableBotCompileCache,
   };
 }

@@ -6,7 +6,7 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { getLoadedChannelPluginForRead } from "../channels/plugins/registry-loaded.js";
 import type { ChannelId } from "../channels/plugins/types.public.js";
 import { routeFromConversationRef, routeToDeliveryFields } from "../channels/route-projection.js";

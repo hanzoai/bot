@@ -1,5 +1,5 @@
 // Realtime transcription provider registry stores transcription provider factories.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   resolvePluginCapabilityProvider,
   resolvePluginCapabilityProviders,
@@ -20,7 +20,7 @@ export function normalizeRealtimeTranscriptionProviderId(
 }
 
 function resolveRealtimeTranscriptionProviderEntries(
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): RealtimeTranscriptionProviderPlugin[] {
   return resolvePluginCapabilityProviders({
     key: "realtimeTranscriptionProviders",
@@ -28,7 +28,7 @@ function resolveRealtimeTranscriptionProviderEntries(
   });
 }
 
-function buildProviderMaps(cfg?: OpenClawConfig): {
+function buildProviderMaps(cfg?: BotConfig): {
   canonical: Map<string, RealtimeTranscriptionProviderPlugin>;
   aliases: Map<string, RealtimeTranscriptionProviderPlugin>;
 } {
@@ -37,7 +37,7 @@ function buildProviderMaps(cfg?: OpenClawConfig): {
 
 /** Lists canonical realtime transcription providers for the active config. */
 export function listRealtimeTranscriptionProviders(
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): RealtimeTranscriptionProviderPlugin[] {
   return [...buildProviderMaps(cfg).canonical.values()];
 }
@@ -45,7 +45,7 @@ export function listRealtimeTranscriptionProviders(
 /** Resolves a realtime transcription provider by id or alias. */
 export function getRealtimeTranscriptionProvider(
   providerId: string | undefined,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): RealtimeTranscriptionProviderPlugin | undefined {
   const normalized = normalizeRealtimeTranscriptionProviderId(providerId);
   if (!normalized) {
@@ -61,7 +61,7 @@ export function getRealtimeTranscriptionProvider(
 /** Canonicalizes a configured provider id while preserving unknown ids. */
 export function canonicalizeRealtimeTranscriptionProviderId(
   providerId: string | undefined,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): RealtimeTranscriptionProviderId | undefined {
   const normalized = normalizeRealtimeTranscriptionProviderId(providerId);
   if (!normalized) {

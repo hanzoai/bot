@@ -1,8 +1,8 @@
 // Gateway methods expose session files and workspace browsing.
 import { createHash } from "node:crypto";
 import path from "node:path";
-import { asOptionalObjectRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asOptionalObjectRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,

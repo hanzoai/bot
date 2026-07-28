@@ -2,7 +2,7 @@ import {
   embeddedAgentLog,
   type AgentHarnessRuntimeArtifactBinding,
   type NativeHookRelayRegistrationHandle,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import { resolveCodexStartupTimeoutMs } from "./attempt-timeouts.js";
 import type { CodexAppServerClient } from "./client.js";
 import { resolveCodexToolAbortTerminalReason } from "./dynamic-tool-execution.js";

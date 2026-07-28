@@ -4,9 +4,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { TextDecoder } from "node:util";
-import { readByteStreamWithLimit } from "@openclaw/media-core/read-byte-stream-with-limit";
+import { readByteStreamWithLimit } from "@hanzo/bot-media-core/read-byte-stream-with-limit";
 import type { EmbeddedAgentRunMeta } from "../agents/embedded-agent.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { parseStrictNonNegativeInteger } from "../infra/parse-finite-number.js";
 import { writeRuntimeJson, writeRuntimeStdout, type RuntimeEnv } from "../runtime.js";
@@ -238,7 +238,7 @@ function exitCodeForEnvelope(envelope: AgentExecEnvelope): 0 | 1 | 2 {
   return envelope.status === "ok" ? 0 : envelope.status === "timeout" ? 2 : 1;
 }
 
-function buildImplicitConfig(cwd: string): OpenClawConfig {
+function buildImplicitConfig(cwd: string): BotConfig {
   return {
     env: { shellEnv: { enabled: false } },
     agents: {
@@ -291,27 +291,27 @@ function setAgentExecEnvironment(params: {
   configPath: string;
   cwd: string;
 }): () => void {
-  const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  const previousConfigPath = process.env.OPENCLAW_CONFIG_PATH;
-  const previousWorkspaceDir = process.env.OPENCLAW_WORKSPACE_DIR;
-  process.env.OPENCLAW_STATE_DIR = params.stateDir;
-  process.env.OPENCLAW_CONFIG_PATH = params.configPath;
-  process.env.OPENCLAW_WORKSPACE_DIR = params.cwd;
+  const previousStateDir = process.env.BOT_STATE_DIR;
+  const previousConfigPath = process.env.BOT_CONFIG_PATH;
+  const previousWorkspaceDir = process.env.BOT_WORKSPACE_DIR;
+  process.env.BOT_STATE_DIR = params.stateDir;
+  process.env.BOT_CONFIG_PATH = params.configPath;
+  process.env.BOT_WORKSPACE_DIR = params.cwd;
   return () => {
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.BOT_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.BOT_STATE_DIR = previousStateDir;
     }
     if (previousConfigPath === undefined) {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.BOT_CONFIG_PATH;
     } else {
-      process.env.OPENCLAW_CONFIG_PATH = previousConfigPath;
+      process.env.BOT_CONFIG_PATH = previousConfigPath;
     }
     if (previousWorkspaceDir === undefined) {
-      delete process.env.OPENCLAW_WORKSPACE_DIR;
+      delete process.env.BOT_WORKSPACE_DIR;
     } else {
-      process.env.OPENCLAW_WORKSPACE_DIR = previousWorkspaceDir;
+      process.env.BOT_WORKSPACE_DIR = previousWorkspaceDir;
     }
   };
 }
@@ -394,11 +394,11 @@ export async function agentExecCommand(
     const cwd = await requireDirectory(opts.cwd ?? process.cwd(), "Working directory");
     const stateDir = opts.stateDir
       ? await requireDirectory(opts.stateDir, "State directory")
-      : await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-exec-"));
+      : await fs.mkdtemp(path.join(os.tmpdir(), "bot-agent-exec-"));
     cleanupRoot = opts.stateDir
-      ? await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-agent-exec-config-"))
+      ? await fs.mkdtemp(path.join(os.tmpdir(), "bot-agent-exec-config-"))
       : stateDir;
-    const configPath = path.join(cleanupRoot, "openclaw.json");
+    const configPath = path.join(cleanupRoot, "bot.json");
     await fs.writeFile(configPath, `${JSON.stringify(buildImplicitConfig(cwd), null, 2)}\n`, {
       encoding: "utf8",
       flag: "wx",

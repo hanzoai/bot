@@ -1,6 +1,6 @@
 // Control UI module implements format behavior.
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asDateTimestampMs } from "@hanzo/bot-normalization-core/number-coercion";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import {
   formatDurationCompact,
   formatDurationHuman,
@@ -11,7 +11,7 @@ import {
 } from "../../../src/infra/format-time/format-relative.ts";
 import { t } from "../i18n/index.ts";
 
-export { formatByteSize } from "@openclaw/normalization-core";
+export { formatByteSize } from "@hanzo/bot-normalization-core";
 export { formatRelativeTimestamp, formatTimeAgo, formatDurationCompact, formatDurationHuman };
 
 export function formatUnknownText(

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { CallGatewayCliOptions } from "../gateway/call.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { WizardCancelledError } from "../wizard/prompts.js";
@@ -23,7 +23,7 @@ function makeRuntime(): RuntimeEnv {
   };
 }
 
-function makeLocalConfig(): OpenClawConfig {
+function makeLocalConfig(): BotConfig {
   return {
     wizard: { securityAcknowledgedAt: "2026-07-11T00:00:00.000Z" },
     agents: {
@@ -40,7 +40,7 @@ function makeLocalConfig(): OpenClawConfig {
 }
 
 function makeTarget(
-  config: OpenClawConfig,
+  config: BotConfig,
   auth: { token?: string; password?: string },
 ): RemoteGatewayInferenceTarget {
   return {
@@ -134,7 +134,7 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
       secret: "selected-password",
     },
   ])(
-    "pins $label across detect, activate, verify, OpenClaw, and in-process TUI",
+    "pins $label across detect, activate, verify, Bot, and in-process TUI",
     async ({ auth, secret }) => {
       const localConfig = makeLocalConfig();
       const localConfigBefore = structuredClone(localConfig);
@@ -149,11 +149,11 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
         expect(options.config?.gateway?.remote?.url).toBe("wss://selected.example/ws");
         order.push(options.method);
 
-        if (options.method === "openclaw.setup.detect") {
+        if (options.method === "bot.setup.detect") {
           expect(options.timeoutMs).toBe(20_000);
           return detectResult();
         }
-        if (options.method === "openclaw.setup.activate") {
+        if (options.method === "bot.setup.activate") {
           expect(options.timeoutMs).toBe(150_000);
           expect(options.params).toEqual({
             kind: "claude-cli",
@@ -168,12 +168,12 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
             lines: ["Default model: claude-cli/opus"],
           };
         }
-        if (options.method === "openclaw.setup.verify") {
+        if (options.method === "bot.setup.verify") {
           expect(options.timeoutMs).toBe(30_000);
           expect(remoteConfig.modelRef).toBe("claude-cli/opus");
           return { ok: true, modelRef: remoteConfig.modelRef, latencyMs: 100 };
         }
-        if (options.method === "openclaw.chat") {
+        if (options.method === "bot.chat") {
           expect(options.timeoutMs).toBe(190_000);
           expect(remoteConfig.modelRef).toBe("claude-cli/opus");
           expect(options.params).toEqual({
@@ -219,10 +219,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
       });
 
       expect(order).toEqual([
-        "openclaw.setup.detect",
-        "openclaw.setup.activate",
-        "openclaw.setup.verify",
-        "openclaw.chat",
+        "bot.setup.detect",
+        "bot.setup.activate",
+        "bot.setup.verify",
+        "bot.chat",
         "tui",
       ]);
       expect(remoteConfig.modelRef).toBe("claude-cli/opus");
@@ -237,10 +237,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
 
   it("hands an auth-free Gateway to the TUI as the exact bound route", async () => {
     const callGatewayMock = vi.fn(async (options: CallGatewayCliOptions): Promise<unknown> => {
-      if (options.method === "openclaw.setup.detect") {
+      if (options.method === "bot.setup.detect") {
         return detectResult();
       }
-      if (options.method === "openclaw.setup.activate") {
+      if (options.method === "bot.setup.activate") {
         return {
           ok: true,
           modelRef: "claude-cli/opus",
@@ -248,10 +248,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
           lines: ["Default model: claude-cli/opus"],
         };
       }
-      if (options.method === "openclaw.setup.verify") {
+      if (options.method === "bot.setup.verify") {
         return { ok: true, modelRef: "claude-cli/opus", latencyMs: 100 };
       }
-      if (options.method === "openclaw.chat") {
+      if (options.method === "bot.chat") {
         return {
           sessionId: (options.params as { sessionId: string }).sessionId,
           reply: "Ready.",
@@ -294,16 +294,16 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
       verification: { ok: true, modelRef: "openai/other", latencyMs: 100 },
       error: "Gateway verified openai/other, not the activated claude-cli/opus",
     },
-  ])("fails closed on $label before OpenClaw", async ({ verification, error }) => {
+  ])("fails closed on $label before Bot", async ({ verification, error }) => {
     const localConfig = makeLocalConfig();
     const localConfigBefore = structuredClone(localConfig);
     const methods: string[] = [];
     const callGatewayMock = vi.fn(async (options: CallGatewayCliOptions): Promise<unknown> => {
       methods.push(options.method);
-      if (options.method === "openclaw.setup.detect") {
+      if (options.method === "bot.setup.detect") {
         return detectResult();
       }
-      if (options.method === "openclaw.setup.activate") {
+      if (options.method === "bot.setup.activate") {
         return {
           ok: true,
           modelRef: "claude-cli/opus",
@@ -311,7 +311,7 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
           lines: ["Default model: claude-cli/opus"],
         };
       }
-      if (options.method === "openclaw.setup.verify") {
+      if (options.method === "bot.setup.verify") {
         return verification;
       }
       throw new Error(`unexpected Gateway method ${options.method}`);
@@ -332,9 +332,9 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
     ).rejects.toThrow(error);
 
     expect(methods).toEqual([
-      "openclaw.setup.detect",
-      "openclaw.setup.activate",
-      "openclaw.setup.verify",
+      "bot.setup.detect",
+      "bot.setup.activate",
+      "bot.setup.verify",
     ]);
     expect(runTui).not.toHaveBeenCalled();
     expect(localConfig).toEqual(localConfigBefore);
@@ -344,10 +344,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
     const methods: string[] = [];
     const callGatewayMock = vi.fn(async (options: CallGatewayCliOptions): Promise<unknown> => {
       methods.push(options.method);
-      if (options.method === "openclaw.setup.detect") {
+      if (options.method === "bot.setup.detect") {
         return detectResult();
       }
-      if (options.method === "openclaw.setup.activate") {
+      if (options.method === "bot.setup.activate") {
         throw new Error("gateway connection closed after request");
       }
       throw new Error(`unexpected Gateway method ${options.method}`);
@@ -367,18 +367,18 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
       ),
     ).rejects.toThrow("gateway connection closed after request");
 
-    expect(methods).toEqual(["openclaw.setup.detect", "openclaw.setup.activate"]);
+    expect(methods).toEqual(["bot.setup.detect", "bot.setup.activate"]);
     expect(runTui).not.toHaveBeenCalled();
   });
 
-  it("treats a cancelled remote OpenClaw conversation as a pause without opening the agent", async () => {
+  it("treats a cancelled remote Bot conversation as a pause without opening the agent", async () => {
     const methods: string[] = [];
     const callGatewayMock = vi.fn(async (options: CallGatewayCliOptions): Promise<unknown> => {
       methods.push(options.method);
-      if (options.method === "openclaw.setup.detect") {
+      if (options.method === "bot.setup.detect") {
         return detectResult();
       }
-      if (options.method === "openclaw.setup.activate") {
+      if (options.method === "bot.setup.activate") {
         return {
           ok: true,
           modelRef: "claude-cli/opus",
@@ -386,10 +386,10 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
           lines: ["Default model: claude-cli/opus"],
         };
       }
-      if (options.method === "openclaw.setup.verify") {
+      if (options.method === "bot.setup.verify") {
         return { ok: true, modelRef: "claude-cli/opus", latencyMs: 100 };
       }
-      if (options.method === "openclaw.chat") {
+      if (options.method === "bot.chat") {
         return {
           sessionId: (options.params as { sessionId: string }).sessionId,
           reply: "Which channel should I configure?",
@@ -417,12 +417,12 @@ describe("runRemoteGatewayInferenceOnboarding", () => {
     );
 
     expect(methods).toEqual([
-      "openclaw.setup.detect",
-      "openclaw.setup.activate",
-      "openclaw.setup.verify",
-      "openclaw.chat",
+      "bot.setup.detect",
+      "bot.setup.activate",
+      "bot.setup.verify",
+      "bot.chat",
     ]);
-    expect(prompter.outro).toHaveBeenCalledWith("OpenClaw setup paused.");
+    expect(prompter.outro).toHaveBeenCalledWith("Bot setup paused.");
     expect(runTui).not.toHaveBeenCalled();
   });
 });

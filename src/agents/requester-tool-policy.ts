@@ -3,8 +3,8 @@
  * Sender-dependent policy resolves once at trusted ingress; verified descendants
  * consume the persisted effective parent projection instead of guessing identity.
  */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import type { InputProvenance } from "../sessions/input-provenance.js";
 import { normalizeInputProvenance } from "../sessions/input-provenance.js";
 import {
@@ -43,7 +43,7 @@ type RequesterToolPolicyResolution = {
 type SenderPolicyMode = "always" | "when-sender-id" | "never";
 
 type RequesterToolPolicyParams = {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   agentId?: string;
   sessionKey?: string;
   subagentSessionKey?: string;

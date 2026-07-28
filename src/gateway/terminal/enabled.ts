@@ -5,8 +5,8 @@
 // agents stay refused. Lives outside launch.ts so eagerly-loaded HTTP/CSP
 // paths can import it without defeating the lazy import of the launch policy
 // in server-runtime-state-prepare.ts.
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 
-export function isTerminalConfigEnabled(config: OpenClawConfig | undefined): boolean {
+export function isTerminalConfigEnabled(config: BotConfig | undefined): boolean {
   return config?.gateway?.terminal?.enabled !== false;
 }

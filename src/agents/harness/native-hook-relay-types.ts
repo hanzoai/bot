@@ -1,5 +1,5 @@
 import type { Server } from "node:http";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { PluginHookToolRequesterContext } from "../../plugins/hook-types.js";
 import type {
   BeforeToolCallFailureDisposition,
@@ -63,7 +63,7 @@ export type NativeHookRelayRegistration = {
   agentId?: string;
   sessionId: string;
   sessionKey?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   runId: string;
   channelId?: string;
   requester?: PluginHookToolRequesterContext;
@@ -97,12 +97,12 @@ export type RegisterNativeHookRelayParams = {
   agentId?: string;
   sessionId: string;
   sessionKey?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   runId: string;
   channelId?: string;
   requester?: PluginHookToolRequesterContext;
   allowedEvents?: readonly NativeHookRelayEvent[];
-  /** Whether this relay should run OpenClaw loop detection from native PreToolUse hooks. */
+  /** Whether this relay should run Bot loop detection from native PreToolUse hooks. */
   preToolUseLoopDetection?: boolean;
   ttlMs?: number;
   command?: NativeHookRelayCommandOptions;

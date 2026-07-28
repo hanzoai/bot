@@ -2,7 +2,7 @@
 import {
   sanitizeEmbeddingCacheHeaders,
   type MemoryEmbeddingProviderAdapter,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+} from "bot/plugin-sdk/memory-core-host-engine-embeddings";
 import {
   createLmstudioEmbeddingProvider,
   DEFAULT_LMSTUDIO_EMBEDDING_MODEL,

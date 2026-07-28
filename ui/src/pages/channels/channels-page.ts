@@ -15,7 +15,7 @@ import { loadSettings, patchSettings } from "../../app/settings.ts";
 import { renderSettingsWorkspace } from "../../components/settings-workspace.ts";
 import { t } from "../../i18n/index.ts";
 import { resolveChannelPairingAuthSignature } from "../../lib/channels/index.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { PollController } from "../../lit/poll-controller.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { importNostrProfile, parseValidationErrors, putNostrProfile } from "./nostr-profile-ops.ts";
@@ -47,7 +47,7 @@ function formatNostrProfileOperationError(error: unknown, prefix: string): strin
     : `${prefix}: ${String(error)}`;
 }
 
-class ChannelsPage extends OpenClawLightDomElement {
+class ChannelsPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -734,6 +734,6 @@ class ChannelsPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-channels-page")) {
-  customElements.define("openclaw-channels-page", ChannelsPage);
+if (!customElements.get("bot-channels-page")) {
+  customElements.define("bot-channels-page", ChannelsPage);
 }

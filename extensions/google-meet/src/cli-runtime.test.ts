@@ -1,4 +1,4 @@
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "bot/plugin-sdk/number-runtime";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { testing } from "./cli-shared.js";
 import type { GoogleMeetRuntime } from "./runtime.js";
@@ -16,7 +16,7 @@ describe("google-meet CLI", () => {
   });
 
   afterAll(() => {
-    vi.doUnmock("openclaw/plugin-sdk/ssrf-runtime");
+    vi.doUnmock("bot/plugin-sdk/ssrf-runtime");
     vi.resetModules();
   });
 

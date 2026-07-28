@@ -12,7 +12,7 @@ import "../../components/app-sidebar.ts";
 describe("AppSidebar session section visibility", () => {
   it("renders an active draft first inside an expanded empty Threads section", async () => {
     localStorage.setItem(
-      "openclaw:sidebar:sessions:collapsed-sections",
+      "bot:sidebar:sessions:collapsed-sections",
       JSON.stringify(["ungrouped"]),
     );
     const gateway = createGateway({} as GatewayBrowserClient);
@@ -50,7 +50,7 @@ describe("AppSidebar session section visibility", () => {
 
   it("keeps normal pagination when a draft overrides collapsed Threads", async () => {
     localStorage.setItem(
-      "openclaw:sidebar:sessions:collapsed-sections",
+      "bot:sidebar:sessions:collapsed-sections",
       JSON.stringify(["ungrouped"]),
     );
     const gateway = createGateway({} as GatewayBrowserClient);

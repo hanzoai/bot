@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { createOpenClawTestState, type OpenClawTestState } from "openclaw/plugin-sdk/test-state";
+import { createBotTestState, type BotTestState } from "bot/plugin-sdk/test-state";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { IMessageRpcClient } from "./client.js";
 import { loadFreshIMessageReplyCacheForTest } from "./test-support/runtime.js";
@@ -76,12 +76,12 @@ function createApprovalText(id = "approval-123"): string {
 }
 
 describe("sendMessageIMessage receipts", () => {
-  let openClawState: OpenClawTestState;
+  let botState: BotTestState;
 
   beforeEach(async () => {
-    openClawState = await createOpenClawTestState({
+    botState = await createBotTestState({
       layout: "state-only",
-      prefix: "openclaw-imessage-send-",
+      prefix: "bot-imessage-send-",
     });
     await loadFreshSendModule();
   });
@@ -91,7 +91,7 @@ describe("sendMessageIMessage receipts", () => {
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
     vi.useRealTimers();
-    await openClawState.cleanup();
+    await botState.cleanup();
   });
 
   it("attaches a text receipt for native send ids", async () => {
@@ -1248,7 +1248,7 @@ describe("sendMessageIMessage receipts", () => {
           },
         },
         client,
-        cliPath: "/Users/me/.openclaw/scripts/imsg",
+        cliPath: "/Users/me/.bot/scripts/imsg",
         runCliJson,
         resolveSentMessageGuidImpl,
       }),
@@ -1268,7 +1268,7 @@ describe("sendMessageIMessage receipts", () => {
   it("does not use the local default chat.db path for auto-detected ssh wrappers", async () => {
     vi.useFakeTimers({ now: 1_000 });
     vi.stubEnv("HOME", "/Users/me");
-    const wrapperDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-imsg-wrapper-"));
+    const wrapperDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-imsg-wrapper-"));
     const wrapperPath = path.join(wrapperDir, "imsg");
     fs.writeFileSync(wrapperPath, '#!/bin/sh\nexec ssh -T gateway-host imsg "$@"\n');
     const client = createRejectingClient(new Error("imsg rpc timeout (send)"));

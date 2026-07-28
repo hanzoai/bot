@@ -15,7 +15,7 @@ let restoreDialogPolyfill: () => void;
 async function renderModal() {
   render(
     html`
-      <openclaw-modal-dialog
+      <bot-modal-dialog
         label="Confirm action"
         description="Review the operation before continuing."
       >
@@ -25,14 +25,14 @@ async function renderModal() {
           <button id="first-action">First</button>
           <button id="last-action">Last</button>
         </section>
-      </openclaw-modal-dialog>
+      </bot-modal-dialog>
     `,
     container,
   );
   return await getRenderedModalDialog(container);
 }
 
-describe("openclaw-modal-dialog", () => {
+describe("bot-modal-dialog", () => {
   beforeEach(() => {
     restoreDialogPolyfill = installDialogPolyfill();
     container = document.createElement("div");
@@ -67,9 +67,9 @@ describe("openclaw-modal-dialog", () => {
 
   it("focuses slotted autofocus content", async () => {
     render(
-      html`<openclaw-modal-dialog label="Edit">
+      html`<bot-modal-dialog label="Edit">
         <textarea id="autofocus-target" autofocus></textarea>
-      </openclaw-modal-dialog>`,
+      </bot-modal-dialog>`,
       container,
     );
     await getRenderedModalDialog(container);

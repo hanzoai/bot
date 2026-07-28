@@ -3,7 +3,7 @@ import {
   fetchWithSsrFGuard,
   shouldUseEnvHttpProxyForUrl,
   ssrfPolicyFromHttpBaseUrlAllowedHostname,
-} from "./openclaw-runtime-network.js";
+} from "./bot-runtime-network.js";
 import type { SsrFPolicy } from "./ssrf-policy.js";
 
 // Remote memory HTTP wrapper that applies SSRF policy and releases guarded sockets.

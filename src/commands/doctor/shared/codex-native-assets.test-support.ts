@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import "./codex-native-assets.js";
 
 type CodexNativeAssetHit = {
@@ -8,14 +8,14 @@ type CodexNativeAssetHit = {
 
 type TestApi = {
   scanCodexNativeAssets(params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     env?: NodeJS.ProcessEnv;
   }): Promise<CodexNativeAssetHit[]>;
 };
 
 function getTestApi(): TestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.codexNativeAssetsTestApi")
+    Symbol.for("bot.codexNativeAssetsTestApi")
   ] as TestApi;
 }
 

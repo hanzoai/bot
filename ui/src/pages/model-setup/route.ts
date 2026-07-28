@@ -19,7 +19,7 @@ async function loadModelSetupRouteData(
   if (
     !client ||
     !hasOperatorAdminAccess(snapshot.hello?.auth ?? null) ||
-    isGatewayMethodAdvertised(snapshot, "openclaw.setup.detect") !== true
+    isGatewayMethodAdvertised(snapshot, "bot.setup.detect") !== true
   ) {
     return { state: { phase: "loading" }, client, firstRun };
   }
@@ -55,6 +55,6 @@ export const page = definePage({
     import("./model-setup-page.ts").then(() => ({
       header: true,
       render: (data: ModelSetupRouteData | undefined) =>
-        html`<openclaw-model-setup-page .routeData=${data}></openclaw-model-setup-page>`,
+        html`<bot-model-setup-page .routeData=${data}></bot-model-setup-page>`,
     })),
 });

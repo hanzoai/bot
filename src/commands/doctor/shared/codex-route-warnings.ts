@@ -1,7 +1,7 @@
 // Doctor warnings and repairs for legacy OpenAI Codex model/provider routing.
-import { asOptionalRecord as asMutableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString as normalizeString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import { asOptionalRecord as asMutableRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString as normalizeString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { detectWindowsSpawnCommandInlineArgs } from "../../../plugin-sdk/windows-spawn.js";
 import {
   canAutoMigrateLegacyLosslessCompaction,
@@ -44,7 +44,7 @@ function formatUnsupportedCompactionWarning(params: {
   fixHint: string;
 }): string {
   return [
-    "- Codex runtime uses native server-side compaction and ignores OpenClaw compaction summarizer overrides.",
+    "- Codex runtime uses native server-side compaction and ignores Bot compaction summarizer overrides.",
     ...params.hits.map(
       (hit) => `- ${hit.path}: ${hit.value} is ignored while this agent uses Codex runtime.`,
     ),
@@ -75,7 +75,7 @@ function formatLegacyLosslessCompactionWarning(params: {
     "- Legacy Lossless compaction config should use the Lossless context-engine slot for Codex.",
     ...configLines,
     params.canAutoFix
-      ? "- Run `openclaw doctor --fix`: it migrates legacy Lossless compaction config to the Lossless context-engine slot."
+      ? "- Run `bot doctor --fix`: it migrates legacy Lossless compaction config to the Lossless context-engine slot."
       : "- Move the Lossless config manually; doctor will not overwrite an existing non-Lossless context-engine slot or collapse conflicting per-agent summary models.",
   ].join("\n");
 }
@@ -85,8 +85,8 @@ function formatDisabledCodexPluginWarning(params: {
   repairBlocked: boolean;
 }): string {
   const fixHint = params.repairBlocked
-    ? "- Enable plugins.entries.codex and plugin loading, and remove `codex` from plugins.deny; or set the affected OpenAI models to an OpenClaw runtime policy."
-    : "- Run `openclaw doctor --fix`: it enables plugins.entries.codex, or set the affected OpenAI models to an OpenClaw runtime policy.";
+    ? "- Enable plugins.entries.codex and plugin loading, and remove `codex` from plugins.deny; or set the affected OpenAI models to an Bot runtime policy."
+    : "- Run `bot doctor --fix`: it enables plugins.entries.codex, or set the affected OpenAI models to an Bot runtime policy.";
   return [
     "- Codex runtime is selected, but the Codex plugin is disabled.",
     ...params.hits.map(
@@ -97,7 +97,7 @@ function formatDisabledCodexPluginWarning(params: {
   ].join("\n");
 }
 
-function collectCodexAppServerCommandWarnings(cfg: OpenClawConfig): string[] {
+function collectCodexAppServerCommandWarnings(cfg: BotConfig): string[] {
   const plugins = asMutableRecord(cfg.plugins);
   const entries = asMutableRecord(plugins?.entries);
   const codex = asMutableRecord(entries?.codex);
@@ -120,7 +120,7 @@ function collectCodexAppServerCommandWarnings(cfg: OpenClawConfig): string[] {
   ];
 }
 
-function collectCodexComputerUseWarnings(cfg: OpenClawConfig): string[] {
+function collectCodexComputerUseWarnings(cfg: BotConfig): string[] {
   const plugins = asMutableRecord(cfg.plugins);
   const entries = asMutableRecord(plugins?.entries);
   const codex = asMutableRecord(entries?.codex);
@@ -165,7 +165,7 @@ function collectCodexComputerUseWarnings(cfg: OpenClawConfig): string[] {
 
 /** Collect doctor warnings for legacy Codex model refs, runtime pins, and compaction overrides. */
 export function collectCodexRouteWarnings(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   blockedProviderPlan?: BlockedLegacyOpenAICodexProviderPlan;
 }): string[] {
@@ -221,7 +221,7 @@ export function collectCodexRouteWarnings(params: {
               hit.runtime ? `; current runtime is "${hit.runtime}"` : ""
             }.`,
         ),
-        "- Run `openclaw doctor --fix`: it rewrites configured model refs and stale sessions to `openai/*`, moves Codex intent to provider/model runtime policy, and clears old whole-agent runtime pins.",
+        "- Run `bot doctor --fix`: it rewrites configured model refs and stale sessions to `openai/*`, moves Codex intent to provider/model runtime policy, and clears old whole-agent runtime pins.",
       ].join("\n"),
     );
   }
@@ -273,7 +273,7 @@ export function collectCodexRouteWarnings(params: {
       formatUnsupportedCompactionWarning({
         hits: fixableHits,
         fixHint:
-          "- Run `openclaw doctor --fix`: it removes unsupported Codex compaction overrides.",
+          "- Run `bot doctor --fix`: it removes unsupported Codex compaction overrides.",
       }),
     );
   }
@@ -282,12 +282,12 @@ export function collectCodexRouteWarnings(params: {
 
 /** Rewrite legacy Codex config routes to OpenAI refs and explicit runtime policy when allowed. */
 export function maybeRepairCodexRoutes(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   shouldRepair: boolean;
   codexRuntimeReady?: boolean;
   blockedProviderPlan?: BlockedLegacyOpenAICodexProviderPlan;
-}): { cfg: OpenClawConfig; warnings: string[]; changes: string[] } {
+}): { cfg: BotConfig; warnings: string[]; changes: string[] } {
   const env = params.env ?? process.env;
   const blockedProviderPlan =
     params.blockedProviderPlan ?? collectBlockedLegacyOpenAICodexProviderPlan(params.cfg);

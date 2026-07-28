@@ -332,7 +332,7 @@ export const hi: TranslationMap = {
     errorTitle: "पैनल लोड नहीं हो सका",
     genericSubtitle: "इस पैनल को लोड करते समय कुछ गड़बड़ हो गई।",
     staleTitle: "एक नया संस्करण उपलब्ध है",
-    staleSubtitle: "OpenClaw को बैकग्राउंड में अपडेट किया गया था। नवीनतम पैनल पाने के लिए फिर से लोड करें।",
+    staleSubtitle: "Bot को बैकग्राउंड में अपडेट किया गया था। नवीनतम पैनल पाने के लिए फिर से लोड करें।",
     reloading: "रीलोड हो रहा है…",
     retry: "फिर से प्रयास करें",
   },
@@ -340,7 +340,7 @@ export const hi: TranslationMap = {
     pairing: {
       button: "मोबाइल डिवाइस पेयर करें",
       adminRequired: "सेटअप कोड बनाने के लिए एडमिनिस्ट्रेटर एक्सेस आवश्यक है।",
-      title: "OpenClaw मोबाइल",
+      title: "Bot मोबाइल",
       subtitle: "नया फ़ोन कनेक्ट करने के लिए मोबाइल ऐप में इस QR कोड को स्कैन करें।",
       noApp: "अभी तक ऐप नहीं है?",
       getApps: "ऐप्स प्राप्त करें",
@@ -355,14 +355,14 @@ export const hi: TranslationMap = {
       transportLimitedHint:
         "यह Gateway URL प्लेनटेक्स्ट ws:// का उपयोग करता है। wss:// या Tailscale Serve का उपयोग करें, फिर पूर्ण एक्सेस के लिए नया कोड बनाएँ।",
       failed: "सेटअप कोड नहीं बनाया जा सका।",
-      qrAlt: "OpenClaw मोबाइल पेयरिंग QR कोड",
+      qrAlt: "Bot मोबाइल पेयरिंग QR कोड",
       qrUnavailable: "QR उपलब्ध नहीं है। इसके बजाय सेटअप कोड कॉपी करें।",
       copySetupCode: "सेटअप कोड कॉपी करें",
       newCode: "नया कोड",
       showSetupCode: "सेटअप कोड दिखाएँ",
       pending: "समीक्षा की प्रतीक्षा में डिवाइस अनुरोध: {count}",
       review: "समीक्षा",
-      waiting: "आधिकारिक OpenClaw मोबाइल ऐप स्कैन करने के बाद अपने आप कनेक्ट हो जाते हैं।",
+      waiting: "आधिकारिक Bot मोबाइल ऐप स्कैन करने के बाद अपने आप कनेक्ट हो जाते हैं।",
       help: "पेयरिंग सहायता",
       manageDevices: "डिवाइस प्रबंधित करें",
     },
@@ -506,11 +506,11 @@ export const hi: TranslationMap = {
     ownerSession: "सत्र",
     ownerWorkboard: "वर्कबोर्ड",
     title: "प्रबंधित Worktrees",
-    subtitle: "OpenClaw के स्वामित्व वाले पृथक repository checkouts.",
+    subtitle: "Bot के स्वामित्व वाले पृथक repository checkouts.",
     cleanNow: "अभी साफ़ करें",
     cleanupTitle: "सफ़ाई",
     cleanupSubtitle:
-      "डिस्क स्थान खाली करने के लिए OpenClaw समय-समय पर पुराने worktrees हटाता है। तय करें कि सफ़ाई कितनी सख़्ती से की जाए।",
+      "डिस्क स्थान खाली करने के लिए Bot समय-समय पर पुराने worktrees हटाता है। तय करें कि सफ़ाई कितनी सख़्ती से की जाए।",
     cleanupMaxCount: "अधिकतम worktrees",
     cleanupMaxCountHelp:
       "सभी repositories में रखे जाने वाले प्रबंधित worktrees की अधिकतम संख्या। पुराने worktrees का पहले snapshot लिया जाता है और फिर उन्हें हटा दिया जाता है। संख्या सीमा अक्षम करने के लिए इसे 0 पर सेट करें।",
@@ -561,8 +561,8 @@ export const hi: TranslationMap = {
     cloudWorker: "Cloud · {profile}",
     cloudWorkerProvider: "Cloud वर्कर प्रदाता: {provider}",
     cloudRequiresWorktree: "Cloud वर्कर के लिए प्रबंधित worktree आवश्यक है",
-    cloudRequiresOpenClawRuntime:
-      "Cloud workers को OpenClaw रनटाइम की आवश्यकता होती है; {runtime} चयनित है।",
+    cloudRequiresBotRuntime:
+      "Cloud workers को Bot रनटाइम की आवश्यकता होती है; {runtime} चयनित है।",
     cloudSecureContextRequired:
       "Cloud वर्कर को एक सुरक्षित ब्राउज़र संदर्भ की आवश्यकता है, ताकि पुनर्प्राप्ति आपके कार्य को सुरक्षित रख सके।",
     cloudStartFailed: "सत्र स्थानीय रूप से बनाया गया था, लेकिन Cloud स्टार्टअप विफल रहा: {error}",
@@ -1347,7 +1347,7 @@ export const hi: TranslationMap = {
       title: "पुश नोटिफ़िकेशन",
       nativeTitle: "सूचनाएं",
       hint: "अपने gateway से ब्राउज़र पुश नोटिफ़िकेशन प्राप्त करें।",
-      nativeHint: "इस Mac पर सूचनाएँ OpenClaw ऐप द्वारा मूल रूप से दिखाई जाती हैं।",
+      nativeHint: "इस Mac पर सूचनाएँ Bot ऐप द्वारा मूल रूप से दिखाई जाती हैं।",
       unavailableHint: "इस ब्राउज़र में उपलब्ध नहीं है।",
       unavailable: "अनुपलब्ध",
       checking: "जाँच हो रही है...",
@@ -1371,7 +1371,7 @@ export const hi: TranslationMap = {
       openSystemSettings: "System Settings खोलें",
       blockedHint: "सूचनाएँ अवरुद्ध हैं। सूचनाओं की अनुमति देने के लिए अपने ब्राउज़र की साइट अनुमतियाँ अपडेट करें।",
       nativeBlockedHint:
-        "macOS में OpenClaw के लिए सूचनाएँ अक्षम हैं। उन्हें System Settings > Notifications में अनुमति दें।",
+        "macOS में Bot के लिए सूचनाएँ अक्षम हैं। उन्हें System Settings > Notifications में अनुमति दें।",
     },
     appearance: {
       theme: "थीम",
@@ -1448,7 +1448,7 @@ export const hi: TranslationMap = {
     autoSaveFailed: "सहेजना विफल",
     autoSaveConflict: "सेटिंग्स कहीं और बदली गईं",
     retry: "पुनः प्रयास करें",
-    applyBannerText: "openclaw.json में सहेजा गया — लागू करने के लिए gateway पुनः आरंभ करें।",
+    applyBannerText: "bot.json में सहेजा गया — लागू करने के लिए gateway पुनः आरंभ करें।",
     applyBannerAction: "पुनः आरंभ करें और लागू करें",
     rawDiscard: "खारिज करें",
     rawDraftBlocksApply: "सहेजे न गए raw config संपादन — पुनः आरंभ करने से पहले Raw editor में सहेजें या त्यागें।",
@@ -1507,7 +1507,7 @@ export const hi: TranslationMap = {
     },
   },
   approvalPage: {
-    brandName: "OpenClaw",
+    brandName: "Bot",
     eyebrow: "Operator approval",
     loadingTitle: "Loading approval",
     loadingDescription: "Checking the current approval state with the Gateway.",
@@ -1516,7 +1516,7 @@ export const hi: TranslationMap = {
       "This approval could not be found or this device is not authorized to review it.",
     connectionErrorTitle: "Connection interrupted",
     connectionErrorDescription:
-      "OpenClaw cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
+      "Bot cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
     retry: "पुनः प्रयास करें",
     execTitle: "Command approval",
     pending: "Waiting for your decision",
@@ -1693,7 +1693,7 @@ export const hi: TranslationMap = {
     chat: "चैट",
     settings: "सेटिंग्स",
     settingsGeneral: "सामान्य",
-    askOpenClaw: "OpenClaw से पूछें",
+    askBot: "Bot से पूछें",
     settingsGroupConnections: "कनेक्शन",
     settingsGroupAgents: "एजेंट और टूल्स",
     settingsGroupSecurity: "गोपनीयता और सुरक्षा",
@@ -1819,7 +1819,7 @@ export const hi: TranslationMap = {
     skillWorkshop: "कौशल वर्कशॉप",
     nodes: "नोड्स",
     chat: "चैट",
-    custodian: "OpenClaw",
+    custodian: "Bot",
     config: "कॉन्फ़िग",
     profile: "प्रोफ़ाइल",
     communications: "संचार",
@@ -1856,7 +1856,7 @@ export const hi: TranslationMap = {
     nodes: "पेयर किए गए डिवाइस और कमांड्स।",
     chat: "त्वरित हस्तक्षेपों के लिए गेटवे चैट।",
     custodian: "सिस्टम सेटअप और देखभाल।",
-    config: "openclaw.json संपादित करें।",
+    config: "bot.json संपादित करें।",
     profile: "आपके एजेंट के आँकड़े, streaks, और रीफ में जीवन।",
     communications: "चैनल, संदेश, और ऑडियो सेटिंग्स।",
     appearance: "थीम, UI, और सेटअप विज़ार्ड सेटिंग्स।",
@@ -1879,7 +1879,7 @@ export const hi: TranslationMap = {
   modelSetup: {
     heading: "अपना AI कनेक्ट करें",
     intro:
-      "OpenClaw आपके पास पहले से मौजूद AI एक्सेस का दोबारा उपयोग करता है — CLI लॉगिन, API कुंजी या प्रदाता साइन-इन।",
+      "Bot आपके पास पहले से मौजूद AI एक्सेस का दोबारा उपयोग करता है — CLI लॉगिन, API कुंजी या प्रदाता साइन-इन।",
     loading: "उपलब्ध AI एक्सेस के लिए इस Gateway की जाँच की जा रही है…",
     retry: "पुनः प्रयास करें",
     checkAgain: "फिर से जाँचें",
@@ -1892,7 +1892,7 @@ export const hi: TranslationMap = {
     },
     access: {
       adminRequired: "मॉडल सेटअप के लिए operator.admin एक्सेस आवश्यक है।",
-      gatewayTooOld: "Gateway पर OpenClaw का पुराना संस्करण चल रहा है",
+      gatewayTooOld: "Gateway पर Bot का पुराना संस्करण चल रहा है",
     },
     candidates: {
       title: "इस Gateway पर मिले",
@@ -2004,12 +2004,12 @@ export const hi: TranslationMap = {
     confirmTitle: "{provider} से आयात करें?",
     confirmDescription: "चुनी गई {count} मेमोरी फ़ाइलों को इस एजेंट वर्कस्पेस में कॉपी करें।",
     confirmReplace: "बदलने से पहले मौजूदा गंतव्य फ़ाइलों का बैकअप माइग्रेशन रिपोर्ट में लिया जाएगा।",
-    confirmBackup: "मेमोरी कॉपी करने से पहले OpenClaw एक सत्यापित पूर्व-आयात बैकअप बनाता है।",
+    confirmBackup: "मेमोरी कॉपी करने से पहले Bot एक सत्यापित पूर्व-आयात बैकअप बनाता है।",
     confirmImport: "मेमोरी आयात करें",
     disconnected: "मेमोरी आयात करने के लिए Gateway से कनेक्ट करें।",
     title: "असिस्टेंट मेमोरी आयात करें",
     subtitle:
-      "OpenClaw में कॉपी करने से पहले Codex की समेकित मेमोरी और Claude Code की ऑटो-मेमोरी की समीक्षा करें।",
+      "Bot में कॉपी करने से पहले Codex की समेकित मेमोरी और Claude Code की ऑटो-मेमोरी की समीक्षा करें।",
     agent: "गंतव्य एजेंट",
     replaceExisting: "मौजूदा आयात बदलें",
     replaceHint: "टकरावों का फिर से पूर्वावलोकन करें और बदलने से पहले आइटम बैकअप सुरक्षित रखें।",
@@ -2017,7 +2017,7 @@ export const hi: TranslationMap = {
   onboarding: {
     memoryImport: {
       title: "अपने सहायक की मेमोरी अपने साथ लाएँ",
-      body: "OpenClaw को अन्य कोडिंग सहायकों की मेमोरी मिली है। इसे अपने एजेंट वर्कस्पेस में इम्पोर्ट करें?",
+      body: "Bot को अन्य कोडिंग सहायकों की मेमोरी मिली है। इसे अपने एजेंट वर्कस्पेस में इम्पोर्ट करें?",
       plannedCount: "{count} इम्पोर्ट के लिए तैयार",
       alreadyImported: "पहले ही इम्पोर्ट किए गए: {count}",
       sourceUnavailable: "स्रोत पथ उपलब्ध नहीं है",
@@ -2033,33 +2033,33 @@ export const hi: TranslationMap = {
       unknownError: "अनुरोध विफल रहा",
       doneTitle: "मेमोरी इम्पोर्ट पूरा हुआ",
       doneBody:
-        "{migrated} माइग्रेट किए गए, {skipped} छोड़े गए। आप OpenClaw को सेट अप करना जारी रख सकते हैं।",
+        "{migrated} माइग्रेट किए गए, {skipped} छोड़े गए। आप Bot को सेट अप करना जारी रख सकते हैं।",
     },
   },
   custodian: {
-    title: "OpenClaw",
+    title: "Bot",
     subtitle: "आपका सिस्टम सेटअप गाइड",
     subtitleCaretaker: "सिस्टम सेटअप और देखभाल।",
     exitSetup: "सेटअप से बाहर निकलें",
     newAgent: "नया एजेंट",
     hatchDraft: "उठो, मेरे दोस्त!",
-    placeholder: "OpenClaw को संदेश भेजें…",
+    placeholder: "Bot को संदेश भेजें…",
     sensitivePlaceholder: "संवेदनशील मान दर्ज करें…",
     sensitiveReply: "संवेदनशील उत्तर भेजा गया",
     send: "भेजें",
-    thinking: "OpenClaw सोच रहा है",
+    thinking: "Bot सोच रहा है",
     earlier: "पहले",
-    requestFailed: "OpenClaw उत्तर नहीं दे सका। पुनः प्रयास करें।",
+    requestFailed: "Bot उत्तर नहीं दे सका। पुनः प्रयास करें।",
     connectionChanged: "Gateway कनेक्शन बदल गया। इस सेटअप को जारी रखने के लिए पुनः प्रयास करें।",
-    sessionRestarted: "{error} OpenClaw ने एक नया सत्र शुरू किया; संदर्भ के लिए पहले के संदेश बने रहते हैं।",
-    unsupportedGateway: "OpenClaw के साथ सेटअप जारी रखने के लिए Gateway को अपडेट करें।",
+    sessionRestarted: "{error} Bot ने एक नया सत्र शुरू किया; संदर्भ के लिए पहले के संदेश बने रहते हैं।",
+    unsupportedGateway: "Bot के साथ सेटअप जारी रखने के लिए Gateway को अपडेट करें।",
     history: {
       button: "इतिहास",
       title: "हाल के बदलाव",
       description: "इस सिस्टम पर क्या बदला, सबसे नया पहले।",
       loading: "हाल के बदलाव लोड हो रहे हैं…",
       empty: "अभी तक कोई रिकॉर्ड किया गया बदलाव नहीं।",
-      requestFailed: "OpenClaw बदलाव इतिहास लोड नहीं कर सका।",
+      requestFailed: "Bot बदलाव इतिहास लोड नहीं कर सका।",
       loadMore: "और लोड करें",
       loadingMore: "और लोड हो रहा है…",
       changedPaths: "बदले गए पथ ({count})",
@@ -2194,7 +2194,7 @@ export const hi: TranslationMap = {
       notes: "नोट्स को Markdown, Obsidian, Notion, या Bear में कैप्चर करें।",
     },
     noInstalledTitle: "कोई वैकल्पिक प्लगइन्स इंस्टॉल नहीं हैं",
-    noInstalledBody: "OpenClaw को विस्तारित करने के लिए कोई विशेष प्लगइन खोजें या ClawHub में खोजें।",
+    noInstalledBody: "Bot को विस्तारित करने के लिए कोई विशेष प्लगइन खोजें या ClawHub में खोजें।",
     noInstalledMatchTitle: "कोई इंस्टॉल किए गए प्लगइन्स मेल नहीं खाते",
     noMatchBody: "कोई अलग खोज आज़माएँ।",
     filterAll: "सभी",
@@ -2228,7 +2228,7 @@ export const hi: TranslationMap = {
     detailPluginId: "Plugin ID",
     offlineTitle: "Gateway ऑफ़लाइन",
     offlineBody: "इंस्टॉल किए गए और अनुशंसित प्लगइन ब्राउज़ करने के लिए कनेक्ट करें।",
-    optionalCapability: "वैकल्पिक OpenClaw क्षमता।",
+    optionalCapability: "वैकल्पिक Bot क्षमता।",
     enabled: "सक्षम",
     disabled: "अक्षम",
     available: "उपलब्ध",
@@ -2280,7 +2280,7 @@ export const hi: TranslationMap = {
     },
   },
   aboutPage: {
-    productName: "OpenClaw",
+    productName: "Bot",
     tagline: "आपका व्यक्तिगत AI सहायक, जो आपके अपने डिवाइसों पर चलता है।",
     waveHello: "Clawd को हाथ हिलाकर नमस्ते कहें",
     linksLabel: "समुदाय और संसाधन",
@@ -2290,7 +2290,7 @@ export const hi: TranslationMap = {
     linkDiscord: "Discord",
     linkX: "X (Twitter)",
     linkChangelog: "परिवर्तन लॉग",
-    license: "© 2026 OpenClaw Foundation — MIT License.",
+    license: "© 2026 Bot Foundation — MIT License.",
     artifactTitle: "Control UI",
     artifactSubtitle: "इस ब्राउज़र आर्टिफैक्ट के बिल्ड होने पर एम्बेड की गई पहचान।",
     artifactDetails: "Control UI बिल्ड विवरण",
@@ -2307,7 +2307,7 @@ export const hi: TranslationMap = {
     gatewayVersionHint: "सक्रिय Gateway कनेक्शन द्वारा रिपोर्ट किया गया; इस Control UI बिल्ड से अलग।",
   },
   appsPage: {
-    heroTitle: "OpenClaw को हर जगह ले जाएं",
+    heroTitle: "Bot को हर जगह ले जाएं",
     heroTagline:
       "आपके फ़ोन, घड़ी, डेस्कटॉप और ब्राउज़र के लिए साथी ऐप्स — साथ ही आपके एजेंट की क्षमताओं को बढ़ाने वाले plugins।",
     sectionMobile: "आपके फ़ोन पर",
@@ -2331,11 +2331,11 @@ export const hi: TranslationMap = {
     cards: {
       ios: {
         title: "iPhone",
-        desc: "iOS से OpenClaw में चैट करें, बात करें, कार्रवाइयाँ स्वीकृत करें और साझा करें।",
+        desc: "iOS से Bot में चैट करें, बात करें, कार्रवाइयाँ स्वीकृत करें और साझा करें।",
       },
       android: {
         title: "Android",
-        desc: "आपका Android फ़ोन एक पूर्ण OpenClaw नोड के रूप में — चैट, कैमरा और Canvas।",
+        desc: "आपका Android फ़ोन एक पूर्ण Bot नोड के रूप में — चैट, कैमरा और Canvas।",
       },
       appleWatch: {
         title: "Apple Watch",
@@ -2343,7 +2343,7 @@ export const hi: TranslationMap = {
       },
       wearOs: {
         title: "Wear OS",
-        desc: "Android साथी OpenClaw को आपकी घड़ी तक विस्तारित करता है।",
+        desc: "Android साथी Bot को आपकी घड़ी तक विस्तारित करता है।",
       },
       macos: {
         title: "macOS",
@@ -2351,7 +2351,7 @@ export const hi: TranslationMap = {
       },
       windows: {
         title: "Windows",
-        desc: "Windows साथी आपके PC को एक OpenClaw नोड के रूप में जोड़ता है।",
+        desc: "Windows साथी आपके PC को एक Bot नोड के रूप में जोड़ता है।",
       },
       linux: {
         title: "Linux",
@@ -2359,11 +2359,11 @@ export const hi: TranslationMap = {
       },
       chrome: {
         title: "Chrome एक्सटेंशन",
-        desc: "OpenClaw को अपने मौजूदा Chrome को चलाने दें — टैब, पेज और फ़ॉर्म।",
+        desc: "Bot को अपने मौजूदा Chrome को चलाने दें — टैब, पेज और फ़ॉर्म।",
       },
       plugins: {
         title: "प्लगइन्स और ClawHub",
-        desc: "समुदाय के चैनल, टूल और Skills के साथ OpenClaw को विस्तारित करें।",
+        desc: "समुदाय के चैनल, टूल और Skills के साथ Bot को विस्तारित करें।",
       },
     },
   },
@@ -2557,7 +2557,7 @@ export const hi: TranslationMap = {
     selfLearning: {
       pitchTitle: "स्व-शिक्षण चालू करें",
       pitchBody:
-        "OpenClaw सुधारों और पूरे किए गए महत्वपूर्ण रन की समीक्षा करता है, फिर इस बोर्ड के लिए Skill प्रस्तावों के ड्राफ़्ट तैयार करता है। इसमें अतिरिक्त बैकग्राउंड टोकन खर्च होते हैं और ड्राफ़्ट लंबित प्रस्तावों के रूप में आते हैं।",
+        "Bot सुधारों और पूरे किए गए महत्वपूर्ण रन की समीक्षा करता है, फिर इस बोर्ड के लिए Skill प्रस्तावों के ड्राफ़्ट तैयार करता है। इसमें अतिरिक्त बैकग्राउंड टोकन खर्च होते हैं और ड्राफ़्ट लंबित प्रस्तावों के रूप में आते हैं।",
       enable: "स्व-शिक्षण सक्षम करें",
       enabling: "सक्षम किया जा रहा है…",
       updateError: "स्व-शिक्षण सेटिंग अपडेट नहीं की जा सकी।",
@@ -3715,16 +3715,16 @@ export const hi: TranslationMap = {
         title: "ऑथ आवश्यक",
         summary:
           "Gateway पहुँच योग्य है, लेकिन इस ब्राउज़र के कनेक्ट होने से पहले इसे मिलान करने वाले टोकन या पासवर्ड की आवश्यकता है।",
-        stepPaste: "openclaw dashboard --no-open से टोकन पेस्ट करें या कॉन्फ़िगर किया गया पासवर्ड दर्ज करें।",
+        stepPaste: "bot dashboard --no-open से टोकन पेस्ट करें या कॉन्फ़िगर किया गया पासवर्ड दर्ज करें।",
         stepGenerate:
-          "यदि कोई टोकन कॉन्फ़िगर नहीं है, तो gateway होस्ट पर openclaw doctor --generate-gateway-token चलाएँ।",
+          "यदि कोई टोकन कॉन्फ़िगर नहीं है, तो gateway होस्ट पर bot doctor --generate-gateway-token चलाएँ।",
         stepConnect: "क्रेडेंशियल अपडेट करने के बाद फिर से कनेक्ट करें पर क्लिक करें।",
       },
       authFailed: {
         title: "ऑथ मेल नहीं खाया",
         summary:
           "प्रदान किया गया क्रेडेंशियल अस्वीकार कर दिया गया। सबसे आम कारण पुराना टोकन या किसी अन्य Gateway URL से कॉपी किया गया टोकन है।",
-        stepDashboard: "openclaw dashboard --no-open चलाएँ और नया URL खोलें या उसका टोकन पेस्ट करें।",
+        stepDashboard: "bot dashboard --no-open चलाएँ और नया URL खोलें या उसका टोकन पेस्ट करें।",
         stepReplace: "पुराने टोकन/पासवर्ड मान बदलें; किसी अन्य Gateway URL से टोकन दोबारा उपयोग न करें।",
         stepMode:
           "एक समय में एक मेल खाने वाला auth mode उपयोग करें: token mode के लिए gateway token, password mode के लिए password।",
@@ -3744,8 +3744,8 @@ export const hi: TranslationMap = {
         summary:
           "Control UI का उपयोग करने से पहले इस ब्राउज़र को Gateway host से एक बार की स्वीकृति चाहिए।",
         upgradeSummary: "यह ब्राउज़र पहले से ज्ञात है, लेकिन अनुरोधित access बदल गया है और नई स्वीकृति चाहिए।",
-        stepList: "Gateway host पर openclaw devices list चलाएँ।",
-        stepApproveId: "इस request को स्वीकृत करें: openclaw devices approve {requestId}.",
+        stepList: "Gateway host पर bot devices list चलाएँ।",
+        stepApproveId: "इस request को स्वीकृत करें: bot devices approve {requestId}.",
         stepApprove: "उस सूची से लंबित browser/device request को स्वीकृत करें।",
         stepReconnect: "स्वीकृति पूरी होने के बाद फिर से कनेक्ट करें।",
       },
@@ -3772,21 +3772,21 @@ export const hi: TranslationMap = {
         summary: "सर्व किया गया Control UI और चल रहा Gateway समर्थित कनेक्शन प्रोटोकॉल पर सहमत नहीं हैं।",
         refresh: "पृष्ठ रीफ्रेश करें",
         stepDashboard:
-          "openclaw dashboard के साथ सर्व किया गया dashboard फिर से खोलें ताकि UI और Gateway एक ही install से आएँ।",
+          "bot dashboard के साथ सर्व किया गया dashboard फिर से खोलें ताकि UI और Gateway एक ही install से आएँ।",
         stepDevUi:
           "यदि pnpm ui:dev का उपयोग कर रहे हैं, तो वर्तमान checkout के विरुद्ध dev UI को फिर से build या restart करें।",
         stepRestart:
-          "OpenClaw अपडेट करने के बाद Gateway को रीस्टार्ट करें ताकि वह वर्तमान प्रोटोकॉल सर्व करे।",
+          "Bot अपडेट करने के बाद Gateway को रीस्टार्ट करें ताकि वह वर्तमान प्रोटोकॉल सर्व करे।",
       },
       network: {
         title: "कनेक्ट नहीं हो सका",
         summary:
           "ब्राउज़र Gateway कनेक्शन पूरा नहीं कर सका। credentials दोबारा आज़माने से पहले target और transport जाँचें।",
-        stepGateway: "openclaw status या openclaw gateway run के साथ पुष्टि करें कि Gateway चल रहा है।",
+        stepGateway: "bot status या bot gateway run के साथ पुष्टि करें कि Gateway चल रहा है।",
         stepUrl:
           "WebSocket URL जांचें और जब Gateway HTTPS/Tailscale Serve के पीछे हो, तो wss:// का उपयोग करें।",
         stepDashboard:
-          "मौजूदा URL और auth विवरण फिर से कॉपी करने के लिए openclaw dashboard --no-open के साथ dashboard फिर से खोलें।",
+          "मौजूदा URL और auth विवरण फिर से कॉपी करने के लिए bot dashboard --no-open के साथ dashboard फिर से खोलें।",
       },
     },
   },
@@ -3882,7 +3882,7 @@ export const hi: TranslationMap = {
       remoteViewOnly: "यह सत्र एक युग्मित नोड पर है और केवल देखने के लिए है।",
       unsupportedViewOnly: "यह बाहरी सत्र स्रोत केवल देखने के लिए है।",
       sessionMenu: "External session actions",
-      openInOpenClaw: "Open in OpenClaw",
+      openInBot: "Open in Bot",
       openInTerminal: "Open in terminal",
       terminalUnavailable: "Terminal opening is unavailable for this session.",
     },
@@ -3937,7 +3937,7 @@ export const hi: TranslationMap = {
     followUpModeOverriding: "सर्वर डिफ़ॉल्ट ({mode}) को ओवरराइड कर रहे हैं",
     followUpModeReset: "सर्वर डिफ़ॉल्ट पर रीसेट करें",
     catalogOpenTarget: "बाहरी सत्र इसमें खोलें",
-    catalogOpenTargetViewer: "OpenClaw viewer",
+    catalogOpenTargetViewer: "Bot viewer",
     catalogOpenTargetTerminal: "टर्मिनल",
     onboardingDisabled: "सेटअप के दौरान अक्षम",
     commandPaletteTitle: "खोजें या यहां जाएं… (⌘K)",
@@ -3955,7 +3955,7 @@ export const hi: TranslationMap = {
       titleOne: "1 क्लाउड वर्कस्पेस विरोध",
       titleMany: "{count} क्लाउड वर्कस्पेस विरोध",
       description:
-        "OpenClaw ने आपके स्थानीय संस्करण रखे और अन्य क्लाउड परिवर्तन लागू किए। स्टेज किए गए परिणाम का निरीक्षण करें या किसी विरोधित पथ के लिए उसका संस्करण लें।",
+        "Bot ने आपके स्थानीय संस्करण रखे और अन्य क्लाउड परिवर्तन लागू किए। स्टेज किए गए परिणाम का निरीक्षण करें या किसी विरोधित पथ के लिए उसका संस्करण लें।",
       morePaths: "+{count} और पथ",
       stagedResult: "स्टेज किया गया क्लाउड परिणाम",
       copyStagedResult: "स्टेज किया गया परिणाम ref कॉपी करें",
@@ -3966,7 +3966,7 @@ export const hi: TranslationMap = {
       commandHelp:
         "इन्हें Bash या zsh में चलाएँ (Windows पर Git Bash)। यदि inspect कहता है कि पथ मौजूद नहीं है, तो क्लाउड ने इसे हटा दिया है; सत्यापित करें और स्थानीय पथ को मैन्युअल रूप से हटाएँ। यदि checkout किसी file/directory विरोध की रिपोर्ट करता है, तो अवरोधक स्थानीय पथ को स्थानांतरित या हटाएँ, फिर पुनः प्रयास करें। यदि स्टेज किया गया ref गायब है, तो सूचना पुरानी है; स्थानीय पथ को न बदलें।",
       commandsUnavailable:
-        "इस फ़ाइलनाम में टर्मिनल कंट्रोल कैरेक्टर हैं, इसलिए OpenClaw इसके लिए कॉपी करने योग्य शेल कमांड नहीं बनाएगा। स्टेज किए गए ref का सीधे निरीक्षण करें और पथ को सावधानीपूर्वक मैन्युअल रूप से दर्ज करें।",
+        "इस फ़ाइलनाम में टर्मिनल कंट्रोल कैरेक्टर हैं, इसलिए Bot इसके लिए कॉपी करने योग्य शेल कमांड नहीं बनाएगा। स्टेज किए गए ref का सीधे निरीक्षण करें और पथ को सावधानीपूर्वक मैन्युअल रूप से दर्ज करें।",
       dismiss: "वर्कस्पेस विरोध सूचना खारिज करें",
       eventSender: "क्लाउड वर्कस्पेस",
       eventTitleOne: "क्लाउड परिणाम 1 विरोध के साथ लागू किया गया",
@@ -4539,7 +4539,7 @@ export const hi: TranslationMap = {
       filters: "फ़िल्टर",
       shownOf: "{total} में से {shown}",
       emptyTitle: "अभी तक कोई अनुसूचित कार्य नहीं",
-      emptyHint: "वर्णन करें कि OpenClaw को क्या और कब करना चाहिए — यह अनुसूची पर चलता है।",
+      emptyHint: "वर्णन करें कि Bot को क्या और कब करना चाहिए — यह अनुसूची पर चलता है।",
       noMatching: "मौजूदा फ़िल्टर से कोई कार्य मेल नहीं खाता।",
       loadMore: "और लोड करें",
       loading: "लोड हो रहा है...",
@@ -4606,7 +4606,7 @@ export const hi: TranslationMap = {
     detail: {
       tabsLabel: "ऑटोमेशन का विवरण",
       newTitle: "नया शेड्यूल किया गया कार्य",
-      newSubtitle: "बताएं कि OpenClaw को क्या करना चाहिए, फिर चुनें कि यह कब चले।",
+      newSubtitle: "बताएं कि Bot को क्या करना चाहिए, फिर चुनें कि यह कब चले।",
       back: "सभी ऑटोमेशन",
       settingsTab: "सेटिंग्स",
       historyTitle: "रन इतिहास",
@@ -4679,7 +4679,7 @@ export const hi: TranslationMap = {
       descriptionPlaceholder: "इस जॉब के लिए वैकल्पिक संदर्भ",
       agentPlaceholder: "main या ops",
       agentHelp: "किसी ज्ञात एजेंट को चुनने के लिए टाइप करना शुरू करें, या कोई कस्टम एजेंट दर्ज करें।",
-      promptPlaceholder: "बताएं कि OpenClaw को क्या करना चाहिए...",
+      promptPlaceholder: "बताएं कि Bot को क्या करना चाहिए...",
       repeat: "दोहराएं",
       repeatInterval: "अंतराल",
       repeatOnce: "एक बार",

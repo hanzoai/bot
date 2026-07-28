@@ -1,7 +1,7 @@
-/** Loads and normalizes OpenClaw plugin manifests, including contracts and config schemas. */
+/** Loads and normalizes Bot plugin manifests, including contracts and config schemas. */
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeModelCatalog } from "@openclaw/model-catalog-core/model-catalog-normalize";
+import { normalizeModelCatalog } from "@hanzo/bot-model-catalog-core/model-catalog-normalize";
 import { normalizeOptionalString } from "../../packages/normalization-core/src/string-coerce.js";
 import { normalizeTrimmedStringList } from "../../packages/normalization-core/src/string-normalization.js";
 import { matchRootFileOpenFailure, openRootFileSync } from "../infra/boundary-file-read.js";
@@ -24,7 +24,7 @@ export {
 } from "./manifest-setup-normalizers.js";
 
 /** Canonical plugin manifest filename inside plugin roots. */
-export const PLUGIN_MANIFEST_FILENAME = "openclaw.plugin.json";
+export const PLUGIN_MANIFEST_FILENAME = "bot.plugin.json";
 const PLUGIN_MANIFEST_FILENAMES = [PLUGIN_MANIFEST_FILENAME] as const;
 const MAX_PLUGIN_MANIFEST_BYTES = 256 * 1024;
 const MAX_PLUGIN_MANIFEST_LOAD_CACHE_ENTRIES = 512;
@@ -190,7 +190,7 @@ export function loadPluginManifest(
   if (isCoreReservedPluginId(id)) {
     return cacheResult({
       ok: false,
-      error: `plugin manifest id "${id}" is reserved by OpenClaw core`,
+      error: `plugin manifest id "${id}" is reserved by Bot core`,
       manifestPath,
     });
   }

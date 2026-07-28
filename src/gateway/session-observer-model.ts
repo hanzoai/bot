@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { z } from "zod";
 import {
   SESSION_OBSERVER_HEALTH_VALUES,
@@ -20,7 +20,7 @@ import {
   patchSessionEntry,
 } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { AgentEventPayload } from "../infra/agent-events.js";
 import { redactToolPayloadText } from "../logging/redact.js";
 import { normalizeAgentId } from "../routing/session-key.js";
@@ -191,7 +191,7 @@ export function createDormantSessionObserverRun(
 }
 
 export type SessionObserverDeps = {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => BotConfig;
   subscribers: SessionMessageSubscriberRegistry;
   sessionEventSubscribers?: SessionEventSubscriberRegistry;
   broadcastToConnIds: (

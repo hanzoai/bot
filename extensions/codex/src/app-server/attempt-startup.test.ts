@@ -7,7 +7,7 @@ import {
   AgentHarnessPreflightError,
   type CodexBundleMcpThreadConfig,
   type EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { startCodexAttemptThread } from "./attempt-startup.js";
 import { isCodexAppServerStartupError } from "./attempt-timeouts.js";
@@ -46,7 +46,7 @@ type AttemptPaths = {
 const tempRoots = new Set<string>();
 
 function createAttemptPaths(): AttemptPaths {
-  const root = path.join(os.tmpdir(), `openclaw-codex-attempt-startup-${randomUUID()}`);
+  const root = path.join(os.tmpdir(), `bot-codex-attempt-startup-${randomUUID()}`);
   tempRoots.add(root);
   return {
     agentDir: path.join(root, "agent"),
@@ -176,7 +176,7 @@ async function captureExpectedRuntimeArtifact(
     before,
     startOptions: appServer.start,
     spawnIdentity,
-    runtimeIdentity: { serverVersion: "0.143.0", userAgent: "openclaw/0.143.0 (macOS; test)" },
+    runtimeIdentity: { serverVersion: "0.143.0", userAgent: "bot/0.143.0 (macOS; test)" },
   });
 }
 
@@ -186,7 +186,7 @@ async function answerInitialize(harness: ClientHarness): Promise<void> {
     timeout: HARNESS_REQUEST_TIMEOUT_MS,
   });
   const initialize = JSON.parse(harness.writes[0] ?? "{}") as { id?: number };
-  harness.send({ id: initialize.id, result: { userAgent: "openclaw/0.143.0 (macOS; test)" } });
+  harness.send({ id: initialize.id, result: { userAgent: "bot/0.143.0 (macOS; test)" } });
 }
 
 async function waitForRequest(

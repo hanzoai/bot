@@ -1,8 +1,8 @@
 import Foundation
-import OpenClawKit
+import BotKit
 import Security
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 private struct KeychainEntry: Hashable {
     let service: String
@@ -10,7 +10,7 @@ private struct KeychainEntry: Hashable {
 }
 
 private let gatewayService = GatewaySettingsStore._testGatewayService
-private let nodeService = "ai.openclawfoundation.app.node"
+private let nodeService = "ai.botfoundation.app.node"
 private let instanceIdEntry = KeychainEntry(service: nodeService, account: "instanceId")
 private let preferredGatewayEntry = KeychainEntry(service: gatewayService, account: "preferredStableID")
 private let lastGatewayEntry = KeychainEntry(service: gatewayService, account: "lastDiscoveredStableID")
@@ -366,7 +366,7 @@ private func withLastGatewaySnapshot(_ body: () -> Void) {
 
     @Test func `shared tls certificate does not alias distinct routes`() {
         let instanceID = "tls-owner-\(UUID().uuidString)"
-        let discoveredID = "bonjour|_openclaw._tcp|local|gateway-\(UUID().uuidString)"
+        let discoveredID = "bonjour|_bot._tcp|local|gateway-\(UUID().uuidString)"
         let manualID = "manual|gateway-\(UUID().uuidString).local|443"
         let fingerprint = "AA:BB:CC:DD"
         defer {

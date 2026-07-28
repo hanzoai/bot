@@ -7,7 +7,7 @@ import type { PluginManifestRecord } from "../../plugins/manifest-registry.js";
 import type { PluginBundleFormat } from "../../plugins/manifest-types.js";
 import { resolvePackageExtensionEntries, type PackageManifest } from "../../plugins/manifest.js";
 import { validatePackageExtensionEntriesForInstall } from "../../plugins/package-entry-resolution.js";
-import { auditOpenClawPeerDependencyLink } from "../../plugins/plugin-peer-link.js";
+import { auditBotPeerDependencyLink } from "../../plugins/plugin-peer-link.js";
 import type { PluginVerificationFailureReason } from "../../plugins/runtime-degraded-state.js";
 import { resolveUserPath } from "../../utils.js";
 
@@ -204,8 +204,8 @@ async function validatePackagePayload(params: {
 }): Promise<PluginPayloadSmokeFailure[]> {
   const failures: PluginPayloadSmokeFailure[] = [];
 
-  if (manifestDeclaresOpenClawPeer(params.manifest)) {
-    const peerIssue = await auditOpenClawPeerDependencyLink({
+  if (manifestDeclaresBotPeer(params.manifest)) {
+    const peerIssue = await auditBotPeerDependencyLink({
       packageDir: params.installPath,
       packageName: params.manifest.name ?? params.pluginId,
     });
@@ -213,8 +213,8 @@ async function validatePackagePayload(params: {
       failures.push({
         pluginId: params.pluginId,
         installPath: params.installPath,
-        reason: "missing-openclaw-peer-link",
-        detail: `Plugin declares peerDependency "openclaw" but peer link audit failed: ${peerIssue.reason}.`,
+        reason: "missing-bot-peer-link",
+        detail: `Plugin declares peerDependency "bot" but peer link audit failed: ${peerIssue.reason}.`,
       });
     }
   }
@@ -228,7 +228,7 @@ async function validatePackagePayload(params: {
       detail: `Plugin extension entry validation failed: ${
         extensionResolution.status === "invalid"
           ? extensionResolution.error
-          : "package.json openclaw.extensions is empty"
+          : "package.json bot.extensions is empty"
       }`,
     });
     return failures;
@@ -329,13 +329,13 @@ export function validateBundleInstallRecordPayload(params: {
   };
 }
 
-function manifestDeclaresOpenClawPeer(manifest: PackageManifest): boolean {
+function manifestDeclaresBotPeer(manifest: PackageManifest): boolean {
   const peerDependencies = (manifest as { peerDependencies?: unknown }).peerDependencies;
   return (
     typeof peerDependencies === "object" &&
     peerDependencies !== null &&
     !Array.isArray(peerDependencies) &&
-    typeof (peerDependencies as Record<string, unknown>).openclaw === "string"
+    typeof (peerDependencies as Record<string, unknown>).bot === "string"
   );
 }
 

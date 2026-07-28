@@ -2,7 +2,7 @@
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { ProviderAuthMethod, ProviderPlugin } from "../plugins/types.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { setupWizardCommand } from "./onboard.js";
@@ -10,8 +10,8 @@ import { setupWizardCommand } from "./onboard.js";
 type ConfigSnapshotStub = {
   exists: boolean;
   valid: boolean;
-  config: OpenClawConfig;
-  sourceConfig?: OpenClawConfig;
+  config: BotConfig;
+  sourceConfig?: BotConfig;
 };
 
 type ProviderAuthMethodNonInteractiveValidationContext = Parameters<
@@ -101,7 +101,7 @@ vi.mock("../plugins/provider-auth-choice.runtime.js", () => ({
 
 vi.mock("./onboard-helpers.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./onboard-helpers.js")>()),
-  DEFAULT_WORKSPACE: "~/.openclaw/workspace",
+  DEFAULT_WORKSPACE: "~/.bot/workspace",
   handleReset: mocks.handleReset,
 }));
 
@@ -188,7 +188,7 @@ describe("setupWizardCommand", () => {
 
     expect(runtime.error).toHaveBeenCalledOnce();
     expect(runtime.error).toHaveBeenCalledWith(
-      `Invalid --secret-input-mode. Use "plaintext" or "ref", or run ${formatCliCommand("openclaw onboard")} for the interactive setup.`,
+      `Invalid --secret-input-mode. Use "plaintext" or "ref", or run ${formatCliCommand("bot onboard")} for the interactive setup.`,
     );
     expect(runtime.exit).toHaveBeenCalledWith(1);
     expect(mocks.runInteractiveSetup).not.toHaveBeenCalled();
@@ -204,10 +204,10 @@ describe("setupWizardCommand", () => {
 
       expect(runtime.log).toHaveBeenCalledWith(
         [
-          "Windows detected - OpenClaw runs great on WSL2!",
+          "Windows detected - Bot runs great on WSL2!",
           "Native Windows might be trickier.",
           "Quick setup: wsl --install (one command, one reboot)",
-          "Guide: https://docs.openclaw.ai/windows",
+          "Guide: https://docs.bot.ai/windows",
         ].join("\n"),
       );
     } finally {
@@ -236,7 +236,7 @@ describe("setupWizardCommand", () => {
       config: {
         agents: {
           defaults: {
-            workspace: "/tmp/openclaw-custom-workspace",
+            workspace: "/tmp/bot-custom-workspace",
           },
         },
       },
@@ -251,7 +251,7 @@ describe("setupWizardCommand", () => {
 
     expect(mocks.handleReset).toHaveBeenCalledWith(
       "config+creds+sessions",
-      path.resolve("/tmp/openclaw-custom-workspace"),
+      path.resolve("/tmp/bot-custom-workspace"),
       runtime,
     );
   });
@@ -265,7 +265,7 @@ describe("setupWizardCommand", () => {
       sourceConfig: {
         agents: {
           defaults: {
-            workspace: "/tmp/openclaw-invalid-config-workspace",
+            workspace: "/tmp/bot-invalid-config-workspace",
           },
         },
       },
@@ -281,12 +281,12 @@ describe("setupWizardCommand", () => {
 
     expect(mocks.handleReset).toHaveBeenCalledWith(
       "full",
-      path.resolve("/tmp/openclaw-invalid-config-workspace"),
+      path.resolve("/tmp/bot-invalid-config-workspace"),
       runtime,
     );
     expect(mocks.handleReset).not.toHaveBeenCalledWith(
       "full",
-      path.resolve("~/.openclaw/workspace"),
+      path.resolve("~/.bot/workspace"),
       runtime,
     );
   });
@@ -303,7 +303,7 @@ describe("setupWizardCommand", () => {
             workspace: 42,
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
     });
 
     await setupWizardCommand(
@@ -369,7 +369,7 @@ describe("setupWizardCommand", () => {
 
     expect(runtime.error).toHaveBeenCalledOnce();
     expect(runtime.error).toHaveBeenCalledWith(
-      `Invalid --reset-scope. Use "config", "config+creds+sessions", or "full". Run ${formatCliCommand("openclaw onboard --reset --reset-scope config")} for a config-only reset.`,
+      `Invalid --reset-scope. Use "config", "config+creds+sessions", or "full". Run ${formatCliCommand("bot onboard --reset --reset-scope config")} for a config-only reset.`,
     );
     expect(runtime.exit).toHaveBeenCalledWith(1);
     expect(mocks.handleReset).not.toHaveBeenCalled();
@@ -391,7 +391,7 @@ describe("setupWizardCommand", () => {
     );
 
     expect(runtime.error).toHaveBeenCalledWith(
-      `Invalid --mode "typo". Use "local" or "remote", or run ${formatCliCommand("openclaw onboard")} for interactive setup.`,
+      `Invalid --mode "typo". Use "local" or "remote", or run ${formatCliCommand("bot onboard")} for interactive setup.`,
     );
     expect(runtime.exit).toHaveBeenCalledWith(1);
     expect(mocks.handleReset).not.toHaveBeenCalled();
@@ -412,7 +412,7 @@ describe("setupWizardCommand", () => {
     );
 
     expect(runtime.error).toHaveBeenCalledWith(
-      `Invalid --mode "". Use "local" or "remote", or run ${formatCliCommand("openclaw onboard")} for interactive setup.`,
+      `Invalid --mode "". Use "local" or "remote", or run ${formatCliCommand("bot onboard")} for interactive setup.`,
     );
     expect(mocks.handleReset).not.toHaveBeenCalled();
   });
@@ -518,8 +518,8 @@ describe("setupWizardCommand", () => {
   });
 
   it("rejects conflicting gateway token inputs before reset", async () => {
-    const previous = process.env.OPENCLAW_GATEWAY_TOKEN;
-    process.env.OPENCLAW_GATEWAY_TOKEN = "env-token";
+    const previous = process.env.BOT_GATEWAY_TOKEN;
+    process.env.BOT_GATEWAY_TOKEN = "env-token";
     const runtime = makeRuntime();
 
     try {
@@ -527,15 +527,15 @@ describe("setupWizardCommand", () => {
         {
           reset: true,
           gatewayToken: "plaintext-token",
-          gatewayTokenRefEnv: "OPENCLAW_GATEWAY_TOKEN",
+          gatewayTokenRefEnv: "BOT_GATEWAY_TOKEN",
         },
         runtime,
       );
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_TOKEN;
+        delete process.env.BOT_GATEWAY_TOKEN;
       } else {
-        process.env.OPENCLAW_GATEWAY_TOKEN = previous;
+        process.env.BOT_GATEWAY_TOKEN = previous;
       }
     }
 
@@ -721,7 +721,7 @@ describe("setupWizardCommand", () => {
     );
 
     expect(runtime.error).toHaveBeenCalledWith(
-      `Missing --anthropic-api-key (or ANTHROPIC_API_KEY in env). Export ANTHROPIC_API_KEY, pass --anthropic-api-key, or run ${formatCliCommand("openclaw onboard")} for interactive setup.`,
+      `Missing --anthropic-api-key (or ANTHROPIC_API_KEY in env). Export ANTHROPIC_API_KEY, pass --anthropic-api-key, or run ${formatCliCommand("bot onboard")} for interactive setup.`,
     );
     expect(mocks.handleReset).not.toHaveBeenCalled();
     expect(mocks.runNonInteractiveSetup).not.toHaveBeenCalled();

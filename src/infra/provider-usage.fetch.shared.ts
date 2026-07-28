@@ -2,7 +2,7 @@
 import {
   asDateTimestampMs,
   resolveTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@hanzo/bot-normalization-core/number-coercion";
 import { readProviderJsonResponse } from "../agents/provider-http-errors.js";
 import { parseFiniteNumber as parseFiniteNumberish } from "./parse-finite-number.js";
 import { resolveProviderUsageDisplayName } from "./provider-usage.shared.js";

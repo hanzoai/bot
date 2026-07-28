@@ -1,13 +1,13 @@
 // Telegram provider-owned authorization for message mutations in forum topics.
-import { normalizeAccountId, normalizeOptionalAccountId } from "openclaw/plugin-sdk/account-core";
-import { resolveDefaultAgentId } from "openclaw/plugin-sdk/agent-runtime";
+import { normalizeAccountId, normalizeOptionalAccountId } from "bot/plugin-sdk/account-core";
+import { resolveDefaultAgentId } from "bot/plugin-sdk/agent-runtime";
 import type {
   ChannelMessageActionContext,
   ChannelThreadingToolContext,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { parseStrictPositiveInteger } from "bot/plugin-sdk/number-runtime";
+import { resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
 import { resolveDefaultTelegramAccountId } from "./accounts.js";
 import {
   createTelegramMessageCache,
@@ -69,7 +69,7 @@ function resolveCurrentTelegramConversation(
 export async function resolveTelegramMessageMutationChatId(params: {
   chatId: string | number;
   messageId: number;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   context?: TelegramMessageMutationContext;
 }): Promise<string | number> {

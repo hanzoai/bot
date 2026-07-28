@@ -69,19 +69,19 @@ const QA_DOCKER_E2E_LANES = {
   },
   "update-migration": {
     env: (env) => ({
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC:
-        env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC ?? "openclaw@2026.4.23",
-      OPENCLAW_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "1",
-      OPENCLAW_UPGRADE_SURVIVOR_SCENARIO:
-        env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIO ?? "plugin-deps-cleanup",
+      BOT_UPGRADE_SURVIVOR_BASELINE_SPEC:
+        env.BOT_UPGRADE_SURVIVOR_BASELINE_SPEC ?? "bot@2026.4.23",
+      BOT_UPGRADE_SURVIVOR_PUBLISHED_BASELINE: "1",
+      BOT_UPGRADE_SURVIVOR_SCENARIO:
+        env.BOT_UPGRADE_SURVIVOR_SCENARIO ?? "plugin-deps-cleanup",
     }),
     script: "scripts/e2e/upgrade-survivor-docker.sh",
   },
   "update-restart-auth": {
     env: (env) => ({
-      OPENCLAW_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT:
-        env.OPENCLAW_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT ?? "1500s",
-      OPENCLAW_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
+      BOT_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT:
+        env.BOT_UPGRADE_SURVIVOR_DOCKER_RUN_TIMEOUT ?? "1500s",
+      BOT_UPGRADE_SURVIVOR_UPDATE_RESTART_MODE: "auto-auth",
     }),
     script: "scripts/e2e/upgrade-survivor-docker.sh",
   },

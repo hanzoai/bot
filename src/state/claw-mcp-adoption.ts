@@ -1,21 +1,21 @@
 import { existsSync } from "node:fs";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "./openclaw-state-db.paths.js";
+  runBotStateWriteTransaction,
+  type BotStateDatabaseOptions,
+} from "./bot-state-db.js";
+import { resolveBotStateSqlitePath } from "./bot-state-db.paths.js";
 
 /** Records an explicit non-Claw claim through the canonical MCP owner. */
 export function markClawMcpServerIndependentlyOwned(
   name: string,
-  options: OpenClawStateDatabaseOptions & { nowMs?: number } = {},
+  options: BotStateDatabaseOptions & { nowMs?: number } = {},
 ): number {
-  const databasePath = options.path ?? resolveOpenClawStateSqlitePath(options.env ?? process.env);
+  const databasePath = options.path ?? resolveBotStateSqlitePath(options.env ?? process.env);
   if (!existsSync(databasePath)) {
     return 0;
   }
   try {
-    return runOpenClawStateWriteTransaction(({ db }) => {
+    return runBotStateWriteTransaction(({ db }) => {
       const result =
         db /* sqlite-allow-raw: record a current non-Claw MCP owner after direct config. */
           .prepare(

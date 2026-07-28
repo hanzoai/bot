@@ -216,7 +216,7 @@ export async function openChromeMcpTab(
         );
       }
       const markerUrl = normalizedProfileOptions.browserUrl
-        ? `about:blank#openclaw-${randomUUID()}`
+        ? `about:blank#bot-${randomUUID()}`
         : undefined;
       const initialUrl = markerUrl ?? "about:blank";
       const result = await callTool(

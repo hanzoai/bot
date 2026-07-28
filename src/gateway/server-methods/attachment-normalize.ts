@@ -30,7 +30,7 @@ function normalizeAttachmentContent(content: unknown): string | undefined {
 export function normalizeRpcAttachmentsToChatAttachments(
   attachments: RpcAttachmentInput[] | undefined,
 ): ChatAttachment[] {
-  // Accept both the OpenClaw attachment fields and Anthropic-style
+  // Accept both the Bot attachment fields and Anthropic-style
   // source:{type:"base64",media_type,data} payloads used by some clients.
   return (
     attachments

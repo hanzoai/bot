@@ -1,14 +1,14 @@
 // Memory Core plugin module owns shared manager synchronization state.
 import type { DatabaseSync } from "node:sqlite";
 import type { FSWatcher } from "chokidar";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   createSubsystemLogger,
   resolveAgentDir,
   resolveUserPath,
-  type OpenClawConfig,
+  type BotConfig,
   type ResolvedMemorySearchConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+} from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import {
   ensureMemoryIndexSchema,
   loadSqliteVecExtension,
@@ -18,8 +18,8 @@ import {
   type MemorySource,
   type MemorySyncParams,
   type MemorySyncProgressUpdate,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { runSqliteImmediateTransactionSync } from "openclaw/plugin-sdk/sqlite-runtime";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
+import { runSqliteImmediateTransactionSync } from "bot/plugin-sdk/sqlite-runtime";
 import type { MemoryCoreAcquireLocalService } from "./embedding-local-service.js";
 import {
   resolveEmbeddingProviderAdapterId,
@@ -110,7 +110,7 @@ function memoryTableExists(db: DatabaseSync, tableName: string): boolean {
 }
 export abstract class MemoryManagerSyncBase {
   protected readonly acquireLocalService?: MemoryCoreAcquireLocalService;
-  protected abstract readonly cfg: OpenClawConfig;
+  protected abstract readonly cfg: BotConfig;
   protected abstract readonly agentId: string;
   protected abstract readonly workspaceDir: string;
   protected abstract readonly settings: ResolvedMemorySearchConfig;

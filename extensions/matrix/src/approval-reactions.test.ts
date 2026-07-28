@@ -1,5 +1,5 @@
 // Matrix tests cover approval reactions plugin behavior.
-import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
+import { createPluginRuntimeStore } from "bot/plugin-sdk/runtime-store";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildMatrixApprovalReactionHint,

@@ -1,8 +1,8 @@
 // Gateway-first agent CLI implementation with explicit --local embedded execution.
 import fs from "node:fs/promises";
 import { TextDecoder } from "node:util";
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { resolveTimerTimeoutMs } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   GATEWAY_CLIENT_MODES,
   GATEWAY_CLIENT_NAMES,
@@ -15,7 +15,7 @@ import {
   readGatewayDispatchConfig,
   readGatewayDispatchConfigWithShellEnvFallback,
 } from "../config/gateway-dispatch-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   callGateway,
   isGatewayCredentialsRequiredError,
@@ -127,7 +127,7 @@ const runtimeConfigModuleLoader = createLazyPromiseLoader(() => import("../confi
   cacheRejections: true,
 });
 const replyPayloadModuleLoader = createLazyPromiseLoader(
-  () => import("openclaw/plugin-sdk/reply-payload"),
+  () => import("bot/plugin-sdk/reply-payload"),
   { cacheRejections: true },
 );
 let gatewayAbortRetryDelaysMsForTests: readonly number[] | undefined;
@@ -138,7 +138,7 @@ function resolveGatewayAbortRetryDelaysMs(): readonly number[] {
 
 const loadAgentSessionModule = agentSessionModuleCache.load;
 
-async function loadRuntimeConfig(): Promise<OpenClawConfig> {
+async function loadRuntimeConfig(): Promise<BotConfig> {
   const { getRuntimeConfig } = await runtimeConfigModuleLoader.load();
   return getRuntimeConfig();
 }
@@ -172,7 +172,7 @@ function protectJsonStdout(opts: Pick<AgentCliOpts, "json">): void {
 
 function missingAgentMessageError(): Error {
   return new Error(
-    `Missing message. Use ${formatCliCommand('openclaw agent --message "..." --agent <id>')} or ${formatCliCommand("openclaw agent --message-file <path> --agent <id>")}.`,
+    `Missing message. Use ${formatCliCommand('bot agent --message "..." --agent <id>')} or ${formatCliCommand("bot agent --message-file <path> --agent <id>")}.`,
   );
 }
 
@@ -252,7 +252,7 @@ async function resolveAgentMessageOpts(opts: AgentCliOpts): Promise<AgentDispatc
   return { ...rest, message };
 }
 
-function parseTimeoutSeconds(opts: { cfg: OpenClawConfig; timeout?: string }) {
+function parseTimeoutSeconds(opts: { cfg: BotConfig; timeout?: string }) {
   const raw =
     opts.timeout !== undefined
       ? parseStrictNonNegativeInteger(opts.timeout)
@@ -545,7 +545,7 @@ async function abortAcceptedGatewayAgentRunWithGatewayCall(params: {
   signal: AgentCliSignal | undefined;
   runtime: RuntimeEnv;
   gatewayIdentity: AgentGatewayCallIdentity;
-  config: OpenClawConfig;
+  config: BotConfig;
 }): Promise<void> {
   const request: GatewayRequestFunction = async <T = Record<string, unknown>>(
     method: string,
@@ -650,20 +650,20 @@ async function agentViaGatewayCommand(
   const explicitSessionKey = opts.sessionKey?.trim();
   if (!opts.to && !opts.sessionId && !opts.agent && !explicitSessionKey) {
     throw new Error(
-      `No target session selected. Use --agent <id>, --session-key <key>, --session-id <id>, or --to <E.164>. Run ${formatCliCommand("openclaw agents list")} to see agents.`,
+      `No target session selected. Use --agent <id>, --session-key <key>, --session-id <id>, or --to <E.164>. Run ${formatCliCommand("bot agents list")} to see agents.`,
     );
   }
 
   // Scoped gateway turns need core agent/session/gateway fields only. The
   // running gateway owns plugin validation and plugin metadata freshness.
-  let cfg: OpenClawConfig = readGatewayDispatchConfig();
+  let cfg: BotConfig = readGatewayDispatchConfig();
   const agentIdRaw = opts.agent?.trim();
   const agentId = agentIdRaw ? normalizeAgentId(agentIdRaw) : undefined;
   if (agentId) {
     const knownAgents = listAgentIds(cfg);
     if (!knownAgents.includes(agentId)) {
       throw new Error(
-        `Unknown agent id "${agentIdRaw}". Use "${formatCliCommand("openclaw agents list")}" to see configured agents.`,
+        `Unknown agent id "${agentIdRaw}". Use "${formatCliCommand("bot agents list")}" to see configured agents.`,
       );
     }
   }
@@ -699,7 +699,7 @@ async function agentViaGatewayCommand(
   const modelOverride = normalizeOptionalString(opts.model);
   const hasModelOverride = Boolean(modelOverride);
   const needsAdminGatewayIdentity = hasModelOverride || isSessionResetCommand(body);
-  const hasGatewayUrlOverride = Boolean(normalizeOptionalString(process.env.OPENCLAW_GATEWAY_URL));
+  const hasGatewayUrlOverride = Boolean(normalizeOptionalString(process.env.BOT_GATEWAY_URL));
   const usesRemoteGateway = cfg.gateway?.mode === "remote" || hasGatewayUrlOverride;
   const gatewayIdentity: AgentGatewayCallIdentity = needsAdminGatewayIdentity
     ? {
@@ -721,7 +721,7 @@ async function agentViaGatewayCommand(
   let activeConnectionAbortAttempted = false;
   let activeConnectionAbortSucceeded = false;
   let response: GatewayAgentResponse | undefined;
-  const dispatchGatewayAgentCall = async (activeCfg: OpenClawConfig) =>
+  const dispatchGatewayAgentCall = async (activeCfg: BotConfig) =>
     await withProgress(
       {
         label: "Waiting for agent reply…",
@@ -882,7 +882,7 @@ export async function agentCliCommand(
   // Fail loudly and point at the first-class command instead of no-opping.
   if (isCompactControlCommand(messageOpts.message)) {
     runtime.error?.(
-      "Slash commands cannot be executed via --message from the CLI. Use: openclaw sessions compact <key>",
+      "Slash commands cannot be executed via --message from the CLI. Use: bot sessions compact <key>",
     );
     runtime.exit(1);
     return undefined;
@@ -932,7 +932,7 @@ export async function agentCliCommand(
         // finish this turn. Recommending a blind retry or --local here could
         // double-execute the message, so point at verification first.
         runtime.error?.(
-          `Gateway agent call ${failureHint}; the Gateway may still be running this turn. Check \`openclaw gateway status\` and the session transcript before retrying or rerunning with --local, so the turn does not execute twice.`,
+          `Gateway agent call ${failureHint}; the Gateway may still be running this turn. Check \`bot gateway status\` and the session transcript before retrying or rerunning with --local, so the turn does not execute twice.`,
         );
       }
       throw err;

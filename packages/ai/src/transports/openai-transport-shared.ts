@@ -1,4 +1,4 @@
-import type { Api, Model, OpenAICompletionsCompat, Usage } from "@openclaw/llm-core";
+import type { Api, Model, OpenAICompletionsCompat, Usage } from "@hanzo/bot-llm-core";
 import { getAiTransportHost } from "../host.js";
 /** Shared options, usage shape, cache identity, ordering, and stream scheduling for OpenAI APIs. */
 import {
@@ -41,7 +41,7 @@ export type BaseOpenAIStreamOptions = {
   headers?: Record<string, string>;
   firstEventTimeoutMs?: number;
   onFirstEventTimeout?: (reason: Error) => void;
-  openclawCodeModeToolSurface?: boolean;
+  botCodeModeToolSurface?: boolean;
   responseFormat?: Record<string, unknown>;
   frequencyPenalty?: number;
   presencePenalty?: number;
@@ -133,7 +133,7 @@ export function resolveCacheRetention(
   if (cacheRetention === "short" || cacheRetention === "long" || cacheRetention === "none") {
     return cacheRetention;
   }
-  if (typeof process !== "undefined" && process.env.OPENCLAW_CACHE_RETENTION === "long") {
+  if (typeof process !== "undefined" && process.env.BOT_CACHE_RETENTION === "long") {
     return "long";
   }
   return "short";

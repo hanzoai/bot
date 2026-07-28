@@ -277,10 +277,10 @@ function findPatchIdenticalCiReuse({
   return undefined;
 }
 
-const CI_GATE_CHECK_NAME = "openclaw/ci-gate";
+const CI_GATE_CHECK_NAME = "bot/ci-gate";
 
 /**
- * True when this run's own openclaw/ci-gate job already succeeded on the
+ * True when this run's own bot/ci-gate job already succeeded on the
  * run's CURRENT attempt. The gate job needs every selected lane and fails on
  * any non-success result, so a successful gate proves the merge-relevant
  * outcome minutes before post-gate stragglers (timing summaries, artifact

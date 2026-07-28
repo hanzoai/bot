@@ -5,7 +5,7 @@ import {
   resolveAllAgentSessionStoreTargetsSync,
 } from "../config/sessions.js";
 import type { SessionTranscriptTurnExpectedState } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { isMainRestartRecoveryCandidate } from "./main-session-recovery-state.js";
 import { resolveAgentSessionDirs } from "./session-dirs.js";
@@ -89,7 +89,7 @@ export function hasCurrentProcessOwner(params: {
 }
 
 export async function resolveRestartRecoveryStorePaths(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   stateDir?: string;
 }): Promise<string[]> {
   const storePaths = new Set<string>();
@@ -98,7 +98,7 @@ export async function resolveRestartRecoveryStorePaths(params: {
     storePaths.add(path.join(sessionsDir, "sessions.json"));
   }
   if (params.cfg) {
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
     for (const target of resolveAllAgentSessionStoreTargetsSync(params.cfg, { env })) {
       storePaths.add(path.resolve(target.storePath));
     }

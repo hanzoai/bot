@@ -43,7 +43,7 @@ describe("renderAbout", () => {
     render(renderAbout(createProps({ onPokeClawd })), container);
 
     const hero = container.querySelector(".about-hero");
-    expect(hero?.querySelector(".about-hero__name")?.textContent).toBe("OpenClaw");
+    expect(hero?.querySelector(".about-hero__name")?.textContent).toBe("Bot");
     expect(hero?.querySelector(".about-hero__version")?.textContent).toBe("v2026.7.10");
     expect(hero?.querySelector(".about-hero__clawd svg")).not.toBeNull();
 
@@ -54,12 +54,12 @@ describe("renderAbout", () => {
 
     const links = Array.from(hero?.querySelectorAll<HTMLAnchorElement>(".about-hero__link") ?? []);
     expect(links.map((link) => link.getAttribute("href"))).toEqual([
-      "https://openclaw.ai",
-      "https://docs.openclaw.ai",
-      "https://github.com/openclaw/openclaw",
+      "https://bot.ai",
+      "https://docs.bot.ai",
+      "https://github.com/hanzoai/bot",
       "https://discord.gg/clawd",
-      "https://x.com/openclaw",
-      "https://docs.openclaw.ai/releases",
+      "https://x.com/bot",
+      "https://docs.bot.ai/releases",
     ]);
     for (const link of links) {
       expect(link.getAttribute("target")).toBe("_blank");
@@ -102,7 +102,7 @@ describe("renderAbout", () => {
         new Date(COMMIT_AT),
       ),
     );
-    expect(commitAge?.nextElementSibling?.tagName.toLowerCase()).toBe("openclaw-tooltip");
+    expect(commitAge?.nextElementSibling?.tagName.toLowerCase()).toBe("bot-tooltip");
 
     expect(values?.[2]?.textContent).toContain("feature/build-chip*");
 

@@ -15,7 +15,7 @@ import type { QaSuiteRuntimeEnv } from "./suite-runtime-types.js";
 
 const fetchWithSsrFGuardMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("bot/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: fetchWithSsrFGuardMock,
 }));
 
@@ -52,8 +52,8 @@ function createConfigMutationEnv(
 
 describe("qa suite gateway helpers", () => {
   it("replaces the gateway process after writing the requested config", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-qa-gateway-restart-"));
-    const configPath = path.join(tempDir, "openclaw.json");
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-qa-gateway-restart-"));
+    const configPath = path.join(tempDir, "bot.json");
     await fs.writeFile(configPath, '{"gateway":{"auth":{"token":"keep-me"}}}\n', "utf8");
     const restartAfterStateMutation = vi.fn(
       async (

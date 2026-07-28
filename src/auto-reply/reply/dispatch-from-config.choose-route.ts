@@ -1,8 +1,8 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   hasOutboundReplyContent,
   resolveSendableOutboundReplyParts,
-} from "openclaw/plugin-sdk/reply-payload";
+} from "bot/plugin-sdk/reply-payload";
 import { logVerbose } from "../../globals.js";
 import { registerReplyDispatcherSettledTask } from "../dispatch-dispatcher.js";
 import {

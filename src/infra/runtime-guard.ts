@@ -1,7 +1,7 @@
-// Validates the current runtime against OpenClaw's Node engine floor.
+// Validates the current runtime against Bot's Node engine floor.
 import process from "node:process";
 import { format } from "node:util";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { formatConsoleDiagnosticBlock } from "../logging/json-console-line.js";
 import type { RuntimeEnv } from "../runtime.js";
 
@@ -99,7 +99,7 @@ function currentRuntimeProvidesNodeSqlite(): boolean {
   }
 }
 
-/** Returns whether a detected runtime meets OpenClaw's minimum runtime contract. */
+/** Returns whether a detected runtime meets Bot's minimum runtime contract. */
 function runtimeSatisfies(details: RuntimeDetails): boolean {
   if (details.kind === "node") {
     return isSupportedNodeVersion(details.version);
@@ -110,12 +110,12 @@ function runtimeSatisfies(details: RuntimeDetails): boolean {
   return false;
 }
 
-/** Returns whether the current process runtime satisfies OpenClaw's engine contract. */
+/** Returns whether the current process runtime satisfies Bot's engine contract. */
 export function isCurrentRuntimeSupported(): boolean {
   return runtimeSatisfies(detectRuntime());
 }
 
-/** Checks a Node version label against OpenClaw's supported Node version range. */
+/** Checks a Node version label against Bot's supported Node version range. */
 export function isSupportedNodeVersion(version: string | null): boolean {
   const parsed = parseSemver(version);
   if (!parsed) {
@@ -200,12 +200,12 @@ export function assertSupportedRuntime(
   const execLabel = details.execPath ?? "unknown";
   const requirement =
     details.kind === "bun"
-      ? "openclaw cannot run under Bun because the runtime does not provide node:sqlite."
-      : "openclaw requires Node >=22.22.3 <23, >=24.15.0 <25, or >=25.9.0.";
+      ? "bot cannot run under Bun because the runtime does not provide node:sqlite."
+      : "bot requires Node >=22.22.3 <23, >=24.15.0 <25, or >=25.9.0.";
   const retryHint =
     details.kind === "bun"
-      ? "Run OpenClaw with Node; Bun remains supported for installs and package scripts."
-      : "Upgrade Node and re-run openclaw.";
+      ? "Run Bot with Node; Bun remains supported for installs and package scripts."
+      : "Upgrade Node and re-run bot.";
 
   runtime.error(
     [

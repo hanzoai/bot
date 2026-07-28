@@ -1,5 +1,5 @@
 /** Maps cron jobs to the canonical session-store keys they are bound to. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { resolveCronAgentSessionKey } from "./isolated-agent/session-key.js";
 import type { CronServiceContract } from "./service-contract.js";
@@ -16,7 +16,7 @@ type CronJobSessionBinding = Pick<CronJob, "id" | "agentId" | "sessionKey" | "se
  */
 export function resolveCronJobBoundSessionKeys(
   job: CronJobSessionBinding,
-  opts: { cfg: OpenClawConfig; defaultAgentId?: string },
+  opts: { cfg: BotConfig; defaultAgentId?: string },
 ): Set<string> {
   const agentId = normalizeAgentId(job.agentId ?? opts.defaultAgentId);
   const keys = new Set<string>();
@@ -69,7 +69,7 @@ class CronJobBindingStaleError extends Error {
  */
 export async function disableCronJobsBoundToSession(params: {
   cron: Pick<CronServiceContract, "list" | "updateWithPrecondition" | "getDefaultAgentId">;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
 }): Promise<string[]> {
   const jobs = await params.cron.list();

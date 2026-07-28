@@ -1,5 +1,5 @@
 // Markdown Core module implements chunk text behavior.
-import { avoidTrailingHighSurrogateBreak } from "@openclaw/normalization-core/utf16-slice";
+import { avoidTrailingHighSurrogateBreak } from "@hanzo/bot-normalization-core/utf16-slice";
 
 export { avoidTrailingHighSurrogateBreak };
 

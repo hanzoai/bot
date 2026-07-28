@@ -4,8 +4,8 @@
  * Session persistence uses stable error codes so callers can distinguish lock
  * contention or stale lock cleanup from ordinary write failures.
  */
-const SESSION_WRITE_LOCK_TIMEOUT_CODE = "OPENCLAW_SESSION_WRITE_LOCK_TIMEOUT";
-const SESSION_WRITE_LOCK_STALE_CODE = "OPENCLAW_SESSION_WRITE_LOCK_STALE";
+const SESSION_WRITE_LOCK_TIMEOUT_CODE = "BOT_SESSION_WRITE_LOCK_TIMEOUT";
+const SESSION_WRITE_LOCK_STALE_CODE = "BOT_SESSION_WRITE_LOCK_STALE";
 
 /** Error thrown when a session write lock cannot be acquired before timeout. */
 export class SessionWriteLockTimeoutError extends Error {

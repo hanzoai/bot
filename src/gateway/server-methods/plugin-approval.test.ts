@@ -1,7 +1,7 @@
 // Plugin approval tests cover requested/resolved plugin approval events,
 // requester visibility, broadcast behavior, and approval manager integration.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PluginApprovalRequestPayload } from "../../infra/plugin-approvals.js";
 import { ExecApprovalManager } from "../exec-approval-manager.js";
@@ -584,7 +584,7 @@ describe("createPluginApprovalHandlers", () => {
       const handlers = createPluginApprovalHandlers(manager);
       const reviewerClient = createClient({
         connId: "conn-tui-reviewer",
-        clientId: "openclaw-tui",
+        clientId: "bot-tui",
         deviceId: "device-tui-reviewer",
         scopes: ["operator.approvals"],
       });

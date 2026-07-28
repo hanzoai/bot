@@ -1,5 +1,5 @@
 // Huggingface provider module implements model/runtime integration.
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-types";
+import type { ModelProviderConfig } from "bot/plugin-sdk/provider-model-types";
 import {
   buildHuggingfaceModelDefinition,
   discoverHuggingfaceModels,

@@ -1,6 +1,6 @@
-import type { Context, Model } from "@openclaw/llm-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import type { Context, Model } from "@hanzo/bot-llm-core";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { getAiTransportHost } from "../host.js";
 import {
   findOpenAIStrictToolProjectionDiagnostics,
@@ -150,7 +150,7 @@ export function isOpenAICodexResponsesModel(model: Model): boolean {
   return (
     OPENAI_CODEX_RESPONSES_PROVIDERS.has(model.provider) &&
     (model.api === "openai-chatgpt-responses" ||
-      model.api === "openclaw-openai-chatgpt-responses-transport")
+      model.api === "bot-openai-chatgpt-responses-transport")
   );
 }
 

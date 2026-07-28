@@ -1,10 +1,10 @@
 /** Detects conflicting plugin HTTP routes before Gateway registration accepts them. */
 import { canonicalizePathVariant } from "../gateway/security-path.js";
-import type { OpenClawPluginHttpRouteMatch } from "./types.js";
+import type { BotPluginHttpRouteMatch } from "./types.js";
 
 type PluginHttpRouteLike = {
   path: string;
-  match: OpenClawPluginHttpRouteMatch;
+  match: BotPluginHttpRouteMatch;
 };
 
 function prefixMatchPath(pathname: string, prefix: string): boolean {
@@ -39,7 +39,7 @@ function doPluginHttpRoutesOverlap(
 export function findOverlappingPluginHttpRoute<
   T extends {
     path: string;
-    match: OpenClawPluginHttpRouteMatch;
+    match: BotPluginHttpRouteMatch;
   },
 >(routes: readonly T[], candidate: PluginHttpRouteLike): T | undefined {
   return routes.find((route) => doPluginHttpRoutesOverlap(route, candidate));

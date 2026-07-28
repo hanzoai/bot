@@ -10,7 +10,7 @@ import {
   type CodexBundleMcpThreadConfig,
   type EmbeddedRunAttemptParams,
   type resolveSandboxContext,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   CODEX_APP_SERVER_UNSUBSCRIBE_TIMEOUT_MS,
   CodexAppServerUnsafeSubscriptionError,
@@ -40,7 +40,7 @@ import {
 } from "./config.js";
 import {
   resolveCodexAppServerExecutionCwd,
-  resolveCodexExternalSandboxPolicyForOpenClawSandbox,
+  resolveCodexExternalSandboxPolicyForBotSandbox,
   resolveCodexSandboxEnvironmentSelection,
   shouldRequireCodexSandboxExecServerEnvironment,
 } from "./dynamic-tool-build.js";
@@ -402,7 +402,7 @@ export async function startCodexAttemptThread(params: {
                 !startupSandboxEnvironment
               ) {
                 throw new Error(
-                  "Codex app-server did not register an OpenClaw sandbox exec-server environment.",
+                  "Codex app-server did not register an Bot sandbox exec-server environment.",
                 );
               }
             } catch (error) {
@@ -421,7 +421,7 @@ export async function startCodexAttemptThread(params: {
               remoteWorkspaceRoot: params.appServer.remoteWorkspaceRoot,
             });
             const startupSandboxPolicy = startupSandboxEnvironment
-              ? resolveCodexExternalSandboxPolicyForOpenClawSandbox(params.sandbox)
+              ? resolveCodexExternalSandboxPolicyForBotSandbox(params.sandbox)
               : undefined;
             let startupReservation: CodexThreadRouteReservation | undefined;
             const releaseStartupReservation = () => {

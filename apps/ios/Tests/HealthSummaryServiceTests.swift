@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawKit
+import BotKit
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 struct HealthSummaryServiceTests {
     @Test func `date range covers the current calendar day`() throws {

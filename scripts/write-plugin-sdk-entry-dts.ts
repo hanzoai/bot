@@ -1,4 +1,4 @@
-// Write Plugin Sdk Entry Dts script supports OpenClaw repository automation.
+// Write Plugin Sdk Entry Dts script supports Bot repository automation.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -9,17 +9,17 @@ import {
   productionPluginSdkEntrypoints,
 } from "./lib/plugin-sdk-entries.mjs";
 
-const USE_CANONICAL_DECLARATIONS = process.env.OPENCLAW_PLUGIN_SDK_CANONICAL_DTS === "1";
+const USE_CANONICAL_DECLARATIONS = process.env.BOT_PLUGIN_SDK_CANONICAL_DTS === "1";
 
 function isBareImportSpecifier(id: string): boolean {
   if (
-    id === "@openclaw/llm-core" ||
-    id.startsWith("@openclaw/llm-core/") ||
-    id === "@openclaw/model-catalog-core/model-catalog-types" ||
-    id === "@openclaw/retry" ||
-    id.startsWith("@openclaw/normalization-core/") ||
-    id.startsWith("@openclaw/media-core/") ||
-    id.startsWith("@openclaw/acp-core/")
+    id === "@hanzo/bot-llm-core" ||
+    id.startsWith("@hanzo/bot-llm-core/") ||
+    id === "@hanzo/bot-model-catalog-core/model-catalog-types" ||
+    id === "@hanzo/bot-retry" ||
+    id.startsWith("@hanzo/bot-normalization-core/") ||
+    id.startsWith("@hanzo/bot-media-core/") ||
+    id.startsWith("@hanzo/bot-acp-core/")
   ) {
     return false;
   }
@@ -49,7 +49,7 @@ function copyFlatDeclarations(fromDir: string, toDir: string): void {
 }
 
 const distPluginSdkDir = path.join(process.cwd(), "dist/plugin-sdk");
-const shouldBuildPrivateQaEntries = process.env.OPENCLAW_BUILD_PRIVATE_QA === "1";
+const shouldBuildPrivateQaEntries = process.env.BOT_BUILD_PRIVATE_QA === "1";
 const flatDeclarationEntrypoints = shouldBuildPrivateQaEntries
   ? pluginSdkEntrypoints
   : productionPluginSdkEntrypoints;
@@ -65,7 +65,7 @@ if (USE_CANONICAL_DECLARATIONS) {
     }
   }
 } else {
-  const flatDeclarationTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-sdk-dts-"));
+  const flatDeclarationTempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-plugin-sdk-dts-"));
   try {
     await build({
       clean: true,

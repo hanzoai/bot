@@ -1,6 +1,6 @@
 // Imported by agent.test.ts to keep its mocked suite in one Vitest module graph.
 import fs from "node:fs/promises";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ErrorCodes } from "../../../packages/gateway-protocol/src/index.js";
 import { isAgentRunRestartAbortReason } from "../../agents/run-termination.js";
@@ -575,7 +575,7 @@ describe("gateway agent handler", () => {
     expect(call.userTurnTranscriptRecorder?.message).toMatchObject({
       role: "user",
       content: "persist me",
-      __openclaw: { senderId: "alice@example.com" },
+      __bot: { senderId: "alice@example.com" },
     });
   });
 
@@ -1198,7 +1198,7 @@ describe("gateway agent handler", () => {
   });
 
   it("does not pass a text-only user-turn recorder for offloaded image agent runs", async () => {
-    await withTempDir({ prefix: "openclaw-gateway-agent-offloaded-image-" }, async (root) => {
+    await withTempDir({ prefix: "bot-gateway-agent-offloaded-image-" }, async (root) => {
       useTestStateDir(root);
       mockMainSessionEntry({
         sessionId: "existing-session-id",
@@ -1336,7 +1336,7 @@ describe("gateway agent handler", () => {
     vi.setSystemTime(new Date("2026-05-07T12:00:00.000Z"));
     const staleEntry = {
       sessionId: "old-session-id",
-      sessionFile: "/tmp/openclaw/agents/main/sessions/old-session-id.jsonl",
+      sessionFile: "/tmp/bot/agents/main/sessions/old-session-id.jsonl",
       updatedAt: 0,
       sessionStartedAt: 0,
     };
@@ -1369,7 +1369,7 @@ describe("gateway agent handler", () => {
     vi.setSystemTime(now);
     const missingTranscriptEntry = {
       sessionId: "failed-missing-session-id",
-      sessionFile: "/tmp/openclaw/missing/failed-missing-session-id.jsonl",
+      sessionFile: "/tmp/bot/missing/failed-missing-session-id.jsonl",
       status: "failed",
       updatedAt: now,
       sessionStartedAt: now,
@@ -1413,7 +1413,7 @@ describe("gateway agent handler", () => {
         sizeBytes: 64,
       });
 
-      await withTempDir({ prefix: "openclaw-gateway-terminal-main-newer-" }, async (root) => {
+      await withTempDir({ prefix: "bot-gateway-terminal-main-newer-" }, async (root) => {
         const sessionsDir = `${root}/sessions`;
         const sessionFile = "terminal-main-session.jsonl";
         mocks.loadSessionEntry.mockReturnValue({
@@ -1472,7 +1472,7 @@ describe("gateway agent handler", () => {
     setDateOnlyFakeClockActive(true);
     vi.setSystemTime(now);
 
-    await withTempDir({ prefix: "openclaw-gateway-terminal-main-fresh-marker-" }, async (root) => {
+    await withTempDir({ prefix: "bot-gateway-terminal-main-fresh-marker-" }, async (root) => {
       const sessionsDir = `${root}/sessions`;
       await fs.mkdir(sessionsDir, { recursive: true });
       const sessionFile = "terminal-main-session.jsonl";
@@ -1539,7 +1539,7 @@ describe("gateway agent handler", () => {
     vi.setSystemTime(now);
 
     await withTempDir(
-      { prefix: "openclaw-gateway-terminal-main-explicit-resume-" },
+      { prefix: "bot-gateway-terminal-main-explicit-resume-" },
       async (root) => {
         const sessionsDir = `${root}/sessions`;
         await fs.mkdir(sessionsDir, { recursive: true });
@@ -1611,7 +1611,7 @@ describe("gateway agent handler", () => {
       vi.setSystemTime(now);
 
       await withTempDir(
-        { prefix: `openclaw-gateway-terminal-main-${runKind}-reuse-` },
+        { prefix: `bot-gateway-terminal-main-${runKind}-reuse-` },
         async (root) => {
           const sessionsDir = `${root}/sessions`;
           await fs.mkdir(sessionsDir, { recursive: true });

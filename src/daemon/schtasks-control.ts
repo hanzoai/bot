@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { isGatewayArgv } from "../infra/gateway-process-argv.js";
 import { parseTcpPortFromArgs } from "../infra/tcp-port.js";
 import { sleep } from "../utils.js";

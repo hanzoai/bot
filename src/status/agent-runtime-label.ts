@@ -1,18 +1,18 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 // Agent runtime label helpers format provider, model, and runtime labels.
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { isCliProvider } from "../agents/model-selection.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 // Status runtime labels turn harness/provider/session state into a short
 // operator-facing name, sanitizing any persisted ACP/backend text.
 const AGENT_RUNTIME_LABELS: Readonly<Record<string, string>> = {
-  openclaw: "OpenClaw Default",
+  bot: "Bot Default",
   codex: "OpenAI Codex",
   "codex-cli": "OpenAI Codex",
   "claude-cli": "Claude CLI",
@@ -20,7 +20,7 @@ const AGENT_RUNTIME_LABELS: Readonly<Record<string, string>> = {
 };
 
 export function resolveAgentRuntimeLabel(args: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionEntry?: Pick<
     SessionEntry,
     "acp" | "agentRuntimeOverride" | "agentHarnessId" | "modelProvider" | "providerOverride"
@@ -56,5 +56,5 @@ export function resolveAgentRuntimeLabel(args: {
     );
   }
 
-  return expectDefined(AGENT_RUNTIME_LABELS.openclaw, "OpenClaw runtime label");
+  return expectDefined(AGENT_RUNTIME_LABELS.bot, "Bot runtime label");
 }

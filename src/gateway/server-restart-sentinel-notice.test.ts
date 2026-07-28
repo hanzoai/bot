@@ -7,7 +7,7 @@ import {
   loadPendingDelivery,
   markDeliveryPlatformSendAttemptStarted,
 } from "../infra/outbound/delivery-queue-storage.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 
 const mocks = vi.hoisted(() => ({
@@ -41,7 +41,7 @@ describe("restart sentinel notice recovery", () => {
   let stateDir = "";
   const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
     afterEach(() => {
-      closeOpenClawStateDatabaseForTest();
+      closeBotStateDatabaseForTest();
       envSnapshot?.restore();
       envSnapshot = undefined;
       cleanup();
@@ -49,10 +49,10 @@ describe("restart sentinel notice recovery", () => {
   });
 
   beforeEach(() => {
-    closeOpenClawStateDatabaseForTest();
-    stateDir = tempDirs.make("openclaw-restart-notice-");
-    envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    closeBotStateDatabaseForTest();
+    stateDir = tempDirs.make("bot-restart-notice-");
+    envSnapshot = captureEnv(["BOT_STATE_DIR"]);
+    setTestEnvValue("BOT_STATE_DIR", stateDir);
     mocks.sendDurableMessageBatch.mockReset();
     mocks.recoveryDeliver.mockReset();
     mocks.resolveOutboundChannelMessageAdapter.mockClear();

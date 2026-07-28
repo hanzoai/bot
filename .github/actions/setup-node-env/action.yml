@@ -92,7 +92,7 @@ runs:
       run: |
         set -euo pipefail
         source "$GITHUB_ACTION_PATH/../setup-pnpm-store-cache/ensure-node.sh"
-        openclaw_ensure_node "$REQUESTED_NODE_VERSION"
+        bot_ensure_node "$REQUESTED_NODE_VERSION"
 
     - name: Setup pnpm
       id: setup-pnpm
@@ -133,7 +133,7 @@ runs:
         # inputs, runner platform, and the exact Node patch live in the runtime
         # marker below, so changes refresh this disk in place.
         key: ${{ github.repository }}-node-deps-bind-v6-${{ inputs.node-version }}
-        path: /var/tmp/openclaw-node-deps
+        path: /var/tmp/bot-node-deps
         # Single semantic writer: only the designated trusted-push job may
         # commit, so pull_request clones stay read-only. Like every sticky
         # disk here, this gate binds cooperating code, not hostile code: the
@@ -150,7 +150,7 @@ runs:
       if: inputs.vitest-fs-cache == 'true' && inputs.save-vitest-fs-cache == 'true' && runner.os != 'Windows'
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
       with:
-        path: /var/tmp/openclaw-vitest-fs-cache
+        path: /var/tmp/bot-vitest-fs-cache
         # Blacksmith transparently accelerates the upstream Actions cache API.
         # The scheduled/dispatch warmer writes one immutable protected archive;
         # all CI shards restore it into isolated runner-local directories.
@@ -162,7 +162,7 @@ runs:
       if: inputs.vitest-fs-cache == 'true' && inputs.save-vitest-fs-cache != 'true' && runner.os != 'Windows'
       uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
       with:
-        path: /var/tmp/openclaw-vitest-fs-cache
+        path: /var/tmp/bot-vitest-fs-cache
         key: ${{ github.repository }}-vitest-fs-v3-protected-${{ runner.os }}-${{ runner.arch }}-node-${{ inputs.node-version }}-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', '**/package.json', '**/tsconfig*.json', 'vitest.config.*', 'test/vitest/**', '!**/node_modules/**') }}-${{ github.run_id }}-${{ github.run_attempt }}
         restore-keys: |
           ${{ github.repository }}-vitest-fs-v3-protected-${{ runner.os }}-${{ runner.arch }}-node-${{ inputs.node-version }}-${{ hashFiles('pnpm-lock.yaml', 'pnpm-workspace.yaml', '**/package.json', '**/tsconfig*.json', 'vitest.config.*', 'test/vitest/**', '!**/node_modules/**') }}-
@@ -175,8 +175,8 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        cache_root=/var/tmp/openclaw-vitest-fs-cache
-        generation_file="$cache_root/.openclaw-transform-generation"
+        cache_root=/var/tmp/bot-vitest-fs-cache
+        generation_file="$cache_root/.bot-transform-generation"
         mkdir -p "$cache_root"
         cache_generation=""
         if [[ -f "$generation_file" ]]; then
@@ -192,8 +192,8 @@ runs:
         printf '%s\n' "$CACHE_GENERATION" > "$generation_file"
         # The shard runner treats this as a persistent root and assigns one
         # isolated subdirectory per concurrent Vitest worker.
-        echo "OPENCLAW_VITEST_FS_MODULE_CACHE_PATH=$cache_root" >> "$GITHUB_ENV"
-        echo "OPENCLAW_VITEST_FS_MODULE_CACHE_WRITER=$CACHE_WRITER" >> "$GITHUB_ENV"
+        echo "BOT_VITEST_FS_MODULE_CACHE_PATH=$cache_root" >> "$GITHUB_ENV"
+        echo "BOT_VITEST_FS_MODULE_CACHE_WRITER=$CACHE_WRITER" >> "$GITHUB_ENV"
 
     - name: Select Node compile cache epoch
       id: node-compile-cache-epoch
@@ -213,7 +213,7 @@ runs:
       if: inputs.node-compile-cache == 'true' && inputs.save-node-compile-cache == 'true' && runner.os != 'Windows'
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
       with:
-        path: /var/tmp/openclaw-node-compile-cache
+        path: /var/tmp/bot-node-compile-cache
         key: ${{ github.repository }}-node-compile-v3-${{ inputs.node-compile-cache-scope }}-protected-${{ runner.os }}-${{ runner.arch }}-node-${{ inputs.node-version }}-${{ steps.node-compile-cache-epoch.outputs.value }}
         restore-keys: |
           ${{ github.repository }}-node-compile-v3-${{ inputs.node-compile-cache-scope }}-protected-${{ runner.os }}-${{ runner.arch }}-node-${{ inputs.node-version }}-
@@ -222,7 +222,7 @@ runs:
       if: inputs.node-compile-cache == 'true' && inputs.save-node-compile-cache != 'true' && runner.os != 'Windows'
       uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
       with:
-        path: /var/tmp/openclaw-node-compile-cache
+        path: /var/tmp/bot-node-compile-cache
         key: ${{ github.repository }}-node-compile-v3-${{ inputs.node-compile-cache-scope }}-protected-${{ runner.os }}-${{ runner.arch }}-node-${{ inputs.node-version }}-${{ steps.node-compile-cache-epoch.outputs.value }}
         restore-keys: |
           ${{ github.repository }}-node-compile-v3-${{ inputs.node-compile-cache-scope }}-protected-${{ runner.os }}-${{ runner.arch }}-node-${{ inputs.node-version }}-
@@ -234,11 +234,11 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        cache_root=/var/tmp/openclaw-node-compile-cache
+        cache_root=/var/tmp/bot-node-compile-cache
         mkdir -p "$cache_root"
         echo "NODE_COMPILE_CACHE=$cache_root" >> "$GITHUB_ENV"
         echo "NODE_COMPILE_CACHE_PORTABLE=1" >> "$GITHUB_ENV"
-        echo "OPENCLAW_NODE_COMPILE_CACHE_WRITER=$CACHE_WRITER" >> "$GITHUB_ENV"
+        echo "BOT_NODE_COMPILE_CACHE_WRITER=$CACHE_WRITER" >> "$GITHUB_ENV"
 
     # Post actions run last-in-first-out. Register after stickydisk so this bind
     # is gone before stickydisk flushes, unmounts, and snapshots its filesystem.
@@ -255,7 +255,7 @@ runs:
         FROZEN_LOCKFILE: ${{ inputs.frozen-lockfile }}
       run: |
         set -euo pipefail
-        sticky_root=/var/tmp/openclaw-node-deps
+        sticky_root=/var/tmp/bot-node-deps
         sticky_modules="$sticky_root/node_modules"
         sticky_store="$sticky_root/store"
         workspace_modules="$GITHUB_WORKSPACE/node_modules"
@@ -277,10 +277,10 @@ runs:
         deps_fingerprint="os-${RUNNER_OS:?}-arch-${RUNNER_ARCH:?}-node-$(node --version)-${deps_input_fingerprint:?}"
         # zizmor: ignore[github-env] static trusted path defined in this composite action.
         echo "PNPM_CONFIG_STORE_DIR=$sticky_store" >> "$GITHUB_ENV"
-        echo "OPENCLAW_STICKY_DEPS_FINGERPRINT=$deps_fingerprint" >> "$GITHUB_ENV"
+        echo "BOT_STICKY_DEPS_FINGERPRINT=$deps_fingerprint" >> "$GITHUB_ENV"
         # pnpm exec may reconcile a restored workspace before nested builds.
         # Sticky jobs already have every build tool, so invoke their Node entrypoints directly.
-        echo "OPENCLAW_BUILD_ALL_NO_PNPM=1" >> "$GITHUB_ENV"
+        echo "BOT_BUILD_ALL_NO_PNPM=1" >> "$GITHUB_ENV"
 
     - name: Setup Bun
       if: inputs.install-bun == 'true'
@@ -315,7 +315,7 @@ runs:
         CI: "true"
         FROZEN_LOCKFILE: ${{ inputs.frozen-lockfile }}
         STICKY_DISK: ${{ inputs.sticky-disk }}
-        STICKY_ROOT: /var/tmp/openclaw-node-deps
+        STICKY_ROOT: /var/tmp/bot-node-deps
         STICKY_WRITER: ${{ inputs.save-sticky-disk == 'true' && github.event_name != 'pull_request' && 'true' || 'false' }}
       run: |
         set -euo pipefail
@@ -332,7 +332,7 @@ runs:
             ;;
         esac
 
-        sticky_marker="$STICKY_ROOT/.openclaw-deps-fingerprint"
+        sticky_marker="$STICKY_ROOT/.bot-deps-fingerprint"
         sticky_fingerprint=""
         sticky_fingerprint_matches="false"
         sticky_snapshot_matches="false"
@@ -340,7 +340,7 @@ runs:
           sticky_fingerprint="$(<"$sticky_marker")"
         fi
         if [ "$STICKY_DISK" = "true" ] && [ -n "$sticky_fingerprint" ] &&
-          [ "$sticky_fingerprint" = "${OPENCLAW_STICKY_DEPS_FINGERPRINT:?}" ]; then
+          [ "$sticky_fingerprint" = "${BOT_STICKY_DEPS_FINGERPRINT:?}" ]; then
           sticky_fingerprint_matches="true"
           if bash "$GITHUB_ACTION_PATH/sticky-importers.sh" restore "$STICKY_ROOT" "$GITHUB_WORKSPACE"; then
             sticky_snapshot_matches="true"
@@ -356,7 +356,7 @@ runs:
           sudo umount "$GITHUB_WORKSPACE/node_modules"
           rm -rf "$GITHUB_WORKSPACE/node_modules"
           mkdir -p "$GITHUB_WORKSPACE/node_modules"
-          ephemeral_store="${RUNNER_TEMP:?}/openclaw-pnpm-store"
+          ephemeral_store="${RUNNER_TEMP:?}/bot-pnpm-store"
           mkdir -p "$ephemeral_store"
           export PNPM_CONFIG_STORE_DIR="$ephemeral_store"
           echo "PNPM_CONFIG_STORE_DIR=$ephemeral_store" >> "$GITHUB_ENV"
@@ -423,7 +423,7 @@ runs:
           if [ "$sticky_fingerprint_matches" = "true" ]; then
             echo "Sticky dependency snapshot importer contents are incomplete; reinstalling"
           elif [ "$STICKY_DISK" = "true" ] && [ -n "$sticky_fingerprint" ]; then
-            echo "Sticky dependency snapshot is stale (disk: $sticky_fingerprint, want: $OPENCLAW_STICKY_DEPS_FINGERPRINT); reinstalling"
+            echo "Sticky dependency snapshot is stale (disk: $sticky_fingerprint, want: $BOT_STICKY_DEPS_FINGERPRINT); reinstalling"
           fi
           # A stale marker must not survive a mid-install failure: the commit
           # heuristics skip failed steps, but a wrong marker plus a partial
@@ -462,7 +462,7 @@ runs:
           # publishes the fingerprint; read-only clones are discarded at job
           # end, so capturing there would only burn shard wall clock.
           if [ "$STICKY_DISK" = "true" ] && [ "$STICKY_WRITER" = "true" ]; then
-            bash "$GITHUB_ACTION_PATH/sticky-importers.sh" capture "$STICKY_ROOT" "$GITHUB_WORKSPACE" "$OPENCLAW_STICKY_DEPS_FINGERPRINT"
+            bash "$GITHUB_ACTION_PATH/sticky-importers.sh" capture "$STICKY_ROOT" "$GITHUB_WORKSPACE" "$BOT_STICKY_DEPS_FINGERPRINT"
           fi
         fi
 

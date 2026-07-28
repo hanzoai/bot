@@ -1,12 +1,12 @@
 // Googlechat plugin module implements channel base behavior.
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
-import { formatNormalizedAllowFromEntries } from "openclaw/plugin-sdk/allow-from";
+import { describeAccountSnapshot } from "bot/plugin-sdk/account-helpers";
+import { formatNormalizedAllowFromEntries } from "bot/plugin-sdk/allow-from";
 import {
   adaptScopedAccountAccessor,
   createScopedChannelConfigAdapter,
-} from "openclaw/plugin-sdk/channel-config-helpers";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/channel-core";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/channel-config-helpers";
+import type { ChannelPlugin } from "bot/plugin-sdk/channel-core";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   type GoogleChatConfigAccessorAccount,
   listGoogleChatAccountIds,

@@ -1,14 +1,14 @@
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+import { defineChannelSetupContract } from "bot/plugin-sdk/channel-setup";
 // Line plugin module implements setup core behavior.
 import type {
   ChannelSetupAdapter,
   ChannelSetupInput,
-  OpenClawConfig,
-} from "openclaw/plugin-sdk/setup";
+  BotConfig,
+} from "bot/plugin-sdk/setup";
 import {
   createSetupInputPresenceValidator,
   patchScopedAccountConfig,
-} from "openclaw/plugin-sdk/setup";
+} from "bot/plugin-sdk/setup";
 import { hasLineCredentials, parseLineAllowFromId } from "./account-helpers.js";
 import {
   DEFAULT_ACCOUNT_ID,
@@ -24,12 +24,12 @@ type LineSetupInput = ChannelSetupInput & {
 };
 
 export function patchLineAccountConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   patch: Record<string, unknown>;
   clearFields?: string[];
   enabled?: boolean;
-}): OpenClawConfig {
+}): BotConfig {
   return patchScopedAccountConfig({
     cfg: params.cfg,
     channelKey: "line",
@@ -45,7 +45,7 @@ export function patchLineAccountConfig(params: {
   });
 }
 
-export function isLineConfigured(cfg: OpenClawConfig, accountId: string): boolean {
+export function isLineConfigured(cfg: BotConfig, accountId: string): boolean {
   return hasLineCredentials(resolveLineAccount({ cfg, accountId }));
 }
 

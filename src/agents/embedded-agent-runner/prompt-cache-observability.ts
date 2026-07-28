@@ -5,8 +5,8 @@ import crypto from "node:crypto";
 import {
   sortPromptCacheToolsByName,
   splitSystemPromptCacheBoundary,
-} from "@openclaw/ai/internal/shared";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@hanzo/bot-ai/internal/shared";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { stableStringify } from "../stable-stringify.js";
 import type { NormalizedUsage } from "../usage.js";
 

@@ -1,6 +1,6 @@
-// Plugin state SQLite helpers persist plugin state in the OpenClaw state database.
+// Plugin state SQLite helpers persist plugin state in the Bot state database.
 import type { DatabaseSync } from "node:sqlite";
-import { resolveExpiresAtMsFromDurationMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveExpiresAtMsFromDurationMs } from "@hanzo/bot-normalization-core/number-coercion";
 import type { Insertable, Selectable } from "kysely";
 import {
   executeSqliteQuerySync,
@@ -9,15 +9,15 @@ import {
 } from "../infra/kysely-sync.js";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import { normalizeSqliteNumber } from "../infra/sqlite-number.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  closeOpenClawStateDatabase,
-  isOpenClawStateDatabaseOpen,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeBotStateDatabase,
+  isBotStateDatabaseOpen,
+  openBotStateDatabase,
+  type BotStateDatabaseOptions,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 import {
   PluginStateStoreError,
   type PluginStateEntry,
@@ -33,8 +33,8 @@ export const MAX_PLUGIN_STATE_VALUE_BYTES = 65_536;
 export const MAX_PLUGIN_STATE_ENTRIES_PER_PLUGIN = 50_000;
 let maxPluginStateEntriesPerPluginForTests: number | undefined;
 
-type PluginStateEntriesTable = OpenClawStateKyselyDatabase["plugin_state_entries"];
-type PluginStateStoreDatabase = Pick<OpenClawStateKyselyDatabase, "plugin_state_entries">;
+type PluginStateEntriesTable = BotStateKyselyDatabase["plugin_state_entries"];
+type PluginStateStoreDatabase = Pick<BotStateKyselyDatabase, "plugin_state_entries">;
 
 type PluginStateRow = Selectable<PluginStateEntriesTable>;
 
@@ -99,7 +99,7 @@ function wrapPluginStateError(
   operation: PluginStateStoreOperation,
   fallbackCode: PluginStateStoreErrorCode,
   message: string,
-  pathname = resolveOpenClawStateSqlitePath(process.env),
+  pathname = resolveBotStateSqlitePath(process.env),
 ): PluginStateStoreError {
   if (error instanceof PluginStateStoreError) {
     return error;
@@ -121,7 +121,7 @@ function parseStoredJson(raw: string, operation: PluginStateStoreOperation): unk
       code: "PLUGIN_STATE_CORRUPT",
       operation,
       message: "Plugin state entry contains corrupt JSON.",
-      path: resolveOpenClawStateSqlitePath(process.env),
+      path: resolveBotStateSqlitePath(process.env),
       cause: error,
     });
   }
@@ -369,10 +369,10 @@ function sweepExpiredPluginStateEntriesFromDatabase(db: DatabaseSync, now: numbe
 
 function openPluginStateDatabase(
   operation: PluginStateStoreOperation = "open",
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): PluginStateDatabase {
   const env = options.env ?? process.env;
-  const pathname = resolveOpenClawStateSqlitePath(env);
+  const pathname = resolveBotStateSqlitePath(env);
   if (cachedDatabase && cachedDatabase.path === pathname && cachedDatabase.db.isOpen) {
     return cachedDatabase;
   }
@@ -381,7 +381,7 @@ function openPluginStateDatabase(
   }
 
   try {
-    const database = openOpenClawStateDatabase(options);
+    const database = openBotStateDatabase(options);
     cachedDatabase = {
       db: database.db,
       path: database.path,
@@ -403,17 +403,17 @@ function countRow(row: CountRow | undefined): number {
   return typeof raw === "bigint" ? Number(raw) : raw;
 }
 
-function envOptions(env?: NodeJS.ProcessEnv): OpenClawStateDatabaseOptions {
+function envOptions(env?: NodeJS.ProcessEnv): BotStateDatabaseOptions {
   return env ? { env } : {};
 }
 
 function runWriteTransaction<T>(
   operation: PluginStateStoreOperation,
   write: (store: PluginStateDatabase) => T,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): T {
   const store = openPluginStateDatabase(operation, options);
-  return runOpenClawStateWriteTransaction(() => {
+  return runBotStateWriteTransaction(() => {
     const result = write(store);
     return result;
   }, options);
@@ -1196,10 +1196,10 @@ function seedPluginStateDatabaseEntriesForTests(
 }
 
 function probePluginStateStore(): PluginStateStoreProbeResult {
-  const databasePath = resolveOpenClawStateSqlitePath(process.env);
+  const databasePath = resolveBotStateSqlitePath(process.env);
   const steps: PluginStateStoreProbeStep[] = [];
   const wasOpen = cachedDatabase !== null;
-  const stateWasOpen = isOpenClawStateDatabaseOpen();
+  const stateWasOpen = isBotStateDatabaseOpen();
 
   const pushOk = (name: string) => steps.push({ name, ok: true });
   const pushFailure = (name: string, error: unknown) => {
@@ -1269,7 +1269,7 @@ function probePluginStateStore(): PluginStateStoreProbeResult {
       });
     });
     pushOk("write-read-delete");
-    openOpenClawStateDatabase().walMaintenance.checkpoint();
+    openBotStateDatabase().walMaintenance.checkpoint();
     pushOk("checkpoint");
   } catch (error) {
     pushFailure("probe", error);
@@ -1284,11 +1284,11 @@ function probePluginStateStore(): PluginStateStoreProbeResult {
 
 export function closePluginStateDatabase(): void {
   cachedDatabase = null;
-  closeOpenClawStateDatabase();
+  closeBotStateDatabase();
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.pluginStateSqliteTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.pluginStateSqliteTestApi")] = {
     probePluginStateStore,
     seedPluginStateDatabaseEntriesForTests,
     setMaxPluginStateEntriesPerPluginForTests,

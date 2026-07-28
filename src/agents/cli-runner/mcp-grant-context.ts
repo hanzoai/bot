@@ -1,6 +1,6 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { canonicalizeMainSessionAlias } from "../../config/sessions/main-session.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { McpLoopbackRequestContext } from "../../gateway/mcp-grant-store.js";
 import { normalizeMessageChannel } from "../../utils/message-channel.js";
 import type { RunCliAgentParams } from "./types.js";
@@ -80,7 +80,7 @@ function resolveCliMcpMessageProvider(
 
 function resolveCliMcpSessionKey(
   run: Pick<RunCliAgentParams, "sessionKey">,
-  config: OpenClawConfig,
+  config: BotConfig,
   agentId: string,
 ): string {
   return canonicalizeMainSessionAlias({
@@ -92,7 +92,7 @@ function resolveCliMcpSessionKey(
 
 export function buildCliMcpGrantContext(params: {
   run: RunCliAgentParams;
-  config: OpenClawConfig;
+  config: BotConfig;
   requireExplicitMessageTarget: boolean;
   agentId: string;
   modelProvider: string;

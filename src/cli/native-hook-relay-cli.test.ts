@@ -29,7 +29,7 @@ describe("native hook relay CLI", () => {
         {
           provider: "codex",
           relayId: "relay-1",
-          stateDb: "/tmp/profile/state/openclaw.sqlite",
+          stateDb: "/tmp/profile/state/bot.sqlite",
           generation: "generation-1",
           event: "post_tool_use",
         },
@@ -43,7 +43,7 @@ describe("native hook relay CLI", () => {
     expect(invokeBridge).toHaveBeenCalledWith(
       expect.objectContaining({
         relayId: "relay-1",
-        stateDbPath: "/tmp/profile/state/openclaw.sqlite",
+        stateDbPath: "/tmp/profile/state/bot.sqlite",
       }),
     );
   });

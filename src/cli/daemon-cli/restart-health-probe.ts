@@ -1,10 +1,10 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import type { PluginHealthErrorSummary } from "../../commands/health.types.js";
 import { createConfigIO } from "../../config/io.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { resolveGatewayProbeAuthSafeWithSecretInputs } from "../../gateway/probe-auth.js";
 import { probeGateway } from "../../gateway/probe.js";
 import { inspectPortUsage, type PortUsage } from "../../infra/ports.js";
@@ -139,9 +139,9 @@ export async function confirmGatewayReachable(params: {
   env?: NodeJS.ProcessEnv;
   allowDeviceIdentityRequired?: boolean;
 }): Promise<GatewayReachability> {
-  const token = normalizeOptionalString(params.auth?.token ?? process.env.OPENCLAW_GATEWAY_TOKEN);
+  const token = normalizeOptionalString(params.auth?.token ?? process.env.BOT_GATEWAY_TOKEN);
   const password = normalizeOptionalString(
-    params.auth?.password ?? process.env.OPENCLAW_GATEWAY_PASSWORD,
+    params.auth?.password ?? process.env.BOT_GATEWAY_PASSWORD,
   );
   const probe = await probeGateway({
     url: `ws://127.0.0.1:${params.port}`,
@@ -180,7 +180,7 @@ export async function resolveGatewayRestartProbeAuth(
     suppressFutureVersionWarning: true,
   })
     .readBestEffortConfig()
-    .catch((): OpenClawConfig => ({}));
+    .catch((): BotConfig => ({}));
   const resolved = await resolveGatewayProbeAuthSafeWithSecretInputs({
     cfg,
     mode: "local",

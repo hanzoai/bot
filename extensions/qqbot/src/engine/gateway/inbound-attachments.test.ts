@@ -12,7 +12,7 @@ vi.mock("../utils/file-utils.js", () => ({
 }));
 
 vi.mock("../utils/platform.js", () => ({
-  getQQBotMediaDir: () => "/tmp/openclaw-qqbot-downloads",
+  getQQBotMediaDir: () => "/tmp/bot-qqbot-downloads",
 }));
 
 vi.mock("../utils/stt.js", () => ({
@@ -66,7 +66,7 @@ describe("engine/gateway/inbound-attachments", () => {
 
     expect(downloadFileMock).toHaveBeenCalledWith(
       "https://cdn.example.test/a.png",
-      "/tmp/openclaw-qqbot-downloads",
+      "/tmp/bot-qqbot-downloads",
       "a.png",
     );
     expect(result.imageUrls).toEqual(["https://cdn.example.test/a.png"]);
@@ -75,8 +75,8 @@ describe("engine/gateway/inbound-attachments", () => {
   });
 
   it("classifies image content types case-insensitively when download succeeds", async () => {
-    downloadFileMock.mockResolvedValueOnce("/tmp/openclaw-qqbot-downloads/a.png");
-    downloadFileMock.mockResolvedValueOnce("/tmp/openclaw-qqbot-downloads/b.png");
+    downloadFileMock.mockResolvedValueOnce("/tmp/bot-qqbot-downloads/a.png");
+    downloadFileMock.mockResolvedValueOnce("/tmp/bot-qqbot-downloads/b.png");
 
     const result = await processAttachments(
       [
@@ -87,8 +87,8 @@ describe("engine/gateway/inbound-attachments", () => {
     );
 
     expect(result.imageUrls).toEqual([
-      "/tmp/openclaw-qqbot-downloads/a.png",
-      "/tmp/openclaw-qqbot-downloads/b.png",
+      "/tmp/bot-qqbot-downloads/a.png",
+      "/tmp/bot-qqbot-downloads/b.png",
     ]);
     expect(result.imageMediaTypes).toEqual(["image/png", "image/png"]);
     expect(result.attachmentInfo).toBe("");
@@ -108,7 +108,7 @@ describe("engine/gateway/inbound-attachments", () => {
   });
 
   it("does not classify a mixed-case non-image content type as an image", async () => {
-    downloadFileMock.mockResolvedValue("/tmp/openclaw-qqbot-downloads/doc.pdf");
+    downloadFileMock.mockResolvedValue("/tmp/bot-qqbot-downloads/doc.pdf");
 
     const result = await processAttachments(
       [
@@ -122,11 +122,11 @@ describe("engine/gateway/inbound-attachments", () => {
     );
 
     expect(result.imageUrls).toEqual([]);
-    expect(result.attachmentInfo).toBe("\n[Attachment: /tmp/openclaw-qqbot-downloads/doc.pdf]");
+    expect(result.attachmentInfo).toBe("\n[Attachment: /tmp/bot-qqbot-downloads/doc.pdf]");
   });
 
   it("prefers voice_wav_url for voice downloads and transcribes with configured STT", async () => {
-    downloadFileMock.mockResolvedValue("/tmp/openclaw-qqbot-downloads/voice.wav");
+    downloadFileMock.mockResolvedValue("/tmp/bot-qqbot-downloads/voice.wav");
     resolveSTTConfigMock.mockReturnValue({
       baseUrl: "https://stt.example.test",
       apiKey: "key",
@@ -149,12 +149,12 @@ describe("engine/gateway/inbound-attachments", () => {
 
     expect(downloadFileMock).toHaveBeenCalledWith(
       "https://cdn.example.test/voice.wav",
-      "/tmp/openclaw-qqbot-downloads",
+      "/tmp/bot-qqbot-downloads",
     );
-    expect(transcribeAudioMock).toHaveBeenCalledWith("/tmp/openclaw-qqbot-downloads/voice.wav", {
+    expect(transcribeAudioMock).toHaveBeenCalledWith("/tmp/bot-qqbot-downloads/voice.wav", {
       channels: { qqbot: { stt: {} } },
     });
-    expect(result.voiceAttachmentPaths).toEqual(["/tmp/openclaw-qqbot-downloads/voice.wav"]);
+    expect(result.voiceAttachmentPaths).toEqual(["/tmp/bot-qqbot-downloads/voice.wav"]);
     expect(result.voiceAttachmentUrls).toEqual(["https://cdn.example.test/voice.wav"]);
     expect(result.voiceAsrReferTexts).toEqual(["platform text"]);
     expect(result.voiceTranscripts).toEqual(["transcribed voice"]);

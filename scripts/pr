@@ -29,12 +29,12 @@ pr_subcommand_classification() {
 # PR_SUBCOMMAND_CLASSIFICATIONS_END
 
 dev_wrapper_opt_in=0
-if [ "${OPENCLAW_PR_DEV_WRAPPER:-}" = "1" ]; then
+if [ "${BOT_PR_DEV_WRAPPER:-}" = "1" ]; then
   dev_wrapper_opt_in=1
 fi
 if [ "${1-}" = "--dev-wrapper" ]; then
   dev_wrapper_opt_in=1
-  export OPENCLAW_PR_DEV_WRAPPER=1
+  export BOT_PR_DEV_WRAPPER=1
   shift
 fi
 requested_subcommand="${1-}"
@@ -92,12 +92,12 @@ if common_git_dir=$(git -C "$script_parent_dir" rev-parse --path-format=absolute
       [ "$linked_wrapper_revision" != "$anchor_wrapper_revision" ]; then
       requested_classification=$(pr_subcommand_classification "$requested_subcommand" 2>/dev/null || true)
       if [ "$dev_wrapper_opt_in" = "1" ] && [ "$requested_classification" = "advisory" ]; then
-        if [ "${OPENCLAW_PR_DEV_WRAPPER_BANNER_SHOWN:-}" != "1" ]; then
+        if [ "${BOT_PR_DEV_WRAPPER_BANNER_SHOWN:-}" != "1" ]; then
           local_head_revision=$(git -C "$script_parent_dir" rev-parse HEAD 2>/dev/null || printf 'unknown')
           echo "WARNING: running local scripts/pr revision $local_head_revision via dev-wrapper opt-in." >&2
           echo "subcommand '$requested_subcommand' is classified advisory." >&2
           echo "The local wrapper differs from the canonical checkout and origin/main; landing subcommands remain refused." >&2
-          export OPENCLAW_PR_DEV_WRAPPER_BANNER_SHOWN=1
+          export BOT_PR_DEV_WRAPPER_BANNER_SHOWN=1
         fi
       else
         if [ "$dev_wrapper_opt_in" = "1" ] && [ -n "$requested_classification" ]; then
@@ -133,19 +133,19 @@ is_main_only_pr_command() {
 }
 
 is_supervised_pr_process() {
-  [ "${OPENCLAW_PR_DEDICATED_PROCESS_GROUP:-}" = "1" ] &&
-    [ "${OPENCLAW_PR_LOCK_NOTIFY_FD:-}" = "3" ] &&
-    [ "${OPENCLAW_PR_LOCK_SUPERVISOR_PID:-}" = "$PPID" ]
+  [ "${BOT_PR_DEDICATED_PROCESS_GROUP:-}" = "1" ] &&
+    [ "${BOT_PR_LOCK_NOTIFY_FD:-}" = "3" ] &&
+    [ "${BOT_PR_LOCK_SUPERVISOR_PID:-}" = "$PPID" ]
 }
 
 if [ "${1-}" = "gc" ] || is_locked_pr_command "${1-}"; then
   if is_supervised_pr_process; then
     # Do not leak the one-shot marker to tools or nested wrapper calls.
-    unset OPENCLAW_PR_DEDICATED_PROCESS_GROUP
+    unset BOT_PR_DEDICATED_PROCESS_GROUP
   else
-    unset OPENCLAW_PR_DEDICATED_PROCESS_GROUP
-    unset OPENCLAW_PR_LOCK_NOTIFY_FD
-    unset OPENCLAW_PR_LOCK_SUPERVISOR_PID
+    unset BOT_PR_DEDICATED_PROCESS_GROUP
+    unset BOT_PR_LOCK_NOTIFY_FD
+    unset BOT_PR_LOCK_SUPERVISOR_PID
     command -v node >/dev/null 2>&1 || { echo "Missing required command: node" >&2; exit 1; }
     exec node "$script_parent_dir/pr-lib/process-group-runner.mjs" "$script_parent_dir/.." "$script_self" "$@"
   fi
@@ -178,12 +178,12 @@ Usage:
   scripts/pr ci-dispatch <PR>
   scripts/pr merge-verify <PR>
   scripts/pr merge-run <PR> [--auto-merge]
-    OPENCLAW_PR_MERGE_METHOD=merge|rebase preserves the PR commit series.
+    BOT_PR_MERGE_METHOD=merge|rebase preserves the PR commit series.
     --auto-merge enables pinned squash auto-merge for a verified BEHIND head.
-    OPENCLAW_PR_AUTO_MERGE=1 is equivalent.
+    BOT_PR_AUTO_MERGE=1 is equivalent.
 
   --dev-wrapper permits a mismatched local wrapper only for subcommands
-  classified advisory. OPENCLAW_PR_DEV_WRAPPER=1 is equivalent.
+  classified advisory. BOT_PR_DEV_WRAPPER=1 is equivalent.
 
 Required commands: git, gh, jq, rg (ripgrep), pnpm, node.
 USAGE
@@ -197,10 +197,10 @@ require_cmds() {
       missing+=("$cmd")
     fi
   done
-  if ! OPENCLAW_GH_BIN="$(resolve_plain_gh_bin)"; then
+  if ! BOT_GH_BIN="$(resolve_plain_gh_bin)"; then
     missing+=("gh")
   else
-    export OPENCLAW_GH_BIN
+    export BOT_GH_BIN
   fi
 
   if [ "${#missing[@]}" -gt 0 ]; then
@@ -403,7 +403,7 @@ main() {
       local pr="${1-}"
       [ -n "$pr" ] || { usage; exit 2; }
       local auto_merge=false
-      if [ "${2-}" = "--auto-merge" ] || [ "${OPENCLAW_PR_AUTO_MERGE:-}" = "1" ]; then
+      if [ "${2-}" = "--auto-merge" ] || [ "${BOT_PR_AUTO_MERGE:-}" = "1" ]; then
         auto_merge=true
       fi
       merge_run "$pr" "$auto_merge"

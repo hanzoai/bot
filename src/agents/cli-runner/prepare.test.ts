@@ -3,13 +3,13 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
-import { expectDefined } from "@openclaw/normalization-core";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@hanzo/bot-ai/internal/shared";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { Type } from "typebox";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildGroupChatContext, buildGroupIntro } from "../../auto-reply/reply/groups.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { registerLegacyContextEngine } from "../../context-engine/legacy.registration.js";
 import { registerContextEngineForOwner } from "../../context-engine/registry.js";
 import type { ContextEngine } from "../../context-engine/types.js";
@@ -119,7 +119,7 @@ const mockBuildActiveMusicGenerationTaskPromptContextForSession = vi.mocked(
 
 let defaultTestCliBackend = buildDefaultTestCliBackend();
 
-function createCliBackendConfig(params: TestCliBackendParams = {}): OpenClawConfig {
+function createCliBackendConfig(params: TestCliBackendParams = {}): BotConfig {
   defaultTestCliBackend = buildDefaultTestCliBackend(params);
   return {};
 }
@@ -298,7 +298,7 @@ describe("prepareCliRunContext", () => {
             },
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
     });
 
     expect(context.backendResolved.modelProvider).toBe("fixture-anthropic");
@@ -330,7 +330,7 @@ describe("prepareCliRunContext", () => {
       revokeMcpLoopbackClientGrant: vi.fn(() => true),
       resolveMcpLoopbackPolicyTools: vi.fn(() => ({ agentId: "main", tools: [] })),
       resolveMcpLoopbackScopedTools: vi.fn(() => ({ agentId: "main", tools: [] })),
-      resolveOpenClawReferencePaths: vi.fn(async () => ({ docsPath: null, sourcePath: null })),
+      resolveBotReferencePaths: vi.fn(async () => ({ docsPath: null, sourcePath: null })),
       prepareClaudeCliSkillsPlugin: vi.fn(async () => ({
         args: [],
         cleanup: vi.fn(async () => undefined),
@@ -367,7 +367,7 @@ describe("prepareCliRunContext", () => {
   it("honors an explicit auth agent directory independently of session identity", async () => {
     const { dir } = fixture.session;
     const modelOwnerAgentDir = path.join(dir, "ops-agent");
-    const systemAgentDir = path.join(dir, "openclaw-agent");
+    const systemAgentDir = path.join(dir, "bot-agent");
     const prepareExecution = vi.fn(async () => undefined);
     fs.mkdirSync(modelOwnerAgentDir, { recursive: true });
     setRawCliBackendForPrepareTest({
@@ -385,15 +385,15 @@ describe("prepareCliRunContext", () => {
     });
 
     const context = await fixture.prepare({
-      sessionKey: "agent:openclaw:main",
-      agentId: "openclaw",
+      sessionKey: "agent:bot:main",
+      agentId: "bot",
       agentDir: modelOwnerAgentDir,
       authProfileId: "test-cli:ops",
       config: {
         agents: {
           list: [
             { id: "ops", default: true, agentDir: modelOwnerAgentDir },
-            { id: "openclaw", agentDir: systemAgentDir },
+            { id: "bot", agentDir: systemAgentDir },
           ],
         },
       },
@@ -630,7 +630,7 @@ describe("prepareCliRunContext", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
 
     expect(resolveApiKeyForProfile).toHaveBeenCalledWith(
@@ -979,8 +979,8 @@ describe("prepareCliRunContext", () => {
         mcp?: { allowed?: string[] };
         mcpServers?: Record<string, { url?: string }>;
       };
-      expect(generatedSettings.mcp?.allowed).toEqual(["openclaw"]);
-      expect(generatedSettings.mcpServers?.openclaw?.url).toBe("http://127.0.0.1:31783/mcp");
+      expect(generatedSettings.mcp?.allowed).toEqual(["bot"]);
+      expect(generatedSettings.mcpServers?.bot?.url).toBe("http://127.0.0.1:31783/mcp");
       expect(context.preparedBackend.env?.GEMINI_CLI_SYSTEM_SETTINGS_PATH).toBe(
         profileSystemSettingsPath,
       );
@@ -1129,7 +1129,7 @@ describe("prepareCliRunContext", () => {
         args: ["--plugin-dir", skillsPluginDir],
         cleanup: skillsCleanup,
       })),
-      resolveOpenClawReferencePaths: vi.fn(async () => {
+      resolveBotReferencePaths: vi.fn(async () => {
         throw new Error("reference path lookup failed");
       }),
     });
@@ -1145,7 +1145,7 @@ describe("prepareCliRunContext", () => {
       expect(skillsCleanup).toHaveBeenCalledOnce();
       expect(fs.existsSync(skillsPluginDir)).toBe(false);
       expect(
-        fs.readdirSync(tempRoot).filter((entry) => entry.startsWith("openclaw-cli-mcp-")),
+        fs.readdirSync(tempRoot).filter((entry) => entry.startsWith("bot-cli-mcp-")),
       ).toEqual([]);
     } finally {
       tempEnvSnapshot.restore();
@@ -1208,7 +1208,7 @@ describe("prepareCliRunContext", () => {
           },
         ],
       })),
-      resolveOpenClawReferencePaths: vi.fn(async () => ({ docsPath: "docs", sourcePath: "src" })),
+      resolveBotReferencePaths: vi.fn(async () => ({ docsPath: "docs", sourcePath: "src" })),
     });
 
     const context = await fixture.prepare({
@@ -1231,7 +1231,7 @@ describe("prepareCliRunContext", () => {
     );
     expect(context.systemPrompt).toBe("BTW system prompt");
     expect(context.params.prompt).toBe("side question prompt");
-    expect(context.openClawHistoryPrompt).toBeUndefined();
+    expect(context.botHistoryPrompt).toBeUndefined();
     expect(context.contextEngine).toBeUndefined();
     expect(context.contextEngineTurnPrompt).toBeUndefined();
     expect(context.hadSessionFile).toBe(false);
@@ -1267,7 +1267,7 @@ describe("prepareCliRunContext", () => {
     const bootstrapPath = path.join(dir, "BOOTSTRAP.md");
     const config = {
       agents: { defaults: { workspace: dir } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     setRawCliBackendForPrepareTest({
       id: "test-cli",
       pluginId: "test",
@@ -1480,14 +1480,14 @@ describe("prepareCliRunContext", () => {
       trigger: "user",
       transcriptPrompt: "latest ask",
       currentInboundContext: {
-        text: "Sender: ⟦openclaw:ctx⟧\nsender_id=U123",
+        text: "Sender: ⟦bot:ctx⟧\nsender_id=U123",
         promptJoiner: " ",
       },
       runId: "run-test-context",
     });
 
     expect(context.params.prompt).toBe(
-      "Sender: ⟦openclaw:ctx⟧\nsender_id=U123 trusted hook context\n\nlatest ask\n\ntrusted hook tail",
+      "Sender: ⟦bot:ctx⟧\nsender_id=U123 trusted hook context\n\nlatest ask\n\ntrusted hook tail",
     );
     expect(context.params.transcriptPrompt).toBe("latest ask");
     expect(context.contextEngineTurnPrompt).toBe("latest ask");
@@ -1511,12 +1511,12 @@ describe("prepareCliRunContext", () => {
       },
     });
     // Room resumes carry compact event text into the CLI prompt but keep the
-    // richer room context in OpenClaw history for reseed and audits.
+    // richer room context in Bot history for reseed and audits.
     const context = await fixture.prepare({
       sessionKey: "agent:main:test",
       agentId: "main",
       trigger: "user",
-      prompt: "[OpenClaw room event]",
+      prompt: "[Bot room event]",
       currentInboundEventKind: "room_event",
       currentInboundContext: {
         text: "Room context:\nAlice: lunch?\n\nCurrent event:\nBob: yes",
@@ -1531,9 +1531,9 @@ describe("prepareCliRunContext", () => {
     });
 
     expect(context.reusableCliSession).toEqual({ mode: "reuse", sessionId: "cli-session" });
-    expect(context.params.prompt).toBe("Current event:\nBob: yes\n\n[OpenClaw room event]");
-    expect(context.openClawHistoryPrompt).toContain("Room context:\nAlice: lunch?");
-    expect(context.openClawHistoryPrompt).toContain("Current event:\nBob: yes");
+    expect(context.params.prompt).toBe("Current event:\nBob: yes\n\n[Bot room event]");
+    expect(context.botHistoryPrompt).toContain("Room context:\nAlice: lunch?");
+    expect(context.botHistoryPrompt).toContain("Current event:\nBob: yes");
   });
 
   it("marks inter-session prompts after CLI prompt-build hook context is applied", async () => {
@@ -1660,7 +1660,7 @@ describe("prepareCliRunContext", () => {
     const context = await fixture.prepare({});
 
     expect(context.params.prompt).toBe("latest ask");
-    expect(context.systemPrompt).toContain("You are a personal assistant running inside OpenClaw.");
+    expect(context.systemPrompt).toContain("You are a personal assistant running inside Bot.");
     expect(context.systemPrompt).toContain("Current model identity: test-cli/test-model.");
     expect(context.systemPrompt).not.toContain("hook exploded");
     expect(hookRunner.runBeforePromptBuild).toHaveBeenCalledOnce();
@@ -1680,7 +1680,7 @@ describe("prepareCliRunContext", () => {
     });
     registerTestContextEngine(engineId, factory);
     setCliRunnerPrepareTestDeps({
-      resolveOpenClawReferencePaths: vi.fn(async () => {
+      resolveBotReferencePaths: vi.fn(async () => {
         throw new Error("reference path lookup failed");
       }),
     });
@@ -1745,7 +1745,7 @@ describe("prepareCliRunContext", () => {
           hostRequirements: {
             "agent-run": {
               requiredCapabilities: ["assemble-before-prompt"],
-              unsupportedMessage: "Use the native Codex or OpenClaw embedded runtime.",
+              unsupportedMessage: "Use the native Codex or Bot embedded runtime.",
             },
           },
         },
@@ -1776,7 +1776,7 @@ describe("prepareCliRunContext", () => {
         list: [{ id: "main", default: true, agentDir: runtimeAgentDir }],
       },
       plugins: { slots: { contextEngine: engineId } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const factory = vi.fn((_ctx: unknown): ContextEngine => {
       return {
         info: { id: engineId, name: "CLI runtime config engine" },
@@ -1875,7 +1875,7 @@ describe("prepareCliRunContext", () => {
 
   it("uses cwd for CLI system prompt workspace guidance", async () => {
     const { dir } = fixture.session;
-    const taskDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cli-task-"));
+    const taskDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-cli-task-"));
     try {
       const context = await fixture.prepare({
         cwd: taskDir,
@@ -1936,7 +1936,7 @@ describe("prepareCliRunContext", () => {
     const context = await fixture.prepare({
       sessionKey: "agent:main:test",
       currentInboundContext: {
-        text: "Conversation info: ⟦openclaw:ctx⟧\nchannel=telegram",
+        text: "Conversation info: ⟦bot:ctx⟧\nchannel=telegram",
       },
       extraSystemPrompt: "new stable prompt",
       extraSystemPromptStatic: "new stable prompt",
@@ -1952,9 +1952,9 @@ describe("prepareCliRunContext", () => {
       sessionId: "cli-session",
       drift: { reasons: ["system-prompt"] },
     });
-    expect(context.openClawHistoryPrompt).toBeUndefined();
+    expect(context.botHistoryPrompt).toBeUndefined();
     expect(context.params.prompt).toContain(
-      "OpenClaw resumed this CLI session after prompt content changed.",
+      "Bot resumed this CLI session after prompt content changed.",
     );
     expect(context.params.prompt).toContain("changed=system-prompt");
     expect(context.params.prompt).toContain("latest ask");
@@ -1978,7 +1978,7 @@ describe("prepareCliRunContext", () => {
       invalidatedReason: "system-prompt",
     });
     expect(context.params.prompt).not.toContain(
-      "OpenClaw resumed this CLI session after prompt content changed.",
+      "Bot resumed this CLI session after prompt content changed.",
     );
   });
 
@@ -2281,8 +2281,8 @@ describe("prepareCliRunContext", () => {
       sessionId: "cli-session",
       drift: { reasons: ["system-prompt"] },
     });
-    expect(context.openClawHistoryPrompt).toContain("prior no-compaction ask");
-    expect(context.openClawHistoryPrompt).toContain("latest ask");
+    expect(context.botHistoryPrompt).toContain("prior no-compaction ask");
+    expect(context.botHistoryPrompt).toContain("latest ask");
   });
 
   it("prepares opted-in raw-tail history for session-expired retry without disabling native resume", async () => {
@@ -2309,8 +2309,8 @@ describe("prepareCliRunContext", () => {
     });
 
     expect(context.reusableCliSession).toEqual({ mode: "reuse", sessionId: "cli-session" });
-    expect(context.openClawHistoryPrompt).toContain("prior resumable ask");
-    expect(context.openClawHistoryPrompt).toContain("latest ask");
+    expect(context.botHistoryPrompt).toContain("prior resumable ask");
+    expect(context.botHistoryPrompt).toContain("latest ask");
   });
 
   it("applies direct-run prepend system context helpers on the CLI path", async () => {
@@ -2644,8 +2644,8 @@ describe("prepareCliRunContext", () => {
     });
 
     expect(context.preparedBackend.env).toMatchObject({
-      OPENCLAW_MCP_TOKEN: "loopback-token",
-      OPENCLAW_MCP_CLI_CAPTURE_KEY: "",
+      BOT_MCP_TOKEN: "loopback-token",
+      BOT_MCP_CLI_CAPTURE_KEY: "",
     });
     expect(mintMcpLoopbackClientGrant).toHaveBeenCalledWith({
       context: {
@@ -2793,7 +2793,7 @@ describe("prepareCliRunContext", () => {
 
     expect(context.mcpDeliveryCapture).toBe(true);
     expect(context.preparedBackend.env).toMatchObject({
-      OPENCLAW_MCP_CLI_CAPTURE_KEY: "",
+      BOT_MCP_CLI_CAPTURE_KEY: "",
     });
   });
 
@@ -2812,7 +2812,7 @@ describe("prepareCliRunContext", () => {
       toolsAllow: ["read", "web_search"],
     });
     await expect(run).rejects.toThrow(
-      `CLI backend "test-cli" cannot enforce this run's tool cap. Upgrade its plugin and retry; if current, ask its maintainer to add exact-cap support. OpenClaw did not start the run.`,
+      `CLI backend "test-cli" cannot enforce this run's tool cap. Upgrade its plugin and retry; if current, ask its maintainer to add exact-cap support. Bot did not start the run.`,
     );
 
     expect(getActiveMcpLoopbackRuntime).not.toHaveBeenCalled();
@@ -2850,7 +2850,7 @@ describe("prepareCliRunContext", () => {
 
     expect(context.params.cliToolAvailability).toEqual({
       native: [],
-      openClaw: ["write", "apply_patch"],
+      bot: ["write", "apply_patch"],
     });
     expect(resolveMcpLoopbackPolicyTools).toHaveBeenCalledWith(
       expect.objectContaining({ toolsAllow: ["write"] }),
@@ -2879,13 +2879,13 @@ describe("prepareCliRunContext", () => {
     await expect(
       fixture.prepare({
         provider: "settings-cli",
-        cliToolAvailability: { native: [], openClaw: [] },
+        cliToolAvailability: { native: [], bot: [] },
       }),
     ).rejects.toThrow(
       "did not enforce exact per-run tool availability during execution preparation",
     );
     expect(prepareExecution).toHaveBeenCalledWith(
-      expect.objectContaining({ toolAvailability: { native: [], openClaw: [], mcp: [] } }),
+      expect.objectContaining({ toolAvailability: { native: [], bot: [], mcp: [] } }),
     );
     expect(cleanup).toHaveBeenCalledOnce();
   });
@@ -2910,9 +2910,9 @@ describe("prepareCliRunContext", () => {
 
     const context = await fixture.prepare({
       provider: "settings-cli",
-      cliToolAvailability: { native: [], openClaw: [] },
+      cliToolAvailability: { native: [], bot: [] },
     });
-    expect(context.params.cliToolAvailability).toEqual({ native: [], openClaw: [] });
+    expect(context.params.cliToolAvailability).toEqual({ native: [], bot: [] });
     await context.preparedBackend.cleanup?.();
   });
 
@@ -2937,15 +2937,15 @@ describe("prepareCliRunContext", () => {
     const context = await fixture.prepare({
       provider: "claude-cli",
       sessionEntry: { execHost: "node", execNode: "node-a" } as never,
-      cliToolAvailability: { native: ["Read"], openClaw: ["message"] },
+      cliToolAvailability: { native: ["Read"], bot: ["message"] },
     });
 
     expect(prepareExecution).toHaveBeenCalledWith(
       expect.objectContaining({
-        toolAvailability: { native: ["Read"], openClaw: [], mcp: [] },
+        toolAvailability: { native: ["Read"], bot: [], mcp: [] },
       }),
     );
-    expect(context.params.cliToolAvailability).toEqual({ native: ["Read"], openClaw: [] });
+    expect(context.params.cliToolAvailability).toEqual({ native: ["Read"], bot: [] });
     await context.preparedBackend.cleanup?.();
   });
 
@@ -3005,7 +3005,7 @@ describe("prepareCliRunContext", () => {
       expect(context.params.toolsAllow).toBeUndefined();
       expect(context.params.cliToolAvailability).toEqual({
         native: [],
-        openClaw: ["write", "apply_patch"],
+        bot: ["write", "apply_patch"],
       });
       expect(mintMcpLoopbackClientGrant.mock.calls[0]?.[0]?.context.toolsAllow).toEqual([
         "write",
@@ -3093,7 +3093,7 @@ describe("prepareCliRunContext", () => {
         },
         cliToolAvailability: {
           native: [],
-          openClaw: ["memory_search", "memory_get"],
+          bot: ["memory_search", "memory_get"],
         },
       });
       cleanup = context.preparedBackend.cleanup;
@@ -3109,25 +3109,25 @@ describe("prepareCliRunContext", () => {
       const rawBundle = JSON.parse(fs.readFileSync(mcpConfigPath ?? "", "utf-8")) as {
         mcpServers?: Record<string, unknown>;
       };
-      expect(Object.keys(rawBundle.mcpServers ?? {})).toEqual(["openclaw"]);
+      expect(Object.keys(rawBundle.mcpServers ?? {})).toEqual(["bot"]);
     } finally {
       await cleanup?.();
     }
   });
 
-  it("serves only the openclaw MCP server for ring-zero runs", async () => {
+  it("serves only the bot MCP server for ring-zero runs", async () => {
     const { dir, sessionFile } = fixture.session;
     const getActiveMcpLoopbackRuntime = vi.fn(() => undefined);
     const resolveExecutionArgs = vi.fn(
       (context: {
         baseArgs: readonly string[];
-        toolAvailability?: { native: readonly string[]; openClaw: readonly string[] };
+        toolAvailability?: { native: readonly string[]; bot: readonly string[] };
       }) => [
         ...context.baseArgs,
         "--tools",
         context.toolAvailability?.native.join(",") ?? "default",
         "--allowedTools",
-        context.toolAvailability?.openClaw.join(",") ?? "",
+        context.toolAvailability?.bot.join(",") ?? "",
       ],
     );
     setCliRunnerPrepareTestDeps({ getActiveMcpLoopbackRuntime });
@@ -3158,12 +3158,12 @@ describe("prepareCliRunContext", () => {
       provider: "claude-cli",
       model: "test-model",
       timeoutMs: 1_000,
-      runId: "run-test-openclaw-mcp",
+      runId: "run-test-bot-mcp",
       config: createCliBackendConfig(),
       systemAgentTool: { surface: "cli" },
       cliToolAvailability: {
         native: [],
-        openClaw: ["openclaw"],
+        bot: ["bot"],
       },
     };
     const context = await prepareCliRunContext(params);
@@ -3181,7 +3181,7 @@ describe("prepareCliRunContext", () => {
     expect(resolveExecutionArgs).not.toHaveBeenCalled();
     expect(context.params.cliToolAvailability).toEqual({
       native: [],
-      openClaw: ["openclaw"],
+      bot: ["bot"],
     });
     const mcpConfigPath = expectDefined(
       args[args.indexOf("--mcp-config") + 1],
@@ -3190,10 +3190,10 @@ describe("prepareCliRunContext", () => {
     const raw = JSON.parse(fs.readFileSync(mcpConfigPath, "utf-8")) as {
       mcpServers?: Record<string, { env?: Record<string, string> }>;
     };
-    expect(Object.keys(raw.mcpServers ?? {})).toEqual(["openclaw"]);
-    expect(raw.mcpServers?.openclaw?.env).toMatchObject({
-      OPENCLAW_TOOLS_MCP_TOOLS: "openclaw",
-      OPENCLAW_TOOLS_MCP_SYSTEM_AGENT_SURFACE: "cli",
+    expect(Object.keys(raw.mcpServers ?? {})).toEqual(["bot"]);
+    expect(raw.mcpServers?.bot?.env).toMatchObject({
+      BOT_TOOLS_MCP_TOOLS: "bot",
+      BOT_TOOLS_MCP_SYSTEM_AGENT_SURFACE: "cli",
     });
 
     await context.preparedBackend.cleanup?.();
@@ -3346,13 +3346,13 @@ describe("prepareCliRunContext", () => {
     });
 
     // Candidate is invalidated (no native --resume) yet reseed still fires:
-    // prepare hands the prior OpenClaw conversation forward as history.
+    // prepare hands the prior Bot conversation forward as history.
     expect(context.reusableCliSession).toEqual({
       mode: "invalidate",
       invalidatedReason: "missing-transcript",
     });
-    expect(context.openClawHistoryPrompt).toContain("prior claude-cli ask");
-    expect(context.openClawHistoryPrompt).toContain("latest ask");
+    expect(context.botHistoryPrompt).toContain("prior claude-cli ask");
+    expect(context.botHistoryPrompt).toContain("latest ask");
   });
 
   it("prepares node-placed Claude resumes without Gateway MCP, skills, or transcript checks", async () => {
@@ -3428,7 +3428,7 @@ describe("prepareCliRunContext", () => {
     });
     // The reseed prompt is gateway-built text, so node placement keeps the
     // backend's raw-transcript reseed semantics for fresh-retry paths.
-    expect(context.openClawHistoryPrompt).toContain("gateway-only history");
+    expect(context.botHistoryPrompt).toContain("gateway-only history");
     expect(context.claudeSkillsPluginArgs).toEqual([]);
     expect(context.systemPrompt).not.toContain("GATEWAY_ONLY_SKILL_PATH");
     expect(context.mcpDeliveryCapture).toBeUndefined();
@@ -3500,8 +3500,8 @@ describe("prepareCliRunContext", () => {
       sessionId: "warm-claude-sid",
     });
     expect(context.requiredClaudeLiveSessionGeneration).toBe("warm-live-generation");
-    expect(context.openClawHistoryPrompt).toContain("earlier warm context");
-    expect(context.openClawHistoryPrompt).toContain("warm follow-up");
+    expect(context.botHistoryPrompt).toContain("earlier warm context");
+    expect(context.botHistoryPrompt).toContain("warm follow-up");
   });
 
   it("disables Claude live transport while preserving native transcript resume", async () => {
@@ -3513,7 +3513,7 @@ describe("prepareCliRunContext", () => {
     });
 
     const context = await fixture.prepare({
-      sessionKey: "agent:openclaw:main",
+      sessionKey: "agent:bot:main",
       prompt: "approve the proposal",
       provider: "claude-cli",
       model: "opus",
@@ -3599,7 +3599,7 @@ describe("prepareCliRunContext", () => {
 
   it("renders CLI skills from sandbox-readable paths instead of persisted host snapshots", async () => {
     const { dir } = fixture.session;
-    const hostSkillDir = "/home/tzdai/.npm-global/lib/node_modules/openclaw/skills/gog";
+    const hostSkillDir = "/home/tzdai/.npm-global/lib/node_modules/bot/skills/gog";
     const hostSkillPath = `${hostSkillDir}/SKILL.md`;
     const materializedWorkspace = path.join(dir, "state", "sandbox-skills");
     const materializedSkillDir = path.join(materializedWorkspace, "skills", "gog");
@@ -3645,10 +3645,10 @@ describe("prepareCliRunContext", () => {
             description: "Read Gmail safely.",
             filePath: hostSkillPath,
             baseDir: hostSkillDir,
-            source: "openclaw-bundled",
+            source: "bot-bundled",
             sourceInfo: {
               path: hostSkillPath,
-              source: "openclaw-bundled",
+              source: "bot-bundled",
               scope: "project",
               origin: "top-level",
               baseDir: hostSkillDir,
@@ -3665,7 +3665,7 @@ describe("prepareCliRunContext", () => {
       workspaceDir: dir,
     });
     expect(context.systemPrompt).toContain(
-      "/workspace/.openclaw/sandbox-skills/skills/gog/SKILL.md",
+      "/workspace/.bot/sandbox-skills/skills/gog/SKILL.md",
     );
     expect(context.systemPrompt).not.toContain(hostSkillPath);
     expect(context.systemPromptReport.skills.promptChars).toBeGreaterThan(0);
@@ -3698,7 +3698,7 @@ describe("prepareCliRunContext", () => {
     const skill = createWeatherSkillFixture(dir, testCase.materialized);
     setCliBackendForPrepareTest({ id: "claude-cli", pluginId: "anthropic" });
     if (testCase.pluginResult !== "default") {
-      const pluginDir = path.join(dir, "openclaw-skills");
+      const pluginDir = path.join(dir, "bot-skills");
       setCliRunnerPrepareTestDeps({
         prepareClaudeCliSkillsPlugin: vi.fn(async () => ({
           args: testCase.pluginResult === "args" ? ["--plugin-dir", pluginDir] : [],
@@ -3725,7 +3725,7 @@ describe("prepareCliRunContext", () => {
       expect(context.systemPromptReport.skills.promptChars).toBe(0);
       expect(context.claudeSkillsPluginArgs).toEqual([
         "--plugin-dir",
-        path.join(dir, "openclaw-skills"),
+        path.join(dir, "bot-skills"),
       ]);
     }
   });
@@ -3790,12 +3790,12 @@ describe("prepareCliRunContext", () => {
       model: testCase.model,
     });
 
-    expect(context.openClawHistoryPrompt).toBeDefined();
+    expect(context.botHistoryPrompt).toBeDefined();
     if (testCase.expectsTruncation) {
-      expect(context.openClawHistoryPrompt).toContain("OpenClaw reseed history truncated");
+      expect(context.botHistoryPrompt).toContain("Bot reseed history truncated");
     } else {
-      expect(context.openClawHistoryPrompt).toContain(testCase.marker);
-      expect(context.openClawHistoryPrompt).not.toContain("OpenClaw reseed history truncated");
+      expect(context.botHistoryPrompt).toContain(testCase.marker);
+      expect(context.botHistoryPrompt).not.toContain("Bot reseed history truncated");
     }
   });
 
@@ -3855,10 +3855,10 @@ describe("prepareCliRunContext", () => {
     });
 
     expect(context.reusableCliSession).toEqual({ mode: "reuse", sessionId: "cli-session" });
-    expect(context.openClawHistoryPrompt).toBeDefined();
-    expect(context.openClawHistoryPrompt).toContain(recentMarker);
-    expect(context.openClawHistoryPrompt).toContain("EARLIEST_USER");
-    expect(context.openClawHistoryPrompt).not.toContain("OpenClaw reseed history truncated");
+    expect(context.botHistoryPrompt).toBeDefined();
+    expect(context.botHistoryPrompt).toContain(recentMarker);
+    expect(context.botHistoryPrompt).toContain("EARLIEST_USER");
+    expect(context.botHistoryPrompt).not.toContain("Bot reseed history truncated");
   });
 });
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

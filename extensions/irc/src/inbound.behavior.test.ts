@@ -1,5 +1,5 @@
 // Irc tests cover inbound.behavior plugin behavior.
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
+import { createPluginRuntimeMock } from "bot/plugin-sdk/channel-test-helpers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ResolvedIrcAccount } from "./accounts.js";
 import { handleIrcInbound } from "./inbound.js";
@@ -59,7 +59,7 @@ function createAccount(overrides?: Partial<ResolvedIrcAccount>): ResolvedIrcAcco
     accountId: "default",
     enabled: true,
     server: "irc.example.com",
-    nick: "OpenClaw",
+    nick: "Bot",
     config: {
       dmPolicy: "pairing",
       allowFrom: [],
@@ -122,7 +122,7 @@ describe("irc inbound behavior", () => {
     expect(sendReply).toHaveBeenCalledWith(
       "alice",
       [
-        "OpenClaw: access not configured.",
+        "Bot: access not configured.",
         "",
         "Your IRC id: alice!ident@example.com",
         "Pairing code:",
@@ -132,7 +132,7 @@ describe("irc inbound behavior", () => {
         "",
         "Ask the bot owner to approve with:",
         "```",
-        "openclaw pairing approve irc CODE",
+        "bot pairing approve irc CODE",
         "```",
       ].join("\n"),
       undefined,

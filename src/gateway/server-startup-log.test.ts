@@ -67,7 +67,7 @@ describe("gateway startup log", () => {
 
     expect(warn.mock.calls).toEqual([
       [
-        "security warning: dangerous config flags enabled: hooks.gmail.allowUnsafeExternalContent=true. Run `openclaw security audit`.",
+        "security warning: dangerous config flags enabled: hooks.gmail.allowUnsafeExternalContent=true. Run `bot security audit`.",
       ],
     ]);
   });
@@ -148,7 +148,7 @@ describe("gateway startup log", () => {
 
     expect(warn.mock.calls).toEqual([
       [
-        "configured channel warning: channels.missing-chat is configured but no channel plugin is installed or loadable (no-channel-owner). Run `openclaw doctor --fix` or install the channel plugin before relying on this channel.",
+        "configured channel warning: channels.missing-chat is configured but no channel plugin is installed or loadable (no-channel-owner). Run `bot doctor --fix` or install the channel plugin before relying on this channel.",
       ],
     ]);
   });
@@ -236,7 +236,7 @@ describe("gateway startup log", () => {
     pluginRegistryMocks.loadPluginManifestRegistryForPluginRegistry.mockReturnValue({
       plugins: [
         {
-          id: "openclaw-modern-chat",
+          id: "bot-modern-chat",
           origin: "global",
           channels: ["legacy-chat"],
           enabledByDefault: false,
@@ -259,7 +259,7 @@ describe("gateway startup log", () => {
       activationSourceConfig: {
         plugins: {
           entries: {
-            "openclaw-modern-chat": {
+            "bot-modern-chat": {
               enabled: true,
             },
           },

@@ -1,7 +1,7 @@
 import type {
   MessagingToolSend,
   MessagingToolSourceReplyPayload,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 
 type SourceReplyDeliveryIntent = {
   record: MessagingToolSend | MessagingToolSourceReplyPayload;

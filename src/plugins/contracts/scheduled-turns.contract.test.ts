@@ -1,9 +1,9 @@
 // Scheduled turn contract tests cover plugin scheduled turn metadata and timestamp bounds.
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_DATE_TIMESTAMP_MS } from "@hanzo/bot-normalization-core/number-coercion";
 import {
   createPluginRegistryFixture,
   registerTestPlugin,
-} from "openclaw/plugin-sdk/plugin-test-contracts";
+} from "bot/plugin-sdk/plugin-test-contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CronServiceContract } from "../../cron/service-contract.js";
 import type { CronJob, CronJobCreate } from "../../cron/types.js";
@@ -22,7 +22,7 @@ import {
   schedulePluginSessionTurn,
   unschedulePluginSessionTurnsByTag,
 } from "../host-hook-scheduled-turns.js";
-import { loadOpenClawPlugins } from "../loader.js";
+import { loadBotPlugins } from "../loader.js";
 import { clearPluginLoaderCache, makeTempDir, writePlugin } from "../loader.test-fixtures.js";
 import { createEmptyPluginRegistry } from "../registry-empty.js";
 import {
@@ -36,7 +36,7 @@ import {
   setActivePluginRegistry,
 } from "../runtime.js";
 import { createPluginRecord } from "../status.test-helpers.js";
-import type { OpenClawPluginApi } from "../types.js";
+import type { BotPluginApi } from "../types.js";
 
 const workflowMocks = vi.hoisted(() => ({
   cronAdd: vi.fn(),
@@ -99,9 +99,9 @@ function createMockCronService(): CronServiceContract {
     stop: vi.fn(),
     status: vi.fn(async () => ({
       enabled: true,
-      storePath: "/tmp/openclaw-test-cron.json",
+      storePath: "/tmp/bot-test-cron.json",
       storage: "sqlite" as const,
-      sqlitePath: "/tmp/openclaw-test-state/state/openclaw.sqlite",
+      sqlitePath: "/tmp/bot-test-state/state/bot.sqlite",
       jobs: 0,
       nextWakeAtMs: null,
     })),
@@ -528,11 +528,11 @@ describe("plugin scheduled turns", () => {
 
     const registry = withEnv(
       {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        BOT_BUNDLED_PLUGINS_DIR: bundledDir,
+        BOT_DISABLE_BUNDLED_PLUGINS: undefined,
       },
       () =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           hostServices: { cron },
           config: {
@@ -666,11 +666,11 @@ describe("plugin scheduled turns", () => {
 
     const registry = withEnv(
       {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        BOT_BUNDLED_PLUGINS_DIR: bundledDir,
+        BOT_DISABLE_BUNDLED_PLUGINS: undefined,
       },
       () =>
-        loadOpenClawPlugins({
+        loadBotPlugins({
           cache: false,
           hostServices: { cron },
           config: {
@@ -1120,7 +1120,7 @@ describe("plugin scheduled turns", () => {
       makeCronJob({ id: scheduledIds.shift() ?? "unexpected-job" }),
     );
     const { config, registry } = createPluginRegistryFixture({}, { hostServices: { cron } });
-    let capturedApi: OpenClawPluginApi | undefined;
+    let capturedApi: BotPluginApi | undefined;
     registerTestPlugin({
       registry,
       config,
@@ -1224,7 +1224,7 @@ describe("plugin scheduled turns", () => {
       },
     };
     const { config, registry } = createPluginRegistryFixture({}, { hostServices });
-    let capturedApi: OpenClawPluginApi | undefined;
+    let capturedApi: BotPluginApi | undefined;
     registerTestPlugin({
       registry,
       config,

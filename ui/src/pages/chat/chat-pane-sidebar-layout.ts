@@ -38,7 +38,7 @@ export function renderSidebarRegion(params: {
   sessionKey: string;
 }): TemplateResult {
   const hasPanels = params.layout.columns.some((column) => column.panels.length > 0);
-  if (hasPanels && !customElements.get("openclaw-chat-sidebar-region")) {
+  if (hasPanels && !customElements.get("bot-chat-sidebar-region")) {
     sidebarRegionLoad ??= import("./components/chat-sidebar-region.runtime.ts").then(
       () => true,
       () => {
@@ -51,7 +51,7 @@ export function renderSidebarRegion(params: {
     params.availableWidth > 0 ? params.availableWidth : Number.POSITIVE_INFINITY;
   const collapsed = params.narrow || isSidebarRegionCollapsed(params.layout, availableWidth);
   return html`<div class="sidebar-region ${collapsed && hasPanels ? "sidebar-region--narrow" : ""}">
-    <openclaw-chat-sidebar-region
+    <bot-chat-sidebar-region
       .layout=${params.layout}
       .panelTemplates=${params.panelTemplates}
       .panelOpenUrls=${{ discussion: params.discussionOpenUrl }}
@@ -62,7 +62,7 @@ export function renderSidebarRegion(params: {
       .focusVersion=${params.focusVersion}
       .narrow=${params.narrow}
       .availableWidth=${params.availableWidth}
-    ></openclaw-chat-sidebar-region>
+    ></bot-chat-sidebar-region>
     <div class="sidebar-region__primary">${params.primary}</div>
     <div class="sidebar-region__right-runtime"></div>
     <div class="sidebar-region__panels-runtime"></div>

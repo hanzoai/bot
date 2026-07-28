@@ -1,5 +1,5 @@
 /** Detects directive-only turns that should skip the model. */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { MsgContext } from "../templating.js";
 import type { InlineDirectives } from "./directive-handling.parse.js";
 import { stripMentions, stripStructuralPrefixes } from "./mentions.js";
@@ -9,7 +9,7 @@ export function isDirectiveOnly(params: {
   directives: InlineDirectives;
   cleanedBody: string;
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   isGroup: boolean;
 }): boolean {

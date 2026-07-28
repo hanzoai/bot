@@ -1,5 +1,5 @@
 // Codex plugin module implements conversation control behavior.
-import { ModelSelectionLockedError } from "openclaw/plugin-sdk/model-session-runtime";
+import { ModelSelectionLockedError } from "bot/plugin-sdk/model-session-runtime";
 import { resolveCodexBindingAppServerConnection } from "./app-server/binding-connection.js";
 import { CODEX_CONTROL_METHODS } from "./app-server/capabilities.js";
 import type { CodexAppServerClient } from "./app-server/client.js";
@@ -44,7 +44,7 @@ type CodexAppServerBindingLookup = Omit<CodexAppServerAuthProfileLookup, "authPr
 
 type PermissionsMode = "default" | "yolo";
 
-const CODEX_CONVERSATION_CONTROL_STATE = Symbol.for("openclaw.codex.conversationControl");
+const CODEX_CONVERSATION_CONTROL_STATE = Symbol.for("bot.codex.conversationControl");
 
 function getActiveTurns(): Map<string, ActiveTurn> {
   const globalState = globalThis as typeof globalThis & {
@@ -344,7 +344,7 @@ async function requireThreadBinding(
 ) {
   const binding = await bindingStore.read(identity);
   if (!binding?.threadId) {
-    throw new Error("No Codex thread is attached to this OpenClaw session yet.");
+    throw new Error("No Codex thread is attached to this Bot session yet.");
   }
   return binding;
 }

@@ -1,5 +1,5 @@
-// Shipped apps stamp `openclaw-native-nav`; current apps advertise web chrome
-// at document start and stamp `openclaw-native-web-chrome` at document end.
+// Shipped apps stamp `bot-native-nav`; current apps advertise web chrome
+// at document start and stamp `bot-native-web-chrome` at document end.
 // Plain browsers keep their normal in-page controls.
 import { chromium, type Browser, type BrowserContext } from "playwright";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
@@ -13,7 +13,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 let browser: Browser;
@@ -52,23 +52,23 @@ describeControlUiE2e("Control UI native-nav sidebar toggle E2E", () => {
       // document.documentElement exists, so defer until the DOM is parsed.
       await page.addInitScript(() => {
         const nativeWindow = window as Window & {
-          openclawNavMessages?: unknown[];
+          botNavMessages?: unknown[];
         };
-        nativeWindow.openclawNavMessages = [];
+        nativeWindow.botNavMessages = [];
         Object.defineProperty(window, "webkit", {
           configurable: true,
           value: {
             messageHandlers: {
-              openclawNav: {
+              botNav: {
                 postMessage(message: unknown) {
-                  nativeWindow.openclawNavMessages?.push(message);
+                  nativeWindow.botNavMessages?.push(message);
                 },
               },
             },
           },
         });
         const stamp = () =>
-          document.documentElement.classList.add("openclaw-native-macos", "openclaw-native-nav");
+          document.documentElement.classList.add("bot-native-macos", "bot-native-nav");
         if (document.documentElement) {
           stamp();
         } else {
@@ -79,18 +79,18 @@ describeControlUiE2e("Control UI native-nav sidebar toggle E2E", () => {
     if (options.webChrome) {
       await page.addInitScript(() => {
         const nativeWindow = window as Window & {
-          __OPENCLAW_NATIVE_WEB_CHROME__?: boolean;
-          __OPENCLAW_NATIVE_HISTORY__?: { canGoBack: boolean; canGoForward: boolean };
+          __BOT_NATIVE_WEB_CHROME__?: boolean;
+          __BOT_NATIVE_HISTORY__?: { canGoBack: boolean; canGoForward: boolean };
         };
-        nativeWindow["__OPENCLAW_NATIVE_WEB_CHROME__"] = true;
-        nativeWindow["__OPENCLAW_NATIVE_HISTORY__"] = {
+        nativeWindow["__BOT_NATIVE_WEB_CHROME__"] = true;
+        nativeWindow["__BOT_NATIVE_HISTORY__"] = {
           canGoBack: false,
           canGoForward: false,
         };
         const stamp = () =>
           document.documentElement.classList.add(
-            "openclaw-native-macos",
-            "openclaw-native-web-chrome",
+            "bot-native-macos",
+            "bot-native-web-chrome",
           );
         if (document.documentElement) {
           stamp();
@@ -126,8 +126,8 @@ describeControlUiE2e("Control UI native-nav sidebar toggle E2E", () => {
     await expect
       .poll(() =>
         page.evaluate(() => {
-          const messages = (window as Window & { openclawNavMessages?: unknown[] })
-            .openclawNavMessages;
+          const messages = (window as Window & { botNavMessages?: unknown[] })
+            .botNavMessages;
           return messages?.find(
             (message) =>
               typeof message === "object" &&
@@ -138,7 +138,7 @@ describeControlUiE2e("Control UI native-nav sidebar toggle E2E", () => {
       )
       .toMatchObject({ type: "nav-state", collapsed: false });
     const initialWidth = await page.evaluate(() => {
-      const messages = (window as Window & { openclawNavMessages?: unknown[] }).openclawNavMessages;
+      const messages = (window as Window & { botNavMessages?: unknown[] }).botNavMessages;
       const message = messages?.find(
         (candidate) =>
           typeof candidate === "object" &&
@@ -159,7 +159,7 @@ describeControlUiE2e("Control UI native-nav sidebar toggle E2E", () => {
     // Collapse through the native titlebar path; the whole web chrome cluster
     // hides (native titlebar provides search and new-thread while collapsed).
     await page.evaluate(() => {
-      window.dispatchEvent(new CustomEvent("openclaw:native-toggle-sidebar"));
+      window.dispatchEvent(new CustomEvent("bot:native-toggle-sidebar"));
     });
     await expect
       .poll(() => page.locator(".shell").getAttribute("class"))
@@ -168,8 +168,8 @@ describeControlUiE2e("Control UI native-nav sidebar toggle E2E", () => {
       .poll(() =>
         page.evaluate(() =>
           (
-            window as Window & { openclawNavMessages?: Array<{ collapsed?: boolean }> }
-          ).openclawNavMessages?.some((message) => message.collapsed === true),
+            window as Window & { botNavMessages?: Array<{ collapsed?: boolean }> }
+          ).botNavMessages?.some((message) => message.collapsed === true),
         ),
       )
       .toBe(true);
@@ -181,12 +181,12 @@ describeControlUiE2e("Control UI native-nav sidebar toggle E2E", () => {
       .toBe(true);
 
     await page.evaluate(() => {
-      window.dispatchEvent(new CustomEvent("openclaw:native-open-search"));
+      window.dispatchEvent(new CustomEvent("bot:native-open-search"));
     });
     await expect.poll(() => page.locator(".cmd-palette-overlay").isVisible()).toBe(true);
 
     await page.evaluate(() => {
-      window.dispatchEvent(new CustomEvent("openclaw:native-new-session"));
+      window.dispatchEvent(new CustomEvent("bot:native-new-session"));
     });
     await expect.poll(() => new URL(page.url()).pathname).toBe("/new");
   });
@@ -217,7 +217,7 @@ describeControlUiE2e("Control UI native-nav sidebar toggle E2E", () => {
 
     await page.evaluate(() => {
       window.dispatchEvent(
-        new CustomEvent("openclaw:native-history-state", {
+        new CustomEvent("bot:native-history-state", {
           detail: { canGoBack: true, canGoForward: false },
         }),
       );
@@ -226,7 +226,7 @@ describeControlUiE2e("Control UI native-nav sidebar toggle E2E", () => {
     await expect.poll(() => forward.isDisabled()).toBe(true);
     await page.evaluate(() => {
       window.dispatchEvent(
-        new CustomEvent("openclaw:native-history-state", {
+        new CustomEvent("bot:native-history-state", {
           detail: { canGoBack: false, canGoForward: true },
         }),
       );
@@ -346,7 +346,7 @@ describeControlUiE2e("Control UI native-nav sidebar toggle E2E", () => {
     // the web hamburger would be a duplicate control.
     await expect.poll(() => page.locator(".topbar-nav-toggle").isVisible()).toBe(false);
     await page.evaluate(() => {
-      window.dispatchEvent(new CustomEvent("openclaw:native-toggle-sidebar"));
+      window.dispatchEvent(new CustomEvent("bot:native-toggle-sidebar"));
     });
     await expect
       .poll(() => page.locator(".shell").getAttribute("class"))
@@ -354,7 +354,7 @@ describeControlUiE2e("Control UI native-nav sidebar toggle E2E", () => {
     // Closing through the native toggle restores focus to the content anchor,
     // not the hidden hamburger the drawer recorded as its trigger.
     await page.evaluate(() => {
-      window.dispatchEvent(new CustomEvent("openclaw:native-toggle-sidebar"));
+      window.dispatchEvent(new CustomEvent("bot:native-toggle-sidebar"));
     });
     await expect
       .poll(() => page.locator(".shell").getAttribute("class"))

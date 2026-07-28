@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginStateKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { PluginStateKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
 
 export const PROGRESS_STORE_TTL_MS = 7 * 24 * 60 * 60_000;
 export const MAX_TRACKED_RUNS = 4_096;
@@ -8,7 +8,7 @@ const TERMINAL_TOMBSTONE_TTL_MS = 60 * 60_000;
 export type SubagentProgressOutcome = "ok" | "error" | "timeout" | "killed" | "unknown";
 
 export type ProgressApi = {
-  config: OpenClawConfig;
+  config: BotConfig;
   logger: { debug?: (message: string) => void };
   runtime?: {
     state: {

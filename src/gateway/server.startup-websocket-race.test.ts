@@ -65,8 +65,8 @@ describe("gateway startup websocket readiness", () => {
   });
 
   it("accepts an immediate websocket connection once startup resolves", async () => {
-    const previousMinimal = process.env.OPENCLAW_TEST_MINIMAL_GATEWAY;
-    process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = "0";
+    const previousMinimal = process.env.BOT_TEST_MINIMAL_GATEWAY;
+    process.env.BOT_TEST_MINIMAL_GATEWAY = "0";
     let server: GatewayServerForTest | undefined;
     let client: WebSocket | undefined;
     try {
@@ -84,16 +84,16 @@ describe("gateway startup websocket readiness", () => {
         await server.close();
       }
       if (previousMinimal === undefined) {
-        delete process.env.OPENCLAW_TEST_MINIMAL_GATEWAY;
+        delete process.env.BOT_TEST_MINIMAL_GATEWAY;
       } else {
-        process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = previousMinimal;
+        process.env.BOT_TEST_MINIMAL_GATEWAY = previousMinimal;
       }
     }
   });
 
   it("serves a specific IPv4 bind and its required loopback alias", async () => {
-    const previousMinimal = process.env.OPENCLAW_TEST_MINIMAL_GATEWAY;
-    process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = "0";
+    const previousMinimal = process.env.BOT_TEST_MINIMAL_GATEWAY;
+    process.env.BOT_TEST_MINIMAL_GATEWAY = "0";
     let server: GatewayServerForTest | undefined;
     const clients: WebSocket[] = [];
     try {
@@ -113,9 +113,9 @@ describe("gateway startup websocket readiness", () => {
         await server.close();
       }
       if (previousMinimal === undefined) {
-        delete process.env.OPENCLAW_TEST_MINIMAL_GATEWAY;
+        delete process.env.BOT_TEST_MINIMAL_GATEWAY;
       } else {
-        process.env.OPENCLAW_TEST_MINIMAL_GATEWAY = previousMinimal;
+        process.env.BOT_TEST_MINIMAL_GATEWAY = previousMinimal;
       }
     }
   });

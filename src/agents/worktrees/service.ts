@@ -6,7 +6,7 @@ import path from "node:path";
 import { resolveStateDir } from "../../config/paths.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { runCommandWithTimeout } from "../../process/exec.js";
-import { withOpenClawStateLease } from "../../state/openclaw-state-lease.js";
+import { withBotStateLease } from "../../state/bot-state-lease.js";
 import { createCrustaceanSlug } from "../session-slug.js";
 import { resolveWorktreeBase } from "./base-ref.js";
 import { lockState, lockWorktreeForProcess, unlockWorktree } from "./git-lock.js";
@@ -76,7 +76,7 @@ export class WorktreeSnapshotError extends Error {
     this.snapshotError = snapshotError;
   }
 }
-const SNAPSHOT_REF_PREFIX = "refs/openclaw/snapshots";
+const SNAPSHOT_REF_PREFIX = "refs/bot/snapshots";
 const log = createSubsystemLogger("agents/worktrees");
 
 type ServiceOptions = {
@@ -127,7 +127,7 @@ async function nameIsUnavailable(
   if (registered || (await pathExists(worktreePath))) {
     return true;
   }
-  const branch = `openclaw/${name}`;
+  const branch = `bot/${name}`;
   const branchExists = await runGit(repoRoot, [
     "show-ref",
     "--quiet",
@@ -273,7 +273,7 @@ async function canResetFailedWorktreeAdd(
 }
 
 async function runSetupScript(repoRoot: string, worktreePath: string): Promise<void> {
-  const setupScript = path.join(repoRoot, ".openclaw", "worktree-setup.sh");
+  const setupScript = path.join(repoRoot, ".bot", "worktree-setup.sh");
   const stat = await fs.stat(setupScript).catch(() => undefined);
   if (!stat?.isFile() || (stat.mode & 0o111) === 0) {
     return;
@@ -282,8 +282,8 @@ async function runSetupScript(repoRoot: string, worktreePath: string): Promise<v
     timeoutMs: 120_000,
     cwd: worktreePath,
     env: {
-      OPENCLAW_SOURCE_TREE_PATH: repoRoot,
-      OPENCLAW_WORKTREE_PATH: worktreePath,
+      BOT_SOURCE_TREE_PATH: repoRoot,
+      BOT_WORKTREE_PATH: worktreePath,
     },
   });
   if (result.code !== 0) {
@@ -400,15 +400,15 @@ async function snapshotWorktree(
   reason: string,
   provisionedPaths: readonly string[],
 ): Promise<string> {
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-worktree-index-"));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-worktree-index-"));
   const indexPath = path.join(tempDir, "index");
   const snapshotRef = `${SNAPSHOT_REF_PREFIX}/${record.id}`;
   const env: NodeJS.ProcessEnv = {
     GIT_INDEX_FILE: indexPath,
-    GIT_AUTHOR_NAME: "OpenClaw",
-    GIT_AUTHOR_EMAIL: "openclaw@localhost",
-    GIT_COMMITTER_NAME: "OpenClaw",
-    GIT_COMMITTER_EMAIL: "openclaw@localhost",
+    GIT_AUTHOR_NAME: "Bot",
+    GIT_AUTHOR_EMAIL: "bot@localhost",
+    GIT_COMMITTER_NAME: "Bot",
+    GIT_COMMITTER_EMAIL: "bot@localhost",
     ...(process.platform === "win32"
       ? {}
       : {
@@ -508,7 +508,7 @@ async function snapshotWorktree(
     const parent = await requireGit(record.path, ["rev-parse", "HEAD"]);
     const commit = await requireGit(
       record.path,
-      ["commit-tree", tree, "-p", parent, "-m", `OpenClaw worktree snapshot: ${reason}`],
+      ["commit-tree", tree, "-p", parent, "-m", `Bot worktree snapshot: ${reason}`],
       { env },
     );
     await requireGit(record.repoRoot, ["update-ref", snapshotRef, commit]);
@@ -533,7 +533,7 @@ export class ManagedWorktreeService {
       const ownerKind = params.ownerKind ?? "manual";
       const ownerId = params.ownerId;
       const ownerKey = createHash("sha256").update(`${ownerKind}\0${ownerId}`).digest("hex");
-      return await withOpenClawStateLease(
+      return await withBotStateLease(
         {
           scope: WORKTREE_OWNER_LEASE_SCOPE,
           key: ownerKey,
@@ -571,7 +571,7 @@ export class ManagedWorktreeService {
     // Keep selection and Git branch/path creation under one cross-process lease.
     // Numeric suffix families and truncation-equivalent bases can otherwise
     // converge on the same ordinal candidate after separate availability checks.
-    return await withOpenClawStateLease(
+    return await withBotStateLease(
       {
         scope: WORKTREE_CREATE_LEASE_SCOPE,
         key: `${repository.fingerprint}:${worktreeNameAllocationFamily(allocationName)}`,
@@ -625,7 +625,7 @@ export class ManagedWorktreeService {
       }
       return await this.restore({ id: existing.id });
     }
-    const branch = `openclaw/${name}`;
+    const branch = `bot/${name}`;
     const branchExists = await runGit(repository.repoRoot, [
       "show-ref",
       "--quiet",
@@ -871,7 +871,7 @@ export class ManagedWorktreeService {
       if ((state.kind === "live" || state.kind === "foreign") && !force) {
         throw new Error(
           state.kind === "live"
-            ? `worktree is locked by live OpenClaw pid ${state.pid}`
+            ? `worktree is locked by live Bot pid ${state.pid}`
             : `worktree has a foreign lock${state.reason ? `: ${state.reason}` : ""}`,
         );
       }

@@ -8,7 +8,7 @@ import {
   normalizePluginNodeCapabilityScopedUrl,
   PLUGIN_NODE_CAPABILITY_PATH_PREFIX,
   type NormalizedPluginNodeCapabilityUrl,
-} from "openclaw/plugin-sdk/gateway-runtime";
+} from "bot/plugin-sdk/gateway-runtime";
 
 /** Path prefix used for Canvas capability-scoped gateway routes. */
 export const CANVAS_CAPABILITY_PATH_PREFIX = PLUGIN_NODE_CAPABILITY_PATH_PREFIX;

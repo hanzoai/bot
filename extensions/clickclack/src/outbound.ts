@@ -7,16 +7,16 @@ import {
   createMessageReceiptFromOutboundResults,
   type ChannelMessageUnknownSendContext,
   type ChannelMessageUnknownSendReconciliationResult,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "bot/plugin-sdk/channel-outbound";
 import {
   loadOutboundMediaFromUrl,
   type OutboundMediaLoadOptions,
-} from "openclaw/plugin-sdk/outbound-media";
+} from "bot/plugin-sdk/outbound-media";
 import {
   FormatCapabilityProfile,
   renderMarkdownWithMarkers,
   sanitizeAssistantVisibleText,
-} from "openclaw/plugin-sdk/text-chunking";
+} from "bot/plugin-sdk/text-chunking";
 import { resolveClickClackAccount } from "./accounts.js";
 import { createClickClackClient, type ClickClackClient } from "./http-client.js";
 import { resolveChannelId, resolveWorkspaceId } from "./resolve.js";
@@ -103,8 +103,8 @@ function mediaDeliveryNonces(params: { deliveryQueueId?: string; deliveryPartInd
     return {};
   }
   return {
-    message: `openclaw-media:${digest}`,
-    upload: `openclaw-upload:${digest}`,
+    message: `bot-media:${digest}`,
+    upload: `bot-upload:${digest}`,
   };
 }
 
@@ -113,7 +113,7 @@ function textDeliveryNonce(params: {
   deliveryPartIndex?: number;
 }): string | undefined {
   const digest = durableDeliveryDigest(params);
-  return digest ? `openclaw-text:${digest}` : undefined;
+  return digest ? `bot-text:${digest}` : undefined;
 }
 
 function createDispatchOnce(onPlatformSendDispatch?: () => Promise<void>): () => Promise<void> {

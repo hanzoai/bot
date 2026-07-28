@@ -4,12 +4,12 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+import type { DB as BotAgentKyselyDatabase } from "../../state/bot-agent-db.generated.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+} from "../../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import type { TranscriptEvent } from "./session-accessor.js";
 import {
   appendSqliteTranscriptEvent,
@@ -29,7 +29,7 @@ type TestPaths = { stateDir: string; tempDir: string };
 let paths: TestPaths;
 
 beforeEach(() => {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-session-search-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-session-search-"));
   paths = {
     stateDir: path.join(tempDir, "state"),
     tempDir,
@@ -37,7 +37,7 @@ beforeEach(() => {
 });
 
 function env(): NodeJS.ProcessEnv {
-  return { ...process.env, OPENCLAW_STATE_DIR: paths.stateDir };
+  return { ...process.env, BOT_STATE_DIR: paths.stateDir };
 }
 
 function transcriptScope(sessionId: string, sessionKey: string) {
@@ -81,18 +81,18 @@ async function waitForSearchReconcile(query: string): Promise<void> {
 
 afterEach(async () => {
   await waitForSearchReconcile("cleanup-probe");
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeBotAgentDatabasesForTest();
+  closeBotStateDatabaseForTest();
   fs.rmSync(paths.tempDir, { recursive: true, force: true });
 });
 
 function agentKysely() {
-  const database = openOpenClawAgentDatabase({ agentId: "main", env: env() });
+  const database = openBotAgentDatabase({ agentId: "main", env: env() });
   return {
     db: database.db,
     kysely: getNodeSqliteKysely<
       Pick<
-        OpenClawAgentKyselyDatabase,
+        BotAgentKyselyDatabase,
         "session_transcript_fts" | "session_transcript_index_state" | "transcript_events"
       >
     >(database.db),

@@ -1,5 +1,5 @@
 // Control UI view renders skill workshop screen content.
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { html, nothing } from "lit";
 import { keyed } from "lit/directives/keyed.js";
 import { styleMap } from "lit/directives/style-map.js";
@@ -93,7 +93,7 @@ export function renderSkillWorkshop(props: SkillWorkshopProps) {
     </section>
     ${preview && selected
       ? html`
-          <openclaw-file-preview-modal
+          <bot-file-preview-modal
             .files=${selected.supportFiles}
             .activePath=${preview.path}
             .query=${props.filePreviewQuery}
@@ -103,7 +103,7 @@ export function renderSkillWorkshop(props: SkillWorkshopProps) {
             @file-preview-select=${(event: CustomEvent<string>) =>
               props.onPreviewFile(selected.key, event.detail)}
             @file-preview-close=${props.onClosePreview}
-          ></openclaw-file-preview-modal>
+          ></bot-file-preview-modal>
         `
       : nothing}
     ${revisionProposal ? renderRevisionDialog(props, revisionProposal) : nothing}
@@ -117,10 +117,10 @@ function renderRevisionDialog(props: SkillWorkshopProps, proposal: SkillWorkshop
     props.mode === "board" ? t("skillWorkshop.actions.revise") : t("skillWorkshop.actions.tweak");
 
   return html`
-    <openclaw-modal-dialog
+    <bot-modal-dialog
       .label=${`${t("skillWorkshop.revision.title", { verb })}: ${proposal.slug}`}
       .description=${t("skillWorkshop.revision.description")}
-      style="--openclaw-modal-width: 560px"
+      style="--bot-modal-width: 560px"
       @modal-cancel=${props.onRevisionCancel}
     >
       <section class="sw-revision-dialog ${busy ? "sw-revision-dialog--sending" : ""}">
@@ -131,7 +131,7 @@ function renderRevisionDialog(props: SkillWorkshopProps, proposal: SkillWorkshop
             </div>
             <h2 id="sw-revision-title">${proposal.slug}</h2>
           </div>
-          <openclaw-tooltip content=${t("skillWorkshop.actions.close")}>
+          <bot-tooltip content=${t("skillWorkshop.actions.close")}>
             <button
               type="button"
               class="sw-revision-dialog__close"
@@ -141,7 +141,7 @@ function renderRevisionDialog(props: SkillWorkshopProps, proposal: SkillWorkshop
             >
               ×
             </button>
-          </openclaw-tooltip>
+          </bot-tooltip>
         </div>
         <p class="sw-revision-dialog__copy">${t("skillWorkshop.revision.description")}</p>
         <textarea
@@ -180,7 +180,7 @@ function renderRevisionDialog(props: SkillWorkshopProps, proposal: SkillWorkshop
           </button>
         </div>
       </section>
-    </openclaw-modal-dialog>
+    </bot-modal-dialog>
   `;
 }
 
@@ -364,14 +364,14 @@ function renderDetail(props: SkillWorkshopProps, proposal: SkillWorkshopProposal
           </div>
         </div>
         <div class="sw-detail__nav">
-          <openclaw-tooltip content=${t("skillWorkshop.actions.previous")}>
+          <bot-tooltip content=${t("skillWorkshop.actions.previous")}>
             <button aria-label=${t("skillWorkshop.actions.previous")} @click=${props.onPrev}>
               ↑
             </button>
-          </openclaw-tooltip>
-          <openclaw-tooltip content=${t("skillWorkshop.actions.next")}>
+          </bot-tooltip>
+          <bot-tooltip content=${t("skillWorkshop.actions.next")}>
             <button aria-label=${t("skillWorkshop.actions.next")} @click=${props.onNext}>↓</button>
-          </openclaw-tooltip>
+          </bot-tooltip>
         </div>
       </div>
 

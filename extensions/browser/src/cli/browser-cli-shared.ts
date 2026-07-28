@@ -4,8 +4,8 @@
 import {
   parseStrictNonNegativeInteger,
   parseStrictPositiveInteger,
-} from "openclaw/plugin-sdk/number-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/number-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   BROWSER_REQUEST_GATEWAY_METHOD,
   BROWSER_REQUEST_GATEWAY_SCOPES,

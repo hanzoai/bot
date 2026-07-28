@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import type { BotPluginApi } from "bot/plugin-sdk/plugin-entry";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
 import { vi } from "vitest";
 import { registerPiSessionCatalog } from "./pi-session-catalog-plugin.js";
 
@@ -13,7 +13,7 @@ export async function createPiStoreFixture(
   acpResolvable = false,
 ): Promise<string> {
   const root = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-pi-catalog-"),
+    path.join(resolvePreferredBotTmpDir(), "bot-pi-catalog-"),
   );
   temporaryDirectories.push(root);
   const directory = acpResolvable ? path.join(root, "sessions", "project") : root;
@@ -89,7 +89,7 @@ export async function installFakePiFixture(
   originalPath: string | undefined,
 ): Promise<string> {
   const directory = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-pi-cli-"),
+    path.join(resolvePreferredBotTmpDir(), "bot-pi-cli-"),
   );
   temporaryDirectories.push(directory);
   const executable = path.join(directory, "pi");
@@ -100,26 +100,26 @@ export async function installFakePiFixture(
 }
 
 export function registerPiNodeHostCommands(): Parameters<
-  OpenClawPluginApi["registerNodeHostCommand"]
+  BotPluginApi["registerNodeHostCommand"]
 >[0][] {
-  const commands: Parameters<OpenClawPluginApi["registerNodeHostCommand"]>[0][] = [];
+  const commands: Parameters<BotPluginApi["registerNodeHostCommand"]>[0][] = [];
   registerPiSessionCatalog({
     pluginConfig: {},
     registerSessionCatalog: vi.fn(),
     registerNodeHostCommand: (
-      command: Parameters<OpenClawPluginApi["registerNodeHostCommand"]>[0],
+      command: Parameters<BotPluginApi["registerNodeHostCommand"]>[0],
     ) => commands.push(command),
     registerNodeInvokePolicy: vi.fn(),
-  } as unknown as OpenClawPluginApi);
+  } as unknown as BotPluginApi);
   return commands;
 }
 
 export function capturePiContinuationCatalog() {
-  let provider: Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0] | undefined;
+  let provider: Parameters<BotPluginApi["registerSessionCatalog"]>[0] | undefined;
   const entries: Array<{ sessionKey: string; entry: Record<string, unknown> }> = [];
   const createSessionEntry = vi.fn(
     async (
-      params: Parameters<OpenClawPluginApi["runtime"]["agent"]["session"]["createSessionEntry"]>[0],
+      params: Parameters<BotPluginApi["runtime"]["agent"]["session"]["createSessionEntry"]>[0],
     ) => {
       const sessionKey = `agent:${params.agentId ?? "main"}:${params.key}`;
       const entry = {
@@ -171,6 +171,6 @@ export function capturePiContinuationCatalog() {
     },
     registerNodeHostCommand: vi.fn(),
     registerNodeInvokePolicy: vi.fn(),
-  } as unknown as OpenClawPluginApi);
+  } as unknown as BotPluginApi);
   return { createSessionEntry, entries, provider: provider! };
 }

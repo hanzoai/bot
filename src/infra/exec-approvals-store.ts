@@ -8,10 +8,10 @@ import {
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
-import { OpenClawStateLeaseError, withOpenClawStateLease } from "../state/openclaw-state-lease.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
+import { BotStateLeaseError, withBotStateLease } from "../state/bot-state-lease.js";
 import { formatErrorMessage } from "./errors.js";
 import {
   createFailClosedExecApprovalsFallback,
@@ -65,7 +65,7 @@ function warnFailClosed(message: string, error?: unknown): void {
 
 function readExecApprovalsSnapshotFromDatabase(): ExecApprovalsSnapshot {
   assertNoPendingLegacyExecApprovals();
-  const { db } = openOpenClawStateDatabase();
+  const { db } = openBotStateDatabase();
   return snapshotFromExecApprovalsRow({
     path: resolveExecApprovalsDisplayPath(),
     row: readExecApprovalsConfigRow(db),
@@ -172,7 +172,7 @@ function updateExecApprovalsInTransaction(
   params: InternalExecApprovalsUpdate,
 ): ExecApprovalsSnapshot | null {
   assertNoPendingLegacyExecApprovals();
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db }) => {
       const current = snapshotFromExecApprovalsRow({
         path: resolveExecApprovalsDisplayPath(),
@@ -224,7 +224,7 @@ export async function withAgentExecApprovalsRemoved<T>(
 ): Promise<T> {
   const key = normalizeAgentId(agentId);
   try {
-    return await withOpenClawStateLease(
+    return await withBotStateLease(
       {
         scope: EXEC_APPROVALS_MUTATION_LEASE_SCOPE,
         key: EXEC_APPROVALS_MUTATION_LEASE_KEY,
@@ -284,8 +284,8 @@ export async function withAgentExecApprovalsRemoved<T>(
     );
   } catch (error) {
     if (
-      error instanceof OpenClawStateLeaseError &&
-      error.code === "OPENCLAW_STATE_LEASE_STORAGE_FAILED"
+      error instanceof BotStateLeaseError &&
+      error.code === "BOT_STATE_LEASE_STORAGE_FAILED"
     ) {
       throw new ExecApprovalsStoreUnavailableError(error);
     }
@@ -297,7 +297,7 @@ function restoreExecApprovalsSnapshotInTransaction(
   snapshot: ExecApprovalsSnapshot,
   leaseOwner?: ExecApprovalsMutationLeaseOwner,
 ): void {
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       if (!snapshot.exists) {
         deleteExecApprovalsConfigRow(db, leaseOwner);
@@ -321,7 +321,7 @@ export async function restoreExecApprovalsSnapshotLocked(
   baseHash: string,
 ): Promise<boolean> {
   assertNoPendingLegacyExecApprovals();
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db }) => {
       const current = snapshotFromExecApprovalsRow({
         path: resolveExecApprovalsDisplayPath(),
@@ -385,6 +385,6 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.execApprovalsStoreTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.execApprovalsStoreTestApi")] =
     testing;
 }

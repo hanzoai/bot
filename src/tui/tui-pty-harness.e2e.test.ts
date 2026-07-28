@@ -23,15 +23,15 @@ const TEST_TIMEOUT_MS = 5_000;
 const STARTUP_TEST_TIMEOUT_MS = 25_000;
 
 async function startTuiFixture(opts: { env?: NodeJS.ProcessEnv } = {}) {
-  const tempDir = await mkdtemp(path.join(tmpdir(), "openclaw-tui-pty-"));
+  const tempDir = await mkdtemp(path.join(tmpdir(), "bot-tui-pty-"));
   const scriptPath = await writeTuiPtyFixtureScript(tempDir);
   const logPath = path.join(tempDir, "fixture-log.jsonl");
   const run = startPty(process.execPath, ["--import", "tsx", scriptPath], {
     activeRuns,
     cwd: process.cwd(),
     env: {
-      OPENCLAW_THEME: "dark",
-      OPENCLAW_TUI_PTY_LOG_PATH: logPath,
+      BOT_THEME: "dark",
+      BOT_TUI_PTY_LOG_PATH: logPath,
       NO_COLOR: undefined,
       ...opts.env,
     },
@@ -67,20 +67,20 @@ describe.sequential("TUI PTY harness", () => {
       startTuiFixture(),
       startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_MODEL: "gpt-5.6-sol@openai:setup-64cddea3-938c-431e-be3b-aa47090577c7",
-          OPENCLAW_TUI_PTY_THINKING_LEVEL: "high",
+          BOT_TUI_PTY_MODEL: "gpt-5.6-sol@openai:setup-64cddea3-938c-431e-be3b-aa47090577c7",
+          BOT_TUI_PTY_THINKING_LEVEL: "high",
         },
       }),
       startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_MODEL: "fixture-provider/fixture-model",
-          OPENCLAW_TUI_PTY_THINKING_LEVEL: "medium",
-          OPENCLAW_TUI_PTY_LAUNCH_THINKING: "high",
-          OPENCLAW_TUI_PTY_INITIAL_MESSAGE: "thinking override proof",
+          BOT_TUI_PTY_MODEL: "fixture-provider/fixture-model",
+          BOT_TUI_PTY_THINKING_LEVEL: "medium",
+          BOT_TUI_PTY_LAUNCH_THINKING: "high",
+          BOT_TUI_PTY_INITIAL_MESSAGE: "thinking override proof",
         },
       }),
       startTuiFixture({
-        env: { OPENCLAW_TUI_PTY_STARTUP_DELAY_MS: "400" },
+        env: { BOT_TUI_PTY_STARTUP_DELAY_MS: "400" },
       }),
     ]);
     const [mainBoot, compactBoot, thinkingOverrideBoot, slowBoot] = boots;
@@ -295,8 +295,8 @@ describe.sequential("TUI PTY harness", () => {
     async (cols, rows) => {
       const compactFixture = await startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_COLS: String(cols),
-          OPENCLAW_TUI_PTY_ROWS: String(rows),
+          BOT_TUI_PTY_COLS: String(cols),
+          BOT_TUI_PTY_ROWS: String(rows),
         },
       });
 
@@ -315,9 +315,9 @@ describe.sequential("TUI PTY harness", () => {
     async () => {
       const compactPickerFixture = await startTuiFixture({
         env: {
-          OPENCLAW_TUI_PTY_COLS: "20",
-          OPENCLAW_TUI_PTY_ROWS: "18",
-          OPENCLAW_TUI_PTY_PICKER_FIXTURE: "1",
+          BOT_TUI_PTY_COLS: "20",
+          BOT_TUI_PTY_ROWS: "18",
+          BOT_TUI_PTY_PICKER_FIXTURE: "1",
         },
       });
 

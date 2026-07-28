@@ -12,7 +12,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 const artifactDir = path.resolve(process.cwd(), ".artifacts/control-ui-e2e/chat-background-tasks");
 const baseTime = Date.now();
@@ -87,7 +87,7 @@ describeControlUiE2e("Control UI chat background-tasks rail mocked Gateway E2E",
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(
-        `Playwright Chromium is not installed at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+        `Playwright Chromium is not installed at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install chromium\`, or set BOT_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
       );
     }
     server = await startControlUiE2eServer();
@@ -282,7 +282,7 @@ describeControlUiE2e("Control UI chat background-tasks rail mocked Gateway E2E",
       const statusLink = page.locator(".chat-tasks-status__link");
       await statusLink.hover();
       const previewBody = page.locator(
-        "openclaw-tooltip.chat-tasks-status__preview wa-tooltip[open] .body",
+        "bot-tooltip.chat-tasks-status__preview wa-tooltip[open] .body",
       );
       await previewBody.waitFor({ state: "visible" });
       const linkBox = await statusLink.boundingBox();

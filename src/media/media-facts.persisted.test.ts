@@ -16,7 +16,7 @@ describe("canonical persisted media", () => {
     },
     {
       name: "facts-only",
-      message: { __openclaw: { media: [canonicalFact] } },
+      message: { __bot: { media: [canonicalFact] } },
       expected: [{ ...canonicalFact, kind: "image" }],
     },
     {
@@ -29,7 +29,7 @@ describe("canonical persisted media", () => {
       message: {
         MediaPath: canonicalFact.path,
         MediaType: canonicalFact.contentType,
-        __openclaw: { media: [canonicalFact] },
+        __bot: { media: [canonicalFact] },
       },
       expected: [{ ...canonicalFact, kind: "image" }],
     },
@@ -38,7 +38,7 @@ describe("canonical persisted media", () => {
       message: {
         MediaPath: "/media/legacy-conflict.jpg",
         MediaType: "image/jpeg",
-        __openclaw: { media: [canonicalFact] },
+        __bot: { media: [canonicalFact] },
       },
       expected: [{ ...canonicalFact, kind: "image" }],
     },
@@ -47,7 +47,7 @@ describe("canonical persisted media", () => {
       message: {
         MediaPaths: ["", "/media/second.png"],
         MediaTypes: ["", "image/png"],
-        __openclaw: { media: [{ url: "https://example.test/first" }] },
+        __bot: { media: [{ url: "https://example.test/first" }] },
       },
       expected: [
         { url: "https://example.test/first" },
@@ -61,7 +61,7 @@ describe("canonical persisted media", () => {
     },
     {
       name: "media-only",
-      message: { role: "user", content: "", __openclaw: { media: [canonicalFact] } },
+      message: { role: "user", content: "", __bot: { media: [canonicalFact] } },
       expected: [{ ...canonicalFact, kind: "image" }],
     },
   ])("canonicalizes $name rows", ({ message, expected }) => {
@@ -81,11 +81,11 @@ describe("canonical persisted media", () => {
       MediaTranscribedIndexes: [0],
       MediaStaged: true,
       MediaWorkspaceDir: "/media/workspace",
-      __openclaw: { traceId: "trace-1", media: [{ messageId: "m1" }] },
+      __bot: { traceId: "trace-1", media: [{ messageId: "m1" }] },
     });
 
     expect(result.message).toEqual({
-      __openclaw: {
+      __bot: {
         traceId: "trace-1",
         media: [
           expect.objectContaining({
@@ -129,7 +129,7 @@ describe("canonical persisted media", () => {
     const result = canonicalizePersistedUserMessageMedia({
       MediaPaths: ["/media/a.bin", "/media/b.pdf"],
       MediaTypes: ["application/pdf"],
-      __openclaw: {
+      __bot: {
         media: [
           { path: "/media/a.bin", contentType: "application/octet-stream" },
           { path: "/media/b.pdf", contentType: "application/pdf" },
@@ -151,12 +151,12 @@ describe("canonical persisted media", () => {
       MediaPaths: ["", "/media/b.png"],
       MediaType: "image",
       MediaTypes: ["image/png"],
-      __openclaw: {
+      __bot: {
         media: [{}, { path: "/media/b.png", contentType: "image/png" }],
       },
     });
 
-    expect((result.message["__openclaw"] as { media: unknown[] }).media).toEqual([
+    expect((result.message["__bot"] as { media: unknown[] }).media).toEqual([
       {},
       expect.objectContaining({ path: "/media/b.png", contentType: "image/png" }),
     ]);
@@ -165,7 +165,7 @@ describe("canonical persisted media", () => {
   it("removes a conflicting top-level media copy", () => {
     const result = canonicalizePersistedUserMessageMedia({
       media: [{ path: "/media/runtime.png", contentType: "image/png" }],
-      __openclaw: { media: [canonicalFact] },
+      __bot: { media: [canonicalFact] },
     });
 
     expect(result.message).not.toHaveProperty("media");

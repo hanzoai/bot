@@ -1,16 +1,16 @@
 {
-  "name": "@openclaw/signal",
+  "name": "@hanzo/bot-signal",
   "version": "2026.7.2",
-  "description": "OpenClaw Signal channel plugin",
+  "description": "Bot Signal channel plugin",
   "type": "module",
   "dependencies": {
     "ws": "8.21.1",
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -86,8 +86,8 @@
       }
     },
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/signal",
-      "npmSpec": "@openclaw/signal",
+      "clawhubSpec": "clawhub:@hanzo/bot-signal",
+      "npmSpec": "@hanzo/bot-signal",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.9",
       "allowInvalidConfigRecovery": true
@@ -96,7 +96,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {
@@ -106,6 +106,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   }
 }

@@ -1,17 +1,17 @@
-// Check No Monolithic Plugin Sdk Entry Imports script supports OpenClaw repository automation.
+// Check No Monolithic Plugin Sdk Entry Imports script supports Bot repository automation.
 import fs from "node:fs";
 import path from "node:path";
-import { discoverOpenClawPlugins } from "../src/plugins/discovery.js";
+import { discoverBotPlugins } from "../src/plugins/discovery.js";
 import { collectFilesSync, isCodeFile, relativeToCwd } from "./check-file-utils.js";
 
 const LEGACY_BROAD_SUBPATH_PATTERNS = [
   {
-    pattern: /["']openclaw\/plugin-sdk\/config-runtime["']/,
-    label: "openclaw/plugin-sdk/config-runtime",
+    pattern: /["']bot\/plugin-sdk\/config-runtime["']/,
+    label: "bot/plugin-sdk/config-runtime",
   },
   {
-    pattern: /["']openclaw\/plugin-sdk\/infra-runtime["']/,
-    label: "openclaw/plugin-sdk/infra-runtime",
+    pattern: /["']bot\/plugin-sdk\/infra-runtime["']/,
+    label: "bot/plugin-sdk/infra-runtime",
   },
 ] as const;
 
@@ -58,7 +58,7 @@ function collectBundledExtensionSourceFiles(): string[] {
 }
 
 function main() {
-  const discovery = discoverOpenClawPlugins({});
+  const discovery = discoverBotPlugins({});
   const bundledCandidates = discovery.candidates.filter((c) => c.origin === "bundled");
   const filesToCheck = new Set<string>();
   for (const candidate of bundledCandidates) {
@@ -99,7 +99,7 @@ function main() {
         console.error(`- ${relativeToCwd(file)} (${labels.join(", ")})`);
       }
     }
-    console.error("Use focused openclaw/plugin-sdk/<domain> subpaths for bundled plugins.");
+    console.error("Use focused bot/plugin-sdk/<domain> subpaths for bundled plugins.");
     process.exit(1);
   }
 

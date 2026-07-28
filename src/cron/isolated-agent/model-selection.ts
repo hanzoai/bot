@@ -1,7 +1,7 @@
 import { resolveConfiguredModelPolicyAllow } from "../../agents/model-selection-shared.js";
 /** Resolves provider/model precedence for isolated cron runs. */
 import type { AgentConfig } from "../../config/types.agents.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { CronJob } from "../types.js";
 import { buildCronAgentDefaultsConfig } from "./run-config.js";
 import {
@@ -27,7 +27,7 @@ type CronSessionModelOverrides = {
 type CronModelSelectionSource = "default" | "subagent" | "agent" | "hook" | "payload" | "session";
 
 type ResolveCronModelSelectionParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   owner?: ResolvedPublishedModelCatalogOwner;
   agentConfigOverride?: Pick<AgentConfig, "model" | "subagents">;
   sessionEntry: CronSessionModelOverrides;
@@ -45,7 +45,7 @@ type ResolveCronModelSelectionResult =
       provider: string;
       model: string;
       modelSource: CronModelSelectionSource;
-      cfgWithAgentDefaults: OpenClawConfig;
+      cfgWithAgentDefaults: BotConfig;
       owner: ResolvedPublishedModelCatalogOwner;
     }
   | {
@@ -53,7 +53,7 @@ type ResolveCronModelSelectionResult =
       error: string;
     };
 
-function formatAllowedModelRefs(params: { cfg: OpenClawConfig; agentId?: string }): string {
+function formatAllowedModelRefs(params: { cfg: BotConfig; agentId?: string }): string {
   const configured = resolveConfiguredModelPolicyAllow(params).refs;
   if (configured && configured.length > 0) {
     return configured.toSorted().join(", ");
@@ -62,7 +62,7 @@ function formatAllowedModelRefs(params: { cfg: OpenClawConfig; agentId?: string 
 }
 
 function formatCronPayloadModelRejection(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   modelOverride: string;
   error: string;
@@ -78,7 +78,7 @@ function formatCronPayloadModelRejection(params: {
 }
 
 export async function resolveCronModelSelectionOwner(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   requiredAgentId?: string;
   agentDir?: string;
@@ -129,7 +129,7 @@ export async function resolveCronModelSelection(
     defaults: owner.config.agents?.defaults,
     agentConfigOverride: ownerAgentConfigOverride,
   });
-  const cfgWithAgentDefaults: OpenClawConfig = {
+  const cfgWithAgentDefaults: BotConfig = {
     ...owner.config,
     agents: Object.assign({}, owner.config.agents, { defaults: ownerAgentDefaults }),
   };

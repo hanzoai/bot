@@ -17,7 +17,7 @@ describe.runIf(browserMode)("chat sidebar layout", () => {
     container.className = "sidebar-column__panel";
     container.style.cssText = "display:flex;width:480px;height:320px;";
 
-    const panel = document.createElement("openclaw-chat-detail-panel") as DetailPanel;
+    const panel = document.createElement("bot-chat-detail-panel") as DetailPanel;
     panel.className = "chat-sidebar";
     panel.content = {
       kind: "markdown",
@@ -48,7 +48,7 @@ describe.runIf(browserMode)("chat sidebar layout", () => {
     container.className = "sidebar-column__panel";
     container.style.cssText = "display:flex;width:480px;height:320px;";
 
-    const panel = document.createElement("openclaw-chat-detail-panel") as DetailPanel;
+    const panel = document.createElement("bot-chat-detail-panel") as DetailPanel;
     panel.className = "chat-sidebar";
     panel.content = {
       kind: "file",

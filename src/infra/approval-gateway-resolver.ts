@@ -6,14 +6,14 @@ import type {
   ApprovalResolveResult,
 } from "../../packages/gateway-protocol/src/index.js";
 import { isWellFormedApprovalId } from "../../packages/gateway-protocol/src/schema/approvals.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { withOperatorApprovalsGatewayClient } from "../gateway/operator-approvals-client.js";
 import { isApprovalNotFoundError } from "./approval-errors.js";
 import { getGatewayNativeApprovalRuntime } from "./approval-gateway-runtime-context.js";
 import type { GatewayNativeApprovalMethod } from "./approval-gateway-runtime-methods.js";
 
 type ResolveApprovalOverGatewayBaseParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   approvalId: string;
   decision: ApprovalDecision;
   senderId?: string | null;

@@ -1,16 +1,16 @@
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+import { defineChannelSetupContract } from "bot/plugin-sdk/channel-setup";
 // Telegram plugin module implements setup core behavior.
-import type { ChannelSetupAdapter } from "openclaw/plugin-sdk/setup-runtime";
+import type { ChannelSetupAdapter } from "bot/plugin-sdk/setup-runtime";
 import {
   createEnvPatchedAccountSetupAdapter,
   patchChannelConfigForAccount,
   promptResolvedAllowFrom,
   splitSetupEntries,
   createSetupTranslator,
-  type OpenClawConfig,
+  type BotConfig,
   type WizardPrompter,
-} from "openclaw/plugin-sdk/setup-runtime";
-import { formatCliCommand, formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
+} from "bot/plugin-sdk/setup-runtime";
+import { formatCliCommand, formatDocsLink } from "bot/plugin-sdk/setup-tools";
 import { resolveDefaultTelegramAccountId, resolveTelegramAccount } from "./accounts.js";
 import { isNumericTelegramSenderUserId } from "./allow-from.js";
 import { namedAccountPromotionKeys, singleAccountKeysToMove } from "./setup-contract.js";
@@ -29,19 +29,19 @@ export function getTelegramTokenHelpLines(): string[] {
     t("wizard.telegram.tokenHelpWebApp", { url: "https://t.me/BotFather?startapp" }),
     t("wizard.telegram.tokenEnvTip"),
     t("wizard.channels.docs", { link: formatDocsLink("/telegram") }),
-    t("wizard.telegram.website", { url: "https://openclaw.ai" }),
+    t("wizard.telegram.website", { url: "https://bot.ai" }),
   ];
 }
 
 export function getTelegramUserIdHelpLines(): string[] {
   return [
     t("wizard.telegram.userIdHelpLogs", {
-      command: formatCliCommand("openclaw logs --follow"),
+      command: formatCliCommand("bot logs --follow"),
     }),
     t("wizard.telegram.userIdHelpGetUpdates"),
     t("wizard.telegram.userIdHelpThirdParty"),
     t("wizard.channels.docs", { link: formatDocsLink("/telegram") }),
-    t("wizard.telegram.website", { url: "https://openclaw.ai" }),
+    t("wizard.telegram.website", { url: "https://bot.ai" }),
   ];
 }
 
@@ -58,7 +58,7 @@ export function parseTelegramAllowFromId(raw: string): string | null {
 }
 
 export async function promptTelegramAllowFromForAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prompter: WizardPrompter;
   accountId?: string;
 }) {

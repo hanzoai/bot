@@ -1,19 +1,19 @@
 // Hook frontmatter helpers parse metadata blocks from hook files.
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
+import { readStringValue } from "@hanzo/bot-normalization-core/string-coerce";
 import { parseFrontmatterBlock } from "../../packages/markdown-core/src/frontmatter.js";
 import {
-  applyOpenClawManifestInstallCommonFields,
+  applyBotManifestInstallCommonFields,
   getFrontmatterString,
   normalizeStringList,
-  parseOpenClawManifestInstallBase,
+  parseBotManifestInstallBase,
   parseFrontmatterBool,
-  resolveOpenClawManifestBlock,
-  resolveOpenClawManifestInstall,
-  resolveOpenClawManifestOs,
-  resolveOpenClawManifestRequires,
+  resolveBotManifestBlock,
+  resolveBotManifestInstall,
+  resolveBotManifestOs,
+  resolveBotManifestRequires,
 } from "../shared/frontmatter.js";
 import type {
-  OpenClawHookMetadata,
+  BotHookMetadata,
   HookEntry,
   HookInstallSpec,
   HookInvocationPolicy,
@@ -26,12 +26,12 @@ export function parseFrontmatter(content: string): ParsedHookFrontmatter {
 }
 
 function parseInstallSpec(input: unknown): HookInstallSpec | undefined {
-  const parsed = parseOpenClawManifestInstallBase(input, ["bundled", "npm", "git"]);
+  const parsed = parseBotManifestInstallBase(input, ["bundled", "npm", "git"]);
   if (!parsed) {
     return undefined;
   }
   const { raw } = parsed;
-  const spec = applyOpenClawManifestInstallCommonFields<HookInstallSpec>(
+  const spec = applyBotManifestInstallCommonFields<HookInstallSpec>(
     {
       kind: parsed.kind as HookInstallSpec["kind"],
     },
@@ -47,17 +47,17 @@ function parseInstallSpec(input: unknown): HookInstallSpec | undefined {
   return spec;
 }
 
-/** Resolve OpenClaw hook metadata from the manifest block in HOOK.md frontmatter. */
-export function resolveOpenClawMetadata(
+/** Resolve Bot hook metadata from the manifest block in HOOK.md frontmatter. */
+export function resolveBotMetadata(
   frontmatter: ParsedHookFrontmatter,
-): OpenClawHookMetadata | undefined {
-  const metadataObj = resolveOpenClawManifestBlock({ frontmatter });
+): BotHookMetadata | undefined {
+  const metadataObj = resolveBotManifestBlock({ frontmatter });
   if (!metadataObj) {
     return undefined;
   }
-  const requires = resolveOpenClawManifestRequires(metadataObj);
-  const install = resolveOpenClawManifestInstall(metadataObj, parseInstallSpec);
-  const osRaw = resolveOpenClawManifestOs(metadataObj);
+  const requires = resolveBotManifestRequires(metadataObj);
+  const install = resolveBotManifestInstall(metadataObj, parseInstallSpec);
+  const osRaw = resolveBotManifestOs(metadataObj);
   const eventsRaw = normalizeStringList(metadataObj.events);
   return {
     always: typeof metadataObj.always === "boolean" ? metadataObj.always : undefined,

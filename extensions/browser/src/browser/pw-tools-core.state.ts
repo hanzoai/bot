@@ -1,7 +1,7 @@
 /**
  * Browser context and emulation state helpers for Playwright-backed tools.
  */
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { playwrightCore } from "./playwright-core.runtime.js";
 import { ensurePageState, getPageForTargetId } from "./pw-session.js";
 import { withPageScopedCdpClient } from "./pw-session.page-cdp.js";

@@ -3,8 +3,8 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import v8 from "node:v8";
-import { expectDefined } from "@openclaw/normalization-core";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { resolveStateDir } from "../config/paths.js";
 import type {
   DiagnosticMemoryPressureEvent,
@@ -26,7 +26,7 @@ const DEFAULT_DIAGNOSTIC_STABILITY_BUNDLE_RETENTION = 20;
 export const MAX_DIAGNOSTIC_STABILITY_BUNDLE_BYTES = 5 * 1024 * 1024;
 
 const SAFE_REASON_CODE = /^[A-Za-z0-9_.:-]{1,120}$/u;
-const BUNDLE_PREFIX = "openclaw-stability-";
+const BUNDLE_PREFIX = "bot-stability-";
 const BUNDLE_SUFFIX = ".json";
 const REDACTED_HOSTNAME = "<redacted-hostname>";
 const MAX_SAFE_ERROR_MESSAGE_LENGTH = 500;
@@ -1353,7 +1353,7 @@ export function writeDiagnosticStabilityBundleSync(
       content: `${JSON.stringify(bundle, null, 2)}\n`,
       dirMode: 0o700,
       mode: 0o600,
-      tempPrefix: ".openclaw-stability",
+      tempPrefix: ".bot-stability",
     });
     pruneOldBundles(dir, options.retention ?? DEFAULT_DIAGNOSTIC_STABILITY_BUNDLE_RETENTION);
     return { status: "written", path: file, bundle };

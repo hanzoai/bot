@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { OpenClawCrablineChannelDriverSelection } from "@openclaw/crabline";
+import type { BotCrablineChannelDriverSelection } from "@openclaw/crabline";
 import type { QaCliBackendAuthMode } from "./gateway-child.js";
 import type {
   QaLabLatestReport,
@@ -57,7 +57,7 @@ export async function runQaRuntimeParitySuite(params: {
   claudeCliAuthMode?: QaCliBackendAuthMode;
   enabledPluginIds?: string[];
   channelDriver?: QaScorecardChannelDriver | null;
-  channelDriverSelection?: OpenClawCrablineChannelDriverSelection | null;
+  channelDriverSelection?: BotCrablineChannelDriverSelection | null;
   concurrency: number;
   selectedScenarios: ReturnType<typeof readQaBootstrapScenarioCatalog>["scenarios"];
   startLab?: QaSuiteStartLabFn;

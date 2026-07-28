@@ -14,7 +14,7 @@ type QueueCleanupTestApi = {
 
 function getTestApi(): QueueCleanupTestApi {
   const api = (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.queueCleanupTestApi")
+    Symbol.for("bot.queueCleanupTestApi")
   ];
   if (!api) {
     throw new Error("queue cleanup test API is unavailable");

@@ -102,7 +102,7 @@ describe("WorkboardPage lifecycle", () => {
     };
     context.gateway.snapshot.phase = "connected";
     context.gateway.snapshot.client = { request: vi.fn() } as never;
-    const page = document.createElement("openclaw-workboard-page") as WorkboardPageTestElement;
+    const page = document.createElement("bot-workboard-page") as WorkboardPageTestElement;
     page.context = context;
     document.body.append(page);
     await page.updateComplete;
@@ -125,7 +125,7 @@ describe("WorkboardPage lifecycle", () => {
     context.gateway.snapshot.phase = "connected";
     context.gateway.snapshot.client = { request: vi.fn() } as never;
     configureLiveRefresh.mockReturnValueOnce(true);
-    const page = document.createElement("openclaw-workboard-page") as WorkboardPageTestElement;
+    const page = document.createElement("bot-workboard-page") as WorkboardPageTestElement;
     page.context = context;
     document.body.append(page);
     await page.updateComplete;
@@ -145,7 +145,7 @@ describe("WorkboardPage lifecycle", () => {
     };
     context.gateway.snapshot.phase = "connected";
     context.gateway.snapshot.client = { request: vi.fn() } as never;
-    const page = document.createElement("openclaw-workboard-page") as WorkboardPageTestElement;
+    const page = document.createElement("bot-workboard-page") as WorkboardPageTestElement;
     page.context = context;
     document.body.append(page);
     await page.updateComplete;
@@ -160,7 +160,7 @@ describe("WorkboardPage lifecycle", () => {
   it("stops the previous capability runtime when the workboard source changes", async () => {
     const first = createWorkboardCapability();
     const second = createWorkboardCapability();
-    const page = document.createElement("openclaw-workboard-page") as WorkboardPageTestElement;
+    const page = document.createElement("bot-workboard-page") as WorkboardPageTestElement;
     page.context = contextWithWorkboard(first);
     document.body.append(page);
     await page.updateComplete;
@@ -177,7 +177,7 @@ describe("WorkboardPage lifecycle", () => {
   it("closes card overlays that leave the selected agent scope", async () => {
     const workboard = createWorkboardCapability();
     const context = contextWithWorkboard(workboard);
-    const page = document.createElement("openclaw-workboard-page") as WorkboardPageTestElement;
+    const page = document.createElement("bot-workboard-page") as WorkboardPageTestElement;
     page.context = context;
     document.body.append(page);
     await page.updateComplete;
@@ -213,7 +213,7 @@ describe("WorkboardPage lifecycle", () => {
   it("keeps card overlays that remain inside the selected agent scope", async () => {
     const workboard = createWorkboardCapability();
     const context = contextWithWorkboard(workboard);
-    const page = document.createElement("openclaw-workboard-page") as WorkboardPageTestElement;
+    const page = document.createElement("bot-workboard-page") as WorkboardPageTestElement;
     page.context = context;
     document.body.append(page);
     await page.updateComplete;
@@ -253,7 +253,7 @@ describe("WorkboardPage lifecycle", () => {
     "reconciles existing card overlays when the board route changes to $boardFilter",
     async ({ boardFilter, remainsVisible }) => {
       const workboard = createWorkboardCapability();
-      const page = document.createElement("openclaw-workboard-page") as WorkboardPageTestElement;
+      const page = document.createElement("bot-workboard-page") as WorkboardPageTestElement;
       page.context = contextWithWorkboard(workboard);
       document.body.append(page);
       await page.updateComplete;
@@ -289,7 +289,7 @@ describe("WorkboardPage lifecycle", () => {
 
   it("preserves a new-card draft when the board route changes", async () => {
     const workboard = createWorkboardCapability();
-    const page = document.createElement("openclaw-workboard-page") as WorkboardPageTestElement;
+    const page = document.createElement("bot-workboard-page") as WorkboardPageTestElement;
     page.context = contextWithWorkboard(workboard);
     document.body.append(page);
     await page.updateComplete;

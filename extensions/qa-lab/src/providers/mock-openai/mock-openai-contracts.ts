@@ -1,7 +1,7 @@
 // QA Lab mock provider contracts, wire helpers, and scenario constants.
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { setTimeout as sleep } from "node:timers/promises";
-import { readRequestBodyWithLimit } from "openclaw/plugin-sdk/webhook-ingress";
+import { readRequestBodyWithLimit } from "bot/plugin-sdk/webhook-ingress";
 import { writeJson } from "../shared/http-json.js";
 
 export type ResponsesInputItem = Record<string, unknown>;
@@ -119,8 +119,8 @@ export type MockOpenAiRequestSnapshotInput = Omit<MockOpenAiRequestSnapshot, "cu
 
 // Runtime-context delimiters are owned by src/agents/internal-runtime-context.ts.
 // This mock mirrors the wire shape so delimiter drift fails through QA timeouts.
-export const INTERNAL_RUNTIME_CONTEXT_BEGIN = "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>";
-export const INTERNAL_RUNTIME_CONTEXT_END = "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>";
+export const INTERNAL_RUNTIME_CONTEXT_BEGIN = "<<<BEGIN_BOT_INTERNAL_CONTEXT>>>";
+export const INTERNAL_RUNTIME_CONTEXT_END = "<<<END_BOT_INTERNAL_CONTEXT>>>";
 
 // Anthropic /v1/messages request/response shapes the mock actually needs.
 // This is a subset of the real Anthropic Messages API — just enough so the
@@ -200,7 +200,7 @@ export const QA_WHATSAPP_AGENT_MESSAGE_ACTION_UPLOAD_PROMPT_RE =
 export const QA_WHATSAPP_PENDING_HISTORY_TRIGGER_MARKER_RE =
   /\bWHATSAPP_QA_PENDING_HISTORY_TRIGGER_([A-Z0-9]+)\b/u;
 export const QA_WHATSAPP_BROADCAST_PROMPT_RE =
-  /\bopenclawqa broadcast fanout check\s+([A-Z0-9_]+)\b/i;
+  /\bbotqa broadcast fanout check\s+([A-Z0-9_]+)\b/i;
 export const QA_WHATSAPP_RUNTIME_AGENT_RE = /\bRuntime:\s*[^\n]*\bagent=([A-Za-z0-9_-]+)/i;
 export const QA_WHATSAPP_ACTIVATION_ALWAYS_MARKER_RE =
   /\bWHATSAPP_QA_ACTIVATION_ALWAYS_([A-Z0-9]+)\b/u;
@@ -257,8 +257,8 @@ export const QA_RESTART_RECOVERY_PROMPT_RE = /previous turn was interrupted by a
 const QA_AUDIO_TRANSCRIPTION_TEXT =
   "Reply with only this exact marker: WHATSAPP_QA_AUDIO_TRANSCRIPT_OK";
 const QA_GROUP_AUDIO_TRANSCRIPTION_TEXT =
-  "openclawqa reply with only this exact marker after group audio preflight: WHATSAPP_QA_GROUP_AUDIO_TRANSCRIPT_OK";
-const QA_GROUP_AUDIO_TRIGGER_SENTINEL = "OPENCLAW_QA_GROUP_AUDIO_TRIGGER";
+  "botqa reply with only this exact marker after group audio preflight: WHATSAPP_QA_GROUP_AUDIO_TRANSCRIPT_OK";
+const QA_GROUP_AUDIO_TRIGGER_SENTINEL = "BOT_QA_GROUP_AUDIO_TRIGGER";
 const QA_MATRIX_VOICE_TRANSCRIPTION_TRIGGER = "MATRIX_QA_VOICE_PREFLIGHT_TRIGGER";
 const QA_MATRIX_VOICE_TRANSCRIPTION_TEXT =
   "C3PLQA reply with only these words Matrix QA voice pre-flight OK.";

@@ -339,7 +339,7 @@ export const uk: TranslationMap = {
     genericSubtitle: "Під час завантаження цієї панелі сталася помилка.",
     staleTitle: "Доступна нова версія",
     staleSubtitle:
-      "OpenClaw оновлено у фоновому режимі. Перезавантажте, щоб отримати найновішу панель.",
+      "Bot оновлено у фоновому режимі. Перезавантажте, щоб отримати найновішу панель.",
     reloading: "Перезавантаження…",
     retry: "Повторити",
   },
@@ -347,7 +347,7 @@ export const uk: TranslationMap = {
     pairing: {
       button: "Під’єднати мобільний пристрій",
       adminRequired: "Для створення кодів налаштування потрібен доступ адміністратора.",
-      title: "OpenClaw mobile",
+      title: "Bot mobile",
       subtitle: "Відскануйте цей QR-код у мобільному застосунку, щоб підключити новий телефон.",
       noApp: "Ще не маєте застосунку?",
       getApps: "Отримати застосунки",
@@ -362,14 +362,14 @@ export const uk: TranslationMap = {
       transportLimitedHint:
         "Ця URL-адреса Gateway використовує незашифрований протокол ws://. Використовуйте wss:// або Tailscale Serve, а потім створіть новий код для повного доступу.",
       failed: "Не вдалося створити код налаштування.",
-      qrAlt: "QR-код сполучення OpenClaw mobile",
+      qrAlt: "QR-код сполучення Bot mobile",
       qrUnavailable: "QR-код недоступний. Натомість скопіюйте код налаштування.",
       copySetupCode: "Скопіювати код налаштування",
       newCode: "Новий код",
       showSetupCode: "Показати код налаштування",
       pending: "Запити пристроїв, що очікують на перегляд: {count}",
       review: "Перегляд",
-      waiting: "Офіційні мобільні застосунки OpenClaw підключаються автоматично після сканування.",
+      waiting: "Офіційні мобільні застосунки Bot підключаються автоматично після сканування.",
       help: "Довідка щодо сполучення",
       manageDevices: "Керувати пристроями",
     },
@@ -516,11 +516,11 @@ export const uk: TranslationMap = {
     ownerSession: "Сесія",
     ownerWorkboard: "Workboard",
     title: "Керовані Worktrees",
-    subtitle: "Ізольовані копії репозиторію, що належать OpenClaw.",
+    subtitle: "Ізольовані копії репозиторію, що належать Bot.",
     cleanNow: "Очистити зараз",
     cleanupTitle: "Очищення",
     cleanupSubtitle:
-      "OpenClaw періодично видаляє старі робочі дерева, щоб звільнити місце на диску. Налаштуйте інтенсивність очищення.",
+      "Bot періодично видаляє старі робочі дерева, щоб звільнити місце на диску. Налаштуйте інтенсивність очищення.",
     cleanupMaxCount: "Максимальна кількість робочих дерев",
     cleanupMaxCountHelp:
       "Максимальна кількість керованих робочих дерев, які зберігатимуться в усіх репозиторіях. Для старіших робочих дерев спочатку створюються знімки, після чого їх видаляють. Установіть значення 0, щоб вимкнути обмеження кількості.",
@@ -571,8 +571,8 @@ export const uk: TranslationMap = {
     cloudWorker: "Хмара · {profile}",
     cloudWorkerProvider: "Постачальник хмарного виконавця: {provider}",
     cloudRequiresWorktree: "Для хмарних виконавців потрібне кероване робоче дерево",
-    cloudRequiresOpenClawRuntime:
-      "Хмарні воркери потребують середовища OpenClaw; вибрано {runtime}.",
+    cloudRequiresBotRuntime:
+      "Хмарні воркери потребують середовища Bot; вибрано {runtime}.",
     cloudSecureContextRequired:
       "Хмарним виконавцям потрібен захищений контекст браузера, щоб відновлення могло захистити ваше завдання.",
     cloudStartFailed: "Сеанс створено локально, але запуск у хмарі завершився помилкою: {error}",
@@ -1365,7 +1365,7 @@ export const uk: TranslationMap = {
       title: "Push-сповіщення",
       nativeTitle: "Сповіщення",
       hint: "Отримуйте push-сповіщення браузера від вашого gateway.",
-      nativeHint: "Сповіщення показуються нативно застосунком OpenClaw на цьому Mac.",
+      nativeHint: "Сповіщення показуються нативно застосунком Bot на цьому Mac.",
       unavailableHint: "Недоступно в цьому браузері.",
       unavailable: "Недоступно",
       checking: "Перевірка...",
@@ -1390,7 +1390,7 @@ export const uk: TranslationMap = {
       blockedHint:
         "Сповіщення заблоковано. Оновіть дозволи сайту в браузері, щоб дозволити сповіщення.",
       nativeBlockedHint:
-        "Сповіщення для OpenClaw вимкнено в macOS. Дозвольте їх у Системних параметрах > Сповіщення.",
+        "Сповіщення для Bot вимкнено в macOS. Дозвольте їх у Системних параметрах > Сповіщення.",
     },
     appearance: {
       theme: "Тема",
@@ -1469,7 +1469,7 @@ export const uk: TranslationMap = {
     autoSaveFailed: "Не вдалося зберегти",
     autoSaveConflict: "Налаштування змінено в іншому місці",
     retry: "Повторити",
-    applyBannerText: "Збережено в openclaw.json — перезапустіть gateway для застосування.",
+    applyBannerText: "Збережено в bot.json — перезапустіть gateway для застосування.",
     applyBannerAction: "Перезапустити й застосувати",
     rawDiscard: "Відхилити",
     rawDraftBlocksApply:
@@ -1532,7 +1532,7 @@ export const uk: TranslationMap = {
     },
   },
   approvalPage: {
-    brandName: "OpenClaw",
+    brandName: "Bot",
     eyebrow: "Operator approval",
     loadingTitle: "Loading approval",
     loadingDescription: "Checking the current approval state with the Gateway.",
@@ -1541,7 +1541,7 @@ export const uk: TranslationMap = {
       "This approval could not be found or this device is not authorized to review it.",
     connectionErrorTitle: "Connection interrupted",
     connectionErrorDescription:
-      "OpenClaw cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
+      "Bot cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
     retry: "Retry",
     execTitle: "Command approval",
     pending: "Waiting for your decision",
@@ -1720,7 +1720,7 @@ export const uk: TranslationMap = {
     chat: "Чат",
     settings: "Налаштування",
     settingsGeneral: "Загальні",
-    askOpenClaw: "Запитати OpenClaw",
+    askBot: "Запитати Bot",
     settingsGroupConnections: "Підключення",
     settingsGroupAgents: "Агенти й інструменти",
     settingsGroupSecurity: "Конфіденційність і безпека",
@@ -1847,7 +1847,7 @@ export const uk: TranslationMap = {
     skillWorkshop: "Майстерня Skills",
     nodes: "Вузли",
     chat: "Чат",
-    custodian: "OpenClaw",
+    custodian: "Bot",
     config: "Конфігурація",
     profile: "Профіль",
     communications: "Комунікації",
@@ -1885,7 +1885,7 @@ export const uk: TranslationMap = {
     nodes: "Спарені пристрої та команди.",
     chat: "Чат шлюзу для швидких втручань.",
     custodian: "Налаштування та обслуговування системи.",
-    config: "Редагування openclaw.json.",
+    config: "Редагування bot.json.",
     profile: "Статистика, серії та життя вашого агента на рифі.",
     communications: "Канали, повідомлення та налаштування аудіо.",
     appearance: "Тема, інтерфейс і налаштування майстра налаштування.",
@@ -1908,7 +1908,7 @@ export const uk: TranslationMap = {
   modelSetup: {
     heading: "Підключіть свій ШІ",
     intro:
-      "OpenClaw повторно використовує вже наявний у вас доступ до ШІ — вхід через CLI, API-ключ або обліковий запис постачальника.",
+      "Bot повторно використовує вже наявний у вас доступ до ШІ — вхід через CLI, API-ключ або обліковий запис постачальника.",
     loading: "Перевіряємо доступні способи доступу до ШІ на цьому Gateway…",
     retry: "Повторити",
     checkAgain: "Перевірити ще раз",
@@ -1921,7 +1921,7 @@ export const uk: TranslationMap = {
     },
     access: {
       adminRequired: "Для налаштування моделі потрібен доступ operator.admin.",
-      gatewayTooOld: "Gateway працює на застарілій версії OpenClaw",
+      gatewayTooOld: "Gateway працює на застарілій версії Bot",
     },
     candidates: {
       title: "Знайдено на цьому Gateway",
@@ -2037,12 +2037,12 @@ export const uk: TranslationMap = {
       "Скопіювати {count} вибраних файлів пам’яті до робочого простору цього агента.",
     confirmReplace:
       "Перед заміною наявні файли призначення буде збережено в резервній копії у звіті про міграцію.",
-    confirmBackup: "Перед копіюванням пам’яті OpenClaw створює перевірену резервну копію.",
+    confirmBackup: "Перед копіюванням пам’яті Bot створює перевірену резервну копію.",
     confirmImport: "Імпортувати пам’ять",
     disconnected: "Підключіться до Gateway, щоб імпортувати пам’ять.",
     title: "Імпорт пам’яті асистента",
     subtitle:
-      "Перегляньте консолідовану пам’ять Codex і автоматичну пам’ять Claude Code, перш ніж копіювати їх до OpenClaw.",
+      "Перегляньте консолідовану пам’ять Codex і автоматичну пам’ять Claude Code, перш ніж копіювати їх до Bot.",
     agent: "Агент призначення",
     replaceExisting: "Замінити наявні імпортовані дані",
     replaceHint:
@@ -2051,7 +2051,7 @@ export const uk: TranslationMap = {
   onboarding: {
     memoryImport: {
       title: "Перенесіть із собою пам’ять асистента",
-      body: "OpenClaw виявив пам’ять інших асистентів для програмування. Імпортувати її до робочого простору вашого агента?",
+      body: "Bot виявив пам’ять інших асистентів для програмування. Імпортувати її до робочого простору вашого агента?",
       plannedCount: "{count} готово до імпорту",
       alreadyImported: "Уже імпортовано: {count}",
       sourceUnavailable: "Шлях до джерела недоступний",
@@ -2067,35 +2067,35 @@ export const uk: TranslationMap = {
       unknownError: "Не вдалося виконати запит",
       doneTitle: "Імпорт пам’яті завершено",
       doneBody:
-        "Перенесено: {migrated}, пропущено: {skipped}. Можна продовжити налаштування OpenClaw.",
+        "Перенесено: {migrated}, пропущено: {skipped}. Можна продовжити налаштування Bot.",
     },
   },
   custodian: {
-    title: "OpenClaw",
+    title: "Bot",
     subtitle: "Ваш посібник із налаштування системи",
     subtitleCaretaker: "Налаштування та обслуговування системи.",
     exitSetup: "Вийти з налаштування",
     newAgent: "Новий агент",
     hatchDraft: "Прокидайся, друже!",
-    placeholder: "Повідомлення для OpenClaw…",
+    placeholder: "Повідомлення для Bot…",
     sensitivePlaceholder: "Введіть конфіденційне значення…",
     sensitiveReply: "Конфіденційну відповідь надіслано",
     send: "Надіслати",
-    thinking: "OpenClaw думає",
+    thinking: "Bot думає",
     earlier: "Раніше",
-    requestFailed: "OpenClaw не зміг відповісти. Спробуйте ще раз.",
+    requestFailed: "Bot не зміг відповісти. Спробуйте ще раз.",
     connectionChanged:
       "З'єднання з Gateway змінилося. Повторіть спробу, щоб продовжити це налаштування.",
     sessionRestarted:
-      "{error} OpenClaw розпочав новий сеанс; попередні повідомлення залишаються для контексту.",
-    unsupportedGateway: "Оновіть Gateway, щоб продовжити налаштування з OpenClaw.",
+      "{error} Bot розпочав новий сеанс; попередні повідомлення залишаються для контексту.",
+    unsupportedGateway: "Оновіть Gateway, щоб продовжити налаштування з Bot.",
     history: {
       button: "Історія",
       title: "Останні зміни",
       description: "Що змінилося в цій системі, спершу найновіші.",
       loading: "Завантаження останніх змін…",
       empty: "Ще немає записаних змін.",
-      requestFailed: "OpenClaw не зміг завантажити історію змін.",
+      requestFailed: "Bot не зміг завантажити історію змін.",
       loadMore: "Завантажити ще",
       loadingMore: "Завантаження ще…",
       changedPaths: "Змінені шляхи ({count})",
@@ -2239,7 +2239,7 @@ export const uk: TranslationMap = {
     },
     noInstalledTitle: "Не встановлено жодних додаткових плагінів",
     noInstalledBody:
-      "Відкрийте для себе рекомендований плагін або шукайте в ClawHub, щоб розширити OpenClaw.",
+      "Відкрийте для себе рекомендований плагін або шукайте в ClawHub, щоб розширити Bot.",
     noInstalledMatchTitle: "Немає збігів серед установлених плагінів",
     noMatchBody: "Спробуйте інший пошук.",
     filterAll: "Усі",
@@ -2273,7 +2273,7 @@ export const uk: TranslationMap = {
     detailPluginId: "ID плагіна",
     offlineTitle: "Gateway офлайн",
     offlineBody: "Підключіться, щоб переглянути встановлені й рекомендовані плагіни.",
-    optionalCapability: "Необов’язкова можливість OpenClaw.",
+    optionalCapability: "Необов’язкова можливість Bot.",
     enabled: "Увімкнено",
     disabled: "Вимкнено",
     available: "Доступно",
@@ -2326,7 +2326,7 @@ export const uk: TranslationMap = {
     },
   },
   aboutPage: {
-    productName: "OpenClaw",
+    productName: "Bot",
     tagline: "Ваш особистий ШІ-асистент, що працює на ваших власних пристроях.",
     waveHello: "Привітайтеся з Clawd",
     linksLabel: "Спільнота та ресурси",
@@ -2336,7 +2336,7 @@ export const uk: TranslationMap = {
     linkDiscord: "Discord",
     linkX: "X (Twitter)",
     linkChangelog: "Журнал змін",
-    license: "© 2026 OpenClaw Foundation — ліцензія MIT.",
+    license: "© 2026 Bot Foundation — ліцензія MIT.",
     artifactTitle: "Control UI",
     artifactSubtitle: "Ідентифікаційні дані, вбудовані під час збірки цього браузерного артефакту.",
     artifactDetails: "Відомості про збірку Control UI",
@@ -2354,7 +2354,7 @@ export const uk: TranslationMap = {
       "Повідомляється активним підключенням Gateway; окремо від цієї збірки Control UI.",
   },
   appsPage: {
-    heroTitle: "Беріть OpenClaw всюди",
+    heroTitle: "Беріть Bot всюди",
     heroTagline:
       "Супутні застосунки для телефона, годинника, комп’ютера та браузера — а також плагіни для розширення можливостей вашого агента.",
     sectionMobile: "На телефоні",
@@ -2378,11 +2378,11 @@ export const uk: TranslationMap = {
     cards: {
       ios: {
         title: "iPhone",
-        desc: "Спілкуйтеся, розмовляйте, підтверджуйте дії та діліться в OpenClaw з iOS.",
+        desc: "Спілкуйтеся, розмовляйте, підтверджуйте дії та діліться в Bot з iOS.",
       },
       android: {
         title: "Android",
-        desc: "Ваш телефон Android як повноцінний вузол OpenClaw — чат, камера та Canvas.",
+        desc: "Ваш телефон Android як повноцінний вузол Bot — чат, камера та Canvas.",
       },
       appleWatch: {
         title: "Apple Watch",
@@ -2390,7 +2390,7 @@ export const uk: TranslationMap = {
       },
       wearOs: {
         title: "Wear OS",
-        desc: "Компаньйон для Android розширює OpenClaw на ваш годинник.",
+        desc: "Компаньйон для Android розширює Bot на ваш годинник.",
       },
       macos: {
         title: "macOS",
@@ -2398,7 +2398,7 @@ export const uk: TranslationMap = {
       },
       windows: {
         title: "Windows",
-        desc: "Компаньйон для Windows підключає ваш ПК як вузол OpenClaw.",
+        desc: "Компаньйон для Windows підключає ваш ПК як вузол Bot.",
       },
       linux: {
         title: "Linux",
@@ -2406,11 +2406,11 @@ export const uk: TranslationMap = {
       },
       chrome: {
         title: "Розширення Chrome",
-        desc: "Дозвольте OpenClaw керувати вашим наявним Chrome — вкладками, сторінками та формами.",
+        desc: "Дозвольте Bot керувати вашим наявним Chrome — вкладками, сторінками та формами.",
       },
       plugins: {
         title: "Плагіни та ClawHub",
-        desc: "Розширюйте OpenClaw каналами, інструментами та навичками від спільноти.",
+        desc: "Розширюйте Bot каналами, інструментами та навичками від спільноти.",
       },
     },
   },
@@ -2607,7 +2607,7 @@ export const uk: TranslationMap = {
     selfLearning: {
       pitchTitle: "Увімкнути самонавчання",
       pitchBody:
-        "OpenClaw аналізує виправлення та суттєві завершені запуски, а потім створює чернетки пропозицій навичок для цієї дошки. Він використовує додаткові фонові токени, а чернетки надходять як пропозиції, що очікують розгляду.",
+        "Bot аналізує виправлення та суттєві завершені запуски, а потім створює чернетки пропозицій навичок для цієї дошки. Він використовує додаткові фонові токени, а чернетки надходять як пропозиції, що очікують розгляду.",
       enable: "Увімкнути самонавчання",
       enabling: "Увімкнення…",
       updateError: "Не вдалося оновити налаштування самонавчання.",
@@ -3769,9 +3769,9 @@ export const uk: TranslationMap = {
         title: "Потрібна автентифікація",
         summary:
           "Gateway доступний, але цьому браузеру потрібен відповідний токен або пароль перед підключенням.",
-        stepPaste: "Вставте токен з openclaw dashboard --no-open або введіть налаштований пароль.",
+        stepPaste: "Вставте токен з bot dashboard --no-open або введіть налаштований пароль.",
         stepGenerate:
-          "Якщо токен не налаштовано, виконайте openclaw doctor --generate-gateway-token на хості Gateway.",
+          "Якщо токен не налаштовано, виконайте bot doctor --generate-gateway-token на хості Gateway.",
         stepConnect: "Після оновлення облікових даних знову натисніть Connect.",
       },
       authFailed: {
@@ -3779,7 +3779,7 @@ export const uk: TranslationMap = {
         summary:
           "Надані облікові дані відхилено. Найпоширеніша причина — застарілий токен або токен, скопійований з іншого Gateway URL.",
         stepDashboard:
-          "Виконайте openclaw dashboard --no-open і відкрийте свіжий URL або вставте його токен.",
+          "Виконайте bot dashboard --no-open і відкрийте свіжий URL або вставте його токен.",
         stepReplace:
           "Замініть застарілі значення токена/пароля; не використовуйте повторно токен з іншого Gateway URL.",
         stepMode:
@@ -3803,8 +3803,8 @@ export const uk: TranslationMap = {
           "Цей браузер потребує одноразового схвалення від хоста Gateway перед використанням Control UI.",
         upgradeSummary:
           "Цей браузер уже відомий, але запитаний доступ змінився і потребує нового схвалення.",
-        stepList: "Виконайте openclaw devices list на хості Gateway.",
-        stepApproveId: "Схваліть цей запит: openclaw devices approve {requestId}.",
+        stepList: "Виконайте bot devices list на хості Gateway.",
+        stepApproveId: "Схваліть цей запит: bot devices approve {requestId}.",
         stepApprove: "Схваліть запит браузера/пристрою, що очікує, з цього списку.",
         stepReconnect: "Підключіться знову після завершення схвалення.",
       },
@@ -3832,22 +3832,22 @@ export const uk: TranslationMap = {
           "Надана Control UI і запущений Gateway не узгоджуються щодо підтримуваного протоколу з’єднання.",
         refresh: "Оновити сторінку",
         stepDashboard:
-          "Знову відкрийте наданий dashboard через openclaw dashboard, щоб UI і Gateway походили з однієї інсталяції.",
+          "Знову відкрийте наданий dashboard через bot dashboard, щоб UI і Gateway походили з однієї інсталяції.",
         stepDevUi:
           "Якщо використовуєте pnpm ui:dev, перебудуйте або перезапустіть dev UI з поточного checkout.",
         stepRestart:
-          "Перезапустіть Gateway після оновлення OpenClaw, щоб він надавав поточний протокол.",
+          "Перезапустіть Gateway після оновлення Bot, щоб він надавав поточний протокол.",
       },
       network: {
         title: "Не вдалося підключитися",
         summary:
           "Браузер не зміг завершити з’єднання з Gateway. Перевірте ціль і транспорт перед повторною спробою з обліковими даними.",
         stepGateway:
-          "Підтвердьте, що Gateway працює, через openclaw status або openclaw gateway run.",
+          "Підтвердьте, що Gateway працює, через bot status або bot gateway run.",
         stepUrl:
           "Перевірте WebSocket URL і використовуйте wss://, коли Gateway знаходиться за HTTPS/Tailscale Serve.",
         stepDashboard:
-          "Знову відкрийте dashboard через openclaw dashboard --no-open, щоб повторно скопіювати поточний URL і деталі auth.",
+          "Знову відкрийте dashboard через bot dashboard --no-open, щоб повторно скопіювати поточний URL і деталі auth.",
       },
     },
   },
@@ -3943,7 +3943,7 @@ export const uk: TranslationMap = {
       remoteViewOnly: "Цей сеанс розташований на спареному вузлі й доступний лише для перегляду.",
       unsupportedViewOnly: "Це зовнішнє джерело сеансів доступне лише для перегляду.",
       sessionMenu: "External session actions",
-      openInOpenClaw: "Open in OpenClaw",
+      openInBot: "Open in Bot",
       openInTerminal: "Open in terminal",
       terminalUnavailable: "Terminal opening is unavailable for this session.",
     },
@@ -3999,7 +3999,7 @@ export const uk: TranslationMap = {
     followUpModeOverriding: "Перевизначення типового значення сервера ({mode})",
     followUpModeReset: "Скинути до типового значення сервера",
     catalogOpenTarget: "Відкривати зовнішні сеанси в",
-    catalogOpenTargetViewer: "OpenClaw viewer",
+    catalogOpenTargetViewer: "Bot viewer",
     catalogOpenTargetTerminal: "Terminal",
     onboardingDisabled: "Вимкнено під час налаштування",
     commandPaletteTitle: "Пошук або перехід до… (⌘K)",
@@ -4017,7 +4017,7 @@ export const uk: TranslationMap = {
       titleOne: "1 конфлікт хмарного робочого простору",
       titleMany: "{count} конфліктів хмарного робочого простору",
       description:
-        "OpenClaw зберіг ваші локальні версії та застосував інші хмарні зміни. Перевірте підготовлений результат або візьміть його версію для конфліктного шляху.",
+        "Bot зберіг ваші локальні версії та застосував інші хмарні зміни. Перевірте підготовлений результат або візьміть його версію для конфліктного шляху.",
       morePaths: "+ще {count} шляхів",
       stagedResult: "Підготовлений хмарний результат",
       copyStagedResult: "Копіювати посилання на підготовлений результат",
@@ -4028,7 +4028,7 @@ export const uk: TranslationMap = {
       commandHelp:
         "Виконайте це у Bash або zsh (Git Bash у Windows). Якщо inspect повідомляє, що шлях не існує, хмара видалила його; перевірте та видаліть локальний шлях вручну. Якщо checkout повідомляє про конфлікт файлу/каталогу, перемістіть або видаліть локальний шлях, що блокує, а потім повторіть спробу. Якщо staged ref відсутній, повідомлення застаріле; не змінюйте локальний шлях.",
       commandsUnavailable:
-        "Це ім'я файлу містить керуючі символи терміналу, тому OpenClaw не створюватиме для нього копійовану команду оболонки. Перевірте staged ref безпосередньо та вводьте шлях вручну з обережністю.",
+        "Це ім'я файлу містить керуючі символи терміналу, тому Bot не створюватиме для нього копійовану команду оболонки. Перевірте staged ref безпосередньо та вводьте шлях вручну з обережністю.",
       dismiss: "Відхилити повідомлення про конфлікт робочого простору",
       eventSender: "Хмарний робочий простір",
       eventTitleOne: "Хмарний результат застосовано з 1 конфліктом",
@@ -4609,7 +4609,7 @@ export const uk: TranslationMap = {
       filters: "Фільтри",
       shownOf: "{shown} з {total}",
       emptyTitle: "Ще немає запланованих завдань",
-      emptyHint: "Опишіть, що і коли має робити OpenClaw — воно виконуватиметься за розкладом.",
+      emptyHint: "Опишіть, що і коли має робити Bot — воно виконуватиметься за розкладом.",
       noMatching: "Немає завдань, що відповідають поточним фільтрам.",
       loadMore: "Завантажити ще",
       loading: "Завантаження...",
@@ -4676,7 +4676,7 @@ export const uk: TranslationMap = {
     detail: {
       tabsLabel: "Відомості про автоматизацію",
       newTitle: "Нове заплановане завдання",
-      newSubtitle: "Опишіть, що має зробити OpenClaw, потім виберіть час запуску.",
+      newSubtitle: "Опишіть, що має зробити Bot, потім виберіть час запуску.",
       back: "Усі автоматизації",
       settingsTab: "Налаштування",
       historyTitle: "Історія запусків",
@@ -4749,7 +4749,7 @@ export const uk: TranslationMap = {
       descriptionPlaceholder: "Необов’язковий контекст для цього завдання",
       agentPlaceholder: "main або ops",
       agentHelp: "Почніть вводити, щоб вибрати відомого агента, або введіть власного.",
-      promptPlaceholder: "Опишіть, що має зробити OpenClaw...",
+      promptPlaceholder: "Опишіть, що має зробити Bot...",
       repeat: "Повторювати",
       repeatInterval: "Інтервал",
       repeatOnce: "Один раз",

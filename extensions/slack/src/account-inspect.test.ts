@@ -1,5 +1,5 @@
 // Slack tests cover account inspection and credential status reporting.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { inspectSlackAccount } from "./account-inspect.js";
 
@@ -14,7 +14,7 @@ describe("inspectSlackAccount", () => {
             appToken: "test-app-token",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       envBotToken: "",
       envAppToken: "",
       envUserToken: "",
@@ -41,7 +41,7 @@ describe("inspectSlackAccount", () => {
             userToken: "test-user-token",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       envBotToken: "",
       envAppToken: "",
       envUserToken: "",
@@ -66,7 +66,7 @@ describe("inspectSlackAccount", () => {
             appToken: "test-app-token",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       envBotToken: "",
       envAppToken: "",
       envUserToken: "",

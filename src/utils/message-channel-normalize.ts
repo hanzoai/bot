@@ -1,11 +1,11 @@
 // Message channel normalization helpers canonicalize channel identifiers and aliases.
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { CHANNEL_IDS } from "../channels/ids.js";
 import { listRegisteredChannelPluginIds } from "../channels/registry.js";
 import { INTERNAL_MESSAGE_CHANNEL } from "./message-channel-constants.js";
 import { normalizeMessageChannel as normalizeMessageChannelCore } from "./message-channel-core.js";
 
-type ChannelId = string & { readonly __openclawChannelIdBrand?: never };
+type ChannelId = string & { readonly __botChannelIdBrand?: never };
 
 /** Channel id that can receive outbound messages from the Gateway. */
 export type DeliverableMessageChannel = ChannelId;

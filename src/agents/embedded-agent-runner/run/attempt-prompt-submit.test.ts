@@ -1,4 +1,4 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ImageContent } from "../../../llm/types.js";
 import type { AgentMessage } from "../../runtime/index.js";
@@ -98,10 +98,10 @@ describe("submitEmbeddedAttemptPrompt", () => {
     const image: ImageContent = { type: "image", data: "aW1hZ2U=", mimeType: "image/png" };
     const runtimeContextMessage: RuntimeContextCustomMessage = {
       role: "custom",
-      customType: "openclaw.runtime-context",
+      customType: "bot.runtime-context",
       content: "runtime context",
       display: false,
-      details: { source: "openclaw-runtime-context", runtimeContextCarrier: true },
+      details: { source: "bot-runtime-context", runtimeContextCarrier: true },
       timestamp: 2,
     };
     const promptActiveSession = vi.fn(

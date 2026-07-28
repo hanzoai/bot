@@ -15,12 +15,12 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 let browser: Browser;
 let server: ControlUiE2eServer;
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.BOT_CAPTURE_UI_PROOF === "1";
 const uiProofArtifactDir = path.join(
   process.cwd(),
   ".artifacts",
@@ -103,7 +103,7 @@ async function openSidebarTestPage() {
   const page = await context.newPage();
   await installMockGateway(page);
   await page.goto(`${server.baseUrl}chat`);
-  await page.waitForFunction(() => Boolean(customElements.get("openclaw-lobster-pet")));
+  await page.waitForFunction(() => Boolean(customElements.get("bot-lobster-pet")));
   return { context, page };
 }
 
@@ -111,7 +111,7 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(
-        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set BOT_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
       );
     }
     server = await startControlUiE2eServer();
@@ -136,18 +136,18 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
     if (webChrome) {
       await page.addInitScript(() => {
         const nativeWindow = window as Window & {
-          __OPENCLAW_NATIVE_WEB_CHROME__?: boolean;
-          __OPENCLAW_NATIVE_HISTORY__?: { canGoBack: boolean; canGoForward: boolean };
+          __BOT_NATIVE_WEB_CHROME__?: boolean;
+          __BOT_NATIVE_HISTORY__?: { canGoBack: boolean; canGoForward: boolean };
         };
-        nativeWindow["__OPENCLAW_NATIVE_WEB_CHROME__"] = true;
-        nativeWindow["__OPENCLAW_NATIVE_HISTORY__"] = {
+        nativeWindow["__BOT_NATIVE_WEB_CHROME__"] = true;
+        nativeWindow["__BOT_NATIVE_HISTORY__"] = {
           canGoBack: false,
           canGoForward: false,
         };
         const stamp = () =>
           document.documentElement.classList.add(
-            "openclaw-native-macos",
-            "openclaw-native-web-chrome",
+            "bot-native-macos",
+            "bot-native-web-chrome",
           );
         if (document.documentElement) {
           stamp();
@@ -170,7 +170,7 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
         .poll(() =>
           page
             .locator("html")
-            .evaluate((element) => element.classList.contains("openclaw-native-web-chrome")),
+            .evaluate((element) => element.classList.contains("bot-native-web-chrome")),
         )
         .toBe(webChrome);
       await captureSettingsSidebarProof(
@@ -273,7 +273,7 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
     try {
       await page.goto(`${server.baseUrl}chat`);
 
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("bot-app-sidebar");
       const pinnedItems = sidebar.locator(
         '.sidebar-zone-entry[data-sidebar-entry^="route:"] > .nav-item',
       );
@@ -394,7 +394,7 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
       await expect
         .poll(() => trimmedTextContents(settingsLinks))
         .toEqual([
-          "Ask OpenClaw",
+          "Ask Bot",
           "Approvals",
           "Infrastructure",
           "Advanced",
@@ -455,12 +455,12 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
       await expect.poll(() => settingsSearch.inputValue()).toBe("");
       await captureSettingsSidebarProof(settingsSidebar, "01g-settings-search-reset.png");
       await holdUiProof(page);
-      await settingsSidebar.getByRole("link", { name: "Ask OpenClaw" }).click();
+      await settingsSidebar.getByRole("link", { name: "Ask Bot" }).click();
       await expect.poll(() => new URL(page.url()).pathname).toBe("/custodian");
       await expect
         .poll(() => page.locator(".shell").getAttribute("class"))
         .not.toContain("shell--onboarding");
-      // Ask OpenClaw is a settings-takeover page (#111686): the settings
+      // Ask Bot is a settings-takeover page (#111686): the settings
       // sidebar owns navigation there, not the app sidebar.
       await expect.poll(() => settingsSidebar.isVisible()).toBe(true);
       await expect.poll(() => sidebar.isVisible()).toBe(false);
@@ -500,10 +500,10 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
         .not.toContain("Workboard");
       const tasksItem = menu.getByRole("menuitemcheckbox", { name: "Tasks" });
       await expect.poll(() => tasksItem.getAttribute("aria-checked")).toBe("false");
-      // Ask OpenClaw moved to Settings (#111686): custodian is not a sidebar
+      // Ask Bot moved to Settings (#111686): custodian is not a sidebar
       // nav route anymore, so the pin editor does not offer it.
       await expect
-        .poll(() => menu.getByRole("menuitemcheckbox", { name: "OpenClaw" }).count())
+        .poll(() => menu.getByRole("menuitemcheckbox", { name: "Bot" }).count())
         .toBe(0);
       await captureUiProof(page, "02-customize-menu.png");
 
@@ -652,7 +652,7 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
 
     try {
       await page.goto(`${server.baseUrl}chat`);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("bot-app-sidebar");
       await sidebar.locator(".sidebar-nav__head-action").click();
       await expect
         .poll(() =>
@@ -677,7 +677,7 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
 
     try {
       await page.goto(controlUiSessionUrl(server.baseUrl, "agent:main:work"));
-      await page.locator("openclaw-app-sidebar .sidebar-brand__new-thread").click();
+      await page.locator("bot-app-sidebar .sidebar-brand__new-thread").click();
 
       await expect.poll(() => new URL(page.url()).pathname).toBe("/new");
       await expect.poll(() => new URL(page.url()).searchParams.get("agent")).toBe("main");
@@ -725,8 +725,8 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
 
     try {
       await page.goto(`${server.baseUrl}chat`);
-      const sidebar = page.locator("openclaw-app-sidebar");
-      const pet = sidebar.locator(".sidebar-shell openclaw-lobster-pet");
+      const sidebar = page.locator("bot-app-sidebar");
+      const pet = sidebar.locator(".sidebar-shell bot-lobster-pet");
       await expect.poll(() => pet.count()).toBe(1);
       await expect.poll(() => outcome(pet)).toBe("error");
       await expect.poll(() => page.locator(".topbar").isVisible()).toBe(false);
@@ -747,8 +747,8 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
     const { context, page } = await openSidebarTestPage();
 
     try {
-      const sidebar = page.locator("openclaw-app-sidebar");
-      const pet = sidebar.locator("openclaw-lobster-pet");
+      const sidebar = page.locator("bot-app-sidebar");
+      const pet = sidebar.locator("bot-lobster-pet");
       const movement = await pet.evaluate(async (element) => {
         const lobster = element as HTMLElement & {
           anchor: "bar";
@@ -806,7 +806,7 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
     const { context, page } = await openSidebarTestPage();
 
     try {
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("bot-app-sidebar");
       const moreButton = sidebar.locator(".sidebar-nav__head-action");
       await moreButton.click();
       await sidebar
@@ -852,7 +852,7 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
     const { context, page } = await openSidebarTestPage();
 
     try {
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("bot-app-sidebar");
       await sidebar.locator(".sidebar-nav__head-action").click();
       const moreMenu = sidebar.locator("wa-dropdown.sidebar-more-menu");
       await expect
@@ -945,7 +945,7 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
 
     try {
       await page.goto(`${server.baseUrl}chat`);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("bot-app-sidebar");
       await sidebar.getByRole("button", { name: /Switch agent/ }).click();
       const menu = sidebar.locator("wa-dropdown.sidebar-agent-menu");
       const mainSwitch = menu.getByRole("menuitemradio", { name: "Main" });
@@ -1015,7 +1015,7 @@ describeControlUiE2e("Control UI sidebar customization mocked Gateway E2E", () =
     try {
       await page.goto(`${server.baseUrl}chat`);
       await gateway.waitForRequest("agent.identity.get");
-      const card = page.locator("openclaw-app-sidebar openclaw-sidebar-agent-card");
+      const card = page.locator("bot-app-sidebar bot-sidebar-agent-card");
       await expect
         .poll(() => card.locator(".sidebar-agent-card__name").textContent())
         .toContain("Workspace Molty");

@@ -32,7 +32,7 @@ function extractSqliteUsageSnapshot(message: unknown): SessionTranscriptUsageSna
     hasNonzeroUsage(usage) ||
     typeof totalTokens === "number" ||
     (typeof costUsd === "number" && Number.isFinite(costUsd) && costUsd > 0);
-  const isDeliveryMirror = modelProvider === "openclaw" && model === "delivery-mirror";
+  const isDeliveryMirror = modelProvider === "bot" && model === "delivery-mirror";
   if (!hasMeaningfulUsage && !modelProvider && !model) {
     return null;
   }

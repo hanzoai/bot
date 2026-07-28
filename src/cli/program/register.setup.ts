@@ -166,7 +166,7 @@ async function runOnboardingEntry(
 
 function addSystemAgentOptions(command: Command): Command {
   return command
-    .option("-m, --message <text>", "Run one OpenClaw request")
+    .option("-m, --message <text>", "Run one Bot request")
     .option("--yes", "Approve persistent config writes for one --message request", false)
     .option("--json", "Output system overview or onboarding summary as JSON", false);
 }
@@ -175,18 +175,18 @@ function addSystemAgentOptions(command: Command): Command {
 export function registerSetupCommand(program: Command): void {
   const command = program
     .command("setup")
-    .description("Chat with OpenClaw; onboard when setup is incomplete")
+    .description("Chat with Bot; onboard when setup is incomplete")
     .addHelpText(
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n` +
-        `  ${theme.command("openclaw setup")}\n` +
-        `    ${theme.muted("Chat with OpenClaw, or onboard when setup is incomplete.")}\n` +
-        `  ${theme.command('openclaw setup -m "status"')}\n` +
+        `  ${theme.command("bot setup")}\n` +
+        `    ${theme.muted("Chat with Bot, or onboard when setup is incomplete.")}\n` +
+        `  ${theme.command('bot setup -m "status"')}\n` +
         `    ${theme.muted("Run one system-agent request.")}\n` +
-        `  ${theme.command("openclaw setup --wizard")}\n` +
+        `  ${theme.command("bot setup --wizard")}\n` +
         `    ${theme.muted("Run full onboarding.")}\n\n` +
-        `${theme.muted("Docs:")} ${formatDocsLink("/cli/setup", "docs.openclaw.ai/cli/setup")}\n`,
+        `${theme.muted("Docs:")} ${formatDocsLink("/cli/setup", "docs.bot.ai/cli/setup")}\n`,
     )
     .option(
       "--workspace <dir>",
@@ -223,7 +223,7 @@ export function registerSetupCommand(program: Command): void {
     .option("--gateway-token <token>", "Gateway token (token auth)")
     .option(
       "--gateway-token-ref-env <name>",
-      "Gateway token SecretRef env var name (token auth; e.g. OPENCLAW_GATEWAY_TOKEN)",
+      "Gateway token SecretRef env var name (token auth; e.g. BOT_GATEWAY_TOKEN)",
     )
     .option("--gateway-password <password>", "Gateway password (password auth)")
     .option("--tailscale <mode>", "Tailscale: off|serve|funnel")
@@ -274,7 +274,7 @@ export function registerSetupCommand(program: Command): void {
   addSystemAgentOptions(
     program
       .command("crestodian", { hidden: true }) // hidden alias
-      .description("Deprecated: use openclaw setup"),
+      .description("Deprecated: use bot setup"),
   ).action(async (options) => {
     const { defaultRuntime } = await import("../../runtime.js");
     await runCommandWithRuntime(defaultRuntime, async () => {

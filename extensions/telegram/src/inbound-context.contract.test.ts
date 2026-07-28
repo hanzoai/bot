@@ -1,6 +1,6 @@
 // Telegram tests cover inbound context.contract plugin behavior.
-import { expectChannelInboundContextContract } from "openclaw/plugin-sdk/channel-contract-testing";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { expectChannelInboundContextContract } from "bot/plugin-sdk/channel-contract-testing";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, it } from "vitest";
 import { buildTelegramMessageContextForTest } from "./bot-message-context.test-harness.js";
 
@@ -19,7 +19,7 @@ describe("Telegram inbound context contract", () => {
             groups: { "*": { requireMention: false } },
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
       message: {
         chat: { id: 42, type: "group", title: "Ops" },
         text: "hello",

@@ -1,11 +1,11 @@
 // Doctor migration from legacy shipped plugin install config into persisted install registry.
 import fs from "node:fs";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import {
   extractShippedPluginInstallConfigRecords,
   stripShippedPluginInstallConfigRecords,
 } from "../../../config/plugin-install-config-migration.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { loadInstalledPluginIndexInstallRecords } from "../../../plugins/installed-plugin-index-records.js";
 import {
   inspectPersistedInstalledPluginIndex,
@@ -55,7 +55,7 @@ export type PluginRegistryInstallMigrationParams = LoadInstalledPluginIndexParam
   InstalledPluginIndexStoreOptions & {
     dryRun?: boolean;
     existsSync?: (path: string) => boolean;
-    readConfig?: () => Promise<OpenClawConfig> | OpenClawConfig;
+    readConfig?: () => Promise<BotConfig> | BotConfig;
   };
 
 /** Decide whether plugin install registry migration should run for this environment. */
@@ -81,7 +81,7 @@ export function preflightPluginRegistryInstallMigration(
 
 async function readMigrationConfig(
   params: PluginRegistryInstallMigrationParams,
-): Promise<OpenClawConfig> {
+): Promise<BotConfig> {
   if (params.config) {
     return params.config;
   }
@@ -154,7 +154,7 @@ function addPluginReference(
   }
 }
 
-function listConfiguredChannelIds(config: OpenClawConfig): Set<string> {
+function listConfiguredChannelIds(config: BotConfig): Set<string> {
   const channels = config.channels;
   if (!channels || typeof channels !== "object" || Array.isArray(channels)) {
     return new Set();
@@ -166,7 +166,7 @@ function listConfiguredChannelIds(config: OpenClawConfig): Set<string> {
   );
 }
 
-function listConfiguredModelProviderIds(config: OpenClawConfig): Set<string> {
+function listConfiguredModelProviderIds(config: BotConfig): Set<string> {
   const providers = config.models?.providers;
   if (!providers || typeof providers !== "object" || Array.isArray(providers)) {
     return new Set();
@@ -180,7 +180,7 @@ function listConfiguredModelProviderIds(config: OpenClawConfig): Set<string> {
 
 function listMigrationRelevantPluginRecords(params: {
   index: InstalledPluginIndex;
-  config: OpenClawConfig;
+  config: BotConfig;
   installRecords: Record<string, unknown>;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
@@ -270,7 +270,7 @@ export async function migratePluginRegistryForInstall(
   }
 
   const rawConfig = await readMigrationConfig(params);
-  const config = stripShippedPluginInstallConfigRecords(rawConfig) as OpenClawConfig;
+  const config = stripShippedPluginInstallConfigRecords(rawConfig) as BotConfig;
   const durableInstallRecords =
     params.installRecords ?? (await loadInstalledPluginIndexInstallRecords(params));
   const installRecords = {

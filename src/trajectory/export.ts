@@ -1,7 +1,7 @@
 // Trajectory export helpers package recorded trajectories for diagnostics.
 import fsp from "node:fs/promises";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { sanitizeDiagnosticPayload } from "../agents/payload-redaction.js";
 import type { AgentMessage } from "../agents/runtime/index.js";
 import { parseSessionFileEntriesWithWarnings } from "../agents/sessions/session-file-parser.js";
@@ -404,7 +404,7 @@ function isRuntimeTrajectoryEvent(value: unknown): value is TrajectoryEvent {
     return false;
   }
   return (
-    value.traceSchema === "openclaw-trajectory" &&
+    value.traceSchema === "bot-trajectory" &&
     value.schemaVersion === 1 &&
     value.source === "runtime" &&
     typeof value.type === "string" &&
@@ -518,7 +518,7 @@ function buildTranscriptEvents(params: {
   for (const entry of params.entries) {
     const push = (type: string, data?: Record<string, unknown>) => {
       events.push({
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "bot-trajectory",
         schemaVersion: 1,
         traceId: params.traceId,
         source: "transcript",
@@ -934,7 +934,7 @@ function buildMetadataCapture(params: {
     };
   })();
   return {
-    traceSchema: "openclaw-trajectory",
+    traceSchema: "bot-trajectory",
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
     traceId: params.manifest.traceId,
@@ -965,7 +965,7 @@ function buildArtifactsCapture(params: {
     return undefined;
   }
   return {
-    traceSchema: "openclaw-trajectory",
+    traceSchema: "bot-trajectory",
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
     traceId: params.manifest.traceId,
@@ -1043,7 +1043,7 @@ function buildPromptsCapture(params: {
     return undefined;
   }
   return {
-    traceSchema: "openclaw-trajectory",
+    traceSchema: "bot-trajectory",
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
     traceId: params.manifest.traceId,
@@ -1067,9 +1067,9 @@ export function resolveDefaultTrajectoryExportDir(params: {
   const sessionFileName = safeTrajectorySessionFileName(params.sessionId);
   return path.join(
     params.workspaceDir,
-    ".openclaw",
+    ".bot",
     "trajectory-exports",
-    `openclaw-trajectory-${sessionFileName.slice(0, 8)}-${timestamp}`,
+    `bot-trajectory-${sessionFileName.slice(0, 8)}-${timestamp}`,
   );
 }
 
@@ -1130,7 +1130,7 @@ export async function exportTrajectoryBundle(params: BuildTrajectoryBundleParams
   const rawEvents = sortTrajectoryEvents([...runtimeEvents, ...transcriptEvents]);
   const events = rawEvents.map((event) => redactEventForExport(event, redaction));
   const manifest: TrajectoryBundleManifest = {
-    traceSchema: "openclaw-trajectory",
+    traceSchema: "bot-trajectory",
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
     traceId: params.sessionId,

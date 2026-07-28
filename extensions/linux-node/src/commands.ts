@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type {
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeHostCommandAvailabilityContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { runCommandWithTimeout } from "openclaw/plugin-sdk/process-runtime";
-import { resolvePreferredOpenClawTmpDir, withTempWorkspace } from "openclaw/plugin-sdk/temp-path";
+  BotPluginNodeHostCommand,
+  BotPluginNodeHostCommandAvailabilityContext,
+} from "bot/plugin-sdk/plugin-entry";
+import { runCommandWithTimeout } from "bot/plugin-sdk/process-runtime";
+import { resolvePreferredBotTmpDir, withTempWorkspace } from "bot/plugin-sdk/temp-path";
 import {
   assertToolResult,
   clamp,
@@ -139,14 +139,14 @@ async function defaultWithTempFile<T>(
   run: (filePath: string) => Promise<T>,
 ): Promise<T> {
   return await withTempWorkspace(
-    { rootDir: resolvePreferredOpenClawTmpDir(), prefix: "openclaw-linux-node-" },
+    { rootDir: resolvePreferredBotTmpDir(), prefix: "bot-linux-node-" },
     async ({ dir }) => await run(path.join(dir, `capture${suffix}`)),
   );
 }
 
 export function createLinuxNodeCommands(
   deps: LinuxNodeCommandDeps,
-): OpenClawPluginNodeHostCommand[] {
+): BotPluginNodeHostCommand[] {
   const platform = deps.platform ?? process.platform;
   const env = deps.env ?? process.env;
   const findExecutable = deps.resolveExecutable ?? resolveExecutable;
@@ -182,7 +182,7 @@ export function createLinuxNodeCommands(
   };
   const isAvailable =
     (capability: keyof ResolvedLinuxNodePluginConfig, tool: "ffmpeg" | "notify-send") =>
-    (context: OpenClawPluginNodeHostCommandAvailabilityContext) =>
+    (context: BotPluginNodeHostCommandAvailabilityContext) =>
       platform === "linux" &&
       isCapabilityEnabledForHost(context, capability) &&
       findTool(tool, context.env) !== null;

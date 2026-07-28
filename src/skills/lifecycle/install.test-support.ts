@@ -25,7 +25,7 @@ type SkillsInstallTestApi = {
 
 function getTestApi(): SkillsInstallTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.skillsInstallTestApi")
+    Symbol.for("bot.skillsInstallTestApi")
   ] as SkillsInstallTestApi;
 }
 

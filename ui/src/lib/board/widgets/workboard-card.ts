@@ -5,7 +5,7 @@ import type { BoardViewWidget } from "../view-types.ts";
 import type { PluginBoardWidgetRenderer } from "./index.ts";
 import { WorkboardWidgetElement } from "./workboard-widget.ts";
 
-class OpenClawWorkboardCardWidget extends WorkboardWidgetElement {
+class BotWorkboardCardWidget extends WorkboardWidgetElement {
   private async handleStatusChange(event: Event): Promise<void> {
     const cardId = this.readStringProp("cardId");
     const card = this.cards.find((candidate) => candidate.id === cardId);
@@ -86,8 +86,8 @@ class OpenClawWorkboardCardWidget extends WorkboardWidgetElement {
   }
 }
 
-if (!customElements.get("openclaw-workboard-card-widget")) {
-  customElements.define("openclaw-workboard-card-widget", OpenClawWorkboardCardWidget);
+if (!customElements.get("bot-workboard-card-widget")) {
+  customElements.define("bot-workboard-card-widget", BotWorkboardCardWidget);
 }
 
 export const renderWorkboardCardWidget: PluginBoardWidgetRenderer = ({
@@ -101,16 +101,16 @@ export const renderWorkboardCardWidget: PluginBoardWidgetRenderer = ({
   canMutate: boolean;
   requestUpdate: () => void;
 }) => html`
-  <openclaw-workboard-card-widget
+  <bot-workboard-card-widget
     .widget=${widget}
     .sessionKey=${sessionKey}
     .canMutate=${canMutate}
     .hostRequestUpdate=${requestUpdate}
-  ></openclaw-workboard-card-widget>
+  ></bot-workboard-card-widget>
 `;
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-workboard-card-widget": OpenClawWorkboardCardWidget;
+    "bot-workboard-card-widget": BotWorkboardCardWidget;
   }
 }

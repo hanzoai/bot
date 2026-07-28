@@ -1,4 +1,4 @@
-import { createNonExitingRuntimeEnv } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { createNonExitingRuntimeEnv } from "bot/plugin-sdk/plugin-test-runtime";
 // Feishu ingress tests cover debounce ownership and constituent claim settlement.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ClawdbotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";

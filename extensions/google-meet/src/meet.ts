@@ -1,4 +1,4 @@
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 import { exportGoogleDriveDocumentText, extractGoogleDriveDocumentId } from "./drive.js";
 import {
   createGoogleMeetSpace,

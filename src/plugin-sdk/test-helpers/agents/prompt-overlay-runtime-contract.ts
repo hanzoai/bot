@@ -1,7 +1,7 @@
 /**
  * Shared contract fixtures for agent prompt overlay runtime behavior.
  */
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import type { ProviderSystemPromptContributionContext } from "../../../plugins/types.js";
 
 export const GPT5_CONTRACT_MODEL_ID = "gpt-5.4";
@@ -12,7 +12,7 @@ export const OPENAI_CODEX_CONTRACT_PROVIDER_ID = "openai";
 export const CODEX_CONTRACT_PROVIDER_ID = "codex";
 export const NON_OPENAI_CONTRACT_PROVIDER_ID = "openrouter";
 
-export function openAiPluginPersonalityConfig(personality: "friendly" | "off"): OpenClawConfig {
+export function openAiPluginPersonalityConfig(personality: "friendly" | "off"): BotConfig {
   return {
     plugins: {
       entries: {
@@ -21,23 +21,23 @@ export function openAiPluginPersonalityConfig(personality: "friendly" | "off"): 
         },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies BotConfig;
 }
 
-export function sharedGpt5PersonalityConfig(_personality: "friendly" | "off"): OpenClawConfig {
+export function sharedGpt5PersonalityConfig(_personality: "friendly" | "off"): BotConfig {
   return {};
 }
 
 export function codexPromptOverlayContext(params?: {
   modelId?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): ProviderSystemPromptContributionContext {
   return {
     provider: CODEX_CONTRACT_PROVIDER_ID,
     modelId: params?.modelId ?? GPT5_CONTRACT_MODEL_ID,
     promptMode: "full",
-    agentDir: "/tmp/openclaw-codex-prompt-contract-agent",
-    workspaceDir: "/tmp/openclaw-codex-prompt-contract-workspace",
+    agentDir: "/tmp/bot-codex-prompt-contract-agent",
+    workspaceDir: "/tmp/bot-codex-prompt-contract-workspace",
     ...(params?.config ? { config: params.config } : {}),
   };
 }

@@ -1,13 +1,13 @@
 // Openai plugin module implements shared behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { findCatalogTemplate } from "openclaw/plugin-sdk/provider-catalog-shared";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { findCatalogTemplate } from "bot/plugin-sdk/provider-catalog-shared";
 import {
   cloneFirstTemplateModel,
   matchesExactOrPrefix,
   type ProviderPlugin,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { buildProviderStreamFamilyHooks } from "openclaw/plugin-sdk/provider-stream-family";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/provider-model-shared";
+import { buildProviderStreamFamilyHooks } from "bot/plugin-sdk/provider-stream-family";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { createOpenAINativeWebSearchWrapper } from "./native-web-search.js";
 import { buildOpenAIReplayPolicy } from "./replay-policy.js";
 import {
@@ -37,7 +37,7 @@ const OPENAI_API_BASE_URL = "https://api.openai.com/v1";
 
 export const OPENAI_DEFAULT_RUNTIME_CONTEXT_TOKENS = 272_000;
 
-export function resolveConfiguredOpenAIBaseUrl(cfg: OpenClawConfig | undefined): string {
+export function resolveConfiguredOpenAIBaseUrl(cfg: BotConfig | undefined): string {
   return normalizeOptionalString(cfg?.models?.providers?.openai?.baseUrl) ?? OPENAI_API_BASE_URL;
 }
 

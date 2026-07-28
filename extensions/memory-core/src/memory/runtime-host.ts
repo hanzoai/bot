@@ -1,5 +1,5 @@
-import { resolveGlobalSingleton } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import type { PluginStateLeaseRunner } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { resolveGlobalSingleton } from "bot/plugin-sdk/memory-core-host-engine-foundation";
+import type { PluginStateLeaseRunner } from "bot/plugin-sdk/plugin-state-runtime";
 import type { MemoryCoreAcquireLocalService } from "./embedding-local-service.js";
 
 export type MemoryCoreRuntimeHost = {
@@ -7,7 +7,7 @@ export type MemoryCoreRuntimeHost = {
   withLease?: PluginStateLeaseRunner;
 };
 
-const MEMORY_LEASE_HOST_IDENTITIES_KEY = Symbol.for("openclaw.memoryLeaseHostIdentities");
+const MEMORY_LEASE_HOST_IDENTITIES_KEY = Symbol.for("bot.memoryLeaseHostIdentities");
 
 // Manager caches survive module reloads, so lease-host identities must survive too.
 // Otherwise a new runtime can reuse a manager whose writes belong to another host.

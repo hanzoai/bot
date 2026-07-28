@@ -3,11 +3,11 @@
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@hanzo/bot-normalization-core/number-coercion";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { getRuntimeConfig } from "../config/io.js";
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import { getAgentRunContext } from "../infra/agent-events.js";
 import {
   normalizeAgentId,
@@ -71,7 +71,7 @@ function setResolvedSessionKeyCache(
 
 // Agent scoping accepts global sessions only when global scope is configured,
 // and rejects malformed agent-prefixed keys before store normalization.
-function sessionKeyMatchesAgent(sessionKey: string, agentId: string, cfg: OpenClawConfig): boolean {
+function sessionKeyMatchesAgent(sessionKey: string, agentId: string, cfg: BotConfig): boolean {
   if (cfg.session?.scope === "global" && sessionKey.trim().toLowerCase() === "global") {
     return true;
   }

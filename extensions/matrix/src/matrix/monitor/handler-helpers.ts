@@ -1,5 +1,5 @@
-import { getSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { getSessionEntry } from "bot/plugin-sdk/session-store-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { CoreConfig } from "../../types.js";
 import {
   formatMatrixMediaTooLargeText,

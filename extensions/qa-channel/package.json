@@ -1,8 +1,8 @@
 {
-  "name": "@openclaw/qa-channel",
+  "name": "@hanzo/bot-qa-channel",
   "version": "2026.7.2",
   "private": true,
-  "description": "OpenClaw QA synthetic channel plugin",
+  "description": "Bot QA synthetic channel plugin",
   "type": "module",
   "exports": {
     ".": "./index.ts",
@@ -15,18 +15,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*",
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -38,7 +38,7 @@
       "detailLabel": "QA Channel",
       "docsPath": "/channels/qa-channel",
       "docsLabel": "qa-channel",
-      "blurb": "Synthetic Slack-class transport for automated OpenClaw QA scenarios.",
+      "blurb": "Synthetic Slack-class transport for automated Bot QA scenarios.",
       "systemImage": "checklist",
       "order": 999,
       "exposure": {
@@ -46,11 +46,34 @@
         "setup": false,
         "docs": false
       },
-      "setup": { "fields": [
-        { "key": "baseUrl", "kind": "string", "cli": { "flags": "--base-url <url>", "description": "QA channel base URL" } },
-        { "key": "botUserId", "kind": "string", "cli": { "flags": "--bot-user-id <id>", "description": "QA channel bot user id" } },
-        { "key": "botDisplayName", "kind": "string", "cli": { "flags": "--bot-display-name <name>", "description": "QA channel bot display name" } }
-      ] }
+      "setup": {
+        "fields": [
+          {
+            "key": "baseUrl",
+            "kind": "string",
+            "cli": {
+              "flags": "--base-url <url>",
+              "description": "QA channel base URL"
+            }
+          },
+          {
+            "key": "botUserId",
+            "kind": "string",
+            "cli": {
+              "flags": "--bot-user-id <id>",
+              "description": "QA channel bot user id"
+            }
+          },
+          {
+            "key": "botDisplayName",
+            "kind": "string",
+            "cli": {
+              "flags": "--bot-display-name <name>",
+              "description": "QA channel bot display name"
+            }
+          }
+        ]
+      }
     }
   }
 }

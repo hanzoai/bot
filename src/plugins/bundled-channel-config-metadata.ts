@@ -13,7 +13,7 @@ import {
 } from "./bundled-plugin-scan.js";
 import type { PluginConfigUiHint } from "./manifest-types.js";
 import type {
-  OpenClawPackageManifest,
+  BotPackageManifest,
   PluginManifest,
   PluginManifestChannelConfig,
 } from "./manifest.js";
@@ -137,9 +137,9 @@ function loadChannelConfigSurfaceModuleSync(modulePath: string): ChannelConfigSu
 }
 
 function resolvePackageChannelMeta(
-  packageManifest: OpenClawPackageManifest | undefined,
+  packageManifest: BotPackageManifest | undefined,
   channelId: string,
-): OpenClawPackageManifest["channel"] | undefined {
+): BotPackageManifest["channel"] | undefined {
   const channelMeta = packageManifest?.channel;
   return channelMeta?.id?.trim() === channelId ? channelMeta : undefined;
 }
@@ -147,7 +147,7 @@ function resolvePackageChannelMeta(
 export function collectBundledChannelConfigs(params: {
   pluginDir: string;
   manifest: PluginManifest;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: BotPackageManifest;
 }): Record<string, PluginManifestChannelConfig> | undefined {
   const channelIds = normalizeBundledPluginStringList(params.manifest.channels);
   const existingChannelConfigs: Record<string, PluginManifestChannelConfig> =

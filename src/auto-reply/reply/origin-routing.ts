@@ -1,5 +1,5 @@
 // Normalizes origin route fields from inbound messages and provider context.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { OriginatingChannelType } from "../templating.js";
 
 /** Resolves the original message provider before reply redirection. */

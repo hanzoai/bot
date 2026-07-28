@@ -10,7 +10,7 @@ import type { AgentExecutionAuthBinding } from "../agents/execution-auth-binding
 import { describeFailoverError } from "../agents/failover-error.js";
 import { splitTrailingAuthProfile } from "../agents/model-ref-profile.js";
 import { applyMergePatch } from "../config/merge-patch.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { enablePluginInConfig } from "../plugins/enable.js";
@@ -43,9 +43,9 @@ export async function cleanupSetupInferenceTempDir(params: {
 }): Promise<void> {
   try {
     const disposeDatabase =
-      params.deps.disposeOpenClawAgentDatabaseByPath ??
-      (await import("../state/openclaw-agent-db.js")).disposeOpenClawAgentDatabaseByPath;
-    disposeDatabase(path.join(params.tempDir, "agent", "openclaw-agent.sqlite"));
+      params.deps.disposeBotAgentDatabaseByPath ??
+      (await import("../state/bot-agent-db.js")).disposeBotAgentDatabaseByPath;
+    disposeDatabase(path.join(params.tempDir, "agent", "bot-agent.sqlite"));
   } catch {
     // Windows cannot remove an open SQLite file. Keep cleanup nonfatal, but
     // always try the directory removal so callers do not retain probe secrets.
@@ -102,7 +102,7 @@ export async function retainUnownedCodexInstall(params: {
     const marked = await markRetained({
       packageDir: params.record.installPath,
       pluginId: "codex",
-      reason: "openclaw-inference-activation-not-committed",
+      reason: "bot-inference-activation-not-committed",
     });
     if (!marked) {
       log.warn("Could not retain the uncommitted Codex runtime package generation.");
@@ -164,11 +164,11 @@ export async function reloadCodexRegistryAfterActivation(params: {
   const runtimeConfig =
     snapshot.exists && snapshot.valid
       ? (snapshot.runtimeConfig ?? snapshot.config)
-      : ({} satisfies OpenClawConfig);
+      : ({} satisfies BotConfig);
   const sourceConfig =
     snapshot.exists && snapshot.valid
       ? (snapshot.sourceConfig ?? snapshot.config)
-      : ({} satisfies OpenClawConfig);
+      : ({} satisfies BotConfig);
   try {
     const refreshPluginRegistry =
       params.deps.refreshPluginRegistryAfterConfigMutation ??
@@ -223,11 +223,11 @@ function mergePatchConflicts(base: unknown, current: unknown, patch: unknown): b
 }
 
 export function applyManualAuthConfig(
-  config: OpenClawConfig,
+  config: BotConfig,
   manualAuth: NonNullable<SetupInferenceTestPlan["manualAuth"]>,
   configKind: "runtime" | "source",
   enablePlugin: typeof enablePluginInConfig = enablePluginInConfig,
-): OpenClawConfig {
+): BotConfig {
   let enabledConfig = config;
   if (manualAuth.pluginId) {
     const enableResult = enablePlugin(config, manualAuth.pluginId);
@@ -245,7 +245,7 @@ export function applyManualAuthConfig(
       "Provider configuration changed during the live inference test, so the verified credential was not saved. Review the current provider settings and retry.",
     );
   }
-  return applyMergePatch(enabledConfig, manualAuth.configPatch) as OpenClawConfig;
+  return applyMergePatch(enabledConfig, manualAuth.configPatch) as BotConfig;
 }
 
 export type ManualAuthPersistenceReceipt = {
@@ -283,7 +283,7 @@ function modelSelectionReferencesProfile(value: unknown, profileIds: ReadonlySet
 }
 
 export function configReferencesManualAuthProfiles(
-  config: OpenClawConfig,
+  config: BotConfig,
   receipt: ManualAuthPersistenceReceipt,
 ): boolean {
   const profileIds = new Set(receipt.profiles.map((profile) => profile.profileId));
@@ -495,7 +495,7 @@ export async function runSetupInferenceTest(params: {
       result = (await runCli({
         sessionId,
         sessionKey: `temp:setup-inference:${runId}`,
-        agentId: plan.routeAgentId ?? plan.agentId ?? "openclaw",
+        agentId: plan.routeAgentId ?? plan.agentId ?? "bot",
         trigger: "manual",
         sessionFile,
         workspaceDir: tempDir,
@@ -507,8 +507,8 @@ export async function runSetupInferenceTest(params: {
         ...(plan.authProfileId ? { authProfileId: plan.authProfileId } : {}),
         timeoutMs,
         runId,
-        messageChannel: "openclaw",
-        messageProvider: "openclaw",
+        messageChannel: "bot",
+        messageProvider: "bot",
         executionMode: "side-question",
         disableTools: true,
         cleanupCliLiveSessionOnRunEnd: true,
@@ -523,7 +523,7 @@ export async function runSetupInferenceTest(params: {
       result = (await runEmbedded({
         sessionId,
         sessionKey: `temp:setup-inference:${runId}`,
-        agentId: plan.routeAgentId ?? plan.agentId ?? "openclaw",
+        agentId: plan.routeAgentId ?? plan.agentId ?? "bot",
         trigger: "manual",
         sessionFile,
         workspaceDir: tempDir,
@@ -556,8 +556,8 @@ export async function runSetupInferenceTest(params: {
           : {}),
         disableTools: true,
         modelRun: true,
-        messageChannel: "openclaw",
-        messageProvider: "openclaw",
+        messageChannel: "bot",
+        messageProvider: "bot",
         onSuccessfulAuthBinding: (binding) => {
           successfulAuth = binding;
         },
@@ -593,7 +593,7 @@ export async function runSetupInferenceTest(params: {
         ok: false,
         status: "unknown",
         error:
-          "Inference succeeded, but its runtime did not report an owner that OpenClaw can safely reuse.",
+          "Inference succeeded, but its runtime did not report an owner that Bot can safely reuse.",
       };
     }
     return {

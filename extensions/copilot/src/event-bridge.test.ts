@@ -1,6 +1,6 @@
 import type { SessionEvent } from "@github/copilot-sdk";
 // Copilot tests cover event bridge plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { attachEventBridge, type SessionLike } from "./event-bridge.js";
 

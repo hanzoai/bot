@@ -339,13 +339,13 @@ describe("attachConfigIssueDiagnostics", () => {
           },
         ),
       ],
-      { raw, parsed, effective: parsed, configPath: "/tmp/openclaw.json" },
+      { raw, parsed, effective: parsed, configPath: "/tmp/bot.json" },
     );
 
     expect(issues[0]?.path).toBe("agents.list.0.tools.profile");
     expect(issues[0]?.message).toBe('Invalid input (allowed: "minimal", "coding")');
     expect(issues[0]?.line).toBe(4);
-    expect(issues[0]?.sourceFile).toBe("openclaw.json");
+    expect(issues[0]?.sourceFile).toBe("bot.json");
   });
 
   it("formats display path when requested", () => {
@@ -363,7 +363,7 @@ describe("attachConfigIssueDiagnostics", () => {
         raw,
         parsed,
         effective: parsed,
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/bot.json",
         formatPathForDisplay: true,
         includeReceivedValueHint: true,
       },
@@ -379,7 +379,7 @@ describe("attachConfigIssueDiagnostics", () => {
       raw: null,
       parsed: {},
       effective: {},
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/bot.json",
     });
 
     expect(issues[0]?.line).toBeUndefined();
@@ -398,7 +398,7 @@ describe("attachConfigIssueDiagnostics", () => {
         raw: ["{", '  "$include": "./models.json"', "}"].join("\n"),
         parsed: { models: { providers: { openai: { api: "bad" } } } },
         effective: { models: { providers: { openai: { api: "bad" } } } },
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/bot.json",
         formatPathForDisplay: true,
         includeReceivedValueHint: true,
       },
@@ -425,7 +425,7 @@ describe("attachConfigIssueDiagnostics", () => {
         ].join("\n"),
         parsed: { plugins: { entries: { "123": { config: { mode: "bad" } } } } },
         effective: { plugins: { entries: { "123": { config: { mode: "bad" } } } } },
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/bot.json",
         formatPathForDisplay: true,
         includeReceivedValueHint: true,
       },
@@ -444,7 +444,7 @@ describe("attachConfigIssueDiagnostics", () => {
         raw: '{ records: { "01": { mode: "bad" }, "1": { mode: "good" } } }',
         parsed: recordConfig,
         effective: recordConfig,
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/bot.json",
         formatPathForDisplay: true,
         includeReceivedValueHint: true,
       },
@@ -463,7 +463,7 @@ describe("attachConfigIssueDiagnostics", () => {
       raw: ['{ "foo.bar": "literal",', '  foo: { bar: "nested" } }'].join("\n"),
       parsed: dottedConfig,
       effective: dottedConfig,
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/bot.json",
       formatPathForDisplay: true,
       includeReceivedValueHint: true,
     };
@@ -488,7 +488,7 @@ describe("attachConfigIssueDiagnostics", () => {
       raw: ['{ "foo.bar": "literal",', "  foo: {} }"].join("\n"),
       parsed: dottedConfig,
       effective: dottedConfig,
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/bot.json",
       formatPathForDisplay: true,
       includeReceivedValueHint: true,
     };
@@ -515,7 +515,7 @@ describe("attachConfigIssueDiagnostics", () => {
         raw: envRaw,
         parsed: { agents: { list: [{ tools: { profile: "${PROFILE}" } }] } },
         effective: { agents: { list: [{ tools: { profile: "none" } }] } },
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/bot.json",
         formatPathForDisplay: true,
         includeReceivedValueHint: true,
       },
@@ -535,7 +535,7 @@ describe("attachConfigIssueDiagnostics", () => {
         raw: '{ plugins: { entries: { custom: { config: { accessCode: "private" } } } } }',
         parsed: pluginConfig,
         effective: pluginConfig,
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/bot.json",
         formatPathForDisplay: true,
         includeReceivedValueHint: true,
       },
@@ -555,7 +555,7 @@ describe("attachConfigIssueDiagnostics", () => {
         raw: '{ plugins: { entries: { "vendor.plugin": { config: { sessionValue: "private" } } } } }',
         parsed: pluginConfig,
         effective: pluginConfig,
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/bot.json",
         formatPathForDisplay: true,
         includeReceivedValueHint: true,
       },

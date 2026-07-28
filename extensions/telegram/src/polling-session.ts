@@ -1,11 +1,11 @@
 // Telegram plugin module implements polling session behavior.
 import { type RunOptions, run } from "@grammyjs/runner";
-import type { ChannelAccountSnapshot } from "openclaw/plugin-sdk/channel-contract";
-import type { TelegramNetworkConfig } from "openclaw/plugin-sdk/config-contracts";
-import { drainPendingDeliveries } from "openclaw/plugin-sdk/delivery-queue-runtime";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { formatDurationPrecise, sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { ChannelAccountSnapshot } from "bot/plugin-sdk/channel-contract";
+import type { TelegramNetworkConfig } from "bot/plugin-sdk/config-contracts";
+import { drainPendingDeliveries } from "bot/plugin-sdk/delivery-queue-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { formatDurationPrecise, sleepWithAbort } from "bot/plugin-sdk/runtime-env";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import { withTelegramApiErrorLogging } from "./api-logging.js";
 import { createTelegramBot } from "./bot.js";
 import type { TelegramTransport } from "./fetch.js";
@@ -35,7 +35,7 @@ import {
 // Surfaced in logs and channel status when getUpdates returns 409; the only
 // user-fixable causes are a second poller on the same token or a stale webhook.
 const TELEGRAM_GET_UPDATES_CONFLICT_HINT =
-  " Another OpenClaw gateway, script, or Telegram poller may be using this bot token; stop the duplicate poller or switch this account to webhook mode.";
+  " Another Bot gateway, script, or Telegram poller may be using this bot token; stop the duplicate poller or switch this account to webhook mode.";
 
 const DEFAULT_POLL_STALL_THRESHOLD_MS = 120_000;
 const MIN_POLL_STALL_THRESHOLD_MS = 30_000;
@@ -186,7 +186,7 @@ export class TelegramPollingSession {
     } finally {
       // Release the transport's dispatchers on session shutdown. Without
       // this, the undici keep-alive sockets survive beyond the session and
-      // leak to api.telegram.org; see openclaw#68128.
+      // leak to api.telegram.org; see bot#68128.
       await this.#transportState.dispose();
       this.#status.notePollingStop();
     }

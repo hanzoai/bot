@@ -14,7 +14,7 @@ afterEach(async () => {
 });
 
 async function writeTranscript(content: string): Promise<string> {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-memory-transcript-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-session-memory-transcript-"));
   tempRoots.push(root);
   const filePath = path.join(root, "session.jsonl");
   await fs.writeFile(filePath, content, "utf-8");

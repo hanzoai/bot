@@ -73,16 +73,16 @@ function buildCliStartup(repoRoot: string) {
   }
 }
 
-async function runRealPicker(options: ProducerOptions, openclawHome: string) {
+async function runRealPicker(options: ProducerOptions, botHome: string) {
   const startedAt = Date.now();
   const deadline = startedAt + options.timeoutMs;
   const child = spawn(
     process.execPath,
     [
       "scripts/e2e/lib/run-with-pty.mjs",
-      path.join(openclawHome, "picker.raw.log"),
+      path.join(botHome, "picker.raw.log"),
       process.execPath,
-      "openclaw.mjs",
+      "bot.mjs",
       "configure",
       "--section",
       "channels",
@@ -93,15 +93,15 @@ async function runRealPicker(options: ProducerOptions, openclawHome: string) {
         ...process.env,
         CI: undefined,
         COLUMNS: "120",
-        HOME: openclawHome,
+        HOME: botHome,
         LANG: "en_US.UTF-8",
         LC_ALL: "en_US.UTF-8",
         LC_MESSAGES: "en_US.UTF-8",
         LINES: "40",
-        OPENCLAW_CONFIG_PATH: undefined,
-        OPENCLAW_HOME: openclawHome,
-        OPENCLAW_LOCALE: "en",
-        OPENCLAW_STATE_DIR: undefined,
+        BOT_CONFIG_PATH: undefined,
+        BOT_HOME: botHome,
+        BOT_LOCALE: "en",
+        BOT_STATE_DIR: undefined,
         TELEGRAM_BOT_TOKEN: undefined,
         TERM: "xterm-256color",
       },
@@ -217,7 +217,7 @@ function assertPickerConfig(config: unknown) {
   }
   return {
     channelEnabled: true,
-    configPath: ".openclaw/openclaw.json",
+    configPath: ".hanzoai/bot.json",
     defaultGroupRequiresMention: true,
     pluginEnabled: true,
     selectedChannel: "telegram",
@@ -247,15 +247,15 @@ async function runCliChannelPickerProducer(options: ProducerOptions) {
   const startedAt = Date.now();
   const writer = createEvidenceWriter(options);
   const workDir = path.join(options.artifactBase, ".work");
-  const openclawHome = path.join(workDir, "openclaw-home");
+  const botHome = path.join(workDir, "bot-home");
 
   try {
     await fs.rm(workDir, { force: true, recursive: true });
-    await fs.mkdir(openclawHome, { recursive: true });
+    await fs.mkdir(botHome, { recursive: true });
     buildCliStartup(options.repoRoot);
-    const result = await runRealPicker(options, openclawHome);
+    const result = await runRealPicker(options, botHome);
     writer.appendLog(sanitizePickerTranscript(result.transcript));
-    const configPath = path.join(openclawHome, ".openclaw", "openclaw.json");
+    const configPath = path.join(botHome, ".bot", "bot.json");
     const assertion = assertPickerConfig(JSON.parse(await fs.readFile(configPath, "utf8")));
     await fs.writeFile(
       path.join(options.artifactBase, "config-assertion.json"),

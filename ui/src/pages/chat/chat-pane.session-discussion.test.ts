@@ -85,17 +85,17 @@ describe("chat pane session discussion auto-show", () => {
     const renderPanel = async () => {
       const config = pane.buildSessionDiscussionPanel(state, SESSION_KEY)!;
       render(
-        html`<openclaw-session-discussion
+        html`<bot-session-discussion
           .sessionKey=${config.sessionKey}
           .canOpen=${config.canOpen}
           .sourceGeneration=${pane.connectionGeneration}
           .loadInfo=${config.loadInfo}
           .openDiscussion=${config.openDiscussion}
           .onStateChange=${config.onStateChange}
-        ></openclaw-session-discussion>`,
+        ></bot-session-discussion>`,
         container,
       );
-      await container.querySelector("openclaw-session-discussion")?.updateComplete;
+      await container.querySelector("bot-session-discussion")?.updateComplete;
     };
 
     await renderPanel();

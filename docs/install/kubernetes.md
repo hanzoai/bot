@@ -1,16 +1,16 @@
 ---
-summary: "Deploy OpenClaw Gateway to a Kubernetes cluster with Kustomize"
+summary: "Deploy Bot Gateway to a Kubernetes cluster with Kustomize"
 read_when:
-  - You want to run OpenClaw on a Kubernetes cluster
-  - You want to test OpenClaw in a Kubernetes environment
+  - You want to run Bot on a Kubernetes cluster
+  - You want to test Bot in a Kubernetes environment
 title: "Kubernetes"
 ---
 
-A minimal starting point for running OpenClaw on Kubernetes, not a production-ready deployment. It covers the core resources and is meant to be adapted to your environment.
+A minimal starting point for running Bot on Kubernetes, not a production-ready deployment. It covers the core resources and is meant to be adapted to your environment.
 
 ## Why not Helm
 
-OpenClaw is a single container with some config files. The interesting customization is in agent content (Markdown files, skills, config overrides), not infrastructure templating. Kustomize handles overlays without the overhead of a Helm chart. Layer a Helm chart on top of these manifests if your deployment grows more complex.
+Bot is a single container with some config files. The interesting customization is in agent content (Markdown files, skills, config overrides), not infrastructure templating. Kustomize handles overlays without the overhead of a Helm chart. Layer a Helm chart on top of these manifests if your deployment grows more complex.
 
 ## What you need
 
@@ -25,14 +25,14 @@ OpenClaw is a single container with some config files. The interesting customiza
 export <PROVIDER>_API_KEY="..."
 ./scripts/k8s/deploy.sh
 
-kubectl port-forward svc/openclaw 18789:18789 -n openclaw
+kubectl port-forward svc/bot 18789:18789 -n bot
 open http://localhost:18789
 ```
 
 `deploy.sh` creates token auth by default. Retrieve the generated gateway token for the Control UI:
 
 ```bash
-kubectl get secret openclaw-secrets -n openclaw -o jsonpath='{.data.OPENCLAW_GATEWAY_TOKEN}' | base64 -d
+kubectl get secret bot-secrets -n bot -o jsonpath='{.data.BOT_GATEWAY_TOKEN}' | base64 -d
 ```
 
 For local debugging, `./scripts/k8s/deploy.sh --show-token` prints the token after deploy.
@@ -75,19 +75,19 @@ Add `--show-token` to either command to print the token to stdout for local test
 ### 2) Access the gateway
 
 ```bash
-kubectl port-forward svc/openclaw 18789:18789 -n openclaw
+kubectl port-forward svc/bot 18789:18789 -n bot
 open http://localhost:18789
 ```
 
 ## What gets deployed
 
 ```text
-Namespace: openclaw (configurable via OPENCLAW_NAMESPACE)
-├── Deployment/openclaw        # Single pod, init container + gateway
-├── Service/openclaw           # ClusterIP on port 18789
+Namespace: bot (configurable via BOT_NAMESPACE)
+├── Deployment/bot        # Single pod, init container + gateway
+├── Service/bot           # ClusterIP on port 18789
 ├── PersistentVolumeClaim      # 10Gi for agent state and config
-├── ConfigMap/openclaw-config  # openclaw.json + AGENTS.md
-└── Secret/openclaw-secrets    # Gateway token + API keys
+├── ConfigMap/bot-config  # bot.json + AGENTS.md
+└── Secret/bot-secrets    # Gateway token + API keys
 ```
 
 ## Customization
@@ -102,7 +102,7 @@ Edit the `AGENTS.md` in `scripts/k8s/manifests/configmap.yaml` and redeploy:
 
 ### Gateway config
 
-Edit `openclaw.json` in `scripts/k8s/manifests/configmap.yaml`. See [Gateway configuration](/gateway/configuration) for the full reference.
+Edit `bot.json` in `scripts/k8s/manifests/configmap.yaml`. See [Gateway configuration](/gateway/configuration) for the full reference.
 
 ### Add providers
 
@@ -120,15 +120,15 @@ Existing provider keys stay in the Secret unless you overwrite them.
 Or patch the Secret directly:
 
 ```bash
-kubectl patch secret openclaw-secrets -n openclaw \
+kubectl patch secret bot-secrets -n bot \
   -p '{"stringData":{"<PROVIDER>_API_KEY":"..."}}'
-kubectl rollout restart deployment/openclaw -n openclaw
+kubectl rollout restart deployment/bot -n bot
 ```
 
 ### Custom namespace
 
 ```bash
-OPENCLAW_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh
+BOT_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh
 ```
 
 ### Custom image
@@ -136,7 +136,7 @@ OPENCLAW_NAMESPACE=my-namespace ./scripts/k8s/deploy.sh
 Edit the `image` field in `scripts/k8s/manifests/deployment.yaml`:
 
 ```yaml
-image: ghcr.io/openclaw/openclaw:slim # primary; official Docker Hub mirror: openclaw/openclaw
+image: ghcr.io/hanzoai/bot:slim # primary; official Docker Hub mirror: hanzoai/bot
 ```
 
 ### Expose beyond port-forward
@@ -182,7 +182,7 @@ scripts/k8s/
 ├── create-kind.sh              # Local Kind cluster (auto-detects docker/podman)
 └── manifests/
     ├── kustomization.yaml      # Kustomize base
-    ├── configmap.yaml          # openclaw.json + AGENTS.md
+    ├── configmap.yaml          # bot.json + AGENTS.md
     ├── deployment.yaml         # Pod spec with security hardening
     ├── pvc.yaml                # 10Gi persistent storage
     └── service.yaml            # ClusterIP on 18789

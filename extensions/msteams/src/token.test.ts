@@ -2,7 +2,7 @@
 import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import { resetPluginStateStoreForTests } from "bot/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MSTeamsConfig } from "../runtime-api.js";
 import { setMSTeamsRuntime } from "./runtime.js";
@@ -41,7 +41,7 @@ const ENV_KEYS = [
   "MSTEAMS_CERTIFICATE_THUMBPRINT",
   "MSTEAMS_USE_MANAGED_IDENTITY",
   "MSTEAMS_MANAGED_IDENTITY_CLIENT_ID",
-  "OPENCLAW_STATE_DIR",
+  "BOT_STATE_DIR",
 ] as const;
 
 let savedEnv: Record<string, string | undefined> = {};
@@ -298,8 +298,8 @@ describe("resolveDelegatedAccessToken", () => {
     resetPluginStateStoreForTests();
     setMSTeamsRuntime(msteamsRuntimeStub);
     saveAndClearEnv();
-    stateDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-msteams-token-"));
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    stateDir = mkdtempSync(path.join(os.tmpdir(), "bot-msteams-token-"));
+    process.env.BOT_STATE_DIR = stateDir;
     oauthTokenMocks.refreshMSTeamsDelegatedTokens.mockReset();
   });
 
@@ -331,7 +331,7 @@ describe("resolveDelegatedAccessToken", () => {
       accessToken: "stale-access",
       refreshToken: "refresh-token",
     });
-    expect(existsSync(path.join(stateDir!, "state", "openclaw.sqlite"))).toBe(true);
+    expect(existsSync(path.join(stateDir!, "state", "bot.sqlite"))).toBe(true);
     expect(existsSync(path.join(stateDir!, "msteams-delegated.json"))).toBe(false);
   });
 

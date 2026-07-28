@@ -1,8 +1,8 @@
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import { listRawChannelPluginCatalogEntries } from "../../../channels/plugins/catalog.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import type { PluginInstallRecord } from "../../../config/types.plugins.js";
-import { compareOpenClawReleaseVersions } from "../../../infra/npm-registry-spec.js";
+import { compareBotReleaseVersions } from "../../../infra/npm-registry-spec.js";
 import type { UpdateChannel } from "../../../infra/update-channels.js";
 import {
   resolveDefaultPluginExtensionsDir,
@@ -50,8 +50,8 @@ const REPAIRABLE_PACKAGE_ENTRY_DIAGNOSTIC_MARKERS = [
   "extension entry unreadable",
   "requires compiled runtime output",
 ] as const;
-const OPENCLAW_BETA_COMPANION_VERSION_RE = /^(\d{4}\.[1-9]\d?\.[1-9]\d?)-beta\.[1-9]\d*$/;
-const OPENCLAW_STABLE_OR_BETA_COMPANION_VERSION_RE =
+const BOT_BETA_COMPANION_VERSION_RE = /^(\d{4}\.[1-9]\d?\.[1-9]\d?)-beta\.[1-9]\d*$/;
+const BOT_STABLE_OR_BETA_COMPANION_VERSION_RE =
   /^(\d{4}\.[1-9]\d?\.[1-9]\d?)(?:-beta\.[1-9]\d*)?$/;
 
 function resolveCandidateClawHubSpec(install: PluginPackageInstall): string | undefined {
@@ -63,7 +63,7 @@ function resolveCandidateClawHubSpec(install: PluginPackageInstall): string | un
 }
 
 export function collectDownloadableInstallCandidates(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   missingPluginIds: ReadonlySet<string>;
   configuredPluginIds?: ReadonlySet<string>;
@@ -243,7 +243,7 @@ function addLegacyNpmDeclarationInstallCandidate(params: {
 }
 
 function collectLegacyNpmDeclarationInstallCandidates(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   configuredPluginIds: ReadonlySet<string>;
   missingPluginIds: ReadonlySet<string>;
@@ -292,7 +292,7 @@ function collectLegacyNpmDeclarationInstallCandidates(params: {
 }
 
 export function collectUpdateDeferredPluginIds(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   configuredPluginIds: ReadonlySet<string>;
   configuredChannelIds: ReadonlySet<string>;
@@ -391,7 +391,7 @@ function installedRuntimePackageVersionIsStale(params: {
   ) {
     return false;
   }
-  const comparison = compareOpenClawReleaseVersions(params.installedVersion, params.currentVersion);
+  const comparison = compareBotReleaseVersions(params.installedVersion, params.currentVersion);
   return comparison === null ? params.installedVersion !== params.currentVersion : comparison < 0;
 }
 
@@ -399,8 +399,8 @@ function betaCompanionMatchesCurrentStableVersion(params: {
   installedVersion: string;
   currentVersion: string;
 }): boolean {
-  const installedBase = OPENCLAW_BETA_COMPANION_VERSION_RE.exec(params.installedVersion)?.[1];
-  const currentBase = OPENCLAW_STABLE_OR_BETA_COMPANION_VERSION_RE.exec(params.currentVersion)?.[1];
+  const installedBase = BOT_BETA_COMPANION_VERSION_RE.exec(params.installedVersion)?.[1];
+  const currentBase = BOT_STABLE_OR_BETA_COMPANION_VERSION_RE.exec(params.currentVersion)?.[1];
   return Boolean(installedBase && currentBase && installedBase === currentBase);
 }
 
@@ -465,7 +465,7 @@ function isConfiguredPluginRepairTarget(params: {
 }
 
 export function collectOfficialReplacementInstallCandidates(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   repairablePluginIds: ReadonlySet<string>;
   configuredPluginIds: ReadonlySet<string>;

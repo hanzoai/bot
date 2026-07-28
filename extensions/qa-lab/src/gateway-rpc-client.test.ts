@@ -11,7 +11,7 @@ const gatewayRpcMock = vi.hoisted(() => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/gateway-runtime", () => ({
+vi.mock("bot/plugin-sdk/gateway-runtime", () => ({
   callGatewayFromCli: gatewayRpcMock.callGatewayFromCli,
 }));
 
@@ -39,12 +39,12 @@ describe("startQaGatewayRpcClient", () => {
   });
 
   it("calls the in-process gateway cli helper without mutating process.env", async () => {
-    const originalHome = process.env.OPENCLAW_HOME;
-    delete process.env.OPENCLAW_HOME;
+    const originalHome = process.env.BOT_HOME;
+    delete process.env.BOT_HOME;
 
     try {
       gatewayRpcMock.callGatewayFromCli.mockImplementationOnce(async () => {
-        expect(process.env.OPENCLAW_HOME).toBeUndefined();
+        expect(process.env.BOT_HOME).toBeUndefined();
         return { ok: true };
       });
 
@@ -79,13 +79,13 @@ describe("startQaGatewayRpcClient", () => {
       );
     } finally {
       if (originalHome === undefined) {
-        delete process.env.OPENCLAW_HOME;
+        delete process.env.BOT_HOME;
       } else {
-        process.env.OPENCLAW_HOME = originalHome;
+        process.env.BOT_HOME = originalHome;
       }
     }
 
-    expect(process.env.OPENCLAW_HOME).toBe(originalHome);
+    expect(process.env.BOT_HOME).toBe(originalHome);
   });
 
   it("wraps request failures with gateway logs", async () => {
@@ -93,11 +93,11 @@ describe("startQaGatewayRpcClient", () => {
     const client = await startQaGatewayRpcClient({
       wsUrl: "ws://127.0.0.1:18789",
       token: "qa-token",
-      logs: () => "OPENCLAW_GATEWAY_TOKEN=secret-token\nAuthorization: Bearer secret+/token=123456",
+      logs: () => "BOT_GATEWAY_TOKEN=secret-token\nAuthorization: Bearer secret+/token=123456",
     });
 
     await expect(client.request("health")).rejects.toThrow(
-      "gateway not connected\nGateway logs:\nOPENCLAW_GATEWAY_TOKEN=<redacted>\nAuthorization: Bearer <redacted>",
+      "gateway not connected\nGateway logs:\nBOT_GATEWAY_TOKEN=<redacted>\nAuthorization: Bearer <redacted>",
     );
   });
 

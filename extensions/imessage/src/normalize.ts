@@ -1,9 +1,9 @@
 // Imessage helper module supports normalize behavior.
-import { normalizeE164 } from "openclaw/plugin-sdk/account-resolution";
+import { normalizeE164 } from "bot/plugin-sdk/account-resolution";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { normalizeBareIMessageChatIdentifier } from "./target-identifiers.js";
 
 const SERVICE_PREFIXES = ["imessage:", "sms:", "auto:"] as const;

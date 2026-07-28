@@ -1,20 +1,20 @@
 // Mattermost plugin module implements client behavior.
-import { buildTimeoutAbortSignal } from "openclaw/plugin-sdk/extension-shared";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
+import { buildTimeoutAbortSignal } from "bot/plugin-sdk/extension-shared";
+import { resolveTimerTimeoutMs } from "bot/plugin-sdk/number-runtime";
 import {
   readProviderJsonResponse,
   readResponseTextLimited,
-} from "openclaw/plugin-sdk/provider-http";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { retryAsync } from "openclaw/plugin-sdk/retry-runtime";
+} from "bot/plugin-sdk/provider-http";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
+import { retryAsync } from "bot/plugin-sdk/retry-runtime";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromPrivateNetworkOptIn,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/ssrf-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { z } from "zod";
 
 const MATTERMOST_ERROR_BODY_LIMIT_BYTES = 8 * 1024;

@@ -1,5 +1,5 @@
 import { clearCurrentProviderAuthState } from "../agents/model-provider-auth.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isSecretRef } from "../config/types.secrets.js";
 import { isRecord } from "../utils.js";
 import type { ChannelKind } from "./config-reload-plan.js";
@@ -32,10 +32,10 @@ function projectCanonicalSecretRefsOntoRuntime(
 }
 
 export function restoreCanonicalSecretRefs(
-  runtimeConfig: OpenClawConfig,
-  sourceConfig: OpenClawConfig,
-): OpenClawConfig {
-  return projectCanonicalSecretRefsOntoRuntime(sourceConfig, runtimeConfig) as OpenClawConfig;
+  runtimeConfig: BotConfig,
+  sourceConfig: BotConfig,
+): BotConfig {
+  return projectCanonicalSecretRefsOntoRuntime(sourceConfig, runtimeConfig) as BotConfig;
 }
 
 export function resetPreparedModelRuntimeStateForHotReload(): void {

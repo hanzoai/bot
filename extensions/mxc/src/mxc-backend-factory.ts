@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { CreateSandboxBackendParams, SandboxBackendHandle } from "openclaw/plugin-sdk/sandbox";
+import type { CreateSandboxBackendParams, SandboxBackendHandle } from "bot/plugin-sdk/sandbox";
 import type { MxcConfig } from "./config.js";
 import { createMxcSandboxBackendHandle } from "./mxc-backend.js";
 
@@ -10,10 +10,10 @@ function sanitizeRuntimeId(value: string): string {
     .replace(/^-+|-+$/g, "")
     .slice(0, 48);
   const hash = createHash("sha256").update(value).digest("hex").slice(0, 8);
-  return `openclaw-mxc-${slug || "sandbox"}-${hash}`;
+  return `bot-mxc-${slug || "sandbox"}-${hash}`;
 }
 
-/** Factory function called by OpenClaw when sandbox.backend=mxc. */
+/** Factory function called by Bot when sandbox.backend=mxc. */
 export function createMxcSandboxBackendFactory(config: MxcConfig) {
   return async function createMxcSandboxBackend(
     params: CreateSandboxBackendParams,

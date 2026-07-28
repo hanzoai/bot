@@ -2,14 +2,14 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fsHandlers } from "./fs.js";
 
 const tempRoots: string[] = [];
 
 async function makeTempRoot(): Promise<string> {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-fs-listdir-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-fs-listdir-"));
   tempRoots.push(root);
   // macOS tmpdir is a /var -> /private/var symlink; the handler returns resolved paths.
   return await fs.realpath(root);

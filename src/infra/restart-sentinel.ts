@@ -1,12 +1,12 @@
 // Persists restart sentinel state that coordinates deferred restarts.
-import { isRecord as isPlainRecord } from "@openclaw/normalization-core/record-coerce";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { isRecord as isPlainRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { sliceUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { formatCliCommand } from "../cli/command-format.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
 import { resolveRuntimeServiceVersion } from "../version.js";
 import { formatErrorMessage } from "./errors.js";
 import {
@@ -30,16 +30,16 @@ export function formatDoctorNonInteractiveHint(
   env: Record<string, string | undefined> = process.env as Record<string, string | undefined>,
 ): string {
   return `Recommended follow-up: run ${formatCliCommand(
-    "openclaw doctor --non-interactive",
+    "bot doctor --non-interactive",
     env,
-  )} in a terminal or approvals-capable OpenClaw surface.`;
+  )} in a terminal or approvals-capable Bot surface.`;
 }
 
 export async function writeRestartSentinel(
   payload: RestartSentinelPayload,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<RestartSentinel> {
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db }) => writeRestartSentinelRowSync(db, payload),
     { env },
     { operationLabel: "restart-sentinel.write" },
@@ -54,7 +54,7 @@ async function rewriteRestartSentinel(
   rewrite: (payload: RestartSentinelPayload) => RestartSentinelPayload | null,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<RestartSentinel | null> {
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db }) => {
       const current = readRestartSentinelRowSync(db);
       if (current.kind !== "valid") {
@@ -113,7 +113,7 @@ export async function markUpdateRestartSentinelFailure(
 }
 
 export async function clearRestartSentinel(env: NodeJS.ProcessEnv = process.env): Promise<boolean> {
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db }) => deleteRestartSentinelRowSync(db),
     { env },
     { operationLabel: "restart-sentinel.clear" },
@@ -124,7 +124,7 @@ export async function clearRestartSentinelIfRevision(
   expectedRevision: number,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<boolean> {
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db }) => deleteRestartSentinelRowSync(db, expectedRevision),
     { env },
     { operationLabel: "restart-sentinel.clear-if-revision" },
@@ -146,7 +146,7 @@ export async function readRestartSentinel(
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<RestartSentinel | null> {
   try {
-    const database = openOpenClawStateDatabase({ env });
+    const database = openBotStateDatabase({ env });
     const current = readRestartSentinelRowSync(database.db);
     if (current.kind === "invalid") {
       sentinelLog.warn("Ignoring invalid typed restart sentinel row");
@@ -161,7 +161,7 @@ export async function readRestartSentinel(
 
 export async function hasRestartSentinel(env: NodeJS.ProcessEnv = process.env): Promise<boolean> {
   try {
-    const database = openOpenClawStateDatabase({ env });
+    const database = openBotStateDatabase({ env });
     const current = readRestartSentinelRowSync(database.db);
     if (current.kind === "invalid") {
       sentinelLog.warn("Ignoring invalid typed restart sentinel row");

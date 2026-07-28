@@ -1,5 +1,5 @@
 // Byteplus tests cover video generation provider plugin behavior.
-import { expectExplicitVideoGenerationCapabilities } from "openclaw/plugin-sdk/provider-test-contracts";
+import { expectExplicitVideoGenerationCapabilities } from "bot/plugin-sdk/provider-test-contracts";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 // Submit/poll transport is mocked locally so each test can inject the BytePlus task JSON
@@ -13,12 +13,12 @@ const { postJsonRequestMock, fetchWithTimeoutMock, resolveApiKeyForProviderMock 
   }),
 );
 
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", () => ({
+vi.mock("bot/plugin-sdk/provider-auth-runtime", () => ({
   resolveApiKeyForProvider: resolveApiKeyForProviderMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-http", async (importActual) => {
-  const actual = await importActual<typeof import("openclaw/plugin-sdk/provider-http")>();
+vi.mock("bot/plugin-sdk/provider-http", async (importActual) => {
+  const actual = await importActual<typeof import("bot/plugin-sdk/provider-http")>();
   return {
     // REAL byte-bounded JSON reader under test — not stubbed.
     readProviderJsonResponse: actual.readProviderJsonResponse,

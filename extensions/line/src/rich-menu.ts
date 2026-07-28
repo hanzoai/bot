@@ -1,10 +1,10 @@
 // Line plugin module implements rich menu behavior.
 import { messagingApi } from "@line/bot-sdk";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { getAgentScopedMediaLocalRoots } from "openclaw/plugin-sdk/media-local-roots";
-import { mimeTypeFromFilePath } from "openclaw/plugin-sdk/media-mime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { loadWebMediaRaw } from "openclaw/plugin-sdk/web-media";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { getAgentScopedMediaLocalRoots } from "bot/plugin-sdk/media-local-roots";
+import { mimeTypeFromFilePath } from "bot/plugin-sdk/media-mime";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
+import { loadWebMediaRaw } from "bot/plugin-sdk/web-media";
 import { resolveLineAccount } from "./accounts.js";
 import { messageAction } from "./actions.js";
 import { resolveLineChannelAccessToken } from "./channel-access-token.js";
@@ -40,7 +40,7 @@ export interface CreateRichMenuParams {
 }
 
 interface RichMenuOpts {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelAccessToken?: string;
   accountId?: string;
   verbose?: boolean;

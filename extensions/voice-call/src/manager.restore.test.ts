@@ -1,9 +1,9 @@
 // Voice Call tests cover manager.restore plugin behavior.
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { OpenKeyedStoreOptions } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { VoiceCallConfigSchema } from "./config.js";
 import { CallManager } from "./manager.js";

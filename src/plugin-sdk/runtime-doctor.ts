@@ -42,10 +42,10 @@ export type {
 } from "../plugin-state/plugin-state-store.js";
 export { createPluginStateSyncKeyedStore } from "../plugin-state/plugin-state-store.js";
 export {
-  detectOpenClawStateDatabaseSchemaMigrations,
-  repairOpenClawStateDatabaseSchema,
-} from "../state/openclaw-state-db.js";
-export type { OpenClawStateDatabaseSchemaMigration } from "../state/openclaw-state-db.js";
+  detectBotStateDatabaseSchemaMigrations,
+  repairBotStateDatabaseSchema,
+} from "../state/bot-state-db.js";
+export type { BotStateDatabaseSchemaMigration } from "../state/bot-state-db.js";
 export { removePluginFromConfig } from "../plugins/uninstall.js";
 export type {
   PluginDoctorStateMigration,

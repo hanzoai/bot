@@ -7,8 +7,8 @@ import { randomUUID } from "node:crypto";
 import {
   isFutureDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { ExecElevatedDefaults } from "./bash-tools.exec-types.js";
 
 const EXEC_APPROVAL_FOLLOWUP_IDEMPOTENCY_PREFIX = "exec-approval-followup:";

@@ -231,7 +231,7 @@ export function renderArray(
                       <span class="settings-row__title">#${index + 1}</span>
                     </div>
                     <div class="settings-row__control">
-                      <openclaw-tooltip .content=${t("configForm.removeItem")}>
+                      <bot-tooltip .content=${t("configForm.removeItem")}>
                         <button
                           type="button"
                           class="btn btn--icon"
@@ -246,7 +246,7 @@ export function renderArray(
                         >
                           ${icons.trash}
                         </button>
-                      </openclaw-tooltip>
+                      </bot-tooltip>
                     </div>
                   </div>
                   ${renderNode({
@@ -377,7 +377,7 @@ function renderMapField(
                       />
                     </div>
                     <div class="settings-row__control">
-                      <openclaw-tooltip .content=${t("configForm.removeEntry")}>
+                      <bot-tooltip .content=${t("configForm.removeEntry")}>
                         <button
                           type="button"
                           class="btn btn--icon"
@@ -392,7 +392,7 @@ function renderMapField(
                         >
                           ${icons.trash}
                         </button>
-                      </openclaw-tooltip>
+                      </bot-tooltip>
                     </div>
                   </div>
                   ${anySchema

@@ -1,10 +1,10 @@
 // Load session runtime model metadata so we can infer context windows when the
 // agent reports a model id. This includes custom models.json entries.
 
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { getRuntimeConfig } from "../config/config.js";
 import { projectConfigOntoRuntimeSourceSnapshot } from "../config/runtime-source-projection.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { computeBackoff, type BackoffPolicy } from "../infra/backoff.js";
 import { resolveAgentDir, resolveDefaultAgentId } from "./agent-scope.js";
 import {
@@ -153,7 +153,7 @@ export function applyConfiguredContextWindows(params: {
   }
 }
 
-function primeConfiguredContextWindowsFromConfig(cfg: OpenClawConfig): OpenClawConfig {
+function primeConfiguredContextWindowsFromConfig(cfg: BotConfig): BotConfig {
   applyConfiguredContextWindows({
     cache: MODEL_CONFIGURED_CONTEXT_TOKEN_CACHE,
     windowCache: MODEL_CONTEXT_WINDOW_CACHE,
@@ -165,7 +165,7 @@ function primeConfiguredContextWindowsFromConfig(cfg: OpenClawConfig): OpenClawC
   return cfg;
 }
 
-function primeConfiguredContextWindows(): OpenClawConfig | undefined {
+function primeConfiguredContextWindows(): BotConfig | undefined {
   if (CONTEXT_WINDOW_RUNTIME_STATE.configuredConfig) {
     return primeConfiguredContextWindowsFromConfig(CONTEXT_WINDOW_RUNTIME_STATE.configuredConfig);
   }
@@ -186,7 +186,7 @@ function primeConfiguredContextWindows(): OpenClawConfig | undefined {
   }
 }
 
-export function ensureContextWindowCacheLoaded(cfgOverride?: OpenClawConfig): Promise<void> {
+export function ensureContextWindowCacheLoaded(cfgOverride?: BotConfig): Promise<void> {
   const generation = CONTEXT_WINDOW_RUNTIME_STATE.generation;
   if (
     CONTEXT_WINDOW_RUNTIME_STATE.loadPromise &&
@@ -286,7 +286,7 @@ export async function waitForContextWindowCacheLoad(options?: {
 }
 
 /** Replace cached model context metadata for the active runtime configuration. */
-export async function refreshContextWindowCache(cfg: OpenClawConfig): Promise<void> {
+export async function refreshContextWindowCache(cfg: BotConfig): Promise<void> {
   beginContextWindowCacheRefresh();
   MODEL_CONFIGURED_CONTEXT_TOKEN_CACHE.clear();
   MODEL_CONTEXT_WINDOW_CACHE.clear();

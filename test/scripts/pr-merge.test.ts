@@ -23,7 +23,7 @@ type MergeScenario = {
 };
 
 function runMerge(scenario: MergeScenario = {}) {
-  const root = tempDirs.make("openclaw-pr-merge-");
+  const root = tempDirs.make("bot-pr-merge-");
   const localDir = join(root, ".local");
   const calls = join(root, "gh-calls.log");
   const autoCalled = join(root, "auto-called");
@@ -37,7 +37,7 @@ function runMerge(scenario: MergeScenario = {}) {
     `#!/usr/bin/env node
 const { appendFileSync, readFileSync } = require("node:fs");
 const args = process.argv.slice(2);
-appendFileSync(process.env.OPENCLAW_TEST_RG_CALLS, JSON.stringify(args) + "\\n");
+appendFileSync(process.env.BOT_TEST_RG_CALLS, JSON.stringify(args) + "\\n");
 const pattern = args.at(-2);
 const file = args.at(-1);
 const flags = args.includes("-i") ? "i" : "";
@@ -84,17 +84,17 @@ process.exit(new RegExp(pattern, flags).test(readFileSync(file, "utf8")) ? 0 : 1
 
   const shell = `
 set -euo pipefail
-source "$OPENCLAW_TEST_MERGE_SCRIPT"
+source "$BOT_TEST_MERGE_SCRIPT"
 enter_worktree() { :; }
 require_artifact() { :; }
 validate_review_artifact_data() {
-  if [ "$OPENCLAW_TEST_REVIEW_ARTIFACTS" != "valid" ]; then
+  if [ "$BOT_TEST_REVIEW_ARTIFACTS" != "valid" ]; then
     echo 'review artifact validation failed' >&2
     return 1
   fi
 }
 require_ready_review_recommendation() {
-  if [ "$OPENCLAW_TEST_REVIEW_RECOMMENDATION" != "ready" ]; then
+  if [ "$BOT_TEST_REVIEW_RECOMMENDATION" != "ready" ]; then
     echo 'review recommendation is not ready' >&2
     return 1
   fi
@@ -103,7 +103,7 @@ verify_prep_branch_matches_prepared_head() { :; }
 mark_pr_operation_side_effects_started() { :; }
 mainline_drift_requires_sync() { return 1; }
 print_relevant_log_excerpt() { cat "$1"; }
-repo_root() { printf '%s\\n' "$OPENCLAW_TEST_ROOT"; }
+repo_root() { printf '%s\\n' "$BOT_TEST_ROOT"; }
 remove_worktree_if_present() { :; }
 delete_local_branch_if_safe() { :; }
 pr_meta_json() {
@@ -111,7 +111,7 @@ pr_meta_json() {
 }
 git() {
   if [ "\${1-}" = "merge-base" ]; then
-    if [ "$OPENCLAW_TEST_MERGE_STATE_STATUS" = "BEHIND" ]; then
+    if [ "$BOT_TEST_MERGE_STATE_STATUS" = "BEHIND" ]; then
       return 1
     fi
     return 0
@@ -119,13 +119,13 @@ git() {
   return 0
 }
 gh() {
-  printf '%s\\n' "$*" >> "$OPENCLAW_TEST_GH_CALLS"
+  printf '%s\\n' "$*" >> "$BOT_TEST_GH_CALLS"
   case "$1 $2" in
     "pr checks")
       case " $* " in
         *" --json "*)
-          printf '%s\\n' "$OPENCLAW_TEST_CHECKS_JSON"
-          return "$OPENCLAW_TEST_CHECKS_EXIT_STATUS"
+          printf '%s\\n' "$BOT_TEST_CHECKS_JSON"
+          return "$BOT_TEST_CHECKS_EXIT_STATUS"
           ;;
       esac
       ;;
@@ -135,57 +135,57 @@ gh() {
           printf '%s\\n' '{"state":"OPEN","isDraft":false}'
           ;;
         *"--json state,headRefOid,mergeable,mergeStateStatus,autoMergeRequest"*)
-          if [ -e "$OPENCLAW_TEST_AUTO_STATE" ] && [ "$(cat "$OPENCLAW_TEST_AUTO_STATE")" = "enabled" ]; then
-            printf '%s\\n' "$OPENCLAW_TEST_POST_AUTO_META"
-          elif [ -e "$OPENCLAW_TEST_AUTO_STATE" ]; then
-            printf '%s\\n' "$OPENCLAW_TEST_DISABLED_AUTO_META"
+          if [ -e "$BOT_TEST_AUTO_STATE" ] && [ "$(cat "$BOT_TEST_AUTO_STATE")" = "enabled" ]; then
+            printf '%s\\n' "$BOT_TEST_POST_AUTO_META"
+          elif [ -e "$BOT_TEST_AUTO_STATE" ]; then
+            printf '%s\\n' "$BOT_TEST_DISABLED_AUTO_META"
           else
-            printf '%s\\n' "$OPENCLAW_TEST_PRE_AUTO_META"
+            printf '%s\\n' "$BOT_TEST_PRE_AUTO_META"
           fi
           ;;
         *"--json state,headRefOid,autoMergeRequest"*)
-          if [ -e "$OPENCLAW_TEST_AUTO_STATE" ] && [ "$(cat "$OPENCLAW_TEST_AUTO_STATE")" = "disabled" ]; then
-            printf '%s\\n' "$OPENCLAW_TEST_DISABLED_AUTO_META"
+          if [ -e "$BOT_TEST_AUTO_STATE" ] && [ "$(cat "$BOT_TEST_AUTO_STATE")" = "disabled" ]; then
+            printf '%s\\n' "$BOT_TEST_DISABLED_AUTO_META"
           else
-            printf '%s\\n' "$OPENCLAW_TEST_POST_AUTO_META"
+            printf '%s\\n' "$BOT_TEST_POST_AUTO_META"
           fi
           ;;
         *"--json state --jq .state"*) printf 'MERGED\\n' ;;
-        *"--json mergeCommit"*) printf '%s\\n' "$OPENCLAW_TEST_LANDED_SHA" ;;
+        *"--json mergeCommit"*) printf '%s\\n' "$BOT_TEST_LANDED_SHA" ;;
         *"--json commits"*) printf '1\\n' ;;
         *"--json headRefName,headRepository"*)
-          printf '%s\\n' '{"headRefName":"feature","headRepository":{"name":"openclaw"},"headRepositoryOwner":{"login":"openclaw"},"isCrossRepository":false,"maintainerCanModify":true}'
+          printf '%s\\n' '{"headRefName":"feature","headRepository":{"name":"bot"},"headRepositoryOwner":{"login":"bot"},"isCrossRepository":false,"maintainerCanModify":true}'
           ;;
-        *"--json url"*) printf 'https://github.com/openclaw/openclaw/pull/123\\n' ;;
+        *"--json url"*) printf 'https://github.com/hanzoai/bot/pull/123\\n' ;;
         *) printf '%s\\n' '{"state":"OPEN"}' ;;
       esac
       ;;
     "pr merge")
       case " $* " in
         *" --disable-auto "*)
-          printf 'disabled\\n' > "$OPENCLAW_TEST_AUTO_STATE"
+          printf 'disabled\\n' > "$BOT_TEST_AUTO_STATE"
           ;;
         *" --auto "*)
-          : > "$OPENCLAW_TEST_AUTO_CALLED"
-          printf 'enabled\\n' > "$OPENCLAW_TEST_AUTO_STATE"
-          if [ "$OPENCLAW_TEST_AUTO_RESULT" = "unavailable" ]; then
-            echo "$OPENCLAW_TEST_AUTO_ERROR" >&2
+          : > "$BOT_TEST_AUTO_CALLED"
+          printf 'enabled\\n' > "$BOT_TEST_AUTO_STATE"
+          if [ "$BOT_TEST_AUTO_RESULT" = "unavailable" ]; then
+            echo "$BOT_TEST_AUTO_ERROR" >&2
             return 1
           fi
-          if [ "$OPENCLAW_TEST_AUTO_RESULT" = "inconclusive" ]; then
+          if [ "$BOT_TEST_AUTO_RESULT" = "inconclusive" ]; then
             echo 'transport closed after mutation' >&2
             return 1
           fi
           ;;
       esac
       ;;
-    "repo view") printf 'openclaw/openclaw\\n' ;;
-    "pr comment") printf 'https://github.com/openclaw/openclaw/pull/123#issuecomment-1\\n' ;;
+    "repo view") printf 'hanzoai/bot\\n' ;;
+    "pr comment") printf 'https://github.com/hanzoai/bot/pull/123#issuecomment-1\\n' ;;
     "api "*) : ;;
     *) echo "unexpected gh invocation: $*" >&2; return 2 ;;
   esac
 }
-merge_run 123 "$OPENCLAW_TEST_AUTO_REQUESTED"
+merge_run 123 "$BOT_TEST_AUTO_REQUESTED"
 `;
 
   const result = spawnSync("bash", ["-c", shell], {
@@ -193,25 +193,25 @@ merge_run 123 "$OPENCLAW_TEST_AUTO_REQUESTED"
     encoding: "utf8",
     env: {
       ...process.env,
-      OPENCLAW_TEST_AUTO_CALLED: autoCalled,
-      OPENCLAW_TEST_AUTO_ERROR:
+      BOT_TEST_AUTO_CALLED: autoCalled,
+      BOT_TEST_AUTO_ERROR:
         scenario.autoError ?? "GraphQL: Pull request auto merge is not allowed for this repository",
-      OPENCLAW_TEST_AUTO_REQUESTED: scenario.auto ? "true" : "false",
-      OPENCLAW_TEST_AUTO_RESULT: scenario.autoResult ?? "enabled",
-      OPENCLAW_TEST_AUTO_STATE: autoState,
-      OPENCLAW_TEST_CHECKS_EXIT_STATUS: scenario.checks === "pending" ? "8" : "0",
-      OPENCLAW_TEST_CHECKS_JSON: JSON.stringify(checks),
-      OPENCLAW_TEST_DISABLED_AUTO_META: disabledAutoMeta,
-      OPENCLAW_TEST_GH_CALLS: calls,
-      OPENCLAW_TEST_LANDED_SHA: landedSha,
-      OPENCLAW_TEST_MERGE_SCRIPT: mergeScript,
-      OPENCLAW_TEST_MERGE_STATE_STATUS: scenario.mergeStateStatus ?? "BEHIND",
-      OPENCLAW_TEST_POST_AUTO_META: postAutoMeta,
-      OPENCLAW_TEST_PRE_AUTO_META: preAutoMeta,
-      OPENCLAW_TEST_REVIEW_ARTIFACTS: scenario.reviewArtifacts ?? "valid",
-      OPENCLAW_TEST_REVIEW_RECOMMENDATION: scenario.recommendation ?? "ready",
-      OPENCLAW_TEST_RG_CALLS: rgCalls,
-      OPENCLAW_TEST_ROOT: root,
+      BOT_TEST_AUTO_REQUESTED: scenario.auto ? "true" : "false",
+      BOT_TEST_AUTO_RESULT: scenario.autoResult ?? "enabled",
+      BOT_TEST_AUTO_STATE: autoState,
+      BOT_TEST_CHECKS_EXIT_STATUS: scenario.checks === "pending" ? "8" : "0",
+      BOT_TEST_CHECKS_JSON: JSON.stringify(checks),
+      BOT_TEST_DISABLED_AUTO_META: disabledAutoMeta,
+      BOT_TEST_GH_CALLS: calls,
+      BOT_TEST_LANDED_SHA: landedSha,
+      BOT_TEST_MERGE_SCRIPT: mergeScript,
+      BOT_TEST_MERGE_STATE_STATUS: scenario.mergeStateStatus ?? "BEHIND",
+      BOT_TEST_POST_AUTO_META: postAutoMeta,
+      BOT_TEST_PRE_AUTO_META: preAutoMeta,
+      BOT_TEST_REVIEW_ARTIFACTS: scenario.reviewArtifacts ?? "valid",
+      BOT_TEST_REVIEW_RECOMMENDATION: scenario.recommendation ?? "ready",
+      BOT_TEST_RG_CALLS: rgCalls,
+      BOT_TEST_ROOT: root,
       PATH: `${bin}${delimiter}${process.env.PATH ?? ""}`,
     },
   });

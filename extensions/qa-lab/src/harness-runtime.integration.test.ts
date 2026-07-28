@@ -1,5 +1,5 @@
 // Qa Lab integration tests cover the real QA Channel runtime contract.
-import { qaChannelPlugin, setQaChannelRuntime } from "@openclaw/qa-channel/api.js";
+import { qaChannelPlugin, setQaChannelRuntime } from "@hanzo/bot-qa-channel/api.js";
 import { describe, expect, it, vi } from "vitest";
 import { startQaBusServer } from "./bus-server.js";
 import { createQaBusState } from "./bus-state.js";

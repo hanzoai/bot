@@ -1,5 +1,5 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { hasOutboundReplyContent } from "openclaw/plugin-sdk/reply-payload";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { hasOutboundReplyContent } from "bot/plugin-sdk/reply-payload";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { appendCronStyleCurrentTimeLine } from "../agents/current-time.js";
 import { resolveEmbeddedSessionLane } from "../agents/embedded-agent-runner/lanes.js";
@@ -30,7 +30,7 @@ import {
   loadExactSessionEntry,
   type SessionEntryLifecycleRemoval,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   hasActiveCronJobs,
   hasActiveCronJobsExceptMarker,
@@ -130,7 +130,7 @@ function hasActiveRunForSession(
 }
 
 export type HeartbeatRunOptions = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentId?: string;
   sessionKey?: string;
   heartbeat?: HeartbeatConfig;

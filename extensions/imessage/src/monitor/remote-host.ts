@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
 import { expandIMessageUserPath } from "../cli-path.js";
 
 export async function detectRemoteHostFromCliPath(cliPath: string): Promise<string | undefined> {

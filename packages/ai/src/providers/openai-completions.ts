@@ -419,7 +419,7 @@ export const streamOpenAICompletions: StreamFunction<
         stage: "completions",
         abort: firstEventAbort.abort,
         onTimeout: getFirstStreamEventTimeoutHandler(options),
-        hint: "The provider may be stalled while parsing the tool payload; retry with a smaller tool surface or enable OPENCLAW_DEBUG_MODEL_PAYLOAD=tools to inspect exposed tools.",
+        hint: "The provider may be stalled while parsing the tool payload; retry with a smaller tool surface or enable BOT_DEBUG_MODEL_PAYLOAD=tools to inspect exposed tools.",
       });
 
       for await (const chunk of guardedOpenaiStream) {

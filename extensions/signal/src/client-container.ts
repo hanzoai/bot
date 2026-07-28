@@ -7,18 +7,18 @@
  */
 
 import nodePath from "node:path";
-import { toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { resolveFetch } from "openclaw/plugin-sdk/fetch-runtime";
-import { detectMime, parseMediaContentLength } from "openclaw/plugin-sdk/media-runtime";
+import { toErrorObject } from "bot/plugin-sdk/error-runtime";
+import { resolveFetch } from "bot/plugin-sdk/fetch-runtime";
+import { detectMime, parseMediaContentLength } from "bot/plugin-sdk/media-runtime";
 import {
   parseStrictNonNegativeInteger,
   resolveTimerTimeoutMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/number-runtime";
 import {
   readResponseTextPrefix,
   readResponseWithLimit,
-} from "openclaw/plugin-sdk/response-limit-runtime";
-import { readRegularFile } from "openclaw/plugin-sdk/security-runtime";
+} from "bot/plugin-sdk/response-limit-runtime";
+import { readRegularFile } from "bot/plugin-sdk/security-runtime";
 import WebSocket from "ws";
 
 type ContainerRpcOptions = {

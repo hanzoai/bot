@@ -1,9 +1,9 @@
 // Memory Core plugin module implements tools behavior.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import type {
   MemoryReadResult,
   MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
 import {
   asToolParamsRecord,
   jsonResult,
@@ -13,18 +13,18 @@ import {
   resolveMemoryDreamingPluginConfig,
   resolveMemorySearchConfig,
   type MemoryCorpusSearchResult,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-core";
+  type BotConfig,
+} from "bot/plugin-sdk/memory-core-host-runtime-core";
 import type {
   MemorySearchResult,
   MemorySearchRuntimeDebug,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-files";
+} from "bot/plugin-sdk/memory-core-host-runtime-files";
 import {
   resolveMemoryDreamingConfig,
   resolveMemoryDeepDreamingConfig,
-} from "openclaw/plugin-sdk/memory-core-host-status";
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginStateLeaseRunner } from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/memory-core-host-status";
+import type { BotPluginToolContext } from "bot/plugin-sdk/plugin-entry";
+import type { PluginStateLeaseRunner } from "bot/plugin-sdk/plugin-state-runtime";
 import { asRecord } from "./dreaming-shared.js";
 import type { MemoryCoreAcquireLocalService } from "./memory/embedding-local-service.js";
 import {
@@ -173,7 +173,7 @@ async function closeMemoryManagers(
 const PAUSED_MEMORY_INDEX_WARNING =
   "Tell the user: memory search is paused because the memory index was built with a different embedding provider/model/settings.";
 const PAUSED_MEMORY_INDEX_ACTION =
-  "Tell the user to run: openclaw memory status --index or openclaw memory index --force.";
+  "Tell the user to run: bot memory status --index or bot memory index --force.";
 
 function resolvePausedMemoryIndexIdentityReason(status: { custom?: unknown }): string | undefined {
   const indexIdentity = asRecord(asRecord(status.custom)?.indexIdentity);
@@ -321,7 +321,7 @@ function isActiveMemorySessionKey(sessionKey?: string): boolean {
 }
 
 function resolveActiveMemoryQmdSearchModeOverride(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   sessionKey?: string,
 ): "search" | "vsearch" | "query" | undefined {
   if (!isActiveMemorySessionKey(sessionKey)) {
@@ -449,13 +449,13 @@ async function executeMemoryReadResult(params: {
 }
 
 export function createMemorySearchTool(options: {
-  config?: OpenClawConfig;
-  getConfig?: () => OpenClawConfig | undefined;
+  config?: BotConfig;
+  getConfig?: () => BotConfig | undefined;
   agentId?: string;
   agentSessionKey?: string;
   sandboxed?: boolean;
   oneShotCliRun?: boolean;
-  conversationRecall?: OpenClawPluginToolContext["conversationRecall"];
+  conversationRecall?: BotPluginToolContext["conversationRecall"];
   acquireLocalService?: MemoryCoreAcquireLocalService;
   withLease?: PluginStateLeaseRunner;
 }) {
@@ -859,8 +859,8 @@ export function createMemorySearchTool(options: {
 }
 
 export function createMemoryGetTool(options: {
-  config?: OpenClawConfig;
-  getConfig?: () => OpenClawConfig | undefined;
+  config?: BotConfig;
+  getConfig?: () => BotConfig | undefined;
   agentId?: string;
   agentSessionKey?: string;
   sandboxed?: boolean;

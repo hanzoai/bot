@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -12,7 +12,7 @@ import {
   type SessionEntry,
 } from "../config/sessions.js";
 import { listSessionEntries } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isIncognitoSessionKey } from "../routing/session-key.js";
 import { verifyBoardViewTicket } from "./board-view-ticket.js";
 import { gatewayClientSessionCreator } from "./server-methods/gateway-client-identity.js";
@@ -83,7 +83,7 @@ export function isGatewayAdmin(client: Pick<GatewayClient, "connect"> | null): b
   return client?.connect?.scopes?.includes(ADMIN_SCOPE) === true;
 }
 
-export function allowedSessionVisibilities(cfg: OpenClawConfig): SessionVisibility[] {
+export function allowedSessionVisibilities(cfg: BotConfig): SessionVisibility[] {
   const policy = cfg.session?.sharing;
   return [
     "shared",
@@ -94,14 +94,14 @@ export function allowedSessionVisibilities(cfg: OpenClawConfig): SessionVisibili
 }
 
 export function isSessionVisibilityAllowed(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   visibility: SessionVisibility,
 ): boolean {
   return allowedSessionVisibilities(cfg).includes(visibility);
 }
 
 export function resolveSessionSharingTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   agentId?: string;
   projection?: "full" | "list";
@@ -208,7 +208,7 @@ export function authorizeIncognitoSessionTarget(params: {
 }
 
 export function canAccessIncognitoSession(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   client: GatewayClient | null;
   sessionKey: string;
   agentId?: string;
@@ -226,7 +226,7 @@ export function canAccessIncognitoSession(params: {
 }
 
 export function authorizeResolvedSessionMutation(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   client: GatewayClient | null;
   sessionKey: string;
   agentId?: string;
@@ -359,7 +359,7 @@ const REQUIRED_SESSION_TARGET_METHODS = new Set([
 ]);
 
 function resolveSessionGroupMutationTargets(params: {
-  getCfg: () => OpenClawConfig;
+  getCfg: () => BotConfig;
   requestParams: unknown;
 }): SessionMutationTarget[] | undefined {
   const groupName = readStringParam(params.requestParams, "name");
@@ -410,7 +410,7 @@ function resolveSessionMutationTargets(params: {
   method: string;
   requestParams: unknown;
   context: GatewayRequestContext;
-  getCfg: () => OpenClawConfig;
+  getCfg: () => BotConfig;
 }): SessionMutationTarget[] | undefined {
   if (params.method === "sessions.groups.rename" || params.method === "sessions.groups.delete") {
     return resolveSessionGroupMutationTargets({
@@ -480,8 +480,8 @@ export function resolveSessionMutationAuthorization(params: {
   // getter reloads/resolves gateway config, so non-session requests (the vast majority) must not
   // pay it. Group discovery and the authorization loop then share one snapshot, so a mid-request
   // config change cannot split target discovery from authorization.
-  let cachedCfg: OpenClawConfig | undefined;
-  const getCfg = (): OpenClawConfig => (cachedCfg ??= params.context.getRuntimeConfig());
+  let cachedCfg: BotConfig | undefined;
+  const getCfg = (): BotConfig => (cachedCfg ??= params.context.getRuntimeConfig());
   // Each cache pair defines one synchronous freshness epoch: initial authorization shares one,
   // while commit-time guards start fresh after handler work.
   const createLookupCaches = (): {
@@ -555,7 +555,7 @@ export function resolveSessionMutationAuthorization(params: {
       const assertTargetCurrent = (
         targetRef: SessionMutationTarget,
         expected: AuthorizedSessionMutationTarget | undefined,
-        currentCfg: OpenClawConfig,
+        currentCfg: BotConfig,
         currentLookupCaches?: ReturnType<typeof createLookupCaches>,
       ) => {
         const current = resolveSessionSharingTarget({
@@ -618,7 +618,7 @@ export function resolveSessionMutationAuthorization(params: {
 }
 
 function loadSharingSnapshot(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   sessionKey: string,
   agentId?: string,
 ): SessionSharingSnapshot {
@@ -645,7 +645,7 @@ function loadSharingSnapshot(
 }
 
 export function canReceiveSessionEvent(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   client: GatewayWsClient;
   sessionKeys: readonly string[];
   agentId?: string;

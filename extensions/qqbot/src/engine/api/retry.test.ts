@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   sleep: vi.fn(async () => {}),
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-env", () => ({ sleep: mocks.sleep }));
+vi.mock("bot/plugin-sdk/runtime-env", () => ({ sleep: mocks.sleep }));
 
 function createLogger(): EngineLogger {
   return {

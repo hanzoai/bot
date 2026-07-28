@@ -16,7 +16,7 @@ import { validateJsonSchemaValue } from "../plugins/schema-validator.js";
 import { hasKind } from "../plugins/slots.js";
 import { isRecord, resolveUserPath } from "../utils.js";
 import { shouldSuppressMissingCodexPluginDiagnostics } from "./codex-plugin-diagnostics.js";
-import type { ConfigValidationIssue, OpenClawConfig } from "./types.js";
+import type { ConfigValidationIssue, BotConfig } from "./types.js";
 
 const LEGACY_REMOVED_PLUGIN_IDS = new Set([
   "google-antigravity-auth",
@@ -105,7 +105,7 @@ export function resolveExplicitPluginReferencePath(
 
 function formatRemovedPluginConfigWarning(pluginId: string): string {
   if (pluginId === "skill-workshop") {
-    return "plugin removed: skill-workshop (stale plugin config ignored; Skill Workshop is built into OpenClaw skills now. Use skills.workshop settings and openclaw skills workshop commands, then remove this plugins config entry)";
+    return "plugin removed: skill-workshop (stale plugin config ignored; Skill Workshop is built into Bot skills now. Use skills.workshop settings and bot skills workshop commands, then remove this plugins config entry)";
   }
   return `plugin removed: ${pluginId} (stale config entry ignored; remove it from plugins config)`;
 }
@@ -127,15 +127,15 @@ function formatMissingOfficialExternalPluginWarning(
     return null;
   }
   if (pluginId === "memory-lancedb" && opts?.selectedMissingMemorySlot) {
-    return `plugin not installed: ${pluginId} — gateway will run without persistent memory until installed; install the official external plugin with: openclaw plugins install ${installSpec}`;
+    return `plugin not installed: ${pluginId} — gateway will run without persistent memory until installed; install the official external plugin with: bot plugins install ${installSpec}`;
   }
-  return `plugin not installed: ${pluginId} — install the official external plugin with: openclaw plugins install ${installSpec}`;
+  return `plugin not installed: ${pluginId} — install the official external plugin with: bot plugins install ${installSpec}`;
 }
 
 export function validateExplicitPluginConfig(params: {
   raw: unknown;
-  config: OpenClawConfig;
-  effectiveConfig: OpenClawConfig;
+  config: BotConfig;
+  effectiveConfig: BotConfig;
   env?: NodeJS.ProcessEnv;
   applyDefaults: boolean;
   registry: PluginManifestRegistry;
@@ -265,7 +265,7 @@ export function validateExplicitPluginConfig(params: {
       shouldSuppressMissingCodexPluginDiagnostics(
         config,
         env ?? process.env,
-        isRecord(raw) ? (raw as OpenClawConfig) : undefined,
+        isRecord(raw) ? (raw as BotConfig) : undefined,
       )
     ) {
       return;
@@ -408,7 +408,7 @@ export function validateExplicitPluginConfig(params: {
           params.replacePluginEntryConfig(pluginId, result.value as Record<string, unknown>);
         }
       } else if (record.format === "bundle") {
-        // Compatible bundles currently expose no native OpenClaw config schema.
+        // Compatible bundles currently expose no native Bot config schema.
         // Treat them as schema-less capability packs rather than failing validation.
       } else {
         issues.push({

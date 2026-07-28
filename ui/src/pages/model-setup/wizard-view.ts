@@ -25,7 +25,7 @@ export function renderModelSetupWizard(props: WizardViewProps): TemplateResult |
     props.state.phase === "step" ||
     props.state.phase === "done";
   return html`
-    <openclaw-modal-dialog
+    <bot-modal-dialog
       label=${t(
         props.mode === "prepare"
           ? "modelSetup.wizard.prepareDialogLabel"
@@ -83,6 +83,6 @@ export function renderModelSetupWizard(props: WizardViewProps): TemplateResult |
           </button>
         </div>
       </div>
-    </openclaw-modal-dialog>
+    </bot-modal-dialog>
   `;
 }

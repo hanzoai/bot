@@ -63,7 +63,7 @@ function applyThemePresentation(settings: ReturnType<typeof loadSettings>): void
   const resolvedTheme = resolveTheme(settings.theme, settings.themeMode);
   root.dataset.theme = resolvedTheme;
   root.dataset.themeMode = resolvedTheme.endsWith("light") ? "light" : "dark";
-  // Carapace CSS (openclaw/carapace) selects on [data-theme-resolved]; keep it
+  // Carapace CSS (bot/carapace) selects on [data-theme-resolved]; keep it
   // in lockstep with data-theme-mode so its stylesheets work unmodified here.
   root.dataset.themeResolved = root.dataset.themeMode;
   root.classList.toggle("wa-light", root.dataset.themeMode === "light");
@@ -262,7 +262,7 @@ export function bootstrapApplication(
     dependencies.sessionPathBuilderReady ??
     (documentMode
       ? Promise.resolve()
-      : import("@openclaw/session-url-contract").then((contract) => {
+      : import("@hanzo/bot-session-url-contract").then((contract) => {
           setSessionPathBuilder(contract.buildControlUiSessionPath);
         }));
 
@@ -433,14 +433,14 @@ export function bootstrapApplication(
       void router
         .navigate(routeId, context, { history: "push" }, routeLocation(routeId, options))
         .catch((error: unknown) => {
-          console.error("[openclaw] route navigation failed", error);
+          console.error("[bot] route navigation failed", error);
         });
     },
     replace: (routeId, options) => {
       void router
         .navigate(routeId, context, { history: "replace" }, routeLocation(routeId, options))
         .catch((error: unknown) => {
-          console.error("[openclaw] route replacement failed", error);
+          console.error("[bot] route replacement failed", error);
         });
     },
     revalidate: (routeId) => router.revalidate(context, routeId),
@@ -508,7 +508,7 @@ export function bootstrapApplication(
                 isDefaultChatLanding(history.location(), basePath, routeIdFromPath),
             }),
             (error) => {
-              console.error("[openclaw] initial session location failed", error);
+              console.error("[bot] initial session location failed", error);
             },
           );
         });

@@ -1,8 +1,8 @@
 // Telegram message/session/prompt pipeline shared by bot handler registrars.
 import type { Message } from "grammy/types";
-import { resolveChannelContextVisibilityMode } from "openclaw/plugin-sdk/context-visibility-runtime";
-import { kindFromMime } from "openclaw/plugin-sdk/media-runtime";
-import { evaluateSupplementalContextVisibility } from "openclaw/plugin-sdk/security-runtime";
+import { resolveChannelContextVisibilityMode } from "bot/plugin-sdk/context-visibility-runtime";
+import { kindFromMime } from "bot/plugin-sdk/media-runtime";
+import { evaluateSupplementalContextVisibility } from "bot/plugin-sdk/security-runtime";
 import { expandTelegramAllowFromWithAccessGroups } from "./access-groups.js";
 import { resolveTelegramAccount, resolveTelegramMediaRuntimeOptions } from "./accounts.js";
 import { firstDefined, isSenderAllowed, normalizeAllowFrom } from "./bot-access.js";

@@ -1,4 +1,4 @@
-import { MediaFetchError } from "openclaw/plugin-sdk/media-runtime";
+import { MediaFetchError } from "bot/plugin-sdk/media-runtime";
 import { describe, expect, it } from "vitest";
 import {
   isDurablyRetryableInboundMediaError,

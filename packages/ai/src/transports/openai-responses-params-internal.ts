@@ -1,5 +1,5 @@
-import type { Context, Model } from "@openclaw/llm-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import type { Context, Model } from "@hanzo/bot-llm-core";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type {
   FunctionTool,
   ResponseFormatTextConfig,

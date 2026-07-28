@@ -1,5 +1,5 @@
 // Model-backed compaction request construction.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveAgentWorkspaceDir } from "../../agents/agent-scope.js";
 import { compactEmbeddedAgentSession } from "../../agents/embedded-agent.js";
 import { resolvePersistedSessionRuntimeId } from "../../agents/session-runtime-compat.js";
@@ -17,12 +17,12 @@ import {
   scanSessionTranscriptTree,
   selectSessionTranscriptTreePathNodes,
 } from "../../config/sessions/transcript-tree.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { resolveSessionModelRef } from "../session-utils.js";
 
 type GatewaySessionCompactionParams = {
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: SessionEntry;
   sessionId: string;
   sessionKey: string;
@@ -30,13 +30,13 @@ type GatewaySessionCompactionParams = {
   storePath: string;
 };
 
-function usesLegacyOpenClawCompaction(params: GatewaySessionCompactionParams): boolean {
+function usesLegacyBotCompaction(params: GatewaySessionCompactionParams): boolean {
   const persistedRuntime = params.entry.modelSelectionLocked
     ? resolvePersistedSessionRuntimeId(params.entry)
     : params.entry.agentHarnessId;
   const contextEngine = params.cfg.plugins?.slots?.contextEngine?.trim();
   return (
-    (!persistedRuntime || persistedRuntime === "openclaw") &&
+    (!persistedRuntime || persistedRuntime === "bot") &&
     (!contextEngine || contextEngine === "legacy")
   );
 }
@@ -54,7 +54,7 @@ async function resolveGatewayCompactionTranscriptTarget(params: GatewaySessionCo
 export async function preflightGatewaySessionCompaction(
   params: GatewaySessionCompactionParams,
 ): Promise<{ reason: "Already compacted" | "Nothing to compact (session too small)" } | undefined> {
-  if (!usesLegacyOpenClawCompaction(params)) {
+  if (!usesLegacyBotCompaction(params)) {
     return undefined;
   }
   try {

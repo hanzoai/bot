@@ -1,11 +1,11 @@
 {
-  "name": "@openclaw/qqbot",
+  "name": "@hanzo/bot-qqbot",
   "version": "2026.7.2",
   "private": false,
-  "description": "OpenClaw QQ Bot channel plugin for group and direct-message workflows.",
+  "description": "Bot QQ Bot channel plugin for group and direct-message workflows.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "dependencies": {
@@ -18,19 +18,19 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
+    "@hanzo/bot-plugin-sdk": "workspace:*",
     "@types/ws": "8.18.1",
-    "openclaw": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -55,14 +55,39 @@
       "docsLabel": "qqbot",
       "blurb": "connect to QQ via official QQ Bot API with group chat and direct message support.",
       "systemImage": "bubble.left.and.bubble.right",
-      "setup": { "fields": [
-        { "key": "token", "kind": "string", "sensitive": true, "cli": { "flags": "--token <appId:secret>", "description": "QQBot app id and client secret" } },
-        { "key": "tokenFile", "kind": "string", "sensitive": true, "cli": { "flags": "--token-file <path>", "description": "QQBot client secret file" } },
-        { "key": "useEnv", "kind": "boolean", "cli": { "flags": "--use-env", "description": "Use QQBOT environment credentials" } }
-      ] }
+      "setup": {
+        "fields": [
+          {
+            "key": "token",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--token <appId:secret>",
+              "description": "QQBot app id and client secret"
+            }
+          },
+          {
+            "key": "tokenFile",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--token-file <path>",
+              "description": "QQBot client secret file"
+            }
+          },
+          {
+            "key": "useEnv",
+            "kind": "boolean",
+            "cli": {
+              "flags": "--use-env",
+              "description": "Use QQBOT environment credentials"
+            }
+          }
+        ]
+      }
     },
     "install": {
-      "npmSpec": "@openclaw/qqbot",
+      "npmSpec": "@hanzo/bot-qqbot",
       "localPath": "extensions/qqbot",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.10"
@@ -71,7 +96,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2"
+      "botVersion": "2026.7.2"
     },
     "release": {
       "publishToClawHub": true,

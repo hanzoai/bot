@@ -1,6 +1,6 @@
 // Matrix plugin module implements tool actions behavior.
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { AgentToolResult } from "bot/plugin-sdk/agent-core";
+import { normalizeOptionalLowercaseString } from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveMatrixAccountConfig } from "./matrix/accounts.js";
 import {
   bootstrapMatrixVerification,

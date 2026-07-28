@@ -2,7 +2,7 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { parseDiscordTarget } from "./target-parsing.js";
 
 function normalizeDiscordTarget(

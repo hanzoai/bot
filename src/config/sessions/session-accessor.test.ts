@@ -1,12 +1,12 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { withTestTimeout } from "../../../test/helpers/promise.js";
 import type { MsgContext } from "../../auto-reply/templating.js";
 import { onSessionTranscriptUpdate } from "../../sessions/transcript-events.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { openBotAgentDatabase } from "../../state/bot-agent-db.js";
 import { appendSqliteTrajectoryRuntimeEvents } from "../../trajectory/runtime-store.sqlite.js";
 import type { TrajectoryEvent } from "../../trajectory/types.js";
 import {
@@ -82,7 +82,7 @@ vi.mock("../../gateway/session-archive.runtime.js", async (importOriginal) => {
 
 function createTestTrajectoryEvent(sessionId: string): TrajectoryEvent {
   return {
-    traceSchema: "openclaw-trajectory",
+    traceSchema: "bot-trajectory",
     schemaVersion: 1,
     traceId: sessionId,
     source: "runtime",
@@ -117,7 +117,7 @@ describe("session accessor seam", () => {
 
   beforeEach(() => {
     cleanupArchivedSessionTranscriptsMock.mockReset();
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-session-accessor-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-session-accessor-"));
     storePath = path.join(tempDir, "sessions.json");
     transcriptPath = path.join(tempDir, "session.jsonl");
   });
@@ -210,7 +210,7 @@ describe("session accessor seam", () => {
       resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       "entry count database path",
     );
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openBotAgentDatabase({ agentId: "main", path: databasePath });
 
     expect(readSqliteSessionEntryCount(database)).toBe(1);
     expect(readSqliteSessionEntryKeys(database)).toEqual(["agent:main:logical-entry"]);
@@ -228,7 +228,7 @@ describe("session accessor seam", () => {
       resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       "createdBy database path",
     );
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openBotAgentDatabase({ agentId: "main", path: databasePath });
 
     expect(
       database.db
@@ -320,7 +320,7 @@ describe("session accessor seam", () => {
       agentId: "main",
     }).path;
     expect(databasePath).toBeDefined();
-    const database = openOpenClawAgentDatabase({
+    const database = openBotAgentDatabase({
       agentId: "main",
       path: databasePath,
     });
@@ -397,7 +397,7 @@ describe("session accessor seam", () => {
       agentId: "main",
     }).path;
     expect(databasePath).toBeDefined();
-    const database = openOpenClawAgentDatabase({
+    const database = openBotAgentDatabase({
       agentId: "main",
       path: databasePath,
     });
@@ -720,7 +720,7 @@ describe("session accessor seam", () => {
       resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       "alias database path",
     );
-    const aliasDatabase = openOpenClawAgentDatabase({ agentId: "main", path: aliasDatabasePath });
+    const aliasDatabase = openBotAgentDatabase({ agentId: "main", path: aliasDatabasePath });
     aliasDatabase.db
       .prepare(
         `INSERT INTO session_nodes (
@@ -952,7 +952,7 @@ describe("session accessor seam", () => {
       resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       "focused session database path",
     );
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openBotAgentDatabase({ agentId: "main", path: databasePath });
     const unrelatedEntryJson = "{ unrelated, intentionally invalid JSON";
     database.db
       .prepare(
@@ -1151,7 +1151,7 @@ describe("session accessor seam", () => {
       agentId: "main",
       env: {
         ...process.env,
-        OPENCLAW_STATE_DIR: stateDir,
+        BOT_STATE_DIR: stateDir,
       },
       sessionId: "default-store-turn-session",
       sessionKey: "agent:main:default-store-turn",
@@ -1299,7 +1299,7 @@ describe("session accessor seam", () => {
       updatedAt: 10,
       initializationPending: true,
     });
-    const databasePath = path.join(tempDir, "openclaw-agent.sqlite");
+    const databasePath = path.join(tempDir, "bot-agent.sqlite");
     const fixedTime = new Date("2020-01-01T00:00:00.000Z");
     fs.utimesSync(databasePath, fixedTime, fixedTime);
 
@@ -2539,7 +2539,7 @@ describe("session accessor seam", () => {
     const stateDir = path.join(tempDir, "state-root");
     const scope = {
       agentId: "main",
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, BOT_STATE_DIR: stateDir },
       sessionId,
       sessionKey: "agent:main:main",
     };
@@ -2599,7 +2599,7 @@ describe("session accessor seam", () => {
       resolveSqliteTargetFromSessionStorePath(storePath, { agentId: "main" }).path,
       "manual compact database path",
     );
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openBotAgentDatabase({ agentId: "main", path: databasePath });
     database.db.exec(`
       CREATE TRIGGER reject_manual_compact_metadata_update
       BEFORE UPDATE OF entry_json ON session_nodes
@@ -3445,7 +3445,7 @@ describe("session accessor seam", () => {
         sessionKey,
         storePath,
       })?.entry.sessionFile,
-    ).toBe(`sqlite:main:session-1:${path.join(tempDir, "openclaw-agent.sqlite")}`);
+    ).toBe(`sqlite:main:session-1:${path.join(tempDir, "bot-agent.sqlite")}`);
   });
 
   it("tracks replacement and deletion transcript mutations", async () => {
@@ -3509,7 +3509,7 @@ describe("session accessor seam", () => {
     }).path;
     expect(databasePath).toBeDefined();
     const readGeneration = () =>
-      openOpenClawAgentDatabase({ agentId: scope.agentId, path: databasePath })
+      openBotAgentDatabase({ agentId: scope.agentId, path: databasePath })
         .db.prepare("SELECT generation FROM transcript_rewrite_watermarks WHERE session_id = ?")
         .get(scope.sessionId) as { generation: string } | undefined;
 

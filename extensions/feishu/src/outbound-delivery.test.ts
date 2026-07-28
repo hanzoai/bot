@@ -1,12 +1,12 @@
 // Feishu tests cover the shared outbound delivery path.
-import { sendDurableMessageBatch } from "openclaw/plugin-sdk/channel-outbound";
+import { sendDurableMessageBatch } from "bot/plugin-sdk/channel-outbound";
 import {
   createOutboundTestPlugin,
   createTestRegistry,
   releasePinnedPluginChannelRegistry,
   resetGlobalHookRunner,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/channel-test-helpers";
+} from "bot/plugin-sdk/channel-test-helpers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const sendMediaFeishuMock = vi.hoisted(() => vi.fn());

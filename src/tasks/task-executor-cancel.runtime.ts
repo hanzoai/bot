@@ -1,5 +1,5 @@
 // Lazy runtime boundary for task cancellation and its runtime-specific control stack.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { getRegisteredDetachedTaskLifecycleRuntime } from "./detached-task-runtime-state.js";
 import {
@@ -9,7 +9,7 @@ import {
 } from "./runtime-internal.js";
 
 export async function cancelDetachedTaskRunById(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   taskId: string;
   reason?: string;
 }) {

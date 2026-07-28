@@ -7,7 +7,7 @@ type OnboardSkillsTestApi = {
 
 function getTestApi(): OnboardSkillsTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.onboardSkillsTestApi")
+    Symbol.for("bot.onboardSkillsTestApi")
   ] as OnboardSkillsTestApi;
 }
 

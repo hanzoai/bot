@@ -16,8 +16,8 @@ import {
 const port =
   process.env.MOCK_PORT != null
     ? readTcpPortEnv("MOCK_PORT")
-    : readTcpPortEnv("OPENCLAW_MOCK_OPENAI_PORT");
-const successMarker = process.env.SUCCESS_MARKER ?? "OPENCLAW_E2E_OK";
+    : readTcpPortEnv("BOT_MOCK_OPENAI_PORT");
+const successMarker = process.env.SUCCESS_MARKER ?? "BOT_E2E_OK";
 const requestLog = process.env.MOCK_REQUEST_LOG;
 const responseChunkDelayMs = process.env.MOCK_RESPONSE_CHUNK_DELAY_MS
   ? readPositiveIntEnv("MOCK_RESPONSE_CHUNK_DELAY_MS", undefined)
@@ -228,14 +228,14 @@ function writeImageGeneration(res) {
         b64_json:
           "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+yf7kAAAAASUVORK5CYII=",
         mime_type: "image/png",
-        revised_prompt: "openclaw mock image",
+        revised_prompt: "bot mock image",
       },
     ],
   });
 }
 
 function resolveResponseText(bodyText) {
-  const matches = Array.from(bodyText.matchAll(/\bOPENCLAW_E2E_[A-Z0-9]+(?:_[A-Z0-9]+)*\b/gu));
+  const matches = Array.from(bodyText.matchAll(/\bBOT_E2E_[A-Z0-9]+(?:_[A-Z0-9]+)*\b/gu));
   return matches.at(-1)?.[0] ?? successMarker;
 }
 
@@ -355,7 +355,7 @@ const server = http.createServer((req, res) => {
     if (req.method === "GET" && url.pathname === "/v1/models") {
       writeJson(res, 200, {
         object: "list",
-        data: [{ id: "gpt-5.6-luna", object: "model", owned_by: "openclaw-e2e" }],
+        data: [{ id: "gpt-5.6-luna", object: "model", owned_by: "bot-e2e" }],
       });
       return;
     }

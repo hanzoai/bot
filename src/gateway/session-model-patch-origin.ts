@@ -2,12 +2,12 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveProviderIdForAuth } from "../agents/provider-auth-aliases.js";
 import { resolveSessionModelRef } from "../agents/session-model-ref.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { createAgentPatchedSessionModelFallback } from "../config/sessions/session-model-fallback.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 
 const agentSessionModelPatch = new AsyncLocalStorage<boolean>();
@@ -21,7 +21,7 @@ export function isAgentSessionModelPatchOrigin(): boolean {
 }
 
 export function shouldPreserveSessionAuthProfileOverride(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: SessionEntry;
   currentProvider: string;
   provider: string;
@@ -52,7 +52,7 @@ export function shouldPreserveSessionAuthProfileOverride(params: {
 }
 
 export function snapshotAgentModelFallback(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   entry: SessionEntry,
   agentId: string,
   now: number,

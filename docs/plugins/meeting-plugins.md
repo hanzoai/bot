@@ -1,13 +1,13 @@
 ---
 summary: "Choose and configure Google Meet, Microsoft Teams, or Zoom meeting participation"
 read_when:
-  - You want an OpenClaw agent to join a video meeting
+  - You want an Bot agent to join a video meeting
   - You are choosing between the Google Meet, Microsoft Teams meetings, and Zoom meetings plugins
   - You need the shared Chrome, BlackHole, SoX, or meeting-mode setup
 title: "Meeting plugins"
 ---
 
-OpenClaw has separate plugins for Google Meet, Microsoft Teams meetings, and Zoom. All three can join through Chrome, use the same participation modes, and run Chrome either on the Gateway host or on a paired node. Their platform URLs, installation model, and extra capabilities differ.
+Bot has separate plugins for Google Meet, Microsoft Teams meetings, and Zoom. All three can join through Chrome, use the same participation modes, and run Chrome either on the Gateway host or on a paired node. Their platform URLs, installation model, and extra capabilities differ.
 
 These plugins participate in meetings. They are separate from messaging channels such as the [Microsoft Teams channel](/channels/msteams) and from the [Voice call plugin](/plugins/voice-call).
 
@@ -27,16 +27,16 @@ The three plugins share the same modes:
 
 | Mode         | Behavior                                                                                              | Audio requirements                                      |
 | ------------ | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `agent`      | Realtime transcription goes to the configured OpenClaw agent; regular OpenClaw TTS speaks the reply.  | Chrome talk-back requires the BlackHole and SoX bridge. |
+| `agent`      | Realtime transcription goes to the configured Bot agent; regular Bot TTS speaks the reply.  | Chrome talk-back requires the BlackHole and SoX bridge. |
 | `bidi`       | A realtime voice model listens and replies directly.                                                  | Chrome talk-back requires the BlackHole and SoX bridge. |
 | `transcribe` | Joins observe-only and exposes a bounded live-caption transcript when the platform provides captions. | No BlackHole or SoX talk-back bridge.                   |
 
-Use `transcribe` when the agent only needs meeting text. Use `agent` for normal OpenClaw reasoning and tools. Use `bidi` when low-latency direct voice is more important than routing each turn through the regular agent.
+Use `transcribe` when the agent only needs meeting text. Use `agent` for normal Bot reasoning and tools. Use `bidi` when low-latency direct voice is more important than routing each turn through the regular agent.
 
 The bounded live transcript remains available only in `transcribe` mode. In all
 three modes, browser joins also persist completed caption rows and a derived
 summary to the shared state database. Leaving the meeting finalizes visible
-captions and writes the summary; use [`openclaw transcripts`](/cli/transcripts)
+captions and writes the summary; use [`bot transcripts`](/cli/transcripts)
 to list, inspect, or export it. This durable notes path does not change the live
 agent-consult transcript or create an audio/video recording.
 
@@ -64,23 +64,23 @@ system_profiler SPAudioDataType | grep -i BlackHole
 command -v sox
 ```
 
-The Gateway host still owns the OpenClaw agent and model credentials when Chrome runs on a paired node. Configure a realtime transcription provider and OpenClaw TTS for `agent` mode, or a realtime voice provider for `bidi` mode. The platform guides contain the provider and audio-command options.
+The Gateway host still owns the Bot agent and model credentials when Chrome runs on a paired node. Configure a realtime transcription provider and Bot TTS for `agent` mode, or a realtime voice provider for `bidi` mode. The platform guides contain the provider and audio-command options.
 
 ## Install or disable plugins
 
-Install Google Meet separately; it is enabled by default after installation. Teams meetings and Zoom are included with OpenClaw and enabled by default:
+Install Google Meet separately; it is enabled by default after installation. Teams meetings and Zoom are included with Bot and enabled by default:
 
 ```bash
 # Google Meet only
-openclaw plugins install npm:@openclaw/google-meet
+bot plugins install npm:@hanzo/bot-google-meet
 ```
 
 Disable any meeting plugin you do not use:
 
 ```bash
-openclaw plugins disable google-meet
-openclaw plugins disable teams-meetings
-openclaw plugins disable zoom-meetings
+bot plugins disable google-meet
+bot plugins disable teams-meetings
+bot plugins disable zoom-meetings
 ```
 
 Restart the Gateway if your plugin-management path does not restart it automatically. Then run the platform setup check before joining.
@@ -89,9 +89,9 @@ Restart the Gateway if your plugin-management path does not restart it automatic
 
 | Platform        | Setup check                    | Join command                                                                  |
 | --------------- | ------------------------------ | ----------------------------------------------------------------------------- |
-| Google Meet     | `openclaw googlemeet setup`    | `openclaw googlemeet join 'https://meet.google.com/abc-defg-hij'`             |
-| Microsoft Teams | `openclaw teamsmeetings setup` | `openclaw teamsmeetings join 'https://teams.microsoft.com/l/meetup-join/...'` |
-| Zoom            | `openclaw zoommeetings setup`  | `openclaw zoommeetings join 'https://zoom.us/j/1234567890'`                   |
+| Google Meet     | `bot googlemeet setup`    | `bot googlemeet join 'https://meet.google.com/abc-defg-hij'`             |
+| Microsoft Teams | `bot teamsmeetings setup` | `bot teamsmeetings join 'https://teams.microsoft.com/l/meetup-join/...'` |
+| Zoom            | `bot zoommeetings setup`  | `bot zoommeetings join 'https://zoom.us/j/1234567890'`                   |
 
 Treat any failed setup check as a blocker for that transport and mode. For an observe-only smoke test, select `transcribe` mode and confirm that status reports an in-call session before expecting caption text.
 
@@ -105,13 +105,13 @@ Browser automation handles the normal guest-name, prejoin camera and microphone,
 - Microsoft Teams may require tenant sign-in, email verification, or organizer admission.
 - Zoom may require authentication, email verification, a passcode, CAPTCHA completion, or host admission; an account can also disable browser join.
 
-When a join or status result includes `manualAction`, complete its reported step in the same OpenClaw Chrome profile before retrying. Repeatedly opening new tabs does not resolve an account, tenant, lobby, or CAPTCHA gate.
+When a join or status result includes `manualAction`, complete its reported step in the same Bot Chrome profile before retrying. Repeatedly opening new tabs does not resolve an account, tenant, lobby, or CAPTCHA gate.
 
 Only join meetings where the operator is authorized to add an agent. Tell participants when local policy or consent rules require disclosure of automated participation, transcription, or synthesized speech.
 
 ## Discord voice chat
 
-[Discord voice channels](/channels/discord#voice-channels) provide native, audio-only realtime conversation without browser meeting automation. OpenClaw can join a voice channel, listen, route turns through an OpenClaw agent or realtime voice model, and speak replies. It does not send or receive camera video or screen sharing, even when people use video in the same Discord channel, so Discord voice is a related live-conversation surface rather than a fourth browser meeting plugin.
+[Discord voice channels](/channels/discord#voice-channels) provide native, audio-only realtime conversation without browser meeting automation. Bot can join a voice channel, listen, route turns through an Bot agent or realtime voice model, and speak replies. It does not send or receive camera video or screen sharing, even when people use video in the same Discord channel, so Discord voice is a related live-conversation surface rather than a fourth browser meeting plugin.
 
 ## Platform guides
 

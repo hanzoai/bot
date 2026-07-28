@@ -2,12 +2,12 @@
 import fs from "node:fs";
 import type { SessionStoreTarget } from "../config/sessions/targets.js";
 import {
-  assertOpenClawAgentDatabaseForMaintenance,
-  clearOpenClawAgentDatabaseOpenFailure,
-  ensureOpenClawAgentDatabasePermissions,
-  isOpenClawAgentDatabaseOpen,
-  migrateOpenClawAgentDatabaseForMaintenance,
-} from "../state/openclaw-agent-db.js";
+  assertBotAgentDatabaseForMaintenance,
+  clearBotAgentDatabaseOpenFailure,
+  ensureBotAgentDatabasePermissions,
+  isBotAgentDatabaseOpen,
+  migrateBotAgentDatabaseForMaintenance,
+} from "../state/bot-agent-db.js";
 import { resolveTargetSqlitePath } from "./doctor-session-sqlite-readers.js";
 import type { DoctorSessionSqliteCompactReport } from "./doctor-session-sqlite-types.js";
 import { compactDoctorSqliteFile } from "./doctor-sqlite-compact.js";
@@ -34,22 +34,22 @@ export function compactDoctorSessionSqliteTarget(
     };
   }
   if (!stat.isFile()) {
-    throw new Error(`OpenClaw agent database is not a regular file: ${sqlitePath}`);
+    throw new Error(`Bot agent database is not a regular file: ${sqlitePath}`);
   }
-  if (isOpenClawAgentDatabaseOpen(sqlitePath)) {
+  if (isBotAgentDatabaseOpen(sqlitePath)) {
     throw new Error(
-      `OpenClaw agent database ${sqlitePath} is already open in this process. Stop OpenClaw and retry.`,
+      `Bot agent database ${sqlitePath} is already open in this process. Stop Bot and retry.`,
     );
   }
   const requireQuarantineCleared = () => {
-    if (!clearOpenClawAgentDatabaseOpenFailure(sqlitePath, { env: options.env })) {
+    if (!clearBotAgentDatabaseOpenFailure(sqlitePath, { env: options.env })) {
       throw new Error(
-        `OpenClaw agent database ${sqlitePath} was repaired, but its persisted quarantine record could not be cleared. Rerun openclaw doctor --fix so the database is not refused again.`,
+        `Bot agent database ${sqlitePath} was repaired, but its persisted quarantine record could not be cleared. Rerun bot doctor --fix so the database is not refused again.`,
       );
     }
   };
   if (options.migrateOlderSchema) {
-    migrateOpenClawAgentDatabaseForMaintenance({
+    migrateBotAgentDatabaseForMaintenance({
       agentId: target.agentId,
       pathname: sqlitePath,
     });
@@ -59,14 +59,14 @@ export function compactDoctorSessionSqliteTarget(
   const compact = compactDoctorSqliteFile({
     afterSuccess: () => {
       requireQuarantineCleared();
-      ensureOpenClawAgentDatabasePermissions(sqlitePath, {
+      ensureBotAgentDatabasePermissions(sqlitePath, {
         agentId: target.agentId,
         path: sqlitePath,
       });
     },
     sqlitePath,
     validateBeforeMutation: (database) =>
-      assertOpenClawAgentDatabaseForMaintenance(database, {
+      assertBotAgentDatabaseForMaintenance(database, {
         agentId: target.agentId,
         pathname: sqlitePath,
       }),

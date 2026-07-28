@@ -1,4 +1,4 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { formatSqliteSessionFileMarker } from "../config/sessions/sqlite-marker.js";
 import { extractTextFromChatContent } from "../shared/chat-content.js";
 import type { DetachedTaskFindResult } from "../tasks/detached-task-runtime-contract.js";
@@ -121,7 +121,7 @@ export function createSubagentRegistryLifecycleDelivery(
         const text = extractTextFromChatContent(record.content, { joinWith: "" });
         return (
           record.role === "assistant" &&
-          record.provider === "openclaw" &&
+          record.provider === "bot" &&
           record.model === "delivery-mirror" &&
           text === expectedText
         );

@@ -1,12 +1,12 @@
 // Opencode Go tests cover onboard plugin behavior.
-import { expectProviderOnboardPrimaryAndFallbacks } from "openclaw/plugin-sdk/provider-test-contracts";
+import { expectProviderOnboardPrimaryAndFallbacks } from "bot/plugin-sdk/provider-test-contracts";
 import { describe, expect, it } from "vitest";
 import { applyOpencodeGoConfig, applyOpencodeGoProviderConfig } from "./onboard.js";
 
 const MODEL_REF = "opencode-go/kimi-k2.6";
 
 describe("opencode-go onboard", () => {
-  it("leaves model aliases to the OpenClaw catalog", () => {
+  it("leaves model aliases to the Bot catalog", () => {
     const cfg = {
       agents: {
         defaults: {

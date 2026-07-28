@@ -200,7 +200,7 @@ function repairFiles(root, files) {
 }
 
 function copyDocsToTemp(root, files) {
-  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-docs-format-"));
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-docs-format-"));
   for (const relativePath of files) {
     const source = path.join(root, relativePath);
     const target = path.join(tempRoot, relativePath);

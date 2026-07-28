@@ -262,8 +262,8 @@ function relocateCandidateRange(
   };
 }
 
-const DREAMING_FENCE_START_RE = /<!--\s*openclaw:dreaming:[a-z][a-z0-9-]*:start\s*-->/i;
-const DREAMING_FENCE_END_RE = /<!--\s*openclaw:dreaming:[a-z][a-z0-9-]*:end\s*-->/i;
+const DREAMING_FENCE_START_RE = /<!--\s*bot:dreaming:[a-z][a-z0-9-]*:start\s*-->/i;
+const DREAMING_FENCE_END_RE = /<!--\s*bot:dreaming:[a-z][a-z0-9-]*:end\s*-->/i;
 
 function lineRangeOverlapsDreamingFence(
   lines: string[],
@@ -283,7 +283,7 @@ function lineRangeOverlapsDreamingFence(
     const isEnd = DREAMING_FENCE_END_RE.test(line);
     if (isStart || isEnd) {
       // The marker line itself is managed-block content. A relocated range
-      // that includes a `<!-- openclaw:dreaming:*:start/end -->` marker would
+      // that includes a `<!-- bot:dreaming:*:start/end -->` marker would
       // build its snippet from raw lines that contain that marker text and
       // leak it into MEMORY.md alongside any adjacent fenced content captured
       // by the same window. (#80613)
@@ -322,7 +322,7 @@ export async function rehydratePromotionCandidate(
       continue;
     }
     // Managed dreaming blocks in daily memory files are scratchwork, not durable
-    // content. If rehydration lands inside an openclaw:dreaming fence (for example
+    // content. If rehydration lands inside an bot:dreaming fence (for example
     // because file edits shifted lines between ranking and apply), refuse the
     // candidate so dream artifacts cannot be promoted into MEMORY.md.
     if (lineRangeOverlapsDreamingFence(lines, relocated.startLine, relocated.endLine)) {

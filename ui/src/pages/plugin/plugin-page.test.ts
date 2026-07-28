@@ -55,12 +55,12 @@ class ExternalPluginPage extends PluginPage {
   }
 }
 
-const deferredPluginPageTag = "openclaw-deferred-plugin-page-test";
+const deferredPluginPageTag = "bot-deferred-plugin-page-test";
 if (!customElements.get(deferredPluginPageTag)) {
   customElements.define(deferredPluginPageTag, DeferredPluginPage);
 }
 
-const externalPluginPageTag = "openclaw-external-plugin-page-test";
+const externalPluginPageTag = "bot-external-plugin-page-test";
 if (!customElements.get(externalPluginPageTag)) {
   customElements.define(externalPluginPageTag, ExternalPluginPage);
 }

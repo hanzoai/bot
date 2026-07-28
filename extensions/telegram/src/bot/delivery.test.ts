@@ -1,6 +1,6 @@
 // Telegram tests cover delivery plugin behavior.
 import type { Bot } from "grammy";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTelegramPromptContextProjectionSequence } from "../prompt-context-projection.js";
 const { loadWebMedia } = vi.hoisted(() => ({
@@ -29,28 +29,28 @@ type DeliverWithParams = Omit<
   Partial<Pick<DeliverRepliesParams, "replyToMode" | "textLimit" | "mediaLoader">>;
 type RuntimeStub = Pick<RuntimeEnv, "error" | "log" | "exit">;
 
-vi.mock("openclaw/plugin-sdk/web-media", () => ({
+vi.mock("bot/plugin-sdk/web-media", () => ({
   loadWebMedia: (...args: unknown[]) => loadWebMedia(...args),
 }));
 
-vi.mock("openclaw/plugin-sdk/media-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/media-runtime")>();
+vi.mock("bot/plugin-sdk/media-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/media-runtime")>();
   return {
     ...actual,
     probeVideoDimensions,
   };
 });
 
-vi.mock("openclaw/plugin-sdk/hook-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/hook-runtime")>();
+vi.mock("bot/plugin-sdk/hook-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/hook-runtime")>();
   return {
     ...actual,
     triggerInternalHook,
   };
 });
 
-vi.mock("openclaw/plugin-sdk/plugin-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/plugin-runtime")>();
+vi.mock("bot/plugin-sdk/plugin-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/plugin-runtime")>();
   return {
     ...actual,
     getGlobalHookRunner: () => messageHookRunner,

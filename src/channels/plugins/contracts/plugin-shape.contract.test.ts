@@ -25,8 +25,8 @@ const sanitizeAssistantVisibleTextMock = vi.hoisted(() =>
   vi.fn((text: string) => `shared-sanitizer:${text}`),
 );
 
-vi.mock("openclaw/plugin-sdk/text-chunking", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/text-chunking")>();
+vi.mock("bot/plugin-sdk/text-chunking", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/text-chunking")>();
   return { ...actual, sanitizeAssistantVisibleText: sanitizeAssistantVisibleTextMock };
 });
 

@@ -1,7 +1,7 @@
 // Discord plugin module implements message run queue behavior.
-import { createChannelRunQueue } from "openclaw/plugin-sdk/channel-outbound";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { danger } from "openclaw/plugin-sdk/runtime-env";
+import { createChannelRunQueue } from "bot/plugin-sdk/channel-outbound";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { danger } from "bot/plugin-sdk/runtime-env";
 import { materializeDiscordInboundJob, type DiscordInboundJob } from "./inbound-job.js";
 import type { RuntimeEnv } from "./message-handler.preflight.types.js";
 import type { DiscordMonitorStatusSink } from "./status.js";

@@ -8,7 +8,7 @@ import {
   type PreparedModelRuntimeReplacementGateId,
 } from "../agents/prepared-model-runtime.js";
 import { isRestartEnabled } from "../config/commands.flags.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { resetDirectoryCache } from "../infra/outbound/target-resolver.js";
@@ -88,7 +88,7 @@ export function createGatewayReloadHandlers(params: GatewayReloadHandlerParams) 
 
   const applyHotReload = async (
     plan: GatewayReloadPlan,
-    nextConfig: OpenClawConfig,
+    nextConfig: BotConfig,
     publication?: GatewayHotReloadPublication,
   ): Promise<void> => {
     assertIrreversibleReloadPlanHasRecoveryOwner(plan, restartRecoveryAvailable);
@@ -137,8 +137,8 @@ export function createGatewayReloadHandlers(params: GatewayReloadHandlerParams) 
     // Planning happens before candidate env publication, while channel starts
     // happen after it. Use one candidate snapshot across both phases.
     const shouldSkipChannelRestart =
-      isTruthyEnvValue(candidateEnv.OPENCLAW_SKIP_CHANNELS) ||
-      isTruthyEnvValue(candidateEnv.OPENCLAW_SKIP_PROVIDERS);
+      isTruthyEnvValue(candidateEnv.BOT_SKIP_CHANNELS) ||
+      isTruthyEnvValue(candidateEnv.BOT_SKIP_PROVIDERS);
     const channelReloadTargets = () =>
       new Set<ChannelKind>([...channelsToRestart, ...restartChannelAccounts.keys()]);
     const getChannelAutostartSuppression = () => params.getChannelAutostartSuppression?.() ?? null;
@@ -535,7 +535,7 @@ export function createGatewayReloadHandlers(params: GatewayReloadHandlerParams) 
               signal: restartAbortController.signal,
               onSkipped: () =>
                 params.logHooks.info(
-                  "skipping gmail watcher restart (OPENCLAW_SKIP_GMAIL_WATCHER=1)",
+                  "skipping gmail watcher restart (BOT_SKIP_GMAIL_WATCHER=1)",
                 ),
             });
           }
@@ -557,7 +557,7 @@ export function createGatewayReloadHandlers(params: GatewayReloadHandlerParams) 
       channelsStoppedBeforePluginReload,
       shouldSkipChannelRestart,
       skipChannelRestartLogMessage:
-        "skipping channel reload (OPENCLAW_SKIP_CHANNELS=1 or OPENCLAW_SKIP_PROVIDERS=1)",
+        "skipping channel reload (BOT_SKIP_CHANNELS=1 or BOT_SKIP_PROVIDERS=1)",
       pluginReloadAborted,
       isLifecycleReloadAborted,
       getChannelAutostartSuppression,

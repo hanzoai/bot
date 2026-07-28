@@ -4,7 +4,7 @@ import type { SessionCreatedActor as ProtocolSessionCreatedActor } from "../../.
 import type { ActorIdentityUser } from "../app/user-profile.ts";
 import { t } from "../i18n/index.ts";
 import { resolveAvatar } from "../lib/identity-avatar.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../lit/bot-element.ts";
 import "./viewer-facepile.ts";
 
 export type SessionCreatedActor = ProtocolSessionCreatedActor;
@@ -42,12 +42,12 @@ export function renderSessionOwnerChip(
   user?: ActorIdentityUser,
 ) {
   return createdActor?.id
-    ? html`<openclaw-session-owner-chip
+    ? html`<bot-session-owner-chip
         .createdActor=${createdActor}
         .user=${user ?? null}
         size=${size}
         attribution=${attribution}
-      ></openclaw-session-owner-chip>`
+      ></bot-session-owner-chip>`
     : nothing;
 }
 
@@ -81,7 +81,7 @@ function ownerHue(id: string): number {
  * Actors absent from the current self/presence identities keep their stable
  * initials because provenance outlives presence.
  */
-class SessionOwnerChip extends OpenClawLightDomElement {
+class SessionOwnerChip extends BotLightDomElement {
   @property({ attribute: false }) createdActor: SessionCreatedActor | null = null;
   @property({ attribute: false }) user: ActorIdentityUser | null = null;
   @property({ type: String }) size: "row" | "header" = "row";
@@ -118,23 +118,23 @@ class SessionOwnerChip extends OpenClawLightDomElement {
         aria-label=${accessibleLabel}
         title=${accessibleLabel}
         >${avatar?.kind === "profile" && user
-          ? html`<openclaw-viewer-avatar
+          ? html`<bot-viewer-avatar
               .user=${{ ...user, watchedSessions: [] }}
               variant="session"
               aria-hidden="true"
-            ></openclaw-viewer-avatar>`
+            ></bot-viewer-avatar>`
           : initials}</span
       >
     `;
   }
 }
 
-if (!customElements.get("openclaw-session-owner-chip")) {
-  customElements.define("openclaw-session-owner-chip", SessionOwnerChip);
+if (!customElements.get("bot-session-owner-chip")) {
+  customElements.define("bot-session-owner-chip", SessionOwnerChip);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-session-owner-chip": SessionOwnerChip;
+    "bot-session-owner-chip": SessionOwnerChip;
   }
 }

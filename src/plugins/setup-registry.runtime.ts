@@ -1,6 +1,6 @@
 /** Metadata lookup helpers for plugin setup CLI backend descriptors. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
+import type { BotConfig } from "../config/types.bot.js";
 import { isInstalledPluginEnabled } from "./installed-plugin-index.js";
 import {
   resolvePluginMetadataSnapshot,
@@ -17,7 +17,7 @@ type SetupCliBackendDescriptorEntry = {
 
 type SetupCliBackendDescriptorLookupParams = {
   backend: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 };

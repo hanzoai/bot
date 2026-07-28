@@ -24,7 +24,7 @@ export function buildLiveShardPnpmArgs(files: string[], passthroughArgs: string[
  */
 export function resolveLiveShardPreparation(files: unknown): {
   env: {
-    OPENCLAW_BUILD_PRIVATE_QA: string;
+    BOT_BUILD_PRIVATE_QA: string;
   };
   profile: string;
   requiredArtifact: string;

@@ -1,10 +1,10 @@
-// Volcengine plugin entrypoint registers its OpenClaw integration.
-import { buildOpenAICompatibleLiveModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { readManifestProviderDefaultModelRef } from "openclaw/plugin-sdk/provider-catalog-shared";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { ensureModelAllowlistEntry } from "openclaw/plugin-sdk/provider-onboard";
+// Volcengine plugin entrypoint registers its Bot integration.
+import { buildOpenAICompatibleLiveModelProviderConfig } from "bot/plugin-sdk/provider-catalog-live-runtime";
+import { readManifestProviderDefaultModelRef } from "bot/plugin-sdk/provider-catalog-shared";
+import { defineSingleProviderPluginEntry } from "bot/plugin-sdk/provider-entry";
+import { ensureModelAllowlistEntry } from "bot/plugin-sdk/provider-onboard";
 import { applyVolcengineToolSchemaCompat } from "./api.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 import { VOLCENGINE_PROVIDER_CATALOG_ENTRIES } from "./provider-catalog.js";
 import { buildVolcengineSpeechProvider } from "./speech-provider.js";
 

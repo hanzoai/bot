@@ -1,22 +1,22 @@
 import { PollLayoutType } from "discord-api-types/payloads/v10";
 import type { RESTAPIPoll } from "discord-api-types/rest/v10";
 import type { APIChannel } from "discord-api-types/v10";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 // Discord plugin module implements send.shared behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { buildOutboundMediaLoadOptions } from "openclaw/plugin-sdk/media-runtime";
-import { extensionForMime } from "openclaw/plugin-sdk/media-runtime";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import { buildOutboundMediaLoadOptions } from "bot/plugin-sdk/media-runtime";
+import { extensionForMime } from "bot/plugin-sdk/media-runtime";
 import {
   normalizePollDurationHours,
   normalizePollInput,
   type OutboundMediaAccess,
   type PollInput,
-} from "openclaw/plugin-sdk/media-runtime";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import type { ChunkMode } from "openclaw/plugin-sdk/reply-chunking";
-import { resolveTextChunksWithFallback } from "openclaw/plugin-sdk/reply-payload";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { loadWebMedia } from "openclaw/plugin-sdk/web-media";
+} from "bot/plugin-sdk/media-runtime";
+import { requireRuntimeConfig } from "bot/plugin-sdk/plugin-config-runtime";
+import type { ChunkMode } from "bot/plugin-sdk/reply-chunking";
+import { resolveTextChunksWithFallback } from "bot/plugin-sdk/reply-payload";
+import { normalizeStringEntries } from "bot/plugin-sdk/string-coerce-runtime";
+import { loadWebMedia } from "bot/plugin-sdk/web-media";
 import { chunkDiscordTextWithMode } from "./chunk.js";
 import { createDiscordClient, resolveDiscordRest, type DiscordClientOpts } from "./client.js";
 import {
@@ -178,7 +178,7 @@ async function buildDiscordSendError(
   err: unknown,
   ctx: {
     channelId: string;
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     rest: RequestClient;
     token: string;
     hasMedia: boolean;
@@ -267,7 +267,7 @@ async function resolveChannelId(
 
 async function resolveDiscordTargetChannelId(
   raw: string,
-  opts: DiscordClientOpts & { cfg: OpenClawConfig },
+  opts: DiscordClientOpts & { cfg: BotConfig },
 ): Promise<{ channelId: string; dm?: boolean }> {
   const cfg = requireRuntimeConfig(opts.cfg, "Discord target channel resolution");
   const recipient = await parseAndResolveRecipient(raw, cfg, opts.accountId, {

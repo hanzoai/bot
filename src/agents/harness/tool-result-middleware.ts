@@ -1,14 +1,14 @@
 /**
  * Runs native harness tool-result middleware around tool execution results.
  */
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { boundedJsonUtf8Bytes } from "../../infra/json-utf8-bytes.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import type {
   AgentToolResultMiddleware,
   AgentToolResultMiddlewareContext,
   AgentToolResultMiddlewareEvent,
-  OpenClawAgentToolResult,
+  BotAgentToolResult,
 } from "../../plugins/agent-tool-result-middleware-types.js";
 import { createLazyPromiseLoader } from "../../shared/lazy-promise.js";
 import { truncateUtf16Safe } from "../../utils.js";
@@ -29,7 +29,7 @@ const MAX_MIDDLEWARE_DETAILS_DEPTH = 20;
 const MAX_MIDDLEWARE_DETAILS_KEYS = 1_000;
 const NESTED_TOOL_RESULT_BLOCK_TYPES = new Set(["toolresult", "tool_result"]);
 
-type MiddlewareContentBlock = OpenClawAgentToolResult["content"][number];
+type MiddlewareContentBlock = BotAgentToolResult["content"][number];
 type MiddlewareContentCoerceState = { depth: number; seen: Set<object> };
 type MiddlewareToolResultCoerceOptions = {
   sanitizeContent?: boolean;
@@ -113,7 +113,7 @@ function isValidMiddlewareDetails(value: unknown): boolean {
   return size.complete && size.bytes <= MAX_MIDDLEWARE_DETAILS_BYTES;
 }
 
-function isValidMiddlewareToolResult(value: unknown): value is OpenClawAgentToolResult {
+function isValidMiddlewareToolResult(value: unknown): value is BotAgentToolResult {
   if (!isRecord(value) || !Array.isArray(value.content)) {
     return false;
   }
@@ -320,14 +320,14 @@ function coerceMiddlewareContentBlocks(
 function coerceMiddlewareToolResult(
   value: unknown,
   options: MiddlewareToolResultCoerceOptions = {},
-): OpenClawAgentToolResult | undefined {
+): BotAgentToolResult | undefined {
   if (isValidMiddlewareToolResult(value)) {
     return value;
   }
   if (!isRecord(value) || !Array.isArray(value.content)) {
     return undefined;
   }
-  const content: OpenClawAgentToolResult["content"] = [];
+  const content: BotAgentToolResult["content"] = [];
   const state = createMiddlewareContentCoerceState();
   let inspectedBlocks = 0;
   for (const block of value.content) {
@@ -409,7 +409,7 @@ function sanitizeMiddlewareDetailsValue(value: unknown): unknown {
  * harness owes a registered middleware a JSON-safe view of that payload;
  * subsequent middleware-side mutations are still validated strictly.
  */
-function sanitizeToolResultForMiddleware(result: OpenClawAgentToolResult): OpenClawAgentToolResult {
+function sanitizeToolResultForMiddleware(result: BotAgentToolResult): BotAgentToolResult {
   const coerced = coerceMiddlewareToolResult(result, {
     sanitizeContent: true,
     sanitizeDetails: true,
@@ -426,7 +426,7 @@ function sanitizeToolResultForMiddleware(result: OpenClawAgentToolResult): OpenC
   return { ...result, details: sanitizeMiddlewareDetailsValue(result.details) };
 }
 
-function buildMiddlewareFailureResult(): OpenClawAgentToolResult {
+function buildMiddlewareFailureResult(): BotAgentToolResult {
   return {
     content: [
       {
@@ -443,8 +443,8 @@ function buildMiddlewareFailureResult(): OpenClawAgentToolResult {
 
 function buildDeliveredMessagingFailureFallback(
   event: AgentToolResultMiddlewareEvent,
-  result: OpenClawAgentToolResult,
-): OpenClawAgentToolResult | undefined {
+  result: BotAgentToolResult,
+): BotAgentToolResult | undefined {
   if (
     event.isError === true ||
     isToolResultError(result) ||
@@ -469,9 +469,9 @@ function buildDeliveredMessagingFailureFallback(
 }
 
 function reconcileDeliveredMessagingFailure(
-  result: OpenClawAgentToolResult,
-  fallback: OpenClawAgentToolResult | undefined,
-): OpenClawAgentToolResult {
+  result: BotAgentToolResult,
+  fallback: BotAgentToolResult | undefined,
+): BotAgentToolResult {
   return fallback && isRecord(result.details) && result.details.middlewareError === true
     ? fallback
     : result;
@@ -499,7 +499,7 @@ export function createAgentToolResultMiddlewareRunner(
   return {
     async applyToolResultMiddleware(
       event: AgentToolResultMiddlewareEvent,
-    ): Promise<OpenClawAgentToolResult> {
+    ): Promise<BotAgentToolResult> {
       const handlersForRun = await resolveHandlers();
       // Fast path: with no middleware registered the result is delivered
       // unchanged; skip validation entirely so tool emitters that produce

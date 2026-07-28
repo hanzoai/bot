@@ -34,7 +34,7 @@ export function parseScreenRecordPayload(value: unknown): ScreenRecordPayload {
 /** Build the temp output path for a screen recording artifact. */
 export function screenRecordTempPath(opts: { ext: string; tmpDir?: string; id?: string }) {
   const { tmpDir, id, ext } = resolveTempPathParts(opts);
-  return path.join(tmpDir, `openclaw-screen-record-${id}${ext}`);
+  return path.join(tmpDir, `bot-screen-record-${id}${ext}`);
 }
 
 /** Decode and write a screen recording payload to disk. */
@@ -78,7 +78,7 @@ export function parseScreenSnapshotPayload(value: unknown): ScreenSnapshotPayloa
 /** Build the temp output path for a screen snapshot artifact. */
 export function screenSnapshotTempPath(opts: { ext?: string; tmpDir?: string; id?: string }) {
   const { tmpDir, id, ext } = resolveTempPathParts({ ...opts, ext: opts.ext ?? ".png" });
-  return path.join(tmpDir, `openclaw-screen-snapshot-${id}${ext}`);
+  return path.join(tmpDir, `bot-screen-snapshot-${id}${ext}`);
 }
 
 /** Decode and write a screen snapshot payload to disk. */

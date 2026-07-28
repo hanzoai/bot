@@ -1,5 +1,5 @@
 export type UpdateAvailable = import("../../../src/infra/update-startup.js").UpdateAvailable;
-import type { FastMode } from "@openclaw/normalization-core/string-coerce";
+import type { FastMode } from "@hanzo/bot-normalization-core/string-coerce";
 import type { SessionObserverDigest } from "../../../packages/gateway-protocol/src/schema/sessions.js";
 import type { SessionAgentStatus } from "../../../packages/gateway-protocol/src/session-icon.js";
 import type { SessionGoal } from "../../../src/config/sessions/types.js";
@@ -16,7 +16,7 @@ import type {
 } from "../../../src/shared/session-types.js";
 export type { ConfigUiHint, ConfigUiHints } from "../../../src/shared/config-ui-hints-types.js";
 export type { SessionGoal } from "../../../src/config/sessions/types.js";
-export type { FastMode } from "@openclaw/normalization-core/string-coerce";
+export type { FastMode } from "@hanzo/bot-normalization-core/string-coerce";
 export type ChannelsPairingAccount =
   import("../../../packages/gateway-protocol/src/index.js").ChannelsPairingAccount;
 export type ChannelsPairingApproveResult =

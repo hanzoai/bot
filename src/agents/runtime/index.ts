@@ -1,4 +1,4 @@
-/** OpenClaw-owned agent runtime facade; the plugin SDK module owns the adapter. */
+/** Bot-owned agent runtime facade; the plugin SDK module owns the adapter. */
 export {
   Agent,
   bashExecutionToText,
@@ -13,7 +13,7 @@ export {
   generateBranchSummary,
   generateSummary,
   getLastAssistantUsage,
-  openClawAgentCoreRuntime,
+  botAgentCoreRuntime,
   prepareBranchEntries,
   prepareCompaction,
   runAgentLoop,

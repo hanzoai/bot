@@ -1,6 +1,6 @@
 import path from "node:path";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { emitDiagnosticEvent } from "../infra/diagnostic-events.js";
 import {
   type EventSessionRoutingPolicy,
@@ -86,14 +86,14 @@ function detectCursorKeyMode(raw: string): "application" | "normal" | null {
 
 /** Default retained aggregate output cap for exec sessions. */
 export const DEFAULT_MAX_OUTPUT = clampWithDefault(
-  readEnvInt("OPENCLAW_BASH_MAX_OUTPUT_CHARS", "PI_BASH_MAX_OUTPUT_CHARS"),
+  readEnvInt("BOT_BASH_MAX_OUTPUT_CHARS", "PI_BASH_MAX_OUTPUT_CHARS"),
   200_000,
   1_000,
   200_000,
 );
 /** Default pending output cap for poll/update buffers. */
 export const DEFAULT_PENDING_MAX_OUTPUT = clampWithDefault(
-  readEnvInt("OPENCLAW_BASH_PENDING_MAX_OUTPUT_CHARS"),
+  readEnvInt("BOT_BASH_PENDING_MAX_OUTPUT_CHARS"),
   30_000,
   1_000,
   200_000,
@@ -456,7 +456,7 @@ function formatExecFailureReason(params: {
         typeof params.timeoutSec === "number" && params.timeoutSec > 0
           ? `Command timed out after ${params.timeoutSec} seconds.`
           : "Command timed out.";
-      return `${appendExecTimeoutRetryGuidance(timeoutText, params.failureKind)}\n\nIf it should keep running, start it with exec background=true or yieldMs so OpenClaw can register a pollable process session. Do not rely on shell backgrounding with a trailing &.`;
+      return `${appendExecTimeoutRetryGuidance(timeoutText, params.failureKind)}\n\nIf it should keep running, start it with exec background=true or yieldMs so Bot can register a pollable process session. Do not rely on shell backgrounding with a trailing &.`;
     }
     case "no-output-timeout":
       return appendExecTimeoutRetryGuidance(
@@ -569,9 +569,9 @@ function wrapPosixCommandWithPathPrepend(
   }
 
   // Pass the prepend string safely via a temporary environment variable.
-  env.OPENCLAW_PREPEND_PATH = pathPrepend.join(path.delimiter);
+  env.BOT_PREPEND_PATH = pathPrepend.join(path.delimiter);
 
-  return `export PATH="\${OPENCLAW_PREPEND_PATH}\${PATH:+:$PATH}"; unset OPENCLAW_PREPEND_PATH; ${command}`;
+  return `export PATH="\${BOT_PREPEND_PATH}\${PATH:+:$PATH}"; unset BOT_PREPEND_PATH; ${command}`;
 }
 
 /** Starts a host or sandbox exec process and registers it for polling/backgrounding. */
@@ -617,7 +617,7 @@ export async function runExecProcess(opts: {
   const supervisor = getProcessSupervisor();
   const shellRuntimeEnv: Record<string, string> = {
     ...opts.env,
-    OPENCLAW_SHELL: "exec",
+    BOT_SHELL: "exec",
   };
 
   const session: ProcessSession = {

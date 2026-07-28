@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { PluginRuntime } from "openclaw/plugin-sdk/runtime-store";
+import type { PluginRuntime } from "bot/plugin-sdk/runtime-store";
 import {
   getBrowserStateRuntime,
   getOptionalBrowserStateRuntime,

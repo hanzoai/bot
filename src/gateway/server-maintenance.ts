@@ -1,6 +1,6 @@
 // Gateway maintenance timers.
 // Starts periodic health, dedupe, abort, and media cleanup loops.
-import { isFutureDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { isFutureDateTimestampMs } from "@hanzo/bot-normalization-core/number-coercion";
 import { createManagedWorktreeOwnerProtection } from "../agents/worktrees/owner-protection.js";
 import {
   managedWorktrees,
@@ -8,7 +8,7 @@ import {
   WORKTREE_GC_INTERVAL_MS,
 } from "../agents/worktrees/service.js";
 import type { HealthSummary } from "../commands/health.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { sweepStaleRunContexts } from "../infra/agent-events.js";
 import { pruneOrphanedDeliveryQueueMedia } from "../infra/outbound/delivery-queue-media-spool.js";
 import { cleanOldMedia } from "../media/store.js";
@@ -68,7 +68,7 @@ export function startGatewayMaintenanceTimers(params: {
   agentRunSeq: Map<string, number>;
   nodeSendToSession: (sessionKey: string, event: string, payload: unknown) => void;
   mediaCleanupTtlMs?: number;
-  getRuntimeConfig: () => OpenClawConfig;
+  getRuntimeConfig: () => BotConfig;
   runWorktreeGc?: () => Promise<unknown>;
   runDeliveryQueueMediaGc?: () => Promise<unknown>;
   enableSkillCurator?: boolean;

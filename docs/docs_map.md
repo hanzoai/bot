@@ -1,10 +1,10 @@
 ---
-summary: "Generated heading map for OpenClaw docs pages"
+summary: "Generated heading map for Bot docs pages"
 read_when: "Finding which docs page covers a topic before reading the page"
 title: "Docs map"
 ---
 
-# OpenClaw docs map
+# Bot docs map
 
 This file is generated from `docs/**/*.md` and `docs/**/*.mdx` headings to help agents navigate the documentation tree.
 Do not edit it by hand; run `pnpm docs:map:gen`.
@@ -591,7 +591,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Route: /channels/matrix-migration
 - Headings:
   - H2: What the migration does automatically
-  - H2: Upgrading from OpenClaw releases older than 2026.4
+  - H2: Upgrading from Bot releases older than 2026.4
   - H2: Recommended upgrade flow
   - H2: Common messages and what they mean
   - H3: Manual recovery messages
@@ -713,7 +713,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H3: Step 3: Configure messaging endpoint
   - H3: Step 4: Enable Teams channel
   - H3: Step 5: Build Teams app manifest
-  - H3: Step 6: Configure OpenClaw
+  - H3: Step 6: Configure Bot
   - H3: Step 7: Run the gateway
   - H2: Federated authentication (certificate plus managed identity)
   - H3: Option A: Certificate-based authentication
@@ -964,7 +964,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Webhook security
   - H2: Multi-account config
   - H2: Troubleshooting
-  - H3: Twilio returns 403 or OpenClaw rejects the webhook
+  - H3: Twilio returns 403 or Bot rejects the webhook
   - H3: No pairing request appears
   - H3: Outbound sends fail
   - H3: Messages arrive but the agent does not answer
@@ -1204,7 +1204,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Runner registration budget
   - H2: Surface ratchets
   - H2: Local equivalents
-  - H2: OpenClaw Performance
+  - H2: Bot Performance
   - H2: Full Release Validation
   - H2: Live and E2E shards
   - H2: Package Acceptance
@@ -1278,7 +1278,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/agent
 - Headings:
-  - H1: openclaw agent
+  - H1: bot agent
   - H2: agent exec
   - H3: agent exec options
   - H2: Options
@@ -1291,7 +1291,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/agents
 - Headings:
-  - H1: openclaw agents
+  - H1: bot agents
   - H2: Examples
   - H2: Command surface
   - H3: agents list
@@ -1312,8 +1312,8 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/approvals
 - Headings:
-  - H1: openclaw approvals
-  - H2: openclaw exec-policy
+  - H1: bot approvals
+  - H2: bot exec-policy
   - H2: Common commands
   - H2: Pending approvals
   - H2: Replace approvals from a file
@@ -1332,7 +1332,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/audit
 - Headings:
-  - H1: openclaw audit
+  - H1: bot audit
   - H2: Filters
   - H2: Recorded events
   - H2: Gateway RPC
@@ -1342,7 +1342,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/backup
 - Headings:
-  - H1: openclaw backup
+  - H1: bot backup
   - H2: Notes
   - H2: SQLite snapshots
   - H3: Verify and restore
@@ -1355,7 +1355,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/browser
 - Headings:
-  - H1: openclaw browser
+  - H1: bot browser
   - H2: Common flags
   - H2: Quick start (local)
   - H2: Quick troubleshooting
@@ -1374,7 +1374,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/channels
 - Headings:
-  - H1: openclaw channels
+  - H1: bot channels
   - H2: Common commands
   - H2: Status / capabilities / resolve / logs
   - H2: Inbound dead letters
@@ -1389,7 +1389,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/clawbot
 - Headings:
-  - H1: openclaw clawbot
+  - H1: bot clawbot
   - H2: Migration
   - H2: Related
 
@@ -1397,7 +1397,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/claws
 - Headings:
-  - H1: openclaw claws
+  - H1: bot claws
   - H2: Create a Claw package
   - H2: Inspect and preview
   - H2: Inspect installed state
@@ -1421,7 +1421,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/completion
 - Headings:
-  - H1: openclaw completion
+  - H1: bot completion
   - H2: Usage
   - H2: Options
   - H2: Install flow
@@ -1454,7 +1454,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/configure
 - Headings:
-  - H1: openclaw configure
+  - H1: bot configure
   - H2: Options
   - H2: Model section
   - H2: Web section
@@ -1470,7 +1470,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/cron
 - Headings:
-  - H1: openclaw cron
+  - H1: bot cron
   - H2: Create jobs quickly
   - H2: Sessions
   - H2: Delivery
@@ -1498,7 +1498,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/daemon
 - Headings:
-  - H1: openclaw daemon
+  - H1: bot daemon
   - H2: Usage
   - H2: Subcommands and options
   - H2: Notes
@@ -1508,7 +1508,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/dashboard
 - Headings:
-  - H1: openclaw dashboard
+  - H1: bot dashboard
   - H2: Machine-readable output
   - H2: Related
 
@@ -1516,27 +1516,27 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/devices
 - Headings:
-  - H1: openclaw devices
+  - H1: bot devices
   - H2: Common options
   - H2: Commands
-  - H3: openclaw devices list
-  - H3: `openclaw devices approve [requestId] [--latest]`
-  - H3: openclaw devices reject &lt;requestId&gt;
-  - H3: openclaw devices remove &lt;deviceId&gt;
-  - H3: openclaw devices rename --device &lt;id&gt; --name &lt;label&gt;
-  - H3: `openclaw devices clear --yes [--pending]`
-  - H3: `openclaw devices rotate --device &lt;id&gt; --role &lt;role&gt; [--scope &lt;scope...&gt;]`
-  - H3: openclaw devices revoke --device &lt;id&gt; --role &lt;role&gt;
+  - H3: bot devices list
+  - H3: `bot devices approve [requestId] [--latest]`
+  - H3: bot devices reject &lt;requestId&gt;
+  - H3: bot devices remove &lt;deviceId&gt;
+  - H3: bot devices rename --device &lt;id&gt; --name &lt;label&gt;
+  - H3: `bot devices clear --yes [--pending]`
+  - H3: `bot devices rotate --device &lt;id&gt; --role &lt;role&gt; [--scope &lt;scope...&gt;]`
+  - H3: bot devices revoke --device &lt;id&gt; --role &lt;role&gt;
   - H2: Notes
   - H2: Token drift recovery checklist
-  - H2: Paperclip / `openclaw_gateway` first-run approval
+  - H2: Paperclip / `bot_gateway` first-run approval
   - H2: Related
 
 ## cli/directory.md
 
 - Route: /cli/directory
 - Headings:
-  - H1: openclaw directory
+  - H1: bot directory
   - H2: Common flags
   - H2: Notes
   - H2: Using results with message send
@@ -1550,7 +1550,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/dns
 - Headings:
-  - H1: openclaw dns
+  - H1: bot dns
   - H2: dns setup
   - H2: Related
 
@@ -1558,7 +1558,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/docs
 - Headings:
-  - H1: openclaw docs
+  - H1: bot docs
   - H2: Usage
   - H2: Examples
   - H2: How it works
@@ -1570,7 +1570,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/doctor
 - Headings:
-  - H1: openclaw doctor
+  - H1: bot doctor
   - H2: Postures
   - H2: Examples
   - H2: Options
@@ -1590,7 +1590,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/fleet
 - Headings:
-  - H1: openclaw fleet
+  - H1: bot fleet
   - H2: Quick start
   - H2: Tenant IDs
   - H2: fleet create
@@ -1615,7 +1615,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/flows
 - Headings:
-  - H1: openclaw tasks flow
+  - H1: bot tasks flow
   - H2: Subcommands
   - H3: Status filter values
   - H2: Examples
@@ -1649,7 +1649,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/health
 - Headings:
-  - H1: openclaw health
+  - H1: bot health
   - H2: Options
   - H2: Behavior
   - H2: Related
@@ -1658,7 +1658,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/hooks
 - Headings:
-  - H1: openclaw hooks
+  - H1: bot hooks
   - H2: List hooks
   - H2: Get hook info
   - H2: Check eligibility
@@ -1706,7 +1706,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/logs
 - Headings:
-  - H1: openclaw logs
+  - H1: bot logs
   - H2: Options
   - H2: Shared Gateway RPC options
   - H2: Examples
@@ -1718,7 +1718,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Route: /cli/mcp
 - Headings:
   - H2: Choose the right MCP path
-  - H2: OpenClaw as an MCP server
+  - H2: Bot as an MCP server
   - H3: When to use serve
   - H3: How it works
   - H3: Choose a client mode
@@ -1732,7 +1732,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H3: Security and trust boundary
   - H3: Testing
   - H3: Troubleshooting
-  - H2: OpenClaw as an MCP client registry
+  - H2: Bot as an MCP client registry
   - H3: Saved MCP server definitions
   - H3: Common server recipes
   - H3: JSON output shapes
@@ -1749,7 +1749,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/memory
 - Headings:
-  - H1: openclaw memory
+  - H1: bot memory
   - H2: memory status
   - H2: memory index
   - H2: memory search
@@ -1765,7 +1765,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/message
 - Headings:
-  - H1: openclaw message
+  - H1: bot message
   - H2: Channel selection
   - H2: Target formats (-t, --target)
   - H2: Common flags
@@ -1786,7 +1786,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/migrate
 - Headings:
-  - H1: openclaw migrate
+  - H1: bot migrate
   - H2: Commands
   - H2: Safety model
   - H2: Claude provider
@@ -1808,7 +1808,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/models
 - Headings:
-  - H1: openclaw models
+  - H1: bot models
   - H2: Common commands
   - H3: Status
   - H3: List
@@ -1823,7 +1823,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/node
 - Headings:
-  - H1: openclaw node
+  - H1: bot node
   - H2: Why use a node host?
   - H2: Browser proxy (zero-config)
   - H2: Run (foreground)
@@ -1838,7 +1838,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/nodes
 - Headings:
-  - H1: openclaw nodes
+  - H1: bot nodes
   - H2: Status
   - H2: Pairing
   - H2: Invoke
@@ -1849,7 +1849,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/onboard
 - Headings:
-  - H1: openclaw onboard
+  - H1: bot onboard
   - H2: Examples
   - H2: Guided flow
   - H2: Reset
@@ -1865,13 +1865,13 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Other behaviors
   - H2: Common follow-up commands
 
-## cli/openclaw.md
+## cli/bot.md
 
-- Route: /cli/openclaw
+- Route: /cli/bot
 - Headings:
-  - H1: openclaw setup
+  - H1: bot setup
   - H2: When it starts
-  - H2: What OpenClaw shows
+  - H2: What Bot shows
   - H2: Examples
   - H2: Operations and approval
   - H3: Change history
@@ -1887,7 +1887,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/pairing
 - Headings:
-  - H1: openclaw pairing
+  - H1: bot pairing
   - H2: Commands
   - H2: pairing list
   - H2: pairing approve
@@ -1898,7 +1898,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/path
 - Headings:
-  - H1: openclaw path
+  - H1: bot path
   - H2: Why use it
   - H2: How it is used
   - H2: How it works
@@ -1947,7 +1947,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/policy
 - Headings:
-  - H1: openclaw policy
+  - H1: bot policy
   - H2: Quick start
   - H3: Policy rule reference
   - H4: Scoped overlays
@@ -1978,17 +1978,17 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/promos
 - Headings:
-  - H1: openclaw promos
+  - H1: bot promos
   - H2: Commands
-  - H2: openclaw promos list
-  - H2: openclaw promos claim &lt;slug&gt;
+  - H2: bot promos list
+  - H2: bot promos claim &lt;slug&gt;
   - H2: Passive discovery in models list
 
 ## cli/proxy.md
 
 - Route: /cli/proxy
 - Headings:
-  - H1: openclaw proxy
+  - H1: bot proxy
   - H2: Validate
   - H3: Options
   - H2: Debug proxy
@@ -1998,7 +1998,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/qr
 - Headings:
-  - H1: openclaw qr
+  - H1: bot qr
   - H2: Options
   - H2: Setup code contents
   - H2: Gateway URL resolution
@@ -2010,7 +2010,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/reset
 - Headings:
-  - H1: openclaw reset
+  - H1: bot reset
   - H2: Options
   - H2: Scopes
   - H2: Notes
@@ -2021,9 +2021,9 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Route: /cli/sandbox
 - Headings:
   - H2: Commands
-  - H3: openclaw sandbox list
-  - H3: openclaw sandbox recreate
-  - H3: openclaw sandbox explain
+  - H3: bot sandbox list
+  - H3: bot sandbox recreate
+  - H3: bot sandbox explain
   - H2: Why recreate is needed
   - H2: Common triggers
   - H2: Registry migration
@@ -2034,7 +2034,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/secrets
 - Headings:
-  - H1: openclaw secrets
+  - H1: bot secrets
   - H2: Reload runtime snapshot
   - H2: Audit
   - H2: Configure (interactive helper)
@@ -2048,7 +2048,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/security
 - Headings:
-  - H1: openclaw security
+  - H1: bot security
   - H2: Audit modes
   - H2: What it checks
   - H2: SecretRef behavior
@@ -2061,7 +2061,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/sessions
 - Headings:
-  - H1: openclaw sessions
+  - H1: bot sessions
   - H2: Tail trajectory progress
   - H2: Export a trajectory bundle
   - H2: Cleanup maintenance
@@ -2073,7 +2073,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/setup
 - Headings:
-  - H1: openclaw setup
+  - H1: bot setup
   - H2: Options
   - H3: Baseline mode
   - H2: Examples
@@ -2084,7 +2084,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/skills
 - Headings:
-  - H1: openclaw skills
+  - H1: bot skills
   - H2: Commands
   - H2: Skill Workshop
   - H2: Related
@@ -2104,7 +2104,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/system
 - Headings:
-  - H1: openclaw system
+  - H1: bot system
   - H2: Common commands
   - H2: system event
   - H2: system heartbeat last|enable|disable
@@ -2132,7 +2132,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/transcripts
 - Headings:
-  - H1: openclaw transcripts
+  - H1: bot transcripts
   - H2: Commands
   - H2: Output
   - H2: Many sessions per day
@@ -2144,7 +2144,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/tui
 - Headings:
-  - H1: openclaw tui
+  - H1: bot tui
   - H2: Options
   - H2: Notes
   - H2: Examples
@@ -2155,7 +2155,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/uninstall
 - Headings:
-  - H1: openclaw uninstall
+  - H1: bot uninstall
   - H2: Options
   - H2: Examples
   - H2: Notes
@@ -2165,7 +2165,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/update
 - Headings:
-  - H1: openclaw update
+  - H1: bot update
   - H2: Usage
   - H2: Options
   - H2: update status
@@ -2184,7 +2184,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/voicecall
 - Headings:
-  - H1: openclaw voicecall
+  - H1: bot voicecall
   - H2: Subcommands
   - H2: Setup and smoke
   - H3: setup
@@ -2208,12 +2208,12 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/webhooks
 - Headings:
-  - H1: openclaw webhooks
+  - H1: bot webhooks
   - H2: Subcommands
   - H2: webhooks gmail setup
   - H3: Required
   - H3: Pub/Sub options
-  - H3: OpenClaw delivery options
+  - H3: Bot delivery options
   - H3: gog watch serve options
   - H3: Tailscale exposure
   - H3: Output
@@ -2224,7 +2224,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/wiki
 - Headings:
-  - H1: openclaw wiki
+  - H1: bot wiki
   - H2: Common commands
   - H2: Agent selection
   - H2: Commands
@@ -2269,7 +2269,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /cli/worker
 - Headings:
-  - H1: openclaw worker
+  - H1: bot worker
   - H2: Launch contract
   - H2: Runtime boundary
 
@@ -2453,7 +2453,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H3: /context detail
   - H3: /context map
   - H2: What counts toward the context window
-  - H2: How OpenClaw builds the system prompt
+  - H2: How Bot builds the system prompt
   - H2: Injected workspace files (Project Context)
   - H2: Skills: injected vs loaded on-demand
   - H2: Tools: there are two costs
@@ -3905,7 +3905,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /gateway/remote-gateway-readme
 - Headings:
-  - H1: Running OpenClaw.app with a Remote Gateway
+  - H1: Running Bot.app with a Remote Gateway
   - H2: Setup
   - H2: How it works
   - H2: Related
@@ -4058,7 +4058,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Route: /gateway/security
 - Headings:
   - H2: Scope: personal assistant security model
-  - H2: openclaw security audit
+  - H2: bot security audit
   - H3: What the audit checks (high level)
   - H3: Priority order when triaging findings
   - H2: Hardened baseline in 60 seconds
@@ -4255,7 +4255,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Path-related env vars
   - H2: Agent helper tool downloads
   - H2: Logging
-  - H3: `OPENCLAW_HOME`
+  - H3: `BOT_HOME`
   - H2: nvm users: webfetch TLS failures
   - H2: Legacy environment variables
   - H2: Related
@@ -4282,7 +4282,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Headings:
   - H2: First 60 seconds if something is broken
   - H2: Quick start and first-run setup
-  - H2: What is OpenClaw?
+  - H2: What is Bot?
   - H2: Skills and automation
   - H2: Sandboxing and memory
   - H2: Where things live on disk
@@ -4327,7 +4327,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Live: Android node capability sweep
   - H2: Live: model smoke (profile keys)
   - H3: Layer 1: Direct model completion (no gateway)
-  - H3: Layer 2: Gateway + dev agent smoke (what "@openclaw" actually does)
+  - H3: Layer 2: Gateway + dev agent smoke (what "@bot" actually does)
   - H2: Live: CLI backend smoke (Claude, Gemini, or other local CLIs)
   - H2: Live: APNs HTTP/2 proxy reachability
   - H2: Live: ACP bind smoke (/acp spawn ... --bind here)
@@ -4398,8 +4398,8 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: First 60 seconds
   - H2: Assistant feels limited or missing tools
   - H2: Anthropic long context 429
-  - H2: Local OpenAI-compatible backend works directly but fails in OpenClaw
-  - H2: Plugin install fails with missing openclaw extensions
+  - H2: Local OpenAI-compatible backend works directly but fails in Bot
+  - H2: Plugin install fails with missing bot extensions
   - H2: Install policy blocks plugin installs or updates
   - H2: Plugin present but blocked by suspicious ownership
   - H2: Decision tree
@@ -4409,9 +4409,9 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /
 - Headings:
-  - H1: OpenClaw 🦞
+  - H1: Bot 🦞
   - H2: Browse docs
-  - H2: What is OpenClaw?
+  - H2: What is Bot?
   - H2: How it works
   - H2: Key capabilities
   - H2: Quick start
@@ -4445,7 +4445,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: What you need
   - H2: Configure deployment
   - H2: Deploy Azure resources
-  - H2: Install OpenClaw
+  - H2: Install Bot
   - H2: Cost considerations
   - H2: Cleanup
   - H2: Next steps
@@ -4600,8 +4600,8 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Route: /install/hostinger
 - Headings:
   - H2: Prerequisites
-  - H2: Option A: 1-Click OpenClaw
-  - H2: Option B: OpenClaw on VPS
+  - H2: Option A: 1-Click Bot
+  - H2: Option B: Bot on VPS
   - H2: Verify your setup
   - H2: Troubleshooting
   - H2: Next steps
@@ -4622,7 +4622,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Verify the install
   - H2: Hosting and deployment
   - H2: Update, migrate, or uninstall
-  - H2: Troubleshooting: openclaw not found
+  - H2: Troubleshooting: bot not found
 
 ## install/installer.md
 
@@ -4683,7 +4683,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: 3) Complete Setup Assistant
   - H2: 4) Get the VM IP address
   - H2: 5) SSH into the VM
-  - H2: 6) Install OpenClaw
+  - H2: 6) Install Bot
   - H2: 7) Configure channels
   - H2: 8) Run the VM headlessly
   - H2: Bonus: iMessage integration
@@ -4725,7 +4725,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Route: /install/migrating
 - Headings:
   - H2: Import from another agent system
-  - H2: Move OpenClaw to a new machine
+  - H2: Move Bot to a new machine
   - H3: Migration steps
   - H3: Common pitfalls
   - H3: Verification checklist
@@ -4751,7 +4751,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Check your version
   - H2: Install Node
   - H2: Troubleshooting
-  - H3: openclaw: command not found
+  - H3: bot: command not found
   - H3: Permission errors on npm install -g (Linux)
   - H2: Related
 
@@ -4859,7 +4859,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /install/updating
 - Headings:
-  - H2: Recommended: openclaw update
+  - H2: Recommended: bot update
   - H2: Switch between npm and git installs
   - H2: Source-checkout servers (reference script)
   - H2: Alternative: re-run the installer
@@ -4887,7 +4887,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Prerequisites
   - H2: Create a Box
   - H2: Connect with an SSH tunnel
-  - H2: Install OpenClaw
+  - H2: Install Bot
   - H2: Run onboarding
   - H2: Start the Gateway
   - H2: Auto-restart
@@ -5045,7 +5045,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H3: Terminal file uploads
   - H2: Invoking commands
   - H2: Command policy
-  - H2: Config (openclaw.json)
+  - H2: Config (bot.json)
   - H2: Screenshots (canvas snapshots)
   - H3: Canvas controls
   - H3: A2UI (Canvas)
@@ -5114,7 +5114,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Headings:
   - H2: Behavior (macOS)
   - H2: Voice directives in replies
-  - H2: Config (`~/.openclaw/openclaw.json`)
+  - H2: Config (`~/.hanzoai/bot.json`)
   - H2: macOS UI
   - H2: Android UI
   - H2: Notes
@@ -5144,9 +5144,9 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Client behavior
   - H2: Related
 
-## openclaw-agent-runtime.md
+## bot-agent-runtime.md
 
-- Route: /openclaw-agent-runtime
+- Route: /bot-agent-runtime
 - Headings:
   - H2: Type checking and linting
   - H2: Running Agent Runtime Tests
@@ -5173,7 +5173,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Architecture decision: loop on the worker, inference through the gateway
   - H2: Components
   - H3: 1. Environment state machine + provider contract
-  - H3: 2. Worker bootstrap: install OpenClaw on the box
+  - H3: 2. Worker bootstrap: install Bot on the box
   - H3: 3. Transport: everything over SSH
   - H3: 4. Worker protocol (dedicated; not the node protocol)
   - H3: 5. Session backend RPCs
@@ -5285,7 +5285,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Headings:
   - H2: Before you begin
   - H2: Compose app
-  - H2: Configure OpenClaw
+  - H2: Configure Bot
   - H2: Verify
   - H2: Updates and backups
   - H2: Troubleshooting
@@ -5440,7 +5440,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H1: Logging (macOS)
   - H2: Rolling diagnostics file log (Debug pane)
   - H2: Unified logging private data on macOS
-  - H2: Enable for OpenClaw (ai.openclaw)
+  - H2: Enable for Bot (ai.bot)
   - H2: Disable after debugging
   - H2: Related
 
@@ -5563,7 +5563,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /platforms/mac/xpc
 - Headings:
-  - H1: OpenClaw macOS IPC architecture
+  - H1: Bot macOS IPC architecture
   - H2: Goals
   - H2: How it works
   - H3: Gateway + node transport
@@ -5749,13 +5749,13 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Headings:
   - H2: Why bundles exist
   - H2: Install a bundle
-  - H2: What OpenClaw maps from bundles
+  - H2: What Bot maps from bundles
   - H3: Supported now
   - H4: Skill content
   - H4: Hook packs
-  - H4: MCP for embedded OpenClaw
-  - H4: Embedded OpenClaw settings
-  - H4: Embedded OpenClaw LSP
+  - H4: MCP for embedded Bot
+  - H4: Embedded Bot settings
+  - H4: Embedded Bot LSP
   - H3: Detected but not executed
   - H2: Bundle formats
   - H2: Detection precedence
@@ -5772,7 +5772,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Minimal backend plugin
   - H2: Config shape
   - H2: Advanced backend hooks
-  - H3: ownsNativeCompaction: opting out of OpenClaw compaction
+  - H3: ownsNativeCompaction: opting out of Bot compaction
   - H2: MCP tool bridge
   - H2: Selecting the backend
   - H2: Verification
@@ -5783,7 +5783,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /plugins/codex-computer-use
 - Headings:
-  - H2: OpenClaw.app and Peekaboo
+  - H2: Bot.app and Peekaboo
   - H2: iOS app
   - H2: Direct cua-driver MCP
   - H2: Quick setup
@@ -5793,7 +5793,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H3: Shared plugin cache
   - H2: Remote catalog limit
   - H2: Configuration reference
-  - H2: What OpenClaw checks
+  - H2: What Bot checks
   - H2: macOS permissions
   - H2: Troubleshooting
   - H2: Related
@@ -6093,7 +6093,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: providerRequest reference
   - H2: secretProviderIntegrations reference
   - H2: modelPricing reference
-  - H3: OpenClaw Provider Index
+  - H3: Bot Provider Index
   - H2: Manifest versus package.json
   - H3: package.json fields that affect discovery
   - H2: Discovery precedence (duplicate plugin ids)
@@ -7696,10 +7696,10 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Route: /plugins/sdk-setup
 - Headings:
   - H2: Package metadata
-  - H3: openclaw fields
-  - H3: openclaw.channel
+  - H3: bot fields
+  - H3: bot.channel
   - H3: Channel-owned setup fields
-  - H3: openclaw.install
+  - H3: bot.install
   - H3: Deferred full load
   - H2: Plugin manifest
   - H2: ClawHub publishing
@@ -7772,8 +7772,8 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Troubleshooting
   - H3: plugin entry not found: ./dist/index.js
   - H3: plugin entry does not expose defineToolPlugin metadata
-  - H3: openclaw.plugin.json generated metadata is stale
-  - H3: package.json openclaw.extensions must include ./dist/index.js
+  - H3: bot.plugin.json generated metadata is stale
+  - H3: package.json bot.extensions must include ./dist/index.js
   - H3: Cannot find package 'typebox'
   - H3: Tool does not appear after install
   - H2: See also
@@ -7789,7 +7789,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Generate and apply a SecretRef plan
   - H2: Configure more provider keys
   - H2: SecretRef id format
-  - H2: What OpenClaw stores
+  - H2: What Bot stores
   - H2: Containers and managed deployments
   - H2: Related
 
@@ -7895,7 +7895,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Slash command
   - H2: What it can do
   - H2: Example: parallel research and synthesis
-  - H2: OpenClaw runtime mapping
+  - H2: Bot runtime mapping
   - H2: File locations
   - H2: State backends
   - H2: Security
@@ -8154,7 +8154,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /providers/github-copilot
 - Headings:
-  - H2: Three ways to use Copilot in OpenClaw
+  - H2: Three ways to use Copilot in Bot
   - H2: GitHub Enterprise (data residency)
   - H2: Optional flags
   - H2: Non-interactive onboarding
@@ -8322,7 +8322,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Headings:
   - H2: Built-in catalog
   - H2: Getting started
-  - H2: Configure via openclaw configure
+  - H2: Configure via bot configure
   - H2: Capabilities
   - H3: Image generation
   - H3: Text-to-speech
@@ -8429,7 +8429,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Naming map
   - H2: Implicit agent runtime
   - H2: GPT-5.6 limited preview
-  - H2: OpenClaw feature coverage
+  - H2: Bot feature coverage
   - H2: Memory embeddings
   - H2: Getting started
   - H2: Native Codex app-server auth
@@ -8812,7 +8812,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Tools
   - H3: Local notes
   - H2: Backup tip (recommended)
-  - H2: What OpenClaw does
+  - H2: What Bot does
   - H2: Core skills (enable in Settings → Skills)
   - H2: Usage notes
   - H2: Related
@@ -8935,9 +8935,9 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H3: Example
   - H2: Related
 
-## reference/openclaw-ai.md
+## reference/bot-ai.md
 
-- Route: /reference/openclaw-ai
+- Route: /reference/bot-ai
 - Headings:
   - H2: Quick start
   - H2: Design contract
@@ -8973,7 +8973,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H3: CLI-harness providers (Claude Code, Gemini CLI)
   - H3: Other providers
   - H2: System-prompt cache boundary
-  - H2: OpenClaw cache-stability guards
+  - H2: Bot cache-stability guards
   - H2: Tuning patterns
   - H3: Mixed traffic (recommended default)
   - H3: Cost-first baseline
@@ -9045,7 +9045,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Route: /reference/secretref-credential-surface
 - Headings:
   - H2: Supported credentials
-  - H3: openclaw.json targets (secrets configure + secrets apply + secrets audit)
+  - H3: bot.json targets (secrets configure + secrets apply + secrets audit)
   - H3: auth-profiles.json targets (secrets configure + secrets apply + secrets audit)
   - H2: Unsupported credentials
   - H2: Related
@@ -9079,7 +9079,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /reference/templates/AGENTS.dev
 - Headings:
-  - H1: AGENTS.md - OpenClaw Workspace
+  - H1: AGENTS.md - Bot Workspace
   - H2: Your identity is pre-seeded
   - H2: Backup tip (recommended)
   - H2: Safety defaults
@@ -9247,7 +9247,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /releases/2026.6.11
 - Headings:
-  - H1: OpenClaw v2026.6.11 Release Notes (2026-06-30)
+  - H1: Bot v2026.6.11 Release Notes (2026-06-30)
   - H2: Highlights
   - H3: Channel delivery reliability
   - H3: Provider and model recovery
@@ -9271,7 +9271,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /releases/2026.7.1
 - Headings:
-  - H1: OpenClaw v2026.7.1 Release Notes (2026-07-13)
+  - H1: Bot v2026.7.1 Release Notes (2026-07-13)
   - H2: Highlights
   - H3: Control UI overhaul: chat, sessions, workspaces, and usage
   - H3: Easier setup from install to first chat
@@ -9513,7 +9513,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 
 - Route: /start/lore
 - Headings:
-  - H1: The Lore of OpenClaw 🦞📖
+  - H1: The Lore of Bot 🦞📖
   - H2: The Origin Story
   - H2: The First Molt (January 27, 2026)
   - H2: The Name
@@ -9570,9 +9570,9 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Headings:
   - H2: Related
 
-## start/openclaw.md
+## start/bot.md
 
-- Route: /start/openclaw
+- Route: /start/bot
 - Headings:
   - H2: Safety first
   - H2: Prerequisites
@@ -9673,7 +9673,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H3: acpx runtime startup probe
   - H3: Automatic adapter download
   - H3: Plugin tools MCP bridge
-  - H3: OpenClaw tools MCP bridge
+  - H3: Bot tools MCP bridge
   - H3: Runtime operation timeout configuration
   - H3: Health probe agent configuration
   - H2: Permission configuration
@@ -9822,7 +9822,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Plugin control
   - H2: Agent guidance
   - H2: Missing browser command or tool
-  - H2: Profiles: openclaw, user, chrome
+  - H2: Profiles: bot, user, chrome
   - H2: Configuration
   - H3: Tab cleanup ownership
   - H3: Screenshot vision (text-only model support)
@@ -9873,7 +9873,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Install and pair
   - H2: Use it
   - H3: Tab copilot side panel
-  - H2: Send a page to OpenClaw
+  - H2: Send a page to Bot
   - H2: Remote / cross-machine
   - H2: Diagnostics
   - H2: Security model
@@ -10197,7 +10197,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Enable
   - H2: Pattern: small CLI + JSON pipes + approvals
   - H2: JSON-only LLM steps (llm-task)
-  - H3: Important limitation: embedded Lobster vs openclaw.invoke
+  - H3: Important limitation: embedded Lobster vs bot.invoke
   - H2: Workflow files (.lobster)
   - H3: Injected environment variables
   - H2: Tool parameters
@@ -10322,7 +10322,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Route: /tools/permission-modes
 - Headings:
   - H2: Recommended default
-  - H2: OpenClaw host exec modes
+  - H2: Bot host exec modes
   - H2: Codex Guardian mapping
   - H2: ACPX harness permissions
   - H2: Choosing a mode
@@ -10396,7 +10396,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Headings:
   - H2: Enable self-learning
   - H2: Review past sessions manually
-  - H2: What OpenClaw can learn
+  - H2: What Bot can learn
   - H2: When experience review runs
   - H2: What the reviewer receives
   - H2: Proposal safety
@@ -10760,7 +10760,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Gateway host status
   - H2: Language support
   - H2: Appearance themes
-  - H2: OpenClaw system care
+  - H2: Bot system care
   - H2: Manage plugins
   - H2: Apps and extensions
   - H2: Sidebar navigation
@@ -10868,7 +10868,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Keyboard shortcuts
   - H2: Slash commands
   - H2: Local shell commands
-  - H2: OpenClaw setup and repair helper
+  - H2: Bot setup and repair helper
   - H2: Tool output
   - H2: Terminal colors
   - H2: History + streaming

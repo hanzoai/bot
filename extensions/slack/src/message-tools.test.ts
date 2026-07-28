@@ -1,5 +1,5 @@
 // Slack tests cover message tools plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, expect, it, vi } from "vitest";
 import { createSlackActions } from "./channel-actions.js";
 import { listSlackMessageActions } from "./message-actions.js";
@@ -39,7 +39,7 @@ describe("Slack message tools", () => {
     await actions.handleAction({
       channel: "slack",
       action: "read",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       params: { channelId: "C_CURRENT" },
       requesterAccountId: "work",
       requesterSenderId: "U123",
@@ -81,7 +81,7 @@ describe("Slack message tools", () => {
     await actions.handleAction({
       channel: "slack",
       action: "member-info",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       params: {},
       requesterAccountId: "default",
       requesterSenderId: "U123",
@@ -112,7 +112,7 @@ describe("Slack message tools", () => {
     await actions.handleAction({
       channel: "slack",
       action: "read",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       params: { channelId: "C_CURRENT" },
       toolContext: {
         currentChannelProvider: "slack",
@@ -200,7 +200,7 @@ describe("Slack message tools", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(listSlackMessageActions(cfg)).toEqual([
       "send",
@@ -228,7 +228,7 @@ describe("Slack message tools", () => {
           appToken: "test-app-token",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(listSlackMessageActions(cfg)).toEqual([
       "send",
@@ -283,7 +283,7 @@ describe("Slack message tools", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(listSlackMessageActions(cfg, "default")).toEqual(["send"]);
     expect(listSlackMessageActions(cfg, "work")).toEqual([
@@ -369,7 +369,7 @@ describe("Slack message tools", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
 
     const schemas = Array.isArray(discovery.schema)
@@ -434,7 +434,7 @@ describe("Slack message tools", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
 
     expect(discovery.actions).toEqual(["send"]);

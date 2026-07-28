@@ -3,7 +3,7 @@ import {
   asObject,
   createOpenAiCompatibleSpeechProvider,
   type SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech";
+} from "bot/plugin-sdk/speech";
 import { OPENROUTER_BASE_URL } from "./provider-catalog.js";
 
 const DEFAULT_OPENROUTER_TTS_MODEL = "hexgrad/kokoro-82m";
@@ -36,8 +36,8 @@ export function buildOpenRouterSpeechProvider(): SpeechProviderPlugin {
     voiceCompatibleResponseFormats: ["mp3"],
     baseUrlPolicy: { kind: "canonical", aliases: ["https://openrouter.ai/v1"] },
     extraHeaders: {
-      "HTTP-Referer": "https://openclaw.ai",
-      "X-OpenRouter-Title": "OpenClaw",
+      "HTTP-Referer": "https://bot.ai",
+      "X-OpenRouter-Title": "Bot",
     },
     apiErrorLabel: "OpenRouter TTS API error",
     missingApiKeyError: "OpenRouter API key missing",

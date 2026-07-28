@@ -145,7 +145,7 @@ describe("resolveProviderAuthOverview", () => {
   });
 
   it("reports the selected agent auth store when profiles are effective", () => {
-    persistedStores.set("/tmp/openclaw-agent-custom", {
+    persistedStores.set("/tmp/bot-agent-custom", {
       profiles: {
         "openai:peter@example.test": {},
       },
@@ -165,13 +165,13 @@ describe("resolveProviderAuthOverview", () => {
           },
         },
       } as never,
-      modelsPath: "/tmp/openclaw-agent-custom/models.json",
-      agentDir: "/tmp/openclaw-agent-custom",
+      modelsPath: "/tmp/bot-agent-custom/models.json",
+      agentDir: "/tmp/bot-agent-custom",
     });
 
     expect(overview.effective).toEqual({
       kind: "profiles",
-      detail: "/tmp/openclaw-agent-custom/auth-profiles.json",
+      detail: "/tmp/bot-agent-custom/auth-profiles.json",
     });
   });
 
@@ -196,8 +196,8 @@ describe("resolveProviderAuthOverview", () => {
           },
         },
       } as never,
-      modelsPath: "/tmp/openclaw-agent-custom/models.json",
-      agentDir: "/tmp/openclaw-agent-custom",
+      modelsPath: "/tmp/bot-agent-custom/models.json",
+      agentDir: "/tmp/bot-agent-custom",
     });
 
     expect(overview.effective).toEqual({

@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import {
   ErrorCodes,
   type ErrorShape,
@@ -34,7 +34,7 @@ import {
   resolveSupportedThinkingLevel,
 } from "../auto-reply/thinking.js";
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeExecTarget } from "../infra/exec-approvals.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 import {
@@ -78,7 +78,7 @@ function invalid(message: string): { ok: false; error: ErrorShape } {
 }
 
 export function resolveSessionPatchModelSelection(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   catalog: ModelCatalogEntry[];
   raw: string;
   defaultProvider: string;
@@ -132,7 +132,7 @@ type SessionPatchProjectionEntry = {
 
 /** Project a validated gateway session patch for one session entry. */
 export async function projectSessionsPatchEntry(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entries: readonly SessionPatchProjectionEntry[];
   existingEntry?: SessionEntry;
   storeKey: string;
@@ -669,7 +669,7 @@ export async function projectSessionsPatchEntry(params: {
 
 /** Apply a validated gateway session patch to an in-memory session store entry. */
 export async function applySessionsPatchToStore(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   store: Record<string, SessionEntry>;
   storeKey: string;
   agentId?: string;

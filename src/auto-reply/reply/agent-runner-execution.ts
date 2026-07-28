@@ -3,8 +3,8 @@ import crypto from "node:crypto";
 import {
   hasNonEmptyString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { hasOutboundReplyContent } from "openclaw/plugin-sdk/reply-payload";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import { hasOutboundReplyContent } from "bot/plugin-sdk/reply-payload";
 import type { ChatRunStartupPhase } from "../../../packages/gateway-protocol/src/index.js";
 import { peekSessionMcpRuntime } from "../../agents/agent-bundle-mcp-manager-api.js";
 import { resolveBootstrapWarningSignaturesSeen } from "../../agents/bootstrap-budget.js";

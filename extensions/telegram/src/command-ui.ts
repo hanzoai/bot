@@ -1,5 +1,5 @@
 // Telegram plugin module implements command ui behavior.
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
 import {
   buildBrowseProvidersButton,
   buildModelsKeyboard,

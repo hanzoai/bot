@@ -335,7 +335,7 @@ export async function sendQueuedChatMessage(
             timestamp: startedAt,
             // Send identity keeps this optimistic turn on the same rendered
             // bubble key as the pending row and the authoritative history copy.
-            __openclaw: { idempotencyKey: `${runId}:user` },
+            __bot: { idempotencyKey: `${runId}:user` },
           },
         ];
       }

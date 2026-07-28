@@ -1,13 +1,13 @@
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { MemorySyncParams } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { resolveExpiresAtMsFromDurationMs } from "openclaw/plugin-sdk/number-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import type { MemorySyncParams } from "bot/plugin-sdk/memory-core-host-engine-storage";
+import { resolveExpiresAtMsFromDurationMs } from "bot/plugin-sdk/number-runtime";
 import {
   PluginStateLeaseError,
   type PluginStateLeaseContext,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
-import { retryAsync } from "openclaw/plugin-sdk/retry-runtime";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/plugin-state-runtime";
+import { retryAsync } from "bot/plugin-sdk/retry-runtime";
+import { sleepWithAbort } from "bot/plugin-sdk/runtime-env";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import { asQmdAbortError, isSqliteBusyError } from "./qmd-command-errors.js";
 import { QmdManagerBase, qmdManagerLog } from "./qmd-manager-base.js";
 import {

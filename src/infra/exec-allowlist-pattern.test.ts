@@ -57,10 +57,10 @@ describe("matchesExecAllowlistPattern", () => {
   );
 
   it("expands home-prefix patterns", () => {
-    const openClawHome = path.join(path.resolve("/srv/openclaw-home"), "bin", "tool");
+    const botHome = path.join(path.resolve("/srv/bot-home"), "bin", "tool");
     const fallbackHome = path.join(path.resolve("/home/other"), "bin", "tool");
-    withEnv({ OPENCLAW_HOME: "/srv/openclaw-home", HOME: "/home/other" }, () => {
-      expect(matchesExecAllowlistPattern("~/bin/tool", openClawHome)).toBe(true);
+    withEnv({ BOT_HOME: "/srv/bot-home", HOME: "/home/other" }, () => {
+      expect(matchesExecAllowlistPattern("~/bin/tool", botHome)).toBe(true);
       expect(matchesExecAllowlistPattern("~/bin/tool", fallbackHome)).toBe(false);
     });
   });

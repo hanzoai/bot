@@ -1,7 +1,7 @@
 // Builds plugin registry inputs from installed plugin index records.
 import { normalizePluginsConfig } from "./config-state.js";
 import {
-  discoverOpenClawPlugins,
+  discoverBotPlugins,
   type PluginCandidate,
   type PluginDiscoveryResult,
 } from "./discovery.js";
@@ -34,7 +34,7 @@ export function resolveInstalledPluginIndexRegistry(params: LoadInstalledPluginI
     params.installRecords ?? loadInstalledPluginIndexInstallRecordsSync({ env: params.env });
   const discovery =
     params.discovery ??
-    discoverOpenClawPlugins({
+    discoverBotPlugins({
       workspaceDir: params.workspaceDir,
       extraPaths: normalized.loadPaths,
       env: params.env,

@@ -4,12 +4,12 @@ import {
   asDateTimestampMs,
   resolveDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@hanzo/bot-normalization-core/number-coercion";
 import { resolveDefaultAgentId } from "../agents/agent-scope-config.js";
 import { createAgentRunRestartAbortError } from "../agents/run-termination.js";
 import { readToolValidationErrorSummary } from "../agents/tool-error-summary.js";
 import { isAbortRequestText } from "../auto-reply/reply/abort-primitives.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { emitAgentEvent, getAgentEventLifecycleGeneration } from "../infra/agent-events.js";
 import { jsonUtf8Bytes } from "../infra/json-utf8-bytes.js";
 import { parseAgentSessionKey } from "../routing/session-key.js";
@@ -390,7 +390,7 @@ export type ChatAbortOps = {
     sessionKey?: string,
   ) => { sessionKey: string; agentId?: string; clientRunId: string } | undefined;
   agentRunSeq: Map<string, number>;
-  getRuntimeConfig?: () => OpenClawConfig;
+  getRuntimeConfig?: () => BotConfig;
   broadcast: (
     event: string,
     payload: unknown,
@@ -627,7 +627,7 @@ export function updateChatRunProvider(
 export function abortChatRunsForProvider(
   ops: ChatAbortOps,
   params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     providerId: string;
     agentId?: string;
     stopReason?: string;

@@ -1,11 +1,11 @@
 // Persists short-lived gateway restart intent for supervisor SIGTERM handoff.
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { createSubsystemLogger } from "../logging/subsystem.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -16,7 +16,7 @@ const GATEWAY_RESTART_INTENT_KEY = "gateway-restart";
 const GATEWAY_RESTART_INTENT_TTL_MS = 60_000;
 
 const restartLog = createSubsystemLogger("restart");
-type GatewayRestartIntentDatabase = Pick<OpenClawStateKyselyDatabase, "gateway_restart_intent">;
+type GatewayRestartIntentDatabase = Pick<BotStateKyselyDatabase, "gateway_restart_intent">;
 
 type GatewayRestartIntentPayload = {
   kind: "gateway-restart";
@@ -62,7 +62,7 @@ export function writeGatewayRestartIntentSync(opts: {
         ? Math.floor(opts.intent.waitMs)
         : null;
     const createdAt = Date.now();
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       ({ db }) => {
         const stateDb = getNodeSqliteKysely<GatewayRestartIntentDatabase>(db);
         executeSqliteQuerySync(
@@ -103,7 +103,7 @@ export function writeGatewayRestartIntentSync(opts: {
 
 export function clearGatewayRestartIntentSync(env: NodeJS.ProcessEnv = process.env): void {
   try {
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       ({ db }) => {
         const stateDb = getNodeSqliteKysely<GatewayRestartIntentDatabase>(db);
         executeSqliteQuerySync(
@@ -122,7 +122,7 @@ function readGatewayRestartIntentPayloadSync(
   env: NodeJS.ProcessEnv,
 ): GatewayRestartIntentPayload | null {
   try {
-    const { db } = openOpenClawStateDatabase({ env });
+    const { db } = openBotStateDatabase({ env });
     const stateDb = getNodeSqliteKysely<GatewayRestartIntentDatabase>(db);
     const parsed = executeSqliteQueryTakeFirstSync(
       db,

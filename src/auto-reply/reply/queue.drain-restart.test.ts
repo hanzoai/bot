@@ -1,5 +1,5 @@
 // Tests queue drain restart behavior when follow-up runs chain together.
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "bot/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import {
   getActiveGatewayRootWorkCount,
@@ -78,8 +78,8 @@ describe("followup queue drain restart after idle window", () => {
 
   it("releases a detached drain root when its queue is cleared during debounce", async () => {
     resetGatewayWorkAdmission();
-    const env = captureEnv(["OPENCLAW_TEST_FAST"]);
-    setTestEnvValue("OPENCLAW_TEST_FAST", "0");
+    const env = captureEnv(["BOT_TEST_FAST"]);
+    setTestEnvValue("BOT_TEST_FAST", "0");
     const key = `test-cleared-debounce-root-${Date.now()}`;
     const settings: QueueSettings = { mode: "followup", debounceMs: 60_000, cap: 50 };
 

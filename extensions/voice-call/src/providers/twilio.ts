@@ -1,9 +1,9 @@
 // Voice Call plugin module implements twilio behavior.
 import crypto from "node:crypto";
 import { setTimeout as sleep } from "node:timers/promises";
-import { sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { sleepWithAbort } from "bot/plugin-sdk/runtime-env";
+import { safeEqualSecret } from "bot/plugin-sdk/security-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { getHeader } from "../http-headers.js";
 import type { MediaStreamHandler } from "../media-stream.js";
 import { chunkAudio } from "../telephony-audio.js";

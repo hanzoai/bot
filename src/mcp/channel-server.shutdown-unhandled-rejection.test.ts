@@ -53,7 +53,7 @@ vi.mock("../version.js", async () => ({
 }));
 
 vi.mock("./channel-bridge.js", () => ({
-  OpenClawChannelBridge: class MockOpenClawChannelBridge {
+  BotChannelBridge: class MockBotChannelBridge {
     setServer(server: unknown) {
       bridgeState.setServer(server);
     }
@@ -93,7 +93,7 @@ async function waitForTransport(): Promise<{ onclose?: (() => void) | undefined 
   return transportState.lastTransport;
 }
 
-describe("serveOpenClawChannelMcp shutdown", () => {
+describe("serveBotChannelMcp shutdown", () => {
   const unhandledRejections: unknown[] = [];
   const onUnhandledRejection = (reason: unknown) => {
     unhandledRejections.push(reason);
@@ -113,9 +113,9 @@ describe("serveOpenClawChannelMcp shutdown", () => {
 
   it("does not leak unhandled rejections when shutdown close fails", async () => {
     process.on("unhandledRejection", onUnhandledRejection);
-    const { serveOpenClawChannelMcp } = await import("./channel-server.js");
+    const { serveBotChannelMcp } = await import("./channel-server.js");
 
-    const servePromise = serveOpenClawChannelMcp({ verbose: false });
+    const servePromise = serveBotChannelMcp({ verbose: false });
     const transport = await waitForTransport();
 
     transport.onclose?.();

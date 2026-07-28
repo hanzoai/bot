@@ -18,7 +18,7 @@ import { copyToClipboard } from "../lib/clipboard.ts";
 import type { MarkdownRenderEnv } from "./markdown-render-options.ts";
 import { escapeMarkdownHtml, isMarkdownBlockArtText } from "./markdown-text.ts";
 
-const blockArtCopyPayloadPrefix = "openclaw:block-art-code:";
+const blockArtCopyPayloadPrefix = "bot:block-art-code:";
 const blockArtCodeBlockCopyPayloadEncoding = "block-art-json";
 
 for (const [language, definition] of Object.entries({

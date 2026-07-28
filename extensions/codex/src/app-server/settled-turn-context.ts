@@ -2,7 +2,7 @@ import {
   embeddedAgentLog,
   formatErrorMessage,
   type AgentMessage,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import type { EmbeddedRunAttemptResult } from "./attempt-terminal.js";
 import { readCodexMirroredSessionHistoryMessages } from "./session-history.js";
 import { serializeCodexMirrorSourceEvidence } from "./transcript-mirror-attestation.js";
@@ -105,7 +105,7 @@ function buildCodexSettledTurnFinalizationContext(params: {
   const messages = Object.freeze(
     structuredClone(params.historyMessages.slice(0, historyBoundaryIndex + 1)),
   );
-  return { source: "openclaw-transcript", messages };
+  return { source: "bot-transcript", messages };
 }
 
 /** Reads and freezes the current active transcript branch after mirroring has settled. */

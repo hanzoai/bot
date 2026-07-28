@@ -62,7 +62,7 @@ export abstract class ChatPaneReset extends ChatPaneBoard {
     const title = t("chat.board.resetTitle");
     const description = t("chat.board.resetDescription");
     return html`
-      <openclaw-modal-dialog
+      <bot-modal-dialog
         label=${title}
         description=${description}
         @modal-cancel=${() => this.settleResetConfirmation(false)}
@@ -92,7 +92,7 @@ export abstract class ChatPaneReset extends ChatPaneBoard {
             </button>
           </div>
         </div>
-      </openclaw-modal-dialog>
+      </bot-modal-dialog>
     `;
   }
 

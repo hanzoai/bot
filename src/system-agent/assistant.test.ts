@@ -1,4 +1,4 @@
-// OpenClaw assistant tests cover plan parsing and inference prompt construction.
+// Bot assistant tests cover plan parsing and inference prompt construction.
 import { describe, expect, it } from "vitest";
 import {
   buildSystemAgentAssistantUserPrompt,
@@ -9,7 +9,7 @@ import type { SystemAgentOverview } from "./overview.js";
 function overview(overrides: Partial<SystemAgentOverview["tools"]> = {}): SystemAgentOverview {
   return {
     config: {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       exists: false,
       valid: false,
       issues: [],
@@ -30,13 +30,13 @@ function overview(overrides: Partial<SystemAgentOverview["tools"]> = {}): System
       reachable: false,
     },
     references: {
-      docsUrl: "https://docs.openclaw.ai",
-      sourceUrl: "https://github.com/openclaw/openclaw",
+      docsUrl: "https://docs.bot.ai",
+      sourceUrl: "https://github.com/hanzoai/bot",
     },
   };
 }
 
-describe("OpenClaw assistant", () => {
+describe("Bot assistant", () => {
   it("parses the first compact JSON command", () => {
     expect(
       parseSystemAgentAssistantPlanText(
@@ -65,7 +65,7 @@ describe("OpenClaw assistant", () => {
           apiKeys: { openai: true, anthropic: false },
         }),
         config: {
-          path: "/tmp/openclaw.json",
+          path: "/tmp/bot.json",
           exists: true,
           valid: true,
           issues: [],
@@ -83,10 +83,10 @@ describe("OpenClaw assistant", () => {
         defaultAgentId: "main",
         defaultModel: "openai/gpt-5.5",
         references: {
-          docsPath: "/tmp/openclaw/docs",
-          docsUrl: "https://docs.openclaw.ai",
-          sourcePath: "/tmp/openclaw",
-          sourceUrl: "https://github.com/openclaw/openclaw",
+          docsPath: "/tmp/bot/docs",
+          docsUrl: "https://docs.bot.ai",
+          sourcePath: "/tmp/bot",
+          sourceUrl: "https://github.com/hanzoai/bot",
         },
       },
     });
@@ -95,8 +95,8 @@ describe("OpenClaw assistant", () => {
     expect(prompt).toContain("Default model: openai/gpt-5.5");
     expect(prompt).toContain("id=main, name=Main, workspace=/tmp/main");
     expect(prompt).toContain("OpenAI API key: found");
-    expect(prompt).toContain("OpenClaw docs: /tmp/openclaw/docs");
-    expect(prompt).toContain("OpenClaw source: /tmp/openclaw");
+    expect(prompt).toContain("Bot docs: /tmp/bot/docs");
+    expect(prompt).toContain("Bot source: /tmp/bot");
   });
 
   it("keeps truncated conversation history valid at a UTF-16 boundary", () => {

@@ -2,15 +2,15 @@ import { randomBytes } from "node:crypto";
 import { mkdtempSync, realpathSync, rmSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import type { ContainerConfig } from "@microsoft/mxc-sdk";
-import { runCommandBuffered } from "openclaw/plugin-sdk/process-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/sandbox";
+import { runCommandBuffered } from "bot/plugin-sdk/process-runtime";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/sandbox";
 import type {
   SandboxBackendHandle,
   SandboxBackendExecSpec,
   SandboxBackendCommandParams,
   SandboxBackendCommandResult,
   SandboxBackendManager,
-} from "openclaw/plugin-sdk/sandbox";
+} from "bot/plugin-sdk/sandbox";
 import { resolveMxcBinaryPath } from "./binary-resolver.js";
 import type { MxcConfig } from "./config.js";
 import { createMxcFsBridge } from "./fs-bridge.js";
@@ -56,7 +56,7 @@ function createLauncherPayloadFile(
   payloadJson: string,
 ): MxcExecFinalizeToken & { payloadFile: string } {
   const payloadDir = mkdtempSync(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-mxc-payload-"),
+    path.join(resolvePreferredBotTmpDir(), "bot-mxc-payload-"),
   );
   const payloadFile = path.join(payloadDir, "payload.json");
   try {
@@ -83,7 +83,7 @@ function cleanupLauncherPayloadFile(token: unknown): void {
 }
 
 function createSandboxTempDir(hostEnv: BaselineHostEnv): string {
-  return mkdtempSync(path.join(resolveSandboxTempDir(hostEnv), "openclaw-mxc-sandbox-"));
+  return mkdtempSync(path.join(resolveSandboxTempDir(hostEnv), "bot-mxc-sandbox-"));
 }
 
 function assertWorkdirInsideWorkspace(workspaceDir: string, workdir: string): string {
@@ -345,7 +345,7 @@ function toBuffer(value: Buffer | string): Buffer {
   return Buffer.from(value, "utf-8");
 }
 
-/** Manager for `openclaw sandbox list` and `openclaw sandbox remove`. */
+/** Manager for `bot sandbox list` and `bot sandbox remove`. */
 export const mxcSandboxBackendManager: SandboxBackendManager = {
   async describeRuntime() {
     return {

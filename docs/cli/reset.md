@@ -1,21 +1,21 @@
 ---
-summary: "CLI reference for `openclaw reset` (reset local state/config)"
+summary: "CLI reference for `bot reset` (reset local state/config)"
 read_when:
   - You want to wipe local state while keeping the CLI installed
   - You want a dry-run of what would be removed
 title: "Reset"
 ---
 
-# `openclaw reset`
+# `bot reset`
 
 Reset local config/state (keeps the CLI installed).
 
 ```bash
-openclaw reset
-openclaw reset --dry-run
-openclaw reset --scope config --yes --non-interactive
-openclaw reset --scope config+creds+sessions --yes --non-interactive
-openclaw reset --scope full --yes --non-interactive
+bot reset
+bot reset --dry-run
+bot reset --scope config --yes --non-interactive
+bot reset --scope config+creds+sessions --yes --non-interactive
+bot reset --scope full --yes --non-interactive
 ```
 
 ## Options
@@ -37,11 +37,11 @@ openclaw reset --scope full --yes --non-interactive
 
 ## Notes
 
-- Run `openclaw backup create` first for a restorable snapshot before removing local state.
+- Run `bot backup create` first for a restorable snapshot before removing local state.
 - Workspace setup state and attestations are rows in the shared SQLite database, so `full` removes them with the state directory; there are no current attestation sidecar files to remove separately.
-- Without `--scope`, `openclaw reset` prompts interactively for the scope to remove.
+- Without `--scope`, `bot reset` prompts interactively for the scope to remove.
 - `--non-interactive` is only valid when both `--scope` and `--yes` are set.
-- `config+creds+sessions` and `full` print `Next: openclaw onboard --install-daemon` when done.
+- `config+creds+sessions` and `full` print `Next: bot onboard --install-daemon` when done.
 
 ## Related
 

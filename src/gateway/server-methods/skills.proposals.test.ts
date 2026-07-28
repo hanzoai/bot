@@ -5,14 +5,14 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createBotTestState,
+  type BotTestState,
+} from "../../test-utils/bot-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import { callGatewayHandler } from "./skills.test-helpers.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: BotTestState;
 let stateDir = "";
 
 const mocks = vi.hoisted(() => ({
@@ -53,7 +53,7 @@ vi.mock("../../infra/clawhub.js", () => ({
 
 vi.mock("../../skills/security/clawhub-verdicts.js", () => ({
   collectClawHubVerdictTargets: vi.fn(() => []),
-  fetchOpenClawSkillSecurityVerdicts: vi.fn(),
+  fetchBotSkillSecurityVerdicts: vi.fn(),
 }));
 
 vi.mock("./chat.js", () => ({
@@ -70,15 +70,15 @@ function callHandler(method: string, params: Record<string, unknown>) {
 
 describe("skills proposal gateway handlers", () => {
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createBotTestState({
       layout: "state-only",
-      prefix: "openclaw-skills-proposals-gateway-state-",
+      prefix: "bot-skills-proposals-gateway-state-",
     });
     mocks.chatSend.mockReset();
     mocks.chatSend.mockImplementation(async ({ respond }) => {
       respond(true, { runId: "run-skill-workshop-revision", status: "started" }, undefined);
     });
-    mocks.workspaceDir = await tempDirs.make("openclaw-skills-proposals-gateway-");
+    mocks.workspaceDir = await tempDirs.make("bot-skills-proposals-gateway-");
     stateDir = testState.stateDir;
   });
 
@@ -168,7 +168,7 @@ describe("skills proposal gateway handlers", () => {
     expect(first.ok).toBe(true);
     const firstCreated = first.response as { record: { id: string } };
 
-    const secondWorkspaceDir = await tempDirs.make("openclaw-skills-proposals-gateway-second-");
+    const secondWorkspaceDir = await tempDirs.make("bot-skills-proposals-gateway-second-");
     mocks.workspaceDir = secondWorkspaceDir;
     const second = await callHandler("skills.proposals.create", {
       name: "Second Gateway Skill",
@@ -215,7 +215,7 @@ describe("skills proposal gateway handlers", () => {
     expect(status).toMatchObject({
       ok: true,
       response: {
-        schema: "openclaw.skill-workshop.history-scan.v1",
+        schema: "bot.skill-workshop.history-scan.v1",
         hasScanned: false,
         reviewedSessions: 0,
         ideasFound: 0,

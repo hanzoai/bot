@@ -15,7 +15,7 @@ if (!customElements.get("mcp-app-view")) {
   customElements.define("mcp-app-view", TestMcpAppView);
 }
 
-type BoardWidgetCell = HTMLElementTagNameMap["openclaw-board-widget-cell"];
+type BoardWidgetCell = HTMLElementTagNameMap["bot-board-widget-cell"];
 
 function widget(overrides: Partial<BoardViewWidget> = {}): BoardViewWidget {
   return {
@@ -66,7 +66,7 @@ async function mount(
   currentWidget: BoardViewWidget,
   currentCallbacks: BoardWidgetCellCallbacks,
 ): Promise<BoardWidgetCell> {
-  const cell = document.createElement("openclaw-board-widget-cell");
+  const cell = document.createElement("bot-board-widget-cell");
   cell.widget = currentWidget;
   cell.rect = { name: currentWidget.name, x: 0, y: 0, w: 6, h: currentWidget.sizeH };
   cell.sessionKey = "agent:main:test";
@@ -168,7 +168,7 @@ describe("board MCP App cell lifecycle", () => {
     cell
       .querySelector("mcp-app-view")
       ?.dispatchEvent(
-        new CustomEvent("openclaw-mcp-app-view-expired", { bubbles: true, composed: true }),
+        new CustomEvent("bot-mcp-app-view-expired", { bubbles: true, composed: true }),
       );
     await settle(cell);
 

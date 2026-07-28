@@ -100,7 +100,7 @@ export function prepareTestboxLeaseFreshness({ args, env, provider, repoRoot }) 
   if (provider !== "blacksmith-testbox" || args[0] !== "run" || !id?.startsWith("tbx_")) {
     return null;
   }
-  const configuredStateDir = env.OPENCLAW_TESTBOX_LEASE_STATE_DIR?.trim();
+  const configuredStateDir = env.BOT_TESTBOX_LEASE_STATE_DIR?.trim();
   if (env.VITEST && !configuredStateDir) {
     return null;
   }
@@ -110,9 +110,9 @@ export function prepareTestboxLeaseFreshness({ args, env, provider, repoRoot }) 
   if (existsSync(path)) {
     const saved = JSON.parse(readFileSync(path, "utf8"));
     const staleReasons = testboxLeaseStaleReasons(saved, current);
-    if (staleReasons.length > 0 && env.OPENCLAW_TESTBOX_ALLOW_STALE !== "1") {
+    if (staleReasons.length > 0 && env.BOT_TESTBOX_ALLOW_STALE !== "1") {
       throw new Error(
-        `Testbox ${id} is stale (${staleReasons.join(", ")}); stop it and warm a fresh lease, or set OPENCLAW_TESTBOX_ALLOW_STALE=1 for an intentional diagnostic reuse`,
+        `Testbox ${id} is stale (${staleReasons.join(", ")}); stop it and warm a fresh lease, or set BOT_TESTBOX_ALLOW_STALE=1 for an intentional diagnostic reuse`,
       );
     }
     return { current, path };

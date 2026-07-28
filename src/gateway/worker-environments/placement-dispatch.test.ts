@@ -4,10 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+  type BotStateDatabase,
+} from "../../state/bot-state-db.js";
 import {
   type DispatchStage,
   type PlacementStore,
@@ -18,17 +18,17 @@ import { createWorkerSessionPlacementStore } from "./placement-store.js";
 
 describe("worker placement dispatch", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: BotStateDatabase;
   let placementStore: PlacementStore;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-dispatch-"));
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "bot-dispatch-"));
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
     placementStore = createWorkerSessionPlacementStore({ database, now: () => 1_000 });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 

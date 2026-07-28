@@ -31,7 +31,7 @@ const NATIVE_CLAIM_SUFFIX = ".native-importing";
 class DeviceIdentityMigrationRequiredError extends Error {
   constructor(filePath: string) {
     super(
-      `Legacy device identity exists at ${filePath}. Run "openclaw doctor --fix" before starting the gateway or connecting this client.`,
+      `Legacy device identity exists at ${filePath}. Run "bot doctor --fix" before starting the gateway or connecting this client.`,
     );
     this.name = "DeviceIdentityMigrationRequiredError";
   }
@@ -55,7 +55,7 @@ function pathMayExist(filePath: string): boolean {
 }
 
 function resolveLegacyStateDir(options: DeviceIdentityStoreOptions): string {
-  if (options.env?.OPENCLAW_STATE_DIR?.trim()) {
+  if (options.env?.BOT_STATE_DIR?.trim()) {
     return resolveStateDir(options.env);
   }
   if (options.path) {

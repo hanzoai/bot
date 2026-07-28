@@ -1,6 +1,6 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 // Memory Core helper module supports test manager helpers behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import type { BotConfig } from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import type { MemoryIndexManager } from "./index.js";
 
 const ensureEmbeddingMocksLoaded = createLazyRuntimeModule(() =>
@@ -12,7 +12,7 @@ const loadGetMemorySearchManager = createLazyRuntimeModule(() =>
 );
 
 export async function getRequiredMemoryIndexManager(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   purpose?: "default" | "status" | "cli";
 }): Promise<MemoryIndexManager> {

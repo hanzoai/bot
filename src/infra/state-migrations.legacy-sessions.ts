@@ -58,7 +58,7 @@ export async function migrateLegacySessions(
   }
   if (detected.sessions.targetStoreAliases.hasFinalSymlink) {
     warnings.push(
-      `Deferred legacy session migration in final-component symlink store ${detected.sessions.targetStorePath}; configure one canonical session.store path, then rerun openclaw doctor --fix`,
+      `Deferred legacy session migration in final-component symlink store ${detected.sessions.targetStorePath}; configure one canonical session.store path, then rerun bot doctor --fix`,
     );
     return { changes, warnings };
   }
@@ -173,7 +173,7 @@ export async function migrateLegacySessions(
       }
     } else {
       warnings.push(
-        `Target sessions store unreadable; left untouched to avoid overwriting at ${detected.sessions.targetStorePath}. Run openclaw doctor --fix to archive it and retry the legacy merge.`,
+        `Target sessions store unreadable; left untouched to avoid overwriting at ${detected.sessions.targetStorePath}. Run bot doctor --fix to archive it and retry the legacy merge.`,
       );
     }
   }

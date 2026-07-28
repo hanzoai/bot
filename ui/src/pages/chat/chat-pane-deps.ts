@@ -1,5 +1,5 @@
 export { consume } from "@lit/context";
-export { asNullableRecord as catalogRawRecord } from "@openclaw/normalization-core/record-coerce";
+export { asNullableRecord as catalogRawRecord } from "@hanzo/bot-normalization-core/record-coerce";
 export { html, nothing } from "lit";
 export { property, state as litState } from "lit/decorators.js";
 export {
@@ -144,7 +144,7 @@ export {
   uiSessionEventMatches,
 } from "../../lib/sessions/session-key.ts";
 export { SessionUnreadPatchGuard } from "../../lib/sessions/unread.ts";
-export { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+export { BotLightDomElement } from "../../lit/bot-element.ts";
 export { PollController } from "../../lit/poll-controller.ts";
 export { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 export {

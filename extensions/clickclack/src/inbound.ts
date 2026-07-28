@@ -1,11 +1,11 @@
-import { createChannelInboundEnvelopeBuilder } from "openclaw/plugin-sdk/channel-inbound";
-import { deriveDurableFinalDeliveryRequirements } from "openclaw/plugin-sdk/channel-outbound";
+import { createChannelInboundEnvelopeBuilder } from "bot/plugin-sdk/channel-inbound";
+import { deriveDurableFinalDeliveryRequirements } from "bot/plugin-sdk/channel-outbound";
 /**
- * Converts authorized ClickClack messages into OpenClaw agent/model replies and
+ * Converts authorized ClickClack messages into Bot agent/model replies and
  * routes resulting outbound text back to ClickClack.
  */
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { normalizeAgentId } from "bot/plugin-sdk/routing";
 import { resolveClickClackInboundAccess, type ClickClackInboundAccess } from "./access.js";
 import { createClickClackActivityPublisher, type ClickClackActivityPublisher } from "./activity.js";
 import { resolveClickClackDiscussionRoute } from "./discussions/routing.js";
@@ -38,7 +38,7 @@ function resolveClickClackAgentRunId(messageId: string): string | undefined {
 }
 
 function resolveAccountAgentRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   account: ResolvedClickClackAccount;
   target: string;
   isDirect: boolean;
@@ -92,7 +92,7 @@ function resolveAccountAgentRoute(params: {
 
 async function dispatchModelReply(params: {
   account: ResolvedClickClackAccount;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   message: ClickClackMessage;
   route: { agentId: string };
   target: string;
@@ -163,7 +163,7 @@ export async function handleClickClackInbound(params: {
       : { chatType: "group", kind: "channel", id: message.channel_id ?? "" },
   );
   const accountRoute = resolveAccountAgentRoute({
-    cfg: params.config as OpenClawConfig,
+    cfg: params.config as BotConfig,
     account: params.account,
     target,
     isDirect,
@@ -197,7 +197,7 @@ export async function handleClickClackInbound(params: {
   if (params.account.replyMode === "model" && !discussionRoute) {
     await dispatchModelReply({
       account: params.account,
-      cfg: params.config as OpenClawConfig,
+      cfg: params.config as BotConfig,
       message,
       route,
       target,
@@ -235,7 +235,7 @@ export async function handleClickClackInbound(params: {
   // Preserve both normalized channel fields and ClickClack-native ids so reply
   // routing, session recovery, and command authorization see the same message.
   const body = createChannelInboundEnvelopeBuilder({
-    cfg: params.config as OpenClawConfig,
+    cfg: params.config as BotConfig,
     route,
   })({
     channel: "ClickClack",
@@ -304,7 +304,7 @@ export async function handleClickClackInbound(params: {
       }
     : undefined;
   const dispatchPromise = runtime.channel.inbound.dispatch({
-    cfg: params.config as OpenClawConfig,
+    cfg: params.config as BotConfig,
     channel: CHANNEL_ID,
     accountId: params.account.accountId,
     route: { agentId: route.agentId, dmScope: route.dmScope, sessionKey: route.sessionKey },

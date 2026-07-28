@@ -1,9 +1,9 @@
 // Mattermost tests cover reply delivery plugin behavior.
 import path from "node:path";
-import type { ChunkMode } from "openclaw/plugin-sdk/reply-runtime";
-import { createOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+import type { ChunkMode } from "bot/plugin-sdk/reply-runtime";
+import { createBotTestState } from "bot/plugin-sdk/test-state";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, PluginRuntime } from "../../runtime-api.js";
+import type { BotConfig, PluginRuntime } from "../../runtime-api.js";
 import {
   createMattermostReplyDeliveryBarrier,
   deliverMattermostReplyPayload,
@@ -28,7 +28,7 @@ function createReplyDeliveryCore(): DeliverMattermostReplyPayloadParams["core"] 
         resolveChunkMode: vi.fn<() => ChunkMode>(() => "length"),
         resolveTextChunkLimit: vi.fn(
           (
-            _cfg?: OpenClawConfig,
+            _cfg?: BotConfig,
             _provider?: string,
             _accountId?: string | null,
             opts?: { fallbackLimit?: number },
@@ -122,7 +122,7 @@ describe("createMattermostReplyDeliveryBarrier", () => {
 describe("deliverMattermostReplyPayload", () => {
   it("suppresses payloads flagged as reasoning", async () => {
     const sendMessage = vi.fn(async () => undefined);
-    const cfg = {} satisfies OpenClawConfig;
+    const cfg = {} satisfies BotConfig;
     const core = createReplyDeliveryCore();
 
     const outcome = await deliverMattermostReplyPayload({
@@ -144,7 +144,7 @@ describe("deliverMattermostReplyPayload", () => {
 
   it("returns 'empty' for substantive text that produced no send (regression: #80501)", async () => {
     const sendMessage = vi.fn(async () => undefined);
-    const cfg = {} satisfies OpenClawConfig;
+    const cfg = {} satisfies BotConfig;
     const core = createReplyDeliveryCore();
     // Make the markdown table converter strip the text to empty so
     // deliverTextOrMediaReply sees an empty chunked text and returns "empty".
@@ -170,7 +170,7 @@ describe("deliverMattermostReplyPayload", () => {
 
   it("suppresses reasoning-prefixed payloads even without an explicit flag", async () => {
     const sendMessage = vi.fn(async () => undefined);
-    const cfg = {} satisfies OpenClawConfig;
+    const cfg = {} satisfies BotConfig;
     const core = createReplyDeliveryCore();
 
     await deliverMattermostReplyPayload({
@@ -191,7 +191,7 @@ describe("deliverMattermostReplyPayload", () => {
 
   it("suppresses reasoning payloads formatted as a Mattermost blockquote", async () => {
     const sendMessage = vi.fn(async () => undefined);
-    const cfg = {} satisfies OpenClawConfig;
+    const cfg = {} satisfies BotConfig;
     const core = createReplyDeliveryCore();
 
     await deliverMattermostReplyPayload({
@@ -212,7 +212,7 @@ describe("deliverMattermostReplyPayload", () => {
 
   it("does not suppress messages that mention Reasoning: mid-text", async () => {
     const sendMessage = vi.fn(async () => undefined);
-    const cfg = {} satisfies OpenClawConfig;
+    const cfg = {} satisfies BotConfig;
     const core = createReplyDeliveryCore();
 
     await deliverMattermostReplyPayload({
@@ -241,11 +241,11 @@ describe("deliverMattermostReplyPayload", () => {
   });
 
   it("passes agent-scoped mediaLocalRoots when sending media paths", async () => {
-    const openClawState = await createOpenClawTestState({
+    const botState = await createBotTestState({
       layout: "state-only",
-      prefix: "openclaw-mm-state-",
+      prefix: "bot-mm-state-",
     });
-    const stateDir = openClawState.stateDir;
+    const stateDir = botState.stateDir;
 
     try {
       const sendMessage = vi.fn(async () => undefined);
@@ -253,7 +253,7 @@ describe("deliverMattermostReplyPayload", () => {
 
       const agentId = "agent-1";
       const mediaUrl = `file://${path.join(stateDir, `workspace-${agentId}`, "photo.png")}`;
-      const cfg = {} satisfies OpenClawConfig;
+      const cfg = {} satisfies BotConfig;
 
       await deliverMattermostReplyPayload({
         core,
@@ -287,13 +287,13 @@ describe("deliverMattermostReplyPayload", () => {
         }),
       );
     } finally {
-      await openClawState.cleanup();
+      await botState.cleanup();
     }
   });
 
   it("forwards replyToId for text-only chunked replies", async () => {
     const sendMessage = vi.fn(async () => undefined);
-    const cfg = {} satisfies OpenClawConfig;
+    const cfg = {} satisfies BotConfig;
     const core = createReplyDeliveryCore();
     core.channel.text.chunkMarkdownTextWithMode = vi.fn(() => ["hello"]);
 

@@ -13,14 +13,14 @@ import { CopilotPanelBindingRegistry, CopilotSessionRegistry } from "./copilot-s
 import { createCopilotSessionController } from "./copilot-session.js";
 import { gatewayUrlFromPairing } from "./panel-core.js";
 
-const PANEL_PORT = "openclaw-copilot-panel";
+const PANEL_PORT = "bot-copilot-panel";
 
 /** Background-owned session custody for all tab-specific panel documents. */
 export function createCopilotController({
   chromeApi = chrome,
   getConfig,
   isTabShared,
-  addTabToOpenClawGroup,
+  addTabToBotGroup,
   attachDebugger,
   revokeDebugger,
   restoreDebugger,
@@ -482,7 +482,7 @@ export function createCopilotController({
   }
 
   async function shareTab(tabId) {
-    await addTabToOpenClawGroup(tabId);
+    await addTabToBotGroup(tabId);
     scheduleTabsSync();
     await refreshPanelState(tabId);
   }

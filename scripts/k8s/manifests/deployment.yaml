@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: openclaw
+  name: bot
   labels:
-    app: openclaw
+    app: bot
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: openclaw
+      app: bot
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: openclaw
+        app: bot
     spec:
       automountServiceAccountToken: false
       securityContext:
@@ -29,9 +29,9 @@ spec:
             - sh
             - -c
             - |
-              cp /config/openclaw.json /home/node/.openclaw/openclaw.json
-              mkdir -p /home/node/.openclaw/workspace
-              cp /config/AGENTS.md /home/node/.openclaw/workspace/AGENTS.md
+              cp /config/bot.json /home/node/.hanzoai/bot.json
+              mkdir -p /home/node/.bot/workspace
+              cp /config/AGENTS.md /home/node/.bot/workspace/AGENTS.md
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
@@ -43,13 +43,13 @@ spec:
               memory: 64Mi
               cpu: 100m
           volumeMounts:
-            - name: openclaw-home
-              mountPath: /home/node/.openclaw
+            - name: bot-home
+              mountPath: /home/node/.bot
             - name: config
               mountPath: /config
       containers:
         - name: gateway
-          image: ghcr.io/openclaw/openclaw:slim
+          image: ghcr.io/hanzoai/bot:slim
           imagePullPolicy: IfNotPresent
           command:
             - node
@@ -63,37 +63,37 @@ spec:
           env:
             - name: HOME
               value: /home/node
-            - name: OPENCLAW_CONFIG_DIR
-              value: /home/node/.openclaw
+            - name: BOT_CONFIG_DIR
+              value: /home/node/.bot
             - name: NODE_ENV
               value: production
-            - name: OPENCLAW_GATEWAY_TOKEN
+            - name: BOT_GATEWAY_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: openclaw-secrets
-                  key: OPENCLAW_GATEWAY_TOKEN
+                  name: bot-secrets
+                  key: BOT_GATEWAY_TOKEN
             - name: ANTHROPIC_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: openclaw-secrets
+                  name: bot-secrets
                   key: ANTHROPIC_API_KEY
                   optional: true
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: openclaw-secrets
+                  name: bot-secrets
                   key: OPENAI_API_KEY
                   optional: true
             - name: GEMINI_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: openclaw-secrets
+                  name: bot-secrets
                   key: GEMINI_API_KEY
                   optional: true
             - name: OPENROUTER_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: openclaw-secrets
+                  name: bot-secrets
                   key: OPENROUTER_API_KEY
                   optional: true
           resources:
@@ -122,8 +122,8 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 5
           volumeMounts:
-            - name: openclaw-home
-              mountPath: /home/node/.openclaw
+            - name: bot-home
+              mountPath: /home/node/.bot
             - name: tmp-volume
               mountPath: /tmp
           securityContext:
@@ -136,11 +136,11 @@ spec:
               drop:
                 - ALL
       volumes:
-        - name: openclaw-home
+        - name: bot-home
           persistentVolumeClaim:
-            claimName: openclaw-home-pvc
+            claimName: bot-home-pvc
         - name: config
           configMap:
-            name: openclaw-config
+            name: bot-config
         - name: tmp-volume
           emptyDir: {}

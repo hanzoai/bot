@@ -25,234 +25,234 @@
     "useDefineForClassFields": false,
     "verbatimModuleSyntax": true,
     "paths": {
-      "openclaw/plugin-sdk/*": ["./src/plugin-sdk/*.ts"],
-      "@openclaw/ai": ["./packages/ai/src/index.ts"],
-      "@openclaw/ai/diagnostics": ["./packages/ai/src/utils/diagnostics.ts"],
-      "@openclaw/ai/event-stream": ["./packages/ai/src/utils/event-stream.ts"],
-      "@openclaw/ai/providers": ["./packages/ai/src/providers.ts"],
-      "@openclaw/ai/transports": ["./packages/ai/src/transports.ts"],
-      "@openclaw/ai/types": ["./packages/ai/src/types.ts"],
-      "@openclaw/ai/validation": ["./packages/ai/src/validation.ts"],
-      "@openclaw/ai/internal/anthropic": ["./packages/ai/src/internal/anthropic.ts"],
-      "@openclaw/ai/internal/openai": ["./packages/ai/src/internal/openai.ts"],
-      "@openclaw/ai/internal/retry-after": ["./packages/ai/src/internal/retry-after.ts"],
-      "@openclaw/ai/internal/runtime": ["./packages/ai/src/internal/runtime.ts"],
-      "@openclaw/ai/internal/shared": ["./packages/ai/src/internal/shared.ts"],
-      "@openclaw/agent-core": ["./packages/agent-core/src/index.ts"],
-      "@openclaw/agent-core/*": ["./packages/agent-core/src/*"],
-      "@openclaw/llm-core": ["./packages/llm-core/src/index.ts"],
-      "@openclaw/llm-core/diagnostics": ["./packages/llm-core/src/utils/diagnostics.ts"],
-      "@openclaw/llm-core/event-stream": ["./packages/llm-core/src/utils/event-stream.ts"],
-      "@openclaw/llm-core/validation": ["./packages/llm-core/src/validation.ts"],
-      "@openclaw/llm-core/*": ["./packages/llm-core/src/*"],
-      "@openclaw/model-catalog-core": ["./packages/model-catalog-core/src/index.ts"],
-      "@openclaw/model-catalog-core/configured-model-refs": [
+      "bot/plugin-sdk/*": ["./src/plugin-sdk/*.ts"],
+      "@hanzo/bot-ai": ["./packages/ai/src/index.ts"],
+      "@hanzo/bot-ai/diagnostics": ["./packages/ai/src/utils/diagnostics.ts"],
+      "@hanzo/bot-ai/event-stream": ["./packages/ai/src/utils/event-stream.ts"],
+      "@hanzo/bot-ai/providers": ["./packages/ai/src/providers.ts"],
+      "@hanzo/bot-ai/transports": ["./packages/ai/src/transports.ts"],
+      "@hanzo/bot-ai/types": ["./packages/ai/src/types.ts"],
+      "@hanzo/bot-ai/validation": ["./packages/ai/src/validation.ts"],
+      "@hanzo/bot-ai/internal/anthropic": ["./packages/ai/src/internal/anthropic.ts"],
+      "@hanzo/bot-ai/internal/openai": ["./packages/ai/src/internal/openai.ts"],
+      "@hanzo/bot-ai/internal/retry-after": ["./packages/ai/src/internal/retry-after.ts"],
+      "@hanzo/bot-ai/internal/runtime": ["./packages/ai/src/internal/runtime.ts"],
+      "@hanzo/bot-ai/internal/shared": ["./packages/ai/src/internal/shared.ts"],
+      "@hanzo/bot-agent-core": ["./packages/agent-core/src/index.ts"],
+      "@hanzo/bot-agent-core/*": ["./packages/agent-core/src/*"],
+      "@hanzo/bot-llm-core": ["./packages/llm-core/src/index.ts"],
+      "@hanzo/bot-llm-core/diagnostics": ["./packages/llm-core/src/utils/diagnostics.ts"],
+      "@hanzo/bot-llm-core/event-stream": ["./packages/llm-core/src/utils/event-stream.ts"],
+      "@hanzo/bot-llm-core/validation": ["./packages/llm-core/src/validation.ts"],
+      "@hanzo/bot-llm-core/*": ["./packages/llm-core/src/*"],
+      "@hanzo/bot-model-catalog-core": ["./packages/model-catalog-core/src/index.ts"],
+      "@hanzo/bot-model-catalog-core/configured-model-refs": [
         "./packages/model-catalog-core/src/configured-model-refs.ts"
       ],
-      "@openclaw/model-catalog-core/model-catalog-normalize": [
+      "@hanzo/bot-model-catalog-core/model-catalog-normalize": [
         "./packages/model-catalog-core/src/model-catalog-normalize.ts"
       ],
-      "@openclaw/model-catalog-core/model-catalog-refs": [
+      "@hanzo/bot-model-catalog-core/model-catalog-refs": [
         "./packages/model-catalog-core/src/model-catalog-refs.ts"
       ],
-      "@openclaw/model-catalog-core/model-catalog-types": [
+      "@hanzo/bot-model-catalog-core/model-catalog-types": [
         "./packages/model-catalog-core/src/model-catalog-types.ts"
       ],
-      "@openclaw/model-catalog-core/provider-id": [
+      "@hanzo/bot-model-catalog-core/provider-id": [
         "./packages/model-catalog-core/src/provider-id.ts"
       ],
-      "@openclaw/model-catalog-core/provider-model-id-normalization": [
+      "@hanzo/bot-model-catalog-core/provider-model-id-normalization": [
         "./packages/model-catalog-core/src/provider-model-id-normalization.ts"
       ],
-      "@openclaw/model-catalog-core/provider-model-id-normalize": [
+      "@hanzo/bot-model-catalog-core/provider-model-id-normalize": [
         "./packages/model-catalog-core/src/provider-model-id-normalize.ts"
       ],
-      "@openclaw/model-catalog-core/*": ["./packages/model-catalog-core/src/*"],
-      "@openclaw/gateway-client": ["./packages/gateway-client/src/index.ts"],
-      "@openclaw/gateway-client/browser": ["./packages/gateway-client/src/browser.ts"],
-      "@openclaw/gateway-client/*": ["./packages/gateway-client/src/*"],
-      "@openclaw/gateway-protocol": ["./packages/gateway-protocol/src/index.ts"],
-      "@openclaw/gateway-protocol/client-info": [
+      "@hanzo/bot-model-catalog-core/*": ["./packages/model-catalog-core/src/*"],
+      "@hanzo/bot-gateway-client": ["./packages/gateway-client/src/index.ts"],
+      "@hanzo/bot-gateway-client/browser": ["./packages/gateway-client/src/browser.ts"],
+      "@hanzo/bot-gateway-client/*": ["./packages/gateway-client/src/*"],
+      "@hanzo/bot-gateway-protocol": ["./packages/gateway-protocol/src/index.ts"],
+      "@hanzo/bot-gateway-protocol/client-info": [
         "./packages/gateway-protocol/src/client-info.ts"
       ],
-      "@openclaw/gateway-protocol/connect-error-details": [
+      "@hanzo/bot-gateway-protocol/connect-error-details": [
         "./packages/gateway-protocol/src/connect-error-details.ts"
       ],
-      "@openclaw/gateway-protocol/gateway-error-details": [
+      "@hanzo/bot-gateway-protocol/gateway-error-details": [
         "./packages/gateway-protocol/src/gateway-error-details.ts"
       ],
-      "@openclaw/gateway-protocol/frame-guards": [
+      "@hanzo/bot-gateway-protocol/frame-guards": [
         "./packages/gateway-protocol/src/frame-guards.ts"
       ],
-      "@openclaw/gateway-protocol/schema": ["./packages/gateway-protocol/src/schema.ts"],
-      "@openclaw/gateway-protocol/startup-unavailable": [
+      "@hanzo/bot-gateway-protocol/schema": ["./packages/gateway-protocol/src/schema.ts"],
+      "@hanzo/bot-gateway-protocol/startup-unavailable": [
         "./packages/gateway-protocol/src/startup-unavailable.ts"
       ],
-      "@openclaw/gateway-protocol/version": ["./packages/gateway-protocol/src/version.ts"],
-      "@openclaw/gateway-protocol/*": ["./packages/gateway-protocol/src/*"],
-      "@openclaw/media-generation-core": ["./packages/media-generation-core/src/index.ts"],
-      "@openclaw/media-generation-core/capability-model-ref": [
+      "@hanzo/bot-gateway-protocol/version": ["./packages/gateway-protocol/src/version.ts"],
+      "@hanzo/bot-gateway-protocol/*": ["./packages/gateway-protocol/src/*"],
+      "@hanzo/bot-media-generation-core": ["./packages/media-generation-core/src/index.ts"],
+      "@hanzo/bot-media-generation-core/capability-model-ref": [
         "./packages/media-generation-core/src/capability-model-ref.ts"
       ],
-      "@openclaw/media-generation-core/catalog": [
+      "@hanzo/bot-media-generation-core/catalog": [
         "./packages/media-generation-core/src/catalog.ts"
       ],
-      "@openclaw/media-generation-core/model-ref": [
+      "@hanzo/bot-media-generation-core/model-ref": [
         "./packages/media-generation-core/src/model-ref.ts"
       ],
-      "@openclaw/media-generation-core/normalization": [
+      "@hanzo/bot-media-generation-core/normalization": [
         "./packages/media-generation-core/src/normalization.ts"
       ],
-      "@openclaw/media-generation-core/*": ["./packages/media-generation-core/src/*"],
-      "@openclaw/media-core": ["./packages/media-core/src/index.ts"],
-      "@openclaw/media-core/base64": ["./packages/media-core/src/base64.ts"],
-      "@openclaw/media-core/constants": ["./packages/media-core/src/constants.ts"],
-      "@openclaw/media-core/content-length": ["./packages/media-core/src/content-length.ts"],
-      "@openclaw/media-core/file-name": ["./packages/media-core/src/file-name.ts"],
-      "@openclaw/media-core/inbound-path-policy": [
+      "@hanzo/bot-media-generation-core/*": ["./packages/media-generation-core/src/*"],
+      "@hanzo/bot-media-core": ["./packages/media-core/src/index.ts"],
+      "@hanzo/bot-media-core/base64": ["./packages/media-core/src/base64.ts"],
+      "@hanzo/bot-media-core/constants": ["./packages/media-core/src/constants.ts"],
+      "@hanzo/bot-media-core/content-length": ["./packages/media-core/src/content-length.ts"],
+      "@hanzo/bot-media-core/file-name": ["./packages/media-core/src/file-name.ts"],
+      "@hanzo/bot-media-core/inbound-path-policy": [
         "./packages/media-core/src/inbound-path-policy.ts"
       ],
-      "@openclaw/media-core/inline-image-data-url": [
+      "@hanzo/bot-media-core/inline-image-data-url": [
         "./packages/media-core/src/inline-image-data-url.ts"
       ],
-      "@openclaw/media-core/media-source-url": [
+      "@hanzo/bot-media-core/media-source-url": [
         "./packages/media-core/src/media-source-url.ts"
       ],
-      "@openclaw/media-core/mime": ["./packages/media-core/src/mime.ts"],
-      "@openclaw/media-core/read-byte-stream-with-limit": [
+      "@hanzo/bot-media-core/mime": ["./packages/media-core/src/mime.ts"],
+      "@hanzo/bot-media-core/read-byte-stream-with-limit": [
         "./packages/media-core/src/read-byte-stream-with-limit.ts"
       ],
-      "@openclaw/media-core/*": ["./packages/media-core/src/*"],
-      "@openclaw/media-understanding-common/*": [
+      "@hanzo/bot-media-core/*": ["./packages/media-core/src/*"],
+      "@hanzo/bot-media-understanding-common/*": [
         "./packages/media-understanding-common/src/*"
       ],
-      "@openclaw/markdown-core": ["./packages/markdown-core/src/index.ts"],
-      "@openclaw/markdown-core/code-spans": ["./packages/markdown-core/src/code-spans.ts"],
-      "@openclaw/markdown-core/fences": ["./packages/markdown-core/src/fences.ts"],
-      "@openclaw/markdown-core/frontmatter": ["./packages/markdown-core/src/frontmatter.ts"],
-      "@openclaw/markdown-core/ir": ["./packages/markdown-core/src/ir.ts"],
-      "@openclaw/markdown-core/render": ["./packages/markdown-core/src/render.ts"],
-      "@openclaw/markdown-core/render-aware-chunking": [
+      "@hanzo/bot-markdown-core": ["./packages/markdown-core/src/index.ts"],
+      "@hanzo/bot-markdown-core/code-spans": ["./packages/markdown-core/src/code-spans.ts"],
+      "@hanzo/bot-markdown-core/fences": ["./packages/markdown-core/src/fences.ts"],
+      "@hanzo/bot-markdown-core/frontmatter": ["./packages/markdown-core/src/frontmatter.ts"],
+      "@hanzo/bot-markdown-core/ir": ["./packages/markdown-core/src/ir.ts"],
+      "@hanzo/bot-markdown-core/render": ["./packages/markdown-core/src/render.ts"],
+      "@hanzo/bot-markdown-core/render-aware-chunking": [
         "./packages/markdown-core/src/render-aware-chunking.ts"
       ],
-      "@openclaw/markdown-core/tables": ["./packages/markdown-core/src/tables.ts"],
-      "@openclaw/markdown-core/types": ["./packages/markdown-core/src/types.ts"],
-      "@openclaw/markdown-core/*": ["./packages/markdown-core/src/*"],
-      "@openclaw/normalization-core": ["./packages/normalization-core/src/index.ts"],
-      "@openclaw/normalization-core/agent-id": [
+      "@hanzo/bot-markdown-core/tables": ["./packages/markdown-core/src/tables.ts"],
+      "@hanzo/bot-markdown-core/types": ["./packages/markdown-core/src/types.ts"],
+      "@hanzo/bot-markdown-core/*": ["./packages/markdown-core/src/*"],
+      "@hanzo/bot-normalization-core": ["./packages/normalization-core/src/index.ts"],
+      "@hanzo/bot-normalization-core/agent-id": [
         "./packages/normalization-core/src/agent-id.ts"
       ],
-      "@openclaw/normalization-core/boolean-coercion": [
+      "@hanzo/bot-normalization-core/boolean-coercion": [
         "./packages/normalization-core/src/boolean-coercion.ts"
       ],
-      "@openclaw/normalization-core/cjk-chars": [
+      "@hanzo/bot-normalization-core/cjk-chars": [
         "./packages/normalization-core/src/cjk-chars.ts"
       ],
-      "@openclaw/normalization-core/error-coercion": [
+      "@hanzo/bot-normalization-core/error-coercion": [
         "./packages/normalization-core/src/error-coercion.ts"
       ],
-      "@openclaw/normalization-core/expect": ["./packages/normalization-core/src/expect.ts"],
-      "@openclaw/normalization-core/number-coercion": [
+      "@hanzo/bot-normalization-core/expect": ["./packages/normalization-core/src/expect.ts"],
+      "@hanzo/bot-normalization-core/number-coercion": [
         "./packages/normalization-core/src/number-coercion.ts"
       ],
-      "@openclaw/normalization-core/phone-presentation": [
+      "@hanzo/bot-normalization-core/phone-presentation": [
         "./packages/normalization-core/src/phone-presentation.ts"
       ],
-      "@openclaw/normalization-core/record-coerce": [
+      "@hanzo/bot-normalization-core/record-coerce": [
         "./packages/normalization-core/src/record-coerce.ts"
       ],
-      "@openclaw/normalization-core/result": [
+      "@hanzo/bot-normalization-core/result": [
         "./packages/normalization-core/src/result.ts"
       ],
-      "@openclaw/normalization-core/string-coerce": [
+      "@hanzo/bot-normalization-core/string-coerce": [
         "./packages/normalization-core/src/string-coerce.ts"
       ],
-      "@openclaw/normalization-core/string-normalization": [
+      "@hanzo/bot-normalization-core/string-normalization": [
         "./packages/normalization-core/src/string-normalization.ts"
       ],
-      "@openclaw/normalization-core/utf16-slice": [
+      "@hanzo/bot-normalization-core/utf16-slice": [
         "./packages/normalization-core/src/utf16-slice.ts"
       ],
-      "@openclaw/normalization-core/*": ["./packages/normalization-core/src/*"],
-      "@openclaw/retry": ["./packages/retry/src/index.ts"],
-      "@openclaw/session-url-contract": ["./packages/session-url-contract/src/index.ts"],
-      "@openclaw/session-url-contract/*": ["./packages/session-url-contract/src/*"],
-      "@openclaw/workboard-contract": ["./packages/workboard-contract/src/index.ts"],
-      "@openclaw/acp-core": ["./packages/acp-core/src/index.ts"],
-      "@openclaw/acp-core/meta": ["./packages/acp-core/src/meta.ts"],
-      "@openclaw/acp-core/session": ["./packages/acp-core/src/session.ts"],
-      "@openclaw/acp-core/session-interaction-mode": [
+      "@hanzo/bot-normalization-core/*": ["./packages/normalization-core/src/*"],
+      "@hanzo/bot-retry": ["./packages/retry/src/index.ts"],
+      "@hanzo/bot-session-url-contract": ["./packages/session-url-contract/src/index.ts"],
+      "@hanzo/bot-session-url-contract/*": ["./packages/session-url-contract/src/*"],
+      "@hanzo/bot-workboard-contract": ["./packages/workboard-contract/src/index.ts"],
+      "@hanzo/bot-acp-core": ["./packages/acp-core/src/index.ts"],
+      "@hanzo/bot-acp-core/meta": ["./packages/acp-core/src/meta.ts"],
+      "@hanzo/bot-acp-core/session": ["./packages/acp-core/src/session.ts"],
+      "@hanzo/bot-acp-core/session-interaction-mode": [
         "./packages/acp-core/src/session-interaction-mode.ts"
       ],
-      "@openclaw/acp-core/session-lineage-meta": [
+      "@hanzo/bot-acp-core/session-lineage-meta": [
         "./packages/acp-core/src/session-lineage-meta.ts"
       ],
-      "@openclaw/acp-core/types": ["./packages/acp-core/src/types.ts"],
-      "@openclaw/acp-core/runtime/error-text": [
+      "@hanzo/bot-acp-core/types": ["./packages/acp-core/src/types.ts"],
+      "@hanzo/bot-acp-core/runtime/error-text": [
         "./packages/acp-core/src/runtime/error-text.ts"
       ],
-      "@openclaw/acp-core/runtime/errors": ["./packages/acp-core/src/runtime/errors.ts"],
-      "@openclaw/acp-core/runtime/session-identifiers": [
+      "@hanzo/bot-acp-core/runtime/errors": ["./packages/acp-core/src/runtime/errors.ts"],
+      "@hanzo/bot-acp-core/runtime/session-identifiers": [
         "./packages/acp-core/src/runtime/session-identifiers.ts"
       ],
-      "@openclaw/acp-core/runtime/session-identity": [
+      "@hanzo/bot-acp-core/runtime/session-identity": [
         "./packages/acp-core/src/runtime/session-identity.ts"
       ],
-      "@openclaw/acp-core/runtime/types": ["./packages/acp-core/src/runtime/types.ts"],
-      "@openclaw/acp-core/*": ["./packages/acp-core/src/*"],
-      "@openclaw/terminal-core": ["./packages/terminal-core/src/index.ts"],
-      "@openclaw/terminal-core/ansi": ["./packages/terminal-core/src/ansi.ts"],
-      "@openclaw/terminal-core/decorative-emoji": [
+      "@hanzo/bot-acp-core/runtime/types": ["./packages/acp-core/src/runtime/types.ts"],
+      "@hanzo/bot-acp-core/*": ["./packages/acp-core/src/*"],
+      "@hanzo/bot-terminal-core": ["./packages/terminal-core/src/index.ts"],
+      "@hanzo/bot-terminal-core/ansi": ["./packages/terminal-core/src/ansi.ts"],
+      "@hanzo/bot-terminal-core/decorative-emoji": [
         "./packages/terminal-core/src/decorative-emoji.ts"
       ],
-      "@openclaw/terminal-core/health-style": [
+      "@hanzo/bot-terminal-core/health-style": [
         "./packages/terminal-core/src/health-style.ts"
       ],
-      "@openclaw/terminal-core/links": ["./packages/terminal-core/src/links.ts"],
-      "@openclaw/terminal-core/note": ["./packages/terminal-core/src/note.ts"],
-      "@openclaw/terminal-core/osc-progress": ["./packages/terminal-core/src/osc-progress.ts"],
-      "@openclaw/terminal-core/palette": ["./packages/terminal-core/src/palette.ts"],
-      "@openclaw/terminal-core/progress-line": [
+      "@hanzo/bot-terminal-core/links": ["./packages/terminal-core/src/links.ts"],
+      "@hanzo/bot-terminal-core/note": ["./packages/terminal-core/src/note.ts"],
+      "@hanzo/bot-terminal-core/osc-progress": ["./packages/terminal-core/src/osc-progress.ts"],
+      "@hanzo/bot-terminal-core/palette": ["./packages/terminal-core/src/palette.ts"],
+      "@hanzo/bot-terminal-core/progress-line": [
         "./packages/terminal-core/src/progress-line.ts"
       ],
-      "@openclaw/terminal-core/prompt-select-styled": [
+      "@hanzo/bot-terminal-core/prompt-select-styled": [
         "./packages/terminal-core/src/prompt-select-styled.ts"
       ],
-      "@openclaw/terminal-core/prompt-select-styled-params": [
+      "@hanzo/bot-terminal-core/prompt-select-styled-params": [
         "./packages/terminal-core/src/prompt-select-styled-params.ts"
       ],
-      "@openclaw/terminal-core/prompt-style": [
+      "@hanzo/bot-terminal-core/prompt-style": [
         "./packages/terminal-core/src/prompt-style.ts"
       ],
-      "@openclaw/terminal-core/restore": ["./packages/terminal-core/src/restore.ts"],
-      "@openclaw/terminal-core/safe-text": ["./packages/terminal-core/src/safe-text.ts"],
-      "@openclaw/terminal-core/stream-writer": [
+      "@hanzo/bot-terminal-core/restore": ["./packages/terminal-core/src/restore.ts"],
+      "@hanzo/bot-terminal-core/safe-text": ["./packages/terminal-core/src/safe-text.ts"],
+      "@hanzo/bot-terminal-core/stream-writer": [
         "./packages/terminal-core/src/stream-writer.ts"
       ],
-      "@openclaw/terminal-core/table": ["./packages/terminal-core/src/table.ts"],
-      "@openclaw/terminal-core/terminal-link": [
+      "@hanzo/bot-terminal-core/table": ["./packages/terminal-core/src/table.ts"],
+      "@hanzo/bot-terminal-core/terminal-link": [
         "./packages/terminal-core/src/terminal-link.ts"
       ],
-      "@openclaw/terminal-core/theme": ["./packages/terminal-core/src/theme.ts"],
-      "@openclaw/terminal-core/*": ["./packages/terminal-core/src/*"],
-      "@openclaw/net-policy": ["./packages/net-policy/src/index.ts"],
-      "@openclaw/net-policy/ip": ["./packages/net-policy/src/ip.ts"],
-      "@openclaw/net-policy/ipv4": ["./packages/net-policy/src/ipv4.ts"],
-      "@openclaw/net-policy/redact-sensitive-url": [
+      "@hanzo/bot-terminal-core/theme": ["./packages/terminal-core/src/theme.ts"],
+      "@hanzo/bot-terminal-core/*": ["./packages/terminal-core/src/*"],
+      "@hanzo/bot-net-policy": ["./packages/net-policy/src/index.ts"],
+      "@hanzo/bot-net-policy/ip": ["./packages/net-policy/src/ip.ts"],
+      "@hanzo/bot-net-policy/ipv4": ["./packages/net-policy/src/ipv4.ts"],
+      "@hanzo/bot-net-policy/redact-sensitive-url": [
         "./packages/net-policy/src/redact-sensitive-url.ts"
       ],
-      "@openclaw/net-policy/url-protocol": ["./packages/net-policy/src/url-protocol.ts"],
-      "@openclaw/net-policy/url-userinfo": ["./packages/net-policy/src/url-userinfo.ts"],
-      "@openclaw/net-policy/*": ["./packages/net-policy/src/*"],
-      "@openclaw/speech-core": ["./packages/speech-core/runtime-api.ts"],
-      "@openclaw/speech-core/runtime-api": ["./packages/speech-core/runtime-api.ts"],
-      "@openclaw/speech-core/speaker": ["./packages/speech-core/speaker.ts"],
-      "@openclaw/speech-core/voice-models": ["./packages/speech-core/voice-models.ts"],
-      "@openclaw/speech-core/*": ["./packages/speech-core/*"],
-      "@openclaw/sdk": ["./packages/sdk/src/index.ts"],
-      "@openclaw/plugin-sdk/*": ["./src/plugin-sdk/*.ts"],
-      "openclaw/plugin-sdk/account-id": ["./src/plugin-sdk/account-id.ts"],
-      "@openclaw/*": ["./extensions/*"]
+      "@hanzo/bot-net-policy/url-protocol": ["./packages/net-policy/src/url-protocol.ts"],
+      "@hanzo/bot-net-policy/url-userinfo": ["./packages/net-policy/src/url-userinfo.ts"],
+      "@hanzo/bot-net-policy/*": ["./packages/net-policy/src/*"],
+      "@hanzo/bot-speech-core": ["./packages/speech-core/runtime-api.ts"],
+      "@hanzo/bot-speech-core/runtime-api": ["./packages/speech-core/runtime-api.ts"],
+      "@hanzo/bot-speech-core/speaker": ["./packages/speech-core/speaker.ts"],
+      "@hanzo/bot-speech-core/voice-models": ["./packages/speech-core/voice-models.ts"],
+      "@hanzo/bot-speech-core/*": ["./packages/speech-core/*"],
+      "@hanzo/bot-sdk": ["./packages/sdk/src/index.ts"],
+      "@hanzo/bot-plugin-sdk/*": ["./src/plugin-sdk/*.ts"],
+      "bot/plugin-sdk/account-id": ["./src/plugin-sdk/account-id.ts"],
+      "@hanzo/bot-*": ["./extensions/*"]
     }
   },
   "include": ["src/**/*", "ui/**/*", "extensions/**/*", "packages/**/*"],

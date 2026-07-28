@@ -1,5 +1,5 @@
 // Enqueues follow-up reply runs and schedules queue drains.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { normalizeChatType } from "../../../channels/chat-type.js";
 import { resolveGlobalDedupeCache } from "../../../infra/dedupe.js";
 import { channelRouteDedupeKey } from "../../../plugin-sdk/channel-route.js";
@@ -30,7 +30,7 @@ import {
  * Keep queued message-id dedupe shared across bundled chunks so redeliveries
  * are rejected no matter which chunk receives the enqueue call.
  */
-const RECENT_QUEUE_MESSAGE_IDS_KEY = Symbol.for("openclaw.recentQueueMessageIds");
+const RECENT_QUEUE_MESSAGE_IDS_KEY = Symbol.for("bot.recentQueueMessageIds");
 
 const RECENT_QUEUE_MESSAGE_IDS = resolveGlobalDedupeCache(RECENT_QUEUE_MESSAGE_IDS_KEY, {
   ttlMs: 5 * 60 * 1000,
@@ -227,7 +227,7 @@ function resetRecentQueuedMessageIdDedupe(): void {
 }
 
 if (process.env.VITEST === "true" || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.queueEnqueueTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.queueEnqueueTestApi")] = {
     resetRecentQueuedMessageIdDedupe,
   };
 }

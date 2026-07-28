@@ -5,7 +5,7 @@ import {
   normalizeSortedUniqueStringEntries,
   sortUniqueStrings,
   uniqueStrings,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@hanzo/bot-normalization-core/string-normalization";
 
 // Keep defaults to OS-managed immutable bins only.
 // User/package-manager bins must be opted in via tools.exec.safeBinTrustedDirs.

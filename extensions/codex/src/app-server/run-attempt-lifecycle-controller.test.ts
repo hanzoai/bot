@@ -37,7 +37,7 @@ function createTerminalReleaseHarness() {
     {
       state,
       activeTurnItemIds: new Set(),
-      pendingOpenClawDynamicToolCompletionIds: new Set(),
+      pendingBotDynamicToolCompletionIds: new Set(),
       steeringQueueRef: { current: { cancel } },
       turnWatches: {
         clearCompletionIdleTimer: vi.fn(),

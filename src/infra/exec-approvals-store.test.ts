@@ -3,12 +3,12 @@ import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { sha256Hex } from "./crypto-digest.js";
 import {
@@ -45,22 +45,22 @@ vi.mock("../logging/subsystem.js", () => ({
   }),
 }));
 
-type ExecApprovalsDatabase = Pick<OpenClawStateKyselyDatabase, "exec_approvals_config">;
+type ExecApprovalsDatabase = Pick<BotStateKyselyDatabase, "exec_approvals_config">;
 
 const tempDirs: string[] = [];
-const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+const envSnapshot = captureEnv(["BOT_STATE_DIR"]);
 
 function createStateDir(): string {
   const stateDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "exec-approvals-db-")));
   tempDirs.push(stateDir);
-  setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+  setTestEnvValue("BOT_STATE_DIR", stateDir);
   return stateDir;
 }
 
 function row() {
   return executeSqliteQueryTakeFirstSync(
-    openOpenClawStateDatabase().db,
-    getNodeSqliteKysely<ExecApprovalsDatabase>(openOpenClawStateDatabase().db)
+    openBotStateDatabase().db,
+    getNodeSqliteKysely<ExecApprovalsDatabase>(openBotStateDatabase().db)
       .selectFrom("exec_approvals_config")
       .selectAll()
       .where("config_key", "=", "current"),
@@ -68,8 +68,8 @@ function row() {
 }
 
 function makeStateDatabaseUnavailable(): void {
-  closeOpenClawStateDatabaseForTest();
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
+  closeBotStateDatabaseForTest();
+  const stateDir = process.env.BOT_STATE_DIR;
   if (!stateDir) {
     throw new Error("missing test state dir");
   }
@@ -83,7 +83,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   execApprovalsStoreTesting.reset();
   envSnapshot.restore();
   for (const directory of tempDirs.splice(0)) {
@@ -116,7 +116,7 @@ describe("exec approvals SQLite store", () => {
     const written = await updateExecApprovals({
       update: () => ({
         version: 1,
-        socket: { path: "/tmp/openclaw-approvals.sock", token: "secret" },
+        socket: { path: "/tmp/bot-approvals.sock", token: "secret" },
         defaults: {
           security: "allowlist",
           ask: "on-miss",
@@ -134,7 +134,7 @@ describe("exec approvals SQLite store", () => {
     expect(loadExecApprovals().defaults?.security).toBe("allowlist");
     expect(row()).toMatchObject({
       config_key: "current",
-      socket_path: "/tmp/openclaw-approvals.sock",
+      socket_path: "/tmp/bot-approvals.sock",
       has_socket_token: 1,
       default_security: "allowlist",
       default_ask: "on-miss",
@@ -178,7 +178,7 @@ describe("exec approvals SQLite store", () => {
   });
 
   it("fails closed and warns once for malformed raw_json", () => {
-    const { db } = openOpenClawStateDatabase();
+    const { db } = openBotStateDatabase();
     db.prepare(
       "INSERT INTO exec_approvals_config (config_key, raw_json, socket_path, has_socket_token, default_security, default_ask, default_ask_fallback, auto_allow_skills, agent_count, allowlist_count, updated_at_ms) VALUES (?, ?, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 1)",
     ).run("current", "{not-json");
@@ -314,7 +314,7 @@ describe("exec approvals SQLite store", () => {
   });
 
   it("allows writers after an abandoned mutation lease expires", async () => {
-    const { db } = openOpenClawStateDatabase();
+    const { db } = openBotStateDatabase();
     const now = Date.now();
     db.prepare(
       "INSERT INTO state_leases (scope, lease_key, owner, expires_at, heartbeat_at, payload_json, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NULL, ?, ?)",
@@ -353,15 +353,15 @@ describe("exec approvals SQLite store", () => {
 
   it("serializes two SQLite handles and rejects a stale cross-handle CAS", () => {
     saveExecApprovals({ version: 1, defaults: { security: "deny" }, agents: {} });
-    const databasePath = resolveOpenClawStateSqlitePath(process.env);
-    closeOpenClawStateDatabaseForTest();
+    const databasePath = resolveBotStateSqlitePath(process.env);
+    closeBotStateDatabaseForTest();
     const first = new DatabaseSync(databasePath);
     const second = new DatabaseSync(databasePath);
     try {
       first.exec("PRAGMA busy_timeout = 5000");
       second.exec("PRAGMA busy_timeout = 5000");
       const stale = snapshotFromExecApprovalsRow({
-        path: "state/openclaw.sqlite#exec_approvals_config",
+        path: "state/bot.sqlite#exec_approvals_config",
         row: readExecApprovalsConfigRow(first),
       });
       runSqliteImmediateTransactionSync(second, () => {
@@ -383,8 +383,8 @@ describe("exec approvals SQLite store", () => {
   });
 
   it("blocks runtime reads while the retired JSON or claim exists", () => {
-    closeOpenClawStateDatabaseForTest();
-    const stateDir = process.env.OPENCLAW_STATE_DIR;
+    closeBotStateDatabaseForTest();
+    const stateDir = process.env.BOT_STATE_DIR;
     if (!stateDir) {
       throw new Error("missing test state dir");
     }
@@ -401,7 +401,7 @@ describe("exec approvals SQLite store", () => {
     [false, true, false],
     [false, false, true],
   ])("detects legacy state at every source-claim-source probe", (first, claim, second) => {
-    const stateDir = process.env.OPENCLAW_STATE_DIR;
+    const stateDir = process.env.BOT_STATE_DIR;
     if (!stateDir) {
       throw new Error("missing test state dir");
     }

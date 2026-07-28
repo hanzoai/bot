@@ -3,9 +3,9 @@ import { buildTelegramMessageContextForTest } from "./bot-message-context.test-h
 
 const logVerboseMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/runtime-env")>(
-    "openclaw/plugin-sdk/runtime-env",
+vi.mock("bot/plugin-sdk/runtime-env", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/runtime-env")>(
+    "bot/plugin-sdk/runtime-env",
   );
   return {
     ...actual,

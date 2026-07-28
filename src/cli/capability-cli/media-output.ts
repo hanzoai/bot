@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { detectMime, extensionForMime, normalizeMimeType } from "@openclaw/media-core/mime";
+import { detectMime, extensionForMime, normalizeMimeType } from "@hanzo/bot-media-core/mime";
 import { saveMediaBuffer } from "../../media/store.js";
 
 export async function writeOutputAsset(params: {

@@ -22,10 +22,10 @@ const scrubbedEnvKeys = [
   "MOCK_RESPONSE_CHUNK_DELAY_MS",
   "MOCK_TLS_CERT",
   "MOCK_TLS_KEY",
-  "OPENCLAW_CONFIG_RELOAD_LOG_MAX_READ_BYTES",
-  "OPENCLAW_CONFIG_RELOAD_LOG_PATH",
-  "OPENCLAW_CONFIG_RELOAD_LOG_TIMEOUT_MS",
-  "OPENCLAW_MOCK_OPENAI_PORT",
+  "BOT_CONFIG_RELOAD_LOG_MAX_READ_BYTES",
+  "BOT_CONFIG_RELOAD_LOG_PATH",
+  "BOT_CONFIG_RELOAD_LOG_TIMEOUT_MS",
+  "BOT_MOCK_OPENAI_PORT",
   "RAW_SCHEMA_ERROR",
   "SUCCESS_MARKER",
 ];
@@ -141,9 +141,9 @@ async function withMockServer(
 }
 
 describe("mock OpenAI response markers", () => {
-  it("echoes dynamic OpenClaw E2E markers", async () => {
+  it("echoes dynamic Bot E2E markers", async () => {
     await withMockServer(mockOpenAiPath, {}, async (baseUrl) => {
-      for (const marker of ["OPENCLAW_E2E_SEED_0_123", "OPENCLAW_E2E_ANDROID_OK"]) {
+      for (const marker of ["BOT_E2E_SEED_0_123", "BOT_E2E_ANDROID_OK"]) {
         const response = await fetch(`${baseUrl}/v1/responses`, {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -225,10 +225,10 @@ describe("e2e mock and config helper numeric limits", () => {
     expect(mockPort.stderr).toContain("invalid MOCK_PORT: 44080tcp");
 
     const fallbackPort = runScript(mockOpenAiPath, {
-      OPENCLAW_MOCK_OPENAI_PORT: "44080http",
+      BOT_MOCK_OPENAI_PORT: "44080http",
     });
     expect(fallbackPort.status).not.toBe(0);
-    expect(fallbackPort.stderr).toContain("invalid OPENCLAW_MOCK_OPENAI_PORT: 44080http");
+    expect(fallbackPort.stderr).toContain("invalid BOT_MOCK_OPENAI_PORT: 44080http");
   });
 
   it("rejects out-of-range mock OpenAI port env values", () => {
@@ -237,10 +237,10 @@ describe("e2e mock and config helper numeric limits", () => {
     expect(mockPort.stderr).toContain("invalid MOCK_PORT: 65536");
 
     const fallbackPort = runScript(mockOpenAiPath, {
-      OPENCLAW_MOCK_OPENAI_PORT: "65536",
+      BOT_MOCK_OPENAI_PORT: "65536",
     });
     expect(fallbackPort.status).not.toBe(0);
-    expect(fallbackPort.stderr).toContain("invalid OPENCLAW_MOCK_OPENAI_PORT: 65536");
+    expect(fallbackPort.stderr).toContain("invalid BOT_MOCK_OPENAI_PORT: 65536");
   });
 
   it("rejects loose OpenAI web-search mock port env values", () => {
@@ -268,24 +268,24 @@ describe("e2e mock and config helper numeric limits", () => {
 
   it("rejects loose config-reload log timeout env values", () => {
     const result = runScript(configReloadAssertPath, {
-      OPENCLAW_CONFIG_RELOAD_LOG_TIMEOUT_MS: "30000ms",
+      BOT_CONFIG_RELOAD_LOG_TIMEOUT_MS: "30000ms",
     });
 
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("invalid OPENCLAW_CONFIG_RELOAD_LOG_TIMEOUT_MS: 30000ms");
+    expect(result.stderr).toContain("invalid BOT_CONFIG_RELOAD_LOG_TIMEOUT_MS: 30000ms");
   });
 
   it("rejects loose config-reload log read caps", () => {
     const result = runScript(configReloadAssertPath, {
-      OPENCLAW_CONFIG_RELOAD_LOG_MAX_READ_BYTES: "256kb",
+      BOT_CONFIG_RELOAD_LOG_MAX_READ_BYTES: "256kb",
     });
 
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("invalid OPENCLAW_CONFIG_RELOAD_LOG_MAX_READ_BYTES: 256kb");
+    expect(result.stderr).toContain("invalid BOT_CONFIG_RELOAD_LOG_MAX_READ_BYTES: 256kb");
   });
 
   it("returns a clear error when mock OpenAI cannot append request logs", async () => {
-    const requestLogDirectory = await mkdtemp(join(tmpdir(), "openclaw-mock-request-log-"));
+    const requestLogDirectory = await mkdtemp(join(tmpdir(), "bot-mock-request-log-"));
     try {
       await withMockServer(
         mockOpenAiPath,
@@ -294,7 +294,7 @@ describe("e2e mock and config helper numeric limits", () => {
           const response = await fetch(`${baseUrl}/v1/responses`, {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ input: "OPENCLAW_E2E_OK" }),
+            body: JSON.stringify({ input: "BOT_E2E_OK" }),
           });
           const body = await response.json();
 
@@ -311,21 +311,21 @@ describe("e2e mock and config helper numeric limits", () => {
   });
 
   it("returns a clear error when web-search mock cannot append request logs", async () => {
-    const requestLogDirectory = await mkdtemp(join(tmpdir(), "openclaw-web-search-log-"));
+    const requestLogDirectory = await mkdtemp(join(tmpdir(), "bot-web-search-log-"));
     try {
       await withMockServer(
         webSearchMockPath,
         {
           MOCK_REQUEST_LOG: requestLogDirectory,
           RAW_SCHEMA_ERROR: "400 schema rejected",
-          SUCCESS_MARKER: "OPENCLAW_SCHEMA_E2E_OK",
+          SUCCESS_MARKER: "BOT_SCHEMA_E2E_OK",
         },
         async (baseUrl, output) => {
           const response = await fetch(`${baseUrl}/v1/responses`, {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
-              input: "OPENCLAW_SCHEMA_E2E_OK",
+              input: "BOT_SCHEMA_E2E_OK",
               reasoning: { effort: "low" },
               tools: [{ type: "web_search" }],
             }),

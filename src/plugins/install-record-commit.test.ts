@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
@@ -47,8 +47,8 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.loadInstalledPluginIndexInstallRecords.mockResolvedValue({});
-    mocks.replaceConfigFile.mockImplementation(async (params: { nextConfig: OpenClawConfig }) => ({
-      path: "/tmp/openclaw.json",
+    mocks.replaceConfigFile.mockImplementation(async (params: { nextConfig: BotConfig }) => ({
+      path: "/tmp/bot.json",
       previousHash: null,
       snapshot: {} as never,
       nextConfig: params.nextConfig,
@@ -73,7 +73,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
       },
     };
     mocks.loadInstalledPluginIndexInstallRecords.mockResolvedValue(existingRecords);
-    const nextConfig: OpenClawConfig = {
+    const nextConfig: BotConfig = {
       plugins: {
         entries: {
           demo: { enabled: true },
@@ -123,7 +123,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   });
 
   it("migrates source records below the canonical index and explicit pending records", async () => {
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: BotConfig = {
       plugins: {
         installs: {
           stale: { source: "npm", spec: "stale@1.0.0" },
@@ -136,7 +136,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
       stale: { source: "npm", spec: "stale@2.0.0" },
       codex: { source: "npm", spec: "codex@2.0.0" },
     };
-    const nextConfig: OpenClawConfig = {
+    const nextConfig: BotConfig = {
       plugins: {
         installs: {
           ...sourceConfig.plugins?.installs,
@@ -176,7 +176,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   });
 
   it("preserves source records omitted by a transform callback", async () => {
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: BotConfig = {
       plugins: {
         installs: {
           other: { source: "npm", spec: "other@1.0.0" },
@@ -188,9 +188,9 @@ describe("commitConfigWithPendingPluginInstalls", () => {
     mocks.transformConfigFileWithRetry.mockImplementationOnce(async (params: unknown) => {
       const transformParams = params as {
         transform: (
-          config: OpenClawConfig,
+          config: BotConfig,
           context: { snapshot: typeof snapshot },
-        ) => { nextConfig: OpenClawConfig };
+        ) => { nextConfig: BotConfig };
         commit: (input: unknown) => Promise<unknown>;
       };
       const transformed = transformParams.transform(sourceConfig, { snapshot });
@@ -211,7 +211,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   });
 
   it("strips only selected pending plugin install records", () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       plugins: {
         installs: {
           legacy: { source: "npm", spec: "legacy@1.0.0" },
@@ -230,7 +230,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   });
 
   it("selects only unchanged pending plugin install records for migration stripping", () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: BotConfig = {
       plugins: {
         installs: {
           legacy: { source: "npm", spec: "legacy@1.0.0" },
@@ -238,7 +238,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
         },
       },
     };
-    const nextConfig: OpenClawConfig = {
+    const nextConfig: BotConfig = {
       plugins: {
         installs: {
           legacy: { source: "npm", spec: "legacy@1.0.0" },
@@ -279,14 +279,14 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   });
 
   it("marks replaced managed npm generations when install records are committed", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-record-commit-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-record-commit-"));
     const previousInstallPath = path.join(
       stateDir,
       "npm",
       "projects",
       "codex-v1",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "codex",
     );
     const nextInstallPath = path.join(
@@ -295,26 +295,26 @@ describe("commitConfigWithPendingPluginInstalls", () => {
       "projects",
       "codex-v2",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "codex",
     );
     fs.mkdirSync(previousInstallPath, { recursive: true });
     fs.mkdirSync(nextInstallPath, { recursive: true });
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ BOT_STATE_DIR: stateDir }, async () => {
         await commitPluginInstallRecordsWithConfig({
           previousInstallRecords: {
             codex: {
               source: "npm",
-              spec: "@openclaw/codex@1.0.0",
+              spec: "@hanzo/bot-codex@1.0.0",
               installPath: previousInstallPath,
             },
           },
           nextInstallRecords: {
             codex: {
               source: "npm",
-              spec: "@openclaw/codex@2.0.0",
+              spec: "@hanzo/bot-codex@2.0.0",
               installPath: nextInstallPath,
             },
           },
@@ -329,15 +329,15 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   });
 
   it("does not mark arbitrary npm paths outside the managed npm root", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-record-commit-"));
-    const outsideRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-record-outside-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-record-commit-"));
+    const outsideRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-record-outside-"));
     const previousInstallPath = path.join(
       outsideRoot,
       "npm",
       "projects",
       "codex-v1",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "codex",
     );
     const nextInstallPath = path.join(
@@ -346,26 +346,26 @@ describe("commitConfigWithPendingPluginInstalls", () => {
       "projects",
       "codex-v2",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "codex",
     );
     fs.mkdirSync(previousInstallPath, { recursive: true });
     fs.mkdirSync(nextInstallPath, { recursive: true });
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ BOT_STATE_DIR: stateDir }, async () => {
         await commitPluginInstallRecordsWithConfig({
           previousInstallRecords: {
             codex: {
               source: "npm",
-              spec: "@openclaw/codex@1.0.0",
+              spec: "@hanzo/bot-codex@1.0.0",
               installPath: previousInstallPath,
             },
           },
           nextInstallRecords: {
             codex: {
               source: "npm",
-              spec: "@openclaw/codex@2.0.0",
+              spec: "@hanzo/bot-codex@2.0.0",
               installPath: nextInstallPath,
             },
           },
@@ -381,14 +381,14 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   });
 
   it("marks replaced npm generations across install record id migrations", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-record-commit-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-record-commit-"));
     const previousInstallPath = path.join(
       stateDir,
       "npm",
       "projects",
       "voice-call-v1",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "voice-call",
     );
     const nextInstallPath = path.join(
@@ -397,26 +397,26 @@ describe("commitConfigWithPendingPluginInstalls", () => {
       "projects",
       "voice-call-v2",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "voice-call",
     );
     fs.mkdirSync(previousInstallPath, { recursive: true });
     fs.mkdirSync(nextInstallPath, { recursive: true });
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ BOT_STATE_DIR: stateDir }, async () => {
         await commitPluginInstallRecordsWithConfig({
           previousInstallRecords: {
             "voice-call": {
               source: "npm",
-              spec: "@openclaw/voice-call@1.0.0",
+              spec: "@hanzo/bot-voice-call@1.0.0",
               installPath: previousInstallPath,
             },
           },
           nextInstallRecords: {
-            "@openclaw/voice-call": {
+            "@hanzo/bot-voice-call": {
               source: "npm",
-              spec: "@openclaw/voice-call@2.0.0",
+              spec: "@hanzo/bot-voice-call@2.0.0",
               installPath: nextInstallPath,
             },
           },
@@ -431,14 +431,14 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   });
 
   it("removes newly retained npm markers when the config commit rolls back", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-record-commit-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-record-commit-"));
     const previousInstallPath = path.join(
       stateDir,
       "npm",
       "projects",
       "codex-v1",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "codex",
     );
     const nextInstallPath = path.join(
@@ -447,7 +447,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
       "projects",
       "codex-v2",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "codex",
     );
     fs.mkdirSync(previousInstallPath, { recursive: true });
@@ -455,20 +455,20 @@ describe("commitConfigWithPendingPluginInstalls", () => {
     mocks.replaceConfigFile.mockRejectedValueOnce(new Error("config changed"));
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ BOT_STATE_DIR: stateDir }, async () => {
         await expect(
           commitPluginInstallRecordsWithConfig({
             previousInstallRecords: {
               codex: {
                 source: "npm",
-                spec: "@openclaw/codex@1.0.0",
+                spec: "@hanzo/bot-codex@1.0.0",
                 installPath: previousInstallPath,
               },
             },
             nextInstallRecords: {
               codex: {
                 source: "npm",
-                spec: "@openclaw/codex@2.0.0",
+                spec: "@hanzo/bot-codex@2.0.0",
                 installPath: nextInstallPath,
               },
             },
@@ -484,14 +484,14 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   });
 
   it("removes earlier retained markers when a later marker creation fails", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-record-commit-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-record-commit-"));
     const firstPreviousInstallPath = path.join(
       stateDir,
       "npm",
       "projects",
       "codex-v1",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "codex",
     );
     const firstNextInstallPath = path.join(
@@ -500,7 +500,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
       "projects",
       "codex-v2",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "codex",
     );
     const secondPreviousInstallPath = path.join(
@@ -509,7 +509,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
       "projects",
       "voice-call-v1",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "voice-call",
     );
     const secondNextInstallPath = path.join(
@@ -518,7 +518,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
       "projects",
       "voice-call-v2",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "voice-call",
     );
     fs.mkdirSync(firstPreviousInstallPath, { recursive: true });
@@ -526,36 +526,36 @@ describe("commitConfigWithPendingPluginInstalls", () => {
     fs.mkdirSync(secondPreviousInstallPath, { recursive: true });
     fs.mkdirSync(secondNextInstallPath, { recursive: true });
     fs.writeFileSync(
-      path.join(stateDir, "npm", "projects", "voice-call-v1", ".openclaw-retained-npm-installs"),
+      path.join(stateDir, "npm", "projects", "voice-call-v1", ".bot-retained-npm-installs"),
       "not a directory",
       "utf8",
     );
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ BOT_STATE_DIR: stateDir }, async () => {
         await expect(
           commitPluginInstallRecordsWithConfig({
             previousInstallRecords: {
               codex: {
                 source: "npm",
-                spec: "@openclaw/codex@1.0.0",
+                spec: "@hanzo/bot-codex@1.0.0",
                 installPath: firstPreviousInstallPath,
               },
               "voice-call": {
                 source: "npm",
-                spec: "@openclaw/voice-call@1.0.0",
+                spec: "@hanzo/bot-voice-call@1.0.0",
                 installPath: secondPreviousInstallPath,
               },
             },
             nextInstallRecords: {
               codex: {
                 source: "npm",
-                spec: "@openclaw/codex@2.0.0",
+                spec: "@hanzo/bot-codex@2.0.0",
                 installPath: firstNextInstallPath,
               },
               "voice-call": {
                 source: "npm",
-                spec: "@openclaw/voice-call@2.0.0",
+                spec: "@hanzo/bot-voice-call@2.0.0",
                 installPath: secondNextInstallPath,
               },
             },
@@ -571,14 +571,14 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   });
 
   it("clears retained npm markers for active committed install records", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-record-commit-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-record-commit-"));
     const installPath = path.join(
       stateDir,
       "npm",
       "projects",
       "codex-v2",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "codex",
     );
     fs.mkdirSync(installPath, { recursive: true });
@@ -590,13 +590,13 @@ describe("commitConfigWithPendingPluginInstalls", () => {
     });
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ BOT_STATE_DIR: stateDir }, async () => {
         await commitPluginInstallRecordsWithConfig({
           previousInstallRecords: {},
           nextInstallRecords: {
             codex: {
               source: "npm",
-              spec: "@openclaw/codex@2.0.0",
+              spec: "@hanzo/bot-codex@2.0.0",
               installPath,
             },
           },
@@ -611,14 +611,14 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   });
 
   it("restores cleared active npm markers when the config commit rolls back", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-record-commit-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-record-commit-"));
     const installPath = path.join(
       stateDir,
       "npm",
       "projects",
       "codex-v2",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "codex",
     );
     fs.mkdirSync(installPath, { recursive: true });
@@ -631,14 +631,14 @@ describe("commitConfigWithPendingPluginInstalls", () => {
     mocks.replaceConfigFile.mockRejectedValueOnce(new Error("config changed"));
 
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ BOT_STATE_DIR: stateDir }, async () => {
         await expect(
           commitPluginInstallRecordsWithConfig({
             previousInstallRecords: {},
             nextInstallRecords: {
               codex: {
                 source: "npm",
-                spec: "@openclaw/codex@2.0.0",
+                spec: "@hanzo/bot-codex@2.0.0",
                 installPath,
               },
             },
@@ -695,7 +695,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
   });
 
   it("uses a plain config write when no pending plugin install records exist", async () => {
-    const nextConfig: OpenClawConfig = {
+    const nextConfig: BotConfig = {
       gateway: {
         mode: "local",
       },
@@ -718,7 +718,7 @@ describe("commitConfigWithPendingPluginInstalls", () => {
 
   it("supports non-replace config writers without adding an undefined write options argument", async () => {
     const writeConfigFile = vi.fn(async () => undefined);
-    const nextConfig: OpenClawConfig = {
+    const nextConfig: BotConfig = {
       gateway: {
         mode: "local",
       },

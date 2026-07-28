@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { render } from "lit";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AgentsListResult, SkillStatusEntry, SkillStatusReport } from "../../api/types.ts";
@@ -150,7 +150,7 @@ describe("renderSkills", () => {
         onSelect: (value: string) => void;
         updateComplete: Promise<boolean>;
       }
-    >('openclaw-agent-select[name="skills-agent"]');
+    >('bot-agent-select[name="skills-agent"]');
     const filter = container.querySelector<HTMLInputElement>('input[name="skills-filter"]');
     expect(selector).toBeInstanceOf(HTMLElement);
     expect(filter).toBeInstanceOf(HTMLInputElement);
@@ -183,7 +183,7 @@ describe("renderSkills", () => {
         options: Array<{ value: string; label: string }>;
         updateComplete: Promise<boolean>;
       }
-    >('openclaw-agent-select[name="skills-agent"]');
+    >('bot-agent-select[name="skills-agent"]');
     await selector?.updateComplete;
 
     expect(selector?.options.find((option) => option.value === "main")?.label).toBe(
@@ -424,7 +424,7 @@ describe("renderSkills", () => {
 
     expect(
       container.querySelector<HTMLElement & { disabled: boolean }>(
-        'openclaw-agent-select[name="skills-agent"]',
+        'bot-agent-select[name="skills-agent"]',
       )?.disabled,
     ).toBe(true);
     const refresh = Array.from(container.querySelectorAll<HTMLButtonElement>("button")).find(
@@ -621,7 +621,7 @@ describe("renderSkills", () => {
               score: 0.95,
               slug: "github",
               displayName: "GitHub",
-              summary: "GitHub integration for OpenClaw",
+              summary: "GitHub integration for Bot",
               icon: `https://clawhub.ai/api/v1/skill-icons/${"a".repeat(64)}`,
               version: "1.2.3",
             },
@@ -644,7 +644,7 @@ describe("renderSkills", () => {
     expect(detailButton?.contains(installButton)).toBe(false);
     expect(resultItem?.querySelector(".settings-row__title")?.textContent?.trim()).toBe("GitHub");
     expect(resultItem?.querySelector(".settings-row__desc")?.textContent?.trim()).toBe(
-      "GitHub integration for OpenClaw",
+      "GitHub integration for Bot",
     );
     expect(resultItem?.querySelector(".settings-row__value")?.textContent?.trim()).toBe("v1.2.3");
     expect(resultItem?.querySelector<HTMLImageElement>(".clawhub-skill-icon")?.src).toBe(
@@ -672,7 +672,7 @@ describe("renderSkills", () => {
             skill: {
               slug: "github",
               displayName: "GitHub",
-              summary: "GitHub integration for OpenClaw",
+              summary: "GitHub integration for Bot",
               icon: `https://clawhub.ai/api/v1/skill-icons/${"b".repeat(64)}`,
               createdAt: 1_700_000_000,
               updatedAt: 1_700_000_100,
@@ -686,8 +686,8 @@ describe("renderSkills", () => {
               os: ["macos", "linux"],
             },
             owner: {
-              displayName: "OpenClaw",
-              handle: "openclaw",
+              displayName: "Bot",
+              handle: "bot",
             },
           },
           onClawHubInstall,
@@ -702,7 +702,7 @@ describe("renderSkills", () => {
       Array.from(container.querySelectorAll(".callout")).map((node) => normalizeText(node)),
     ).toEqual(["rate limited", "Installed github"]);
     expect(normalizeText(container.querySelector(".md-preview-dialog__body")!)).toBe(
-      "GitHub integration for OpenClaw By OpenClaw (@openclaw) Latest: v1.2.3 Added search support Platforms: macos, linux Install GitHub",
+      "GitHub integration for Bot By Bot (@bot) Latest: v1.2.3 Added search support Platforms: macos, linux Install GitHub",
     );
     expect(container.querySelector<HTMLImageElement>(".clawhub-skill-icon--detail")?.src).toBe(
       `https://clawhub.ai/api/v1/skill-icons/${"b".repeat(64)}`,
@@ -799,7 +799,7 @@ describe("renderSkills", () => {
               slug: "agentreceipt",
               version: "1.2.3",
               securityAuditUrl:
-                "https://clawhub.ai/openclaw/skills/agentreceipt/security-audit?version=1.2.3",
+                "https://clawhub.ai/bot/skills/agentreceipt/security-audit?version=1.2.3",
               securityStatus: "suspicious",
               securityPassed: false,
             },
@@ -834,7 +834,7 @@ describe("renderSkills", () => {
               requestedSlug: "agentreceipt",
               requestedVersion: "1.2.3",
               securityAuditUrl:
-                "https://clawhub.ai/openclaw/skills/agentreceipt/security-audit?version=1.2.3",
+                "https://clawhub.ai/bot/skills/agentreceipt/security-audit?version=1.2.3",
               securityStatus: "suspicious",
               securityPassed: false,
             },

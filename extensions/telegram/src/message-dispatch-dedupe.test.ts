@@ -6,8 +6,8 @@ import type { Message } from "grammy/types";
 import {
   createChannelReplayGuard,
   type ChannelReplayClaimHandle,
-} from "openclaw/plugin-sdk/persistent-dedupe";
-import { resetPluginStateStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/persistent-dedupe";
+import { resetPluginStateStoreForTests } from "bot/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   claimTelegramMessageDispatchReplay,
@@ -30,7 +30,7 @@ const TELEGRAM_MESSAGE_DISPATCH_DEDUPE_STATE_MAX_ENTRIES = 50_000;
 let previousStateDir: string | undefined;
 
 function createStateDir(): string {
-  const dir = mkdtempSync(path.join(tmpdir(), "openclaw-telegram-dispatch-dedupe-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "bot-telegram-dispatch-dedupe-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -116,17 +116,17 @@ function createDeferred(): { promise: Promise<void>; resolve: () => void } {
 }
 
 beforeEach(() => {
-  previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  process.env.OPENCLAW_STATE_DIR = createStateDir();
+  previousStateDir = process.env.BOT_STATE_DIR;
+  process.env.BOT_STATE_DIR = createStateDir();
   resetPluginStateStoreForTests({ closeDatabase: false });
 });
 
 afterEach(() => {
   resetPluginStateStoreForTests();
   if (previousStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.BOT_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = previousStateDir;
+    process.env.BOT_STATE_DIR = previousStateDir;
   }
   for (const dir of tempDirs.splice(0)) {
     rmSync(dir, { recursive: true, force: true });

@@ -1,11 +1,11 @@
-import { isFutureDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { isFutureDateTimestampMs } from "@hanzo/bot-normalization-core/number-coercion";
 import { resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import {
   AGENT_RUN_RESTART_ABORT_STOP_REASON,
   createAgentRunRestartAbortError,
 } from "../../agents/run-termination.js";
 import { resolveSessionWorkStartError } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { getAgentEventLifecycleGeneration } from "../../infra/agent-events.js";
 import {
   beginSessionWorkAdmission,
@@ -28,7 +28,7 @@ import {
 import type { GatewayRequestHandlerOptions } from "./types.js";
 
 export function createAgentAdmissionController(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runId: string;
   lifecycleGeneration: string;
   agentDedupeKeys: string[];
@@ -42,7 +42,7 @@ export function createAgentAdmissionController(params: {
   getResolvedSessionId: () => string | undefined;
   getResolvedSessionAgentId: () => string | undefined;
   getAgentId: () => string | undefined;
-  getCfgForAgent: () => OpenClawConfig | undefined;
+  getCfgForAgent: () => BotConfig | undefined;
   getSessionPersisted: () => boolean;
   getSupersededSessionId: () => string | undefined;
   setAdmittedSessionId: (sessionId: string) => void;

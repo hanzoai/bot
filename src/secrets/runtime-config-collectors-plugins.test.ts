@@ -1,6 +1,6 @@
 /** Tests plugin-specific runtime config secret collectors. */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { PluginOrigin } from "../plugins/types.js";
 import { collectPluginConfigAssignments } from "./runtime-config-collectors-plugins.js";
 import {
@@ -22,14 +22,14 @@ vi.mock("../plugins/bundled-plugin-metadata.js", () => ({
   listBundledPluginMetadata: () => [],
 }));
 
-function asConfig(value: unknown): OpenClawConfig {
+function asConfig(value: unknown): BotConfig {
   return {
     agents: { list: [{ id: "main", default: true }] },
-    ...(value as OpenClawConfig),
+    ...(value as BotConfig),
   };
 }
 
-function makeContext(sourceConfig: OpenClawConfig): ResolverContext {
+function makeContext(sourceConfig: BotConfig): ResolverContext {
   return createResolverContext({
     sourceConfig,
     env: {},
@@ -57,7 +57,7 @@ function requireAssignment(context: ResolverContext, index: number): RuntimeConf
 function createAcpxMcpSecretConfig(params: {
   plugins?: Record<string, unknown>;
   entry?: Record<string, unknown>;
-}): OpenClawConfig {
+}): BotConfig {
   return asConfig({
     plugins: {
       ...params.plugins,
@@ -75,7 +75,7 @@ function createAcpxMcpSecretConfig(params: {
   });
 }
 
-function collectAcpxConfigAssignments(config: OpenClawConfig): ResolverContext {
+function collectAcpxConfigAssignments(config: BotConfig): ResolverContext {
   const context = makeContext(config);
   collectPluginConfigAssignments({
     config,
@@ -86,7 +86,7 @@ function collectAcpxConfigAssignments(config: OpenClawConfig): ResolverContext {
   return context;
 }
 
-function expectInactiveAcpxConfig(config: OpenClawConfig): void {
+function expectInactiveAcpxConfig(config: BotConfig): void {
   const context = collectAcpxConfigAssignments(config);
   expect(context.assignments).toHaveLength(0);
   expect(context.warnings.map((warning) => warning.code)).toContain(

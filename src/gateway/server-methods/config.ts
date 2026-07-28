@@ -3,9 +3,9 @@ import { isDeepStrictEqual } from "node:util";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+} from "@hanzo/bot-normalization-core/number-coercion";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import {
   ErrorCodes,
   errorShape,
@@ -38,7 +38,7 @@ import { normalizeConfigPatchReplacePaths } from "../../config/patch-replace-pat
 import { redactConfigObject, restoreRedactedValues } from "../../config/redact-snapshot.js";
 import { loadGatewayRuntimeConfigSchema } from "../../config/runtime-schema.js";
 import { lookupConfigSchema, type ConfigSchemaResponse } from "../../config/schema.js";
-import type { ConfigValidationIssue, OpenClawConfig } from "../../config/types.openclaw.js";
+import type { ConfigValidationIssue, BotConfig } from "../../config/types.bot.js";
 import {
   validateConfigObjectRawWithPlugins,
   validateConfigObjectWithPlugins,
@@ -306,7 +306,7 @@ function collectDestructiveIdKeyedArrayEntryPatchPaths(params: {
 }
 
 function rejectDestructiveArrayPatchWithoutIntent(params: {
-  currentConfig: OpenClawConfig;
+  currentConfig: BotConfig;
   mergedConfig: unknown;
   patch: unknown;
   replacePaths: Set<string>;
@@ -424,7 +424,7 @@ function parseValidateConfigFromRawOrRespond(
   requestName: string,
   snapshot: Awaited<ReturnType<typeof readConfigFileSnapshot>>,
   respond: RespondFn,
-): { config: OpenClawConfig; writeConfig: OpenClawConfig; schema: ConfigSchemaResponse } | null {
+): { config: BotConfig; writeConfig: BotConfig; schema: ConfigSchemaResponse } | null {
   const rawValue = parseRawConfigOrRespond(params, requestName, respond);
   if (!rawValue) {
     return null;
@@ -483,12 +483,12 @@ function parseValidateConfigFromRawOrRespond(
   }
   return {
     config: validated.config,
-    writeConfig: validationCandidate as OpenClawConfig,
+    writeConfig: validationCandidate as BotConfig,
     schema,
   };
 }
 
-function listExplicitAgentRosterIds(config: OpenClawConfig): string[] {
+function listExplicitAgentRosterIds(config: BotConfig): string[] {
   const roster = readAgentRosterProperty(config);
   if (roster?.kind === "entries" && isRecord(roster.value)) {
     return Object.keys(roster.value);
@@ -502,8 +502,8 @@ function listExplicitAgentRosterIds(config: OpenClawConfig): string[] {
 }
 
 function rejectDroppedAgentRosterEntries(params: {
-  currentConfig: OpenClawConfig;
-  submittedConfig: OpenClawConfig;
+  currentConfig: BotConfig;
+  submittedConfig: BotConfig;
   respond: RespondFn;
 }): boolean {
   const submittedIds = new Set(
@@ -521,7 +521,7 @@ function rejectDroppedAgentRosterEntries(params: {
     errorShape(
       ErrorCodes.INVALID_REQUEST,
       `config.set would remove existing agent entries: ${droppedIds.join(", ")}. ` +
-        "Use the agents.delete RPC or `openclaw agents delete <id>` for intentional deletion.",
+        "Use the agents.delete RPC or `bot agents delete <id>` for intentional deletion.",
     ),
   );
   return true;
@@ -542,7 +542,7 @@ function summarizeConfigValidationIssues(issues: ReadonlyArray<ConfigValidationI
 }
 
 async function ensureResolvableSecretRefsOrRespond(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   respond: RespondFn;
 }): Promise<PreparedSecretsRuntimeSnapshot | null> {
   try {
@@ -644,8 +644,8 @@ async function respondWithConfigRestartWrite(params: {
 }
 
 function shouldDisconnectSharedAuthClientsForConfigWrite(params: {
-  prevConfig: OpenClawConfig;
-  nextConfig: OpenClawConfig;
+  prevConfig: BotConfig;
+  nextConfig: BotConfig;
   preparedSecretsSnapshot: PreparedSecretsRuntimeSnapshot;
 }): boolean {
   return (
@@ -659,7 +659,7 @@ function shouldDisconnectSharedAuthClientsForConfigWrite(params: {
 
 function respondConfigPatchNoop(params: {
   snapshot: Awaited<ReturnType<typeof readConfigFileSnapshot>>;
-  config: OpenClawConfig;
+  config: BotConfig;
   uiHints: ConfigRedactionHints;
   actor: ReturnType<typeof resolveControlPlaneActor>;
   context: GatewayRequestContext | undefined;
@@ -1009,7 +1009,7 @@ export const configHandlers: GatewayRequestHandlers = {
       );
       return;
     }
-    const writeConfig = validationCandidate as OpenClawConfig;
+    const writeConfig = validationCandidate as BotConfig;
     const validated = validateConfigObjectWithPlugins(validationCandidate);
     if (!validated.ok) {
       respond(

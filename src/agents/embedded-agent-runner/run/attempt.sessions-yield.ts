@@ -1,4 +1,4 @@
-import { isTranscriptOnlyOpenClawAssistantMessage } from "../../../shared/transcript-only-openclaw-assistant.js";
+import { isTranscriptOnlyBotAssistantMessage } from "../../../shared/transcript-only-bot-assistant.js";
 import type { AgentMessage } from "../../runtime/index.js";
 import type { SessionManager } from "../../sessions/index.js";
 /**
@@ -8,8 +8,8 @@ import { isRunnerAbortError } from "../abort.js";
 import { log } from "../logger.js";
 import { resolveEmbeddedAbortSettleTimeoutMs } from "./attempt.abort-settle-timeout.js";
 
-const SESSIONS_YIELD_INTERRUPT_CUSTOM_TYPE = "openclaw.sessions_yield_interrupt";
-const SESSIONS_YIELD_CONTEXT_CUSTOM_TYPE = "openclaw.sessions_yield";
+const SESSIONS_YIELD_INTERRUPT_CUSTOM_TYPE = "bot.sessions_yield_interrupt";
+const SESSIONS_YIELD_CONTEXT_CUSTOM_TYPE = "bot.sessions_yield";
 
 const SESSIONS_YIELD_ABORT_SETTLE_TIMEOUT_MS = resolveEmbeddedAbortSettleTimeoutMs();
 
@@ -229,7 +229,7 @@ export function stripSessionsYieldArtifacts(activeSession: {
         entry.type === "custom" ||
         entry.type === "label" ||
         entry.type === "session_info" ||
-        (entry.type === "message" && isTranscriptOnlyOpenClawAssistantMessage(entry.message)),
+        (entry.type === "message" && isTranscriptOnlyBotAssistantMessage(entry.message)),
     },
   );
 }

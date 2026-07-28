@@ -9,7 +9,7 @@ const tempDirs: string[] = [];
 
 function makeTempDir(): string {
   // Real temp dirs let symlink and permission checks exercise filesystem behavior.
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-queued-writer-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-queued-writer-"));
   tempDirs.push(dir);
   return dir;
 }

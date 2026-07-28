@@ -1,4 +1,4 @@
-// `openclaw plugins inspect`: renders plugin registry shape, capabilities, policy, diagnostics, and install records.
+// `bot plugins inspect`: renders plugin registry shape, capabilities, policy, diagnostics, and install records.
 import { getTerminalTableWidth, renderTable } from "../../packages/terminal-core/src/table.js";
 import { theme } from "../../packages/terminal-core/src/theme.js";
 import { getRuntimeConfig } from "../config/config.js";
@@ -12,7 +12,7 @@ import { shortenHomeInString, shortenHomePath } from "../utils.js";
 import { formatMissingPluginMessage } from "./error-format.js";
 import { quietPluginJsonLogger } from "./plugins-json-logger.js";
 
-/** Options accepted by `openclaw plugins inspect`. */
+/** Options accepted by `bot plugins inspect`. */
 export type PluginInspectOptions = {
   json?: boolean;
   all?: boolean;
@@ -236,7 +236,7 @@ export async function runPluginsInspectCommand(
         workshopEnabled: true,
       });
       const lines = [
-        "Skill Workshop is built into OpenClaw, not a plugin; configure it under skills.workshop.",
+        "Skill Workshop is built into Bot, not a plugin; configure it under skills.workshop.",
       ];
       if (diagnostic) {
         lines.push(diagnostic.message);
@@ -267,7 +267,7 @@ export async function runPluginsInspectCommand(
   });
   if (!inspect) {
     defaultRuntime.error(
-      formatMissingPluginMessage({ id, listCommand: "openclaw plugins list --json" }),
+      formatMissingPluginMessage({ id, listCommand: "bot plugins list --json" }),
     );
     return defaultRuntime.exit(1);
   }
@@ -297,7 +297,7 @@ export async function runPluginsInspectCommand(
   if (inspect.plugin.failedAt) {
     lines.push(`${theme.muted("Failed at:")} ${inspect.plugin.failedAt.toISOString()}`);
   }
-  lines.push(`${theme.muted("Format:")} ${inspect.plugin.format ?? "openclaw"}`);
+  lines.push(`${theme.muted("Format:")} ${inspect.plugin.format ?? "bot"}`);
   if (inspect.plugin.bundleFormat) {
     lines.push(`${theme.muted("Bundle format:")} ${inspect.plugin.bundleFormat}`);
   }

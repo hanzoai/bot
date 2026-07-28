@@ -1,9 +1,9 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 // Coordinates native approval delivery routing and notices.
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import type {
   ChannelApprovalNativeDeliveryPlan,
   ChannelApprovalNativePlannedTarget,

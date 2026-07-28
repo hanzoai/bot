@@ -12,7 +12,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("createReplyRestartRecoveryClaimController", () => {
   it("retargets durable user-turn admission to the prepared reply session", async () => {
-    const root = tempDirs.make("openclaw-reply-admission-");
+    const root = tempDirs.make("bot-reply-admission-");
     const storePath = path.join(root, "sessions.json");
     const sessionKey = "plugin-binding:codex:target";
     const sessionId = "bound-session-id";

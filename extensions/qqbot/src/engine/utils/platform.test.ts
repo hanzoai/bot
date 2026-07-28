@@ -21,20 +21,20 @@ function resolveQQBotLocalMediaPath(p: string): string | null {
 describe("qqbot local media path remapping", () => {
   const createdPaths: string[] = [];
 
-  function createOpenClawTestRoot() {
+  function createBotTestRoot() {
     const actualHome = getHomeDir();
-    const openclawDir = path.join(actualHome, ".openclaw");
-    fs.mkdirSync(openclawDir, { recursive: true });
-    const testRoot = fs.mkdtempSync(path.join(openclawDir, "qqbot-platform-test-"));
+    const botDir = path.join(actualHome, ".bot");
+    fs.mkdirSync(botDir, { recursive: true });
+    const testRoot = fs.mkdtempSync(path.join(botDir, "qqbot-platform-test-"));
     createdPaths.push(testRoot);
     return { actualHome, testRootName: path.basename(testRoot) };
   }
 
   function createQqbotMediaFile(fileName: string) {
-    const { actualHome, testRootName } = createOpenClawTestRoot();
+    const { actualHome, testRootName } = createBotTestRoot();
     const mediaFile = path.join(
       actualHome,
-      ".openclaw",
+      ".bot",
       "media",
       "qqbot",
       "downloads",
@@ -59,7 +59,7 @@ describe("qqbot local media path remapping", () => {
 
     const missingWorkspacePath = path.join(
       actualHome,
-      ".openclaw",
+      ".bot",
       "workspace",
       "qqbot",
       "downloads",
@@ -89,7 +89,7 @@ describe("qqbot local media path remapping", () => {
   it("blocks structured payload paths that escape QQ Bot media via '..'", () => {
     const escapedPath = path.join(
       getHomeDir(),
-      ".openclaw",
+      ".bot",
       "media",
       "qqbot",
       "..",
@@ -106,13 +106,13 @@ describe("qqbot local media path remapping", () => {
     expect(resolveQQBotPayloadLocalFilePath(mediaFile)).toBe(fs.realpathSync(mediaFile));
   });
 
-  it("allows structured payload files inside sibling OpenClaw media subdirectories", () => {
+  it("allows structured payload files inside sibling Bot media subdirectories", () => {
     // Core helpers such as `saveMediaBuffer(..., "outbound", ...)` place framework
     // attachments under sibling directories of `media/qqbot/`. The plugin must
-    // trust the shared `~/.openclaw/media` root so auto-routed sends can access
+    // trust the shared `~/.bot/media` root so auto-routed sends can access
     // those files without the path-outside-storage guard firing.
     const actualHome = getHomeDir();
-    const outboundDir = path.join(actualHome, ".openclaw", "media", "outbound");
+    const outboundDir = path.join(actualHome, ".bot", "media", "outbound");
     fs.mkdirSync(outboundDir, { recursive: true });
     const outboundFile = fs.mkdtempSync(path.join(outboundDir, "qqbot-outbound-"));
     const mediaFile = path.join(outboundFile, "tts.mp3");
@@ -123,11 +123,11 @@ describe("qqbot local media path remapping", () => {
   });
 
   it("blocks structured payload files inside the QQ Bot data directory", () => {
-    const { actualHome, testRootName } = createOpenClawTestRoot();
+    const { actualHome, testRootName } = createBotTestRoot();
 
     const dataFile = path.join(
       actualHome,
-      ".openclaw",
+      ".bot",
       "qqbot",
       "sessions",
       testRootName,
@@ -145,7 +145,7 @@ describe("qqbot local media path remapping", () => {
 
     const missingWorkspacePath = path.join(
       actualHome,
-      ".openclaw",
+      ".bot",
       "workspace",
       "qqbot",
       "downloads",
@@ -157,17 +157,17 @@ describe("qqbot local media path remapping", () => {
   });
 });
 
-// Regression coverage for https://github.com/openclaw/openclaw/issues/83562 —
-// when HOME and OPENCLAW_HOME diverge (Docker, multi-user hosts), QQ Bot media
-// paths must be anchored on OPENCLAW_HOME so files written under
-// `$OPENCLAW_HOME/.openclaw/media/qqbot/` are accepted by the outbound
+// Regression coverage for https://github.com/hanzoai/bot/issues/83562 —
+// when HOME and BOT_HOME diverge (Docker, multi-user hosts), QQ Bot media
+// paths must be anchored on BOT_HOME so files written under
+// `$BOT_HOME/.bot/media/qqbot/` are accepted by the outbound
 // allowlist.
 //
 // Tests intentionally do NOT mock `os.homedir()` — the helper reads it via
 // `import * as os from "node:os"` which `vi.spyOn` cannot reliably intercept
 // across the ESM/CJS interop boundary. Instead each test treats the real OS
-// home as the baseline and only varies `process.env.OPENCLAW_HOME`.
-describe("qqbot media path resolution honors OPENCLAW_HOME (#83562)", () => {
+// home as the baseline and only varies `process.env.BOT_HOME`.
+describe("qqbot media path resolution honors BOT_HOME (#83562)", () => {
   const tempPaths: string[] = [];
   const realOsHome = getHomeDir();
 
@@ -179,7 +179,7 @@ describe("qqbot media path resolution honors OPENCLAW_HOME (#83562)", () => {
     }
   });
 
-  function makeFakeOpenclawHome(): string {
+  function makeFakeBotHome(): string {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "qqbot-oc-home-"));
     tempPaths.push(dir);
     return dir;
@@ -193,74 +193,74 @@ describe("qqbot media path resolution honors OPENCLAW_HOME (#83562)", () => {
     );
   }
 
-  it("accepts files under $OPENCLAW_HOME/.openclaw/media/qqbot when OPENCLAW_HOME differs from HOME", () => {
-    const fakeOpenclawHome = makeFakeOpenclawHome();
-    vi.stubEnv("OPENCLAW_HOME", fakeOpenclawHome);
+  it("accepts files under $BOT_HOME/.bot/media/qqbot when BOT_HOME differs from HOME", () => {
+    const fakeBotHome = makeFakeBotHome();
+    vi.stubEnv("BOT_HOME", fakeBotHome);
 
-    const mediaFile = path.join(fakeOpenclawHome, ".openclaw", "media", "qqbot", "repro.png");
+    const mediaFile = path.join(fakeBotHome, ".bot", "media", "qqbot", "repro.png");
     // Sanity: the fixture must not be accepted by the previous HOME media root.
     // On Windows, `os.tmpdir()` commonly lives under the user profile, so a raw
     // HOME-prefix assertion would make this test fail for the wrong reason.
-    const oldHomeMediaRoot = path.join(realOsHome, ".openclaw", "media", "qqbot");
+    const oldHomeMediaRoot = path.join(realOsHome, ".bot", "media", "qqbot");
     expect(isPathInsideOrEqual(mediaFile, oldHomeMediaRoot)).toBe(false);
     fs.mkdirSync(path.dirname(mediaFile), { recursive: true });
     fs.writeFileSync(mediaFile, "image", "utf8");
 
-    expect(getQQBotMediaPath()).toBe(path.join(fakeOpenclawHome, ".openclaw", "media", "qqbot"));
+    expect(getQQBotMediaPath()).toBe(path.join(fakeBotHome, ".bot", "media", "qqbot"));
     expect(resolveQQBotPayloadLocalFilePath(mediaFile)).toBe(fs.realpathSync(mediaFile));
   });
 
-  it("expands tilde-prefixed OPENCLAW_HOME against the OS home", () => {
+  it("expands tilde-prefixed BOT_HOME against the OS home", () => {
     // Use a unique subdirectory name so we can clean it up safely without
     // touching anything that exists under the real home.
     const sub = `qqbot-tilde-${process.pid}-${Date.now()}`;
     const expectedHome = path.join(realOsHome, sub);
     tempPaths.push(expectedHome);
-    vi.stubEnv("OPENCLAW_HOME", `~/${sub}`);
+    vi.stubEnv("BOT_HOME", `~/${sub}`);
 
-    expect(getQQBotMediaPath()).toBe(path.join(expectedHome, ".openclaw", "media", "qqbot"));
+    expect(getQQBotMediaPath()).toBe(path.join(expectedHome, ".bot", "media", "qqbot"));
 
-    const mediaFile = path.join(expectedHome, ".openclaw", "media", "qqbot", "tilde.png");
+    const mediaFile = path.join(expectedHome, ".bot", "media", "qqbot", "tilde.png");
     fs.mkdirSync(path.dirname(mediaFile), { recursive: true });
     fs.writeFileSync(mediaFile, "image", "utf8");
 
     expect(resolveQQBotPayloadLocalFilePath(mediaFile)).toBe(fs.realpathSync(mediaFile));
   });
 
-  it("falls back to OS home when OPENCLAW_HOME is unset (no regression)", () => {
-    vi.stubEnv("OPENCLAW_HOME", "");
+  it("falls back to OS home when BOT_HOME is unset (no regression)", () => {
+    vi.stubEnv("BOT_HOME", "");
 
-    expect(getQQBotMediaPath()).toBe(path.join(realOsHome, ".openclaw", "media", "qqbot"));
+    expect(getQQBotMediaPath()).toBe(path.join(realOsHome, ".bot", "media", "qqbot"));
   });
 
   it("treats sentinel strings 'undefined' and 'null' as unset", () => {
     for (const sentinel of ["undefined", "null"]) {
-      vi.stubEnv("OPENCLAW_HOME", sentinel);
-      expect(getQQBotMediaPath()).toBe(path.join(realOsHome, ".openclaw", "media", "qqbot"));
+      vi.stubEnv("BOT_HOME", sentinel);
+      expect(getQQBotMediaPath()).toBe(path.join(realOsHome, ".bot", "media", "qqbot"));
     }
   });
 
   it("keeps persisted QQ Bot data anchored on the OS home (compatibility)", () => {
-    const fakeOpenclawHome = makeFakeOpenclawHome();
-    vi.stubEnv("OPENCLAW_HOME", fakeOpenclawHome);
+    const fakeBotHome = makeFakeBotHome();
+    vi.stubEnv("BOT_HOME", fakeBotHome);
 
     // Persisted state (sessions, known users, refs) must NOT migrate when an
-    // operator adds OPENCLAW_HOME — otherwise existing deployments would lose
-    // their session state. Only the media root follows OPENCLAW_HOME.
-    expect(getQQBotDataPath()).toBe(path.join(realOsHome, ".openclaw", "qqbot"));
+    // operator adds BOT_HOME — otherwise existing deployments would lose
+    // their session state. Only the media root follows BOT_HOME.
+    expect(getQQBotDataPath()).toBe(path.join(realOsHome, ".bot", "qqbot"));
   });
 
-  it("rejects files that live under HOME tree when OPENCLAW_HOME is the active root", () => {
-    const fakeOpenclawHome = makeFakeOpenclawHome();
-    vi.stubEnv("OPENCLAW_HOME", fakeOpenclawHome);
+  it("rejects files that live under HOME tree when BOT_HOME is the active root", () => {
+    const fakeBotHome = makeFakeBotHome();
+    vi.stubEnv("BOT_HOME", fakeBotHome);
 
     // File under the HOME-side mirror — exactly the path that *worked* on
-    // current main and *broke* the OPENCLAW_HOME setup. After the fix the
-    // active media root is OPENCLAW_HOME, so a file under HOME is no longer
+    // current main and *broke* the BOT_HOME setup. After the fix the
+    // active media root is BOT_HOME, so a file under HOME is no longer
     // implicitly allowed unless it remaps via the existing workspace fallback.
     // Use a unique subdirectory so we never collide with real user media.
     const stale = `qqbot-stale-${process.pid}-${Date.now()}.png`;
-    const homeOnlyFile = path.join(realOsHome, ".openclaw", "media", "qqbot", stale);
+    const homeOnlyFile = path.join(realOsHome, ".bot", "media", "qqbot", stale);
     tempPaths.push(homeOnlyFile);
     fs.mkdirSync(path.dirname(homeOnlyFile), { recursive: true });
     fs.writeFileSync(homeOnlyFile, "image", "utf8");
@@ -268,16 +268,16 @@ describe("qqbot media path resolution honors OPENCLAW_HOME (#83562)", () => {
     expect(resolveQQBotPayloadLocalFilePath(homeOnlyFile)).toBeNull();
   });
 
-  it("remaps workspace paths under either HOME or OPENCLAW_HOME to the OPENCLAW_HOME media root", () => {
-    const fakeOpenclawHome = makeFakeOpenclawHome();
-    vi.stubEnv("OPENCLAW_HOME", fakeOpenclawHome);
+  it("remaps workspace paths under either HOME or BOT_HOME to the BOT_HOME media root", () => {
+    const fakeBotHome = makeFakeBotHome();
+    vi.stubEnv("BOT_HOME", fakeBotHome);
 
     const baseName = `remap-${process.pid}-${Date.now()}`;
 
-    // Real file lives under the OPENCLAW_HOME media tree.
+    // Real file lives under the BOT_HOME media tree.
     const mediaFile = path.join(
-      fakeOpenclawHome,
-      ".openclaw",
+      fakeBotHome,
+      ".bot",
       "media",
       "qqbot",
       "downloads",
@@ -289,23 +289,23 @@ describe("qqbot media path resolution honors OPENCLAW_HOME (#83562)", () => {
 
     // Agent that only knows the HOME-relative workspace path should still
     // resolve to the real file thanks to the dual-tree workspace fallback.
-    const homeWorkspaceDir = path.join(realOsHome, ".openclaw", "workspace", "qqbot");
+    const homeWorkspaceDir = path.join(realOsHome, ".bot", "workspace", "qqbot");
     const homeWorkspacePath = path.join(homeWorkspaceDir, "downloads", baseName, "remap.png");
     // Track for cleanup; we only created the unique baseName subdir indirectly
     // through resolveQQBotLocalMediaPath, which does NOT actually create the
-    // HOME-side path, so nothing to clean up there beyond the OPENCLAW_HOME tree.
+    // HOME-side path, so nothing to clean up there beyond the BOT_HOME tree.
     expect(resolveQQBotLocalMediaPath(homeWorkspacePath)).toBe(mediaFile);
 
-    // Same path but under OPENCLAW_HOME should also remap.
-    const openclawWorkspacePath = path.join(
-      fakeOpenclawHome,
-      ".openclaw",
+    // Same path but under BOT_HOME should also remap.
+    const botWorkspacePath = path.join(
+      fakeBotHome,
+      ".bot",
       "workspace",
       "qqbot",
       "downloads",
       baseName,
       "remap.png",
     );
-    expect(resolveQQBotLocalMediaPath(openclawWorkspacePath)).toBe(mediaFile);
+    expect(resolveQQBotLocalMediaPath(botWorkspacePath)).toBe(mediaFile);
   });
 });

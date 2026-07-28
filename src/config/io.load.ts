@@ -28,13 +28,13 @@ import {
 } from "./io.warnings.js";
 import { migratePersistedImplicitMainRoster } from "./legacy.js";
 import { resolveShellEnvExpectedKeys } from "./shell-env-expected-keys.js";
-import type { OpenClawConfig } from "./types.js";
+import type { BotConfig } from "./types.js";
 import { validateConfigObjectWithPlugins } from "./validation.js";
 
 export function loadConfigFromContext(
   context: ConfigIoContext,
   options: { skipSuspiciousRecovery?: boolean } = {},
-): OpenClawConfig {
+): BotConfig {
   const { deps, configPath } = context;
   let envBeforeRead: Record<string, string | undefined> | undefined;
   try {
@@ -55,7 +55,7 @@ export function loadConfigFromContext(
           timeoutMs: resolveShellEnvFallbackTimeoutMs(deps.env),
         });
       }
-      return migratePersistedImplicitMainRoster({}).config as OpenClawConfig;
+      return migratePersistedImplicitMainRoster({}).config as BotConfig;
     }
     const raw = deps.fs.readFileSync(configPath, "utf-8");
     const parsed = deps.json5.parse(raw);
@@ -98,7 +98,7 @@ export function loadConfigFromContext(
       );
       return {};
     }
-    const duplicates = findDuplicateAgentDirs(validationConfigRaw as OpenClawConfig, {
+    const duplicates = findDuplicateAgentDirs(validationConfigRaw as BotConfig, {
       env: deps.env,
       homedir: deps.homedir,
     });

@@ -1,15 +1,15 @@
 // Opencode Go provider module implements model/runtime integration.
-import type { ModelCatalogEntry } from "openclaw/plugin-sdk/agent-runtime";
-import type { ProviderRuntimeModel } from "openclaw/plugin-sdk/plugin-entry";
+import type { ModelCatalogEntry } from "bot/plugin-sdk/agent-runtime";
+import type { ProviderRuntimeModel } from "bot/plugin-sdk/plugin-entry";
 import {
   buildLiveModelProviderConfig,
   type LiveModelCatalogFetchGuard,
-} from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { normalizeModelCompat } from "openclaw/plugin-sdk/provider-model-shared";
+} from "bot/plugin-sdk/provider-catalog-live-runtime";
+import { normalizeModelCompat } from "bot/plugin-sdk/provider-model-shared";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "bot/plugin-sdk/provider-model-shared";
 
 const PROVIDER_ID = "opencode-go";
 
@@ -24,7 +24,7 @@ const OPENCODE_GO_MODELS_ENDPOINT = "https://opencode.ai/zen/go/v1/models";
 const OPENCODE_GO_MODELS_TIMEOUT_MS = 5_000;
 const OPENCODE_GO_MODELS_CACHE_TTL_MS = 60_000;
 // OpenCode Go exposes only high/max provider effort for DeepSeek V4. Lower
-// OpenClaw levels retain their existing high-effort behavior.
+// Bot levels retain their existing high-effort behavior.
 const OPENCODE_GO_DEEPSEEK_V4_THINKING_LEVEL_MAP = {
   minimal: "high",
   low: "high",

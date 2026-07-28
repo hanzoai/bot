@@ -1,5 +1,5 @@
 // Codex plugin module implements command handlers behavior.
-import type { PluginCommandContext, PluginCommandResult } from "openclaw/plugin-sdk/plugin-entry";
+import type { PluginCommandContext, PluginCommandResult } from "bot/plugin-sdk/plugin-entry";
 import { readCodexAccountAuthOverview } from "./command-account.js";
 import { canMutateCodexHost, CODEX_NATIVE_EXECUTION_AUTH_ERROR } from "./command-authorization.js";
 import { handleCodexDiagnosticsFeedback } from "./command-diagnostics.js";
@@ -86,7 +86,7 @@ export async function handleCodexSubcommand(
       return {
         text:
           "Codex sub-plugin management is not wired up (codexPluginsManagementIo dep is undefined). " +
-          "Edit ~/.openclaw/openclaw.json or use `openclaw config patch` until the runtime exposes the IO.",
+          "Edit ~/.hanzoai/bot.json or use `bot config patch` until the runtime exposes the IO.",
       };
     }
     return await handleCodexPluginsSubcommand(ctx, rest, deps.codexPluginsManagementIo);

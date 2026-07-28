@@ -2,17 +2,17 @@
 import {
   nativeHookRelayTesting,
   type NativeHookRelayRegistrationHandle,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   onInternalDiagnosticEvent,
   resetDiagnosticEventsForTest,
   type DiagnosticEventPayload,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
+} from "bot/plugin-sdk/diagnostic-runtime";
 import {
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
-} from "openclaw/plugin-sdk/hook-runtime";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/hook-runtime";
+import { createMockPluginRegistry } from "bot/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveCodexSupervisionAppServerRuntimeOptions } from "./config.js";
 import { buildCodexAppServerConnectionFingerprint } from "./plugin-app-cache-key.js";
@@ -26,7 +26,7 @@ const readCodexAppServerBindingMock = vi.fn();
 const isCodexAppServerNativeAuthProfileMock = vi.fn();
 const getSharedCodexAppServerClientMock = vi.fn();
 const refreshCodexAppServerAuthTokensMock = vi.fn();
-const createOpenClawCodingToolsMock = vi.fn();
+const createBotCodingToolsMock = vi.fn();
 const toolExecuteMock = vi.fn();
 const handleCodexAppServerApprovalRequestMock = vi.fn();
 const resolveCodexProviderWebSearchSupportForClientMock = vi.fn();
@@ -89,8 +89,8 @@ vi.mock("./provider-capabilities.js", () => ({
     resolveCodexProviderWebSearchSupportForClientMock(...args),
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness", () => ({
-  createOpenClawCodingTools: (...args: unknown[]) => createOpenClawCodingToolsMock(...args),
+vi.mock("bot/plugin-sdk/agent-harness", () => ({
+  createBotCodingTools: (...args: unknown[]) => createBotCodingToolsMock(...args),
 }));
 
 const { runCodexAppServerSideQuestion: runCodexAppServerSideQuestionImpl } =
@@ -460,7 +460,7 @@ async function runSideQuestionWithManagedWebSearchCall(
   const client = createFakeClient();
   let toolResponse: unknown;
   if (!options.preserveToolFactory) {
-    createOpenClawCodingToolsMock.mockReturnValue([
+    createBotCodingToolsMock.mockReturnValue([
       {
         name: "web_search",
         description: "Search the web",
@@ -515,7 +515,7 @@ describe("runCodexAppServerSideQuestion", () => {
     isCodexAppServerNativeAuthProfileMock.mockReset();
     getSharedCodexAppServerClientMock.mockReset();
     refreshCodexAppServerAuthTokensMock.mockReset();
-    createOpenClawCodingToolsMock.mockReset();
+    createBotCodingToolsMock.mockReset();
     toolExecuteMock.mockReset();
     handleCodexAppServerApprovalRequestMock.mockReset();
     resolveCodexProviderWebSearchSupportForClientMock.mockReset();
@@ -532,7 +532,7 @@ describe("runCodexAppServerSideQuestion", () => {
     toolExecuteMock.mockResolvedValue({
       content: [{ type: "text", text: "tool output" }],
     });
-    createOpenClawCodingToolsMock.mockReturnValue([
+    createBotCodingToolsMock.mockReturnValue([
       {
         name: "wiki_status",
         description: "Check wiki status",
@@ -704,7 +704,7 @@ describe("runCodexAppServerSideQuestion", () => {
     ]);
     expect(client.request.mock.calls.some(([method]) => method === "turn/interrupt")).toBe(false);
 
-    const [toolOptions] = mockCall(createOpenClawCodingToolsMock);
+    const [toolOptions] = mockCall(createBotCodingToolsMock);
     expect(toolOptions).toHaveProperty("agentDir", "/tmp/agent");
     expect(toolOptions).toHaveProperty("workspaceDir", "/tmp/workspace");
     expect(toolOptions).toHaveProperty("sessionId", "session-1");
@@ -890,7 +890,7 @@ describe("runCodexAppServerSideQuestion", () => {
     await runCodexAppServerSideQuestion(sideParams());
     await runCodexAppServerSideQuestion(sideParams());
 
-    const runIds = createOpenClawCodingToolsMock.mock.calls.map(
+    const runIds = createBotCodingToolsMock.mock.calls.map(
       ([options]) => (options as { runId: string }).runId,
     );
     expect(runIds).toHaveLength(2);
@@ -947,7 +947,7 @@ describe("runCodexAppServerSideQuestion", () => {
     expect(turnCall?.[1]).not.toHaveProperty("effort");
     expect(turnCall?.[1]).not.toHaveProperty("collaborationMode");
     expect(turnCall?.[1]).not.toHaveProperty("personality");
-    expect(createOpenClawCodingToolsMock).toHaveBeenCalledWith(
+    expect(createBotCodingToolsMock).toHaveBeenCalledWith(
       expect.objectContaining({ modelProvider: "openai", modelId: "gpt-5.5" }),
     );
   });
@@ -1114,7 +1114,7 @@ describe("runCodexAppServerSideQuestion", () => {
   });
 
   it("disables hosted search when side-question sender policy removes managed web_search", async () => {
-    createOpenClawCodingToolsMock.mockImplementation((options: { senderId?: string }) =>
+    createBotCodingToolsMock.mockImplementation((options: { senderId?: string }) =>
       options.senderId === "restricted-sender"
         ? []
         : [
@@ -1184,13 +1184,13 @@ describe("runCodexAppServerSideQuestion", () => {
     });
     expect(toolResponse).toEqual({
       success: false,
-      contentItems: [{ type: "inputText", text: "Unknown OpenClaw tool: web_search" }],
+      contentItems: [{ type: "inputText", text: "Unknown Bot tool: web_search" }],
     });
     expect(toolExecuteMock).not.toHaveBeenCalled();
   });
 
   it("preserves managed web_search while planning hosted search for Responses side questions", async () => {
-    createOpenClawCodingToolsMock.mockImplementation(
+    createBotCodingToolsMock.mockImplementation(
       (options: { suppressManagedWebSearch?: boolean }) =>
         options.suppressManagedWebSearch === false
           ? [
@@ -1221,7 +1221,7 @@ describe("runCodexAppServerSideQuestion", () => {
     });
     expect(toolResponse).toEqual({
       success: false,
-      contentItems: [{ type: "inputText", text: "Unknown OpenClaw tool: web_search" }],
+      contentItems: [{ type: "inputText", text: "Unknown Bot tool: web_search" }],
     });
     expect(toolExecuteMock).not.toHaveBeenCalled();
   });
@@ -1238,7 +1238,7 @@ describe("runCodexAppServerSideQuestion", () => {
     });
     expect(toolResponse).toEqual({
       success: false,
-      contentItems: [{ type: "inputText", text: "Unknown OpenClaw tool: web_search" }],
+      contentItems: [{ type: "inputText", text: "Unknown Bot tool: web_search" }],
     });
     expect(toolExecuteMock).not.toHaveBeenCalled();
   });
@@ -1265,7 +1265,7 @@ describe("runCodexAppServerSideQuestion", () => {
     });
     expect(toolResponse).toEqual({
       success: false,
-      contentItems: [{ type: "inputText", text: "Unknown OpenClaw tool: web_search" }],
+      contentItems: [{ type: "inputText", text: "Unknown Bot tool: web_search" }],
     });
     expect(toolExecuteMock).not.toHaveBeenCalled();
     expect(resolveCodexProviderWebSearchSupportForClientMock).not.toHaveBeenCalled();
@@ -1293,13 +1293,13 @@ describe("runCodexAppServerSideQuestion", () => {
     });
     expect(toolResponse).toEqual({
       success: false,
-      contentItems: [{ type: "inputText", text: "Unknown OpenClaw tool: web_search" }],
+      contentItems: [{ type: "inputText", text: "Unknown Bot tool: web_search" }],
     });
     expect(toolExecuteMock).not.toHaveBeenCalled();
     expect(resolveCodexProviderWebSearchSupportForClientMock).not.toHaveBeenCalled();
   });
 
-  it("rejects /btw before forking when the current OpenClaw session is sandboxed", async () => {
+  it("rejects /btw before forking when the current Bot session is sandboxed", async () => {
     await expect(
       runCodexAppServerSideQuestion(
         sideParams({
@@ -1308,7 +1308,7 @@ describe("runCodexAppServerSideQuestion", () => {
         }),
       ),
     ).rejects.toThrow(
-      "Codex-native /btw side-question mode is unavailable because OpenClaw sandboxing is active for this session.",
+      "Codex-native /btw side-question mode is unavailable because Bot sandboxing is active for this session.",
     );
 
     expect(getSharedCodexAppServerClientMock).not.toHaveBeenCalled();
@@ -1329,7 +1329,7 @@ describe("runCodexAppServerSideQuestion", () => {
         }),
       ),
     ).rejects.toThrow(
-      "Codex-native /btw side-question mode is unavailable because OpenClaw sandboxing is active for this session.",
+      "Codex-native /btw side-question mode is unavailable because Bot sandboxing is active for this session.",
     );
 
     expect(getSharedCodexAppServerClientMock).not.toHaveBeenCalled();
@@ -1344,7 +1344,7 @@ describe("runCodexAppServerSideQuestion", () => {
         }),
       ),
     ).rejects.toThrow(
-      "Codex-native /btw side-question mode is unavailable because OpenClaw exec host=node is active for this session.",
+      "Codex-native /btw side-question mode is unavailable because Bot exec host=node is active for this session.",
     );
 
     expect(getSharedCodexAppServerClientMock).not.toHaveBeenCalled();
@@ -1423,7 +1423,7 @@ describe("runCodexAppServerSideQuestion", () => {
     const turnStartCall = client.request.mock.calls.find(([method]) => method === "turn/start");
     expect(turnStartCall?.[1]).not.toHaveProperty("config");
     expect(relayIdDuringFork).toBeDefined();
-    expect(createOpenClawCodingToolsMock).toHaveBeenCalledWith(
+    expect(createBotCodingToolsMock).toHaveBeenCalledWith(
       expect.objectContaining({ runId: "run-side-1" }),
     );
     expect(
@@ -2226,7 +2226,7 @@ describe("runCodexAppServerSideQuestion", () => {
     expect(activeDiagnosticToolKeys(diagnosticEvents)).toEqual(new Set());
   });
 
-  it("bridges side-thread dynamic tool requests to OpenClaw tools", async () => {
+  it("bridges side-thread dynamic tool requests to Bot tools", async () => {
     const client = createFakeClient();
     let toolResponse: unknown;
     client.request.mockImplementation(async (method: string) => {
@@ -2282,7 +2282,7 @@ describe("runCodexAppServerSideQuestion", () => {
     const client = createFakeClient();
     const computerExecute = vi.fn();
     let toolResponse: unknown;
-    createOpenClawCodingToolsMock.mockReturnValue([
+    createBotCodingToolsMock.mockReturnValue([
       {
         name: "computer",
         description: "Control a desktop",
@@ -2330,7 +2330,7 @@ describe("runCodexAppServerSideQuestion", () => {
     expect(computerExecute).not.toHaveBeenCalled();
     expect(toolResponse).toEqual({
       success: false,
-      contentItems: [{ type: "inputText", text: "Unknown OpenClaw tool: computer" }],
+      contentItems: [{ type: "inputText", text: "Unknown Bot tool: computer" }],
     });
   });
 
@@ -2941,7 +2941,7 @@ describe("runCodexAppServerSideQuestion", () => {
     ).resolves.toEqual({ text: "Tool answer." });
 
     expect(beforeToolCall).toHaveBeenCalledTimes(1);
-    expect(createOpenClawCodingToolsMock).toHaveBeenCalledWith(
+    expect(createBotCodingToolsMock).toHaveBeenCalledWith(
       expect.objectContaining({ hookChannelId: "voice-room" }),
     );
     expect(toolExecuteMock).toHaveBeenCalledTimes(1);
@@ -3009,7 +3009,7 @@ describe("runCodexAppServerSideQuestion", () => {
 
   it("cleans up notification handlers when side tool setup fails", async () => {
     const client = createFakeClient();
-    createOpenClawCodingToolsMock.mockImplementation(() => {
+    createBotCodingToolsMock.mockImplementation(() => {
       throw new Error("tool setup failed");
     });
     getSharedCodexAppServerClientMock.mockResolvedValue(client);

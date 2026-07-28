@@ -1,5 +1,5 @@
 // Runtime boundary for resolving provider plugins from metadata and config.
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { sortUniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { withActivatedPluginIds } from "./activation-context.js";
 import { resolveBundledPluginCompatibleActivationInputs } from "./activation-context.js";
 import { resolveManifestActivationPluginIds } from "./activation-planner.js";
@@ -8,7 +8,7 @@ import { extractPluginInstallRecordsFromInstalledPluginIndex } from "./installed
 import {
   getRuntimePluginRegistryForLoadOptions,
   isPluginRegistryLoadInFlight,
-  loadOpenClawPlugins,
+  loadBotPlugins,
   type PluginLoadOptions,
 } from "./loader.js";
 import { resolvePluginMetadataSnapshot } from "./plugin-metadata-snapshot.js";
@@ -345,7 +345,7 @@ export function resolvePluginProviders(params: {
     if (params.skipIfLoadInFlight && isPluginRegistryLoadInFlight(loadState.loadOptions)) {
       return [];
     }
-    const registry = loadOpenClawPlugins(loadState.loadOptions);
+    const registry = loadBotPlugins(loadState.loadOptions);
     return registry.providers.map((entry) =>
       Object.assign({}, entry.provider, { pluginId: entry.pluginId }),
     );

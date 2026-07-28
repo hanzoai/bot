@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { stableStringify } from "../agents/stable-stringify.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { BotStateDatabaseOptions } from "../state/bot-state-db.js";
 import {
   CLAW_CRON_REF_SCHEMA_VERSION,
   clawCronGatewayJobMatchesRef,
@@ -57,7 +57,7 @@ function targetRef(params: {
 export async function applyClawCronUpdate(
   updatePlan: ClawUpdatePlan,
   targetManifest: ClawManifest,
-  options: OpenClawStateDatabaseOptions & {
+  options: BotStateDatabaseOptions & {
     cronGateway?: ClawCronGateway;
     nowMs?: number;
     readRefs?: typeof readClawCronRefs;

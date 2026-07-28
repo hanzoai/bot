@@ -1,6 +1,6 @@
 // Slack tests cover outbound payload plugin behavior.
-import { installChannelOutboundPayloadContractSuite } from "openclaw/plugin-sdk/channel-contract-testing";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+import { installChannelOutboundPayloadContractSuite } from "bot/plugin-sdk/channel-contract-testing";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { createSlackOutboundPayloadHarness, slackOutbound } from "../test-api.js";
 import { createSlackSendTestClient } from "./blocks.test-helpers.js";
@@ -531,23 +531,23 @@ describe("slackOutbound sendPayload", () => {
       blocks: [
         {
           type: "actions",
-          block_id: "openclaw_reply_buttons_1",
+          block_id: "bot_reply_buttons_1",
           elements: [expect.objectContaining({ value: "stage" })],
         },
         {
           type: "actions",
-          block_id: "openclaw_reply_select_1",
-          elements: [expect.objectContaining({ action_id: "openclaw:reply_select:1" })],
+          block_id: "bot_reply_select_1",
+          elements: [expect.objectContaining({ action_id: "bot:reply_select:1" })],
         },
         {
           type: "actions",
-          block_id: "openclaw_reply_buttons_2",
+          block_id: "bot_reply_buttons_2",
           elements: [expect.objectContaining({ value: "refresh" })],
         },
         {
           type: "actions",
-          block_id: "openclaw_reply_select_2",
-          elements: [expect.objectContaining({ action_id: "openclaw:reply_select:2" })],
+          block_id: "bot_reply_select_2",
+          elements: [expect.objectContaining({ action_id: "bot:reply_select:2" })],
         },
       ],
     });
@@ -629,7 +629,7 @@ describe("slackOutbound sendPayload", () => {
                 label: "Launch",
                 action: {
                   type: "web-app",
-                  url: "https://node.tailnet.ts.net/__openclaw__/mcp-app#opaque-ticket",
+                  url: "https://node.tailnet.ts.net/__bot__/mcp-app#opaque-ticket",
                 },
               },
               { label: "View", action: { type: "url", url: "https://example.com/view" } },
@@ -654,12 +654,12 @@ describe("slackOutbound sendPayload", () => {
           elements: [
             expect.objectContaining({
               type: "button",
-              action_id: "openclaw:reply_link:1:1",
-              url: "https://node.tailnet.ts.net/__openclaw__/mcp-app#opaque-ticket",
+              action_id: "bot:reply_link:1:1",
+              url: "https://node.tailnet.ts.net/__bot__/mcp-app#opaque-ticket",
             }),
             expect.objectContaining({
               type: "button",
-              action_id: "openclaw:reply_link:1:2",
+              action_id: "bot:reply_link:1:2",
               url: "https://example.com/view",
             }),
           ],
@@ -782,7 +782,7 @@ describe("slackOutbound sendPayload", () => {
     expect(fallback).toContain("Column 20: Value 20");
     expect(segments[2]).toMatchObject({
       kind: "blocks",
-      blocks: [{ block_id: "openclaw_reply_buttons_1" }, { block_id: "openclaw_reply_buttons_2" }],
+      blocks: [{ block_id: "bot_reply_buttons_1" }, { block_id: "bot_reply_buttons_2" }],
     });
 
     const { run, sendMock } = createHarness({
@@ -1028,7 +1028,7 @@ describe("slackOutbound sendPayload", () => {
             blocks: [
               {
                 type: "actions",
-                block_id: "openclaw_reply_buttons_1",
+                block_id: "bot_reply_buttons_1",
                 elements: [],
               },
             ],
@@ -1060,12 +1060,12 @@ describe("slackOutbound sendPayload", () => {
     expect(call[0]).toBe(to);
     expect(call[1]).toBe("Deploy?\n\nStage\n\nApprove");
     const blocks = sendOptions(call).blocks;
-    expect(blocks?.[0]?.block_id).toBe("openclaw_reply_buttons_1");
+    expect(blocks?.[0]?.block_id).toBe("bot_reply_buttons_1");
     expect(blocks?.[1]?.type).toBe("section");
-    expect(blocks?.[2]?.block_id).toBe("openclaw_reply_buttons_2");
-    expect(blocks?.[2]?.elements?.[0]?.action_id).toBe("openclaw:reply_button:2:1");
-    expect(blocks?.[3]?.block_id).toBe("openclaw_reply_buttons_3");
-    expect(blocks?.[3]?.elements?.[0]?.action_id).toBe("openclaw:reply_button:3:1");
+    expect(blocks?.[2]?.block_id).toBe("bot_reply_buttons_2");
+    expect(blocks?.[2]?.elements?.[0]?.action_id).toBe("bot:reply_button:2:1");
+    expect(blocks?.[3]?.block_id).toBe("bot_reply_buttons_3");
+    expect(blocks?.[3]?.elements?.[0]?.action_id).toBe("bot:reply_button:3:1");
   });
 });
 

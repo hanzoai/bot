@@ -15,5 +15,5 @@ export {
   DEFAULT_ACCOUNT_ID,
 } from "./account-core.js";
 
-export type { OpenClawConfig } from "../config/types.openclaw.js";
+export type { BotConfig } from "../config/types.bot.js";
 export { resolveAccountEntry } from "../routing/account-lookup.js";

@@ -5,7 +5,7 @@ import type {
   WAMessage,
   WAPresence,
 } from "baileys";
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
+import { recordChannelActivity } from "bot/plugin-sdk/channel-activity-runtime";
 import { resolveWhatsAppDocumentFileName } from "../document-filename.js";
 import { addWhatsAppImagePreviewFields } from "../image-preview.js";
 import { isWhatsAppNewsletterJid } from "../normalize.js";

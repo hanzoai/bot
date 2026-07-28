@@ -1,6 +1,6 @@
-// Test-state exports provide isolated OpenClaw filesystem and environment fixtures.
+// Test-state exports provide isolated Bot filesystem and environment fixtures.
 export {
-  createOpenClawTestState,
-  withOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createBotTestState,
+  withBotTestState,
+  type BotTestState,
+} from "../test-utils/bot-test-state.js";

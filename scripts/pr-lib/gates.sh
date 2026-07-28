@@ -102,13 +102,13 @@ mark_pr_operation_side_effects_if_available() {
 pin_worktree_bundled_plugins_dir() {
   # Nested .worktrees/<pr> checkouts resolve vitest tooling from the primary
   # checkout's node_modules; pin bundled plugin discovery to this worktree so
-  # PR branches without the openclaw-root node_modules-boundary fix still test
+  # PR branches without the bot-root node_modules-boundary fix still test
   # their own extensions instead of the primary checkout's stale trees.
-  export OPENCLAW_BUNDLED_PLUGINS_DIR="${OPENCLAW_BUNDLED_PLUGINS_DIR:-$PWD/extensions}"
+  export BOT_BUNDLED_PLUGINS_DIR="${BOT_BUNDLED_PLUGINS_DIR:-$PWD/extensions}"
 }
 
 resolve_pr_gates_remote_mode() {
-  case "${OPENCLAW_PR_GATES_REMOTE:-}" in
+  case "${BOT_PR_GATES_REMOTE:-}" in
     "")
       printf 'local\n'
       ;;
@@ -116,7 +116,7 @@ resolve_pr_gates_remote_mode() {
       printf 'testbox\n'
       ;;
     *)
-      echo "Unsupported OPENCLAW_PR_GATES_REMOTE=${OPENCLAW_PR_GATES_REMOTE} (supported: testbox)." >&2
+      echo "Unsupported BOT_PR_GATES_REMOTE=${BOT_PR_GATES_REMOTE} (supported: testbox)." >&2
       return 1
       ;;
   esac
@@ -129,7 +129,7 @@ acquire_pr_gates_lock() {
   # Serialize whole gate blocks across .worktrees on the shared heavy-check
   # lock; a queued gate run waits here, before its first command, instead of
   # dying on child lock timeouts or shard no-output watchdog kills mid-test.
-  if [ "${OPENCLAW_TEST_HEAVY_CHECK_LOCK_HELD:-}" = "1" ]; then
+  if [ "${BOT_TEST_HEAVY_CHECK_LOCK_HELD:-}" = "1" ]; then
     return 0
   fi
 
@@ -152,9 +152,9 @@ acquire_pr_gates_lock() {
   done
   # Same held-lock contract check-changed uses for its children: gate stages
   # must not re-acquire the lock the block holder already owns.
-  export OPENCLAW_TEST_HEAVY_CHECK_LOCK_HELD=1
-  export OPENCLAW_TSGO_HEAVY_CHECK_LOCK_HELD=1
-  export OPENCLAW_OXLINT_SKIP_LOCK=1
+  export BOT_TEST_HEAVY_CHECK_LOCK_HELD=1
+  export BOT_TSGO_HEAVY_CHECK_LOCK_HELD=1
+  export BOT_OXLINT_SKIP_LOCK=1
 }
 
 prepare_local_gate_workspace() {
@@ -172,7 +172,7 @@ release_pr_gates_lock() {
   PR_GATES_LOCK_PID=""
   rm -f "$PR_GATES_LOCK_STATUS_FILE"
   PR_GATES_LOCK_STATUS_FILE=""
-  unset OPENCLAW_TEST_HEAVY_CHECK_LOCK_HELD OPENCLAW_TSGO_HEAVY_CHECK_LOCK_HELD OPENCLAW_OXLINT_SKIP_LOCK
+  unset BOT_TEST_HEAVY_CHECK_LOCK_HELD BOT_TSGO_HEAVY_CHECK_LOCK_HELD BOT_OXLINT_SKIP_LOCK
 }
 
 run_remote_testbox_full_test_gate() {
@@ -185,7 +185,7 @@ run_remote_testbox_full_test_gate() {
   run_quiet_logged "$label" "$log_file" \
     node scripts/crabbox-wrapper.mjs run \
     --provider blacksmith-testbox \
-    --blacksmith-org openclaw \
+    --blacksmith-org bot \
     --blacksmith-workflow .github/workflows/ci-check-testbox.yml \
     --blacksmith-job check \
     --blacksmith-ref main \
@@ -215,7 +215,7 @@ read_remote_testbox_gate_run_url() {
   local expected_repo="${pr_url#https://github.com/}"
   expected_repo="${expected_repo%%/pull/*}"
   if [ -z "$expected_repo" ] || [ "$expected_repo" = "$pr_url" ]; then
-    expected_repo="openclaw/openclaw"
+    expected_repo="hanzoai/bot"
   fi
   local url_prefix="https://github.com/$expected_repo/actions/runs/"
   local marker="GitHub Actions run: $url_prefix"
@@ -295,7 +295,7 @@ derive_prepare_gate_change_plan() {
 run_prepare_push_retry_gates() {
   local docs_only="${1:-false}"
 
-  if [ "${OPENCLAW_TESTBOX:-}" = "1" ]; then
+  if [ "${BOT_TESTBOX:-}" = "1" ]; then
     echo "A lease retry changed the prepared head after gate selection."
     echo "Stop here, wait for hosted evidence on the pushed branch, then re-run prepare-run."
     return 1
@@ -362,8 +362,8 @@ prepare_gates() {
   local pr="$1"
   local gates_remote_mode
   gates_remote_mode=$(resolve_pr_gates_remote_mode)
-  if [ "$gates_remote_mode" = "testbox" ] && [ "${OPENCLAW_TESTBOX:-}" = "1" ]; then
-    echo "OPENCLAW_PR_GATES_REMOTE=testbox conflicts with OPENCLAW_TESTBOX=1; hosted PR gates already own remote proof."
+  if [ "$gates_remote_mode" = "testbox" ] && [ "${BOT_TESTBOX:-}" = "1" ]; then
+    echo "BOT_PR_GATES_REMOTE=testbox conflicts with BOT_TESTBOX=1; hosted PR gates already own remote proof."
     exit 2
   fi
 
@@ -406,7 +406,7 @@ prepare_gates() {
   if [ "$has_changelog_update" = "true" ]; then
     if ! root_changelog_update_allowed_for_pr; then
       echo "CHANGELOG.md is release-owned; normal PRs should put release-note context in the PR body or commit message."
-      echo "Set OPENCLAW_ALLOW_ROOT_CHANGELOG_PR=1 only for explicit release automation or maintainer release closeout."
+      echo "Set BOT_ALLOW_ROOT_CHANGELOG_PR=1 only for explicit release automation or maintainer release closeout."
       exit 1
     fi
     normalize_pr_changelog_entries "$pr"
@@ -443,7 +443,7 @@ prepare_gates() {
   local gates_mode="full"
   local hosted_gates_head=""
   local reuse_gates=false
-  if [ "${OPENCLAW_TESTBOX:-}" != "1" ] && [ "$docs_only" = "true" ] && [ -n "$previous_last_verified_head" ] && git merge-base --is-ancestor "$previous_last_verified_head" HEAD 2>/dev/null; then
+  if [ "${BOT_TESTBOX:-}" != "1" ] && [ "$docs_only" = "true" ] && [ -n "$previous_last_verified_head" ] && git merge-base --is-ancestor "$previous_last_verified_head" HEAD 2>/dev/null; then
     local delta_since_verified
     delta_since_verified=$(git diff --name-only "$previous_last_verified_head"..HEAD)
     if [ -z "$delta_since_verified" ] || file_list_is_docsish_only "$delta_since_verified"; then
@@ -451,7 +451,7 @@ prepare_gates() {
     fi
   fi
 
-  if [ "${OPENCLAW_TESTBOX:-}" = "1" ]; then
+  if [ "${BOT_TESTBOX:-}" = "1" ]; then
     gates_mode="hosted_exact_or_recent_parent"
     remote_gates_provider=""
     remote_gates_lease_id=""
@@ -482,7 +482,7 @@ prepare_gates() {
       # for other heavy work while we wait on remote proof.
       release_pr_gates_lock
       gates_mode="remote_testbox"
-      echo "Running pnpm test on Blacksmith Testbox (OPENCLAW_PR_GATES_REMOTE=testbox)."
+      echo "Running pnpm test on Blacksmith Testbox (BOT_PR_GATES_REMOTE=testbox)."
       run_remote_testbox_full_test_gate \
         "pnpm test (blacksmith-testbox)" \
         ".local/gates-test.log" \
@@ -496,12 +496,12 @@ prepare_gates() {
       previous_full_gates_head="$current_head"
     else
       gates_mode="full"
-      if [ -n "${OPENCLAW_VITEST_MAX_WORKERS:-}" ]; then
-        echo "Running pnpm test with OPENCLAW_VITEST_MAX_WORKERS=$OPENCLAW_VITEST_MAX_WORKERS."
+      if [ -n "${BOT_VITEST_MAX_WORKERS:-}" ]; then
+        echo "Running pnpm test with BOT_VITEST_MAX_WORKERS=$BOT_VITEST_MAX_WORKERS."
         run_quiet_logged \
           "pnpm test" \
           ".local/gates-test.log" \
-          env OPENCLAW_VITEST_MAX_WORKERS="$OPENCLAW_VITEST_MAX_WORKERS" pnpm test
+          env BOT_VITEST_MAX_WORKERS="$BOT_VITEST_MAX_WORKERS" pnpm test
       else
         echo "Running pnpm test with host-aware scheduling defaults."
         run_quiet_logged "pnpm test" ".local/gates-test.log" pnpm test

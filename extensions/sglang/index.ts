@@ -1,10 +1,10 @@
-// Sglang plugin entrypoint registers its OpenClaw integration.
+// Sglang plugin entrypoint registers its Bot integration.
 import {
   definePluginEntry,
-  type OpenClawPluginApi,
+  type BotPluginApi,
   type ProviderAuthMethodNonInteractiveContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { buildProviderReplayFamilyHooks } from "openclaw/plugin-sdk/provider-model-shared";
+} from "bot/plugin-sdk/plugin-entry";
+import { buildProviderReplayFamilyHooks } from "bot/plugin-sdk/provider-model-shared";
 import {
   SGLANG_DEFAULT_API_KEY_ENV_VAR,
   SGLANG_DEFAULT_BASE_URL,
@@ -16,14 +16,14 @@ import {
 const PROVIDER_ID = "sglang";
 
 async function loadProviderSetup() {
-  return await import("openclaw/plugin-sdk/provider-setup");
+  return await import("bot/plugin-sdk/provider-setup");
 }
 
 export default definePluginEntry({
   id: "sglang",
   name: "SGLang Provider",
   description: "Bundled SGLang provider plugin",
-  register(api: OpenClawPluginApi) {
+  register(api: BotPluginApi) {
     api.registerProvider({
       id: PROVIDER_ID,
       label: "SGLang",

@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeBotStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createIrcIngressMonitor } from "./irc-ingress.js";
 
@@ -24,12 +24,12 @@ function createQueue(stateDir: string): IrcIngressQueue {
 }
 
 async function withQueue<T>(fn: (queue: IrcIngressQueue) => Promise<T>): Promise<T> {
-  const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-irc-ingress-"));
+  const created = await fs.mkdtemp(path.join(os.tmpdir(), "bot-irc-ingress-"));
   const stateDir = await fs.realpath(created);
   try {
     return await fn(createQueue(stateDir));
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
@@ -56,7 +56,7 @@ function createDeferred(): { promise: Promise<void>; resolve: () => void } {
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 
@@ -181,7 +181,7 @@ describe("IRC durable ingress", () => {
       try {
         await ingress
           .openConnection("connection-dm")
-          .accept(":Alice!ident@example.org PRIVMSG openclaw-bot :hello", "bot");
+          .accept(":Alice!ident@example.org PRIVMSG bot-bot :hello", "bot");
         expect(await queue.listPending({ limit: "all" })).toEqual([
           expect.objectContaining({ laneKey: "direct:alice" }),
         ]);

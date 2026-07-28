@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Re-exports the OpenClaw CLI entry point for package execution.
+// Re-exports the Bot CLI entry point for package execution.
 // Package executable entrypoint that forwards to the CLI bootstrap.
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -101,20 +101,20 @@ if (isMain) {
     }
     if (isBenignUncaughtExceptionError(error)) {
       console.warn(
-        "[openclaw] Non-fatal uncaught exception (continuing):",
+        "[bot] Non-fatal uncaught exception (continuing):",
         formatUncaughtError(error),
       );
       return;
     }
     for (const line of formatCliFailureLines({
-      title: "OpenClaw hit an unexpected runtime error.",
+      title: "Bot hit an unexpected runtime error.",
       error,
       argv: process.argv,
     })) {
       console.error(line);
     }
     for (const message of runFatalErrorHooks({ reason: "uncaught_exception", error })) {
-      console.error("[openclaw]", message);
+      console.error("[bot]", message);
     }
     restoreTerminalState("uncaught exception", { resumeStdinIfPaused: false });
     process.exit(1);
@@ -131,7 +131,7 @@ if (isMain) {
         console.error(line);
       }
       for (const message of runFatalErrorHooks({ reason: "legacy_cli_failure", error: err })) {
-        console.error("[openclaw]", message);
+        console.error("[bot]", message);
       }
       restoreTerminalState("legacy cli failure", { resumeStdinIfPaused: false });
       process.exitCode = 1;

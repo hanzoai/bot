@@ -1,30 +1,30 @@
 // Discord plugin module implements message handler.process behavior.
 import type { APIAllowedMentions } from "discord-api-types/v10";
-import { resolveAgentConfig, resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
+import { resolveAgentConfig, resolveHumanDelayConfig } from "bot/plugin-sdk/agent-runtime";
 import {
   dispatchChannelInboundTurn,
   hasFinalInboundReplyDispatch,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "bot/plugin-sdk/channel-inbound";
 import {
   bindIngressLifecycleToReplyOptions,
   defineFinalizableLivePreviewAdapter,
   deliverWithFinalizableLivePreviewAdapter,
   resolveChannelMessageSourceReplyDeliveryMode,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { resolveTranscriptBackedChannelFinalText } from "openclaw/plugin-sdk/channel-outbound";
-import { getAgentScopedMediaLocalRoots } from "openclaw/plugin-sdk/media-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import { resolveTranscriptBackedChannelFinalText } from "bot/plugin-sdk/channel-outbound";
+import { getAgentScopedMediaLocalRoots } from "bot/plugin-sdk/media-runtime";
 import {
   getReplyPayloadTtsSupplement,
   isReplyPayloadNonTerminalToolErrorWarning,
   resolveSendableOutboundReplyParts,
-} from "openclaw/plugin-sdk/reply-payload";
-import type { ReplyDispatchKind, ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "bot/plugin-sdk/reply-payload";
+import type { ReplyDispatchKind, ReplyPayload } from "bot/plugin-sdk/reply-runtime";
 import {
   danger,
   logVerbose,
   shouldLogVerbose,
   sleepWithAbort,
-} from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/runtime-env";
 import { chunkDiscordTextWithMode } from "../chunk.js";
 import { discordTextHasBroadcastMention } from "../mentions.js";
 import { editMessageDiscord } from "../send.messages.js";

@@ -2,12 +2,12 @@
 import {
   resolveApprovalOverGateway,
   type ApprovalResolveResult,
-} from "openclaw/plugin-sdk/approval-gateway-runtime";
-import type { ExecApprovalReplyDecision } from "openclaw/plugin-sdk/approval-reply-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/approval-gateway-runtime";
+import type { ExecApprovalReplyDecision } from "bot/plugin-sdk/approval-reply-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 
 type ResolveTelegramApprovalParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   approvalId: string;
   approvalKind: "exec" | "plugin";
   decision: ExecApprovalReplyDecision;

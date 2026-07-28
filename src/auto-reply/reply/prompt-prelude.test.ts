@@ -31,7 +31,7 @@ describe("buildReplyPromptEnvelope", () => {
 
     expect(envelope.prefixedCommandBody).toContain("sender_id=telegram-user-1");
     expect(envelope.prefixedCommandBody).toContain("Startup context");
-    expect(envelope.transcriptCommandBody).toBe("[OpenClaw session reset]");
+    expect(envelope.transcriptCommandBody).toBe("[Bot session reset]");
     expect(envelope.currentInboundContext).toBeUndefined();
   });
 
@@ -153,12 +153,12 @@ describe("buildReplyPromptEnvelope", () => {
       sourceReplyDeliveryMode: "message_tool_only",
     });
 
-    expect(envelope.prefixedCommandBody).toBe("[OpenClaw room event]");
-    expect(envelope.queuedBody).toBe("[OpenClaw room event]");
+    expect(envelope.prefixedCommandBody).toBe("[Bot room event]");
+    expect(envelope.queuedBody).toBe("[Bot room event]");
     expect(envelope.transcriptCommandBody).toBe("#35676 Keśava: No wtf");
     expect(envelope.currentInboundContext?.text).toBe(
       [
-        "[OpenClaw room event]",
+        "[Bot room event]",
         "inbound_event_kind: room_event",
         [
           "Room context:",
@@ -177,7 +177,7 @@ describe("buildReplyPromptEnvelope", () => {
     );
     expect(envelope.currentInboundContext?.resumableText).toBe(
       [
-        "[OpenClaw room event]",
+        "[Bot room event]",
         "inbound_event_kind: room_event",
         [
           "Room context:",
@@ -272,7 +272,7 @@ describe("buildReplyPromptEnvelope", () => {
       BodyStripped: "",
       Provider: "telegram",
       ChatType: "group",
-      MediaPaths: ["/tmp/openclaw-photo.jpg"],
+      MediaPaths: ["/tmp/bot-photo.jpg"],
       MediaUrls: ["https://example.com/photo.jpg"],
       InboundHistory: [{ sender: "Alice", timestamp: 1_700_000_000_000, body: "context" }],
     });

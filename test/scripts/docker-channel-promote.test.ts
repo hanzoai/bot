@@ -6,7 +6,7 @@ import {
   promoteDockerChannel,
 } from "../../scripts/docker-channel-promote.mjs";
 
-const images = ["ghcr.io/openclaw/openclaw", "docker.io/openclaw/openclaw"];
+const images = ["ghcr.io/hanzoai/bot", "docker.io/hanzoai/bot"];
 const digest = `sha256:${"1".repeat(64)}`;
 const changedDigest = `sha256:${"2".repeat(64)}`;
 
@@ -128,12 +128,12 @@ describe("Docker channel promotion", () => {
     expect(verifyAttestationsImpl).toHaveBeenCalledWith(
       expect.objectContaining({
         imageRefs: [
-          `ghcr.io/openclaw/openclaw@${digest}`,
-          `ghcr.io/openclaw/openclaw@${digest}`,
-          `ghcr.io/openclaw/openclaw@${digest}`,
-          `docker.io/openclaw/openclaw@${digest}`,
-          `docker.io/openclaw/openclaw@${digest}`,
-          `docker.io/openclaw/openclaw@${digest}`,
+          `ghcr.io/hanzoai/bot@${digest}`,
+          `ghcr.io/hanzoai/bot@${digest}`,
+          `ghcr.io/hanzoai/bot@${digest}`,
+          `docker.io/hanzoai/bot@${digest}`,
+          `docker.io/hanzoai/bot@${digest}`,
+          `docker.io/hanzoai/bot@${digest}`,
         ],
         requiredPlatforms: [
           { architecture: "amd64", os: "linux", variant: undefined },
@@ -149,8 +149,8 @@ describe("Docker channel promotion", () => {
         "create",
         "--prefer-index=false",
         "--tag",
-        "ghcr.io/openclaw/openclaw:extended-stable",
-        `ghcr.io/openclaw/openclaw@${digest}`,
+        "ghcr.io/hanzoai/bot:extended-stable",
+        `ghcr.io/hanzoai/bot@${digest}`,
       ],
       expect.objectContaining({ timeout: 120_000 }),
     );
@@ -202,7 +202,7 @@ describe("Docker channel promotion", () => {
         { execFileSyncImpl, verifyAttestationsImpl: skipAttestationVerification },
       ),
     ).toThrow(
-      "Refusing to move ghcr.io/openclaw/openclaw:extended-stable backward from 2026.6.34 to 2026.6.33",
+      "Refusing to move ghcr.io/hanzoai/bot:extended-stable backward from 2026.6.34 to 2026.6.33",
     );
     expect(execFileSyncImpl.mock.calls.some(([, args]) => args[2] === "create")).toBe(false);
   });
@@ -319,12 +319,12 @@ describe("Docker channel promotion", () => {
       },
     );
 
-    expect(verifiedRefs).toEqual(Array(3).fill(`ghcr.io/openclaw/openclaw@${digest}`));
+    expect(verifiedRefs).toEqual(Array(3).fill(`ghcr.io/hanzoai/bot@${digest}`));
     expect(
       execFileSyncImpl.mock.calls
         .filter(([, args]) => args[2] === "create")
         .map(([, args]) => args.at(-1)),
-    ).toEqual(Array(3).fill(`ghcr.io/openclaw/openclaw@${digest}`));
+    ).toEqual(Array(3).fill(`ghcr.io/hanzoai/bot@${digest}`));
   });
 
   it("rejects a source whose version label does not match the requested release", () => {
@@ -338,7 +338,7 @@ describe("Docker channel promotion", () => {
         { version: "2026.6.33", images: images.slice(0, 1) },
         { execFileSyncImpl, verifyAttestationsImpl: skipAttestationVerification },
       ),
-    ).toThrow(`ghcr.io/openclaw/openclaw@${digest} reports version 2026.6.34, expected 2026.6.33`);
+    ).toThrow(`ghcr.io/hanzoai/bot@${digest} reports version 2026.6.34, expected 2026.6.33`);
   });
 
   it("rejects a source whose platform version labels disagree", () => {

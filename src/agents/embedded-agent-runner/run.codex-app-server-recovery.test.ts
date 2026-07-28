@@ -1,6 +1,6 @@
 // Coverage for replay-safe Codex app-server recovery retries.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { makeModelFallbackCfg } from "../test-helpers/model-fallback-config-fixture.js";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";

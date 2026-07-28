@@ -109,7 +109,7 @@ export const WHATSAPP_QA_USER_PATH_SCENARIOS: WhatsAppQaScenarioDefinition[] = [
         configMode: "allowlist",
         expectReply: false,
         input:
-          `openclawqa react to this WhatsApp group message with thumbs up for QA action check ${token}. ` +
+          `botqa react to this WhatsApp group message with thumbs up for QA action check ${token}. ` +
           "Do not send any visible text reply after the reaction.",
         matchText: token,
         quietWindowMs: 8_000,
@@ -148,7 +148,7 @@ export const WHATSAPP_QA_USER_PATH_SCENARIOS: WhatsAppQaScenarioDefinition[] = [
         configMode: "allowlist",
         expectReply: false,
         input:
-          `openclawqa use the WhatsApp message tool upload-file action to send a PNG with caption ${token}. ` +
+          `botqa use the WhatsApp message tool upload-file action to send a PNG with caption ${token}. ` +
           "Do not send any visible text reply after the upload.",
         matchText: token,
         quietWindowMs: 8_000,

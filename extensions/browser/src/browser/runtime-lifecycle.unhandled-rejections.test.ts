@@ -31,7 +31,7 @@ const {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/runtime-env", () => ({
+vi.mock("bot/plugin-sdk/runtime-env", () => ({
   registerUnhandledRejectionHandler: registerUnhandledRejectionHandlerMock,
 }));
 

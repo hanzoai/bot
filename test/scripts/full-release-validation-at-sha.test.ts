@@ -90,7 +90,7 @@ describe("full-release-validation-at-sha", () => {
     expect(parseArgs(["--target-ref", "v2026.7.1-beta.5"]).targetRef).toBe("v2026.7.1-beta.5");
     expect(parseArgs(["--target-ref", "v2026.7.1"]).targetRef).toBe("v2026.7.1");
     expect(() => parseArgs(["--target-ref", "feature/not-release"])).toThrow(
-      "canonical OpenClaw release branch or tag",
+      "canonical Bot release branch or tag",
     );
   });
 
@@ -182,13 +182,13 @@ describe("full-release-validation-at-sha", () => {
   });
 
   it("supports current and legacy verifier locations in trusted workflow checkouts", () => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-release-verifier-path-"));
+    const root = mkdtempSync(join(tmpdir(), "bot-release-verifier-path-"));
     try {
       const legacy = join(
         root,
         ".agents",
         "skills",
-        "release-openclaw-ci",
+        "release-bot-ci",
         "scripts",
         "release-ci-summary.mjs",
       );

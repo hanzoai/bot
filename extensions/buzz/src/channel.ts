@@ -1,14 +1,14 @@
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
+import { describeAccountSnapshot } from "bot/plugin-sdk/account-helpers";
 import {
   buildChannelOutboundSessionRoute,
   buildThreadAwareOutboundSessionRoute,
   createChatChannelPlugin,
-} from "openclaw/plugin-sdk/channel-core";
-import { createChannelMessageAdapterFromOutbound } from "openclaw/plugin-sdk/channel-outbound";
+} from "bot/plugin-sdk/channel-core";
+import { createChannelMessageAdapterFromOutbound } from "bot/plugin-sdk/channel-outbound";
 import {
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "bot/plugin-sdk/status-helpers";
 import { BuzzConfigSchema } from "./config-schema.js";
 import { buzzOutboundAdapter, startBuzzGatewayAccount } from "./gateway.js";
 import { discoverBuzzRooms } from "./room-discovery.js";
@@ -49,7 +49,7 @@ export const buzzPlugin = createChatChannelPlugin<ResolvedBuzzAccount, BuzzProbe
       selectionLabel: "Buzz",
       docsPath: "/channels/buzz",
       docsLabel: "buzz",
-      blurb: "Connect OpenClaw agents to Buzz team rooms.",
+      blurb: "Connect Bot agents to Buzz team rooms.",
       order: 56,
     },
     capabilities: {

@@ -1,5 +1,5 @@
 // Imessage tests cover self chat dedupe plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installIMessageStateRuntimeForTest } from "../test-support/runtime.js";
 import { createSentMessageCache } from "./echo-cache.js";
@@ -30,7 +30,7 @@ const IMAGE_MEDIA_FACT = { contentType: "image/png", kind: "image" } as const;
 
 type InboundDecisionParams = Parameters<typeof resolveIMessageInboundDecision>[0];
 
-const cfg = {} as OpenClawConfig;
+const cfg = {} as BotConfig;
 
 beforeEach(() => {
   installIMessageStateRuntimeForTest();

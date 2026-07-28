@@ -5,7 +5,7 @@ import path from "node:path";
 import {
   archiveLegacyStateSource,
   type PluginDoctorStateMigration,
-} from "openclaw/plugin-sdk/runtime-doctor";
+} from "bot/plugin-sdk/runtime-doctor";
 import { normalizeNostrStateAccountId } from "./src/state-account-id.js";
 
 type NostrBusState = {

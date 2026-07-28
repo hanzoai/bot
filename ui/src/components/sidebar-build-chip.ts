@@ -3,7 +3,7 @@ import { property } from "lit/decorators.js";
 import { pathForRoute } from "../app-route-paths.ts";
 import { CONTROL_UI_BUILD_INFO } from "../build-info.ts";
 import { t } from "../i18n/index.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { BotLightDomContentsElement } from "../lit/bot-element.ts";
 import { formatBuildChipText, renderSidebarServerDetails } from "./sidebar-build-chip-format.ts";
 import "./tooltip.ts";
 
@@ -19,7 +19,7 @@ function shouldHandleNavigationClick(event: MouseEvent): boolean {
   );
 }
 
-class SidebarBuildChip extends OpenClawLightDomContentsElement {
+class SidebarBuildChip extends BotLightDomContentsElement {
   @property({ attribute: false }) basePath = "";
   @property({ attribute: false }) gatewayVersion: string | null = null;
   @property({ attribute: false }) onNavigate?: (routeId: "about") => void;
@@ -30,7 +30,7 @@ class SidebarBuildChip extends OpenClawLightDomContentsElement {
       return nothing;
     }
     return html`
-      <openclaw-tooltip class="sidebar-hover-tooltip">
+      <bot-tooltip class="sidebar-hover-tooltip">
         <a
           class="sidebar-footer-build"
           href=${pathForRoute("about", this.basePath)}
@@ -47,11 +47,11 @@ class SidebarBuildChip extends OpenClawLightDomContentsElement {
         <div slot="content" class="sidebar-hover-card sidebar-build-hover-card">
           ${renderSidebarServerDetails(CONTROL_UI_BUILD_INFO, this.gatewayVersion)}
         </div>
-      </openclaw-tooltip>
+      </bot-tooltip>
     `;
   }
 }
 
-if (globalThis.customElements && !customElements.get("openclaw-sidebar-build-chip")) {
-  customElements.define("openclaw-sidebar-build-chip", SidebarBuildChip);
+if (globalThis.customElements && !customElements.get("bot-sidebar-build-chip")) {
+  customElements.define("bot-sidebar-build-chip", SidebarBuildChip);
 }

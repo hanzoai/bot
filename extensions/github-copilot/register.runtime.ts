@@ -3,7 +3,7 @@ import {
   coerceSecretRef,
   ensureAuthProfileStore,
   listProfilesForProvider,
-} from "openclaw/plugin-sdk/provider-auth";
+} from "bot/plugin-sdk/provider-auth";
 import { githubCopilotLoginCommand } from "./login.js";
 import { PROVIDER_ID, resolveCopilotForwardCompatModel } from "./models.js";
 import { wrapCopilotAnthropicStream, wrapCopilotProviderStream } from "./stream.js";

@@ -1,12 +1,12 @@
 import {
   listNativeCommandSpecsForConfig,
   listSkillCommandsForAgents,
-} from "openclaw/plugin-sdk/command-auth-native";
+} from "bot/plugin-sdk/command-auth-native";
 import {
   resolveNativeCommandsEnabled,
   resolveNativeSkillsEnabled,
-} from "openclaw/plugin-sdk/native-command-config-runtime";
-import { isVerbose, shouldLogVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/native-command-config-runtime";
+import { isVerbose, shouldLogVerbose } from "bot/plugin-sdk/runtime-env";
 import { resolveDiscordAccount } from "../accounts.js";
 import { Client } from "../internal/discord.js";
 import { fetchDiscordApplicationId } from "../probe.js";

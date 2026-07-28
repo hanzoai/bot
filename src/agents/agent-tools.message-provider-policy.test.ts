@@ -17,7 +17,7 @@ function toolNames(tools: readonly { name: string }[]): Set<string> {
   return new Set(tools.map((tool) => tool.name));
 }
 
-describe("createOpenClawCodingTools message provider policy", () => {
+describe("createBotCodingTools message provider policy", () => {
   it.each(["voice", "VOICE", " Voice ", "discord-voice", "DISCORD-VOICE", " Discord-Voice "])(
     "does not expose tts tool for normalized voice provider: %s",
     (messageProvider) => {

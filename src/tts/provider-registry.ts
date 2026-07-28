@@ -1,5 +1,5 @@
 // TTS provider registry resolves configured speech providers at runtime.
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import { getActiveRuntimePluginRegistry } from "../plugins/active-runtime-registry.js";
 import {
   resolvePluginCapabilityProvider,
@@ -13,7 +13,7 @@ import {
 } from "./provider-registry-core.js";
 
 /** Resolve speech providers from configured plugin capabilities. */
-function resolveSpeechProviderPluginEntries(cfg?: OpenClawConfig): SpeechProviderPlugin[] {
+function resolveSpeechProviderPluginEntries(cfg?: BotConfig): SpeechProviderPlugin[] {
   return resolvePluginCapabilityProviders({
     key: "speechProviders",
     cfg,

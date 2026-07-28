@@ -1,10 +1,10 @@
 // Manual facade. Keep loader boundary explicit.
-import type { ModelProviderConfig, OpenClawConfig } from "../config/types.js";
+import type { ModelProviderConfig, BotConfig } from "../config/types.js";
 import { loadBundledPluginPublicSurfaceModuleSync } from "./facade-loader.js";
 
 type FacadeModule = {
-  applyXiaomiConfig: (cfg: OpenClawConfig) => OpenClawConfig;
-  applyXiaomiProviderConfig: (cfg: OpenClawConfig) => OpenClawConfig;
+  applyXiaomiConfig: (cfg: BotConfig) => BotConfig;
+  applyXiaomiProviderConfig: (cfg: BotConfig) => BotConfig;
   buildXiaomiProvider: () => ModelProviderConfig;
   XIAOMI_DEFAULT_MODEL_ID: string;
   XIAOMI_DEFAULT_MODEL_REF: string;
@@ -16,7 +16,7 @@ function loadFacadeModule(): FacadeModule {
     artifactBasename: "api.js",
   });
 }
-/** Apply Xiaomi provider defaults to the full OpenClaw config. */
+/** Apply Xiaomi provider defaults to the full Bot config. */
 export const applyXiaomiConfig: FacadeModule["applyXiaomiConfig"] = ((...args) =>
   loadFacadeModule()["applyXiaomiConfig"](...args)) as FacadeModule["applyXiaomiConfig"];
 /** Apply only Xiaomi provider config defaults. */

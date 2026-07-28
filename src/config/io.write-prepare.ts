@@ -1,7 +1,7 @@
 // Prepares config writes by diffing current state and preserving metadata.
 import { isDeepStrictEqual } from "node:util";
-import { normalizeConfiguredProviderCatalogModelId } from "@openclaw/model-catalog-core/provider-model-id-normalization";
-import { expectDefined } from "@openclaw/normalization-core";
+import { normalizeConfiguredProviderCatalogModelId } from "@hanzo/bot-model-catalog-core/provider-model-id-normalization";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import {
   hasAgentRosterProperty,
   listAgentEntries,
@@ -15,7 +15,7 @@ import { isRecord } from "../utils.js";
 import { configIncludeOwnsAgentRosterValues } from "./agent-roster-provenance.js";
 import { applyMergePatch, createMergePatch } from "./merge-patch.js";
 import { normalizeAgentModelMapForConfig, normalizeAgentModelRefForConfig } from "./model-input.js";
-import type { OpenClawConfig } from "./types.js";
+import type { BotConfig } from "./types.js";
 
 const AGENT_ROSTER_PATHS = [
   ["agents", "entries"],
@@ -956,12 +956,12 @@ function shouldPersistCanonicalAgentRoster(params: {
     return true;
   }
   const runtimeRoster = toAgentEntriesRecord(
-    listAgentEntries(params.runtimeConfig as OpenClawConfig),
+    listAgentEntries(params.runtimeConfig as BotConfig),
   );
   const sourceRoster = toAgentEntriesRecord(
-    listAgentEntries(params.sourceConfig as OpenClawConfig),
+    listAgentEntries(params.sourceConfig as BotConfig),
   );
-  const nextRoster = toAgentEntriesRecord(listAgentEntries(params.nextConfig as OpenClawConfig));
+  const nextRoster = toAgentEntriesRecord(listAgentEntries(params.nextConfig as BotConfig));
   return (
     !isDeepStrictEqual(runtimeRoster, nextRoster) && !isDeepStrictEqual(sourceRoster, nextRoster)
   );
@@ -976,11 +976,11 @@ function assertCanonicalAgentRosterRetainsEntries(params: {
     (params.allowedRemovals ?? []).map((agentId) => normalizeAgentId(agentId)),
   );
   const canonicalIds = new Set(
-    listAgentEntries(params.canonicalConfig as OpenClawConfig).map((entry) =>
+    listAgentEntries(params.canonicalConfig as BotConfig).map((entry) =>
       normalizeAgentId(entry.id),
     ),
   );
-  const droppedIds = listAgentEntries(params.currentConfig as OpenClawConfig)
+  const droppedIds = listAgentEntries(params.currentConfig as BotConfig)
     .filter((entry) => {
       const agentId = normalizeAgentId(entry.id);
       return !canonicalIds.has(agentId) && !allowedRemovals.has(agentId);
@@ -1183,16 +1183,16 @@ function canonicalizeAgentRosterForExplicitWrite(params: {
           }),
         )
       : (toAgentEntriesRecord(
-          listAgentEntries(params.rootAuthoredConfig as OpenClawConfig),
+          listAgentEntries(params.rootAuthoredConfig as BotConfig),
         ) as Record<string, unknown>);
   const runtimeEntries = toAgentEntriesRecord(
-    listAgentEntries(params.runtimeConfig as OpenClawConfig),
+    listAgentEntries(params.runtimeConfig as BotConfig),
   ) as Record<string, unknown>;
   const sourceEntries = toAgentEntriesRecord(
-    listAgentEntries(params.sourceConfig as OpenClawConfig),
+    listAgentEntries(params.sourceConfig as BotConfig),
   ) as Record<string, unknown>;
   const nextEntries = toAgentEntriesRecord(
-    listAgentEntries(params.nextConfig as OpenClawConfig),
+    listAgentEntries(params.nextConfig as BotConfig),
   ) as Record<string, unknown>;
   const explicitRoster = readAgentRosterProperty(params.valueSource);
   const renamedLegacyIndexes = new Set(
@@ -1295,7 +1295,7 @@ function canonicalizeAgentRosterForExplicitWrite(params: {
             return [[id, config]];
           }),
         )
-      : (toAgentEntriesRecord(listAgentEntries(params.valueSource as OpenClawConfig)) as Record<
+      : (toAgentEntriesRecord(listAgentEntries(params.valueSource as BotConfig)) as Record<
           string,
           unknown
         >);
@@ -1612,7 +1612,7 @@ export function resolvePersistCandidateForWrite(params: {
       ? setPathValueCreatingParents(
           projectedAuthoredRoster,
           ["agents", "entries"],
-          toAgentEntriesRecord(listAgentEntries(params.sourceConfig as OpenClawConfig)),
+          toAgentEntriesRecord(listAgentEntries(params.sourceConfig as BotConfig)),
         )
       : projectedAuthoredRoster;
   let persistedBase = preserveUntouchedIncludes({

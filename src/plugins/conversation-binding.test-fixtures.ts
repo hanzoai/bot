@@ -1,10 +1,10 @@
 /** Test-only reset for process-global plugin conversation binding state. */
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { resolveGlobalMap, resolveGlobalSingleton } from "../shared/global-singleton.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
+import { runBotStateWriteTransaction } from "../state/bot-state-db.js";
 
-type PluginBindingApprovalsDatabase = Pick<OpenClawStateKyselyDatabase, "plugin_binding_approvals">;
+type PluginBindingApprovalsDatabase = Pick<BotStateKyselyDatabase, "plugin_binding_approvals">;
 
 type PluginBindingGlobalState = {
   fallbackNoticeBindingIds: Set<string>;
@@ -14,9 +14,9 @@ type PluginBindingGlobalState = {
 };
 
 export function resetPluginConversationBindingStateForTest(): void {
-  resolveGlobalMap(Symbol.for("openclaw.pluginBindingPendingRequests")).clear();
+  resolveGlobalMap(Symbol.for("bot.pluginBindingPendingRequests")).clear();
   const state = resolveGlobalSingleton<PluginBindingGlobalState>(
-    Symbol.for("openclaw.plugins.binding.global-state"),
+    Symbol.for("bot.plugins.binding.global-state"),
     () => ({
       fallbackNoticeBindingIds: new Set(),
       approvalsCache: null,
@@ -38,7 +38,7 @@ export function seedPluginConversationBindingApprovalForTest(params: {
   accountId: string;
   approvedAt?: number;
 }): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runBotStateWriteTransaction(({ db }) => {
     const approvalsDb = getNodeSqliteKysely<PluginBindingApprovalsDatabase>(db);
     executeSqliteQuerySync(
       db,

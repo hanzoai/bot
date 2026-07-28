@@ -1,6 +1,6 @@
 /** Operator CLI for bounded metadata-only activity audit pages. */
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { timestampMsToIsoString } from "@hanzo/bot-normalization-core/number-coercion";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import type {
   AuditActivityListParams,
   AuditActivityListResult,
@@ -219,6 +219,6 @@ const testApi = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.auditCommandTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.auditCommandTestApi")] =
     testApi;
 }

@@ -1,16 +1,16 @@
 // DeepInfra doctor contract: migrates legacy video endpoint config to the
 // canonical `models.providers.deepinfra.baseUrl`. Runtime reads only the
-// canonical key; `openclaw doctor --fix` repairs shipped `nativeBaseUrl` and
+// canonical key; `bot doctor --fix` repairs shipped `nativeBaseUrl` and
 // `/v1/inference` values here so no request-time compat remap is needed.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { asObjectRecord } from "openclaw/plugin-sdk/runtime-doctor";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { asObjectRecord } from "bot/plugin-sdk/runtime-doctor";
+import manifest from "./bot.plugin.json" with { type: "json" };
 
 const PROVIDER_PATH = "models.providers.deepinfra";
 const NATIVE_INFERENCE_PATH = "/v1/inference";
 const OPENAI_COMPAT_PATH = "/v1/openai";
 const CANONICAL_BASE_URL: string = manifest.modelCatalog.providers.deepinfra.baseUrl;
-const FIX_HINT = `Run "openclaw doctor --fix" (api.deepinfra.com endpoints migrate automatically; custom hosts must set ${PROVIDER_PATH}.baseUrl to an OpenAI-compatible videos endpoint manually).`;
+const FIX_HINT = `Run "bot doctor --fix" (api.deepinfra.com endpoints migrate automatically; custom hosts must set ${PROVIDER_PATH}.baseUrl to an OpenAI-compatible videos endpoint manually).`;
 
 export const legacyConfigRules = [
   {
@@ -43,8 +43,8 @@ function normalizeBaseUrlValue(value: unknown): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
-export function normalizeCompatibilityConfig({ cfg }: { cfg: OpenClawConfig }): {
-  config: OpenClawConfig;
+export function normalizeCompatibilityConfig({ cfg }: { cfg: BotConfig }): {
+  config: BotConfig;
   changes: string[];
 } {
   const models = asObjectRecord(cfg.models);
@@ -101,7 +101,7 @@ export function normalizeCompatibilityConfig({ cfg }: { cfg: OpenClawConfig }): 
       models: {
         ...models,
         providers: { ...providers, deepinfra: next },
-      } as unknown as OpenClawConfig["models"],
+      } as unknown as BotConfig["models"],
     },
     changes,
   };

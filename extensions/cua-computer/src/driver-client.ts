@@ -73,7 +73,7 @@ class ComputerDriverUnsupportedError extends Error {
 }
 
 // cua-driver is a separately installed process that outlives this client, so it
-// must never inherit OpenClaw secrets (provider tokens, channel credentials).
+// must never inherit Bot secrets (provider tokens, channel credentials).
 // Forward a deny-by-default allowlist of only the OS/session variables the
 // driver needs plus its own CUA_/XDG_/LC_ namespaces.
 const DRIVER_ENV_ALLOWLIST = new Set(
@@ -146,7 +146,7 @@ function buildDriverEnvironment(env: NodeJS.ProcessEnv): Record<string, string> 
       result[key] = value;
     }
   }
-  // Force OpenClaw-managed opt-outs even over an inherited CUA_* value.
+  // Force Bot-managed opt-outs even over an inherited CUA_* value.
   result.CUA_DRIVER_RS_TELEMETRY_ENABLED = "false";
   result.CUA_DRIVER_RS_UPDATE_CHECK = "false";
   return result;
@@ -211,7 +211,7 @@ export class CuaDriverClient implements CuaDriver {
       options.transportFactory ?? ((params) => new StdioClientTransport(params));
     this.clientFactory =
       options.clientFactory ??
-      (() => new Client({ name: "openclaw-cua-computer", version: "0.0.0" }));
+      (() => new Client({ name: "bot-cua-computer", version: "0.0.0" }));
     this.sleep =
       options.sleep ??
       (async (durationMs) => {

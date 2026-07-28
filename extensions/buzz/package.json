@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/buzz",
+  "name": "@hanzo/bot-buzz",
   "version": "2026.7.2",
-  "description": "Connect OpenClaw agents to Buzz rooms",
+  "description": "Connect Bot agents to Buzz rooms",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "dependencies": {
@@ -12,44 +12,71 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*",
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
-    "extensions": ["./index.ts"],
+  "bot": {
+    "extensions": [
+      "./index.ts"
+    ],
     "setupEntry": "./setup-entry.ts",
     "channel": {
       "id": "buzz",
       "configuredState": {
         "env": {
-          "allOf": ["BUZZ_RELAY_URL", "BUZZ_PRIVATE_KEY"]
+          "allOf": [
+            "BUZZ_RELAY_URL",
+            "BUZZ_PRIVATE_KEY"
+          ]
         }
       },
       "label": "Buzz",
       "selectionLabel": "Buzz",
       "docsPath": "/channels/buzz",
       "docsLabel": "buzz",
-      "blurb": "Connect OpenClaw agents to Buzz team rooms.",
+      "blurb": "Connect Bot agents to Buzz team rooms.",
       "order": 56,
       "setup": {
         "fields": [
-          { "key": "relayUrl", "kind": "string", "cli": { "flags": "--relay-url <url>", "description": "Buzz relay WebSocket URL" } },
-          { "key": "privateKey", "kind": "string", "sensitive": true, "cli": { "flags": "--private-key <key>", "description": "Buzz bot Nostr private key" } },
-          { "key": "useEnv", "kind": "boolean", "cli": { "flags": "--use-env", "description": "Use BUZZ_PRIVATE_KEY with the supplied relay URL" } }
+          {
+            "key": "relayUrl",
+            "kind": "string",
+            "cli": {
+              "flags": "--relay-url <url>",
+              "description": "Buzz relay WebSocket URL"
+            }
+          },
+          {
+            "key": "privateKey",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--private-key <key>",
+              "description": "Buzz bot Nostr private key"
+            }
+          },
+          {
+            "key": "useEnv",
+            "kind": "boolean",
+            "cli": {
+              "flags": "--use-env",
+              "description": "Use BUZZ_PRIVATE_KEY with the supplied relay URL"
+            }
+          }
         ]
       }
     },
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/buzz",
-      "npmSpec": "@openclaw/buzz",
+      "clawhubSpec": "clawhub:@hanzo/bot-buzz",
+      "npmSpec": "@hanzo/bot-buzz",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.7.2"
     },
@@ -57,7 +84,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2"
+      "botVersion": "2026.7.2"
     },
     "release": {
       "publishToClawHub": true,

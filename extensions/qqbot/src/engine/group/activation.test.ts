@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const sessionStoreMocks = vi.hoisted(() => ({
   getSessionEntry: vi.fn(),
-  resolveStorePath: vi.fn(() => "/state/agents/main/openclaw-agent.sqlite"),
+  resolveStorePath: vi.fn(() => "/state/agents/main/bot-agent.sqlite"),
 }));
 
-vi.mock("openclaw/plugin-sdk/session-store-runtime", () => sessionStoreMocks);
+vi.mock("bot/plugin-sdk/session-store-runtime", () => sessionStoreMocks);
 
 import { resolveGroupActivation } from "./activation.js";
 
@@ -48,7 +48,7 @@ describe("engine/group/activation", () => {
     ).toBe(testCase.expected);
     expect(sessionStoreMocks.resolveStorePath).toHaveBeenCalledWith(undefined, { agentId: "main" });
     expect(sessionStoreMocks.getSessionEntry).toHaveBeenCalledWith({
-      storePath: "/state/agents/main/openclaw-agent.sqlite",
+      storePath: "/state/agents/main/bot-agent.sqlite",
       agentId: "main",
       sessionKey: "k1",
     });

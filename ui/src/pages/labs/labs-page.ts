@@ -13,7 +13,7 @@ import { renderSettingsWorkspace } from "../../components/settings-workspace.ts"
 import { t } from "../../i18n/index.ts";
 import { resolveEditableSnapshotConfig } from "../../lib/config/index.ts";
 import { buildExternalLinkRel, EXTERNAL_LINK_TARGET } from "../../lib/external-link.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import {
   isLabFeatureEnabled,
@@ -22,7 +22,7 @@ import {
   type LabFeature,
 } from "./labs-registry.ts";
 
-class LabsPage extends OpenClawLightDomElement {
+class LabsPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -149,6 +149,6 @@ class LabsPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-labs-page")) {
-  customElements.define("openclaw-labs-page", LabsPage);
+if (!customElements.get("bot-labs-page")) {
+  customElements.define("bot-labs-page", LabsPage);
 }

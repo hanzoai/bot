@@ -7,10 +7,10 @@ let createSlackSystemEventTestHarness: typeof import("./system-event-test-harnes
 type SlackSystemEventTestOverrides =
   import("./system-event-test-harness.js").SlackSystemEventTestOverrides;
 
-vi.mock("openclaw/plugin-sdk/system-event-runtime", () => ({
+vi.mock("bot/plugin-sdk/system-event-runtime", () => ({
   enqueueSystemEvent: (...args: unknown[]) => reactionQueueMock(...args),
 }));
-vi.mock("openclaw/plugin-sdk/system-event-runtime.js", () => ({
+vi.mock("bot/plugin-sdk/system-event-runtime.js", () => ({
   enqueueSystemEvent: (...args: unknown[]) => reactionQueueMock(...args),
 }));
 type ReactionHandler = (args: { event: Record<string, unknown>; body: unknown }) => Promise<void>;

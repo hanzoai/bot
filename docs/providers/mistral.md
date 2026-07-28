@@ -1,7 +1,7 @@
 ---
-summary: "Use Mistral models and Voxtral transcription with OpenClaw"
+summary: "Use Mistral models and Voxtral transcription with Bot"
 read_when:
-  - You want to use Mistral models in OpenClaw
+  - You want to use Mistral models in Bot
   - You want Voxtral realtime transcription for Voice Call
   - You need Mistral API key onboarding and model refs
 title: "Mistral"
@@ -31,13 +31,13 @@ The bundled `mistral` plugin registers four contracts: chat completions, media u
   </Step>
   <Step title="Run onboarding">
     ```bash
-    openclaw onboard --auth-choice mistral-api-key
+    bot onboard --auth-choice mistral-api-key
     ```
 
     Or pass the key directly:
 
     ```bash
-    openclaw onboard --mistral-api-key "$MISTRAL_API_KEY"
+    bot onboard --mistral-api-key "$MISTRAL_API_KEY"
     ```
 
   </Step>
@@ -51,7 +51,7 @@ The bundled `mistral` plugin registers four contracts: chat completions, media u
   </Step>
   <Step title="Verify the model is available">
     ```bash
-    openclaw models list --provider mistral
+    bot models list --provider mistral
     ```
   </Step>
 </Steps>
@@ -71,13 +71,13 @@ The bundled `mistral` plugin registers four contracts: chat completions, media u
 Browse the bundled catalog row before changing config:
 
 ```bash
-openclaw models list --all --provider mistral --plain
+bot models list --all --provider mistral --plain
 ```
 
 Smoke-test a model without starting the Gateway:
 
 ```bash
-openclaw infer model run --local \
+bot infer model run --local \
   --model mistral/mistral-medium-3-5 \
   --prompt "Reply with exactly: mistral-ok" \
   --json
@@ -140,7 +140,7 @@ The bundled `mistral` plugin registers Voxtral Realtime as a Voice Call streamin
 ```
 
 <Note>
-OpenClaw defaults Mistral realtime STT to `pcm_mulaw` at 8 kHz so Voice Call can forward Twilio media frames directly. Use `encoding: "pcm_s16le"` and a matching `sampleRate` only if your upstream stream is already raw PCM.
+Bot defaults Mistral realtime STT to `pcm_mulaw` at 8 kHz so Voice Call can forward Twilio media frames directly. Use `encoding: "pcm_s16le"` and a matching `sampleRate` only if your upstream stream is already raw PCM.
 </Note>
 
 ## Advanced configuration
@@ -149,15 +149,15 @@ OpenClaw defaults Mistral realtime STT to `pcm_mulaw` at 8 kHz so Voice Call can
   <Accordion title="Adjustable reasoning">
     `mistral/mistral-small-latest`, `mistral/mistral-small-2603`, and `mistral/mistral-medium-3-5` support [adjustable reasoning](https://docs.mistral.ai/studio-api/conversations/reasoning/adjustable) on the Chat Completions API via `reasoning_effort` (`none` minimizes extra thinking in the output; `high` surfaces full thinking traces before the final answer).
 
-    OpenClaw maps the session **thinking** level to Mistral's API:
+    Bot maps the session **thinking** level to Mistral's API:
 
-    | OpenClaw thinking level                                              | Mistral `reasoning_effort` |
+    | Bot thinking level                                              | Mistral `reasoning_effort` |
     | ----------------------------------------------------------------------- | --------------------------- |
     | **off** / **minimal**                                                 | `none`                      |
     | **low** / **medium** / **high** / **xhigh** / **adaptive** / **max** | `high`                       |
 
     <Warning>
-    Avoid combining Medium 3.5 reasoning mode with `temperature: 0`; the Mistral HTTP API has been reported to reject `reasoning_effort="high"` plus `temperature: 0` with a 400 response. Leave temperature unset, or turn thinking off/minimal so OpenClaw sends `reasoning_effort: "none"` before you set a low temperature.
+    Avoid combining Medium 3.5 reasoning mode with `temperature: 0`; the Mistral HTTP API has been reported to reject `reasoning_effort="high"` plus `temperature: 0` with a 400 response. Leave temperature unset, or turn thinking off/minimal so Bot sends `reasoning_effort: "none"` before you set a low temperature.
     </Warning>
 
     Example model-scoped config for Medium 3.5 reasoning:

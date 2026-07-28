@@ -1,5 +1,5 @@
 // Irc tests cover index plugin behavior.
-import { assertBundledChannelEntries } from "openclaw/plugin-sdk/channel-test-helpers";
+import { assertBundledChannelEntries } from "bot/plugin-sdk/channel-test-helpers";
 import { describe } from "vitest";
 import entry from "./index.js";
 import setupEntry from "./setup-entry.js";

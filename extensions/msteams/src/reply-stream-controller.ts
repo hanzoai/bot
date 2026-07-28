@@ -10,8 +10,8 @@ import {
   resolveChannelPreviewStreamMode,
   resolveChannelProgressDraftMaxLines,
   resolveChannelStreamingPreviewToolProgress,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { normalizeOptionalLowercaseString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import { normalizeOptionalLowercaseString } from "bot/plugin-sdk/string-coerce-runtime";
 import type { MSTeamsConfig, ReplyPayload } from "../runtime-api.js";
 import type { MSTeamsMonitorLogger } from "./monitor-types.js";
 import type { MSTeamsTurnContext } from "./sdk-types.js";
@@ -29,7 +29,7 @@ function isStreamCancelledError(err: unknown): boolean {
 }
 
 /**
- * Bridges openclaw's reply pipeline callbacks to the SDK's `ctx.stream`.
+ * Bridges bot's reply pipeline callbacks to the SDK's `ctx.stream`.
  * Streaming is enabled for personal (DM) conversations only; group/channel
  * messages fall through to block delivery.
  *
@@ -79,7 +79,7 @@ export function createTeamsReplyStreamController(params: {
   let latestPlan: AgentPlanStep[] | undefined;
   let latestPlanExplanation: string | undefined;
   let pendingFinalPayload: Maybe<ReplyPayload>;
-  // openclaw's reply pipeline calls onPartialReply with the cumulative text on
+  // bot's reply pipeline calls onPartialReply with the cumulative text on
   // each chunk, but the SDK's HttpStream appends each emit() to its internal
   // text buffer (this.text += activity.text). Forwarding cumulative text into
   // an appending sink produces "chunk1 + chunk2 + chunk3..." duplication. We
@@ -153,7 +153,7 @@ export function createTeamsReplyStreamController(params: {
 
     onPartialReply(payload: { text?: string }): void {
       // Partial-token streaming only fires in "partial" mode. In "progress"
-      // mode, openclaw's pipeline doesn't deliver tokens — the model output
+      // mode, bot's pipeline doesn't deliver tokens — the model output
       // arrives as a single payload at preparePayload time.
       if (
         !stream ||

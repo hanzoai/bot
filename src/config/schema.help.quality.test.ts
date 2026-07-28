@@ -1,6 +1,6 @@
 // Checks config help text quality and coverage.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import { computeBaseConfigSchemaResponse } from "./schema-base.js";
 import { FIELD_HELP } from "./schema.help.js";

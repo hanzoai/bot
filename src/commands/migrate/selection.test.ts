@@ -1,6 +1,6 @@
 // Migration selection tests cover skill/plugin filtering, defaults, shortcuts, and skipped-item reasons.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import type { MigrationItem, MigrationPlan } from "../../plugins/types.js";
 import { applyMigrationItemSelection } from "./item-selection.js";
@@ -36,7 +36,7 @@ function skillItem(params: {
     action: "copy",
     status: params.status ?? "planned",
     source: `/tmp/codex/skills/${params.name}`,
-    target: `/tmp/openclaw/workspace/skills/${params.name}`,
+    target: `/tmp/bot/workspace/skills/${params.name}`,
     reason: params.reason,
     details: {
       skillName: params.name,

@@ -5,10 +5,10 @@ sidebarTitle: "CLI backend plugins"
 read_when:
   - You are building a local AI CLI backend plugin
   - You want to register a backend for model refs such as acme-cli/model
-  - You need to map a third-party CLI into OpenClaw's text fallback runner
+  - You need to map a third-party CLI into Bot's text fallback runner
 ---
 
-CLI backend plugins let OpenClaw call a local AI CLI as a text inference
+CLI backend plugins let Bot call a local AI CLI as a text inference
 backend. The backend appears as a provider prefix in model refs:
 
 ```text
@@ -32,8 +32,8 @@ A CLI backend plugin has three contracts:
 
 | Contract             | File                   | Purpose                                                   |
 | -------------------- | ---------------------- | --------------------------------------------------------- |
-| Package entry        | `package.json`         | Points OpenClaw at the plugin runtime module              |
-| Manifest ownership   | `openclaw.plugin.json` | Declares the backend id before runtime loads              |
+| Package entry        | `package.json`         | Points Bot at the plugin runtime module              |
+| Manifest ownership   | `bot.plugin.json` | Declares the backend id before runtime loads              |
 | Runtime registration | `index.ts`             | Calls `api.registerCliBackend(...)` with command defaults |
 
 The manifest is discovery metadata: it does not execute the CLI or register
@@ -46,22 +46,22 @@ runtime behavior. Runtime behavior starts when the plugin entry calls
   <Step title="Create package metadata">
     ```json package.json
     {
-      "name": "@acme/openclaw-acme-cli",
+      "name": "@acme/bot-acme-cli",
       "version": "1.0.0",
       "type": "module",
-      "openclaw": {
+      "bot": {
         "extensions": ["./index.ts"],
         "compat": {
           "pluginApi": ">=2026.3.24-beta.2",
           "minGatewayVersion": "2026.3.24-beta.2"
         },
         "build": {
-          "openclawVersion": "2026.3.24-beta.2",
+          "botVersion": "2026.3.24-beta.2",
           "pluginSdkVersion": "2026.3.24-beta.2"
         }
       },
       "dependencies": {
-        "openclaw": "^2026.3.24"
+        "bot": "^2026.3.24"
       },
       "devDependencies": {
         "typescript": "^5.9.0"
@@ -70,17 +70,17 @@ runtime behavior. Runtime behavior starts when the plugin entry calls
     ```
 
     Published packages must ship built JavaScript runtime files. If your source
-    entry is `./src/index.ts`, add `openclaw.runtimeExtensions` pointing at the
+    entry is `./src/index.ts`, add `bot.runtimeExtensions` pointing at the
     built JavaScript peer. See [Entry points](/plugins/sdk-entrypoints).
 
   </Step>
 
   <Step title="Declare backend ownership">
-    ```json openclaw.plugin.json
+    ```json bot.plugin.json
     {
       "id": "acme-cli",
       "name": "Acme CLI",
-      "description": "Run Acme's local AI CLI through OpenClaw",
+      "description": "Run Acme's local AI CLI through Bot",
       "cliBackends": ["acme-cli"],
       "setup": {
         "cliBackends": ["acme-cli"],
@@ -96,7 +96,7 @@ runtime behavior. Runtime behavior starts when the plugin entry calls
     }
     ```
 
-    `cliBackends` is the runtime ownership list; it lets OpenClaw auto-load the
+    `cliBackends` is the runtime ownership list; it lets Bot auto-load the
     plugin when model selection or `agentRuntime.id` mentions `acme-cli`.
 
     `setup.cliBackends` is the descriptor-first setup surface. Add it when
@@ -108,12 +108,12 @@ runtime behavior. Runtime behavior starts when the plugin entry calls
 
   <Step title="Register the backend">
     ```typescript index.ts
-    import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+    import { definePluginEntry } from "bot/plugin-sdk/plugin-entry";
     import {
       CLI_FRESH_WATCHDOG_DEFAULTS,
       CLI_RESUME_WATCHDOG_DEFAULTS,
       type CliBackendPlugin,
-    } from "openclaw/plugin-sdk/cli-backend";
+    } from "bot/plugin-sdk/cli-backend";
 
     function buildAcmeCliBackend(): CliBackendPlugin {
       return {
@@ -170,7 +170,7 @@ runtime behavior. Runtime behavior starts when the plugin entry calls
     export default definePluginEntry({
       id: "acme-cli",
       name: "Acme CLI",
-      description: "Run Acme's local AI CLI through OpenClaw",
+      description: "Run Acme's local AI CLI through Bot",
       register(api) {
         api.registerCliBackend(buildAcmeCliBackend());
       },
@@ -178,7 +178,7 @@ runtime behavior. Runtime behavior starts when the plugin entry calls
     ```
 
     The backend id must match the manifest `cliBackends` entry. The registered
-    adapter is authoritative plugin code; OpenClaw config selects the backend
+    adapter is authoritative plugin code; Bot config selects the backend
     but does not rewrite its command contract.
 
   </Step>
@@ -186,7 +186,7 @@ runtime behavior. Runtime behavior starts when the plugin entry calls
 
 ## Config shape
 
-`CliBackendConfig` describes how OpenClaw should launch and parse the CLI. The
+`CliBackendConfig` describes how Bot should launch and parse the CLI. The
 worked example above intentionally exercises the same command, resume, JSONL,
 model-alias, session, image, and watchdog fields as the bundled
 `google-gemini-cli` adapter:
@@ -203,10 +203,10 @@ model-alias, session, image, and watchdog fields as the bundled
 | `maxPromptArgChars`                                       | Max prompt length for `arg` mode before falling back to stdin                     |
 | `env` / `clearEnv`                                        | Extra env vars to inject, or names to strip before launch                         |
 | `modelArg`                                                | Flag used before the model id                                                     |
-| `modelAliases`                                            | Map OpenClaw model ids to CLI-native ids                                          |
+| `modelAliases`                                            | Map Bot model ids to CLI-native ids                                          |
 | `sessionArgs`                                             | How to pass a session id using `{sessionId}`                                      |
 | `sessionMode`                                             | `always`, `existing`, or `none`                                                   |
-| `sessionIdFields`                                         | JSON fields OpenClaw reads from CLI output                                        |
+| `sessionIdFields`                                         | JSON fields Bot reads from CLI output                                        |
 | `systemPromptArg` / `systemPromptFileArg`                 | System prompt transport                                                           |
 | `systemPromptFileConfigArg` / `systemPromptFileConfigKey` | Config-override transport for a system prompt file (for example `-c`)             |
 | `systemPromptMode`                                        | `append` or `replace`                                                             |
@@ -231,13 +231,13 @@ only for behavior that really belongs to the backend.
 | `prepareExecution(ctx)`            | Create temporary auth, config, or environment bridges before launch         |
 | `transformSystemPrompt(ctx)`       | Apply a final CLI-specific system prompt transform                          |
 | `textTransforms`                   | Bidirectional prompt/output replacements                                    |
-| `defaultAuthProfileId`             | Prefer a specific OpenClaw auth profile                                     |
+| `defaultAuthProfileId`             | Prefer a specific Bot auth profile                                     |
 | `authEpochMode`                    | Decide how auth changes invalidate stored CLI sessions                      |
 | `nativeToolMode`                   | Declare whether native tools are absent, always on, or host-selectable      |
 | `toolAvailabilityEnforcement`      | Declare whether exact tool caps are enforced in argv or execution staging   |
 | `sideQuestionToolMode`             | Declare disabled native tools for `/btw` side questions                     |
-| `bundleMcp` / `bundleMcpMode`      | Opt into OpenClaw's loopback MCP tool bridge                                |
-| `ownsNativeCompaction`             | Backend owns its own compaction - OpenClaw defers                           |
+| `bundleMcp` / `bundleMcpMode`      | Opt into Bot's loopback MCP tool bridge                                |
+| `ownsNativeCompaction`             | Backend owns its own compaction - Bot defers                           |
 | `subscriptionAuthDispatch`         | Opted-in embedded runs on subscription credentials execute via this backend |
 | `runtimeArtifact`                  | Bound a script launcher to its complete bundled package tree                |
 
@@ -253,7 +253,7 @@ only when a live inference turn mints or revalidates verified setup authority;
 normal CLI runs do not require it. A backend without this declaration cannot
 mint verified CLI setup authority. A `bundled-package-tree` declaration names
 the exact `package.json` owner and requires the package entrypoint to be the
-command. OpenClaw hashes the bounded complete installed package tree, including
+command. Bot hashes the bounded complete installed package tree, including
 nested dependencies, and fails closed for redirecting symlinks,
 launchers outside the declared package, required external dependency
 declarations, oversized trees, and unknown scripts. Declare this only when that
@@ -269,15 +269,15 @@ ephemeral `/btw` calls. Use it when the CLI needs different one-shot flags,
 such as disabling native tools, session persistence, or resume behavior for
 BTW. If a backend normally has `nativeToolMode: "always-on"` but its
 side-question argv reliably disables those tools, also set
-`sideQuestionToolMode: "disabled"`; otherwise OpenClaw fails closed when BTW
+`sideQuestionToolMode: "disabled"`; otherwise Bot fails closed when BTW
 requires a no-tools CLI run.
 
 Set `nativeToolMode: "selectable"` only when the backend can disable every
 backend-native tool for an individual run. Restricted runs receive a canonical
 contract: `ctx.toolAvailability.native` is the exact backend-native list and
-`ctx.toolAvailability.openClaw` is the exact list of OpenClaw tool names. The
+`ctx.toolAvailability.bot` is the exact list of Bot tool names. The
 host independently limits the generated MCP configuration and grant to that
-OpenClaw list; plugins must not translate it in core or add transport prefixes.
+Bot list; plugins must not translate it in core or add transport prefixes.
 
 Declare how the backend enforces that contract:
 
@@ -288,33 +288,33 @@ Declare how the backend enforces that contract:
 - `toolAvailabilityEnforcement: "prepare-execution"` requires
   `prepareExecution`. The hook must stage an exact per-run policy and return
   `toolAvailabilityEnforced: true`; missing acknowledgement fails closed and
-  OpenClaw cleans up the staged resources before launch.
+  Bot cleans up the staged resources before launch.
 
 Runtime caps such as cron `toolsAllow` are normalized and group-expanded by
-OpenClaw before this contract is built. Native tools are disabled, and a
+Bot before this contract is built. Native tools are disabled, and a
 backend without a complete declared enforcement path fails before execution.
 
 Plugins built against `v2026.7.2-beta.1` through `v2026.7.2-beta.3` may still
 read the deprecated `ctx.toolAvailability.mcp` transport-name projection and
 may omit `toolAvailabilityEnforcement` when a selectable backend implements
-`resolveExecutionArgs`. OpenClaw recognizes that shipped beta path from the
-plugin package's required `openclaw.build.openclawVersion` metadata and
+`resolveExecutionArgs`. Bot recognizes that shipped beta path from the
+plugin package's required `bot.build.botVersion` metadata and
 preserves it through the `2026.8.x` line. New and updated plugins should use canonical
-`ctx.toolAvailability.openClaw` names and declare
+`ctx.toolAvailability.bot` names and declare
 `toolAvailabilityEnforcement: "execution-args"` explicitly; the beta
 compatibility path is scheduled for removal after that window.
 
-### `ownsNativeCompaction`: opting out of OpenClaw compaction
+### `ownsNativeCompaction`: opting out of Bot compaction
 
 If your backend runs an agent that compacts its **own** transcript, set
-`ownsNativeCompaction: true` so OpenClaw's safeguard summarizer never runs
+`ownsNativeCompaction: true` so Bot's safeguard summarizer never runs
 against its sessions - the CLI compaction lifecycle returns a no-op and the
 turn proceeds. `claude-cli` declares it because Claude Code compacts
 internally with no harness endpoint. Native-harness sessions such as Codex
 keep routing to their harness compaction endpoint instead.
 
 **Only declare it when all of the following hold**, or a deferred
-over-budget session can stay over budget or go stale (OpenClaw no longer
+over-budget session can stay over budget or go stale (Bot no longer
 rescues it):
 
 - the backend reliably compacts or bounds its own transcript as it nears its
@@ -326,7 +326,7 @@ rescues it):
 
 ## MCP tool bridge
 
-CLI backends do not receive OpenClaw tools by default. If the CLI can consume
+CLI backends do not receive Bot tools by default. If the CLI can consume
 an MCP configuration, opt in explicitly:
 
 ```typescript
@@ -352,7 +352,7 @@ Supported bridge modes:
 
 Only enable the bridge when the CLI can actually consume it. If the CLI has
 its own built-in tool layer that cannot be disabled, set `nativeToolMode:
-"always-on"` so OpenClaw can fail closed when a caller requires no native
+"always-on"` so Bot can fail closed when a caller requires no native
 tools. If it can disable every native tool per run, use `"selectable"` with the
 `resolveExecutionArgs` contract above.
 
@@ -375,7 +375,7 @@ provider model's `agentRuntime.id`. Adapter mechanics remain in the plugin:
 }
 ```
 
-Put credentials in OpenClaw auth profiles or plugin-owned config. Ensure the
+Put credentials in Bot auth profiles or plugin-owned config. Ensure the
 registered command is on the gateway service's `PATH`; deployments that need a
 different path or argv should change or wrap the plugin registration.
 
@@ -391,8 +391,8 @@ pnpm test extensions/acme-cli
 For local or installed plugins, verify discovery and one real model run:
 
 ```bash
-openclaw plugins inspect acme-cli --runtime --json
-openclaw agent --message "reply exactly: backend ok" --model acme-cli/acme-large
+bot plugins inspect acme-cli --runtime --json
+bot agent --message "reply exactly: backend ok" --model acme-cli/acme-large
 ```
 
 If the backend supports images or MCP, add a live smoke that proves those
@@ -401,8 +401,8 @@ MCP, or session-resume behavior.
 
 ## Checklist
 
-<Check>`package.json` has `openclaw.extensions` and built runtime entries for published packages</Check>
-<Check>`openclaw.plugin.json` declares `cliBackends` and intentional `activation.onStartup`</Check>
+<Check>`package.json` has `bot.extensions` and built runtime entries for published packages</Check>
+<Check>`bot.plugin.json` declares `cliBackends` and intentional `activation.onStartup`</Check>
 <Check>`setup.cliBackends` is present when setup/model discovery should see the backend cold</Check>
 <Check>`api.registerCliBackend(...)` uses the same backend id as the manifest</Check>
 <Check>The backend model prefix or model-scoped `agentRuntime.id` selects the registration</Check>

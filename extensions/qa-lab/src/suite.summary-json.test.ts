@@ -82,10 +82,10 @@ describe("buildQaSuiteSummaryJson", () => {
   it("records the runtime pair when the suite runs the runtime axis", () => {
     const json = buildQaSuiteSummaryJson({
       ...baseParams,
-      runtimePair: ["openclaw", "codex"],
+      runtimePair: ["bot", "codex"],
     });
 
-    expect(json.run.runtimePair).toEqual(["openclaw", "codex"]);
+    expect(json.run.runtimePair).toEqual(["bot", "codex"]);
   });
 
   it("treats an empty scenarioIds array as unspecified (no filter)", () => {
@@ -200,8 +200,8 @@ describe("buildQaSuiteSummaryJson", () => {
             },
             drift: "none" as const,
             cells: {
-              openclaw: {
-                runtime: "openclaw" as const,
+              bot: {
+                runtime: "bot" as const,
                 status: "pass" as const,
                 transcriptBytes: "",
                 toolCalls: [],
@@ -230,7 +230,7 @@ describe("buildQaSuiteSummaryJson", () => {
       runtimeParity: {
         scenarioId: "scenario-a",
         cells: {
-          openclaw: { status: "pass" },
+          bot: { status: "pass" },
           codex: { status: "pass" },
         },
         runtimeParityUsage: {

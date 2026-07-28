@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/cloudflare-ai-gateway-provider",
+  "name": "@hanzo/bot-cloudflare-ai-gateway-provider",
   "version": "2026.7.2",
-  "description": "OpenClaw Cloudflare AI Gateway provider plugin.",
+  "description": "Bot Cloudflare AI Gateway provider plugin.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/cloudflare-ai-gateway-provider",
-      "npmSpec": "@openclaw/cloudflare-ai-gateway-provider",
+      "clawhubSpec": "clawhub:@hanzo/bot-cloudflare-ai-gateway-provider",
+      "npmSpec": "@hanzo/bot-cloudflare-ai-gateway-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.8"
     },
@@ -24,7 +24,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {

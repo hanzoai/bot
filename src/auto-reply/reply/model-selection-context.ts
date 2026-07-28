@@ -1,11 +1,11 @@
 import { resolveContextTokensForModel } from "../../agents/context.js";
 import { DEFAULT_CONTEXT_TOKENS } from "../../agents/defaults.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 
 /** Resolves the context window token count for the selected provider/model. */
 export function resolveContextTokens(params: {
-  cfg: OpenClawConfig;
-  agentCfg: NonNullable<NonNullable<OpenClawConfig["agents"]>["defaults"]> | undefined;
+  cfg: BotConfig;
+  agentCfg: NonNullable<NonNullable<BotConfig["agents"]>["defaults"]> | undefined;
   provider: string;
   model: string;
   modelContextWindow?: number;

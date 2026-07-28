@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { ClawCronUpdateError } from "./cron-update.js";
 import {
   persistClawInstallRecord,
@@ -19,7 +19,7 @@ const source: ClawSourceIdentity = {
   name: "@acme/worker",
   version: "2.0.0",
   packageRoot: "/tmp/target",
-  manifestPath: "/tmp/target/openclaw.claw.json",
+  manifestPath: "/tmp/target/bot.claw.json",
   integrityKind: "artifact",
   integrity: "sha256:target",
   byteLength: 1,
@@ -33,7 +33,7 @@ const manifest: ClawManifest = {
   cronJobs: [],
 };
 const install: PersistedClawInstall = {
-  schemaVersion: "openclaw.clawInstallRecord.v1",
+  schemaVersion: "bot.clawInstallRecord.v1",
   claw: { ...source, version: "1.0.0", integrity: "sha256:current" },
   manifestSchemaVersion: 1,
   planIntegrity: "sha256:current-add-plan",
@@ -46,7 +46,7 @@ const install: PersistedClawInstall = {
   updatedAtMs: 1,
 };
 const addPlan: ClawAddPlan = {
-  schemaVersion: "openclaw.clawAddPlan.v1",
+  schemaVersion: "bot.clawAddPlan.v1",
   stability: "experimental",
   dryRun: true,
   mutationAllowed: false,
@@ -78,7 +78,7 @@ const addPlan: ClawAddPlan = {
 
 function plan(actions: ClawUpdatePlan["actions"]): ClawUpdatePlan {
   return {
-    schemaVersion: "openclaw.clawUpdatePlan.v1",
+    schemaVersion: "bot.clawUpdatePlan.v1",
     stability: "experimental",
     dryRun: true,
     mutationAllowed: false,
@@ -183,7 +183,7 @@ describe("applyClawUpdatePlan", () => {
         desiredDigest: "sha256:target-agent",
       },
     ]);
-    let config: OpenClawConfig = { agents: { entries: { worker: { name: "Worker" } } } };
+    let config: BotConfig = { agents: { entries: { worker: { name: "Worker" } } } };
     const persisted = { ...install, claw: source, updatedAtMs: 2 };
     const persistInstall = vi.fn(() => persisted);
 
@@ -209,7 +209,7 @@ describe("applyClawUpdatePlan", () => {
     });
     expect(persistInstall).toHaveBeenCalledWith(addPlan, expect.any(Object));
     expect(result).toMatchObject({
-      schemaVersion: "openclaw.clawUpdateResult.v1",
+      schemaVersion: "bot.clawUpdateResult.v1",
       status: "complete",
       agentId: "worker",
       targetClaw: { version: "2.0.0" },
@@ -228,7 +228,7 @@ describe("applyClawUpdatePlan", () => {
       },
     ]);
     const order: string[] = [];
-    let config: OpenClawConfig = { agents: { entries: {} } };
+    let config: BotConfig = { agents: { entries: {} } };
 
     await applyClawUpdatePlan(
       updatePlan,
@@ -270,8 +270,8 @@ describe("applyClawUpdatePlan", () => {
   });
 
   it("preserves cron prerequisites when the gateway mutation outcome is uncertain", async () => {
-    const root = tempDirs.make("openclaw-claw-update-apply-");
-    const env = { OPENCLAW_STATE_DIR: join(root, "state") };
+    const root = tempDirs.make("bot-claw-update-apply-");
+    const env = { BOT_STATE_DIR: join(root, "state") };
     const currentAddPlan: ClawAddPlan = {
       ...addPlan,
       claw: install.claw,
@@ -300,7 +300,7 @@ describe("applyClawUpdatePlan", () => {
         reason: "target adds cron job",
       },
     ]);
-    let config: OpenClawConfig = { agents: { entries: {} } };
+    let config: BotConfig = { agents: { entries: {} } };
     const workspaceRollback = vi.fn(async () => undefined);
     const mcpRollback = vi.fn(async () => undefined);
     const packageRollback = vi.fn(async () => undefined);
@@ -421,11 +421,11 @@ describe("applyClawUpdatePlan", () => {
   });
 
   it("preserves resolved plugin metadata when applying an owned version upgrade", async () => {
-    const packageRoot = tempDirs.make("openclaw-claw-plugin-update-");
+    const packageRoot = tempDirs.make("bot-claw-plugin-update-");
     const targetSource = {
       ...source,
       packageRoot,
-      manifestPath: join(packageRoot, "openclaw.claw.json"),
+      manifestPath: join(packageRoot, "bot.claw.json"),
     };
     const targetPackage = {
       kind: "plugin" as const,
@@ -554,7 +554,7 @@ describe("applyClawUpdatePlan", () => {
         currentDigest,
       },
     ]);
-    let config: OpenClawConfig = { agents: { entries: { worker: { name: "Worker" } } } };
+    let config: BotConfig = { agents: { entries: { worker: { name: "Worker" } } } };
     let commits = 0;
 
     await expect(
@@ -595,7 +595,7 @@ describe("applyClawUpdatePlan", () => {
         currentDigest,
       },
     ]);
-    let config: OpenClawConfig = { agents: { entries: {} } };
+    let config: BotConfig = { agents: { entries: {} } };
 
     await expect(
       applyClawUpdatePlan(

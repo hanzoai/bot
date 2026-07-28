@@ -1,5 +1,5 @@
 /** Shared plan construction for plugin-owned SecretRef setup commands. */
-import { isValidAgentId } from "@openclaw/normalization-core/agent-id";
+import { isValidAgentId } from "@hanzo/bot-normalization-core/agent-id";
 import type { PluginIntegrationSecretProviderConfig, SecretRef } from "../config/types.secrets.js";
 import type { SecretsApplyPlan, SecretsPlanTarget } from "./plan.js";
 import { resolveSecretPlanTargetByPath } from "./target-registry-query.js";
@@ -50,7 +50,7 @@ export function parsePluginSecretTargetSpecifier(
 ): { path: string; agentId?: string } {
   if (!value.startsWith("auth-profiles:")) {
     return {
-      path: value.startsWith("openclaw:") ? value.slice("openclaw:".length) : value,
+      path: value.startsWith("bot:") ? value.slice("bot:".length) : value,
     };
   }
   const remainder = value.slice("auth-profiles:".length);
@@ -102,7 +102,7 @@ function createPluginConfigSecretTarget(params: {
     throw new Error(`Invalid --target config path: ${params.path}`);
   }
   const resolved = resolveSecretPlanTargetByPath({
-    configFile: params.agentId ? "auth-profiles.json" : "openclaw.json",
+    configFile: params.agentId ? "auth-profiles.json" : "bot.json",
     pathSegments,
   });
   if (!resolved) {
@@ -159,7 +159,7 @@ export function buildPluginSecretRefSetupPlan(params: {
   for (const target of targets) {
     const key = target.agentId
       ? `auth-profiles:${target.agentId}:${target.path}`
-      : `openclaw:${target.path}`;
+      : `bot:${target.path}`;
     if (seen.has(key)) {
       throw new Error(
         `Duplicate secret target path in ${params.productName} setup: ${target.path}`,

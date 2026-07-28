@@ -1,11 +1,11 @@
 import fsSync from "node:fs";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import { migrateSqliteSchemaToStrict } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { openNodeSqliteDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
+import type { MemorySearchResult } from "bot/plugin-sdk/memory-core-host-runtime-files";
+import { migrateSqliteSchemaToStrict } from "bot/plugin-sdk/plugin-state-runtime";
+import { openNodeSqliteDatabase } from "bot/plugin-sdk/sqlite-runtime";
 
-const QMD_SESSION_ARTIFACT_TABLE = "openclaw_qmd_session_artifacts";
+const QMD_SESSION_ARTIFACT_TABLE = "bot_qmd_session_artifacts";
 const QMD_SESSION_ARTIFACT_SCHEMA = `
   CREATE TABLE IF NOT EXISTS ${QMD_SESSION_ARTIFACT_TABLE} (
     collection TEXT NOT NULL,
@@ -21,7 +21,7 @@ const QMD_SESSION_ARTIFACT_SCHEMA = `
   ) STRICT;
 `;
 
-const QMD_SESSION_ARTIFACT_HIT: unique symbol = Symbol("openclaw.qmdSessionArtifactHit");
+const QMD_SESSION_ARTIFACT_HIT: unique symbol = Symbol("bot.qmdSessionArtifactHit");
 
 export type QmdSessionArtifactMapping = {
   agentId: string;
@@ -80,11 +80,11 @@ function ensureQmdSessionArtifactSchema(db: DatabaseSync): void {
     });
   }
   db.exec(
-    `CREATE INDEX IF NOT EXISTS idx_openclaw_qmd_session_artifacts_docid
+    `CREATE INDEX IF NOT EXISTS idx_bot_qmd_session_artifacts_docid
      ON ${QMD_SESSION_ARTIFACT_TABLE} (docid)`,
   );
   db.exec(
-    `CREATE INDEX IF NOT EXISTS idx_openclaw_qmd_session_artifacts_search_path
+    `CREATE INDEX IF NOT EXISTS idx_bot_qmd_session_artifacts_search_path
      ON ${QMD_SESSION_ARTIFACT_TABLE} (search_path)`,
   );
 }

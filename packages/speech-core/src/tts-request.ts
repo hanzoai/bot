@@ -1,5 +1,5 @@
-import type { OpenClawConfig, TtsConfig } from "openclaw/plugin-sdk/config-contracts";
-import { mergeDeep } from "openclaw/plugin-sdk/plugin-config-runtime";
+import type { BotConfig, TtsConfig } from "bot/plugin-sdk/config-contracts";
+import { mergeDeep } from "bot/plugin-sdk/plugin-config-runtime";
 import {
   canonicalizeSpeechProviderId,
   getSpeechProvider,
@@ -7,18 +7,18 @@ import {
   type SpeechProviderOverrides,
   type TtsDirectiveOverrides,
   type TtsDirectiveParseResult,
-} from "openclaw/plugin-sdk/speech-core";
+} from "bot/plugin-sdk/speech-core";
 import { resolveTtsProvider } from "./tts-provider-resolution.js";
 import { resolveTtsConfig, resolveTtsPrefsPath, resolveTtsRuntimeConfig } from "./tts-settings.js";
 
 export type PreparedTtsRequest = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   directives: TtsDirectiveParseResult;
 };
 
 /** Merge a surface TTS override and resolve its inline synthesis directives. */
 export function prepareTtsRequest(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   override?: TtsConfig;
   text: string;
 }): PreparedTtsRequest {
@@ -38,7 +38,7 @@ export function prepareTtsRequest(params: {
 }
 
 export function resolveExplicitTtsOverrides(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prefsPath?: string;
   provider?: string;
   modelId?: string;

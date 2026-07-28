@@ -1,21 +1,21 @@
 import { collectConfigRuntimeEnvVars } from "./env-vars.js";
-import type { OpenClawConfig } from "./types.js";
+import type { BotConfig } from "./types.js";
 
 export const GATEWAY_CONFIG_SELECTION_ENV_KEYS: ReadonlySet<string> = new Set([
   "ANDROID_DATA",
   "HOME",
   "HOMEDRIVE",
   "HOMEPATH",
-  "OPENCLAW_AGENT_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_HOME",
-  "OPENCLAW_INCLUDE_ROOTS",
-  "OPENCLAW_NIX_MODE",
-  "OPENCLAW_OAUTH_DIR",
-  "OPENCLAW_PACKAGE_DIR",
-  "OPENCLAW_PROFILE",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_WORKSPACE_DIR",
+  "BOT_AGENT_DIR",
+  "BOT_CONFIG_PATH",
+  "BOT_HOME",
+  "BOT_INCLUDE_ROOTS",
+  "BOT_NIX_MODE",
+  "BOT_OAUTH_DIR",
+  "BOT_PACKAGE_DIR",
+  "BOT_PROFILE",
+  "BOT_STATE_DIR",
+  "BOT_WORKSPACE_DIR",
   "PI_CODING_AGENT_DIR",
   "PREFIX",
   "USERPROFILE",
@@ -23,10 +23,10 @@ export const GATEWAY_CONFIG_SELECTION_ENV_KEYS: ReadonlySet<string> = new Set([
 
 /** Rejects config.env changes that would retarget a running Gateway process. */
 export function assertGatewayConfigEnvSelectionUnchanged(
-  previousConfig: OpenClawConfig,
-  nextConfig: OpenClawConfig,
+  previousConfig: BotConfig,
+  nextConfig: BotConfig,
 ): void {
-  const normalize = (config: OpenClawConfig) =>
+  const normalize = (config: BotConfig) =>
     new Map(
       Object.entries(collectConfigRuntimeEnvVars(config)).map(([key, value]) => [
         key.toUpperCase(),

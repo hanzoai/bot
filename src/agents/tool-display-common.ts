@@ -3,12 +3,12 @@
  * Redacts and summarizes arguments into short labels/details for chat and UI
  * tool update streams.
  */
-import { asOptionalObjectRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalObjectRecord as asRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import { sliceUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { parseStrictFiniteNumber } from "../infra/parse-finite-number.js";
 import { redactToolPayloadText } from "../logging/redact.js";
 import { resolveExecDetail, type ToolDetailMode } from "./tool-display-exec.js";
@@ -383,7 +383,7 @@ function collectWebSearchQueries(record: Record<string, unknown>): string[] {
 function parseToolSearchCall(code: string): { target: string; args?: string } | undefined {
   // This is a bounded summary parser for display only; execution still uses the
   // real tool-search bridge and schema validation.
-  const prefixMatch = code.match(/openclaw\.tools\.call\s*\(\s*/s);
+  const prefixMatch = code.match(/bot\.tools\.call\s*\(\s*/s);
   if (!prefixMatch || prefixMatch.index === undefined) {
     return undefined;
   }
@@ -406,14 +406,14 @@ function normalizeToolSearchDisplayToolName(toolName: string | undefined): strin
   if (!value) {
     return undefined;
   }
-  const catalogIdMatch = value.match(/^(?:openclaw|mcp|client):[^:]+:(.+)$/s);
+  const catalogIdMatch = value.match(/^(?:bot|mcp|client):[^:]+:(.+)$/s);
   return normalizeOptionalString(catalogIdMatch?.[1]) ?? value;
 }
 
 function collectToolSearchDescribeBindings(code: string): Map<string, string> {
   const bindings = new Map<string, string>();
   const bindingPattern =
-    /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:await\s+)?openclaw\.tools\.describe\s*\(\s*("[^"]{1,240}"|'[^']{1,240}')\s*(?:,|\))/gs;
+    /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:await\s+)?bot\.tools\.describe\s*\(\s*("[^"]{1,240}"|'[^']{1,240}')\s*(?:,|\))/gs;
   for (const match of code.matchAll(bindingPattern)) {
     const variableName = match[1];
     const target = summarizeToolSearchTarget(match[2]);
@@ -607,14 +607,14 @@ export function resolveToolSearchCodeDisplayTarget(
       bridgeVerb: "call",
     };
   }
-  const describeMatch = code.match(/openclaw\.tools\.describe\s*\(\s*([^)]+?)\s*(?:,|\))/s);
+  const describeMatch = code.match(/bot\.tools\.describe\s*\(\s*([^)]+?)\s*(?:,|\))/s);
   if (describeMatch) {
     const toolName = summarizeToolSearchTarget(describeMatch[1]);
     return toolName
       ? { toolName, detail: "describe via tool search", bridgeVerb: "describe" }
       : { toolName: "tool_search_code", detail: "describe selected tool", bridgeVerb: "describe" };
   }
-  const searchMatch = code.match(/openclaw\.tools\.search\s*\(\s*([^)]+?)\s*(?:,|\))/s);
+  const searchMatch = code.match(/bot\.tools\.search\s*\(\s*([^)]+?)\s*(?:,|\))/s);
   if (searchMatch) {
     const query = summarizeToolSearchTarget(searchMatch[1]);
     return {

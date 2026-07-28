@@ -1,6 +1,6 @@
 // Gateway WebSocket connect finalization attaches node/session state and sends hello-ok.
 import os from "node:os";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { WebSocket } from "ws";
 import {
   GATEWAY_CLIENT_IDS,
@@ -65,7 +65,7 @@ function isReleasedVersion(version: string): boolean {
 
 /**
  * Lazily resolve the local node host's nodeId from canonical shared SQLite state.
- * Process-stable: only changes on `openclaw node install`, which requires restart.
+ * Process-stable: only changes on `bot node install`, which requires restart.
  */
 let cachedLocalNodeId: Promise<string | null> | undefined;
 async function resolveLocalNodeId(): Promise<string | null> {

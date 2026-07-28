@@ -6,7 +6,7 @@ type DispatchFromConfigTestApi = {
 
 function getTestApi(): DispatchFromConfigTestApi {
   const api = (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.dispatchFromConfigTestApi")
+    Symbol.for("bot.dispatchFromConfigTestApi")
   ];
   if (!api) {
     throw new Error("dispatch-from-config test API is unavailable");

@@ -7,8 +7,8 @@ const baseChunker = (text: string, limit: number): string[] =>
 
 describe("chunkQQBotMarkdownText", () => {
   it("falls unsupported inline code back to plain text", () => {
-    expect(chunkQQBotMarkdownText("Run `openclaw status` now.", 120, baseChunker)).toEqual([
-      "Run openclaw status now.",
+    expect(chunkQQBotMarkdownText("Run `bot status` now.", 120, baseChunker)).toEqual([
+      "Run bot status now.",
     ]);
   });
 

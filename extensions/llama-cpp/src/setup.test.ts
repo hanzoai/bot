@@ -4,7 +4,7 @@ import path from "node:path";
 import type {
   ProviderAppGuidedSetupContext,
   ProviderAuthContext,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "bot/plugin-sdk/plugin-entry";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_LLAMA_CPP_MODEL_CACHE_FILE,
@@ -31,7 +31,7 @@ vi.mock("node-llama-cpp", () => ({
 import { detectLlamaCppSetup, prepareLlamaCppSetup, runLlamaCppSetup } from "./setup.js";
 
 const { formatLlamaCppDownloadProgress } = (globalThis as Record<PropertyKey, unknown>)[
-  Symbol.for("openclaw.llamaCppSetupTestApi")
+  Symbol.for("bot.llamaCppSetupTestApi")
 ] as {
   formatLlamaCppDownloadProgress: (params: {
     downloadedSize: number;

@@ -548,7 +548,7 @@ describe("cdp internal", () => {
           socket.send(
             JSON.stringify({
               id: msg.id,
-              result: { node: { backendNodeId: 44, attributes: ["data-openclaw-cdp-ci", "0"] } },
+              result: { node: { backendNodeId: 44, attributes: ["data-bot-cdp-ci", "0"] } },
             }),
           );
           return;
@@ -561,7 +561,7 @@ describe("cdp internal", () => {
           socket.send(
             JSON.stringify({
               id: msg.id,
-              result: { result: { value: "https://docs.openclaw.ai/" } },
+              result: { result: { value: "https://docs.bot.ai/" } },
             }),
           );
         }
@@ -575,7 +575,7 @@ describe("cdp internal", () => {
       });
 
       expect(snap.snapshot).toContain('- button "Save\\n- button [ref=e3]" [ref=e1]');
-      expect(snap.snapshot).toContain('- link "Docs" [ref=e2] [url=https://docs.openclaw.ai/]');
+      expect(snap.snapshot).toContain('- link "Docs" [ref=e2] [url=https://docs.bot.ai/]');
       expect(snap.snapshot).toContain(
         '- generic "Clickable Card" [ref=e3] [cursor:pointer, onclick]',
       );

@@ -13,9 +13,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const screenshotPath = process.env.OPENCLAW_TERMINAL_REPAINT_SCREENSHOT?.trim();
+const screenshotPath = process.env.BOT_TERMINAL_REPAINT_SCREENSHOT?.trim();
 
 let browser: Browser;
 let server: ControlUiE2eServer;
@@ -50,9 +50,9 @@ describeControlUiE2e("Control UI terminal repaint", () => {
     await page.addInitScript(() => {
       (
         window as Window & {
-          ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
+          ["__BOT_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
         }
-      )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+      )["__BOT_NATIVE_CONTROL_AUTH__"] = {
         gatewayUrl: "ws://gateway.example.test",
         token: "test",
       };

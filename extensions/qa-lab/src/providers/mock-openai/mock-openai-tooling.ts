@@ -253,7 +253,7 @@ export function buildQaToolSearchArgs(
     };
   }
   if (targetTool === "web_search") {
-    return { query: "OpenClaw runtime parity fixed query", count: 1 };
+    return { query: "Bot runtime parity fixed query", count: 1 };
   }
   if (targetTool === "web_fetch") {
     return { url: "https://example.com/", maxChars: 500 };

@@ -2,8 +2,8 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
 import { normalizeEnvVarKey } from "../infra/host-env-security.js";
 import { parseStrictInteger, parseStrictPositiveInteger } from "../infra/parse-finite-number.js";
@@ -55,45 +55,45 @@ const LAUNCH_AGENT_ENV_FILE_MODE = 0o600;
 const LAUNCH_AGENT_ENV_WRAPPER_MODE = 0o700;
 const LAUNCH_AGENT_ENV_DIR_NAME = "service-env";
 const LAUNCH_AGENT_STDERR_PATH = "/dev/null";
-const OPENCLAW_UPDATE_LAUNCHD_LABEL_PREFIX = "ai.openclaw.update.";
-const OPENCLAW_MANUAL_UPDATE_LAUNCHD_LABEL_PATTERN = /^ai\.openclaw\.manual-update\.\d+$/;
-const OPENCLAW_PROFILE_UPDATE_LAUNCHD_LABEL_PATTERN =
-  /^ai\.openclaw\.[A-Za-z0-9._-]+\.update\.[A-Za-z0-9._-]+$/;
-const OPENCLAW_DIRECT_CLI_NAMES = new Set(["openclaw", "openclaw.mjs"]);
-const OPENCLAW_NODE_RUNTIME_NAMES = new Set(["bun", "bun.exe", "node", "node.exe"]);
-const OPENCLAW_SCRIPT_NAMES = new Set(["openclaw.mjs"]);
+const BOT_UPDATE_LAUNCHD_LABEL_PREFIX = "ai.bot.update.";
+const BOT_MANUAL_UPDATE_LAUNCHD_LABEL_PATTERN = /^ai\.bot\.manual-update\.\d+$/;
+const BOT_PROFILE_UPDATE_LAUNCHD_LABEL_PATTERN =
+  /^ai\.bot\.[A-Za-z0-9._-]+\.update\.[A-Za-z0-9._-]+$/;
+const BOT_DIRECT_CLI_NAMES = new Set(["bot", "bot.mjs"]);
+const BOT_NODE_RUNTIME_NAMES = new Set(["bun", "bun.exe", "node", "node.exe"]);
+const BOT_SCRIPT_NAMES = new Set(["bot.mjs"]);
 const LAUNCH_AGENT_STOP_PORT_RELEASE_TIMEOUT_MS = LAUNCH_AGENT_EXIT_TIMEOUT_SECONDS * 1_000;
 const LAUNCH_AGENT_STOP_PORT_RELEASE_POLL_MS = 100;
 const LAUNCHCTL_PROTECTED_PID_TIMEOUT_MS = 2_000;
 
-export type StaleOpenClawUpdateLaunchdJob = {
+export type StaleBotUpdateLaunchdJob = {
   label: string;
   pid?: number;
   lastExitStatus?: number;
 };
 
-type OpenClawUpdateLaunchdLabelCandidate = {
+type BotUpdateLaunchdLabelCandidate = {
   label: string;
   requiresMetadata: boolean;
 };
 
-function normalizeOpenClawUpdateLaunchdLabel(label: unknown): string | null {
+function normalizeBotUpdateLaunchdLabel(label: unknown): string | null {
   if (typeof label !== "string") {
     return null;
   }
   const trimmed = label.trim();
-  if (trimmed.startsWith(OPENCLAW_UPDATE_LAUNCHD_LABEL_PREFIX)) {
+  if (trimmed.startsWith(BOT_UPDATE_LAUNCHD_LABEL_PREFIX)) {
     return trimmed;
   }
   // Manual update jobs include a timestamp-like suffix and should be cleaned up
-  // without matching arbitrary ai.openclaw labels.
-  return OPENCLAW_MANUAL_UPDATE_LAUNCHD_LABEL_PATTERN.test(trimmed) ? trimmed : null;
+  // without matching arbitrary ai.bot labels.
+  return BOT_MANUAL_UPDATE_LAUNCHD_LABEL_PATTERN.test(trimmed) ? trimmed : null;
 }
 
-function normalizeOpenClawUpdateLaunchdLabelCandidate(
+function normalizeBotUpdateLaunchdLabelCandidate(
   label: unknown,
-): OpenClawUpdateLaunchdLabelCandidate | null {
-  const normalized = normalizeOpenClawUpdateLaunchdLabel(label);
+): BotUpdateLaunchdLabelCandidate | null {
+  const normalized = normalizeBotUpdateLaunchdLabel(label);
   if (normalized) {
     return { label: normalized, requiresMetadata: false };
   }
@@ -101,36 +101,36 @@ function normalizeOpenClawUpdateLaunchdLabelCandidate(
     return null;
   }
   const trimmed = label.trim();
-  return OPENCLAW_PROFILE_UPDATE_LAUNCHD_LABEL_PATTERN.test(trimmed)
+  return BOT_PROFILE_UPDATE_LAUNCHD_LABEL_PATTERN.test(trimmed)
     ? { label: trimmed, requiresMetadata: true }
     : null;
 }
 
 function isCurrentGatewayLaunchdLabel(label: string, env: NodeJS.ProcessEnv): boolean {
-  const gatewayProfileLabel = resolveGatewayLaunchAgentLabel(env.OPENCLAW_PROFILE);
+  const gatewayProfileLabel = resolveGatewayLaunchAgentLabel(env.BOT_PROFILE);
   if (label === gatewayProfileLabel) {
     return true;
   }
   if (
-    env.OPENCLAW_SERVICE_MARKER?.trim() !== GATEWAY_SERVICE_MARKER ||
-    env.OPENCLAW_SERVICE_KIND?.trim() !== GATEWAY_SERVICE_KIND
+    env.BOT_SERVICE_MARKER?.trim() !== GATEWAY_SERVICE_MARKER ||
+    env.BOT_SERVICE_KIND?.trim() !== GATEWAY_SERVICE_KIND
   ) {
     return false;
   }
-  const configuredLabel = env.OPENCLAW_LAUNCHD_LABEL?.trim();
+  const configuredLabel = env.BOT_LAUNCHD_LABEL?.trim();
   return Boolean(configuredLabel && label === configuredLabel);
 }
 
-function resolveCurrentOpenClawUpdateLaunchdJobLabel(
+function resolveCurrentBotUpdateLaunchdJobLabel(
   env: NodeJS.ProcessEnv = process.env,
-): OpenClawUpdateLaunchdLabelCandidate | null {
+): BotUpdateLaunchdLabelCandidate | null {
   for (const label of [
     env.LAUNCH_JOB_LABEL,
     env.LAUNCH_JOB_NAME,
     env.XPC_SERVICE_NAME,
-    env.OPENCLAW_LAUNCHD_LABEL,
+    env.BOT_LAUNCHD_LABEL,
   ]) {
-    const candidate = normalizeOpenClawUpdateLaunchdLabelCandidate(label);
+    const candidate = normalizeBotUpdateLaunchdLabelCandidate(label);
     if (candidate) {
       if (isCurrentGatewayLaunchdLabel(candidate.label, env)) {
         continue;
@@ -150,11 +150,11 @@ function assertValidLaunchAgentLabel(label: string): string {
 }
 
 function resolveLaunchAgentLabel(args?: { env?: Record<string, string | undefined> }): string {
-  const envLabel = args?.env?.OPENCLAW_LAUNCHD_LABEL?.trim();
+  const envLabel = args?.env?.BOT_LAUNCHD_LABEL?.trim();
   if (envLabel) {
     return assertValidLaunchAgentLabel(envLabel);
   }
-  return assertValidLaunchAgentLabel(resolveGatewayLaunchAgentLabel(args?.env?.OPENCLAW_PROFILE));
+  return assertValidLaunchAgentLabel(resolveGatewayLaunchAgentLabel(args?.env?.BOT_PROFILE));
 }
 
 function resolveLaunchAgentPlistPathForLabel(
@@ -198,7 +198,7 @@ function collectLaunchAgentEnvironmentEntries(
 
 function buildLaunchAgentEnvironmentFile(entries: Array<[string, string]>): string {
   return [
-    "# Generated by OpenClaw. Do not edit while the gateway service is installed.",
+    "# Generated by Bot. Do not edit while the gateway service is installed.",
     ...entries.map(([key, value]) => `export ${key}=${shellSingleQuote(value)}`),
     "",
   ].join("\n");
@@ -225,7 +225,7 @@ async function resolveLaunchAgentEnvironmentWrapperOverwriteWarnings(params: {
     return [];
   }
   return [
-    `Existing generated LaunchAgent env wrapper at ${params.wrapperPath} contains custom behavior and will be overwritten; move custom behavior to openclaw gateway install --wrapper <path> or OPENCLAW_WRAPPER.`,
+    `Existing generated LaunchAgent env wrapper at ${params.wrapperPath} contains custom behavior and will be overwritten; move custom behavior to bot gateway install --wrapper <path> or BOT_WRAPPER.`,
   ];
 }
 
@@ -400,18 +400,18 @@ function readLaunchAgentPidForCleanupSync(serviceTarget: string): number {
   return pid;
 }
 
-export function parseLaunchctlListOpenClawUpdateJobs(
+export function parseLaunchctlListBotUpdateJobs(
   output: string,
-): StaleOpenClawUpdateLaunchdJob[] {
-  return parseLaunchctlListOpenClawUpdateJobCandidates(output)
+): StaleBotUpdateLaunchdJob[] {
+  return parseLaunchctlListBotUpdateJobCandidates(output)
     .filter((job) => !job.requiresMetadata)
     .map(({ requiresMetadata: _requiresMetadata, ...job }) => job);
 }
 
-function parseLaunchctlListOpenClawUpdateJobCandidates(
+function parseLaunchctlListBotUpdateJobCandidates(
   output: string,
-): Array<StaleOpenClawUpdateLaunchdJob & OpenClawUpdateLaunchdLabelCandidate> {
-  const jobs: Array<StaleOpenClawUpdateLaunchdJob & OpenClawUpdateLaunchdLabelCandidate> = [];
+): Array<StaleBotUpdateLaunchdJob & BotUpdateLaunchdLabelCandidate> {
+  const jobs: Array<StaleBotUpdateLaunchdJob & BotUpdateLaunchdLabelCandidate> = [];
   for (const rawLine of output.split(/\r?\n/)) {
     const line = rawLine.trim();
     if (!line) {
@@ -419,7 +419,7 @@ function parseLaunchctlListOpenClawUpdateJobCandidates(
     }
     const parts = line.split(/\s+/);
     const [pidRaw, statusRaw, ...labelParts] = parts;
-    const candidate = normalizeOpenClawUpdateLaunchdLabelCandidate(labelParts.join(" "));
+    const candidate = normalizeBotUpdateLaunchdLabelCandidate(labelParts.join(" "));
     if (!candidate) {
       continue;
     }
@@ -435,24 +435,24 @@ function parseLaunchctlListOpenClawUpdateJobCandidates(
   return jobs.toSorted((a, b) => a.label.localeCompare(b.label));
 }
 
-function hasOpenClawUpdateLaunchdMarker(env: Record<string, string | undefined> | undefined) {
-  return env?.OPENCLAW_UPDATE_RUN_HANDOFF?.trim() === "1";
+function hasBotUpdateLaunchdMarker(env: Record<string, string | undefined> | undefined) {
+  return env?.BOT_UPDATE_RUN_HANDOFF?.trim() === "1";
 }
 
-function isOpenClawUpdateCommandPrefix(programArguments: string[], updateIndex: number): boolean {
+function isBotUpdateCommandPrefix(programArguments: string[], updateIndex: number): boolean {
   if (updateIndex === 1) {
     const cliName = path.basename(programArguments[0] ?? "").toLowerCase();
-    return OPENCLAW_DIRECT_CLI_NAMES.has(cliName);
+    return BOT_DIRECT_CLI_NAMES.has(cliName);
   }
   if (updateIndex !== 2) {
     return false;
   }
   const runtimeName = path.basename(programArguments[0] ?? "").toLowerCase();
   const entryName = path.basename(programArguments[1] ?? "").toLowerCase();
-  return OPENCLAW_NODE_RUNTIME_NAMES.has(runtimeName) && OPENCLAW_SCRIPT_NAMES.has(entryName);
+  return BOT_NODE_RUNTIME_NAMES.has(runtimeName) && BOT_SCRIPT_NAMES.has(entryName);
 }
 
-function isOpenClawUpdateProgramArguments(programArguments: string[] | undefined): boolean {
+function isBotUpdateProgramArguments(programArguments: string[] | undefined): boolean {
   if (!Array.isArray(programArguments) || programArguments.length === 0) {
     return false;
   }
@@ -461,26 +461,26 @@ function isOpenClawUpdateProgramArguments(programArguments: string[] | undefined
     return false;
   }
   return (
-    isOpenClawUpdateCommandPrefix(programArguments, updateIndex) &&
+    isBotUpdateCommandPrefix(programArguments, updateIndex) &&
     !programArguments.some((arg) => arg.trim() === "gateway")
   );
 }
 
-async function isLaunchdJobConfirmedOpenClawUpdater(params: {
+async function isLaunchdJobConfirmedBotUpdater(params: {
   label: string;
   env: NodeJS.ProcessEnv;
 }): Promise<boolean> {
   const plistPath = resolveLaunchAgentPlistPathForLabel(params.env, params.label);
   const command = await readLaunchAgentProgramArgumentsFromFile(plistPath);
   return (
-    hasOpenClawUpdateLaunchdMarker(command?.environment) ||
-    isOpenClawUpdateProgramArguments(command?.programArguments)
+    hasBotUpdateLaunchdMarker(command?.environment) ||
+    isBotUpdateProgramArguments(command?.programArguments)
   );
 }
 
-export async function findStaleOpenClawUpdateLaunchdJobs(
+export async function findStaleBotUpdateLaunchdJobs(
   env: NodeJS.ProcessEnv = process.env,
-): Promise<StaleOpenClawUpdateLaunchdJob[]> {
+): Promise<StaleBotUpdateLaunchdJob[]> {
   if (process.platform !== "darwin") {
     return [];
   }
@@ -490,14 +490,14 @@ export async function findStaleOpenClawUpdateLaunchdJobs(
   }
   // Never report the active gateway label as stale even when a wrapper exposes
   // update-like launchd metadata through the current environment.
-  const jobs: StaleOpenClawUpdateLaunchdJob[] = [];
-  for (const job of parseLaunchctlListOpenClawUpdateJobCandidates(result.stdout)) {
+  const jobs: StaleBotUpdateLaunchdJob[] = [];
+  for (const job of parseLaunchctlListBotUpdateJobCandidates(result.stdout)) {
     if (isCurrentGatewayLaunchdLabel(job.label, env)) {
       continue;
     }
     if (
       job.requiresMetadata &&
-      !(await isLaunchdJobConfirmedOpenClawUpdater({ label: job.label, env }))
+      !(await isLaunchdJobConfirmedBotUpdater({ label: job.label, env }))
     ) {
       continue;
     }
@@ -510,8 +510,8 @@ export async function findStaleOpenClawUpdateLaunchdJobs(
   return jobs;
 }
 
-async function disableOpenClawUpdateLaunchdJobCandidate(params: {
-  candidate: OpenClawUpdateLaunchdLabelCandidate;
+async function disableBotUpdateLaunchdJobCandidate(params: {
+  candidate: BotUpdateLaunchdLabelCandidate;
   env: NodeJS.ProcessEnv;
   trustCurrentEnvMarker: boolean;
 }): Promise<boolean> {
@@ -521,8 +521,8 @@ async function disableOpenClawUpdateLaunchdJobCandidate(params: {
   if (
     params.candidate.requiresMetadata &&
     !(
-      (params.trustCurrentEnvMarker && hasOpenClawUpdateLaunchdMarker(params.env)) ||
-      (await isLaunchdJobConfirmedOpenClawUpdater({
+      (params.trustCurrentEnvMarker && hasBotUpdateLaunchdMarker(params.env)) ||
+      (await isLaunchdJobConfirmedBotUpdater({
         label: params.candidate.label,
         env: params.env,
       }))
@@ -535,29 +535,29 @@ async function disableOpenClawUpdateLaunchdJobCandidate(params: {
   return result.code === 0;
 }
 
-export async function disableOpenClawUpdateLaunchdJob(
+export async function disableBotUpdateLaunchdJob(
   label: string,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<boolean> {
-  const candidate = normalizeOpenClawUpdateLaunchdLabelCandidate(label);
+  const candidate = normalizeBotUpdateLaunchdLabelCandidate(label);
   if (!candidate) {
     return false;
   }
-  return await disableOpenClawUpdateLaunchdJobCandidate({
+  return await disableBotUpdateLaunchdJobCandidate({
     candidate,
     env,
     trustCurrentEnvMarker: false,
   });
 }
 
-export async function disableCurrentOpenClawUpdateLaunchdJob(
+export async function disableCurrentBotUpdateLaunchdJob(
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<boolean> {
-  const candidate = resolveCurrentOpenClawUpdateLaunchdJobLabel(env);
+  const candidate = resolveCurrentBotUpdateLaunchdJobLabel(env);
   if (!candidate) {
     return false;
   }
-  return await disableOpenClawUpdateLaunchdJobCandidate({
+  return await disableBotUpdateLaunchdJobCandidate({
     candidate,
     env,
     // Detached handoffs preserve the configured label, so only launchd-backed
@@ -574,11 +574,11 @@ async function resolveLaunchAgentGatewayPort(env: GatewayServiceEnv): Promise<nu
   if (fromArgs !== null) {
     return fromArgs;
   }
-  const fromServiceEnv = parseTcpPort(command?.environment?.OPENCLAW_GATEWAY_PORT ?? "");
+  const fromServiceEnv = parseTcpPort(command?.environment?.BOT_GATEWAY_PORT ?? "");
   if (fromServiceEnv !== null) {
     return fromServiceEnv;
   }
-  return parseTcpPort(env.OPENCLAW_GATEWAY_PORT ?? "");
+  return parseTcpPort(env.BOT_GATEWAY_PORT ?? "");
 }
 
 function resolveGuiDomain(): string {
@@ -607,7 +607,7 @@ export function formatLaunchAgentGuiSessionError(params: {
     "This usually means you are running from SSH/headless context or as the wrong user (including sudo).",
     `Fix: sign in to the macOS desktop as the target user and rerun \`${params.actionHint}\`.`,
     "For headless VM setups, enable auto-login for the target user so macOS creates the GUI session after boot.",
-    "Headless deployments should use a dedicated logged-in user session or a custom LaunchDaemon (not shipped): https://docs.openclaw.ai/gateway",
+    "Headless deployments should use a dedicated logged-in user session or a custom LaunchDaemon (not shipped): https://docs.bot.ai/gateway",
   ].join("\n");
 }
 
@@ -1030,7 +1030,7 @@ export async function stopLaunchAgent({
   if (!persistDisable) {
     // Default: bootout only. Removes the job from the current launchd domain without
     // persisting a disable, so KeepAlive auto-recovery survives future crashes and
-    // `openclaw gateway start` re-enables cleanly without a manual `launchctl enable`.
+    // `bot gateway start` re-enables cleanly without a manual `launchctl enable`.
     const bootout = await execLaunchctl(["bootout", serviceTarget]);
     if (bootout.code !== 0 && !isLaunchctlNotLoaded(bootout)) {
       throw new Error(`launchctl bootout failed: ${formatLaunchctlResultDetail(bootout)}`);
@@ -1108,7 +1108,7 @@ async function writeLaunchAgentPlist({
 
   const domain = resolveGuiDomain();
   const label = resolveLaunchAgentLabel({ env });
-  for (const legacyLabel of resolveLegacyGatewayLaunchAgentLabels(env.OPENCLAW_PROFILE)) {
+  for (const legacyLabel of resolveLegacyGatewayLaunchAgentLabels(env.BOT_PROFILE)) {
     const legacyPlistPath = resolveLaunchAgentPlistPathForLabel(env, legacyLabel);
     await execLaunchctl(["bootout", domain, legacyPlistPath]);
     await execLaunchctl(["unload", legacyPlistPath]);
@@ -1177,7 +1177,7 @@ async function activateLaunchAgent(params: { env: GatewayServiceEnv; plistPath: 
     domain,
     serviceTarget: `${domain}/${label}`,
     plistPath: params.plistPath,
-    actionHint: "openclaw gateway install --force",
+    actionHint: "bot gateway install --force",
   });
 }
 
@@ -1270,7 +1270,7 @@ async function ensureLaunchAgentLoadedAfterFailure(params: {
       domain: params.domain,
       serviceTarget: params.serviceTarget,
       plistPath: params.plistPath,
-      actionHint: "openclaw gateway start",
+      actionHint: "bot gateway start",
       onMutation: params.onMutation,
     });
   } catch {
@@ -1305,7 +1305,7 @@ export async function startLaunchAgent({
       domain,
       serviceTarget,
       plistPath,
-      actionHint: "openclaw gateway start",
+      actionHint: "bot gateway start",
       onMutation: reportMutation,
       skipEnable: enabled,
     });
@@ -1389,7 +1389,7 @@ export async function restartLaunchAgent({
     warn,
   });
 
-  // `openclaw gateway restart` is an explicit operator request to bring the
+  // `bot gateway restart` is an explicit operator request to bring the
   // LaunchAgent back, so clear any persisted disabled state before restart.
   const enable = await execLaunchctl(["enable", serviceTarget]);
   if (enable.code === 0) {
@@ -1408,7 +1408,7 @@ export async function restartLaunchAgent({
       domain,
       serviceTarget,
       plistPath,
-      actionHint: "openclaw gateway restart",
+      actionHint: "bot gateway restart",
       onMutation: reportMutation,
     });
     writeLaunchAgentActionLine(stdout, "Restarted LaunchAgent", serviceTarget);
@@ -1437,7 +1437,7 @@ export async function restartLaunchAgent({
     domain,
     serviceTarget,
     plistPath,
-    actionHint: "openclaw gateway restart",
+    actionHint: "bot gateway restart",
     onMutation: reportMutation,
   });
   writeLaunchAgentActionLine(stdout, "Restarted LaunchAgent", serviceTarget);

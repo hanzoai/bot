@@ -1,6 +1,6 @@
 // Doctor sandbox tests cover warnings when sandbox mode is enabled without Docker availability.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { DoctorPrompter } from "./doctor-prompter.js";
 import type { DoctorRepairMode } from "./doctor-repair-mode.js";
@@ -62,7 +62,7 @@ describe("maybeRepairSandboxImages", () => {
     migrateLegacySandboxRegistryFiles.mockResolvedValue([]);
   });
 
-  function createSandboxConfig(mode: "off" | "all" | "non-main"): OpenClawConfig {
+  function createSandboxConfig(mode: "off" | "all" | "non-main"): BotConfig {
     return {
       agents: {
         defaults: {
@@ -74,7 +74,7 @@ describe("maybeRepairSandboxImages", () => {
     };
   }
 
-  function createSandboxConfigWithDockerNetwork(network: string): OpenClawConfig {
+  function createSandboxConfigWithDockerNetwork(network: string): BotConfig {
     return {
       agents: {
         defaults: {
@@ -260,8 +260,8 @@ describe("maybeRepairSandboxRegistryFiles", () => {
     inspectLegacySandboxRegistryFiles.mockResolvedValue([
       {
         kind: "containers",
-        registryPath: "/tmp/openclaw/sandbox/containers.json",
-        shardedDir: "/tmp/openclaw/sandbox/containers",
+        registryPath: "/tmp/bot/sandbox/containers.json",
+        shardedDir: "/tmp/bot/sandbox/containers",
         source: "monolithic",
         exists: true,
         valid: true,
@@ -275,8 +275,8 @@ describe("maybeRepairSandboxRegistryFiles", () => {
     expect(note).toHaveBeenCalledWith(
       [
         "Legacy sandbox registry files detected.",
-        "- containers monolithic: /tmp/openclaw/sandbox/containers.json (2 entries)",
-        "Run openclaw doctor --fix to migrate them to SQLite.",
+        "- containers monolithic: /tmp/bot/sandbox/containers.json (2 entries)",
+        "Run bot doctor --fix to migrate them to SQLite.",
       ].join("\n"),
       "Sandbox",
     );
@@ -286,8 +286,8 @@ describe("maybeRepairSandboxRegistryFiles", () => {
     inspectLegacySandboxRegistryFiles.mockResolvedValue([
       {
         kind: "containers",
-        registryPath: "/tmp/openclaw/sandbox/containers.json",
-        shardedDir: "/tmp/openclaw/sandbox/containers",
+        registryPath: "/tmp/bot/sandbox/containers.json",
+        shardedDir: "/tmp/bot/sandbox/containers",
         source: "monolithic",
         exists: true,
         valid: true,
@@ -297,8 +297,8 @@ describe("maybeRepairSandboxRegistryFiles", () => {
     migrateLegacySandboxRegistryFiles.mockResolvedValue([
       {
         kind: "containers",
-        registryPath: "/tmp/openclaw/sandbox/containers.json",
-        shardedDir: "/tmp/openclaw/sandbox/containers",
+        registryPath: "/tmp/bot/sandbox/containers.json",
+        shardedDir: "/tmp/bot/sandbox/containers",
         status: "migrated",
         entries: 2,
       },
@@ -319,8 +319,8 @@ describe("maybeRepairSandboxRegistryFiles", () => {
   it("maps legacy registry files to structured findings and dry-run effects", () => {
     const monolithicFile = {
       kind: "containers",
-      registryPath: "/tmp/openclaw/sandbox/containers.json",
-      shardedDir: "/tmp/openclaw/sandbox/containers",
+      registryPath: "/tmp/bot/sandbox/containers.json",
+      shardedDir: "/tmp/bot/sandbox/containers",
       source: "monolithic",
       exists: true,
       valid: true,
@@ -335,27 +335,27 @@ describe("maybeRepairSandboxRegistryFiles", () => {
       expect.objectContaining({
         checkId: "core/doctor/sandbox/registry-files",
         severity: "warning",
-        path: "/tmp/openclaw/sandbox/containers.json",
-        fixHint: expect.stringContaining("openclaw doctor --fix"),
+        path: "/tmp/bot/sandbox/containers.json",
+        fixHint: expect.stringContaining("bot doctor --fix"),
       }),
     );
     expect(legacySandboxRegistryInspectionToRepairEffect(monolithicFile)).toEqual({
       kind: "state",
       action: "would-migrate-legacy-sandbox-registry",
-      target: "/tmp/openclaw/sandbox/containers.json",
+      target: "/tmp/bot/sandbox/containers.json",
       dryRunSafe: false,
     });
     expect(legacySandboxRegistryInspectionToHealthFinding(shardedFile)).toEqual(
       expect.objectContaining({
-        path: "/tmp/openclaw/sandbox/containers",
+        path: "/tmp/bot/sandbox/containers",
         message: expect.stringContaining(
-          "- containers sharded: /tmp/openclaw/sandbox/containers (2 entries)",
+          "- containers sharded: /tmp/bot/sandbox/containers (2 entries)",
         ),
       }),
     );
     expect(legacySandboxRegistryInspectionToRepairEffect(shardedFile)).toEqual(
       expect.objectContaining({
-        target: "/tmp/openclaw/sandbox/containers",
+        target: "/tmp/bot/sandbox/containers",
       }),
     );
   });
@@ -364,8 +364,8 @@ describe("maybeRepairSandboxRegistryFiles", () => {
     expect(
       legacySandboxRegistryInspectionToRepairEffect({
         kind: "browsers",
-        registryPath: "/tmp/openclaw/sandbox/browsers.json",
-        shardedDir: "/tmp/openclaw/sandbox/browsers",
+        registryPath: "/tmp/bot/sandbox/browsers.json",
+        shardedDir: "/tmp/bot/sandbox/browsers",
         source: "monolithic",
         exists: true,
         valid: false,
@@ -374,7 +374,7 @@ describe("maybeRepairSandboxRegistryFiles", () => {
     ).toEqual(
       expect.objectContaining({
         action: "would-quarantine-legacy-sandbox-registry",
-        target: "/tmp/openclaw/sandbox/browsers.json",
+        target: "/tmp/bot/sandbox/browsers.json",
       }),
     );
   });
@@ -383,8 +383,8 @@ describe("maybeRepairSandboxRegistryFiles", () => {
     expect(
       legacySandboxRegistryInspectionToRepairEffect({
         kind: "containers",
-        registryPath: "/tmp/openclaw/sandbox/containers.json",
-        shardedDir: "/tmp/openclaw/sandbox/containers",
+        registryPath: "/tmp/bot/sandbox/containers.json",
+        shardedDir: "/tmp/bot/sandbox/containers",
         source: "monolithic",
         exists: true,
         valid: true,
@@ -393,7 +393,7 @@ describe("maybeRepairSandboxRegistryFiles", () => {
     ).toEqual(
       expect.objectContaining({
         action: "would-remove-empty-legacy-sandbox-registry",
-        target: "/tmp/openclaw/sandbox/containers.json",
+        target: "/tmp/bot/sandbox/containers.json",
       }),
     );
   });

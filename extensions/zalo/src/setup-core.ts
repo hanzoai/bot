@@ -1,5 +1,5 @@
-import { createChannelDmPolicy } from "openclaw/plugin-sdk/channel-dm-policy";
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+import { createChannelDmPolicy } from "bot/plugin-sdk/channel-dm-policy";
+import { defineChannelSetupContract } from "bot/plugin-sdk/channel-setup";
 // Zalo plugin module implements setup core behavior.
 import {
   createDelegatedSetupWizardProxy,
@@ -9,7 +9,7 @@ import {
   normalizeAccountId,
   createSetupTranslator,
   type ChannelSetupWizard,
-} from "openclaw/plugin-sdk/setup";
+} from "bot/plugin-sdk/setup";
 import { resolveDefaultZaloAccountId, resolveZaloAccount } from "./accounts.js";
 import { promptZaloAllowFrom } from "./setup-allow-from.js";
 

@@ -10,22 +10,22 @@ import type {
   WAMessageKey,
   WASocket,
 } from "baileys";
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
+import { recordChannelActivity } from "bot/plugin-sdk/channel-activity-runtime";
 import {
   formatInboundMediaUnavailableText,
   formatLocationText,
   type MediaPlaceholderTextFact,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { createInboundDebouncer } from "openclaw/plugin-sdk/channel-inbound-debounce";
-import { fanInChannelIngressLifecycles } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { getChildLogger } from "openclaw/plugin-sdk/logging-core";
+} from "bot/plugin-sdk/channel-inbound";
+import { createInboundDebouncer } from "bot/plugin-sdk/channel-inbound-debounce";
+import { fanInChannelIngressLifecycles } from "bot/plugin-sdk/channel-ingress-runtime";
+import { getChildLogger } from "bot/plugin-sdk/logging-core";
 import {
   asDateTimestampMs,
   parseStrictFiniteNumber,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { defaultRuntime } from "openclaw/plugin-sdk/runtime-env";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/number-runtime";
+import { defaultRuntime } from "bot/plugin-sdk/runtime-env";
+import { createSubsystemLogger } from "bot/plugin-sdk/runtime-env";
 import { maybeResolveWhatsAppApprovalReaction } from "../approval-reactions.js";
 import { readWebSelfIdentityForDecision, WhatsAppAuthUnstableError } from "../auth-store.js";
 import { getWhatsAppConnectionController } from "../connection-controller-runtime-context.js";
@@ -34,7 +34,7 @@ import { addWhatsAppImagePreviewFields } from "../image-preview.js";
 import { maybeResolveWhatsAppQuestionReaction } from "../question-reactions.js";
 import { cacheInboundMessageMeta } from "../quoted-message.js";
 import { DEFAULT_RECONNECT_POLICY, computeBackoff, sleepWithAbort } from "../reconnect.js";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import { createWaSocket, formatError, getStatusCode, waitForWaConnection } from "../session.js";
 import {
   createWhatsAppSocketOperationTimeoutAdapter,
@@ -296,8 +296,8 @@ type AppendReplyWindow = {
 };
 
 type MonitorWebInboxOptions = {
-  cfg: OpenClawConfig;
-  loadConfig?: () => OpenClawConfig;
+  cfg: BotConfig;
+  loadConfig?: () => BotConfig;
   socketTiming?: Required<WhatsAppSocketTimingOptions>;
   verbose: boolean;
   accountId: string;

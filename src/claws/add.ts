@@ -6,12 +6,12 @@ import { listAgentEntries } from "../agents/agent-scope.js";
 import { stableStringify } from "../agents/stable-stringify.js";
 import { transformConfigFileWithRetry } from "../config/config.js";
 import type { AgentConfig } from "../config/types.agents.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolvePathViaExistingAncestorSync } from "../infra/boundary-path.js";
 import { normalizeWindowsPathForComparison } from "../infra/path-guards.js";
 import { DEFAULT_AGENT_ID, normalizeAgentId } from "../routing/session-key.js";
 import type { RuntimeEnv } from "../runtime.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { BotStateDatabaseOptions } from "../state/bot-state-db.js";
 import { resolveUserPath } from "../utils.js";
 import {
   ClawCronInstallError,
@@ -40,10 +40,10 @@ import {
   type PersistedClawWorkspaceFile,
 } from "./workspace.js";
 
-export const CLAW_ADD_RESULT_SCHEMA_VERSION = "openclaw.clawAddResult.v1" as const;
+export const CLAW_ADD_RESULT_SCHEMA_VERSION = "bot.clawAddResult.v1" as const;
 
-type ConfigCommit = (transform: (config: OpenClawConfig) => OpenClawConfig) => Promise<void>;
-type ClawAddApplyOptions = OpenClawStateDatabaseOptions & {
+type ConfigCommit = (transform: (config: BotConfig) => BotConfig) => Promise<void>;
+type ClawAddApplyOptions = BotStateDatabaseOptions & {
   consentPlanIntegrity?: string;
   commitConfig?: ConfigCommit;
   persistRecord?: typeof persistClawInstallRecord;
@@ -315,7 +315,7 @@ export async function applyClawAddPlan(
       const existingAgents = listAgentEntries(config);
       const agentsToPreserve: AgentConfig[] =
         existingAgents.length > 0 ? existingAgents : [{ id: DEFAULT_AGENT_ID, default: true }];
-      const configWithPreservedAgents: OpenClawConfig = {
+      const configWithPreservedAgents: BotConfig = {
         ...config,
         agents: {
           ...config.agents,
@@ -345,7 +345,7 @@ export async function applyClawAddPlan(
           "Workspace " + JSON.stringify(workspace) + " is already assigned to an agent.",
         );
       }
-      const nextConfig: OpenClawConfig = {
+      const nextConfig: BotConfig = {
         ...config,
         agents: {
           ...config.agents,

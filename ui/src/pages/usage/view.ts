@@ -521,21 +521,21 @@ export function renderUsage(props: UsageProps) {
                     switch (event.detail.item.value) {
                       case "sessions-csv":
                         downloadTextFile(
-                          `openclaw-usage-sessions-${exportStamp}.csv`,
+                          `bot-usage-sessions-${exportStamp}.csv`,
                           buildSessionsCsv(filteredSessions),
                           "text/csv",
                         );
                         break;
                       case "daily-csv":
                         downloadTextFile(
-                          `openclaw-usage-daily-${exportStamp}.csv`,
+                          `bot-usage-daily-${exportStamp}.csv`,
                           buildDailyCsv(filteredDaily),
                           "text/csv",
                         );
                         break;
                       case "json":
                         downloadTextFile(
-                          `openclaw-usage-${exportStamp}.json`,
+                          `bot-usage-${exportStamp}.json`,
                           JSON.stringify(
                             {
                               totals: displayTotals,
@@ -727,7 +727,7 @@ export function renderUsage(props: UsageProps) {
                         return html`
                           <span class="usage-query-chip">
                             ${label}
-                            <openclaw-tooltip .content=${t("usage.filters.remove")}>
+                            <bot-tooltip .content=${t("usage.filters.remove")}>
                               <button
                                 aria-label=${t("usage.filters.remove")}
                                 @click=${() =>
@@ -737,7 +737,7 @@ export function renderUsage(props: UsageProps) {
                               >
                                 ×
                               </button>
-                            </openclaw-tooltip>
+                            </bot-tooltip>
                           </span>
                         `;
                       })}

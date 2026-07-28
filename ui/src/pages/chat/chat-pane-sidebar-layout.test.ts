@@ -60,8 +60,8 @@ describe("chat pane sidebar layout", () => {
     const primary = container.querySelector("[data-primary]");
     await renderLayout(openSlot({ columns: [] }, "detail"));
     expect(container.querySelector("[data-primary]")).toBe(primary);
-    await customElements.whenDefined("openclaw-chat-sidebar-region");
-    await container.querySelector("openclaw-chat-sidebar-region")?.updateComplete;
+    await customElements.whenDefined("bot-chat-sidebar-region");
+    await container.querySelector("bot-chat-sidebar-region")?.updateComplete;
     expect(container.querySelector("[data-primary]")).toBe(primary);
     const rightTab = container.querySelector(".sidebar-region__right-runtime .sidebar-column__tab");
     expect(rightTab).not.toBeNull();
@@ -71,10 +71,10 @@ describe("chat pane sidebar layout", () => {
     await renderLayout(openSlot({ columns: [] }, "detail"));
     expect(container.querySelector("[data-primary]")).toBe(primary);
     await renderLayout(openSlot({ columns: [] }, "detail"), true);
-    await container.querySelector("openclaw-chat-sidebar-region")?.updateComplete;
+    await container.querySelector("bot-chat-sidebar-region")?.updateComplete;
     expect(container.querySelector("[data-primary]")).toBe(primary);
     await renderLayout(openSlot({ columns: [] }, "detail"));
-    await container.querySelector("openclaw-chat-sidebar-region")?.updateComplete;
+    await container.querySelector("bot-chat-sidebar-region")?.updateComplete;
     expect(container.querySelector("[data-primary]")).toBe(primary);
 
     container.remove();

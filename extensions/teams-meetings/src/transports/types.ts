@@ -3,7 +3,7 @@ import type {
   MeetingBrowserTab,
   MeetingSessionRecord,
   MeetingTranscriptSnapshot,
-} from "openclaw/plugin-sdk/meeting-runtime";
+} from "bot/plugin-sdk/meeting-runtime";
 import type { TeamsMeetingsMode, TeamsMeetingsTransport } from "../config.js";
 
 export type TeamsMeetingsTranscriptSnapshot = MeetingTranscriptSnapshot;

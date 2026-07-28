@@ -1,8 +1,8 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { getCurrentPluginMetadataSnapshot } from "../plugins/current-plugin-metadata-snapshot.js";
 import type {
   PluginManifestProviderEndpoint,
@@ -140,8 +140,8 @@ function readCompatBoolean(
   return asBoolean((compat as Record<string, unknown>)[key]);
 }
 
-const OPENCLAW_ATTRIBUTION_PRODUCT = "OpenClaw";
-const OPENCLAW_ATTRIBUTION_ORIGINATOR = "openclaw";
+const BOT_ATTRIBUTION_PRODUCT = "Bot";
+const BOT_ATTRIBUTION_ORIGINATOR = "bot";
 const OPENROUTER_ATTRIBUTION_CATEGORIES =
   "cli-agent,cloud-agent,programming-app,creative-writing,writing-assistant,general-chat,personal-agent";
 
@@ -153,8 +153,8 @@ const OPENAI_RESPONSES_APIS = new Set([
 ]);
 const OPENAI_RESPONSES_PROVIDERS = new Set(["openai", "azure-openai", "azure-openai-responses"]);
 
-function formatOpenClawUserAgent(version: string): string {
-  return `${OPENCLAW_ATTRIBUTION_ORIGINATOR}/${version}`;
+function formatBotUserAgent(version: string): string {
+  return `${BOT_ATTRIBUTION_ORIGINATOR}/${version}`;
 }
 
 function resolveUrlHostname(value: unknown): string | undefined {
@@ -302,7 +302,7 @@ function resolveProviderAttributionIdentity(
   env: RuntimeVersionEnv = process.env as RuntimeVersionEnv,
 ): ProviderAttributionIdentity {
   return {
-    product: OPENCLAW_ATTRIBUTION_PRODUCT,
+    product: BOT_ATTRIBUTION_PRODUCT,
     version: resolveRuntimeServiceVersion(env),
   };
 }
@@ -317,10 +317,10 @@ function buildOpenRouterAttributionPolicy(
     verification: "vendor-documented",
     hook: "request-headers",
     docsUrl: "https://openrouter.ai/docs/app-attribution",
-    reviewNote: "Documented app attribution headers. Verified in OpenClaw runtime wrapper.",
+    reviewNote: "Documented app attribution headers. Verified in Bot runtime wrapper.",
     ...identity,
     headers: {
-      "HTTP-Referer": "https://openclaw.ai",
+      "HTTP-Referer": "https://bot.ai",
       "X-OpenRouter-Title": identity.product,
       "X-OpenRouter-Categories": OPENROUTER_ATTRIBUTION_CATEGORIES,
     },
@@ -339,7 +339,7 @@ function buildNvidiaAttributionPolicy(
       "NVIDIA NIM billing invoke-origin attribution header. Applied only on verified NVIDIA routes.",
     ...resolveProviderAttributionIdentity(env),
     headers: {
-      "X-BILLING-INVOKE-ORIGIN": OPENCLAW_ATTRIBUTION_PRODUCT,
+      "X-BILLING-INVOKE-ORIGIN": BOT_ATTRIBUTION_PRODUCT,
     },
   };
 }
@@ -358,7 +358,7 @@ function buildGoogleAttributionPolicy(
       "Gemini API partner integration guidance requires x-goog-api-client on partner and library traffic.",
     ...identity,
     headers: {
-      "x-goog-api-client": `${OPENCLAW_ATTRIBUTION_ORIGINATOR}/${identity.version}`,
+      "x-goog-api-client": `${BOT_ATTRIBUTION_ORIGINATOR}/${identity.version}`,
     },
   };
 }
@@ -376,9 +376,9 @@ function buildOpenAIAttributionPolicy(
       "OpenAI native traffic supports hidden originator/User-Agent attribution. Verified against the Codex wire contract.",
     ...identity,
     headers: {
-      originator: OPENCLAW_ATTRIBUTION_ORIGINATOR,
+      originator: BOT_ATTRIBUTION_ORIGINATOR,
       version: identity.version,
-      "User-Agent": formatOpenClawUserAgent(identity.version),
+      "User-Agent": formatBotUserAgent(identity.version),
     },
   };
 }
@@ -393,12 +393,12 @@ function buildXaiAttributionPolicy(
     verification: "vendor-hidden-api-spec",
     hook: "request-headers",
     reviewNote:
-      "xAI api.x.ai accepts a standard openclaw User-Agent. Companion originator/version headers mirror the OpenAI attribution shape for consistency; they are not validated against an xAI-specific spec and are expected to be ignored by xAI's OpenAI-compatible surface.",
+      "xAI api.x.ai accepts a standard bot User-Agent. Companion originator/version headers mirror the OpenAI attribution shape for consistency; they are not validated against an xAI-specific spec and are expected to be ignored by xAI's OpenAI-compatible surface.",
     ...identity,
     headers: {
-      originator: OPENCLAW_ATTRIBUTION_ORIGINATOR,
+      originator: BOT_ATTRIBUTION_ORIGINATOR,
       version: identity.version,
-      "User-Agent": formatOpenClawUserAgent(identity.version),
+      "User-Agent": formatBotUserAgent(identity.version),
     },
   };
 }

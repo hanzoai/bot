@@ -3,9 +3,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import type { AgentMessage } from "bot/plugin-sdk/agent-core";
+import { SessionManager } from "bot/plugin-sdk/agent-sessions";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   appendTranscriptMessage,
@@ -320,7 +320,7 @@ describe("rewriteTranscriptEntriesInSessionManager", () => {
 
 describe("rewriteTranscriptEntriesInRuntimeTranscript", () => {
   it("does not create session metadata for missing runtime transcripts", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-transcript-rewrite-runtime-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-transcript-rewrite-runtime-"));
     const storePath = path.join(dir, "sessions.json");
     await fs.writeFile(storePath, "{}\n", "utf8");
 
@@ -339,7 +339,7 @@ describe("rewriteTranscriptEntriesInRuntimeTranscript", () => {
   });
 
   it("rewrites runtime transcripts through scoped session identity", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-transcript-rewrite-runtime-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-transcript-rewrite-runtime-"));
     const storePath = path.join(dir, "sessions.json");
     const sessionId = "runtime-sqlite-rewrite";
     const sessionFile = formatSqliteSessionFileMarker({

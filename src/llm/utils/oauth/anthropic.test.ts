@@ -127,7 +127,7 @@ describe("Anthropic OAuth token responses", () => {
 
 describe("Anthropic OAuth callback host", () => {
   it("rejects non-loopback callback bind hosts", async () => {
-    vi.stubEnv("OPENCLAW_OAUTH_CALLBACK_HOST", "0.0.0.0");
+    vi.stubEnv("BOT_OAUTH_CALLBACK_HOST", "0.0.0.0");
 
     await expect(
       anthropicOAuthProvider.login({
@@ -138,7 +138,7 @@ describe("Anthropic OAuth callback host", () => {
   });
 
   it("binds IPv4 loopback while keeping Anthropic's registered localhost redirect", async () => {
-    vi.stubEnv("OPENCLAW_OAUTH_CALLBACK_HOST", "127.0.0.1");
+    vi.stubEnv("BOT_OAUTH_CALLBACK_HOST", "127.0.0.1");
     const tokenExchange = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
       if (typeof init?.body !== "string") {
         throw new Error("token exchange did not send a JSON string body");

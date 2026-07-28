@@ -7,7 +7,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { MAX_DATE_TIMESTAMP_MS } from "../../shared/number-coercion.js";
 import { withEnvAsync } from "../../test-utils/env.js";
@@ -44,7 +44,7 @@ async function withOAuthTempRoot(
 ): Promise<void> {
   const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), prefix));
   tempDirs.push(tempRoot);
-  await withEnvAsync({ OPENCLAW_STATE_DIR: tempRoot }, async () => await run(tempRoot));
+  await withEnvAsync({ BOT_STATE_DIR: tempRoot }, async () => await run(tempRoot));
 }
 
 async function withOAuthAgentDirs(
@@ -54,7 +54,7 @@ async function withOAuthAgentDirs(
   await withOAuthTempRoot(prefix, async (tempRoot) => {
     const mainAgentDir = path.join(tempRoot, "agents", "main", "agent");
     const agentDir = path.join(tempRoot, "agents", "sub", "agent");
-    await withEnvAsync({ OPENCLAW_AGENT_DIR: mainAgentDir }, async () => {
+    await withEnvAsync({ BOT_AGENT_DIR: mainAgentDir }, async () => {
       await fs.mkdir(agentDir, { recursive: true });
       await fs.mkdir(mainAgentDir, { recursive: true });
       await run({ mainAgentDir, agentDir });
@@ -261,7 +261,7 @@ describe("createOAuthManager", () => {
           openai: { auth: "oauth", baseUrl: "", models: [] },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const buildApiKey = vi.fn(async (_provider, value: OAuthCredential) => value.access);
     const manager = createOAuthManager({
       buildApiKey,

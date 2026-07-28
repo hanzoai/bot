@@ -1,5 +1,5 @@
 ---
-summary: "CLI onboarding: verify inference, then hand remaining setup to OpenClaw"
+summary: "CLI onboarding: verify inference, then hand remaining setup to Bot"
 read_when:
   - Running or configuring CLI onboarding
   - Setting up a new machine
@@ -8,43 +8,43 @@ sidebarTitle: "Onboarding: CLI"
 ---
 
 ```bash
-openclaw onboard
+bot onboard
 ```
 
 CLI onboarding is the recommended terminal setup path on macOS, Linux, and
 Windows (native or WSL2). By default it detects AI access already available on
-the machine, verifies it with a real completion, and starts OpenClaw to
-configure the workspace, Gateway, and optional features. `openclaw setup` runs the same flow ([Setup](/cli/setup) covers
+the machine, verifies it with a real completion, and starts Bot to
+configure the workspace, Gateway, and optional features. `bot setup` runs the same flow ([Setup](/cli/setup) covers
 the `--baseline` config-only variant). Windows desktop users can also start
 from [Windows Hub](/platforms/windows).
 
 Guided onboarding establishes inference first. It detects available AI access,
-requires a real completion, and only then starts [OpenClaw](/cli/openclaw)
-to configure the rest of OpenClaw. Choosing **Skip for now** exits onboarding
-without starting OpenClaw.
+requires a real completion, and only then starts [Bot](/cli/bot)
+to configure the rest of Bot. Choosing **Skip for now** exits onboarding
+without starting Bot.
 
 The classic wizard remains available for custom providers, remote Gateway
 setup, channel pairing, daemon controls, skills, and imports. Run it explicitly
-with `openclaw onboard --classic`; the guided inference picker does not delegate
-into it. After inference passes, OpenClaw can use `open channel wizard for
+with `bot onboard --classic`; the guided inference picker does not delegate
+into it. After inference passes, Bot can use `open channel wizard for
 <channel>` to hand channel setup that needs secrets to a masked terminal wizard.
-To change the model provider or its authentication, exit OpenClaw and run
-`openclaw onboard`; OpenClaw does not open guided or classic provider flows.
+To change the model provider or its authentication, exit Bot and run
+`bot onboard`; Bot does not open guided or classic provider flows.
 
 <Info>
-Fastest first chat: finish guided setup, run `openclaw dashboard`, and chat in
+Fastest first chat: finish guided setup, run `bot dashboard`, and chat in
 the browser through the Control UI. Docs: [Dashboard](/web/dashboard).
 </Info>
 
 ## Locale
 
 The wizard localizes fixed onboarding copy. It uses the first nonblank value from
-`OPENCLAW_LOCALE`, `LC_ALL`, `LC_MESSAGES`, and `LANG`, in that order, then
+`BOT_LOCALE`, `LC_ALL`, `LC_MESSAGES`, and `LANG`, in that order, then
 falls back to English. Supported locales: `en`, `zh-CN`, `zh-TW`.
 
 ```bash
-OPENCLAW_LOCALE=zh-CN openclaw onboard
-OPENCLAW_LOCALE=en openclaw onboard # Explicit English override
+BOT_LOCALE=zh-CN bot onboard
+BOT_LOCALE=en bot onboard # Explicit English override
 ```
 
 Product names, commands, config keys, URLs, provider IDs, model IDs, and
@@ -53,8 +53,8 @@ plugin/channel labels stay in English regardless of locale.
 To reconfigure non-inference settings later:
 
 ```bash
-openclaw configure
-openclaw agents add <name>
+bot configure
+bot agents add <name>
 ```
 
 <Note>
@@ -65,13 +65,13 @@ openclaw agents add <name>
 The classic wizard includes a web search step where you can pick a provider: Brave,
 DuckDuckGo, Exa, Firecrawl, Gemini, Grok, Kimi, MiniMax Search, Ollama Web
 Search, Perplexity, SearXNG, or Tavily. Some need an API key; others are
-key-free. Configure this later with `openclaw configure --section web`. Docs:
+key-free. Configure this later with `bot configure --section web`. Docs:
 [Web tools](/tools/web).
 </Tip>
 
 ## Guided default
 
-Plain `openclaw onboard` follows this path:
+Plain `bot onboard` follows this path:
 
 1. Accept the security notice.
 2. Detect configured models, API-key environment variables, supported local AI
@@ -87,22 +87,22 @@ Plain `openclaw onboard` follows this path:
    OpenRouter, or choose **More…** for the remaining providers. Each provider's
    regions, plans, and supported browser, device, API-key, or token methods
    appear in a second menu and are tested with the same real completion.
-   Choose **Skip for now** to exit without starting OpenClaw.
+   Choose **Skip for now** to exit without starting Bot.
 5. Persist only the verified model route and any credential/plugin state it
    requires. Workspace and Gateway settings remain untouched.
-6. Start OpenClaw with the verified model so it can configure the workspace,
+6. Start Bot with the verified model so it can configure the workspace,
    Gateway, channels, agents, plugins, and the remaining optional setup.
 
 Re-running the command on a configured installation tests the current default
 model first, making the guided flow a verification and repair pass. A failing
 check never replaces the configured model automatically; onboarding stops and
-asks how to continue. Run `openclaw channels add` or `openclaw configure` for
-later non-inference additions; use `openclaw onboard` for provider or auth route
+asks how to continue. Run `bot channels add` or `bot configure` for
+later non-inference additions; use `bot onboard` for provider or auth route
 changes.
 
 ## Classic wizard: QuickStart vs Advanced
 
-Run `openclaw onboard --classic` to open the full wizard. It starts with a
+Run `bot onboard --classic` to open the full wizard. It starts with a
 choice between **QuickStart** (defaults) and **Advanced** (full control). Pass
 `--flow quickstart` or `--flow advanced` (alias `manual`) to select the classic
 flow and skip that prompt.
@@ -114,7 +114,7 @@ flow and skip that prompt.
     - Gateway port **18789**
     - Gateway auth **Token** (auto-generated, even on loopback)
     - Tool policy: `tools.profile: "coding"` for new setups (an existing explicit profile is preserved)
-    - DM sessions: onboarding preserves an explicit `session.dmScope` and otherwise leaves it unset, so the `"main"` default keeps all direct messages across channels in the agent's rolling main session—the personal-agent default. For shared or multi-user inboxes, use `"per-channel-peer"`; `openclaw security audit` recommends isolation when it detects multi-user DM traffic. Details: [CLI setup reference](/start/wizard-cli-reference#outputs-and-internals)
+    - DM sessions: onboarding preserves an explicit `session.dmScope` and otherwise leaves it unset, so the `"main"` default keeps all direct messages across channels in the agent's rolling main session—the personal-agent default. For shared or multi-user inboxes, use `"per-channel-peer"`; `bot security audit` recommends isolation when it detects multi-user DM traffic. Details: [CLI setup reference](/start/wizard-cli-reference#outputs-and-internals)
     - Tailscale exposure **Off**
     - Telegram and WhatsApp DMs default to **allowlist**: Telegram asks for a numeric Telegram user ID, WhatsApp asks for a phone number
 
@@ -152,9 +152,9 @@ Local mode (default) walks through these steps:
    `exec`), with a fast preflight check before saving. After model/auth setup,
    the wizard offers an optional live completion test; a failure can return to
    model/auth setup once or be ignored without blocking the rest of the
-   classic wizard. Ignoring it does not unlock OpenClaw; conversational setup
+   classic wizard. Ignoring it does not unlock Bot; conversational setup
    still requires a passing inference check.
-2. **Workspace** - directory for agent files (default `~/.openclaw/workspace`). Seeds bootstrap files.
+2. **Workspace** - directory for agent files (default `~/.bot/workspace`). Seeds bootstrap files.
 3. **Gateway** - port, bind address, auth mode, Tailscale exposure. In
    interactive token mode, choose plaintext token storage (default) or opt
    into a SecretRef. Non-interactive SecretRef path: `--gateway-token-ref-env <ENV_VAR>`.
@@ -178,22 +178,22 @@ Re-running onboarding does **not** wipe anything unless you explicitly choose
 **Reset** (or pass `--reset`). CLI `--reset` defaults to config, credentials,
 and sessions; use `--reset-scope full` to also remove the workspace. If the
 config is invalid or contains legacy keys, onboarding asks you to run
-`openclaw doctor` first.
+`bot doctor` first.
 </Note>
 
 `--flow import` runs a detected migration flow (for example Hermes) in the
 classic wizard instead of fresh setup; see [Migrate](/cli/migrate) and the migration guides under
-[Install](/install/migrating-hermes). `openclaw onboard --modern` is a
-compatibility alias for [OpenClaw](/cli/openclaw). It uses the same
-inference gate as `openclaw setup`: verified inference starts the
+[Install](/install/migrating-hermes). `bot onboard --modern` is a
+compatibility alias for [Bot](/cli/bot). It uses the same
+inference gate as `bot setup`: verified inference starts the
 assistant, while an interactive failure returns to guided inference setup.
 
 ## Add another agent
 
-Use `openclaw agents add <name>` to create a separate agent with its own
+Use `bot agents add <name>` to create a separate agent with its own
 workspace, sessions, and auth profiles. Running without `--workspace` starts
 an interactive flow for name, workspace, auth, channels, and bindings - it is
-not the full `openclaw onboard` wizard.
+not the full `bot onboard` wizard.
 
 What it sets:
 
@@ -203,7 +203,7 @@ What it sets:
 
 Notes:
 
-- Default workspace: `~/.openclaw/workspace-<agentId>` (or under
+- Default workspace: `~/.bot/workspace-<agentId>` (or under
   `agents.defaults.workspace` if that is set).
 - Add `bindings` to route inbound messages to this agent (onboarding can do this for you).
 - Non-interactive flags: `--model`, `--agent-dir`, `--bind`, `--non-interactive`.
@@ -213,11 +213,11 @@ Notes:
 For detailed step-by-step behavior and config outputs, see
 [CLI setup reference](/start/wizard-cli-reference).
 For non-interactive examples, see [CLI automation](/start/wizard-cli-automation).
-For the full flag reference, see [`openclaw onboard`](/cli/onboard).
+For the full flag reference, see [`bot onboard`](/cli/onboard).
 
 ## Related docs
 
-- CLI command reference: [`openclaw onboard`](/cli/onboard)
+- CLI command reference: [`bot onboard`](/cli/onboard)
 - Onboarding overview: [Onboarding overview](/start/onboarding-overview)
 - macOS app onboarding: [Onboarding](/start/onboarding)
 - Agent first-run ritual: [Agent Bootstrapping](/start/bootstrapping)

@@ -1,4 +1,4 @@
-import { controlUiSessionSlug } from "@openclaw/session-url-contract";
+import { controlUiSessionSlug } from "@hanzo/bot-session-url-contract";
 import type { RouteLocation } from "@openclaw/uirouter";
 import { notFound } from "@openclaw/uirouter";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";

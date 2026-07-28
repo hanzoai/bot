@@ -4,8 +4,8 @@ import { resolveCliArgvInvocation } from "./argv-invocation.js";
 
 describe("argv-invocation", () => {
   it("resolves root help and empty command path", () => {
-    expect(resolveCliArgvInvocation(["node", "openclaw", "--help"])).toEqual({
-      argv: ["node", "openclaw", "--help"],
+    expect(resolveCliArgvInvocation(["node", "bot", "--help"])).toEqual({
+      argv: ["node", "bot", "--help"],
       commandPath: [],
       primary: null,
       hasHelpOrVersion: true,
@@ -15,9 +15,9 @@ describe("argv-invocation", () => {
 
   it("resolves command path and primary with root options", () => {
     expect(
-      resolveCliArgvInvocation(["node", "openclaw", "--profile", "work", "gateway", "status"]),
+      resolveCliArgvInvocation(["node", "bot", "--profile", "work", "gateway", "status"]),
     ).toEqual({
-      argv: ["node", "openclaw", "--profile", "work", "gateway", "status"],
+      argv: ["node", "bot", "--profile", "work", "gateway", "status"],
       commandPath: ["gateway", "status"],
       primary: "gateway",
       hasHelpOrVersion: false,
@@ -29,7 +29,7 @@ describe("argv-invocation", () => {
     expect(
       resolveCliArgvInvocation([
         "node",
-        "openclaw",
+        "bot",
         "agent",
         "--model",
         "openai/gpt-5.6-sol",
@@ -41,7 +41,7 @@ describe("argv-invocation", () => {
 
   it("does not treat an exec-valued parent option as the subcommand", () => {
     expect(
-      resolveCliArgvInvocation(["node", "openclaw", "agent", "--message", "exec"]).commandPath,
+      resolveCliArgvInvocation(["node", "bot", "agent", "--message", "exec"]).commandPath,
     ).toEqual(["agent"]);
   });
 
@@ -49,7 +49,7 @@ describe("argv-invocation", () => {
     expect(
       resolveCliArgvInvocation([
         "node",
-        "openclaw",
+        "bot",
         "agent",
         "--no-color",
         "--model",

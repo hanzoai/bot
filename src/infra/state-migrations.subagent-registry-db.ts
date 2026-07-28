@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
+import { runBotStateWriteTransaction } from "../state/bot-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -10,7 +10,7 @@ import {
 const MIGRATION_KIND = "legacy-subagent-registry-json";
 
 type SubagentRegistryMigrationDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  BotStateKyselyDatabase,
   "migration_runs" | "migration_sources"
 >;
 
@@ -30,7 +30,7 @@ export function recordLegacySubagentRegistryDiscard(params: {
   const now = Date.now();
   const runId = `${sourceKey}:${params.sourceSha256.slice(0, 16)}`;
   let decision: SubagentRegistryMigrationDecision = "retired-source-discarded";
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       const stateDb = getNodeSqliteKysely<SubagentRegistryMigrationDatabase>(db);
       const receipt = executeSqliteQueryTakeFirstSync(
@@ -112,7 +112,7 @@ export function markLegacySubagentRegistrySourceRemoved(
   sourceKey: string,
   env: NodeJS.ProcessEnv,
 ): void {
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       const stateDb = getNodeSqliteKysely<SubagentRegistryMigrationDatabase>(db);
       executeSqliteQuerySync(

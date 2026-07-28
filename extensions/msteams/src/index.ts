@@ -1,2 +1,2 @@
-// Msteams plugin entrypoint registers its OpenClaw integration.
+// Msteams plugin entrypoint registers its Bot integration.
 export { monitorMSTeamsProvider } from "./monitor.js";

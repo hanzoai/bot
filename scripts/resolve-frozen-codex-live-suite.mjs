@@ -63,11 +63,11 @@ function resolveFrozenCodexCompatibility({ suiteId, targetRoot }) {
 
 function main() {
   const outputFile = requireEnv("GITHUB_OUTPUT");
-  const suiteId = requireEnv("OPENCLAW_FROZEN_CODEX_SUITE_ID");
-  const selectedSha = requireEnv("OPENCLAW_SELECTED_SHA");
-  const workflowSha = requireEnv("OPENCLAW_WORKFLOW_SHA");
+  const suiteId = requireEnv("BOT_FROZEN_CODEX_SUITE_ID");
+  const selectedSha = requireEnv("BOT_SELECTED_SHA");
+  const workflowSha = requireEnv("BOT_WORKFLOW_SHA");
   const isFrozenTarget = selectedSha !== workflowSha;
-  const omissionsAllowed = process.env.OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS === "1";
+  const omissionsAllowed = process.env.BOT_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS === "1";
 
   if (!suiteId.startsWith(CODEX_SUITE_PREFIX) || !isFrozenTarget || !omissionsAllowed) {
     appendLine(outputFile, "run_lane=true");
@@ -76,13 +76,13 @@ function main() {
 
   const result = resolveFrozenCodexCompatibility({
     suiteId,
-    targetRoot: requireEnv("OPENCLAW_FROZEN_TARGET_ROOT"),
+    targetRoot: requireEnv("BOT_FROZEN_TARGET_ROOT"),
   });
   appendLine(outputFile, `run_lane=${result.runLane}`);
 
   const summaryFile = requireEnv("GITHUB_STEP_SUMMARY");
   if (result.model) {
-    appendLine(requireEnv("GITHUB_ENV"), `OPENCLAW_LIVE_CODEX_HARNESS_MODEL=${result.model}`);
+    appendLine(requireEnv("GITHUB_ENV"), `BOT_LIVE_CODEX_HARNESS_MODEL=${result.model}`);
     appendLine(
       summaryFile,
       `Frozen Codex target \`${selectedSha}\`: \`${suiteId}\` uses \`${result.model}\`.`,

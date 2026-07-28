@@ -1,42 +1,42 @@
 // Telegram plugin module implements channel behavior.
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
+import { DEFAULT_ACCOUNT_ID } from "bot/plugin-sdk/account-id";
 import {
   buildDmGroupAccountAllowlistAdapter,
   createNestedAllowlistOverrideResolver,
-} from "openclaw/plugin-sdk/allowlist-config-edit";
-import type { ChannelMessageActionAdapter } from "openclaw/plugin-sdk/channel-contract";
+} from "bot/plugin-sdk/allowlist-config-edit";
+import type { ChannelMessageActionAdapter } from "bot/plugin-sdk/channel-contract";
 import {
   buildChannelOutboundSessionRoute,
   buildThreadAwareOutboundSessionRoute,
   clearAccountEntryFields,
   createChatChannelPlugin,
-} from "openclaw/plugin-sdk/channel-core";
-import { createAccountStatusSink } from "openclaw/plugin-sdk/channel-outbound";
-import { createChannelMessageAdapterFromOutbound } from "openclaw/plugin-sdk/channel-outbound";
+} from "bot/plugin-sdk/channel-core";
+import { createAccountStatusSink } from "bot/plugin-sdk/channel-outbound";
+import { createChannelMessageAdapterFromOutbound } from "bot/plugin-sdk/channel-outbound";
 import {
   resolveOutboundSendDep,
   type OutboundSendDeps,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createPairingPrefixStripper } from "openclaw/plugin-sdk/channel-pairing";
+} from "bot/plugin-sdk/channel-outbound";
+import { createPairingPrefixStripper } from "bot/plugin-sdk/channel-pairing";
 import {
   PAIRING_APPROVED_MESSAGE,
   buildTokenChannelStatusSummary,
   projectCredentialSnapshotFields,
   resolveConfiguredFromCredentialStatuses,
-} from "openclaw/plugin-sdk/channel-status";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createChannelDirectoryAdapter } from "openclaw/plugin-sdk/directory-runtime";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { RoutePeer } from "openclaw/plugin-sdk/routing";
+} from "bot/plugin-sdk/channel-status";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { createChannelDirectoryAdapter } from "bot/plugin-sdk/directory-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import type { RoutePeer } from "bot/plugin-sdk/routing";
 import {
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "bot/plugin-sdk/status-helpers";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import {
   mergeTelegramAccountConfig,
   resolveDefaultTelegramAccountId,
@@ -116,7 +116,7 @@ function resolveTelegramProbe() {
   );
 }
 
-function isTelegramRichMessagesEnabled(cfg: OpenClawConfig, accountId?: string | null): boolean {
+function isTelegramRichMessagesEnabled(cfg: BotConfig, accountId?: string | null): boolean {
   const selectedAccountId = accountId ?? resolveDefaultTelegramAccountId(cfg);
   return mergeTelegramAccountConfig(cfg, selectedAccountId).richMessages === true;
 }
@@ -247,7 +247,7 @@ const telegramChannelOutbound = createTelegramOutboundAdapter({
   preferFinalAssistantVisibleText: true,
 });
 
-const telegramMessageAdapter = createChannelMessageAdapterFromOutbound<OpenClawConfig>({
+const telegramMessageAdapter = createChannelMessageAdapterFromOutbound<BotConfig>({
   id: "telegram",
   live: {
     capabilities: {
@@ -534,7 +534,7 @@ function shouldStripTelegramThreadFromAnnounceOrigin(params: {
 }
 
 function resolveTelegramOutboundSessionRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   accountId?: string | null;
   target: string;
@@ -635,7 +635,7 @@ function resolveTelegramNativeTopicThreadId(
   if (nativeTopicId !== undefined) {
     return nativeTopicId;
   }
-  // Keep the chat-scoped canonical id inside OpenClaw state; translate it back
+  // Keep the chat-scoped canonical id inside Bot state; translate it back
   // only when returning Telegram route metadata used by send/typing paths.
   if (threadId === undefined) {
     return undefined;
@@ -654,7 +654,7 @@ function resolveTelegramNativeTopicThreadId(
 }
 
 async function resolveTelegramTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   inputs: string[];
   kind: "user" | "group";
@@ -834,7 +834,7 @@ export const telegramPlugin = createChatChannelPlugin({
           return {
             text_markup: "markdown_telegram_rich",
             rules: [
-              "Telegram rich ON (Bot API 10.2 blocks; OpenClaw maps markdown + these HTML islands to typed blocks).",
+              "Telegram rich ON (Bot API 10.2 blocks; Bot maps markdown + these HTML islands to typed blocks).",
               'Supported: headings, tables (markdown, or `<table>` HTML for caption/colspan/rowspan/align), block/pull quotes (`<aside>` + `<cite>`), `<details><summary>` (+`open`), dividers `<hr/>`, sup/sub/mark/spoilers, `<ul>`/`<ol>` + `<input type="checkbox" checked/>` tasks, code, anchors `<a name="x"></a>` + `<a href="#x">label</a>`, custom emoji `<tg-emoji emoji-id="...">`, maps `<tg-map lat="" long="" zoom=""/>`, collages/slideshows `<tg-collage>`/`<tg-slideshow>`, block media e.g. `<img src="https://..."/>` (+`<figure>`/`<figcaption>`).',
               "Math: `<tg-math>` inline, `<tg-math-block>` block; never `$...$`/`\\(...\\)`.",
               "Not MarkdownV2/parse_mode.",
@@ -1167,7 +1167,7 @@ export const telegramPlugin = createChatChannelPlugin({
       },
       logoutAccount: async ({ accountId, cfg }) => {
         const envToken = process.env.TELEGRAM_BOT_TOKEN?.trim() ?? "";
-        const nextCfg = { ...cfg } as OpenClawConfig;
+        const nextCfg = { ...cfg } as BotConfig;
         const nextTelegram = cfg.channels?.telegram ? { ...cfg.channels.telegram } : undefined;
         let cleared = false;
         let changed = false;

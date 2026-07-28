@@ -16,8 +16,8 @@
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/number-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { fetchChannelMessage, stripHtmlFromTeamsMessage } from "./graph-thread.js";
 import type { GraphThreadMessage } from "./graph-thread.js";
 

@@ -8,7 +8,7 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 const tempRoots: string[] = [];
 
 function makeTempRoot(): string {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-embedded-abort-leak-test-"));
+  const root = mkdtempSync(path.join(tmpdir(), "bot-embedded-abort-leak-test-"));
   tempRoots.push(root);
   return root;
 }

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { validateConfigObject } from "../config/validation.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
 import { createChannelTestPluginBase, createTestRegistry } from "../test-utils/channel-plugins.js";
@@ -22,7 +22,7 @@ vi.mock("../plugins/setup-registry.js", () => ({
     autoEnableProbes: [],
     diagnostics: [],
   }),
-  runPluginSetupConfigMigrations: ({ config }: { config: OpenClawConfig }) => ({
+  runPluginSetupConfigMigrations: ({ config }: { config: BotConfig }) => ({
     config,
     changes: [],
   }),
@@ -60,12 +60,12 @@ vi.mock("../plugins/manifest-registry.js", () => ({
   },
 }));
 
-function legacyConfig(value: unknown): OpenClawConfig {
-  return value as OpenClawConfig;
+function legacyConfig(value: unknown): BotConfig {
+  return value as BotConfig;
 }
 
 vi.mock("./doctor/shared/channel-legacy-config-migrate.js", () => ({
-  applyChannelDoctorCompatibilityMigrations: (cfg: OpenClawConfig) => ({
+  applyChannelDoctorCompatibilityMigrations: (cfg: BotConfig) => ({
     next: cfg,
     changes: [],
   }),
@@ -75,7 +75,7 @@ vi.mock("../secrets/target-registry.js", () => {
   const entry = {
     id: "channels.discord.token",
     targetType: "channels.discord.token",
-    configFile: "openclaw.json",
+    configFile: "bot.json",
     pathPattern: "channels.discord.token",
     secretShape: "secret_input",
     expectedResolvedValue: "string",
@@ -90,7 +90,7 @@ vi.mock("../secrets/target-registry.js", () => {
       : null;
 
   return {
-    discoverConfigSecretTargets: (cfg: OpenClawConfig) => {
+    discoverConfigSecretTargets: (cfg: BotConfig) => {
       const targets: Array<{
         entry: typeof entry;
         path: string;
@@ -159,9 +159,9 @@ describe("normalizeCompatibilityConfigValues", () => {
   });
 
   beforeAll(() => {
-    previousOauthDir = process.env.OPENCLAW_OAUTH_DIR;
-    tempOauthDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-oauth-"));
-    process.env.OPENCLAW_OAUTH_DIR = tempOauthDir;
+    previousOauthDir = process.env.BOT_OAUTH_DIR;
+    tempOauthDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-oauth-"));
+    process.env.BOT_OAUTH_DIR = tempOauthDir;
   });
 
   beforeEach(() => {
@@ -172,9 +172,9 @@ describe("normalizeCompatibilityConfigValues", () => {
 
   afterAll(() => {
     if (previousOauthDir === undefined) {
-      delete process.env.OPENCLAW_OAUTH_DIR;
+      delete process.env.BOT_OAUTH_DIR;
     } else {
-      process.env.OPENCLAW_OAUTH_DIR = previousOauthDir;
+      process.env.BOT_OAUTH_DIR = previousOauthDir;
     }
     fs.rmSync(tempOauthDir, { recursive: true, force: true });
   });
@@ -186,13 +186,13 @@ describe("normalizeCompatibilityConfigValues", () => {
       },
       messages: {
         groupChat: {
-          mentionPatterns: ["@openclaw"],
+          mentionPatterns: ["@bot"],
         },
       },
     });
 
     expect(res.config.messages?.groupChat).toEqual({
-      mentionPatterns: ["@openclaw"],
+      mentionPatterns: ["@bot"],
     });
     expect(res.changes.some((change) => change.includes("messages.groupChat.visibleReplies"))).toBe(
       false,
@@ -270,7 +270,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           match: { channel: "discord", peer: { kind: "direct", id: "user-1" } },
         },
       ],
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const res = normalizeCompatibilityConfigValues(config);
 
@@ -283,7 +283,7 @@ describe("normalizeCompatibilityConfigValues", () => {
       normalizeCompatibilityConfigValues({
         messages: {
           groupChat: {
-            mentionPatterns: ["@openclaw"],
+            mentionPatterns: ["@bot"],
           },
         },
       }).changes,
@@ -361,7 +361,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.channels?.discord?.token).toBeUndefined();
     expect(res.config.channels?.discord?.accounts?.default?.token).toEqual({
@@ -394,7 +394,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           token: "secretref-env:not-valid",
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.channels?.discord?.token).toBe("secretref-env:not-valid");
     expect(res.changes).toStrictEqual([]);
@@ -452,7 +452,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           accounts: { work: { enabled: true } },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const res = normalizeCompatibilityConfigValues(config);
 
@@ -469,7 +469,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           plugin: {
             ...createChannelTestPluginBase({ id: "undeclared-demo", label: "Undeclared Demo" }),
             setup: {
-              applyAccountConfig: ({ cfg }: { cfg: OpenClawConfig }) => cfg,
+              applyAccountConfig: ({ cfg }: { cfg: BotConfig }) => cfg,
             },
           },
         },
@@ -484,7 +484,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           accounts: { work: { enabled: true } },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     const channel = res.config.channels?.["undeclared-demo"] as
       | { dmPolicy?: string; appToken?: string; accounts?: Record<string, unknown> }
@@ -507,7 +507,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           plugin: {
             ...createChannelTestPluginBase({ id: "late-demo", label: "Late Demo" }),
             setup: {
-              applyAccountConfig: ({ cfg }: { cfg: OpenClawConfig }) => cfg,
+              applyAccountConfig: ({ cfg }: { cfg: BotConfig }) => cfg,
               singleAccountKeysToMove: ["customAuth"],
             },
           },
@@ -523,7 +523,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           accounts: { work: { enabled: true } },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     const channel = res.config.channels?.["late-demo"] as
       | { dmPolicy?: string; customAuth?: string; accounts?: Record<string, unknown> }
@@ -554,7 +554,7 @@ describe("normalizeCompatibilityConfigValues", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig);
+      } as unknown as BotConfig);
       const channel = (
         res.config.channels as Record<string, { accounts?: Record<string, unknown> }>
       )?.[channelId];
@@ -592,7 +592,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.channels?.discord?.accounts?.work).toEqual({
       token: "work-token",
@@ -671,7 +671,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           allowedHostnames: ["localhost"],
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(
       (res.config.browser?.ssrfPolicy as Record<string, unknown> | undefined)?.allowPrivateNetwork,
@@ -691,7 +691,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           dangerouslyAllowPrivateNetwork: false,
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(
       (res.config.browser?.ssrfPolicy as Record<string, unknown> | undefined)?.allowPrivateNetwork,
@@ -756,7 +756,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.models?.providers?.openrouter?.api).toBe("openai-completions");
     expect(res.config.models?.providers?.openrouter?.models?.[0]?.api).toBe("openai-completions");
@@ -791,7 +791,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     const codexModel = res.config.models?.providers?.["openai-codex"]?.models?.[0];
     expect(codexModel?.id).toBe("gpt-5.5");
@@ -831,7 +831,7 @@ describe("normalizeCompatibilityConfigValues", () => {
             },
           ],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       {
         pluginProviderIds: new Set(["plugin-provider"]),
         persistedProviderIdsByAgentId: new Map(),
@@ -875,7 +875,7 @@ describe("normalizeCompatibilityConfigValues", () => {
             { id: "core", model: "anthropic/claude-sonnet-4-6" },
           ],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       {
         pluginProviderIds: new Set(["anthropic", "my-cli"]),
         persistedProviderIdsByAgentId: new Map([["worker", new Set(["agent-local"])]]),
@@ -895,7 +895,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           defaults: { model: "agent-local/model" },
           list: [{ id: "main" }, { id: "worker" }],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       {
         pluginProviderIds: new Set(),
         persistedProviderIdsByAgentId: new Map([
@@ -921,7 +921,7 @@ describe("normalizeCompatibilityConfigValues", () => {
             worker: { model: "deleted/worker" },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       {
         pluginProviderIds: new Set(),
         persistedProviderIdsByAgentId: new Map([
@@ -947,7 +947,7 @@ describe("normalizeCompatibilityConfigValues", () => {
             models: { "deleted/main": {} },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       { pluginProviderIds: new Set(), persistedProviderIdsByAgentId: new Map() },
     );
 
@@ -966,7 +966,7 @@ describe("normalizeCompatibilityConfigValues", () => {
               model: { primary: "deleted/main", fallbacks: 42 },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as BotConfig,
         { pluginProviderIds: new Set(), persistedProviderIdsByAgentId: new Map() },
       ),
     ).not.toThrow();
@@ -992,7 +992,7 @@ describe("normalizeCompatibilityConfigValues", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       {
         pluginProviderIds: new Set(["plugin-provider"]),
         persistedProviderIdsByAgentId: new Map(),
@@ -1030,7 +1030,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config).toEqual({
       models: {
@@ -1080,7 +1080,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         ],
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
     const repaired = maybeRepairCodexRoutes({
       cfg: normalized.config,
       shouldRepair: true,
@@ -1130,7 +1130,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const repaired = maybeRepairCodexRoutes({
       cfg: input,
@@ -1182,7 +1182,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     const migrationChanges: string[] = [];
     for (const migration of LEGACY_CONFIG_MIGRATIONS) {
       migration.apply(migrated as unknown as Record<string, unknown>, migrationChanges);
@@ -1256,7 +1256,7 @@ describe("normalizeCompatibilityConfigValues", () => {
     for (const migration of LEGACY_CONFIG_MIGRATIONS) {
       migration.apply(migrated, migrationChanges);
     }
-    const normalized = normalizeCompatibilityConfigValues(migrated as OpenClawConfig);
+    const normalized = normalizeCompatibilityConfigValues(migrated as BotConfig);
     const repaired = maybeRepairCodexRoutes({ cfg: normalized.config, shouldRepair: true });
 
     expect(repaired.cfg.agents?.defaults?.model).toEqual({
@@ -1294,7 +1294,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.agents?.defaults?.model).toEqual({
       primary: "anthropic/claude-opus-4-7",
@@ -1327,7 +1327,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.agents?.defaults?.agentRuntime).toEqual({ id: "claude-cli" });
     expect(res.config.agents?.defaults?.models).toEqual({
@@ -1353,16 +1353,16 @@ describe("normalizeCompatibilityConfigValues", () => {
             agentRuntime: { id: "claude-cli" },
             model: "anthropic/claude-opus-4-7",
             models: {
-              "anthropic/claude-opus-4-7": { agentRuntime: { id: "openclaw" } },
+              "anthropic/claude-opus-4-7": { agentRuntime: { id: "bot" } },
             },
           },
         ],
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.agents?.list?.[0]?.agentRuntime).toEqual({ id: "claude-cli" });
     expect(res.config.agents?.list?.[0]?.models).toEqual({
-      "anthropic/claude-opus-4-7": { agentRuntime: { id: "openclaw" } },
+      "anthropic/claude-opus-4-7": { agentRuntime: { id: "bot" } },
     });
     expect(res.changes).toStrictEqual([]);
   });
@@ -1381,7 +1381,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.agents?.defaults?.model).toEqual({
       primary: "openai/gpt-5.5",
@@ -1408,7 +1408,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.agents?.defaults?.model).toEqual({
       primary: "openai/gpt-5.5",
@@ -1432,7 +1432,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.agents?.defaults?.models).toEqual({
       "codex-cli/gpt-5.4": { alias: "Legacy CLI fallback" },
@@ -1457,7 +1457,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.agents?.defaults?.model).toBe("openai/gpt-5.5");
     expect(res.config.agents?.defaults?.models?.["openai/gpt-5.5"]?.agentRuntime).toEqual({
@@ -1499,7 +1499,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.agents?.defaults?.models?.["openai/gpt-5.5"]?.agentRuntime).toEqual({
       id: "codex",
@@ -1535,7 +1535,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.models?.providers?.openai?.agentRuntime).toEqual({ id: "codex" });
     expect(res.changes).toContain(
@@ -1557,7 +1557,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.agents?.defaults?.model).toEqual({
       primary: "google/gemini-3.1-pro-preview",
@@ -1589,7 +1589,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const res = normalizeCompatibilityConfigValues(input);
 
@@ -1805,7 +1805,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     expect(res.config.plugins?.entries?.firecrawl).toEqual({
       enabled: true,
@@ -1833,7 +1833,7 @@ describe("normalizeCompatibilityConfigValues", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(res.config.talk).toEqual({
       provider: "elevenlabs",

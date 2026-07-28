@@ -140,7 +140,7 @@ describe("ensurePlaywrightChromium", () => {
 
     expect(
       ensurePlaywrightChromium({
-        env: { OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM: "1" },
+        env: { BOT_UI_E2E_ALLOW_MISSING_CHROMIUM: "1" },
         executablePath: "/cache/chromium/chrome",
         existsSync: () => false,
         log: (line: string) => logs.push(line),
@@ -450,7 +450,7 @@ describe("ensurePlaywrightChromium", () => {
     ).toBe(true);
     expect(
       shouldInstallPlaywrightSystemDependencies({
-        env: { OPENCLAW_TESTBOX: "1" },
+        env: { BOT_TESTBOX: "1" },
         getuid: () => 501,
         platform: "linux",
       }),

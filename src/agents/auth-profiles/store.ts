@@ -5,13 +5,13 @@
  */
 import { AsyncLocalStorage } from "node:async_hooks";
 import { isDeepStrictEqual } from "node:util";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { isSecretRef } from "../../config/types.secrets.js";
 import { asDateTimestampMs } from "../../shared/number-coercion.js";
 import {
-  deferOpenClawAgentPostCommitPublication,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  deferBotAgentPostCommitPublication,
+  type BotAgentDatabase,
+} from "../../state/bot-agent-db.js";
 import { isRecord } from "../../utils.js";
 import { cloneAuthProfileStore } from "./clone.js";
 import { AUTH_STORE_VERSION, log } from "./constants.js";
@@ -68,8 +68,8 @@ const resolveAuthStorePath = resolveAuthProfileDatabasePath;
 
 type LoadAuthProfileStoreOptions = {
   allowKeychainPrompt?: boolean;
-  config?: OpenClawConfig;
-  database?: OpenClawAgentDatabase;
+  config?: BotConfig;
+  database?: BotAgentDatabase;
   externalCli?: ExternalCliAuthDiscovery;
   inheritedAuthDir?: string;
   readOnly?: boolean;
@@ -181,7 +181,7 @@ function preserveLegacyOAuthRefsOnSave(params: {
 
 type ResolvedExternalCliOverlayOptions = {
   allowKeychainPrompt?: boolean;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   externalCliProviderIds?: Iterable<string>;
   externalCliProfileIds?: Iterable<string>;
 };
@@ -221,13 +221,13 @@ const testing = {
   },
 };
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.authProfileStoreTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.authProfileStoreTestApi")] =
     testing;
 }
 
 function resolvePersistedLoadOptions(
   options: Pick<LoadAuthProfileStoreOptions, "allowKeychainPrompt" | "database"> | undefined,
-): { allowKeychainPrompt?: boolean; database?: OpenClawAgentDatabase } {
+): { allowKeychainPrompt?: boolean; database?: BotAgentDatabase } {
   return {
     ...(options?.allowKeychainPrompt !== undefined
       ? { allowKeychainPrompt: options.allowKeychainPrompt }
@@ -399,7 +399,7 @@ function maybeSyncPersistedExternalCliAuthProfiles(params: {
   if (
     params.options?.readOnly === true ||
     params.options?.syncExternalCli === false ||
-    process.env.OPENCLAW_AUTH_STORE_READONLY === "1"
+    process.env.BOT_AUTH_STORE_READONLY === "1"
   ) {
     return { store: params.store, cacheable: true };
   }
@@ -1144,7 +1144,7 @@ export function ensureAuthProfileStore(
   agentDir?: string,
   options?: {
     allowKeychainPrompt?: boolean;
-    config?: OpenClawConfig;
+    config?: BotConfig;
     externalCli?: ExternalCliAuthDiscovery;
     externalCliProviderIds?: Iterable<string>;
     externalCliProfileIds?: Iterable<string>;
@@ -1336,7 +1336,7 @@ function saveAuthProfileStoreInTransaction(
   store: AuthProfileStore,
   agentDir: string | undefined,
   options: SaveAuthProfileStoreOptions | undefined,
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   publishFromSuppliedStore = false,
 ): () => void {
   const savedAuthPath = resolveAuthStorePath(agentDir);
@@ -1441,7 +1441,7 @@ export function saveAuthProfileStore(
   store: AuthProfileStore,
   agentDir?: string,
   options?: SaveAuthProfileStoreOptions,
-  database?: OpenClawAgentDatabase,
+  database?: BotAgentDatabase,
 ): void {
   const effectiveAgentDir = resolveRuntimeAuthProfileAgentDir(agentDir);
   if (database) {
@@ -1455,7 +1455,7 @@ export function saveAuthProfileStore(
     const publishAfterCommit = () => {
       publishRuntimeSnapshotsAfterCommit(publishRuntimeSnapshots);
     };
-    if (!deferOpenClawAgentPostCommitPublication(database, publishAfterCommit)) {
+    if (!deferBotAgentPostCommitPublication(database, publishAfterCommit)) {
       // A supplied connection outside the transaction wrapper autocommits each write.
       publishAfterCommit();
     }

@@ -3,13 +3,13 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { extensionForMime, normalizeMimeType } from "@openclaw/media-core/mime";
+import { extensionForMime, normalizeMimeType } from "@hanzo/bot-media-core/mime";
 import type { Command } from "commander";
 import { resolveAgentDir, resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import { assertOkOrThrowHttpError } from "../../agents/provider-http-errors.js";
 import { getRuntimeConfig } from "../../config/config.js";
 import { resolveAgentModelPrimaryValue } from "../../config/model-input.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { readResponseWithLimit } from "../../infra/http-body.js";
 import { buildMediaUnderstandingRegistry } from "../../media-understanding/provider-registry.js";
 import { describeVideoFile } from "../../media-understanding/runtime.js";
@@ -61,7 +61,7 @@ function normalizeVideoResolution(raw: string | undefined): VideoGenerationResol
 }
 
 async function fetchGeneratedVideoDownload(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   provider: string;
   url: string;
 }) {

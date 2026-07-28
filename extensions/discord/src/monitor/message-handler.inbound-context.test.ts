@@ -1,6 +1,6 @@
 // Discord tests cover message handler.inbound context plugin behavior.
-import { expectChannelInboundContextContract as expectInboundContextContract } from "openclaw/plugin-sdk/channel-contract-testing";
-import { finalizeInboundContext } from "openclaw/plugin-sdk/reply-dispatch-runtime";
+import { expectChannelInboundContextContract as expectInboundContextContract } from "bot/plugin-sdk/channel-contract-testing";
+import { finalizeInboundContext } from "bot/plugin-sdk/reply-dispatch-runtime";
 import { describe, expect, it } from "vitest";
 import { buildDiscordInboundAccessContext } from "./inbound-context.js";
 import { buildFinalizedDiscordDirectInboundContext } from "./inbound-context.test-helpers.js";

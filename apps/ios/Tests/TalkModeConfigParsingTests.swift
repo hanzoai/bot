@@ -1,9 +1,9 @@
 import AVFoundation
 import Foundation
-import OpenClawChatUI
-import OpenClawKit
+import BotChatUI
+import BotKit
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 @MainActor
 struct TalkModeManagerTests {
@@ -535,7 +535,7 @@ struct TalkModeManagerTests {
         #expect(manager.phase == .connecting)
         #expect(manager.watchPresentation == .phase)
 
-        for status in ["Asking OpenClaw", "Still asking OpenClaw", "Updating OpenClaw"] {
+        for status in ["Asking Bot", "Still asking Bot", "Updating Bot"] {
             manager._test_handleRealtimeRelayStatus(status)
             #expect(manager.phase == .thinking)
             #expect(manager.watchPresentation == .phase)
@@ -961,7 +961,7 @@ struct TalkModeManagerTests {
             "talk": [
                 "providers": [
                     "elevenlabs": [
-                        "apiKey": "__OPENCLAW_REDACTED__",
+                        "apiKey": "__BOT_REDACTED__",
                         "voiceId": "bIHbv24MWmeRgasZH58o",
                     ],
                 ],
@@ -982,7 +982,7 @@ struct TalkModeManagerTests {
                 "resolved": [
                     "provider": "elevenlabs",
                     "config": [
-                        "apiKey": "__OPENCLAW_REDACTED__",
+                        "apiKey": "__BOT_REDACTED__",
                         "voiceId": "bIHbv24MWmeRgasZH58o",
                     ],
                 ],
@@ -1001,7 +1001,7 @@ struct TalkModeManagerTests {
         #expect(parsed.realtimeProvider == "openai")
         #expect(parsed.realtimeModelId == "gpt-realtime-2")
         #expect(parsed.realtimeVoiceId == "cedar")
-        #expect(parsed.rawConfigApiKey == "__OPENCLAW_REDACTED__")
+        #expect(parsed.rawConfigApiKey == "__BOT_REDACTED__")
     }
 
     @Test func `leaves native mode for managed room realtime transport`() {
@@ -1052,7 +1052,7 @@ struct TalkModeManagerTests {
             ],
             [
                 "role": "assistant",
-                "__openclaw": ["idempotencyKey": "current-run"],
+                "__bot": ["idempotencyKey": "current-run"],
                 "content": [["type": "text", "text": "current answer"]],
             ],
         ]
@@ -1066,7 +1066,7 @@ struct TalkModeManagerTests {
     }
 
     @Test func `native Talk chat request inherits thinking policy`() {
-        let request = OpenClawChatGatewayRequests.sendMessage(
+        let request = BotChatGatewayRequests.sendMessage(
             sessionKey: "agent:main:main",
             agentID: nil,
             expectedSessionRoutingContract: nil,
@@ -1123,10 +1123,10 @@ struct TalkModeManagerTests {
         #expect(processing.contains("idempotencyKey: runId"))
         #expect(completion.contains("guard let completionEvents = streamingOwner.completionEvents"))
         #expect(completion.contains("stream: completionEvents"))
-        #expect(streaming.contains("as: OpenClawChatEventPayload.self"))
-        #expect(streaming.contains("OpenClawChatEventText.assistantText"))
+        #expect(streaming.contains("as: BotChatEventPayload.self"))
+        #expect(streaming.contains("BotChatEventText.assistantText"))
         #expect(streaming.contains(#"chatEvent.state == "delta" || chatEvent.state == "final""#))
-        #expect(!streaming.contains("OpenClawAgentEventPayload"))
+        #expect(!streaming.contains("BotAgentEventPayload"))
     }
 
     @Test func `late incremental final cannot reopen canceled speech ownership`() async {

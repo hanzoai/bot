@@ -3,15 +3,15 @@ import {
   MAX_DATE_TIMESTAMP_MS,
   resolveDateTimestampMs,
   resolveExpiresAtMsFromDurationSeconds,
-} from "openclaw/plugin-sdk/number-runtime";
-import { generateHexPkceVerifierChallenge } from "openclaw/plugin-sdk/provider-auth";
+} from "bot/plugin-sdk/number-runtime";
+import { generateHexPkceVerifierChallenge } from "bot/plugin-sdk/provider-auth";
 import {
   generateOAuthState,
   parseOAuthCallbackInput,
   waitForLocalOAuthCallback,
-} from "openclaw/plugin-sdk/provider-auth-runtime";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/provider-auth-runtime";
+import { readProviderJsonResponse } from "bot/plugin-sdk/provider-http";
+import { fetchWithSsrFGuard } from "bot/plugin-sdk/ssrf-runtime";
 import { readGoogleApiErrorDetail } from "./google-api-errors.js";
 
 const GOOGLE_MEET_REDIRECT_URI = "http://localhost:8085/oauth2callback";

@@ -53,7 +53,7 @@ async function mountPage(sourceConfig: Record<string, unknown>): Promise<{
     runtimeConfig,
   } as unknown as ApplicationContext;
   const provider = createApplicationContextProvider(context);
-  const page = document.createElement("openclaw-labs-page") as LabsPageElement;
+  const page = document.createElement("bot-labs-page") as LabsPageElement;
   provider.append(page);
   document.body.append(provider);
   await page.updateComplete;

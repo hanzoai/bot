@@ -54,7 +54,7 @@ describe("QA runtime-pair scenario catalog", () => {
     expect(readQaScenarioById("gateway-restart-inflight-run").runtimePairLane).toBeUndefined();
     expect(readQaScenarioById("gateway-restart-inflight-run").execution).toMatchObject({
       kind: "flow",
-      runtime: "openclaw",
+      runtime: "bot",
       timeoutMs: 420_000,
     });
     expect(readQaScenarioExecutionConfig("gateway-restart-inflight-run")).toMatchObject({

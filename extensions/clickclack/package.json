@@ -1,7 +1,7 @@
 {
-  "name": "@openclaw/clickclack",
+  "name": "@hanzo/bot-clickclack",
   "version": "2026.7.2",
-  "description": "OpenClaw ClickClack channel plugin",
+  "description": "Bot ClickClack channel plugin",
   "type": "module",
   "exports": {
     ".": "./dist/index.js",
@@ -13,18 +13,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*",
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -54,21 +54,87 @@
       },
       "setup": {
         "fields": [
-          { "key": "code", "kind": "string", "sensitive": true, "cli": { "flags": "--code <code>", "description": "ClickClack one-time setup code or setup URL" } },
-          { "key": "token", "kind": "string", "sensitive": true, "cli": { "flags": "--token <token>", "description": "ClickClack bot token" } },
-          { "key": "tokenFile", "kind": "string", "sensitive": true, "cli": { "flags": "--token-file <path>", "description": "ClickClack bot token file" } },
-          { "key": "baseUrl", "kind": "string", "cli": { "flags": "--base-url <url>", "description": "ClickClack API base URL" } },
-          { "key": "workspace", "kind": "string", "cli": { "flags": "--workspace <workspace>", "description": "ClickClack workspace id, slug, or name" } },
-          { "key": "defaultTo", "kind": "string", "cli": { "flags": "--default-to <target>", "description": "Default ClickClack target" } },
-          { "key": "allowFrom", "kind": "string-list", "cli": { "flags": "--allow-from <ids>", "description": "Allowed ClickClack senders" } },
-          { "key": "agentActivity", "kind": "boolean", "cli": { "flags": "--agent-activity", "description": "Enable ClickClack agent activity" } },
-          { "key": "useEnv", "kind": "boolean", "cli": { "flags": "--use-env", "description": "Use CLICKCLACK_BOT_TOKEN" } }
+          {
+            "key": "code",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--code <code>",
+              "description": "ClickClack one-time setup code or setup URL"
+            }
+          },
+          {
+            "key": "token",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--token <token>",
+              "description": "ClickClack bot token"
+            }
+          },
+          {
+            "key": "tokenFile",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--token-file <path>",
+              "description": "ClickClack bot token file"
+            }
+          },
+          {
+            "key": "baseUrl",
+            "kind": "string",
+            "cli": {
+              "flags": "--base-url <url>",
+              "description": "ClickClack API base URL"
+            }
+          },
+          {
+            "key": "workspace",
+            "kind": "string",
+            "cli": {
+              "flags": "--workspace <workspace>",
+              "description": "ClickClack workspace id, slug, or name"
+            }
+          },
+          {
+            "key": "defaultTo",
+            "kind": "string",
+            "cli": {
+              "flags": "--default-to <target>",
+              "description": "Default ClickClack target"
+            }
+          },
+          {
+            "key": "allowFrom",
+            "kind": "string-list",
+            "cli": {
+              "flags": "--allow-from <ids>",
+              "description": "Allowed ClickClack senders"
+            }
+          },
+          {
+            "key": "agentActivity",
+            "kind": "boolean",
+            "cli": {
+              "flags": "--agent-activity",
+              "description": "Enable ClickClack agent activity"
+            }
+          },
+          {
+            "key": "useEnv",
+            "kind": "boolean",
+            "cli": {
+              "flags": "--use-env",
+              "description": "Use CLICKCLACK_BOT_TOKEN"
+            }
+          }
         ]
       }
     },
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/clickclack",
-      "npmSpec": "@openclaw/clickclack",
+      "clawhubSpec": "clawhub:@hanzo/bot-clickclack",
+      "npmSpec": "@hanzo/bot-clickclack",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.9",
       "allowInvalidConfigRecovery": true
@@ -77,7 +143,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {
@@ -87,6 +153,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   }
 }

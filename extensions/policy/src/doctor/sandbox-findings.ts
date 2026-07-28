@@ -1,5 +1,5 @@
-import type { HealthFinding } from "openclaw/plugin-sdk/health";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { HealthFinding } from "bot/plugin-sdk/health";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import type { PolicyEvidence, PolicySandboxPostureEvidence } from "../policy-state.js";
 import { CHECK_IDS, POLICY_CHECK_IDS } from "./check-ids.js";
 import { SANDBOX_CONTAINER_POLICY_RULES } from "./metadata.js";
@@ -459,7 +459,7 @@ function sandboxPostureFinding(
     severity: "error",
     message: params.message,
     source: "policy",
-    path: "openclaw config",
+    path: "bot config",
     ocPath: entry.source,
     target: entry.source,
     requirement: params.requirement,

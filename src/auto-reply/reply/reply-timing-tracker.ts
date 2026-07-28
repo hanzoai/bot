@@ -1,5 +1,5 @@
 /** Lightweight reply-stage profiler for slow-turn diagnostics. */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { isDiagnosticFlagEnabled } from "../../infra/diagnostic-flags.js";
 
 type ReplyTimingSpan = {
@@ -34,7 +34,7 @@ const DEFAULT_TIMING_WARN_STAGE_MS = 500;
 
 /** Checks config/env diagnostic flags for reply profiling. */
 export function isReplyProfilerEnabled(params?: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   env?: NodeJS.ProcessEnv;
 }): boolean {
   const cfg = params?.config;
@@ -48,7 +48,7 @@ export function isReplyProfilerEnabled(params?: {
 /** Creates a lightweight timing tracker for slow reply-stage diagnostics. */
 export function createReplyTimingTracker(params: {
   log: ReplyTimingLogger;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   env?: NodeJS.ProcessEnv;
   enabled?: boolean;
   totalWarnMs?: number;

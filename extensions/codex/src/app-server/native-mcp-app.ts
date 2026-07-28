@@ -3,7 +3,7 @@ import {
   type EmbeddedRunAttemptParams,
   type McpToolCatalog,
   type SessionMcpRuntime,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import { getCodexAppServerClientInstanceId, type CodexAppServerClient } from "./client.js";
 import type { CodexMcpServerStatus, CodexThreadItem, JsonObject, JsonValue } from "./protocol.js";
 import { retainSharedCodexAppServerClientIfCurrent } from "./shared-client.js";

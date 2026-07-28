@@ -1,13 +1,13 @@
 // Mattermost plugin module owns one accepted message's reply turn and delivery.
-import { resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
-import type { ChannelInboundTurnPlan } from "openclaw/plugin-sdk/channel-inbound";
+import { resolveHumanDelayConfig } from "bot/plugin-sdk/agent-runtime";
+import type { ChannelInboundTurnPlan } from "bot/plugin-sdk/channel-inbound";
 import {
   bindIngressLifecycleToReplyOptions,
   buildChannelProgressDraftLineForEntry,
   createChannelProgressDraftCompositor,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { finalizeInboundContext } from "openclaw/plugin-sdk/reply-runtime";
-import { resolveInboundLastRouteSessionKey } from "openclaw/plugin-sdk/routing";
+} from "bot/plugin-sdk/channel-outbound";
+import type { finalizeInboundContext } from "bot/plugin-sdk/reply-runtime";
+import { resolveInboundLastRouteSessionKey } from "bot/plugin-sdk/routing";
 import type { MattermostPost } from "./client.js";
 import {
   createMattermostDraftPreviewBoundaryController,

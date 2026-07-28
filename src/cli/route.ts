@@ -84,7 +84,7 @@ export async function tryRouteCli(
   argv: string[],
   options: { machineOutput?: boolean } = {},
 ): Promise<boolean> {
-  if (isTruthyEnvValue(process.env.OPENCLAW_DISABLE_ROUTE_FIRST)) {
+  if (isTruthyEnvValue(process.env.BOT_DISABLE_ROUTE_FIRST)) {
     return false;
   }
   const invocation = resolveCliArgvInvocation(argv);
@@ -108,7 +108,7 @@ export async function tryRouteCli(
     return false;
   }
   if (logLevel) {
-    process.env.OPENCLAW_LOG_LEVEL = logLevel;
+    process.env.BOT_LOG_LEVEL = logLevel;
   }
   await prepareRoutedCommand({
     argv,

@@ -1,8 +1,8 @@
-import { createMessageReceiptFromOutboundResults } from "openclaw/plugin-sdk/channel-outbound";
-import type { MarkdownTableMode } from "openclaw/plugin-sdk/config-contracts";
-import { resolveTextChunkLimit } from "openclaw/plugin-sdk/reply-chunking";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+import { createMessageReceiptFromOutboundResults } from "bot/plugin-sdk/channel-outbound";
+import type { MarkdownTableMode } from "bot/plugin-sdk/config-contracts";
+import { resolveTextChunkLimit } from "bot/plugin-sdk/reply-chunking";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "bot/plugin-sdk/ssrf-runtime";
 import type { ResolvedTelegramAccount } from "./accounts.js";
 import {
   markdownToTelegramChunks,
@@ -43,7 +43,7 @@ import type {
   TelegramSendOpts,
   TelegramSendResult,
 } from "./send-message-types.js";
-import type { OpenClawConfig } from "./send.runtime.js";
+import type { BotConfig } from "./send.runtime.js";
 import { recordSentMessage } from "./sent-message-cache.js";
 
 function buildTelegramTextSendReceipt(params: {
@@ -71,7 +71,7 @@ function buildTelegramTextSendReceipt(params: {
 }
 
 export function createTelegramTextSender(config: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   account: ResolvedTelegramAccount;
   api: TelegramApi;
   chatId: string;

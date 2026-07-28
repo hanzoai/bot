@@ -111,7 +111,7 @@ describe("program routes", () => {
   });
 
   it("passes parsed agents list flags through", async () => {
-    await expect(expectRoute(["agents"]).run(["node", "openclaw", "agents"])).resolves.toBe(true);
+    await expect(expectRoute(["agents"]).run(["node", "bot", "agents"])).resolves.toBe(true);
     expect(agentsListCommandMock).toHaveBeenCalledWith(
       { json: false, bindings: false },
       defaultRuntime,
@@ -120,7 +120,7 @@ describe("program routes", () => {
     await expect(
       expectRoute(["agents", "list"]).run([
         "node",
-        "openclaw",
+        "bot",
         "agents",
         "list",
         "--json",
@@ -135,7 +135,7 @@ describe("program routes", () => {
 
   it("passes parsed channel read-only route flags through", async () => {
     const listRoute = expectRoute(["channels", "list"]);
-    await expect(listRoute.run(["node", "openclaw", "channels", "list", "--json"])).resolves.toBe(
+    await expect(listRoute.run(["node", "bot", "channels", "list", "--json"])).resolves.toBe(
       true,
     );
     expect(channelsListCommandMock).toHaveBeenCalledWith(
@@ -147,7 +147,7 @@ describe("program routes", () => {
     await expect(
       statusRoute.run([
         "node",
-        "openclaw",
+        "bot",
         "channels",
         "status",
         "--json",
@@ -167,10 +167,10 @@ describe("program routes", () => {
   it("routes plugins list JSON without importing the full plugins CLI", async () => {
     const route = expectRoute(["plugins", "list"]);
     expect(route.loadPlugins).toBeUndefined();
-    expect(route.canRun?.(["node", "openclaw", "plugins", "list"])).toBe(false);
+    expect(route.canRun?.(["node", "bot", "plugins", "list"])).toBe(false);
 
     await expect(
-      route.run(["node", "openclaw", "plugins", "list", "--json", "--enabled", "--verbose"]),
+      route.run(["node", "bot", "plugins", "list", "--json", "--enabled", "--verbose"]),
     ).resolves.toBe(true);
 
     expect(runPluginsListCommandMock).toHaveBeenCalledWith(
@@ -183,7 +183,7 @@ describe("program routes", () => {
   it("returns false for plugins list JSON route with unsupported arguments", async () => {
     await expectRunFalse(
       ["plugins", "list"],
-      ["node", "openclaw", "plugins", "list", "--json", "--wat"],
+      ["node", "bot", "plugins", "list", "--json", "--wat"],
     );
   });
 
@@ -193,33 +193,33 @@ describe("program routes", () => {
   });
 
   it("returns false for gateway status route when option values are missing", async () => {
-    await expectRunFalse(["gateway", "status"], ["node", "openclaw", "gateway", "status", "--url"]);
+    await expectRunFalse(["gateway", "status"], ["node", "bot", "gateway", "status", "--url"]);
     await expectRunFalse(
       ["gateway", "status"],
-      ["node", "openclaw", "gateway", "status", "--token"],
+      ["node", "bot", "gateway", "status", "--token"],
     );
     await expectRunFalse(
       ["gateway", "status"],
-      ["node", "openclaw", "gateway", "status", "--password"],
+      ["node", "bot", "gateway", "status", "--password"],
     );
     await expectRunFalse(
       ["gateway", "status"],
-      ["node", "openclaw", "gateway", "status", "--timeout"],
+      ["node", "bot", "gateway", "status", "--timeout"],
     );
   });
 
   it("returns false for gateway status route when probe-only flags are present", async () => {
     await expectRunFalse(
       ["gateway", "status"],
-      ["node", "openclaw", "gateway", "status", "--ssh", "user@host"],
+      ["node", "bot", "gateway", "status", "--ssh", "user@host"],
     );
     await expectRunFalse(
       ["gateway", "status"],
-      ["node", "openclaw", "gateway", "status", "--ssh-identity", "~/.ssh/id_test"],
+      ["node", "bot", "gateway", "status", "--ssh-identity", "~/.ssh/id_test"],
     );
     await expectRunFalse(
       ["gateway", "status"],
-      ["node", "openclaw", "gateway", "status", "--ssh-auto"],
+      ["node", "bot", "gateway", "status", "--ssh-auto"],
     );
   });
 
@@ -228,7 +228,7 @@ describe("program routes", () => {
     await expect(
       route.run([
         "node",
-        "openclaw",
+        "bot",
         "--profile",
         "work",
         "gateway",
@@ -262,7 +262,7 @@ describe("program routes", () => {
 
   it("passes --no-probe through to daemon status", async () => {
     const route = expectRoute(["gateway", "status"]);
-    await expect(route.run(["node", "openclaw", "gateway", "status", "--no-probe"])).resolves.toBe(
+    await expect(route.run(["node", "bot", "gateway", "status", "--no-probe"])).resolves.toBe(
       true,
     );
 
@@ -281,18 +281,18 @@ describe("program routes", () => {
   });
 
   it("returns false when status timeout flag value is missing", async () => {
-    await expectRunFalse(["status"], ["node", "openclaw", "status", "--timeout"]);
+    await expectRunFalse(["status"], ["node", "bot", "status", "--timeout"]);
   });
 
   it.each([
-    { path: ["health"], argv: ["node", "openclaw", "health", "--wat"] },
-    { path: ["status"], argv: ["node", "openclaw", "status", "--wat"] },
-    { path: ["sessions"], argv: ["node", "openclaw", "sessions", "--wat"] },
+    { path: ["health"], argv: ["node", "bot", "health", "--wat"] },
+    { path: ["status"], argv: ["node", "bot", "status", "--wat"] },
+    { path: ["sessions"], argv: ["node", "bot", "sessions", "--wat"] },
     {
       path: ["agents", "list"],
-      argv: ["node", "openclaw", "agents", "list", "--wat"],
+      argv: ["node", "bot", "agents", "list", "--wat"],
     },
-    { path: ["agents"], argv: ["node", "openclaw", "agents", "--wat"] },
+    { path: ["agents"], argv: ["node", "bot", "agents", "--wat"] },
   ])(
     "returns false instead of handling unknown routed option for $path",
     async ({ path, argv }) => {
@@ -303,7 +303,7 @@ describe("program routes", () => {
   it("routes status --json through the lean JSON command", async () => {
     const route = expectRoute(["status"]);
     await expect(
-      route.run(["node", "openclaw", "status", "--json", "--deep", "--usage", "--timeout", "5000"]),
+      route.run(["node", "bot", "status", "--json", "--deep", "--usage", "--timeout", "5000"]),
     ).resolves.toBe(true);
     expect(statusJsonCommandMock).toHaveBeenCalledWith(
       { deep: true, all: false, usage: true, timeoutMs: 5000 },
@@ -312,15 +312,15 @@ describe("program routes", () => {
   });
 
   it("returns false for sessions route when --store value is missing", async () => {
-    await expectRunFalse(["sessions"], ["node", "openclaw", "sessions", "--store"]);
+    await expectRunFalse(["sessions"], ["node", "bot", "sessions", "--store"]);
   });
 
   it("returns false for sessions route when --active value is missing", async () => {
-    await expectRunFalse(["sessions"], ["node", "openclaw", "sessions", "--active"]);
+    await expectRunFalse(["sessions"], ["node", "bot", "sessions", "--active"]);
   });
 
   it("returns false for sessions route when --agent value is missing", async () => {
-    await expectRunFalse(["sessions"], ["node", "openclaw", "sessions", "--agent"]);
+    await expectRunFalse(["sessions"], ["node", "bot", "sessions", "--agent"]);
   });
 
   it("does not fast-route sessions subcommands", () => {
@@ -332,11 +332,11 @@ describe("program routes", () => {
   });
 
   it("returns false for config get route when path argument is missing", async () => {
-    await expectRunFalse(["config", "get"], ["node", "openclaw", "config", "get", "--json"]);
+    await expectRunFalse(["config", "get"], ["node", "bot", "config", "get", "--json"]);
   });
 
   it("returns false for config unset route when path argument is missing", async () => {
-    await expectRunFalse(["config", "unset"], ["node", "openclaw", "config", "unset"]);
+    await expectRunFalse(["config", "unset"], ["node", "bot", "config", "unset"]);
   });
 
   it("passes config get path correctly when root option values precede command", async () => {
@@ -344,7 +344,7 @@ describe("program routes", () => {
     await expect(
       route.run([
         "node",
-        "openclaw",
+        "bot",
         "--log-level",
         "debug",
         "config",
@@ -359,7 +359,7 @@ describe("program routes", () => {
   it("passes config unset path correctly when root option values precede command", async () => {
     const route = expectRoute(["config", "unset"]);
     await expect(
-      route.run(["node", "openclaw", "--profile", "work", "config", "unset", "update.channel"]),
+      route.run(["node", "bot", "--profile", "work", "config", "unset", "update.channel"]),
     ).resolves.toBe(true);
     expect(runConfigUnsetMock).toHaveBeenCalledWith({
       path: "update.channel",
@@ -376,7 +376,7 @@ describe("program routes", () => {
     await expect(
       route.run([
         "node",
-        "openclaw",
+        "bot",
         "config",
         "get",
         "--log-level",
@@ -391,7 +391,7 @@ describe("program routes", () => {
   it("passes config unset path when root value options appear after subcommand", async () => {
     const route = expectRoute(["config", "unset"]);
     await expect(
-      route.run(["node", "openclaw", "config", "unset", "--profile", "work", "update.channel"]),
+      route.run(["node", "bot", "config", "unset", "--profile", "work", "update.channel"]),
     ).resolves.toBe(true);
     expect(runConfigUnsetMock).toHaveBeenCalledWith({
       path: "update.channel",
@@ -408,7 +408,7 @@ describe("program routes", () => {
     await expect(
       route.run([
         "node",
-        "openclaw",
+        "bot",
         "config",
         "unset",
         "--dry-run",
@@ -430,41 +430,41 @@ describe("program routes", () => {
   it("returns false for config get route when unknown option appears", async () => {
     await expectRunFalse(
       ["config", "get"],
-      ["node", "openclaw", "config", "get", "--mystery", "value", "update.channel"],
+      ["node", "bot", "config", "get", "--mystery", "value", "update.channel"],
     );
   });
 
   it("returns false for models list route when --provider value is missing", async () => {
-    await expectRunFalse(["models", "list"], ["node", "openclaw", "models", "list", "--provider"]);
+    await expectRunFalse(["models", "list"], ["node", "bot", "models", "list", "--provider"]);
   });
 
   it("returns false for models status route when probe flags are missing values", async () => {
     await expectRunFalse(
       ["models", "status"],
-      ["node", "openclaw", "models", "status", "--probe-provider"],
+      ["node", "bot", "models", "status", "--probe-provider"],
     );
     await expectRunFalse(
       ["models", "status"],
-      ["node", "openclaw", "models", "status", "--probe-timeout"],
+      ["node", "bot", "models", "status", "--probe-timeout"],
     );
     await expectRunFalse(
       ["models", "status"],
-      ["node", "openclaw", "models", "status", "--probe-concurrency"],
+      ["node", "bot", "models", "status", "--probe-concurrency"],
     );
     await expectRunFalse(
       ["models", "status"],
-      ["node", "openclaw", "models", "status", "--probe-max-tokens"],
+      ["node", "bot", "models", "status", "--probe-max-tokens"],
     );
     await expectRunFalse(
       ["models", "status"],
-      ["node", "openclaw", "models", "status", "--probe-provider", "openai", "--agent"],
+      ["node", "bot", "models", "status", "--probe-provider", "openai", "--agent"],
     );
   });
 
   it("returns false for models status route when --probe-profile has no value", async () => {
     await expectRunFalse(
       ["models", "status"],
-      ["node", "openclaw", "models", "status", "--probe-profile"],
+      ["node", "bot", "models", "status", "--probe-profile"],
     );
   });
 
@@ -473,7 +473,7 @@ describe("program routes", () => {
     await expect(
       route.run([
         "node",
-        "openclaw",
+        "bot",
         "models",
         "status",
         "--probe-provider",
@@ -510,11 +510,11 @@ describe("program routes", () => {
   it("routes tasks list JSON through the lean task JSON command", async () => {
     const rootRoute = expectRoute(["tasks"]);
     expect(rootRoute.loadPlugins).toBeUndefined();
-    expect(rootRoute.canRun?.(["node", "openclaw", "tasks"])).toBe(false);
+    expect(rootRoute.canRun?.(["node", "bot", "tasks"])).toBe(false);
     await expect(
       rootRoute.run([
         "node",
-        "openclaw",
+        "bot",
         "tasks",
         "--json",
         "--runtime",
@@ -530,7 +530,7 @@ describe("program routes", () => {
     const listRoute = expectRoute(["tasks", "list"]);
     expect(listRoute.loadPlugins).toBeUndefined();
     await expect(
-      listRoute.run(["node", "openclaw", "tasks", "list", "--json", "--runtime=cron"]),
+      listRoute.run(["node", "bot", "tasks", "list", "--json", "--runtime=cron"]),
     ).resolves.toBe(true);
     expect(tasksListJsonCommandMock).toHaveBeenLastCalledWith(
       { json: true, runtime: "cron", status: undefined },
@@ -540,7 +540,7 @@ describe("program routes", () => {
     await expect(
       listRoute.run([
         "node",
-        "openclaw",
+        "bot",
         "tasks",
         "list",
         "--json",
@@ -559,7 +559,7 @@ describe("program routes", () => {
   it("routes parent task filter values that command-path discovery sees as positionals", async () => {
     const separateValueArgv = [
       "node",
-      "openclaw",
+      "bot",
       "tasks",
       "--json",
       "--runtime",
@@ -576,7 +576,7 @@ describe("program routes", () => {
 
     const parentOptionBeforeSubcommandArgv = [
       "node",
-      "openclaw",
+      "bot",
       "tasks",
       "--runtime",
       "cli",
@@ -599,11 +599,11 @@ describe("program routes", () => {
   it("routes tasks audit JSON through the lean task JSON command", async () => {
     const route = expectRoute(["tasks", "audit"]);
     expect(route.loadPlugins).toBeUndefined();
-    expect(route.canRun?.(["node", "openclaw", "tasks", "audit"])).toBe(false);
+    expect(route.canRun?.(["node", "bot", "tasks", "audit"])).toBe(false);
     await expect(
       route.run([
         "node",
-        "openclaw",
+        "bot",
         "tasks",
         "audit",
         "--json",
@@ -622,7 +622,7 @@ describe("program routes", () => {
     await expect(
       route.run([
         "node",
-        "openclaw",
+        "bot",
         "tasks",
         "audit",
         "--json",
@@ -639,22 +639,22 @@ describe("program routes", () => {
   });
 
   it("returns false for task JSON routes when option values are missing or unknown", async () => {
-    await expectRunFalse(["tasks"], ["node", "openclaw", "tasks", "--json", "--runtime"]);
-    await expectRunFalse(["tasks", "list"], ["node", "openclaw", "tasks", "list"]);
+    await expectRunFalse(["tasks"], ["node", "bot", "tasks", "--json", "--runtime"]);
+    await expectRunFalse(["tasks", "list"], ["node", "bot", "tasks", "list"]);
     await expectRunFalse(
       ["tasks", "audit"],
-      ["node", "openclaw", "tasks", "audit", "--json", "--limit"],
+      ["node", "bot", "tasks", "audit", "--json", "--limit"],
     );
     await expectRunFalse(
       ["tasks", "audit"],
-      ["node", "openclaw", "tasks", "audit", "--json", "--limit", "5abc"],
+      ["node", "bot", "tasks", "audit", "--json", "--limit", "5abc"],
     );
     await expectRunFalse(
       ["tasks", "audit"],
-      ["node", "openclaw", "tasks", "audit", "--json", "--unknown"],
+      ["node", "bot", "tasks", "audit", "--json", "--unknown"],
     );
     expect(
-      findRoutedCommand(["tasks", "cli"], ["node", "openclaw", "tasks", "--runtime", "cli"]),
+      findRoutedCommand(["tasks", "cli"], ["node", "bot", "tasks", "--runtime", "cli"]),
     ).toBeNull();
   });
 });

@@ -1,7 +1,7 @@
 import { normalizeConfiguredMcpServers } from "../config/mcp-config-normalize.js";
 import { setConfiguredMcpServer, unsetConfiguredMcpServer } from "../config/mcp-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { BotConfig } from "../config/types.bot.js";
+import type { BotStateDatabaseOptions } from "../state/bot-state-db.js";
 import {
   CLAW_MCP_REF_SCHEMA_VERSION,
   deleteClawMcpServerRef,
@@ -32,8 +32,8 @@ export class ClawMcpUpdateError extends Error {
 export async function applyClawMcpUpdate(
   updatePlan: ClawUpdatePlan,
   targetManifest: ClawManifest,
-  options: OpenClawStateDatabaseOptions & {
-    config: OpenClawConfig;
+  options: BotStateDatabaseOptions & {
+    config: BotConfig;
     sourceMcpServers: Record<string, Record<string, unknown>>;
     nowMs?: number;
     setServer?: typeof setConfiguredMcpServer;
@@ -41,7 +41,7 @@ export async function applyClawMcpUpdate(
     readRefs?: typeof readClawMcpServerRefs;
     planRemoval?: (
       ref: PersistedClawMcpServerRef,
-      options: OpenClawStateDatabaseOptions,
+      options: BotStateDatabaseOptions,
     ) => { action: "remove" | "release" };
     upsertRef?: typeof upsertClawMcpServerRef;
     deleteRef?: typeof deleteClawMcpServerRef;

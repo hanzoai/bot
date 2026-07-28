@@ -7,7 +7,7 @@ import {
   registerConfigWriteListener,
 } from "../config/io.js";
 import { isNixMode } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { createSubsystemLogger } from "../logging/subsystem.js";
 import type { PluginHookGatewayCronService } from "../plugins/hook-types.js";
 import { getActiveGatewayRootWorkCount } from "../process/gateway-work-admission.js";
@@ -230,7 +230,7 @@ export async function finishGatewayStartup(params: {
       clients,
       invalidateDeviceTransports: watchNodeHttpRuntime.invalidateSessionsForDevice,
       disconnectDeviceTransports: watchNodeHttpRuntime.disconnectSessionsForDevice,
-      enforceSharedGatewayAuthGenerationForConfigWrite: (nextConfig: OpenClawConfig) => {
+      enforceSharedGatewayAuthGenerationForConfigWrite: (nextConfig: BotConfig) => {
         enforceSharedGatewaySessionGenerationForConfigWrite({
           state: sharedGatewaySessionGenerationState,
           nextConfig,
@@ -541,10 +541,10 @@ export async function finishGatewayStartup(params: {
   }
   finishGatewayRestartTrace("restart.ready", collectGatewayProcessMemoryUsageMb());
   if (!minimalTestGateway) {
-    const { startOpenClawDatabaseIntegrityVerifier } =
-      await import("../state/openclaw-database-verify.js");
+    const { startBotDatabaseIntegrityVerifier } =
+      await import("../state/bot-database-verify.js");
     runtimeState.gatewayLifetimeSidecars.push(
-      startOpenClawDatabaseIntegrityVerifier({ env: process.env }),
+      startBotDatabaseIntegrityVerifier({ env: process.env }),
     );
   }
   postAttachRuntimeReturned = true;

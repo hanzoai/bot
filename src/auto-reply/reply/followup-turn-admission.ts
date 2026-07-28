@@ -5,7 +5,7 @@ import type { SessionEntry } from "../../config/sessions.js";
 import { resolveSessionTranscriptPath } from "../../config/sessions/paths.js";
 import { loadSessionEntry } from "../../config/sessions/session-accessor.js";
 import type { TypingMode } from "../../config/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { defaultRuntime } from "../../runtime.js";
 import { resolveSendPolicy } from "../../sessions/send-policy.js";
@@ -86,7 +86,7 @@ export type AdmittedFollowupTurn = {
   runId: string;
   queued: FollowupRun;
   operation: ReplyOperation;
-  config: OpenClawConfig;
+  config: BotConfig;
   session: FollowupSessionOwner;
   sessionStore?: Record<string, SessionEntry>;
   currentInboundContext?: CurrentInboundPromptContext;

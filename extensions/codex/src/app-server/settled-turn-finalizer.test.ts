@@ -1,5 +1,5 @@
-import type { EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { EmbeddedRunAttemptParams } from "bot/plugin-sdk/agent-harness-runtime";
+import type { Model } from "bot/plugin-sdk/llm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { EmbeddedRunAttemptResult } from "./attempt-terminal.js";
 import {
@@ -63,7 +63,7 @@ function createSettledAttempt(): EmbeddedRunAttemptResult {
       } as never,
     ],
     settledTurnFinalizationContext: {
-      source: "openclaw-transcript",
+      source: "bot-transcript",
       messages: [
         { role: "user", content: "Send the update to Alice." } as never,
         {

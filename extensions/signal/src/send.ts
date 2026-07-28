@@ -1,20 +1,20 @@
-import type { MediaPlaceholderTextFact } from "openclaw/plugin-sdk/channel-inbound";
+import type { MediaPlaceholderTextFact } from "bot/plugin-sdk/channel-inbound";
 // Signal plugin module implements send behavior.
 import {
   createMessageReceiptFromOutboundResults,
   type MessageReceipt,
   type MessageReceiptPartKind,
   type MessageReceiptSourceResult,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { kindFromMime } from "openclaw/plugin-sdk/media-runtime";
-import { resolveOutboundAttachmentFromUrl } from "openclaw/plugin-sdk/media-runtime";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { resolveMarkdownTableMode } from "bot/plugin-sdk/markdown-table-runtime";
+import { kindFromMime } from "bot/plugin-sdk/media-runtime";
+import { resolveOutboundAttachmentFromUrl } from "bot/plugin-sdk/media-runtime";
+import { requireRuntimeConfig } from "bot/plugin-sdk/plugin-config-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveSignalAccount } from "./accounts.js";
 import {
   appendSignalApprovalReactionHintForOutboundMessage,
@@ -27,7 +27,7 @@ import { registerSignalReplyContext } from "./reply-authors.js";
 import { resolveSignalRpcContext } from "./rpc-context.js";
 
 export type SignalSendOpts = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   baseUrl?: string;
   transportKind?: SignalTransportKind;
   account?: string;

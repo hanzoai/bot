@@ -5,15 +5,15 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+  type BotStateDatabaseOptions,
+} from "../state/bot-state-db.js";
 
-type RemoteModelCatalogDatabase = Pick<OpenClawStateKyselyDatabase, "model_catalog_remote">;
-type RemoteModelCatalogStoreRow = Selectable<OpenClawStateKyselyDatabase["model_catalog_remote"]>;
+type RemoteModelCatalogDatabase = Pick<BotStateKyselyDatabase, "model_catalog_remote">;
+type RemoteModelCatalogStoreRow = Selectable<BotStateKyselyDatabase["model_catalog_remote"]>;
 
 type RemoteModelCatalogWriteResult =
   | { status: "written" }
@@ -33,12 +33,12 @@ CREATE TABLE IF NOT EXISTS model_catalog_remote (
 ) STRICT;
 `;
 
-function ensureRemoteModelCatalogSchema(options: OpenClawStateDatabaseOptions = {}): void {
-  const database = openOpenClawStateDatabase(options);
+function ensureRemoteModelCatalogSchema(options: BotStateDatabaseOptions = {}): void {
+  const database = openBotStateDatabase(options);
   if (ensuredDatabases.has(database.db)) {
     return;
   }
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       // sqlite-allow-raw -- feature-local additive schema DDL; catalog rows use Kysely below.
       db.exec(REMOTE_MODEL_CATALOG_SCHEMA_SQL);
@@ -49,13 +49,13 @@ function ensureRemoteModelCatalogSchema(options: OpenClawStateDatabaseOptions = 
   ensuredDatabases.add(database.db);
 }
 
-function openDatabase(options: OpenClawStateDatabaseOptions) {
+function openDatabase(options: BotStateDatabaseOptions) {
   ensureRemoteModelCatalogSchema(options);
-  return openOpenClawStateDatabase(options);
+  return openBotStateDatabase(options);
 }
 
 export function readRemoteModelCatalog(
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): RemoteModelCatalogStoreRow | undefined {
   const state = openDatabase(options);
   const db = getNodeSqliteKysely<RemoteModelCatalogDatabase>(state.db);
@@ -67,10 +67,10 @@ export function readRemoteModelCatalog(
 
 export function writeRemoteModelCatalog(
   row: Omit<RemoteModelCatalogStoreRow, "id">,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): RemoteModelCatalogWriteResult {
   ensureRemoteModelCatalogSchema(options);
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db: sqlite }) => {
       const db = getNodeSqliteKysely<RemoteModelCatalogDatabase>(sqlite);
       const current = executeSqliteQueryTakeFirstSync(
@@ -121,10 +121,10 @@ export function markRemoteModelCatalogChecked(
     etag?: string | null;
     lastModified?: string | null;
   },
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): boolean {
   ensureRemoteModelCatalogSchema(options);
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db: sqlite }) => {
       const db = getNodeSqliteKysely<RemoteModelCatalogDatabase>(sqlite);
       let query = db

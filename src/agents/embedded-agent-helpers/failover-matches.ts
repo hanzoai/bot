@@ -1,7 +1,7 @@
 /**
  * Shared text-pattern matchers for failover, auth, billing, and rate-limit errors.
  */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 
 type ErrorPattern = RegExp | string;
 

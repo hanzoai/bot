@@ -1,8 +1,8 @@
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import type { ApprovalResolveResult } from "bot/plugin-sdk/approval-gateway-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { GoogleChatCardV2 } from "./types.js";
 
-const GOOGLECHAT_APPROVAL_CARD_ID = "openclaw-approval";
+const GOOGLECHAT_APPROVAL_CARD_ID = "bot-approval";
 const MAX_TEXT_PARAGRAPH_CHARS = 1800;
 
 function escapeGoogleChatText(text: string): string {

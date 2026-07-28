@@ -3,7 +3,7 @@
  *
  * Keeps provider metadata and built-in model exceptions on one path before request payloads are built.
  */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 
 /** Minimal model fields needed to resolve OpenAI reasoning effort compatibility. */
 type OpenAIReasoningCompatModel = {

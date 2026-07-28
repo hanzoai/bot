@@ -2,10 +2,10 @@
 import {
   createChannelIngressResolver,
   defineStableChannelIngressIdentity,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { createChannelPairingChallengeIssuer } from "openclaw/plugin-sdk/channel-pairing";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { upsertChannelPairingRequest } from "openclaw/plugin-sdk/conversation-runtime";
+} from "bot/plugin-sdk/channel-ingress-runtime";
+import { createChannelPairingChallengeIssuer } from "bot/plugin-sdk/channel-pairing";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { upsertChannelPairingRequest } from "bot/plugin-sdk/conversation-runtime";
 import {
   formatSignalSenderId,
   looksLikeUuid,
@@ -118,7 +118,7 @@ export async function resolveSignalAccessState(params: {
   sender: SignalSender;
   groupId?: string;
   isGroup?: boolean;
-  cfg?: Pick<OpenClawConfig, "accessGroups" | "commands">;
+  cfg?: Pick<BotConfig, "accessGroups" | "commands">;
   hasControlCommand?: boolean;
   readStoreAllowFrom?: () => Promise<string[]>;
 }) {

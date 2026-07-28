@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { listBuzzAccountIds } from "./types.js";
 
@@ -10,7 +10,7 @@ describe("listBuzzAccountIds", () => {
           privateKey: { source: "file", provider: "vault", id: "/buzz/private-key" },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(listBuzzAccountIds(cfg)).toEqual(["default"]);
   });

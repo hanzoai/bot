@@ -1,7 +1,7 @@
 /** Tests context-pruning extension settings, runtime registry, and message pruning. */
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import type { ExtensionAPI, ExtensionContext } from "openclaw/plugin-sdk/agent-sessions";
-import type { ToolResultMessage } from "openclaw/plugin-sdk/llm";
+import type { AgentMessage } from "bot/plugin-sdk/agent-core";
+import type { ExtensionAPI, ExtensionContext } from "bot/plugin-sdk/agent-sessions";
+import type { ToolResultMessage } from "bot/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import contextPruningExtension from "./context-pruning.js";
 import { pruneContextMessages } from "./context-pruning/pruner.js";

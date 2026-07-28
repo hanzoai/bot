@@ -1,7 +1,7 @@
 import "../../styles/config.css";
 import "../../styles/config-quick.css";
 import { consume } from "@lit/context";
-import { asNullableRecord as asConfigRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asConfigRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { html, type PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
 import type { SystemInfoResult } from "../../../../packages/gateway-protocol/src/index.js";
@@ -31,7 +31,7 @@ import { i18n, isSupportedLocale, t, type Locale } from "../../i18n/index.ts";
 import { resolveModelPrimary } from "../../lib/agents/display.ts";
 import { resolveControlUiServerQueueMode } from "../../lib/chat/follow-up-mode.ts";
 import { isMissingOperatorReadScopeError } from "../../lib/gateway-errors.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { PollController } from "../../lit/poll-controller.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { loadModels } from "../chat/models.ts";
@@ -218,7 +218,7 @@ function applyTextScale(value: unknown) {
   );
 }
 
-export class ConfigPage extends OpenClawLightDomElement {
+export class ConfigPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -1153,7 +1153,7 @@ export class ConfigPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-config-page")) {
-  customElements.define("openclaw-config-page", ConfigPage);
+if (!customElements.get("bot-config-page")) {
+  customElements.define("bot-config-page", ConfigPage);
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

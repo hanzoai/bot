@@ -85,11 +85,11 @@ describe("runtime-guard", () => {
     expect(runtime.error).toHaveBeenCalledOnce();
     expect(runtime.error).toHaveBeenCalledWith(
       [
-        "openclaw requires Node >=22.22.3 <23, >=24.15.0 <25, or >=25.9.0.",
+        "bot requires Node >=22.22.3 <23, >=24.15.0 <25, or >=25.9.0.",
         "Detected: node 20.0.0 (exec: /usr/bin/node).",
         "PATH searched: /usr/bin",
         "Install Node: https://nodejs.org/en/download",
-        "Upgrade Node and re-run openclaw.",
+        "Upgrade Node and re-run bot.",
       ].join("\n"),
     );
     expect(runtime.exit).toHaveBeenCalledWith(1);
@@ -149,11 +149,11 @@ describe("runtime-guard", () => {
     expect(() => assertSupportedRuntime(runtime, details)).toThrow("exit");
     expect(runtime.error).toHaveBeenCalledWith(
       [
-        "openclaw cannot run under Bun because the runtime does not provide node:sqlite.",
+        "bot cannot run under Bun because the runtime does not provide node:sqlite.",
         "Detected: bun 1.3.14 (exec: /usr/bin/bun).",
         "PATH searched: /usr/bin",
         "Install Node: https://nodejs.org/en/download",
-        "Run OpenClaw with Node; Bun remains supported for installs and package scripts.",
+        "Run Bot with Node; Bun remains supported for installs and package scripts.",
       ].join("\n"),
     );
   });
@@ -178,11 +178,11 @@ describe("runtime-guard", () => {
     expect(runtime.error).toHaveBeenCalledOnce();
     expect(runtime.error).toHaveBeenCalledWith(
       [
-        "openclaw requires Node >=22.22.3 <23, >=24.15.0 <25, or >=25.9.0.",
+        "bot requires Node >=22.22.3 <23, >=24.15.0 <25, or >=25.9.0.",
         "Detected: unknown runtime (exec: unknown).",
         "PATH searched: (not set)",
         "Install Node: https://nodejs.org/en/download",
-        "Upgrade Node and re-run openclaw.",
+        "Upgrade Node and re-run bot.",
       ].join("\n"),
     );
     expect(runtime.exit).toHaveBeenCalledWith(1);

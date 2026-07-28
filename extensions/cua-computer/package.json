@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/cua-computer",
+  "name": "@hanzo/bot-cua-computer",
   "version": "2026.7.2",
   "description": "Experimental cua-driver computer control for Windows and Linux node hosts",
   "type": "module",
@@ -9,9 +9,9 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

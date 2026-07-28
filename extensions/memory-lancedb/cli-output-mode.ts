@@ -1,4 +1,4 @@
-import { getRootOptionAwareCommandPath } from "openclaw/plugin-sdk/cli-argv";
+import { getRootOptionAwareCommandPath } from "bot/plugin-sdk/cli-argv";
 
 /** LanceDB inspection commands emit JSON as their only presentation. */
 export function isMemoryMachineOutput(params: { argv: readonly string[] }): boolean {

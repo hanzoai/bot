@@ -1,9 +1,9 @@
 // Qa Lab plugin module implements qa credentials common behavior.
-import { isLoopbackHost } from "openclaw/plugin-sdk/gateway-runtime";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
+import { isLoopbackHost } from "bot/plugin-sdk/gateway-runtime";
+import { parseStrictPositiveInteger } from "bot/plugin-sdk/number-runtime";
 
 export const QA_CREDENTIALS_DEFAULT_ENDPOINT_PREFIX = "/qa-credentials/v1";
-const QA_CREDENTIALS_ALLOW_INSECURE_HTTP_ENV_KEY = "OPENCLAW_QA_ALLOW_INSECURE_HTTP";
+const QA_CREDENTIALS_ALLOW_INSECURE_HTTP_ENV_KEY = "BOT_QA_ALLOW_INSECURE_HTTP";
 
 type ErrorFactory = (message: string) => Error;
 
@@ -44,7 +44,7 @@ export function normalizeQaCredentialConvexSiteUrl(params: {
     url = new URL(params.raw);
   } catch {
     throw toError(
-      `OPENCLAW_QA_CONVEX_SITE_URL must be a valid URL, got "${params.raw || "<empty>"}".`,
+      `BOT_QA_CONVEX_SITE_URL must be a valid URL, got "${params.raw || "<empty>"}".`,
     );
   }
   if (url.protocol === "https:") {
@@ -52,14 +52,14 @@ export function normalizeQaCredentialConvexSiteUrl(params: {
     return text.endsWith("/") ? text.slice(0, -1) : text;
   }
   if (url.protocol !== "http:") {
-    throw toError("OPENCLAW_QA_CONVEX_SITE_URL must use https://.");
+    throw toError("BOT_QA_CONVEX_SITE_URL must use https://.");
   }
   const allowInsecureHttp = isQaCredentialTruthyOptIn(
     params.env[QA_CREDENTIALS_ALLOW_INSECURE_HTTP_ENV_KEY],
   );
   if (!allowInsecureHttp || !isLoopbackHost(url.hostname)) {
     throw toError(
-      `OPENCLAW_QA_CONVEX_SITE_URL must use https://. http:// is only allowed for loopback hosts when ${QA_CREDENTIALS_ALLOW_INSECURE_HTTP_ENV_KEY}=1.`,
+      `BOT_QA_CONVEX_SITE_URL must use https://. http:// is only allowed for loopback hosts when ${QA_CREDENTIALS_ALLOW_INSECURE_HTTP_ENV_KEY}=1.`,
     );
   }
   const text = url.toString();

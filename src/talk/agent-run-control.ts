@@ -1,5 +1,5 @@
 /**
- * Runtime adapter for realtime voice control of active OpenClaw agent runs.
+ * Runtime adapter for realtime voice control of active Bot agent runs.
  *
  * The shared module owns classification and message contracts; this adapter
  * binds those contracts to embedded-run abort, status, and steering primitives.
@@ -113,7 +113,7 @@ export async function controlRealtimeVoiceAgentRun(
         active: false,
         aborted: false,
         reason: "no_active_run",
-        message: "There is no active OpenClaw run to cancel.",
+        message: "There is no active Bot run to cancel.",
         speak: true,
         show: true,
         suppress: false,
@@ -121,8 +121,8 @@ export async function controlRealtimeVoiceAgentRun(
     }
     const aborted = deps.abortEmbeddedAgentRun(sessionId);
     const message = aborted
-      ? "Cancelled the active OpenClaw run."
-      : "OpenClaw could not cancel the active run.";
+      ? "Cancelled the active Bot run."
+      : "Bot could not cancel the active run.";
     return {
       ok: aborted,
       mode,
@@ -147,7 +147,7 @@ export async function controlRealtimeVoiceAgentRun(
       active: false,
       queued: false,
       reason: "no_active_run",
-      message: "There is no active OpenClaw run to steer.",
+      message: "There is no active Bot run to steer.",
       speak: true,
       show: true,
       suppress: false,
@@ -190,7 +190,7 @@ export async function controlRealtimeVoiceAgentRun(
     target: outcome.target,
     message:
       mode === "followup"
-        ? "Queued that follow-up for the active OpenClaw run."
+        ? "Queued that follow-up for the active Bot run."
         : "Got it. I steered the active run.",
     speak: true,
     show: true,

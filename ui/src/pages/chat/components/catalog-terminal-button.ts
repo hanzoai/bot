@@ -16,7 +16,7 @@ export function renderCatalogTerminalButton(
     return nothing;
   }
   return html`
-    <openclaw-tooltip .content=${t("chat.catalog.openInTerminal")}>
+    <bot-tooltip .content=${t("chat.catalog.openInTerminal")}>
       <button
         class="btn btn--ghost btn--icon chat-icon-btn"
         type="button"
@@ -25,6 +25,6 @@ export function renderCatalogTerminalButton(
       >
         ${icons.terminal}
       </button>
-    </openclaw-tooltip>
+    </bot-tooltip>
   `;
 }

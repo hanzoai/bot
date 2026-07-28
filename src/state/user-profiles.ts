@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 // Durable user profiles and mutable login-email aliases in the shared state DB.
 import type { DatabaseSync } from "node:sqlite";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@hanzo/bot-normalization-core/result";
 import { sql } from "kysely";
 import {
   executeSqliteQuerySync,
@@ -11,10 +11,10 @@ import {
 import { generateSecureUuid } from "../infra/secure-random.js";
 import { runSqliteDeferredTransactionSync } from "../infra/sqlite-transaction.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+  type BotStateDatabaseOptions,
+} from "./bot-state-db.js";
 import { USER_PROFILES_SCHEMA_SQL } from "./user-profiles-schema.js";
 
 const MAX_USER_PROFILE_AVATAR_BYTES = 512 * 1024;
@@ -91,12 +91,12 @@ function profileDb(db: DatabaseSync) {
   return getNodeSqliteKysely<UserProfilesDatabase>(db);
 }
 
-function ensureUserProfilesSchema(options: OpenClawStateDatabaseOptions): void {
-  const database = openOpenClawStateDatabase(options);
+function ensureUserProfilesSchema(options: BotStateDatabaseOptions): void {
+  const database = openBotStateDatabase(options);
   if (ensuredDatabases.has(database.db)) {
     return;
   }
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       db.exec(USER_PROFILES_SCHEMA_SQL);
     },
@@ -215,27 +215,27 @@ function requireResolvedProfileById(db: DatabaseSync, profileId: string): UserPr
 /** Resolves a durable profile reference to its current one-hop merge head. */
 export function resolveUserProfileId(
   profileId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): string | undefined {
   ensureUserProfilesSchema(options);
-  const { db } = openOpenClawStateDatabase(options);
+  const { db } = openBotStateDatabase(options);
   return selectResolvedProfileById(db, profileId)?.id;
 }
 
 /** Reads a profile's protocol-facing representation through its merge head. */
 export function getUserProfileListItem(
   profileId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): UserProfileListItem {
   ensureUserProfilesSchema(options);
-  const { db } = openOpenClawStateDatabase(options);
+  const { db } = openBotStateDatabase(options);
   return selectUserProfileListItemById(db, requireResolvedProfileById(db, profileId).id);
 }
 
 /** Resolves an email alias or atomically creates its first durable profile. */
 export function ensureProfileForEmail(
   email: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): UserProfile {
   const normalizedEmail = normalizeEmail(email);
   const profileId = generateSecureUuid();
@@ -245,7 +245,7 @@ export function ensureProfileForEmail(
     MAX_USER_PROFILE_DISPLAY_NAME_LENGTH,
   );
   ensureUserProfilesSchema(options);
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db }) => {
       const kysely = profileDb(db);
       const existingAlias = executeSqliteQueryTakeFirstSync(
@@ -288,12 +288,12 @@ export function ensureProfileForEmail(
 export function linkEmail(
   email: string,
   targetProfileId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): UserProfileListItem {
   const normalizedEmail = normalizeEmail(email);
   const now = Date.now();
   ensureUserProfilesSchema(options);
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db }) => {
       const kysely = profileDb(db);
       const target = requireResolvedProfileById(db, targetProfileId);
@@ -374,11 +374,11 @@ export function linkEmail(
 export function setDisplayName(
   profileId: string,
   name: string | null,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): UserProfileListItem {
   const now = Date.now();
   ensureUserProfilesSchema(options);
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db }) => {
       const profile = requireResolvedProfileById(db, profileId);
       executeSqliteQuerySync(
@@ -400,7 +400,7 @@ export function setAvatar(
   profileId: string,
   bytes: Uint8Array,
   mime: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): Result<UserProfileListItem, UserProfileAvatarError> {
   if (bytes.byteLength > MAX_USER_PROFILE_AVATAR_BYTES) {
     return err({ code: "avatar_too_large", maxBytes: MAX_USER_PROFILE_AVATAR_BYTES });
@@ -410,7 +410,7 @@ export function setAvatar(
   }
   const now = Date.now();
   ensureUserProfilesSchema(options);
-  const value = runOpenClawStateWriteTransaction(
+  const value = runBotStateWriteTransaction(
     ({ db }) => {
       const profile = requireResolvedProfileById(db, profileId);
       const sha256 = createHash("sha256").update(bytes).digest("hex");
@@ -431,10 +431,10 @@ export function setAvatar(
 
 export function getProfileAvatar(
   profileId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): UserProfileAvatar | undefined {
   ensureUserProfilesSchema(options);
-  const { db } = openOpenClawStateDatabase(options);
+  const { db } = openBotStateDatabase(options);
   const profile = selectResolvedProfileById(db, profileId);
   if (!profile?.avatar || !profile.avatar_mime || !profile.avatar_sha256) {
     return undefined;
@@ -445,9 +445,9 @@ export function getProfileAvatar(
     : undefined;
 }
 
-export function listProfiles(options: OpenClawStateDatabaseOptions = {}): UserProfileListItem[] {
+export function listProfiles(options: BotStateDatabaseOptions = {}): UserProfileListItem[] {
   ensureUserProfilesSchema(options);
-  const database = openOpenClawStateDatabase(options);
+  const database = openBotStateDatabase(options);
   return runSqliteDeferredTransactionSync(
     database.db,
     () => {

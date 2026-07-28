@@ -1,16 +1,16 @@
 // Xai plugin module implements tts behavior.
-import { canonicalizeBase64 } from "openclaw/plugin-sdk/media-runtime";
+import { canonicalizeBase64 } from "bot/plugin-sdk/media-runtime";
 import {
   assertOkOrThrowProviderError,
   postJsonRequest,
   readProviderJsonResponse,
-} from "openclaw/plugin-sdk/provider-http";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { asObject, trimToUndefined, type SpeechVoiceOption } from "openclaw/plugin-sdk/speech";
+} from "bot/plugin-sdk/provider-http";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
+import { asObject, trimToUndefined, type SpeechVoiceOption } from "bot/plugin-sdk/speech";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromHttpBaseUrlAllowedHostname,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/ssrf-runtime";
 import WebSocket, { type RawData } from "ws";
 import { XAI_BASE_URL } from "./api.js";
 import { xaiUserAgentHeaderFor } from "./src/xai-user-agent.js";

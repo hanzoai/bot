@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveAttachGrant } from "../mcp-grant-store.js";
 import { closeMcpLoopbackServer } from "../mcp-http.js";
@@ -57,8 +57,8 @@ describe("attach gateway methods", () => {
     expect(body.sessionKey).toBe("agent:main:attach-method");
     expect(body.token).toMatch(/^[0-9a-f]{64}$/);
     expect(body.mcpConfig).toBeTruthy();
-    expect(body.env.OPENCLAW_MCP_TOKEN).toBe(body.token);
-    expect(Object.keys(body.env)).toEqual(["OPENCLAW_MCP_TOKEN"]);
+    expect(body.env.BOT_MCP_TOKEN).toBe(body.token);
+    expect(Object.keys(body.env)).toEqual(["BOT_MCP_TOKEN"]);
     expect(resolveAttachGrant(body.token)?.sessionKey).toBe("agent:main:attach-method");
   });
 

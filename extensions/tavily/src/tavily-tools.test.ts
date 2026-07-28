@@ -1,7 +1,7 @@
 // Tavily tests cover tavily tools plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-runtime";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { BotPluginApi } from "bot/plugin-sdk/plugin-runtime";
+import { createTestPluginApi } from "bot/plugin-sdk/plugin-test-api";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_TAVILY_BASE_URL,
@@ -36,10 +36,10 @@ function requireFirstMockArg(mock: ReturnType<typeof vi.fn>, label: string): unk
   return call[0];
 }
 
-function fakeApi(): OpenClawPluginApi {
+function fakeApi(): BotPluginApi {
   return {
     config: {},
-  } as OpenClawPluginApi;
+  } as BotPluginApi;
 }
 
 describe("tavily tools", () => {
@@ -179,7 +179,7 @@ describe("tavily tools", () => {
       max_results: 5,
       include_answer: true,
       time_range: "week",
-      include_domains: [" docs.openclaw.ai ", "   ", "openclaw.ai"],
+      include_domains: [" docs.bot.ai ", "   ", "bot.ai"],
       exclude_domains: [" bad.example ", ""],
     });
 
@@ -191,7 +191,7 @@ describe("tavily tools", () => {
       maxResults: 5,
       includeAnswer: true,
       timeRange: "week",
-      includeDomains: ["docs.openclaw.ai", "openclaw.ai"],
+      includeDomains: ["docs.bot.ai", "bot.ai"],
       excludeDomains: ["bad.example"],
     });
     const expectedResult = {
@@ -204,7 +204,7 @@ describe("tavily tools", () => {
         maxResults: 5,
         includeAnswer: true,
         timeRange: "week",
-        includeDomains: ["docs.openclaw.ai", "openclaw.ai"],
+        includeDomains: ["docs.bot.ai", "bot.ai"],
         excludeDomains: ["bad.example"],
       },
     };
@@ -227,7 +227,7 @@ describe("tavily tools", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const runtimeConfig = {
       plugins: {
         entries: {
@@ -240,9 +240,9 @@ describe("tavily tools", () => {
           },
         },
       },
-    } as OpenClawConfig;
-    const registeredTools: Array<Parameters<OpenClawPluginApi["registerTool"]>[0]> = [];
-    const registeredOptions: Array<Parameters<OpenClawPluginApi["registerTool"]>[1]> = [];
+    } as BotConfig;
+    const registeredTools: Array<Parameters<BotPluginApi["registerTool"]>[0]> = [];
+    const registeredOptions: Array<Parameters<BotPluginApi["registerTool"]>[1]> = [];
     const api = createTestPluginApi({
       config: rawConfig,
       registerTool(tool, opts) {
@@ -276,7 +276,7 @@ describe("tavily tools", () => {
       throw new Error("Expected single Tavily tool definitions");
     }
 
-    await searchTool.execute("search-call", { query: "openclaw" });
+    await searchTool.execute("search-call", { query: "bot" });
     await extractTool.execute("extract-call", { urls: ["https://example.com"] });
 
     const searchParams = requireFirstMockArg(runTavilySearch, "Tavily search params") as Record<
@@ -284,7 +284,7 @@ describe("tavily tools", () => {
       unknown
     >;
     expect(searchParams.cfg).toBe(runtimeConfig);
-    expect(searchParams.query).toBe("openclaw");
+    expect(searchParams.query).toBe("bot");
     const extractParams = requireFirstMockArg(
       runTavilyExtract,
       "Tavily extract params",
@@ -377,13 +377,13 @@ describe("tavily tools", () => {
     const searchTool = createTavilySearchTool(fakeApi());
     await expect(
       searchTool.execute("search-call", {
-        query: "openclaw",
+        query: "bot",
         max_results: 5.5,
       }),
     ).rejects.toThrow("max_results must be an integer from 1 to 20.");
     await expect(
       searchTool.execute("search-call", {
-        query: "openclaw",
+        query: "bot",
         max_results: 21,
       }),
     ).rejects.toThrow("max_results must be an integer from 1 to 20.");
@@ -425,7 +425,7 @@ describe("tavily tools", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(resolveTavilyApiKey(cfg)).toBe("plugin-key");
     expect(resolveTavilyBaseUrl(cfg)).toBe("https://plugin.tavily.test");
@@ -437,7 +437,7 @@ describe("tavily tools", () => {
 
     expect(resolveTavilyApiKey()).toBe("env-key");
     expect(resolveTavilyBaseUrl()).toBe("https://env.tavily.test");
-    expect(resolveTavilyBaseUrl({} as OpenClawConfig)).not.toBe(DEFAULT_TAVILY_BASE_URL);
+    expect(resolveTavilyBaseUrl({} as BotConfig)).not.toBe(DEFAULT_TAVILY_BASE_URL);
     expect(resolveTavilySearchTimeoutSeconds()).toBe(30);
     expect(resolveTavilyExtractTimeoutSeconds()).toBe(60);
   });

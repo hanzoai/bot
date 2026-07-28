@@ -1,6 +1,6 @@
 // Discord tests cover message handler.queue plugin behavior.
 import { getEventListeners } from "node:events";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { DiscordIngressLifecycle } from "./ingress.js";
 import { createDiscordMessageHandler as createDurableDiscordMessageHandler } from "./message-handler.js";
@@ -85,7 +85,7 @@ function createPreflightContext(channelId = "ch-1") {
     token: "test-token",
     groupPolicy: "allowlist" as const,
   };
-  const cfg: OpenClawConfig = {
+  const cfg: BotConfig = {
     channels: {
       discord: discordConfig,
     },

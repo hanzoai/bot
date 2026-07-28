@@ -1,11 +1,11 @@
 {
-  "name": "@openclaw/session-url-contract",
+  "name": "@hanzo/bot-session-url-contract",
   "version": "0.0.0-private",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
-      "name": "@openclaw/session-url-contract",
+      "name": "@hanzo/bot-session-url-contract",
       "version": "0.0.0-private"
     }
   }

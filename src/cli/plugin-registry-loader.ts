@@ -1,5 +1,5 @@
 // Lazy plugin-registry loader for CLI commands that need plugin command/capability metadata.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { loggingState } from "../logging/state.js";
 import { createLazyImportLoader } from "../shared/lazy-promise.js";
 import type { CliPluginRegistryScope } from "./command-catalog.js";
@@ -14,8 +14,8 @@ function loadPluginRegistryModule() {
 export async function ensureCliPluginRegistryLoaded(params: {
   scope: CliPluginRegistryScope;
   routeLogsToStderr?: boolean;
-  config?: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config?: BotConfig;
+  activationSourceConfig?: BotConfig;
 }) {
   const { ensurePluginRegistryLoaded } = await loadPluginRegistryModule();
   const previousForceStderr = loggingState.forceConsoleToStderr;

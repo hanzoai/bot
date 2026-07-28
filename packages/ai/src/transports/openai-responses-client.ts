@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { AssistantMessage, Context, Model, StreamFn } from "@openclaw/llm-core";
+import type { AssistantMessage, Context, Model, StreamFn } from "@hanzo/bot-llm-core";
 import OpenAI, { AzureOpenAI } from "openai";
 import { getAiTransportHost } from "../host.js";
 import {
@@ -184,8 +184,8 @@ function createResponsesTransportExecutor(config: ResponsesTransportExecutorOpti
         ) as typeof params;
         params = sanitizeResponsesImagePayload(params as Record<string, unknown>) as typeof params;
         if (
-          (options as { openclawCodeModeToolSurface?: unknown } | undefined)
-            ?.openclawCodeModeToolSurface === true
+          (options as { botCodeModeToolSurface?: unknown } | undefined)
+            ?.botCodeModeToolSurface === true
         ) {
           enforceCodeModeResponsesToolSurface(params);
           assertCodeModeResponsesToolSurface(params);

@@ -139,7 +139,7 @@ describe("runEmbeddedAttemptBeforeAgentRun", () => {
           },
         ],
         idempotencyKey: "hook-block:before_agent_run:user:run-1",
-        __openclaw: {
+        __bot: {
           beforeAgentRunBlocked: {
             blockedBy: "policy",
             blockedAt: expect.any(Number),

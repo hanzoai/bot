@@ -1,8 +1,8 @@
 // Checks install policy constraints for package and plugin operations.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig, SecurityConfig } from "../config/types.openclaw.js";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
+import type { BotConfig, SecurityConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { runCommandWithTimeout } from "../process/exec.js";
 import { normalizePositiveInt, normalizePositiveTimerMs } from "../secrets/shared.js";
@@ -63,7 +63,7 @@ export type InstallPolicySource = {
     | "npm"
     | "upload"
     | "workspace";
-  authority: "openclaw" | "official" | "third-party" | "unknown" | "user";
+  authority: "bot" | "official" | "third-party" | "unknown" | "user";
   mutable: boolean;
   network: boolean;
 };
@@ -416,7 +416,7 @@ function isTargetEnabled(params: {
 }
 
 function resolvePolicy(
-  config: OpenClawConfig | undefined,
+  config: BotConfig | undefined,
   targetType: InstallPolicyTarget,
 ):
   | { kind: "disabled" }
@@ -448,7 +448,7 @@ function resolveConfiguredTargets(
 }
 
 export async function validateInstallPolicyStatic(
-  config: OpenClawConfig | undefined,
+  config: BotConfig | undefined,
 ): Promise<InstallPolicyStaticValidation> {
   const policy = config?.security?.installPolicy;
   if (!policy || policy.enabled !== true) {
@@ -569,7 +569,7 @@ function parsePolicyResponse(stdout: string): InstallPolicyResult {
 }
 
 export async function runInstallPolicy(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   env?: NodeJS.ProcessEnv;
   logger?: {
     debug?: (message: string) => void;
@@ -594,7 +594,7 @@ export async function runInstallPolicy(params: {
       const { getRuntimeConfig } = await import("../config/io.js");
       config = getRuntimeConfig({ skipPluginValidation: true });
     } catch (err) {
-      return failClosed(`could not load OpenClaw config (${formatErrorMessage(err)})`);
+      return failClosed(`could not load Bot config (${formatErrorMessage(err)})`);
     }
   }
 
@@ -608,7 +608,7 @@ export async function runInstallPolicy(params: {
 
   const input = JSON.stringify({
     protocolVersion: 1,
-    openclawVersion: resolveRuntimeServiceVersion(params.env ?? process.env),
+    botVersion: resolveRuntimeServiceVersion(params.env ?? process.env),
     ...params.request,
   });
   if (Buffer.byteLength(input, "utf8") > DEFAULT_MAX_REQUEST_BYTES) {
@@ -711,7 +711,7 @@ function formatDecisionContext(request: InstallPolicyRequest): string {
 }
 
 export async function probeInstallPolicy(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env?: NodeJS.ProcessEnv;
   logger?: {
     debug?: (message: string) => void;

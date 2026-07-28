@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/slack",
+  "name": "@hanzo/bot-slack",
   "version": "2026.7.2",
-  "description": "OpenClaw Slack channel plugin for channels, DMs, commands, and app events.",
+  "description": "Bot Slack channel plugin for channels, DMs, commands, and app events.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "dependencies": {
@@ -19,18 +19,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*",
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -64,18 +64,81 @@
         "nativeCommandsAutoEnabled": false,
         "nativeSkillsAutoEnabled": false
       },
-      "setup": { "fields": [
-        { "key": "botToken", "kind": "string", "sensitive": true, "cli": { "flags": "--bot-token <token>", "description": "Slack bot token" } },
-        { "key": "appToken", "kind": "string", "sensitive": true, "cli": { "flags": "--app-token <token>", "description": "Slack app token" } },
-        { "key": "userToken", "kind": "string", "sensitive": true, "cli": { "flags": "--user-token <token>", "description": "Slack user token" } },
-        { "key": "signingSecret", "kind": "string", "sensitive": true, "cli": { "flags": "--signing-secret <secret>", "description": "Slack signing secret" } },
-        { "key": "identity", "kind": "choice", "choices": ["bot", "user"], "cli": { "flags": "--identity <kind>", "description": "Slack identity" } },
-        { "key": "mode", "kind": "choice", "choices": ["socket", "http"], "cli": { "flags": "--mode <mode>", "description": "Slack connection mode" } },
-        { "key": "useEnv", "kind": "boolean", "cli": { "flags": "--use-env", "description": "Use Slack environment credentials" } }
-      ] }
+      "setup": {
+        "fields": [
+          {
+            "key": "botToken",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--bot-token <token>",
+              "description": "Slack bot token"
+            }
+          },
+          {
+            "key": "appToken",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--app-token <token>",
+              "description": "Slack app token"
+            }
+          },
+          {
+            "key": "userToken",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--user-token <token>",
+              "description": "Slack user token"
+            }
+          },
+          {
+            "key": "signingSecret",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--signing-secret <secret>",
+              "description": "Slack signing secret"
+            }
+          },
+          {
+            "key": "identity",
+            "kind": "choice",
+            "choices": [
+              "bot",
+              "user"
+            ],
+            "cli": {
+              "flags": "--identity <kind>",
+              "description": "Slack identity"
+            }
+          },
+          {
+            "key": "mode",
+            "kind": "choice",
+            "choices": [
+              "socket",
+              "http"
+            ],
+            "cli": {
+              "flags": "--mode <mode>",
+              "description": "Slack connection mode"
+            }
+          },
+          {
+            "key": "useEnv",
+            "kind": "boolean",
+            "cli": {
+              "flags": "--use-env",
+              "description": "Use Slack environment credentials"
+            }
+          }
+        ]
+      }
     },
     "install": {
-      "npmSpec": "@openclaw/slack",
+      "npmSpec": "@hanzo/bot-slack",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.5.28",
       "allowInvalidConfigRecovery": true
@@ -87,7 +150,7 @@
       "deferConfiguredChannelFullLoadUntilAfterListen": true
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {

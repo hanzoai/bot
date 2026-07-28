@@ -5,9 +5,9 @@
  * context without launching a full agent consult; otherwise callers may fall
  * back to the normal consult flow.
  */
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { resolveTimerTimeoutMs } from "@hanzo/bot-normalization-core/number-coercion";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { getActiveMemorySearchManager } from "../plugins/memory-runtime.js";
 import { withTimeout } from "../utils/with-timeout.js";
@@ -83,7 +83,7 @@ function resolveLabels(
 ): RealtimeVoiceFastContextLabels {
   return {
     audienceLabel: labels?.audienceLabel?.trim() || "person",
-    contextName: labels?.contextName?.trim() || "OpenClaw memory context",
+    contextName: labels?.contextName?.trim() || "Bot memory context",
   };
 }
 
@@ -115,7 +115,7 @@ function buildMissText(query: string, labels: RealtimeVoiceFastContextLabels): s
 }
 
 async function lookupFastContext(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   sessionKey: string;
   config: RealtimeVoiceFastContextConfig;
@@ -143,7 +143,7 @@ async function lookupFastContext(params: {
 
 /** Try to answer a realtime consult from fast memory/session context. */
 export async function resolveRealtimeVoiceFastContextConsult(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   sessionKey: string;
   config: RealtimeVoiceFastContextConfig;

@@ -8,7 +8,7 @@ import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
 import type { ChannelMeta } from "../../channels/plugins/types.public.js";
 import { isStaticallyChannelConfigured } from "../../config/channel-configured-shared.js";
 import { applyPluginAutoEnable } from "../../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { listManifestChannelContributionIds } from "../../plugins/manifest-contribution-ids.js";
 import type { ChannelChoice } from "../onboard-types.js";
 import {
@@ -34,13 +34,13 @@ type ResolvedChannelSetupEntries = {
   installableCatalogById: Map<ChannelChoice, ChannelPluginCatalogEntry>;
 };
 
-function resolveWorkspaceDir(cfg: OpenClawConfig, workspaceDir?: string): string | undefined {
+function resolveWorkspaceDir(cfg: BotConfig, workspaceDir?: string): string | undefined {
   return workspaceDir ?? resolveAgentWorkspaceDir(cfg, resolveDefaultAgentId(cfg));
 }
 
 /** List channel ids contributed by currently installed manifest-backed plugins. */
 export function listManifestInstalledChannelIds(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }): Set<ChannelChoice> {
@@ -60,7 +60,7 @@ export function listManifestInstalledChannelIds(params: {
 
 /** Return true when a trusted catalog channel is already installed through plugin manifests. */
 export function isCatalogChannelInstalled(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: ChannelPluginCatalogEntry;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
@@ -70,7 +70,7 @@ export function isCatalogChannelInstalled(params: {
 
 /** Merge configured channels and installable catalog channels into setup display buckets. */
 export function resolveChannelSetupEntries(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   installedPlugins: ChannelPlugin[];
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;

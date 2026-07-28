@@ -4,8 +4,8 @@ import path from "node:path";
 import {
   replaceManagedMarkdownBlock,
   withTrailingNewline,
-} from "openclaw/plugin-sdk/memory-host-markdown";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/memory-host-markdown";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   assessPageFreshness,
   buildClaimContradictionClusters,
@@ -493,8 +493,8 @@ async function writeLintReport(rootDir: string, issues: MemoryWikiLintIssue[]): 
   const updated = replaceManagedMarkdownBlock({
     original,
     heading: "## Generated",
-    startMarker: "<!-- openclaw:wiki:lint:start -->",
-    endMarker: "<!-- openclaw:wiki:lint:end -->",
+    startMarker: "<!-- bot:wiki:lint:start -->",
+    endMarker: "<!-- bot:wiki:lint:end -->",
     body: buildLintReportBody(issues),
   });
   await fs.writeFile(reportPath, withTrailingNewline(updated), "utf8");

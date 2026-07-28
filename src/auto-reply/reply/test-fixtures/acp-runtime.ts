@@ -1,8 +1,8 @@
 // Test fixture helpers for constructing ACP runtime session metadata.
 import type { SessionAcpMeta } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 
-export function createAcpTestConfig(overrides?: Partial<OpenClawConfig>): OpenClawConfig {
+export function createAcpTestConfig(overrides?: Partial<BotConfig>): BotConfig {
   return {
     acp: {
       enabled: true,
@@ -12,7 +12,7 @@ export function createAcpTestConfig(overrides?: Partial<OpenClawConfig>): OpenCl
       },
     },
     ...overrides,
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 export function createAcpSessionMeta(overrides?: Partial<SessionAcpMeta>): SessionAcpMeta {

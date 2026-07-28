@@ -1,4 +1,4 @@
-// Human-only arming for delegated OpenClaw changes.
+// Human-only arming for delegated Bot changes.
 import { hashSystemAgentOperation } from "../agents/tools/system-agent-tool.js";
 import { isPersistentSystemAgentOperation, type SystemAgentOperation } from "./operations.js";
 

@@ -2,10 +2,10 @@
 import {
   findNormalizedProviderValue,
   normalizeProviderIdForAuth,
-} from "@openclaw/model-catalog-core/provider-id";
+} from "@hanzo/bot-model-catalog-core/provider-id";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
 import { resolveMergedModelProviderConfig } from "../config/model-provider-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { coerceSecretRef } from "../config/types.secrets.js";
 import type {
   ProviderModelRouteAuthRequirement,
@@ -99,7 +99,7 @@ export type ModelAuthAvailabilityResolver = {
   hasSyntheticAuth(provider: string): boolean;
 };
 type CreateModelAuthAvailabilityResolverParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   authStore: AuthProfileStore;
   agentDir?: string;
   workspaceDir?: string;

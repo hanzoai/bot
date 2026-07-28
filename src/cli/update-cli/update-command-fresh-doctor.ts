@@ -5,7 +5,7 @@ import {
   UPDATE_POST_CORE_CONVERGENCE_ENV,
 } from "../../commands/doctor/shared/update-phase.js";
 import { readConfigFileSnapshot } from "../../config/config.js";
-import type { ConfigFileSnapshot } from "../../config/types.openclaw.js";
+import type { ConfigFileSnapshot } from "../../config/types.bot.js";
 import { resolveGatewayInstallEntrypoint } from "../../daemon/gateway-entrypoint.js";
 import { runExec } from "../../process/exec.js";
 import { defaultRuntime } from "../../runtime.js";
@@ -21,21 +21,21 @@ import {
 } from "./update-command-service.js";
 
 export function withUpdateFinalizationEnv<T>(run: () => Promise<T>): Promise<T> {
-  const previousUpdateInProgress = process.env.OPENCLAW_UPDATE_IN_PROGRESS;
+  const previousUpdateInProgress = process.env.BOT_UPDATE_IN_PROGRESS;
   const previousDeferConfiguredPluginInstallRepair =
     process.env[UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR_ENV];
   const previousParentSupportsDoctorConfigWrite =
     process.env[UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE_ENV];
   const previousPostCoreConvergence = process.env[UPDATE_POST_CORE_CONVERGENCE_ENV];
-  process.env.OPENCLAW_UPDATE_IN_PROGRESS = "1";
+  process.env.BOT_UPDATE_IN_PROGRESS = "1";
   process.env[UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR_ENV] = "1";
   process.env[UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE_ENV] = "1";
   process.env[UPDATE_POST_CORE_CONVERGENCE_ENV] = "1";
   return run().finally(() => {
     if (previousUpdateInProgress === undefined) {
-      delete process.env.OPENCLAW_UPDATE_IN_PROGRESS;
+      delete process.env.BOT_UPDATE_IN_PROGRESS;
     } else {
-      process.env.OPENCLAW_UPDATE_IN_PROGRESS = previousUpdateInProgress;
+      process.env.BOT_UPDATE_IN_PROGRESS = previousUpdateInProgress;
     }
     if (previousDeferConfiguredPluginInstallRepair === undefined) {
       delete process.env[UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR_ENV];
@@ -58,15 +58,15 @@ export function withUpdateFinalizationEnv<T>(run: () => Promise<T>): Promise<T> 
 }
 
 async function withNormalConfigValidation<T>(run: () => Promise<T>): Promise<T> {
-  const previousUpdateInProgress = process.env.OPENCLAW_UPDATE_IN_PROGRESS;
-  process.env.OPENCLAW_UPDATE_IN_PROGRESS = "0";
+  const previousUpdateInProgress = process.env.BOT_UPDATE_IN_PROGRESS;
+  process.env.BOT_UPDATE_IN_PROGRESS = "0";
   try {
     return await run();
   } finally {
     if (previousUpdateInProgress === undefined) {
-      delete process.env.OPENCLAW_UPDATE_IN_PROGRESS;
+      delete process.env.BOT_UPDATE_IN_PROGRESS;
     } else {
-      process.env.OPENCLAW_UPDATE_IN_PROGRESS = previousUpdateInProgress;
+      process.env.BOT_UPDATE_IN_PROGRESS = previousUpdateInProgress;
     }
   }
 }
@@ -84,7 +84,7 @@ function createPostPluginDoctorExecutionFailure(
       {
         reason,
         message: "Updated plugin migrations could not be run in a fresh process.",
-        guidance: ["Run `openclaw update repair` to retry post-update plugin repair."],
+        guidance: ["Run `bot update repair` to retry post-update plugin repair."],
       },
     ],
   };
@@ -100,7 +100,7 @@ export async function runUpdateFinalizationDoctorInFreshProcess(params: {
 }): Promise<void> {
   const entryPath = params.entryPath ?? (await resolveGatewayInstallEntrypoint(params.root));
   if (!entryPath) {
-    throw new Error("Updated OpenClaw entrypoint not found for post-plugin doctor");
+    throw new Error("Updated Bot entrypoint not found for post-plugin doctor");
   }
   const args = [
     entryPath,
@@ -117,7 +117,7 @@ export async function runUpdateFinalizationDoctorInFreshProcess(params: {
     logOutput: false,
     baseEnv: stripGatewayServiceMarkerEnv(disableUpdatedPackageCompileCacheEnv(process.env)),
     env: {
-      OPENCLAW_UPDATE_IN_PROGRESS: "1",
+      BOT_UPDATE_IN_PROGRESS: "1",
       [UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR_ENV]: "1",
       [UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE_ENV]: "1",
       [UPDATE_POST_CORE_CONVERGENCE_ENV]: "1",
@@ -149,7 +149,7 @@ async function validatePostPluginConfigInFreshProcess(params: {
         maxBuffer: 4 * 1024 * 1024,
         logOutput: false,
         baseEnv: stripGatewayServiceMarkerEnv(disableUpdatedPackageCompileCacheEnv(process.env)),
-        env: { OPENCLAW_UPDATE_IN_PROGRESS: "0" },
+        env: { BOT_UPDATE_IN_PROGRESS: "0" },
       },
     );
     return true;
@@ -179,7 +179,7 @@ async function applyFreshPostPluginDoctor(params: {
     return {
       pluginUpdate: createPostPluginDoctorExecutionFailure(
         params.pluginUpdate,
-        "Updated OpenClaw entrypoint not found for post-plugin doctor",
+        "Updated Bot entrypoint not found for post-plugin doctor",
       ),
       configValid: false,
     };

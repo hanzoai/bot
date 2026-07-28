@@ -130,7 +130,7 @@ describe("auth.test boot call", () => {
       user_id: "UUSER",
       user: "human-installer",
       team_id: "T1",
-      team: "OpenClaw",
+      team: "Bot",
       is_enterprise_install: false,
     });
 
@@ -170,7 +170,7 @@ describe("auth.test boot call", () => {
       user_id: "UUSER",
       user: "human-installer",
       team_id: "T1",
-      team: "OpenClaw",
+      team: "Bot",
       is_enterprise_install: false,
     });
     client.conversations.info.mockResolvedValueOnce({

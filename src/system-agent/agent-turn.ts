@@ -1,4 +1,4 @@
-// OpenClaw agent turns run the real embedded agent loop with the ring-zero tool.
+// Bot agent turns run the real embedded agent loop with the ring-zero tool.
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -21,8 +21,8 @@ import {
 } from "./verified-inference.js";
 
 /**
- * OpenClaw is a real agent: same loop, session transcript, and tool pipeline
- * as regular agents — restricted to the single ring-zero `openclaw` tool.
+ * Bot is a real agent: same loop, session transcript, and tool pipeline
+ * as regular agents — restricted to the single ring-zero `bot` tool.
  * Embedded runtimes enforce that restriction with toolsAllow. CLI harnesses
  * must explicitly support per-run native-tool selection, then receive the tool
  * over a dedicated stdio MCP server that replaces the normal bundle surface.
@@ -33,7 +33,7 @@ import {
 // calls, so even metered external routes need the full window, and 120s
 // already covers local startup + generation (planner evidence).
 const AGENT_TURN_TIMEOUT_MS = 120_000;
-const SYSTEM_AGENT_TOOL_NAME = "openclaw";
+const SYSTEM_AGENT_TOOL_NAME = "bot";
 
 export type SystemAgentTurnDirective =
   import("../agents/tools/system-agent-tool.js").SystemAgentToolDirective;
@@ -74,7 +74,7 @@ export function createSystemAgentSession(
     throw new SystemAgentInferenceUnavailableError("agent-turn");
   }
   return {
-    sessionId: `openclaw-${randomUUID()}`,
+    sessionId: `bot-${randomUUID()}`,
     verifiedInference,
     proposalRef: {},
   };
@@ -124,7 +124,7 @@ function extractRunText(result: EmbeddedRunResult): string | undefined {
 async function ensureSystemAgentDirs(
   sessionId: string,
 ): Promise<{ workspaceDir: string; sessionFile: string }> {
-  const base = path.join(resolveStateDir(), "openclaw");
+  const base = path.join(resolveStateDir(), "bot");
   const workspaceDir = path.join(base, "workspace");
   await fs.mkdir(workspaceDir, { recursive: true });
   await fs.mkdir(path.join(base, "sessions"), { recursive: true });
@@ -134,7 +134,7 @@ async function ensureSystemAgentDirs(
 export async function cleanupSystemAgentSession(session: SystemAgentSession): Promise<void> {
   const sessionFile = path.join(
     resolveStateDir(),
-    "openclaw",
+    "bot",
     "sessions",
     `${session.sessionId}.jsonl`,
   );
@@ -197,7 +197,7 @@ function resolveSystemAgentCliBackend(
   route: SystemAgentConfiguredRoute,
 ): ResolvedCliBackend | null {
   // The helper owns the executable/session identity even though its model and
-  // auth come from the configured default agent. OpenClaw also forces a
+  // auth come from the configured default agent. Bot also forces a
   // process per turn so each approval gets fresh MCP authority; fingerprint
   // that effective execution identity rather than the configured live mode.
   const backend = resolveCliBackendConfig(route.provider, route.runConfig, {
@@ -212,7 +212,7 @@ function resolveSystemAgentCliBackend(
 
 function resolveSystemAgentCliToolAvailability(
   backend: ResolvedCliBackend | null,
-): { native: []; openClaw: string[] } | undefined {
+): { native: []; bot: string[] } | undefined {
   if (backend?.nativeToolMode === "none") {
     return undefined;
   }
@@ -221,14 +221,14 @@ function resolveSystemAgentCliToolAvailability(
     ((backend.toolAvailabilityEnforcement === "execution-args" && backend.resolveExecutionArgs) ||
       (backend.toolAvailabilityEnforcement === "prepare-execution" && backend.prepareExecution))
   ) {
-    return { native: [], openClaw: [SYSTEM_AGENT_TOOL_NAME] };
+    return { native: [], bot: [SYSTEM_AGENT_TOOL_NAME] };
   }
   const backendId = backend?.id ?? "unknown";
-  throw new Error(`CLI backend ${backendId} cannot enforce OpenClaw's exact tool availability`);
+  throw new Error(`CLI backend ${backendId} cannot enforce Bot's exact tool availability`);
 }
 
 /**
- * CLI harnesses run the openclaw tool in a stdio MCP subprocess, so the
+ * CLI harnesses run the bot tool in a stdio MCP subprocess, so the
  * in-process proposalRef/directiveRef cannot be shared with the host. Mirror
  * the tool's transitions from the harness tool events instead: a denial
  * registers the exact-operation hash, a mismatch voids it, an executed
@@ -254,8 +254,8 @@ async function mirrorSystemAgentToolStateFromEvents(params: {
       return;
     }
     const name = typeof evt.data.name === "string" ? evt.data.name : "";
-    // CLI harnesses report MCP tools with transport prefixes (mcp__openclaw__openclaw).
-    if (name !== "openclaw" && !name.endsWith("__openclaw")) {
+    // CLI harnesses report MCP tools with transport prefixes (mcp__bot__bot).
+    if (name !== "bot" && !name.endsWith("__bot")) {
       return;
     }
     const args =
@@ -276,7 +276,7 @@ async function mirrorSystemAgentToolStateFromEvents(params: {
 }
 
 /**
- * Run one OpenClaw turn through the embedded agent loop. Route, runner, and
+ * Run one Bot turn through the embedded agent loop. Route, runner, and
  * output failures are typed so callers may try another inference path without
  * mistaking the failure for deterministic setup authority.
  */
@@ -320,7 +320,7 @@ async function runSystemAgentTurnWithDeps(
     });
   }
 
-  const runId = `openclaw-turn-${randomUUID()}`;
+  const runId = `bot-turn-${randomUUID()}`;
   const shared = {
     sessionId: params.session.sessionId,
     sessionKey: buildAgentMainSessionKey({ agentId: SYSTEM_AGENT_ID }),
@@ -333,8 +333,8 @@ async function runSystemAgentTurnWithDeps(
     timeoutMs: AGENT_TURN_TIMEOUT_MS,
     thinkLevel: "off" as const,
     runId,
-    messageChannel: "openclaw",
-    messageProvider: "openclaw",
+    messageChannel: "bot",
+    messageProvider: "bot",
   };
   // Directives are per-turn: the tool records at most one interactive handoff
   // and the engine executes it after the reply.
@@ -402,7 +402,7 @@ async function runSystemAgentTurnWithDeps(
       result = (await runEmbedded({
         ...shared,
         extraSystemPrompt: SYSTEM_AGENT_SYSTEM_PROMPT,
-        toolsAllow: ["openclaw"],
+        toolsAllow: ["bot"],
         systemAgentTool,
         disableMessageTool: true,
         provider: plan.provider,
@@ -446,7 +446,7 @@ export const runSystemAgentTurn: SystemAgentTurnRunner = (params) =>
   runSystemAgentTurnWithDeps(params);
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.systemAgentTurnTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.systemAgentTurnTestApi")] = {
     runSystemAgentTurnWithDeps,
   };
 }

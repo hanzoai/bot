@@ -4,9 +4,9 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createSqliteAcpEventLedger } from "../acp/event-ledger.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
 import { withTempDir } from "../test-helpers/temp-dir.js";
 import {
   detectLegacyAcpReplayLedger,
@@ -52,11 +52,11 @@ async function writeLegacyStore(stateDir: string, value: unknown = legacyStore()
 
 describe("legacy ACP replay doctor migration", () => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
   });
 
   it("detects legacy state only for explicit doctor repair", async () => {
-    await withTempDir({ prefix: "openclaw-acp-replay-migration-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-acp-replay-migration-" }, async (stateDir) => {
       await writeLegacyStore(stateDir);
       expect(detectLegacyAcpReplayLedger({ stateDir }).hasLegacy).toBe(false);
       expect(
@@ -66,7 +66,7 @@ describe("legacy ACP replay doctor migration", () => {
   });
 
   it("imports, verifies, and removes the retired JSON ledger", async () => {
-    await withTempDir({ prefix: "openclaw-acp-replay-migration-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-acp-replay-migration-" }, async (stateDir) => {
       const sourcePath = await writeLegacyStore(stateDir);
       const result = await migrateLegacyAcpReplayLedger({
         detected: detectLegacyAcpReplayLedger({
@@ -85,15 +85,15 @@ describe("legacy ACP replay doctor migration", () => {
       });
       await expect(fs.stat(sourcePath)).rejects.toMatchObject({ code: "ENOENT" });
       const replay = await createSqliteAcpEventLedger({
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, BOT_STATE_DIR: stateDir },
       }).readReplay({ sessionId: "session-1", sessionKey: "agent:main:work" });
       expect(replay.complete).toBe(true);
       expect(replay.events[0]?.update).toEqual({
         sessionUpdate: "agent_message_chunk",
         content: { type: "text", text: "Answer" },
       });
-      const db = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      const db = openBotStateDatabase({
+        env: { ...process.env, BOT_STATE_DIR: stateDir },
       }).db;
       const aggregate = db
         .prepare("SELECT estimated_bytes AS total FROM acp_replay_sessions WHERE session_id = ?")
@@ -114,7 +114,7 @@ describe("legacy ACP replay doctor migration", () => {
   });
 
   it("resumes a claimed source without deleting a replacement ledger", async () => {
-    await withTempDir({ prefix: "openclaw-acp-replay-migration-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-acp-replay-migration-" }, async (stateDir) => {
       const sourcePath = await writeLegacyStore(stateDir);
       const claimPath = `${sourcePath}.doctor-import`;
       await fs.rename(sourcePath, claimPath);
@@ -158,8 +158,8 @@ describe("legacy ACP replay doctor migration", () => {
       });
       expect(second.warnings).toEqual([]);
       await expect(fs.stat(sourcePath)).rejects.toMatchObject({ code: "ENOENT" });
-      const db = openOpenClawStateDatabase({
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      const db = openBotStateDatabase({
+        env: { ...process.env, BOT_STATE_DIR: stateDir },
       }).db;
       const rows = db
         .prepare("SELECT session_id FROM acp_replay_sessions ORDER BY session_id")
@@ -169,7 +169,7 @@ describe("legacy ACP replay doctor migration", () => {
   });
 
   it("retains malformed state without partially importing it", async () => {
-    await withTempDir({ prefix: "openclaw-acp-replay-migration-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-acp-replay-migration-" }, async (stateDir) => {
       const sourcePath = await writeLegacyStore(stateDir, {
         ...legacyStore(),
         sessions: { broken: { sessionId: "broken" } },
@@ -187,15 +187,15 @@ describe("legacy ACP replay doctor migration", () => {
       await expect(fs.stat(sourcePath)).resolves.toBeDefined();
       await expect(
         createSqliteAcpEventLedger({
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, BOT_STATE_DIR: stateDir },
         }).readReplayBySessionId({ sessionId: "broken" }),
       ).resolves.toEqual({ complete: false, events: [] });
     });
   });
 
   it("removes a retry source when its prior import already exists", async () => {
-    await withTempDir({ prefix: "openclaw-acp-replay-migration-" }, async (stateDir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    await withTempDir({ prefix: "bot-acp-replay-migration-" }, async (stateDir) => {
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
       const ledger = createSqliteAcpEventLedger({ env, now: () => 1_000 });
       await ledger.startSession({
         sessionId: "session-1",
@@ -212,7 +212,7 @@ describe("legacy ACP replay doctor migration", () => {
           content: { type: "text", text: "Answer" },
         },
       });
-      const db = openOpenClawStateDatabase({ env }).db;
+      const db = openBotStateDatabase({ env }).db;
       db.exec(`
         UPDATE acp_replay_events SET estimated_bytes = 0;
         UPDATE acp_replay_sessions SET estimated_bytes = 0;
@@ -250,8 +250,8 @@ describe("legacy ACP replay doctor migration", () => {
   });
 
   it("retains a conflicting retry source instead of discarding changed events", async () => {
-    await withTempDir({ prefix: "openclaw-acp-replay-migration-" }, async (stateDir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    await withTempDir({ prefix: "bot-acp-replay-migration-" }, async (stateDir) => {
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
       const ledger = createSqliteAcpEventLedger({ env, now: () => 2_000 });
       await ledger.startSession({
         sessionId: "session-1",
@@ -300,7 +300,7 @@ describe("legacy ACP replay doctor migration", () => {
   });
 
   it("retains a source containing an impossible zero event sequence", async () => {
-    await withTempDir({ prefix: "openclaw-acp-replay-migration-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-acp-replay-migration-" }, async (stateDir) => {
       const store = legacyStore();
       store.sessions["session-1"].events[0]!.seq = 0;
       const sourcePath = await writeLegacyStore(stateDir, store);
@@ -320,11 +320,11 @@ describe("legacy ACP replay doctor migration", () => {
   });
 
   it("runtime ignores the retired JSON ledger until doctor imports it", async () => {
-    await withTempDir({ prefix: "openclaw-acp-replay-migration-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-acp-replay-migration-" }, async (stateDir) => {
       await writeLegacyStore(stateDir);
       await expect(
         createSqliteAcpEventLedger({
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, BOT_STATE_DIR: stateDir },
         }).readReplayBySessionId({ sessionId: "session-1" }),
       ).resolves.toEqual({ complete: false, events: [] });
     });

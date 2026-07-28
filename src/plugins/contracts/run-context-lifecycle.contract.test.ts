@@ -3,12 +3,12 @@ import path from "node:path";
 import {
   createPluginRegistryFixture,
   registerTestPlugin,
-} from "openclaw/plugin-sdk/plugin-test-contracts";
+} from "bot/plugin-sdk/plugin-test-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { withTempConfig } from "../../gateway/test-temp-config.js";
 import { emitAgentEvent, resetAgentEventsForTest } from "../../infra/agent-events.js";
 import { loadSessionStore, updateSessionStore } from "../../plugin-sdk/session-store-runtime.js";
-import { createOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { createBotTestState } from "../../test-utils/bot-test-state.js";
 import { runPluginHostCleanup } from "../host-hook-cleanup.js";
 import {
   clearPluginHostRuntimeState,
@@ -24,7 +24,7 @@ import {
 import { createEmptyPluginRegistry } from "../registry-empty.js";
 import { setActivePluginRegistry } from "../runtime.js";
 import { createPluginRecord } from "../status.test-helpers.js";
-import type { OpenClawPluginApi } from "../types.js";
+import type { BotPluginApi } from "../types.js";
 
 const PLUGIN_HOST_CLEANUP_TIMEOUT_MS = 5_000;
 
@@ -59,7 +59,7 @@ describe("plugin run context lifecycle", () => {
 
   it("blocks stale plugin API run-context mutations after registry replacement", () => {
     const { config, registry } = createPluginRegistryFixture();
-    let capturedApi: OpenClawPluginApi | undefined;
+    let capturedApi: BotPluginApi | undefined;
     registerTestPlugin({
       registry,
       config,
@@ -105,7 +105,7 @@ describe("plugin run context lifecycle", () => {
 
   it("allows run-context mutations after a previous registry is restored active", () => {
     const { config, registry } = createPluginRegistryFixture();
-    let capturedApi: OpenClawPluginApi | undefined;
+    let capturedApi: BotPluginApi | undefined;
     registerTestPlugin({
       registry,
       config,
@@ -172,7 +172,7 @@ describe("plugin run context lifecycle", () => {
   it("keeps restored active registry state after stale async cleanup finishes", async () => {
     let releaseCleanup: (() => void) | undefined;
     let markCleanupStarted: (() => void) | undefined;
-    let capturedApi: OpenClawPluginApi | undefined;
+    let capturedApi: BotPluginApi | undefined;
     const cleanupStarted = new Promise<void>((resolve) => {
       markCleanupStarted = resolve;
     });
@@ -685,11 +685,11 @@ describe("plugin run context lifecycle", () => {
       },
     });
 
-    const openClawState = await createOpenClawTestState({
+    const botState = await createBotTestState({
       layout: "state-only",
-      prefix: "openclaw-run-context-restart-state-",
+      prefix: "bot-run-context-restart-state-",
     });
-    const stateDir = openClawState.stateDir;
+    const stateDir = botState.stateDir;
     const storePath = path.join(stateDir, "sessions.json");
     const tempConfig = {
       session: { store: storePath },
@@ -747,7 +747,7 @@ describe("plugin run context lifecycle", () => {
         },
       });
     } finally {
-      await openClawState.cleanup();
+      await botState.cleanup();
     }
   });
 

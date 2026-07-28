@@ -1,5 +1,5 @@
 // Qqbot plugin module implements group gate stage behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import type { HistoryPort } from "../../adapter/history.port.js";
 import type { QQBotInboundAccess } from "../../adapter/index.js";
 import { classifyCoreCommandForGroup } from "../../commands/command-visibility.js";
@@ -39,7 +39,7 @@ interface GroupGateStageInput {
 export function runGroupGateStage(input: GroupGateStageInput): GroupGateStageResult {
   const { event, deps, accountId, agentId, sessionKey, userContent, processedAttachments } = input;
   const groupOpenid = event.groupOpenid!;
-  const cfg = (deps.cfg ?? {}) as OpenClawConfig;
+  const cfg = (deps.cfg ?? {}) as BotConfig;
 
   const settings = resolveGroupSettings({ cfg, groupOpenid, accountId, agentId });
   const { historyLimit, requireMention, ignoreOtherMentions } = settings.config;

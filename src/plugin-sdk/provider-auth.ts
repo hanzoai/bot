@@ -22,7 +22,7 @@ import {
 } from "../agents/copilot-dynamic-headers.js";
 import { resolveEnvApiKey } from "../agents/model-auth-env.js";
 import { readProviderJsonResponse } from "../agents/provider-http-errors.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { logWarn } from "../logger.js";
 import {
   DEFAULT_GITHUB_COPILOT_DOMAIN,
@@ -36,7 +36,7 @@ import {
   type CachedCopilotToken,
 } from "./provider-auth-copilot-cache.js";
 
-export type { OpenClawConfig } from "../config/config.js";
+export type { BotConfig } from "../config/config.js";
 export type { CachedCopilotToken } from "./provider-auth-copilot-cache.js";
 export type { SecretInput } from "../config/types.secrets.js";
 export type { SecretInputMode } from "../plugins/provider-auth-types.js";
@@ -151,7 +151,7 @@ const COPILOT_PROVIDER_ID = "github-copilot";
 
 const COPILOT_TOKEN_EXCHANGE_TIMEOUT_MS = 30_000;
 
-function readGithubCopilotDomainFromConfig(config?: OpenClawConfig): string | undefined {
+function readGithubCopilotDomainFromConfig(config?: BotConfig): string | undefined {
   const params = config?.models?.providers?.[COPILOT_PROVIDER_ID]?.params;
   const value = params && typeof params === "object" ? params.githubDomain : undefined;
   if (typeof value !== "string" || value.trim().length === 0) {
@@ -190,7 +190,7 @@ function warnOnceOnRejectedConfigDomain(configured: string): void {
 function resolveGithubCopilotDomain(params?: {
   env?: NodeJS.ProcessEnv;
   explicit?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): string {
   const env = params?.env ?? process.env;
   const fromEnv = env.COPILOT_GITHUB_DOMAIN?.trim();
@@ -299,11 +299,11 @@ export async function resolveCopilotApiToken(params: {
    */
   githubDomain?: string;
   /**
-   * OpenClaw config used to resolve the persisted `githubDomain` provider
+   * Bot config used to resolve the persisted `githubDomain` provider
    * param when an explicit `githubDomain` is not supplied. Precedence is
    * `COPILOT_GITHUB_DOMAIN` env > explicit `githubDomain` > config.
    */
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): Promise<{
   /** Copilot API token, from cache or fresh exchange. */
   token: string;
@@ -436,7 +436,7 @@ export function listUsableProviderAuthProfileIds(params: {
   /** Provider id whose usable auth profiles should be listed. */
   provider: string;
   /** Optional runtime config used to resolve auth profile order and default agent dir. */
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   /** Agent directory containing auth profiles. */
   agentDir?: string;
   /** Optional allowed profile credential types. */
@@ -461,7 +461,7 @@ export function isProviderAuthProfileConfigured(params: {
   /** Provider id to check for usable auth profiles. */
   provider: string;
   /** Optional runtime config used to resolve auth profile order and default agent dir. */
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   /** Agent directory containing auth profiles. */
   agentDir?: string;
   /** Optional allowed profile credential types. */
@@ -481,7 +481,7 @@ export async function resolveProviderAuthProfileApiKey(params: {
   /** Provider id whose first usable auth profile should resolve to an API key. */
   provider: string;
   /** Optional runtime config used to resolve auth profile order and secret refs. */
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   /** Agent directory containing auth profiles. */
   agentDir?: string;
   /** Optional allowed profile credential types. */
@@ -511,7 +511,7 @@ export async function resolveProviderAuthProfileApiKey(params: {
 
 function resolveUsableProviderAuthProfiles(params: {
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
   allowKeychainPrompt?: boolean;
   includeExternalCliAuth?: boolean;

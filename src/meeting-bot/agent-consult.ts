@@ -1,6 +1,6 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveDefaultAgentId } from "../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import type { PluginRuntime, RuntimeLogger } from "../plugins/runtime/types.js";
 import { normalizeAgentId } from "../routing/session-key.js";
@@ -50,7 +50,7 @@ export function createMeetingRealtimeEngineBindings(params: {
       toolPolicy: RealtimeVoiceAgentConsultToolPolicy;
     };
   };
-  fullConfig: OpenClawConfig;
+  fullConfig: BotConfig;
   runtime: PluginRuntime;
   logger: RuntimeLogger;
 }): {
@@ -107,7 +107,7 @@ async function submitMeetingConsultWorkingResponse(params: {
 
 async function consultMeetingAgent(params: {
   surface: MeetingAgentConsultSurface;
-  config: OpenClawConfig;
+  config: BotConfig;
   runtime: PluginRuntime;
   logger: RuntimeLogger;
   agentId?: string;
@@ -150,7 +150,7 @@ async function handleMeetingRealtimeConsultToolCall(params: {
   strategy: string;
   session: RealtimeVoiceBridgeSession;
   event: RealtimeVoiceToolCallEvent;
-  config: OpenClawConfig;
+  config: BotConfig;
   runtime: PluginRuntime;
   logger: RuntimeLogger;
   agentId?: string;

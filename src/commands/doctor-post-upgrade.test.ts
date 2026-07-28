@@ -126,11 +126,11 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "sqlite-ghost",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./dist/index.js"] },
+          bot: { extensions: ["./dist/index.js"] },
         }),
         "utf-8",
       );
-      const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+      const manifestPath = path.join(pluginDir, "bot.plugin.json");
       await fs.writeFile(manifestPath, JSON.stringify({ id: "sqlite-ghost" }), "utf-8");
       const index: InstalledPluginIndex = {
         version: 1,
@@ -187,12 +187,12 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "ghost",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./dist/index.js"] },
+          bot: { extensions: ["./dist/index.js"] },
         }),
         "utf-8",
       );
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "bot.plugin.json"),
         JSON.stringify({ id: "ghost" }),
         "utf-8",
       );
@@ -206,7 +206,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           plugins: [
             {
               pluginId: "ghost",
-              manifestPath: path.join(pluginDir, "openclaw.plugin.json"),
+              manifestPath: path.join(pluginDir, "bot.plugin.json"),
               rootDir: pluginDir,
               enabled: true,
               packageJson: { path: "package.json" },
@@ -239,12 +239,12 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "good",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./dist/index.js"] },
+          bot: { extensions: ["./dist/index.js"] },
         }),
         "utf-8",
       );
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "bot.plugin.json"),
         JSON.stringify({ id: "good" }),
         "utf-8",
       );
@@ -258,7 +258,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           plugins: [
             {
               pluginId: "good",
-              manifestPath: path.join(pluginDir, "openclaw.plugin.json"),
+              manifestPath: path.join(pluginDir, "bot.plugin.json"),
               rootDir: pluginDir,
               enabled: true,
               packageJson: { path: "package.json" },
@@ -282,7 +282,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
       await fs.mkdir(pluginDir, { recursive: true });
       await fs.writeFile(path.join(pluginDir, "index.js"), "export default {};", "utf-8");
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "bot.plugin.json"),
         JSON.stringify({ id: "runtime-only" }),
         "utf-8",
       );
@@ -296,7 +296,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           plugins: [
             {
               pluginId: "runtime-only",
-              manifestPath: path.join(pluginDir, "openclaw.plugin.json"),
+              manifestPath: path.join(pluginDir, "bot.plugin.json"),
               rootDir: pluginDir,
               origin: "bundled",
               enabled: true,
@@ -325,12 +325,12 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "legacy-package",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./src/index.ts"] },
+          bot: { extensions: ["./src/index.ts"] },
         }),
         "utf-8",
       );
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "bot.plugin.json"),
         JSON.stringify({ id: "legacy-package" }),
         "utf-8",
       );
@@ -344,7 +344,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           plugins: [
             {
               pluginId: "legacy-package",
-              manifestPath: path.join(pluginDir, "openclaw.plugin.json"),
+              manifestPath: path.join(pluginDir, "bot.plugin.json"),
               rootDir: pluginDir,
               enabled: true,
             },
@@ -378,12 +378,12 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "escape",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["../outside/leak.js"] },
+          bot: { extensions: ["../outside/leak.js"] },
         }),
         "utf-8",
       );
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "bot.plugin.json"),
         JSON.stringify({ id: "escape" }),
         "utf-8",
       );
@@ -397,7 +397,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           plugins: [
             {
               pluginId: "escape",
-              manifestPath: path.join(pluginDir, "openclaw.plugin.json"),
+              manifestPath: path.join(pluginDir, "bot.plugin.json"),
               rootDir: pluginDir,
               enabled: true,
               packageJson: { path: "package.json" },
@@ -433,12 +433,12 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "ts-dist",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./src/index.ts"] },
+          bot: { extensions: ["./src/index.ts"] },
         }),
         "utf-8",
       );
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "bot.plugin.json"),
         JSON.stringify({ id: "ts-dist" }),
         "utf-8",
       );
@@ -452,7 +452,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           plugins: [
             {
               pluginId: "ts-dist",
-              manifestPath: path.join(pluginDir, "openclaw.plugin.json"),
+              manifestPath: path.join(pluginDir, "bot.plugin.json"),
               rootDir: pluginDir,
               enabled: true,
               packageJson: { path: "package.json" },
@@ -482,12 +482,12 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "ts-only",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./src/index.ts"] },
+          bot: { extensions: ["./src/index.ts"] },
         }),
         "utf-8",
       );
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "bot.plugin.json"),
         JSON.stringify({ id: "ts-only" }),
         "utf-8",
       );
@@ -501,7 +501,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           plugins: [
             {
               pluginId: "ts-only",
-              manifestPath: path.join(pluginDir, "openclaw.plugin.json"),
+              manifestPath: path.join(pluginDir, "bot.plugin.json"),
               rootDir: pluginDir,
               enabled: true,
               packageJson: { path: "package.json" },
@@ -537,12 +537,12 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "ts-source",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./src/index.ts"] },
+          bot: { extensions: ["./src/index.ts"] },
         }),
         "utf-8",
       );
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "bot.plugin.json"),
         JSON.stringify({ id: "ts-source" }),
         "utf-8",
       );
@@ -556,7 +556,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           plugins: [
             {
               pluginId: "ts-source",
-              manifestPath: path.join(pluginDir, "openclaw.plugin.json"),
+              manifestPath: path.join(pluginDir, "bot.plugin.json"),
               rootDir: pluginDir,
               origin: "bundled",
               enabled: true,
@@ -586,12 +586,12 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "ts-packaged",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./src/index.ts"] },
+          bot: { extensions: ["./src/index.ts"] },
         }),
         "utf-8",
       );
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "bot.plugin.json"),
         JSON.stringify({ id: "ts-packaged" }),
         "utf-8",
       );
@@ -605,7 +605,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           plugins: [
             {
               pluginId: "ts-packaged",
-              manifestPath: path.join(pluginDir, "openclaw.plugin.json"),
+              manifestPath: path.join(pluginDir, "bot.plugin.json"),
               rootDir: pluginDir,
               origin: "bundled",
               enabled: true,
@@ -639,7 +639,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "len-mismatch",
           version: "0.0.1",
           type: "module",
-          openclaw: {
+          bot: {
             extensions: ["./dist/a.js", "./dist/b.js"],
             runtimeExtensions: ["./dist/a.js"],
           },
@@ -647,7 +647,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
         "utf-8",
       );
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "bot.plugin.json"),
         JSON.stringify({ id: "len-mismatch" }),
         "utf-8",
       );
@@ -661,7 +661,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           plugins: [
             {
               pluginId: "len-mismatch",
-              manifestPath: path.join(pluginDir, "openclaw.plugin.json"),
+              manifestPath: path.join(pluginDir, "bot.plugin.json"),
               rootDir: pluginDir,
               enabled: true,
               packageJson: { path: "package.json" },
@@ -696,7 +696,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           name: "runtime-only",
           version: "0.0.1",
           type: "module",
-          openclaw: {
+          bot: {
             extensions: ["./src/index.ts"],
             runtimeExtensions: ["./dist/index.js"],
           },
@@ -704,7 +704,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
         "utf-8",
       );
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "bot.plugin.json"),
         JSON.stringify({ id: "runtime-only" }),
         "utf-8",
       );
@@ -718,7 +718,7 @@ describe("runPostUpgradeProbes — plugin.entry_unresolved", () => {
           plugins: [
             {
               pluginId: "runtime-only",
-              manifestPath: path.join(pluginDir, "openclaw.plugin.json"),
+              manifestPath: path.join(pluginDir, "bot.plugin.json"),
               rootDir: pluginDir,
               enabled: true,
               packageJson: { path: "package.json" },
@@ -749,7 +749,7 @@ describe("runPostUpgradeProbes — plugin.manifest_drift", () => {
           name: "drifted",
           version: "0.0.1",
           type: "module",
-          openclaw: { extensions: ["./dist/index.js"] },
+          bot: { extensions: ["./dist/index.js"] },
         }),
         "utf-8",
       );
@@ -758,7 +758,7 @@ describe("runPostUpgradeProbes — plugin.manifest_drift", () => {
       const oldManifestHash = crypto.createHash("sha256").update(oldManifestRaw).digest("hex");
       // Write a NEW manifest after installs.json was snapshotted.
       await fs.writeFile(
-        path.join(pluginDir, "openclaw.plugin.json"),
+        path.join(pluginDir, "bot.plugin.json"),
         JSON.stringify({ id: "drifted", version: 2 }),
         "utf-8",
       );
@@ -772,7 +772,7 @@ describe("runPostUpgradeProbes — plugin.manifest_drift", () => {
           plugins: [
             {
               pluginId: "drifted",
-              manifestPath: path.join(pluginDir, "openclaw.plugin.json"),
+              manifestPath: path.join(pluginDir, "bot.plugin.json"),
               manifestHash: oldManifestHash,
               rootDir: pluginDir,
               enabled: true,

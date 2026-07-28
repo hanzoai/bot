@@ -1,10 +1,10 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ErrorCodes } from "../../../packages/gateway-protocol/src/index.js";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { saveMediaBuffer } from "../../media/store.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeBotAgentDatabasesForTest } from "../../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import type { GatewayRequestContext, RespondFn } from "./types.js";
 
 const mocks = vi.hoisted(() => ({
@@ -76,7 +76,7 @@ beforeEach(async () => {
   mocks.external = false;
   mocks.upstreamFork.mockReset();
   mocks.queueClear.mockReset();
-  vi.stubEnv("OPENCLAW_STATE_DIR", tempDirs.make("openclaw-rewind-handler-"));
+  vi.stubEnv("BOT_STATE_DIR", tempDirs.make("bot-rewind-handler-"));
   const storedImage = await saveMediaBuffer(storedImageData, "image/png", "inbound");
   await upsertSessionEntry(
     { agentId: "main", sessionKey },
@@ -97,7 +97,7 @@ beforeEach(async () => {
           { type: "text", text: "edit me" },
           { type: "image", data: "aW1hZ2U=", mimeType: "image/png" },
         ],
-        __openclaw: {
+        __bot: {
           media: [
             { path: storedImage.path, contentType: "image/png" },
             // Duplicate ref proves dedupe: the response must carry this image once.
@@ -140,8 +140,8 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeBotAgentDatabasesForTest();
+  closeBotStateDatabaseForTest();
   vi.unstubAllEnvs();
 });
 

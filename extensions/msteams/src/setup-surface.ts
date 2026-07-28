@@ -9,9 +9,9 @@ import {
   createSetupTranslator,
   type ChannelSetupDmPolicy,
   type ChannelSetupWizard,
-  type OpenClawConfig,
+  type BotConfig,
   type WizardPrompter,
-} from "openclaw/plugin-sdk/setup";
+} from "bot/plugin-sdk/setup";
 import type { MSTeamsTeamConfig } from "../runtime-api.js";
 import { formatUnknownError } from "./errors.js";
 import {
@@ -44,9 +44,9 @@ function looksLikeGuid(value: string): boolean {
 }
 
 async function promptMSTeamsAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prompter: WizardPrompter;
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   const existing = params.cfg.channels?.msteams?.allowFrom ?? [];
   await params.prompter.note(
     [
@@ -112,9 +112,9 @@ async function promptMSTeamsAllowFrom(params: {
 }
 
 function setMSTeamsTeamsAllowlist(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   entries: Array<{ teamKey: string; channelKey?: string }>,
-): OpenClawConfig {
+): BotConfig {
   const baseTeams = cfg.channels?.msteams?.teams ?? {};
   const teams: Record<string, { channels?: Record<string, unknown> }> = { ...baseTeams };
   for (const entry of entries) {
@@ -144,7 +144,7 @@ function setMSTeamsTeamsAllowlist(
   };
 }
 
-function listMSTeamsGroupEntries(cfg: OpenClawConfig): string[] {
+function listMSTeamsGroupEntries(cfg: BotConfig): string[] {
   return Object.entries(cfg.channels?.msteams?.teams ?? {}).flatMap(([teamKey, value]) => {
     const channels = value?.channels ?? {};
     const channelKeys = Object.keys(channels);
@@ -156,7 +156,7 @@ function listMSTeamsGroupEntries(cfg: OpenClawConfig): string[] {
 }
 
 async function resolveMSTeamsGroupAllowlist(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entries: string[];
   prompter: Pick<WizardPrompter, "note">;
 }): Promise<Array<{ teamKey: string; channelKey?: string }>> {

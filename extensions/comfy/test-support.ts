@@ -1,4 +1,4 @@
-import type { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { fetchWithSsrFGuard } from "bot/plugin-sdk/ssrf-runtime";
 
 type ComfyTestApi = {
   getConfig: (cfg?: unknown) => Record<string, unknown>;
@@ -6,7 +6,7 @@ type ComfyTestApi = {
 };
 
 function getComfyTestApi(): ComfyTestApi {
-  const api = Reflect.get(globalThis, Symbol.for("openclaw.comfyTestApi"));
+  const api = Reflect.get(globalThis, Symbol.for("bot.comfyTestApi"));
   if (!api) {
     throw new Error("Comfy test API is unavailable");
   }

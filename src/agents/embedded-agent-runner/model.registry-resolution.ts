@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { ModelRegistry as CoreModelRegistry } from "../../llm/model-registry.js";
 import type { Model } from "../../llm/types.js";
 import { ensureAuthProfileStore, resolveAuthProfileOrder } from "../auth-profiles.js";
@@ -38,7 +38,7 @@ export function resolveExplicitModelWithRegistry(params: {
   provider: string;
   modelId: string;
   modelRegistry: CoreModelRegistry;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
   manifestAlias: ManifestModelCatalogProviderAliasMetadata;
   workspaceDir?: string;
@@ -181,7 +181,7 @@ export function resolveExplicitModelWithRegistry(params: {
 export function resolveDynamicModelAuthProfile(params: {
   provider: string;
   modelId: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
   authProfileId?: string;
   authProfileMode?: AuthProfileCredential["type"] | "aws-sdk";
@@ -239,7 +239,7 @@ function resolvePluginDynamicModelWithRegistry(params: {
   provider: string;
   modelId: string;
   modelRegistry: CoreModelRegistry;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
   agentRuntimeId?: string;
   manifestAlias: ManifestModelCatalogProviderAliasMetadata;
@@ -343,7 +343,7 @@ function shouldDropRuntimePreferredExplicitMiss(params: {
 export function shouldCompareProviderRuntimeResolvedModel(params: {
   provider: string;
   modelId: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
   workspaceDir?: string;
   runtimeHooks: ProviderRuntimeHooks;
@@ -367,7 +367,7 @@ export function shouldCompareProviderRuntimeResolvedModel(params: {
 export function normalizeProviderModelRef(params: {
   provider: string;
   modelId: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
 }): {
   provider: string;
@@ -394,7 +394,7 @@ type ResolveModelWithRegistryParams = {
   provider: string;
   modelId: string;
   modelRegistry: CoreModelRegistry;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
   agentRuntimeId?: string;
   workspaceDir?: string;

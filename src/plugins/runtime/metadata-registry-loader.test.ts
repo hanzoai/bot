@@ -4,7 +4,7 @@ import type { PluginLoadOptions } from "../loader.js";
 
 const loadConfigMock = vi.fn();
 const applyPluginAutoEnableMock = vi.fn();
-const loadOpenClawPluginsMock = vi.fn();
+const loadBotPluginsMock = vi.fn();
 
 let loadPluginMetadataRegistrySnapshot: typeof import("./metadata-registry-loader.js").loadPluginMetadataRegistrySnapshot;
 
@@ -18,7 +18,7 @@ vi.mock("../../config/plugin-auto-enable.js", () => ({
 }));
 
 vi.mock("../loader.js", () => ({
-  loadOpenClawPlugins: (...args: unknown[]) => loadOpenClawPluginsMock(...args),
+  loadBotPlugins: (...args: unknown[]) => loadBotPluginsMock(...args),
 }));
 
 vi.mock("../../agents/agent-scope.js", () => ({
@@ -26,11 +26,11 @@ vi.mock("../../agents/agent-scope.js", () => ({
   resolveDefaultAgentId: () => "default",
 }));
 
-function getOnlyLoadOpenClawPluginsOptions(): PluginLoadOptions {
-  expect(loadOpenClawPluginsMock).toHaveBeenCalledTimes(1);
-  const options = loadOpenClawPluginsMock.mock.calls[0]?.[0];
+function getOnlyLoadBotPluginsOptions(): PluginLoadOptions {
+  expect(loadBotPluginsMock).toHaveBeenCalledTimes(1);
+  const options = loadBotPluginsMock.mock.calls[0]?.[0];
   if (!options || typeof options !== "object") {
-    throw new Error("expected loadOpenClawPlugins to receive plugin load options");
+    throw new Error("expected loadBotPlugins to receive plugin load options");
   }
   return options as PluginLoadOptions;
 }
@@ -43,32 +43,32 @@ describe("loadPluginMetadataRegistrySnapshot", () => {
   beforeEach(() => {
     loadConfigMock.mockReset();
     applyPluginAutoEnableMock.mockReset();
-    loadOpenClawPluginsMock.mockReset();
+    loadBotPluginsMock.mockReset();
     loadConfigMock.mockReturnValue({ plugins: {} });
     applyPluginAutoEnableMock.mockImplementation((params: { config: unknown }) => ({
       config: params.config,
       changes: [],
       autoEnabledReasons: {},
     }));
-    loadOpenClawPluginsMock.mockReturnValue({ plugins: [], diagnostics: [] });
+    loadBotPluginsMock.mockReturnValue({ plugins: [], diagnostics: [] });
   });
 
   it("defaults to a non-activating validate snapshot", () => {
     loadPluginMetadataRegistrySnapshot({
       config: { plugins: {} },
       activationSourceConfig: { plugins: { allow: ["demo"] } },
-      env: { HOME: "/tmp/openclaw-home" } as NodeJS.ProcessEnv,
+      env: { HOME: "/tmp/bot-home" } as NodeJS.ProcessEnv,
       workspaceDir: "/workspace",
       onlyPluginIds: ["demo"],
     });
 
-    const loadOptions = getOnlyLoadOpenClawPluginsOptions();
+    const loadOptions = getOnlyLoadBotPluginsOptions();
     expect(loadOptions).toMatchObject({
       config: { plugins: {} },
       activationSourceConfig: { plugins: { allow: ["demo"] } },
       autoEnabledReasons: {},
       workspaceDir: "/workspace",
-      env: { HOME: "/tmp/openclaw-home" },
+      env: { HOME: "/tmp/bot-home" },
       throwOnLoadError: true,
       cache: false,
       activate: false,
@@ -85,7 +85,7 @@ describe("loadPluginMetadataRegistrySnapshot", () => {
       loadModules: false,
     });
 
-    const loadOptions = getOnlyLoadOpenClawPluginsOptions();
+    const loadOptions = getOnlyLoadBotPluginsOptions();
     expect(loadOptions).toMatchObject({
       config: { plugins: {} },
       activationSourceConfig: { plugins: {} },
@@ -114,7 +114,7 @@ describe("loadPluginMetadataRegistrySnapshot", () => {
       workspaceDir: "/workspace",
     });
 
-    expect(getOnlyLoadOpenClawPluginsOptions()).toMatchObject({
+    expect(getOnlyLoadBotPluginsOptions()).toMatchObject({
       config: { plugins: {} },
       activationSourceConfig: { plugins: {} },
       autoEnabledReasons: {},
@@ -157,7 +157,7 @@ describe("loadPluginMetadataRegistrySnapshot", () => {
     });
 
     expect(applyPluginAutoEnableMock).not.toHaveBeenCalled();
-    expect(getOnlyLoadOpenClawPluginsOptions()).toEqual({
+    expect(getOnlyLoadBotPluginsOptions()).toEqual({
       config: { plugins: { allow: ["compat-provider"] } },
       activationSourceConfig: { plugins: { allow: ["raw-plugin"] } },
       autoEnabledReasons: {},
@@ -179,7 +179,7 @@ describe("loadPluginMetadataRegistrySnapshot", () => {
       onlyPluginIds: [],
     });
 
-    const loadOptions = getOnlyLoadOpenClawPluginsOptions();
+    const loadOptions = getOnlyLoadBotPluginsOptions();
     expect(loadOptions).toMatchObject({
       config: { plugins: {} },
       activationSourceConfig: { plugins: {} },

@@ -108,7 +108,7 @@ describe("scripts/e2e/lib/fixtures/mock-openai-config.mjs", () => {
       models: {
         "openai/gpt-5.4": { params: { preserved: true } },
         "openai/gpt-5.5": {
-          agentRuntime: { id: "openclaw" },
+          agentRuntime: { id: "bot" },
           params: { transport: "sse", openaiWsWarmup: false },
         },
       },
@@ -119,7 +119,7 @@ describe("scripts/e2e/lib/fixtures/mock-openai-config.mjs", () => {
       workspace: "/tmp/release-agent",
       models: {
         "openai/gpt-5.5": {
-          agentRuntime: { id: "openclaw" },
+          agentRuntime: { id: "bot" },
           params: { existing: true, transport: "sse", openaiWsWarmup: false },
         },
       },
@@ -149,7 +149,7 @@ describe("scripts/e2e/lib/fixtures/mock-openai-config.mjs", () => {
       model: { primary: "openai/gpt-5.6-luna" },
       models: {
         "openai/gpt-5.6-luna": {
-          agentRuntime: { id: "openclaw" },
+          agentRuntime: { id: "bot" },
           params: { transport: "sse", openaiWsWarmup: false },
         },
       },

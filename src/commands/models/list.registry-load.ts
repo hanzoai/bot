@@ -1,7 +1,7 @@
 import { shouldSuppressBuiltInModel } from "../../agents/model-suppression.js";
 /** Registry-loading adapters for model-list row construction. */
 import { loadPreparedAgentModelRegistry as loadAgentModelRegistry } from "../../agents/prepared-model-registry.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { ModelRegistry } from "../../llm/model-registry.js";
 import type { Model } from "../../llm/types.js";
 import { loadModelRegistry } from "./list.registry.js";
@@ -10,7 +10,7 @@ import { modelKey } from "./shared.js";
 
 /** Loads the full model registry and tracks discovered provider/model keys. */
 export async function loadListModelRegistry(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   opts?: {
     agentId?: string;
     agentDir?: string;
@@ -30,7 +30,7 @@ export async function loadListModelRegistry(
 function findConfiguredRegistryModel(params: {
   registry: ModelRegistry;
   entry: ConfiguredEntry;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): Model | undefined {
   const model = params.registry.find(params.entry.ref.provider, params.entry.ref.model);
   if (!model) {
@@ -51,7 +51,7 @@ function findConfiguredRegistryModel(params: {
 
 /** Loads only configured registry entries and their auth availability. */
 export async function loadConfiguredListModelRegistry(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   entries: ConfiguredEntry[],
   opts?: {
     agentId?: string;

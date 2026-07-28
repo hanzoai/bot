@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import {
   buildBootstrapContextFiles,
   ensureSessionHeader,
@@ -36,7 +36,7 @@ describe("ensureSessionHeader", () => {
   it("creates transcript files with restrictive permissions", async () => {
     // Session transcripts can contain private prompts and tool outputs, so both
     // the directory and file need restrictive permissions from creation.
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-header-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-session-header-"));
     try {
       const sessionFile = path.join(tempDir, "nested", "session.jsonl");
       await ensureSessionHeader({ sessionFile, sessionId: "session-1", cwd: tempDir });
@@ -304,7 +304,7 @@ describe("buildBootstrapContextFiles", () => {
 
 type BootstrapLimitResolverCase = {
   name: "bootstrapMaxChars" | "bootstrapTotalMaxChars";
-  resolve: (cfg?: OpenClawConfig, agentId?: string | null) => number;
+  resolve: (cfg?: BotConfig, agentId?: string | null) => number;
   defaultValue: number;
 };
 
@@ -332,7 +332,7 @@ describe("bootstrap limit resolvers", () => {
     for (const resolver of BOOTSTRAP_LIMIT_RESOLVERS) {
       const cfg = {
         agents: { defaults: { [resolver.name]: 12345 } },
-      } as OpenClawConfig;
+      } as BotConfig;
       expect(resolver.resolve(cfg)).toBe(12345);
     }
   });
@@ -344,7 +344,7 @@ describe("bootstrap limit resolvers", () => {
           defaults: { [resolver.name]: 12345 },
           list: [{ id: "worker", [resolver.name]: 6789 }],
         },
-      } as OpenClawConfig;
+      } as BotConfig;
       expect(resolver.resolve(cfg, "worker")).toBe(6789);
     }
   });
@@ -356,7 +356,7 @@ describe("bootstrap limit resolvers", () => {
           defaults: { [resolver.name]: 12345 },
           list: [{ id: "worker" }],
         },
-      } as OpenClawConfig;
+      } as BotConfig;
       expect(resolver.resolve(cfg, "worker")).toBe(12345);
     }
   });
@@ -365,7 +365,7 @@ describe("bootstrap limit resolvers", () => {
     for (const resolver of BOOTSTRAP_LIMIT_RESOLVERS) {
       const cfg = {
         agents: { defaults: { [resolver.name]: -1 } },
-      } as OpenClawConfig;
+      } as BotConfig;
       expect(resolver.resolve(cfg)).toBe(resolver.defaultValue);
     }
   });
@@ -381,17 +381,17 @@ describe("resolveBootstrapPromptTruncationWarningMode", () => {
     expect(
       resolveBootstrapPromptTruncationWarningMode({
         agents: { defaults: { bootstrapPromptTruncationWarning: "off" } },
-      } as OpenClawConfig),
+      } as BotConfig),
     ).toBe("always");
     expect(
       resolveBootstrapPromptTruncationWarningMode({
         agents: { defaults: { bootstrapPromptTruncationWarning: "once" } },
-      } as OpenClawConfig),
+      } as BotConfig),
     ).toBe("always");
     expect(
       resolveBootstrapPromptTruncationWarningMode({
         agents: { defaults: { bootstrapPromptTruncationWarning: "always" } },
-      } as OpenClawConfig),
+      } as BotConfig),
     ).toBe("always");
   });
 
@@ -399,7 +399,7 @@ describe("resolveBootstrapPromptTruncationWarningMode", () => {
     expect(
       resolveBootstrapPromptTruncationWarningMode({
         agents: { defaults: { bootstrapPromptTruncationWarning: "invalid" } },
-      } as unknown as OpenClawConfig),
+      } as unknown as BotConfig),
     ).toBe(EXPECTED_DEFAULT_BOOTSTRAP_PROMPT_TRUNCATION_WARNING_MODE);
   });
 });

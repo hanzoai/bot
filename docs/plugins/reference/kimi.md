@@ -1,5 +1,5 @@
 ---
-summary: "Adds Kimi, Kimi Coding model provider support to OpenClaw."
+summary: "Adds Kimi, Kimi Coding model provider support to Bot."
 read_when:
   - You are installing, configuring, or auditing the kimi plugin
 title: "Kimi plugin"
@@ -7,12 +7,12 @@ title: "Kimi plugin"
 
 # Kimi plugin
 
-Adds Kimi, Kimi Coding model provider support to OpenClaw.
+Adds Kimi, Kimi Coding model provider support to Bot.
 
 ## Distribution
 
-- Package: `@openclaw/kimi-provider`
-- Install route: npm; ClawHub: `clawhub:@openclaw/kimi-provider`
+- Package: `@hanzo/bot-kimi-provider`
+- Install route: npm; ClawHub: `clawhub:@hanzo/bot-kimi-provider`
 
 ## Surface
 

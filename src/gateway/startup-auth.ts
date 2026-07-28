@@ -1,9 +1,9 @@
 // Gateway startup auth preparation.
 // Merges auth overrides, resolves secret refs, validates weak secrets, and generates fallbacks.
 import crypto from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { GatewayAuthConfig, GatewayTailscaleConfig } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   hasConfiguredGatewayAuthSecretInput,
   resolveGatewayPasswordSecretRefValue,
@@ -15,7 +15,7 @@ import { trimToUndefined } from "./credentials.js";
 import { assertGatewayAuthNotKnownWeak } from "./known-weak-gateway-secrets.js";
 
 const HOOKS_GATEWAY_AUTH_REUSE_WARNING =
-  "Security warning: hooks.token matches active Gateway shared-secret auth. Startup continues for compatibility; rotate hooks.token or Gateway auth. Run openclaw security audit for a full report, and run openclaw doctor --fix when the reused hooks.token is persisted in config.";
+  "Security warning: hooks.token matches active Gateway shared-secret auth. Startup continues for compatibility; rotate hooks.token or Gateway auth. Run bot security audit for a full report, and run bot doctor --fix when the reused hooks.token is persisted in config.";
 
 /** Merge sparse runtime auth overrides into persisted Gateway auth config. */
 export function mergeGatewayAuthConfig(
@@ -72,7 +72,7 @@ export function mergeGatewayTailscaleConfig(
 }
 
 function resolveGatewayAuthFromConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   authOverride?: GatewayAuthConfig;
   tailscaleOverride?: GatewayTailscaleConfig;
@@ -100,7 +100,7 @@ function findActiveGatewaySharedSecret(auth: ResolvedGatewayAuth): string {
 }
 
 function warnHooksTokenReuseGatewayAuth(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   auth: ResolvedGatewayAuth;
   warn?: (message: string) => void;
 }): void {
@@ -116,11 +116,11 @@ function warnHooksTokenReuseGatewayAuth(params: {
 
 /** Check every source that can satisfy token auth before startup generates one. */
 function hasGatewayTokenCandidate(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   authOverride?: GatewayAuthConfig;
 }): boolean {
-  const envToken = trimToUndefined(params.env.OPENCLAW_GATEWAY_TOKEN);
+  const envToken = trimToUndefined(params.env.BOT_GATEWAY_TOKEN);
   if (envToken) {
     return true;
   }
@@ -150,7 +150,7 @@ function hasGatewayPasswordOverrideCandidate(params: {
 
 /** Ensure startup has effective Gateway auth, generating only an ephemeral token if needed. */
 export async function ensureGatewayStartupAuth(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   authOverride?: GatewayAuthConfig;
   tailscaleOverride?: GatewayTailscaleConfig;
@@ -162,7 +162,7 @@ export async function ensureGatewayStartupAuth(params: {
   persist?: boolean;
   baseHash?: string;
 }): Promise<{
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   auth: ReturnType<typeof resolveGatewayAuth>;
   generatedToken?: string;
   persistedGeneratedToken: boolean;
@@ -181,9 +181,9 @@ export async function ensureGatewayStartupAuth(params: {
       hasPasswordOverride: hasGatewayPasswordOverrideCandidate({
         authOverride: params.authOverride,
       }),
-      hasTokenFallback: Boolean(trimToUndefined(env.OPENCLAW_GATEWAY_TOKEN)),
+      hasTokenFallback: Boolean(trimToUndefined(env.BOT_GATEWAY_TOKEN)),
       hasPasswordFallback:
-        Boolean(trimToUndefined(env.OPENCLAW_GATEWAY_PASSWORD)) ||
+        Boolean(trimToUndefined(env.BOT_GATEWAY_PASSWORD)) ||
         hasConfiguredGatewayAuthSecretInput(params.cfg, "gateway.auth.password"),
     }),
     resolveGatewayPasswordSecretRefValue({
@@ -196,7 +196,7 @@ export async function ensureGatewayStartupAuth(params: {
       hasTokenOverride: hasGatewayTokenOverrideCandidate({
         authOverride: params.authOverride,
       }),
-      hasPasswordFallback: Boolean(trimToUndefined(env.OPENCLAW_GATEWAY_PASSWORD)),
+      hasPasswordFallback: Boolean(trimToUndefined(env.BOT_GATEWAY_PASSWORD)),
       hasTokenFallback: hasGatewayTokenCandidate({
         cfg: params.cfg,
         env,
@@ -225,7 +225,7 @@ export async function ensureGatewayStartupAuth(params: {
   }
 
   const generatedToken = crypto.randomBytes(24).toString("hex");
-  const nextCfg: OpenClawConfig = {
+  const nextCfg: BotConfig = {
     ...params.cfg,
     gateway: {
       ...params.cfg.gateway,

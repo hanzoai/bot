@@ -7,10 +7,10 @@ import {
   readTranscriptRawDelta,
 } from "../src/config/sessions/session-accessor.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../src/state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../src/state/openclaw-state-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+} from "../src/state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../src/state/bot-state-db.js";
 
 const EVENT_COUNT = 100_000;
 const DELTA_COUNT = 20;
@@ -38,7 +38,7 @@ function measure(operation: () => void): Timing {
 }
 
 function seedTranscript(
-  database: ReturnType<typeof openOpenClawAgentDatabase>,
+  database: ReturnType<typeof openBotAgentDatabase>,
   sessionId: string,
   sessionKey: string,
 ): void {
@@ -84,7 +84,7 @@ function seedTranscript(
 }
 
 function appendDelta(
-  database: ReturnType<typeof openOpenClawAgentDatabase>,
+  database: ReturnType<typeof openBotAgentDatabase>,
   sessionId: string,
 ): void {
   const insert = database.db.prepare(
@@ -128,13 +128,13 @@ function readFrontierCursor(scope: Parameters<typeof readTranscriptRawDelta>[0])
 }
 
 function main(): void {
-  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-transcript-bench-"));
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-transcript-bench-"));
+  const env = { ...process.env, BOT_STATE_DIR: stateDir };
   const agentId = "benchmark";
   const sessionId = "cursor-benchmark";
   const sessionKey = `agent:${agentId}:cursor-benchmark`;
   try {
-    const database = openOpenClawAgentDatabase({ agentId, env });
+    const database = openBotAgentDatabase({ agentId, env });
     seedTranscript(database, sessionId, sessionKey);
     const scope = { agentId, sessionId, sessionKey, storePath: database.path };
 
@@ -184,8 +184,8 @@ function main(): void {
       ),
     );
   } finally {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotAgentDatabasesForTest();
+    closeBotStateDatabaseForTest();
     fs.rmSync(stateDir, { force: true, recursive: true });
   }
 }

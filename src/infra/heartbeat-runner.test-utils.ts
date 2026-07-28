@@ -7,12 +7,12 @@ import { heartbeatRunnerTelegramPlugin } from "../../test/helpers/infra/heartbea
 import { resolveMainSessionKey } from "../config/sessions.js";
 import { listSessionEntries, replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { writeCronJobScratch } from "../cron/scratch-store.js";
 import { CronService } from "../cron/service.js";
 import { resolveCronJobsStorePath } from "../cron/store.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { createTestRegistry } from "../test-utils/channel-plugins.js";
 import { normalizeSessionDeliveryState } from "../utils/delivery-context.shared.js";
 import type { DeliveryContext } from "../utils/delivery-context.types.js";
@@ -120,7 +120,7 @@ export function readSessionStoreForTest<T extends object = HeartbeatSessionSeed>
 /** Seed the configured main session and return its session key. */
 export async function seedMainSessionStore(
   storePath: string,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   session: HeartbeatSessionSeed,
 ): Promise<string> {
   const sessionKey = resolveMainSessionKey(cfg);
@@ -136,21 +136,21 @@ export async function withTempHeartbeatSandbox<T>(
     unsetEnvVars?: string[];
   },
 ): Promise<T> {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), options?.prefix ?? "openclaw-hb-"));
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), options?.prefix ?? "bot-hb-"));
   const storePath = path.join(tmpDir, "sessions.json");
   const replySpy = createHeartbeatReplySpy();
   const previousEnv = new Map<string, string | undefined>();
-  const envNames = new Set(["OPENCLAW_STATE_DIR", ...(options?.unsetEnvVars ?? [])]);
+  const envNames = new Set(["BOT_STATE_DIR", ...(options?.unsetEnvVars ?? [])]);
   for (const envName of envNames) {
     previousEnv.set(envName, process.env[envName]);
-    process.env[envName] = envName === "OPENCLAW_STATE_DIR" ? path.join(tmpDir, "state") : "";
+    process.env[envName] = envName === "BOT_STATE_DIR" ? path.join(tmpDir, "state") : "";
   }
   await seedHeartbeatScratchForTest({ content: "- Check status\n" });
   try {
     return await fn({ tmpDir, storePath, replySpy });
   } finally {
     replySpy.mockReset();
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     for (const [envName, previousValue] of previousEnv.entries()) {
       if (previousValue === undefined) {
         delete process.env[envName];

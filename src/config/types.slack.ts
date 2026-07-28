@@ -97,7 +97,7 @@ export type SlackActionConfig = {
 export type SlackSlashCommandConfig = {
   /** Enable handling for the configured slash command (default: false). */
   enabled?: boolean;
-  /** Slash command name (default: "openclaw"). */
+  /** Slash command name (default: "bot"). */
   name?: string;
   /** Session key prefix for slash commands (default: "slack:slash"). */
   sessionPrefix?: string;
@@ -119,7 +119,7 @@ export type SlackRelayConfig = {
   url?: string;
   /** Bearer token used to authenticate the gateway websocket to the Slack relay. */
   authToken?: SecretInput;
-  /** Gateway destination id registered with openclaw-slack-router. */
+  /** Gateway destination id registered with bot-slack-router. */
   gatewayId?: string;
 };
 

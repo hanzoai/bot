@@ -22,7 +22,7 @@ export function registerBackupCommand(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/backup", "docs.openclaw.ai/cli/backup")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/backup", "docs.bot.ai/cli/backup")}\n`,
     );
 
   backup
@@ -38,24 +38,24 @@ export function registerBackupCommand(program: Command) {
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-          ["openclaw backup create", "Create a timestamped backup in the current directory."],
+          ["bot backup create", "Create a timestamped backup in the current directory."],
           [
-            "openclaw backup create --output ~/Backups",
+            "bot backup create --output ~/Backups",
             "Write the archive into an existing backup directory.",
           ],
           [
-            "openclaw backup create --dry-run --json",
+            "bot backup create --dry-run --json",
             "Preview the archive plan without writing any files.",
           ],
           [
-            "openclaw backup create --verify",
+            "bot backup create --verify",
             "Create the archive and immediately validate its manifest and payload layout.",
           ],
           [
-            "openclaw backup create --no-include-workspace",
+            "bot backup create --no-include-workspace",
             "Back up state/config without agent workspace files.",
           ],
-          ["openclaw backup create --only-config", "Back up only the active JSON config file."],
+          ["bot backup create --only-config", "Back up only the active JSON config file."],
         ])}`,
     )
     .action(async (opts) => {
@@ -80,11 +80,11 @@ export function registerBackupCommand(program: Command) {
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
           [
-            "openclaw backup verify ./2026-03-09T08-00-00.000+08-00-openclaw-backup.tar.gz",
+            "bot backup verify ./2026-03-09T08-00-00.000+08-00-bot-backup.tar.gz",
             "Check that the archive structure and manifest are intact.",
           ],
           [
-            "openclaw backup verify ~/Backups/latest.tar.gz --json",
+            "bot backup verify ~/Backups/latest.tar.gz --json",
             "Emit machine-readable verification output.",
           ],
         ])}`,
@@ -112,9 +112,9 @@ function registerBackupSqliteCommands(backup: Command): void {
 
   sqlite
     .command("create")
-    .description("Create a compact, verified snapshot of an OpenClaw SQLite database")
-    .option("--global", "Snapshot the shared OpenClaw state database", false)
-    .option("--agent <id>", "Snapshot one per-agent OpenClaw database")
+    .description("Create a compact, verified snapshot of an Bot SQLite database")
+    .option("--global", "Snapshot the shared Bot state database", false)
+    .option("--agent <id>", "Snapshot one per-agent Bot database")
     .requiredOption("--repository <path>", "Snapshot repository directory")
     .option("--json", "Output JSON", false)
     .addHelpText(
@@ -122,11 +122,11 @@ function registerBackupSqliteCommands(backup: Command): void {
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
           [
-            "openclaw backup sqlite create --global --repository ~/Backups/openclaw-sqlite",
+            "bot backup sqlite create --global --repository ~/Backups/bot-sqlite",
             "Snapshot the shared state database.",
           ],
           [
-            "openclaw backup sqlite create --agent main --repository ~/Backups/openclaw-sqlite",
+            "bot backup sqlite create --agent main --repository ~/Backups/bot-sqlite",
             "Snapshot the main agent database.",
           ],
         ])}`,

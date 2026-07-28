@@ -5,7 +5,7 @@ import {
 } from "../../auto-reply/envelope.js";
 import { resolveStorePath } from "../../config/sessions/paths.js";
 import { readSessionUpdatedAt } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   resolveAgentRoute,
   type ResolvedAgentRoute,
@@ -17,7 +17,7 @@ export type ChannelInboundEnvelopeInput = Omit<AgentEnvelopeParams, "previousTim
 };
 
 export function createChannelInboundEnvelopeBuilder(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   route: Pick<ResolvedAgentRoute, "agentId" | "sessionKey">;
 }) {
   const storePath = resolveStorePath(params.cfg.session?.store, {

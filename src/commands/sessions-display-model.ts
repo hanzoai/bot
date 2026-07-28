@@ -11,7 +11,7 @@ import {
   isCliProvider,
 } from "../agents/model-selection.js";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 type SessionDisplayModelRow = {
   key: string;
@@ -43,7 +43,7 @@ function parseModelRef(raw: string, defaultProvider: string): SessionDisplayMode
 }
 
 function resolveAgentPrimaryModel(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId: string | undefined,
 ): string | undefined {
   if (!agentId) {
@@ -73,7 +73,7 @@ function normalizeStoredOverrideModel(params: {
   };
 }
 
-function resolveDefaultModelRef(cfg: OpenClawConfig, agentId?: string): SessionDisplayModelRef {
+function resolveDefaultModelRef(cfg: BotConfig, agentId?: string): SessionDisplayModelRef {
   const primary =
     resolveAgentPrimaryModel(cfg, agentId) ??
     resolveAgentModelPrimaryValue(cfg.agents?.defaults?.model) ??
@@ -83,7 +83,7 @@ function resolveDefaultModelRef(cfg: OpenClawConfig, agentId?: string): SessionD
 
 /** Resolves default display values for a session table scoped to an agent. */
 export function resolveSessionDisplayDefaults(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId?: string,
 ): SessionDisplayDefaults {
   return {
@@ -92,7 +92,7 @@ export function resolveSessionDisplayDefaults(
 }
 
 function normalizeCliRuntimeDisplayRef(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   ref: SessionDisplayModelRef,
   defaultRef: SessionDisplayModelRef,
 ): SessionDisplayModelRef {
@@ -128,7 +128,7 @@ function normalizeCliRuntimeDisplayRef(
 
 /** Resolves only the model id to show for a session row. */
 export function resolveSessionDisplayModel(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   row: SessionDisplayModelRow,
 ): string {
   return resolveSessionDisplayModelRef(cfg, row).model;
@@ -136,7 +136,7 @@ export function resolveSessionDisplayModel(
 
 /** Resolves provider/model display metadata for a session row. */
 export function resolveSessionDisplayModelRef(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   row: SessionDisplayModelRow,
 ): SessionDisplayModelRef {
   const agentId = row.key.startsWith("agent:") ? row.key.split(":")[1] : undefined;

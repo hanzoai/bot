@@ -7,9 +7,9 @@ read_when:
 title: "Claws"
 ---
 
-# `openclaw claws`
+# `bot claws`
 
-A Claw is a versioned setup for one new OpenClaw agent. It can describe the
+A Claw is a versioned setup for one new Bot agent. It can describe the
 agent's portable identity, workspace files, skills, plugins, MCP servers, and
 cron jobs. Harness-specific agent settings may be carried in a referenced
 package profile. A Claw does not replace or modify an existing agent.
@@ -18,7 +18,7 @@ Claws are experimental. Their schema, command output, and lifecycle may change.
 Enable the command surface explicitly:
 
 ```bash
-export OPENCLAW_EXPERIMENTAL_CLAWS=1
+export BOT_EXPERIMENTAL_CLAWS=1
 ```
 
 The current CLI reads a local package directory, `CLAW.md`, or grouped JSON manifest.
@@ -35,12 +35,12 @@ workspace sidecars referenced by that manifest:
   "name": "@acme/incident-triage-claw",
   "version": "1.0.0",
   "type": "module",
-  "openclaw": { "claw": "CLAW.md" }
+  "bot": { "claw": "CLAW.md" }
 }
 ```
 
 `CLAW.md` starts with YAML frontmatter. A non-empty Markdown body is the
-portable agent prompt. OpenClaw applies it as the Claw-managed `SOUL.md` for
+portable agent prompt. Bot applies it as the Claw-managed `SOUL.md` for
 the new agent:
 
 ```md
@@ -50,7 +50,7 @@ agent:
   id: incident-triage
   name: Incident triage
 metadata:
-  openclaw.config: profiles/openclaw.yml
+  bot.config: profiles/bot.yml
 workspace:
   bootstrapFiles: {}
 packages: []
@@ -64,9 +64,9 @@ You review incoming incidents, identify severity and ownership, and leave a
 concise handoff with evidence.
 ```
 
-`metadata` is a string-to-string map for portable consumer hints. OpenClaw's
-`openclaw.config` key points to an optional, package-relative YAML profile. The
-exported default is `profiles/openclaw.yml`; the pointer is normative, so a
+`metadata` is a string-to-string map for portable consumer hints. Bot's
+`bot.config` key points to an optional, package-relative YAML profile. The
+exported default is `profiles/bot.yml`; the pointer is normative, so a
 package may choose another safe relative `.yml` or `.yaml` path.
 
 ```yaml
@@ -85,18 +85,18 @@ agent:
       sources: [memory, sessions]
 ```
 
-This profile exists only inside the Claw package. OpenClaw validates and uses it
+This profile exists only inside the Claw package. Bot validates and uses it
 while inspecting, adding, updating, and exporting that Claw; it is not copied
-to the user's normal OpenClaw configuration path. Other harnesses can ignore
+to the user's normal Bot configuration path. Other harnesses can ignore
 the namespaced metadata key and consume the portable manifest fields.
 
 The same strict version 1 schema continues to accept grouped JSON manifests.
-Grouped JSON uses the same `metadata.openclaw.config` pointer rather than
-embedding a second copy of the OpenClaw profile. The remaining schema fragments
+Grouped JSON uses the same `metadata.bot.config` pointer rather than
+embedding a second copy of the Bot profile. The remaining schema fragments
 on this page use JSON, with equivalent keys available in `CLAW.md` frontmatter.
 
-The OpenClaw package profile may select any built-in tool profile registered by
-the running OpenClaw version, then refine it with `alsoAllow`, `deny`, and
+The Bot package profile may select any built-in tool profile registered by
+the running Bot version, then refine it with `alsoAllow`, `deny`, and
 `tools.fs.workspaceOnly: true`. A Claw cannot set that field to `false` and
 weaken host filesystem confinement. `tools.allow` remains available as an
 explicit allowlist but cannot be combined with `alsoAllow`. A Claw may also set
@@ -160,7 +160,7 @@ The dry run uses the existing skill and plugin preflight paths to resolve the
 exact artifact, integrity, and any ClawHub trust warning before consent. The
 warning remains visible in the integrity-bound plan. Apply installs missing artifacts
 or reuses matching ones and records whether the Claw introduced or referenced
-each resource. Plugins remain process-wide OpenClaw capabilities rather than
+each resource. Plugins remain process-wide Bot capabilities rather than
 per-agent installations.
 
 Cron jobs declare scheduled work for the new agent:
@@ -209,13 +209,13 @@ removal follow the same ownership policy as other Claw resources.
 Validate the source without planning local changes:
 
 ```bash
-openclaw claws inspect ./incident-triage.claw.json
+bot claws inspect ./incident-triage.claw.json
 ```
 
 Preview all proposed lifecycle actions:
 
 ```bash
-openclaw claws add ./incident-triage.claw.json --dry-run --json
+bot claws add ./incident-triage.claw.json --dry-run --json
 ```
 
 The plan reports the derived agent and workspace, every proposed action,
@@ -224,16 +224,16 @@ digest. Capability records show the exact package, MCP, scheduled-work, sandbox,
 tool, or heartbeat effect. Review the plan before creating the agent:
 
 ```bash
-openclaw claws add ./incident-triage.claw.json \
+bot claws add ./incident-triage.claw.json \
   --yes \
   --plan-integrity <SHA256_FROM_DRY_RUN>
 ```
 
-`--yes` alone is insufficient. OpenClaw rebuilds the plan and rejects consent
+`--yes` alone is insufficient. Bot rebuilds the plan and rejects consent
 when the source, destination, or live configuration changed after preview. Use
 `--agent-id` or `--workspace` during both preview and apply when package
 defaults collide with local state. For disposable profiles and parallel validation,
-pass an explicit `--workspace`; `OPENCLAW_STATE_DIR` relocates runtime state but
+pass an explicit `--workspace`; `BOT_STATE_DIR` relocates runtime state but
 does not change the default workspace location.
 
 Adding a Claw creates the new agent and workspace configuration, writes declared
@@ -244,14 +244,14 @@ and retries fail closed when owned content drifted.
 ## Inspect installed state
 
 ```bash
-openclaw claws status
-openclaw claws status incident-triage --json
-openclaw doctor
+bot claws status
+bot claws status incident-triage --json
+bot doctor
 ```
 
 `status` compares the installed agent and its recorded workspace, package, MCP,
 and cron provenance with current state. It reports incomplete installs, missing
-resources, and drift without changing local state. `openclaw doctor` adds
+resources, and drift without changing local state. `bot doctor` adds
 Claw-specific diagnostics for incomplete ownership records, unsafe managed
 files, and cron jobs that cannot be corroborated with live Gateway inventory.
 
@@ -272,8 +272,8 @@ By default, update uses the source recorded when the Claw was added. Use
 `--from` when that source moved or when testing another package directory:
 
 ```bash
-openclaw claws update incident-triage --dry-run --json
-openclaw claws update incident-triage \
+bot claws update incident-triage --dry-run --json
+bot claws update incident-triage \
   --from ./incident-triage-next \
   --dry-run --json
 ```
@@ -291,19 +291,19 @@ aggregate multi-agent review. Apply the exact reviewed plan with explicit
 consent:
 
 ```bash
-openclaw claws update incident-triage \
+bot claws update incident-triage \
   --yes \
   --plan-integrity <SHA256_FROM_DRY_RUN>
 ```
 
-OpenClaw rebuilds the plan and compare-and-swaps owned state before each
+Bot rebuilds the plan and compare-and-swaps owned state before each
 mutation. Removed package declarations release dependency edges without
 uninstalling artifacts. Cron changes reread the live scheduler definition and
 stop on operator drift. Package installers, source-config writers, and the Gateway scheduler
 are not one transaction. If compensation cannot be proven after an external
-mutation, OpenClaw reports error code `update_partial` with structured
+mutation, Bot reports error code `update_partial` with structured
 `status: partial`, preserves uncertain provenance,
-and stops. Inspect `claws status`, the affected resource, and `openclaw doctor`;
+and stops. Inspect `claws status`, the affected resource, and `bot doctor`;
 then preview again before retrying or removing anything.
 
 ## Remove an installed Claw
@@ -311,8 +311,8 @@ then preview again before retrying or removing anything.
 Preview removal before selecting cleanup:
 
 ```bash
-openclaw claws remove incident-triage --dry-run --json
-openclaw claws remove incident-triage \
+bot claws remove incident-triage --dry-run --json
+bot claws remove incident-triage \
   --yes \
   --plan-integrity <SHA256_FROM_DRY_RUN>
 ```
@@ -329,7 +329,7 @@ owner, include `--remove-unused` in both preview and apply. To select exact
 referenced resources instead, repeat `--remove-referenced`:
 
 ```bash
-openclaw claws remove incident-triage \
+bot claws remove incident-triage \
   --dry-run \
   --remove-referenced 'plugin:@acme/audit-plugin@2.0.0'
 ```
@@ -344,7 +344,7 @@ Export creates a new package directory and fails if the destination exists or
 managed state has drifted:
 
 ```bash
-openclaw claws export incident-triage --out ./incident-triage-export --json
+bot claws export incident-triage --out ./incident-triage-export --json
 ```
 
 The result contains `package.json`, canonical `CLAW.md`, and managed workspace

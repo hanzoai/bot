@@ -141,7 +141,7 @@ describe("ClickClack discussion service", () => {
     expect(opened).toEqual({
       state: "open",
       embedUrl:
-        "https://clickclack.example/embed/channel/team-route/discussion-route?openclawHostTheme=1",
+        "https://clickclack.example/embed/channel/team-route/discussion-route?botHostTheme=1",
       openUrl: "https://clickclack.example/app/team-route/discussion-route",
     });
     expect(reopened).toEqual(opened);
@@ -437,7 +437,7 @@ describe("ClickClack discussion service", () => {
       .mockReturnValue({ sessionId: "session-new", label: "Reset race", updatedAt: 2 });
 
     await expect(harness.service.open(sessionKey)).rejects.toThrow(
-      "OpenClaw session changed while opening",
+      "Bot session changed while opening",
     );
     expect(harness.updateChannel).toHaveBeenCalledWith("chn_discussion", { archived: true });
     expect(harness.store.lookup(sessionKey)).toBeUndefined();
@@ -597,7 +597,7 @@ describe("ClickClack discussion service", () => {
     expect(opened).toEqual({
       state: "open",
       embedUrl:
-        "https://clickclack.example/embed/channel/team-route/recovered-route?openclawHostTheme=1",
+        "https://clickclack.example/embed/channel/team-route/recovered-route?botHostTheme=1",
       openUrl: "https://clickclack.example/app/team-route/recovered-route",
     });
   });

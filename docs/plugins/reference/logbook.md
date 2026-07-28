@@ -11,8 +11,8 @@ Automatic work journal: captures periodic screen snapshots from a paired node an
 
 ## Distribution
 
-- Package: `@openclaw/logbook`
-- Install route: included in OpenClaw
+- Package: `@hanzo/bot-logbook`
+- Install route: included in Bot
 
 ## Surface
 

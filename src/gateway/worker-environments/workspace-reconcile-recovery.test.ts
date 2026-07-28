@@ -26,7 +26,7 @@ afterEach(async () => {
 });
 
 async function temporaryDirectory(name: string): Promise<string> {
-  return tempDirs.make(`openclaw-${name}-`);
+  return tempDirs.make(`bot-${name}-`);
 }
 
 async function gitInit(root: string): Promise<void> {

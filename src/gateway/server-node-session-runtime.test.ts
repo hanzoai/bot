@@ -110,7 +110,7 @@ describe("gateway node session runtime", () => {
       updatedAtMs: 1,
     };
 
-    runtime.broadcastVoiceWakeChanged(["openclaw"]);
+    runtime.broadcastVoiceWakeChanged(["bot"]);
     runtime.broadcastVoiceWakeRoutingChanged(routing);
     await vi.waitFor(() => expect(frames).toHaveLength(2));
 
@@ -120,7 +120,7 @@ describe("gateway node session runtime", () => {
     await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(4));
 
     expect(frames.map((frame) => JSON.parse(frame))).toEqual([
-      { type: "event", event: "voicewake.changed", payload: { triggers: ["openclaw"] } },
+      { type: "event", event: "voicewake.changed", payload: { triggers: ["bot"] } },
       { type: "event", event: "voicewake.routing.changed", payload: { config: routing } },
     ]);
     expect(broadcast).toHaveBeenCalledTimes(4);
@@ -148,7 +148,7 @@ describe("gateway node session runtime", () => {
     runtime.nodeRegistry.register(client, { pairingIdentity: "identity-a" });
     const send = vi.spyOn(runtime.nodeRegistry, "sendEventRawForPairingGeneration");
 
-    runtime.broadcastVoiceWakeChanged(["openclaw"]);
+    runtime.broadcastVoiceWakeChanged(["bot"]);
     await vi.waitFor(() => expect(frames).toHaveLength(1));
     pairingExists = false;
     runtime.broadcastVoiceWakeChanged(["retired"]);
@@ -156,7 +156,7 @@ describe("gateway node session runtime", () => {
 
     expect(send).not.toHaveBeenCalled();
     expect(frames.map((frame) => JSON.parse(frame))).toEqual([
-      { type: "event", event: "voicewake.changed", payload: { triggers: ["openclaw"] } },
+      { type: "event", event: "voicewake.changed", payload: { triggers: ["bot"] } },
     ]);
     expect(client.invalidated).toBe(true);
     expect(broadcast).toHaveBeenCalledTimes(2);

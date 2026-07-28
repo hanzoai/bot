@@ -175,8 +175,8 @@ describe("Tool Search flattened call arguments", () => {
     const baseEntry = catalogRef.current?.entries[0];
     expect(baseEntry).toBeDefined();
     catalogRef.current!.entries = [
-      { ...baseEntry!, id: "openclaw:first:shared_search", tool: first },
-      { ...baseEntry!, id: "openclaw:second:shared_search", tool: second },
+      { ...baseEntry!, id: "bot:first:shared_search", tool: first },
+      { ...baseEntry!, id: "bot:second:shared_search", tool: second },
     ];
     const callTool = createToolSearchTools({ catalogRef, config }).find(
       (tool) => tool.name === TOOL_CALL_RAW_TOOL_NAME,
@@ -397,7 +397,7 @@ describe("Tool Search input schemas", () => {
     const result = await codeTool!.execute("invalid-code-call", {
       code: `
         try {
-          await openclaw.tools.call("strict_instruction", { instructions: "run" });
+          await bot.tools.call("strict_instruction", { instructions: "run" });
           return { executed: true };
         } catch (error) {
           return { error: error.message };

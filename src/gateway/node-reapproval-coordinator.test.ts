@@ -11,7 +11,7 @@ import {
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
 import { createNodeReapprovalCoordinator } from "./node-reapproval-coordinator.js";
 
-const tempDirs = createSuiteTempRootTracker({ prefix: "openclaw-node-reapproval-" });
+const tempDirs = createSuiteTempRootTracker({ prefix: "bot-node-reapproval-" });
 
 async function setupPairedNode(baseDir: string): Promise<void> {
   // Node surfaces attach to paired devices, so device pairing comes first.

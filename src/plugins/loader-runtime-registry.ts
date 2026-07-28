@@ -3,7 +3,7 @@ import {
   hasExplicitCompatibilityInputs,
   resolvePluginLoadCacheContext,
 } from "./loader-load-context.js";
-import { loadOpenClawPlugins } from "./loader-runtime-load.js";
+import { loadBotPlugins } from "./loader-runtime-load.js";
 import type { PluginLoadOptions } from "./loader-types.js";
 import type { PluginRegistry } from "./registry.js";
 import {
@@ -190,11 +190,11 @@ export function resolveRuntimePluginRegistry(
     return compatible;
   }
   // Runtime helpers must not recurse while this exact snapshot is registering.
-  // Direct loadOpenClawPlugins callers still surface the hard error.
+  // Direct loadBotPlugins callers still surface the hard error.
   if (isPluginRegistryLoadInFlight(options)) {
     return undefined;
   }
-  return loadOpenClawPlugins(options);
+  return loadBotPlugins(options);
 }
 
 export function getRuntimePluginRegistryForLoadOptions(

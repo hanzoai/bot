@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 // Control UI tests cover workboard status persistence behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { chromium, type Browser, type Locator, type Page } from "playwright";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { WorkboardCard } from "../../lib/workboard/index.ts";
@@ -17,7 +17,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 const artifactDir = path.join(
   process.cwd(),
@@ -209,7 +209,7 @@ describeControlUiE2e("Control UI Workboard status persistence E2E", () => {
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(
-        `Playwright Chromium is not installed at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install chromium\`, set PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH to a compatible browser, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+        `Playwright Chromium is not installed at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install chromium\`, set PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH to a compatible browser, or set BOT_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
       );
     }
     await mkdir(artifactDir, { recursive: true });
@@ -492,7 +492,7 @@ describeControlUiE2e("Control UI Workboard status persistence E2E", () => {
         path: path.join(artifactDir, "workboard-edit-reopen.png"),
       });
       await page
-        .locator('openclaw-modal-dialog[label="Edit card"] .workboard-modal__actions')
+        .locator('bot-modal-dialog[label="Edit card"] .workboard-modal__actions')
         .last()
         .getByRole("button", { name: "Cancel" })
         .click();

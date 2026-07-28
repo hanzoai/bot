@@ -1,8 +1,8 @@
 // Fallback notice state helpers track fallback notices shown to users.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { areRuntimeModelRefsEquivalent } from "../agents/model-runtime-aliases.js";
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 // Persisted fallback notice state is active only when the current selected and
 // active runtime refs still match the recorded fallback transition.
@@ -14,7 +14,7 @@ export type FallbackNoticeState = Pick<
 export function resolveActiveFallbackState(params: {
   selectedModelRef: string;
   activeModelRef: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   state?: FallbackNoticeState;
 }): { active: boolean; reason?: string } {
   const selected = normalizeOptionalString(params.state?.fallbackNoticeSelectedModel);

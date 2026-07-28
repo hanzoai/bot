@@ -3,7 +3,7 @@ import { existsSync, realpathSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 
 const runFfmpegMock = vi.hoisted(() => vi.fn());
 
@@ -80,7 +80,7 @@ describe("transcodeAudioBufferToOpus", () => {
       ],
       { timeoutMs: 1234 },
     ]);
-    const tempRoot = realpathSync(resolvePreferredOpenClawTmpDir());
+    const tempRoot = realpathSync(resolvePreferredBotTmpDir());
     expect(capturedInputPath?.startsWith(path.join(tempRoot, "tts-test-"))).toBe(true);
     expect(capturedInputPath ? existsSync(capturedInputPath) : true).toBe(false);
     expect(capturedOutputPath ? existsSync(capturedOutputPath) : true).toBe(false);
@@ -148,7 +148,7 @@ describe("transcodeAudioBufferToOpus", () => {
       tempPrefix: "../bad-prefix",
     });
 
-    const tempRoot = realpathSync(resolvePreferredOpenClawTmpDir());
+    const tempRoot = realpathSync(resolvePreferredBotTmpDir());
     expect(capturedInputPath?.startsWith(tempRoot)).toBe(true);
     expect(capturedOutputPath ? existsSync(capturedOutputPath) : true).toBe(false);
   });

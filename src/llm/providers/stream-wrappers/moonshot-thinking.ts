@@ -1,5 +1,5 @@
 // Moonshot thinking wrapper normalizes reasoning output from Moonshot streams.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { StreamFn } from "../../../agents/runtime/index.js";
 import type { ThinkLevel } from "../../../auto-reply/thinking.js";
 import { streamSimple } from "../../stream.js";

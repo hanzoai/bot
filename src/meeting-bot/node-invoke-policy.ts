@@ -1,6 +1,6 @@
 import type {
-  OpenClawPluginNodeInvokePolicy,
-  OpenClawPluginNodeInvokePolicyResult,
+  BotPluginNodeInvokePolicy,
+  BotPluginNodeInvokePolicyResult,
 } from "../plugins/plugin-registration.types.js";
 import { isMeetingAudioBase64 } from "./audio-base64.js";
 
@@ -27,7 +27,7 @@ export type MeetingBrowserNodePolicyOptions = {
 
 type PolicyDecision =
   | { approved: true; params: Record<string, unknown> }
-  | { approved: false; result: OpenClawPluginNodeInvokePolicyResult };
+  | { approved: false; result: BotPluginNodeInvokePolicyResult };
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -222,7 +222,7 @@ function buildForwardParams(
 
 export function createMeetingBrowserNodeInvokePolicy(
   options: MeetingBrowserNodePolicyOptions,
-): OpenClawPluginNodeInvokePolicy {
+): BotPluginNodeInvokePolicy {
   return {
     commands: [options.commandName],
     dangerous: true,

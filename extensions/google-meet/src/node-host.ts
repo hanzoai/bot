@@ -1,6 +1,6 @@
 // Google Meet injects device/URL labels into the shared node-side browser audio host.
 import { spawnSync } from "node:child_process";
-import { createMeetingNodeHost } from "openclaw/plugin-sdk/meeting-runtime";
+import { createMeetingNodeHost } from "bot/plugin-sdk/meeting-runtime";
 import {
   DEFAULT_GOOGLE_MEET_AUDIO_INPUT_COMMAND,
   DEFAULT_GOOGLE_MEET_AUDIO_OUTPUT_COMMAND,
@@ -69,7 +69,7 @@ const googleMeetNodeHost = createMeetingNodeHost({
     buildProfileArgs: (profile) => ["--args", `--profile-directory=${profile}`],
     openedStatus: "chrome-opened",
     openedNotes: [
-      "Browser page control is handled by OpenClaw browser automation when using chrome-node.",
+      "Browser page control is handled by Bot browser automation when using chrome-node.",
     ],
   },
 });

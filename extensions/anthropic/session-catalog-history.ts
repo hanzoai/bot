@@ -1,6 +1,6 @@
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { withSessionTranscriptWriteLock } from "openclaw/plugin-sdk/session-transcript-runtime";
+import type { AgentMessage } from "bot/plugin-sdk/agent-harness-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { withSessionTranscriptWriteLock } from "bot/plugin-sdk/session-transcript-runtime";
 import { CLAUDE_CLI_BACKEND_ID } from "./cli-constants.js";
 import type { ClaudeTranscriptItem } from "./session-catalog-transcript.js";
 
@@ -16,13 +16,13 @@ function importedClaudeMessage(
   }
   const text = importedText || "[Unsupported Claude transcript item]";
   if (item.type === "userMessage") {
-    // Imported native rows are not OpenClaw-authored; mirrorOrigin excludes them
+    // Imported native rows are not Bot-authored; mirrorOrigin excludes them
     // from self-echo provenance so a repeated native prompt stays observable.
     return {
       role: "user",
       content: text,
       timestamp,
-      __openclaw: { mirrorOrigin: "claude-catalog-import" },
+      __bot: { mirrorOrigin: "claude-catalog-import" },
     } as AgentMessage;
   }
   const prefix =
@@ -60,7 +60,7 @@ export async function importClaudeHistory(params: {
   sessionKey: string;
   agentId: string;
   cwd?: string;
-  config: OpenClawConfig;
+  config: BotConfig;
 }): Promise<void> {
   const items = params.items.toReversed();
   await withSessionTranscriptWriteLock(params, async (transcript) => {

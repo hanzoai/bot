@@ -1,8 +1,8 @@
 // Slack plugin module implements members behavior.
 import type { SlackEventMiddlewareArgs } from "@slack/bolt";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { danger } from "openclaw/plugin-sdk/runtime-env";
-import { enqueueSystemEvent } from "openclaw/plugin-sdk/system-event-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { danger } from "bot/plugin-sdk/runtime-env";
+import { enqueueSystemEvent } from "bot/plugin-sdk/system-event-runtime";
 import type { SlackMonitorContext } from "../context.js";
 import type { SlackMemberChannelEvent } from "../types.js";
 import { authorizeAndResolveSlackSystemEventContext } from "./system-event-context.js";

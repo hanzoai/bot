@@ -8,7 +8,7 @@ describe("entry root help fast paths", () => {
     const outputRootHelp = vi.fn();
 
     await expect(
-      tryHandleRootHelpFastPath(["node", "openclaw", "--help"], {
+      tryHandleRootHelpFastPath(["node", "bot", "--help"], {
         loadRootHelpRenderOptionsForConfigSensitivePlugins: async () => null,
         outputPrecomputedRootHelpText,
         outputRootHelp,
@@ -25,7 +25,7 @@ describe("entry root help fast paths", () => {
     const liveOptions = { includePluginDescriptors: true };
 
     await expect(
-      tryHandleRootHelpFastPath(["node", "openclaw", "--help"], {
+      tryHandleRootHelpFastPath(["node", "bot", "--help"], {
         loadRootHelpRenderOptionsForConfigSensitivePlugins: async () => liveOptions,
         outputPrecomputedRootHelpText,
         outputRootHelp,
@@ -40,7 +40,7 @@ describe("entry root help fast paths", () => {
     const outputPrecomputedBrowserHelpText = vi.fn(() => true);
 
     await expect(
-      tryHandlePrecomputedCommandHelpFastPath(["node", "openclaw", "browser", "--help"], {
+      tryHandlePrecomputedCommandHelpFastPath(["node", "bot", "browser", "--help"], {
         outputPrecomputedBrowserHelpText,
       }),
     ).resolves.toBe(true);
@@ -52,7 +52,7 @@ describe("entry root help fast paths", () => {
     const outputPrecomputedNodesHelpText = vi.fn(() => true);
 
     await expect(
-      tryHandlePrecomputedCommandHelpFastPath(["node", "openclaw", "nodes", "--help"], {
+      tryHandlePrecomputedCommandHelpFastPath(["node", "bot", "nodes", "--help"], {
         loadRootHelpRenderOptionsForConfigSensitivePlugins: async () => ({
           includePluginDescriptors: true,
         }),

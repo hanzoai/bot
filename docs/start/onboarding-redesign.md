@@ -14,9 +14,9 @@ title: "Onboarding redesign"
 
 ## North star
 
-A non-technical user types `openclaw onboard` (or opens the app) and is greeted
-by one conversational presence — OpenClaw, the system custodian ("custodian" is
-the internal name only; the user always sees "OpenClaw") — that finds their AI,
+A non-technical user types `bot onboard` (or opens the app) and is greeted
+by one conversational presence — Bot, the system custodian ("custodian" is
+the internal name only; the user always sees "Bot") — that finds their AI,
 sets everything up with announced defaults instead of questions, hatches their
 agent as a visible identity moment, and stays reachable forever after as the
 system's caretaker. Magic by default, one consent boundary, no dead ends.
@@ -49,7 +49,7 @@ Design principles (decided, do not relitigate casually):
 
 ## Current shipped flow (after phases 1-3)
 
-`openclaw onboard` on a fresh macOS install, happy path — four Enters total:
+`bot onboard` on a fresh macOS install, happy path — four Enters total:
 
 1. Security note → one Enter to acknowledge (persisted; never asked again).
 2. **Question zero**: "How should I set things up?" — Full access (recommended)
@@ -85,12 +85,12 @@ Remote-gateway onboarding keeps its legacy conversational handoff
 
 | #   | Phase                                                                                                                                                     | Surface              | Status                                                                                                                            |
 | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Installed-app plugin recommendations (scan, candidates, AI matcher, wizard step, `device.apps` node command)                                              | classic + guided CLI | merged ([#109668](https://github.com/openclaw/openclaw/pull/109668))                                                              |
-| 2   | CLI custodian spine (question zero, discovery theater, auto-apply + hatch)                                                                                | guided CLI           | merged ([`a83ed13204f1`](https://github.com/openclaw/openclaw/commit/a83ed13204f118adf1009e5ac88d5afe1905b86c))                   |
-| 3   | Browser-first handoff (GUI-session detection, wait-for-dashboard-connect, TUI as fallback)                                                                | CLI → web            | merged ([#110054](https://github.com/openclaw/openclaw/pull/110054))                                                              |
-| 4   | Web custodian surface (option cards, typed `question` field on `openclaw.chat`, wizard-step mirroring, first-run handoff)                                 | Control UI           | merged ([#110141](https://github.com/openclaw/openclaw/pull/110141), [#110242](https://github.com/openclaw/openclaw/pull/110242)) |
-| 5   | Hatch and bootstrap (recommendations store with once-semantics, self-naming birth sequence, auto-hatch handoff after fresh setup; avatar ladder deferred) | agent bootstrap      | merged ([#110173](https://github.com/openclaw/openclaw/pull/110173), [#110331](https://github.com/openclaw/openclaw/pull/110331)) |
-| 6   | Custodian presence PR1 (pinned sidebar entry, Ask OpenClaw in Settings, normal-chrome caretaker greeting; event commentary and channel summon are PR2)    | web + channels       | merged ([#110269](https://github.com/openclaw/openclaw/pull/110269))                                                              |
+| 1   | Installed-app plugin recommendations (scan, candidates, AI matcher, wizard step, `device.apps` node command)                                              | classic + guided CLI | merged ([#109668](https://github.com/hanzoai/bot/pull/109668))                                                              |
+| 2   | CLI custodian spine (question zero, discovery theater, auto-apply + hatch)                                                                                | guided CLI           | merged ([`a83ed13204f1`](https://github.com/hanzoai/bot/commit/a83ed13204f118adf1009e5ac88d5afe1905b86c))                   |
+| 3   | Browser-first handoff (GUI-session detection, wait-for-dashboard-connect, TUI as fallback)                                                                | CLI → web            | merged ([#110054](https://github.com/hanzoai/bot/pull/110054))                                                              |
+| 4   | Web custodian surface (option cards, typed `question` field on `bot.chat`, wizard-step mirroring, first-run handoff)                                 | Control UI           | merged ([#110141](https://github.com/hanzoai/bot/pull/110141), [#110242](https://github.com/hanzoai/bot/pull/110242)) |
+| 5   | Hatch and bootstrap (recommendations store with once-semantics, self-naming birth sequence, auto-hatch handoff after fresh setup; avatar ladder deferred) | agent bootstrap      | merged ([#110173](https://github.com/hanzoai/bot/pull/110173), [#110331](https://github.com/hanzoai/bot/pull/110331)) |
+| 6   | Custodian presence PR1 (pinned sidebar entry, Ask Bot in Settings, normal-chrome caretaker greeting; event commentary and channel summon are PR2)    | web + channels       | merged ([#110269](https://github.com/hanzoai/bot/pull/110269))                                                              |
 | 7   | Resilience (custodian reachable on broken config, partial-surface salvage, auto-doctor)                                                                   | gateway              | follow-up                                                                                                                         |
 
 ## Implementation notes per phase
@@ -158,11 +158,11 @@ Remote-gateway onboarding keeps its legacy conversational handoff
   as classic finalize. Browser launch uses the shared `openUrl` helper.
 - Readiness polls the existing `system-presence` RPC as a **CLI-mode loopback
   client presenting the configured shared secret** — the trusted path every
-  `openclaw` command uses. A raw shared-auth Control UI client is rejected
+  `bot` command uses. A raw shared-auth Control UI client is rejected
   with "device identity required" on SecretRef gateways. The reachability
   preflight resolves the same target (and secret) as the wait loop, so the
   gate and the wait can never disagree on auth. The handoff completes only
-  when a connected `openclaw-control-ui`/`webchat` presence row is new
+  when a connected `bot-control-ui`/`webchat` presence row is new
   relative to the pre-launch baseline (an already-open dashboard cannot
   complete it).
 - `gateway.controlUi.enabled: false` short-circuits before any URL is shown.
@@ -173,7 +173,7 @@ Remote-gateway onboarding keeps its legacy conversational handoff
 
 ### Phase 4 — web custodian surface (merged: #110141, #110242)
 
-- `/custodian` page over `openclaw.chat` with the option-card component
+- `/custodian` page over `bot.chat` with the option-card component
   (2-4 cards, one recommended max, always skippable); onboarding chrome via
   `?onboarding=1`; model-setup first-run completion hands off into it.
 - Structured questions are a typed additive `question` field on
@@ -194,16 +194,16 @@ Remote-gateway onboarding keeps its legacy conversational handoff
   (model-generated candidates → preset marks → keep logo) to a follow-up. Same
   thread, avatar swap; the claw mark stays reserved for the custodian. The
   agreed identity persists twice: into `IDENTITY.md`/`SOUL.md` (what the agent
-  reads) and via `openclaw agents set-identity` (what channels and the UI
+  reads) and via `bot agents set-identity` (what channels and the UI
   display).
 - Recommendations (phase 1 service, stored scan with once-semantics) land as
   the last bootstrap step before the bootstrap file is removed: "minimal set
   or maximum convenience?" The bootstrap reads the stored offer via
-  `openclaw onboard recommendations --json` (opaque install IDs only) and
+  `bot onboard recommendations --json` (opaque install IDs only) and
   acknowledges it after the choice is handled so it never asks again. Channel
   connect buttons carry per-channel setup playbooks; the agent collects
   credentials conversationally and relays config writes to the custodian
-  ("asking OpenClaw…" is the canonical idiom).
+  ("asking Bot…" is the canonical idiom).
 - Self-learning is asked, not announced, and doubles as skill-workshop
   consent; describe ClawHub's release-trust, scan, verification, and integrity
   checks plus the publisher-code warning — never imply every release is signed.
@@ -215,9 +215,9 @@ Remote-gateway onboarding keeps its legacy conversational handoff
 
 ### Phase 6 — custodian presence (PR1 merged: #110269; commentary/summon are PR2)
 
-- Shipped in PR1: default-pinned "OpenClaw" sidebar entry (fresh profiles;
+- Shipped in PR1: default-pinned "Bot" sidebar entry (fresh profiles;
   existing users keep saved pins and reach it via customize/More), "Ask
-  OpenClaw" as the first Settings entry, and normal-chrome `/custodian` visits
+  Bot" as the first Settings entry, and normal-chrome `/custodian` visits
   that request the caretaker greeting (no onboarding welcome variant), with
   Exit setup rendered only in onboarding mode. A docked inline Settings pane
   needs shared conversation-view extraction (follow-up).
@@ -231,7 +231,7 @@ Remote-gateway onboarding keeps its legacy conversational handoff
 - Weak model detected at setup: auto-set `localModelLean`, and the custodian
   says so in plain words with an upgrade offer.
 - The custodian knows its internal nickname ("some folks call me the
-  custodian — OpenClaw's fine") and always refers to the agent by name.
+  custodian — Bot's fine") and always refers to the agent by name.
 
 ### Phase 7 — resilience (needs an owner decision before building)
 
@@ -244,7 +244,7 @@ not an implementation detail. Two scopes, pick one:
 
 - **Option A (recommended, policy-compliant): CLI-side auto-doctor.** When a
   gateway or CLI start fails with a known-shape invalid config, the CLI offers
-  (or with consent runs) `openclaw doctor --fix`, then retries once and
+  (or with consent runs) `bot doctor --fix`, then retries once and
   reports plainly. No gateway behavior changes; the custodian stays reachable
   through the existing degraded-SecretRef path and the terminal.
 - **Option B (needs explicit owner sign-off + security review): gateway
@@ -258,21 +258,21 @@ ladder for the hatch; macOS app rendering of the typed `question` field; a
 docked inline Settings pane for the custodian (needs shared conversation-view
 extraction); event-reactive commentary and channel summon/agent-down recovery
 (phase 6 PR2); automatic `localModelLean` for weak models; whether existing
-users' saved sidebar pins should adopt the OpenClaw entry.
+users' saved sidebar pins should adopt the Bot entry.
 
 ## Testing and landing playbook (hard-won; read before phases 4-6)
 
-- **`OPENCLAW_STATE_DIR` does not isolate the Gateway service.** The
-  LaunchAgent label (`ai.openclaw.gateway`) is machine-global: a fresh-install
+- **`BOT_STATE_DIR` does not isolate the Gateway service.** The
+  LaunchAgent label (`ai.bot.gateway`) is machine-global: a fresh-install
   onboarding test with an isolated state dir will REWRITE and RESTART the real
   machine's service (wrapper scripts land inside the isolated dir; the next
   service start breaks when that dir is cleaned). After any fresh-install
-  test, restore with `openclaw gateway install --force && openclaw gateway
+  test, restore with `bot gateway install --force && bot gateway
 restart` from the real environment and verify the plist. Product follow-up:
   state-dir-scoped service labels, or onboarding detecting a foreign service.
 - **Safe end-to-end harness**: pre-seed the isolated config with a `gateway`
   section (so onboarding takes the configured-install path and never touches
-  the service) and run `openclaw gateway run` as a plain foreground process on
+  the service) and run `bot gateway run` as a plain foreground process on
   a spare port with a plain token. That harness proved the phase-3 loop,
   including a real browser connect.
 - **Auth paths differ by client identity, not only credentials.** Presence and
@@ -328,7 +328,7 @@ restart` from the real environment and verify the plist. Product follow-up:
 - Option cards are constrained: 2-4 options, exactly one recommended, always
   skippable; the same component serves onboarding and the agent question tool
   (phase 4).
-- "Asking OpenClaw…" is the canonical delegation idiom; souls may add flavor,
+- "Asking Bot…" is the canonical delegation idiom; souls may add flavor,
   the tool narration stays plain (phase 5).
 - User-facing copy never says "code mode", "tools", or "context window" when
   explaining weak-model trimming (phase 6).

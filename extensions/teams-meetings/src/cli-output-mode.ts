@@ -1,4 +1,4 @@
-import { getRootOptionAwareCommandPath } from "openclaw/plugin-sdk/cli-argv";
+import { getRootOptionAwareCommandPath } from "bot/plugin-sdk/cli-argv";
 
 /** Every Teams meetings action emits one JSON result on stdout. */
 function isTeamsMeetingsMachineOutput(params: { argv: readonly string[] }): boolean {

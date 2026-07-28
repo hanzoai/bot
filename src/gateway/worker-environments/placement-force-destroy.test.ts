@@ -5,10 +5,10 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../../shared/deferred.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+  type BotStateDatabase,
+} from "../../state/bot-state-db.js";
 import { type PlacementStore, REQUEST } from "./placement-dispatch-test-fixtures.js";
 import { createHarness } from "./placement-dispatch-test-harness.js";
 import { createWorkerSessionPlacementStore } from "./placement-store.js";
@@ -16,17 +16,17 @@ import { createWorkerWorkspaceOperationCoordinator } from "./workspace-operation
 
 describe("forced worker environment destruction", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: BotStateDatabase;
   let placementStore: PlacementStore;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-force-destroy-"));
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "bot-force-destroy-"));
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
     placementStore = createWorkerSessionPlacementStore({ database, now: () => 1_000 });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 

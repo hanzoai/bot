@@ -129,24 +129,24 @@ describe("plugin compatibility registry", () => {
     }
     expect(records.get("plugin-sdk-broad-runtime-barrels")?.surfaces).toEqual(
       expect.arrayContaining([
-        "openclaw/plugin-sdk/agent-runtime",
-        "openclaw/plugin-sdk/agent-runtime loadModelCatalog params.useCache",
-        "openclaw/plugin-sdk/agent-runtime loadModelCatalog params.cacheOnly",
-        "openclaw/plugin-sdk/agent-runtime loadModelCatalog params.metadataSnapshot",
-        "openclaw/plugin-sdk/agent-runtime loadModelCatalog",
-        "openclaw/plugin-sdk/cli-runtime",
-        "openclaw/plugin-sdk/conversation-runtime",
-        "openclaw/plugin-sdk/hook-runtime",
-        "openclaw/plugin-sdk/media-runtime",
-        "openclaw/plugin-sdk/media-runtime buildAgentMediaPayload",
-        "openclaw/plugin-sdk/plugin-runtime",
-        "openclaw/plugin-sdk/security-runtime",
+        "bot/plugin-sdk/agent-runtime",
+        "bot/plugin-sdk/agent-runtime loadModelCatalog params.useCache",
+        "bot/plugin-sdk/agent-runtime loadModelCatalog params.cacheOnly",
+        "bot/plugin-sdk/agent-runtime loadModelCatalog params.metadataSnapshot",
+        "bot/plugin-sdk/agent-runtime loadModelCatalog",
+        "bot/plugin-sdk/cli-runtime",
+        "bot/plugin-sdk/conversation-runtime",
+        "bot/plugin-sdk/hook-runtime",
+        "bot/plugin-sdk/media-runtime",
+        "bot/plugin-sdk/media-runtime buildAgentMediaPayload",
+        "bot/plugin-sdk/plugin-runtime",
+        "bot/plugin-sdk/security-runtime",
       ]),
     );
     expect(records.get("deprecated-session-store-beta5-api")?.surfaces).toEqual(
       expect.arrayContaining([
-        "openclaw package root loadSessionStore",
-        "openclaw package root saveSessionStore",
+        "bot package root loadSessionStore",
+        "bot package root saveSessionStore",
       ]),
     );
   });

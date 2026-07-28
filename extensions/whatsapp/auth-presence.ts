@@ -1,18 +1,18 @@
 // Whatsapp plugin module implements auth presence behavior.
 import fs from "node:fs";
 import path from "node:path";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { resolveUserPath } from "openclaw/plugin-sdk/account-resolution";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveOAuthDir } from "openclaw/plugin-sdk/state-paths";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
+import { resolveUserPath } from "bot/plugin-sdk/account-resolution";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { resolveOAuthDir } from "bot/plugin-sdk/state-paths";
 import { hasWebCredsSync } from "./src/creds-files.js";
 
 type WhatsAppAuthPresenceParams =
   | {
-      cfg: OpenClawConfig;
+      cfg: BotConfig;
       env?: NodeJS.ProcessEnv;
     }
-  | OpenClawConfig;
+  | BotConfig;
 
 function addAccountAuthDirs(
   authDirs: Set<string>,
@@ -29,7 +29,7 @@ function addAccountAuthDirs(
 }
 
 function listWhatsAppAuthDirs(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): readonly string[] {
   const oauthDir = resolveOAuthDir(env);

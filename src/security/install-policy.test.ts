@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   killPidIfAlive,
   readPidFile,
@@ -17,7 +17,7 @@ type InstallPolicyRequest = Parameters<typeof runInstallPolicy>[0]["request"];
 const tempDirs: string[] = [];
 
 async function makeTempDir(): Promise<string> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-install-policy-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-install-policy-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -81,7 +81,7 @@ function baseRequest(sourcePath: string): InstallPolicyRequest {
     targetName: "weather",
     sourcePath,
     sourcePathKind: "directory",
-    source: { kind: "clawhub", authority: "openclaw", mutable: false, network: true },
+    source: { kind: "clawhub", authority: "bot", mutable: false, network: true },
     origin: { type: "clawhub", slug: "weather", version: "1.0.0" },
     request: {
       kind: "skill-install",
@@ -94,7 +94,7 @@ function baseRequest(sourcePath: string): InstallPolicyRequest {
   };
 }
 
-function configWithPolicy(scriptPath: string, env: Record<string, string>): OpenClawConfig {
+function configWithPolicy(scriptPath: string, env: Record<string, string>): BotConfig {
   return {
     security: {
       installPolicy: {
@@ -163,12 +163,12 @@ describe("runInstallPolicy", () => {
     expect(result).toEqual({});
     const captured = JSON.parse(await fs.readFile(capturePath, "utf8")) as Record<string, unknown>;
     expect(captured.protocolVersion).toBe(1);
-    expect(captured.openclawVersion).toEqual(expect.any(String));
+    expect(captured.botVersion).toEqual(expect.any(String));
     expect(captured.targetType).toBe("skill");
     expect(captured.sourcePath).toBe(sourceDir);
     expect(captured.source).toEqual({
       kind: "clawhub",
-      authority: "openclaw",
+      authority: "bot",
       mutable: false,
       network: true,
     });
@@ -299,7 +299,7 @@ describe("runInstallPolicy", () => {
   });
 
   it("skips skill requests when targets only include plugins", async () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       security: {
         installPolicy: {
           enabled: true,
@@ -341,7 +341,7 @@ describe("runInstallPolicy", () => {
       reason: "blocked by install policy: unapproved registry",
     });
     expect(warnings.join("\n")).toContain("target=skill:weather");
-    expect(warnings.join("\n")).toContain("source=clawhub/openclaw");
+    expect(warnings.join("\n")).toContain("source=clawhub/bot");
     expect(warnings.join("\n")).toContain("blocked by install policy");
   });
 

@@ -3,7 +3,7 @@
  * Mutation and persistence live in usage.ts; this module owns reusable state
  * predicates used by rotation and failure handling.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import { asDateTimestampMs } from "../../shared/number-coercion.js";
 import type { AuthProfileFailureReason, AuthProfileStore, ProfileUsageStats } from "./types.js";
 

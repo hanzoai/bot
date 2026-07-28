@@ -1,5 +1,5 @@
 // Shared ClawHub exact-release trust gate for plugin and skill installs.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { stripAnsi, visibleWidth } from "../../packages/terminal-core/src/ansi.js";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { formatTerminalLink } from "../../packages/terminal-core/src/terminal-link.js";
@@ -516,11 +516,11 @@ function formatClawHubTrustWarning(params: {
       params.mode === "update"
         ? malicious
           ? [
-              `Latest ${noun} version is marked malicious; OpenClaw will not download it.`,
+              `Latest ${noun} version is marked malicious; Bot will not download it.`,
               `Uninstall the installed ${noun} unless you have independently reviewed it.`,
             ]
-          : [`Latest ${noun} version is blocked by ClawHub; OpenClaw will not download it.`]
-        : [`OpenClaw will not install this ${noun} release from ClawHub.`];
+          : [`Latest ${noun} version is blocked by ClawHub; Bot will not download it.`]
+        : [`Bot will not install this ${noun} release from ClawHub.`];
     const blockedTitle = malicious
       ? "BLOCKED - ClawHub flagged this release as malicious"
       : "BLOCKED - ClawHub blocked this release";

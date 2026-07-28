@@ -19,7 +19,7 @@ type CodexRealtimeGlobalState = {
   sources: Map<symbol, CodexRealtimeBrowserSessionParams>;
 };
 
-const CODEX_REALTIME_GLOBAL_STATE = Symbol.for("openclaw.codex.realtime-voice.v1");
+const CODEX_REALTIME_GLOBAL_STATE = Symbol.for("bot.codex.realtime-voice.v1");
 
 function getGlobalState(): CodexRealtimeGlobalState {
   const root = globalThis as typeof globalThis & {

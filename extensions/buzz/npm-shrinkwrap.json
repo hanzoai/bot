@@ -1,21 +1,21 @@
 {
-  "name": "@openclaw/buzz",
+  "name": "@hanzo/bot-buzz",
   "version": "2026.7.2",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
-      "name": "@openclaw/buzz",
+      "name": "@hanzo/bot-buzz",
       "version": "2026.7.2",
       "dependencies": {
         "nostr-tools": "2.23.12",
         "zod": "4.4.3"
       },
       "peerDependencies": {
-        "openclaw": ">=2026.7.2"
+        "bot": ">=2026.7.2"
       },
       "peerDependenciesMeta": {
-        "openclaw": {
+        "bot": {
           "optional": true
         }
       }

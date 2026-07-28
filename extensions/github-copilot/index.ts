@@ -1,6 +1,6 @@
-// Github Copilot plugin entrypoint registers its OpenClaw integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolvePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
+// Github Copilot plugin entrypoint registers its Bot integration.
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { resolvePluginConfigObject } from "bot/plugin-sdk/plugin-config-runtime";
 import {
   definePluginEntry,
   type ProviderAuthContext,
@@ -8,8 +8,8 @@ import {
   type ProviderAuthMethodNonInteractiveContext,
   type UnifiedModelCatalogEntry,
   type UnifiedModelCatalogProviderContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/plugin-entry";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   applyAuthProfileConfig,
   coerceSecretRef,
@@ -19,7 +19,7 @@ import {
   normalizeOptionalSecretInput,
   resolveDefaultSecretProviderAlias,
   upsertAuthProfileWithLock,
-} from "openclaw/plugin-sdk/provider-auth";
+} from "bot/plugin-sdk/provider-auth";
 import { PUBLIC_GITHUB_COPILOT_DOMAIN, resolveGithubCopilotDomain } from "./domain.js";
 import { createGithubCopilotDynamicModelHooks } from "./dynamic-models.js";
 import { githubCopilotMemoryEmbeddingProviderAdapter } from "./embeddings.js";
@@ -54,7 +54,7 @@ async function loadGithubCopilotRuntime() {
   return await import("./register.runtime.js");
 }
 
-function applyCopilotDefaultModel(cfg: OpenClawConfig): OpenClawConfig {
+function applyCopilotDefaultModel(cfg: BotConfig): BotConfig {
   const defaults = cfg.agents?.defaults;
   const existingModel = defaults?.model;
   const existingPrimary =
@@ -132,7 +132,7 @@ function resolveExistingCopilotAuthResult(agentDir?: string): ProviderAuthResult
 // or tenant fallback), so only the host is stored here. Mirror of
 // clearGithubCopilotDomainConfigPatch; both are provider-owned and live with the
 // plugin rather than the shared SDK.
-function buildGithubCopilotDomainConfigPatch(domain: string): Partial<OpenClawConfig> {
+function buildGithubCopilotDomainConfigPatch(domain: string): Partial<BotConfig> {
   const normalized = normalizeGithubCopilotDomain(domain);
   return {
     models: {
@@ -140,26 +140,26 @@ function buildGithubCopilotDomainConfigPatch(domain: string): Partial<OpenClawCo
         [PROVIDER_ID]: { params: { githubDomain: normalized } },
       },
     },
-  } as unknown as Partial<OpenClawConfig>;
+  } as unknown as Partial<BotConfig>;
 }
 
 // Removes a previously persisted enterprise domain so config falls back to the
 // "no config == github.com" default. Undefined leaves are deleted on merge.
-function clearGithubCopilotDomainConfigPatch(): Partial<OpenClawConfig> {
+function clearGithubCopilotDomainConfigPatch(): Partial<BotConfig> {
   return {
     models: {
       providers: {
         [PROVIDER_ID]: { params: { githubDomain: undefined } },
       },
     },
-  } as unknown as Partial<OpenClawConfig>;
+  } as unknown as Partial<BotConfig>;
 }
 
 function applyGithubCopilotDomainToConfig(
-  config: OpenClawConfig,
+  config: BotConfig,
   domain: string,
   previousDomain: string,
-): OpenClawConfig {
+): BotConfig {
   const isEnterprise = domain !== PUBLIC_GITHUB_COPILOT_DOMAIN;
   const shouldClear = !isEnterprise && previousDomain !== PUBLIC_GITHUB_COPILOT_DOMAIN;
   if (!isEnterprise && !shouldClear) {
@@ -265,7 +265,7 @@ async function resolveCopilotNonInteractiveToken(
 
 async function runGitHubCopilotNonInteractiveAuth(
   ctx: ProviderAuthMethodNonInteractiveContext,
-): Promise<OpenClawConfig | null> {
+): Promise<BotConfig | null> {
   const opts = ctx.opts as Record<string, unknown> | undefined;
   const flagValue = normalizeOptionalSecretInput(opts?.githubCopilotToken);
   const resolved = await resolveCopilotNonInteractiveToken(ctx, flagValue);
@@ -351,7 +351,7 @@ export default definePluginEntry({
     };
     configureCopilotTokenCacheStore(openTokenCacheStore);
 
-    function resolveCurrentPluginConfig(config?: OpenClawConfig): GithubCopilotPluginConfig {
+    function resolveCurrentPluginConfig(config?: BotConfig): GithubCopilotPluginConfig {
       const runtimePluginConfig = resolvePluginConfigObject(config, "github-copilot");
       if (runtimePluginConfig) {
         return runtimePluginConfig as GithubCopilotPluginConfig;

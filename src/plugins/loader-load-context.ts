@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { resolveConfigEnvVars } from "../config/env-substitution.js";
 import { createConfigRuntimeEnv } from "../config/env-vars.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { tryReadJsonSync } from "../infra/json-files.js";
 import { resolveUserPath } from "../utils.js";
@@ -16,7 +16,7 @@ import {
   type PluginActivationConfigSource,
 } from "./config-state.js";
 import { getCurrentPluginMetadataSnapshot } from "./current-plugin-metadata-snapshot.js";
-import { resolveOpenClawDevSourceRoot } from "./dev-source-root.js";
+import { resolveBotDevSourceRoot } from "./dev-source-root.js";
 import { extractPluginInstallRecordsFromInstalledPluginIndex } from "./installed-plugin-index-install-records.js";
 import { loadInstalledPluginIndexInstallRecordsSync } from "./installed-plugin-index-records.js";
 import type { PluginLoadOptions, PluginRuntimeSubagentMode } from "./loader-types.js";
@@ -322,14 +322,14 @@ export function resolvePluginLoadCacheContext(options: PluginLoadOptions = {}) {
     shouldResolveRawConfigEnvVars
       ? (resolveConfigEnvVars(rawConfig, env, {
           onMissing: () => undefined,
-        }) as OpenClawConfig)
+        }) as BotConfig)
       : rawConfig,
     env,
   );
   const activationSourceConfig = shouldResolveRawConfigEnvVars
     ? (resolveConfigEnvVars(rawActivationSourceConfig, env, {
         onMissing: () => undefined,
-      }) as OpenClawConfig)
+      }) as BotConfig)
     : rawActivationSourceConfig;
   const normalized = normalizePluginsConfig(cfg.plugins);
   const activationSource = createPluginActivationSource({ config: activationSourceConfig });
@@ -381,7 +381,7 @@ export function resolvePluginLoadCacheContext(options: PluginLoadOptions = {}) {
       loadInstalledPluginIndexInstallRecordsSync({ env })),
     ...cfg.plugins?.installs,
   };
-  const devSourceRoot = resolveOpenClawDevSourceRoot(env);
+  const devSourceRoot = resolveBotDevSourceRoot(env);
   const cacheKey = buildCacheKey({
     workspaceDir: options.workspaceDir,
     plugins: shouldResolveRawConfigEnvVars

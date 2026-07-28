@@ -38,7 +38,7 @@ export async function recoverInstalledLaunchAgent<
   if (!repaired.ok) {
     if (repaired.status === "gui-session-unavailable") {
       const actionHint =
-        params.result === "started" ? "openclaw gateway start" : "openclaw gateway restart";
+        params.result === "started" ? "bot gateway start" : "bot gateway restart";
       throw new Error(
         formatLaunchAgentGuiSessionError({
           detail: repaired.detail,

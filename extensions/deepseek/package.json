@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/deepseek-provider",
+  "name": "@hanzo/bot-deepseek-provider",
   "version": "2026.7.2",
-  "description": "OpenClaw DeepSeek provider plugin.",
+  "description": "Bot DeepSeek provider plugin.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/deepseek-provider",
-      "npmSpec": "@openclaw/deepseek-provider",
+      "clawhubSpec": "clawhub:@hanzo/bot-deepseek-provider",
+      "npmSpec": "@hanzo/bot-deepseek-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.8"
     },
@@ -24,7 +24,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {

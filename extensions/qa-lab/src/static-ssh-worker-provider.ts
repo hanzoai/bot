@@ -3,9 +3,9 @@ import type {
   WorkerProfile,
   WorkerProvider,
   WorkerSshEndpoint,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { WorkerProviderError } from "openclaw/plugin-sdk/plugin-entry";
-import { isSecretRef, isValidSecretRef } from "openclaw/plugin-sdk/secret-input";
+} from "bot/plugin-sdk/plugin-entry";
+import { WorkerProviderError } from "bot/plugin-sdk/plugin-entry";
+import { isSecretRef, isValidSecretRef } from "bot/plugin-sdk/secret-input";
 
 const STATIC_SSH_WORKER_PROVIDER_ID = "static-ssh";
 

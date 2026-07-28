@@ -29,7 +29,7 @@ it("uses the same user initials and identity hue in the roster and attributed ch
     email: "riley@example.test",
     watchedSessions: [],
   };
-  const viewerAvatar = document.createElement("openclaw-viewer-avatar") as ViewerAvatarElement;
+  const viewerAvatar = document.createElement("bot-viewer-avatar") as ViewerAvatarElement;
   viewerAvatar.user = user;
   document.body.append(viewerAvatar);
 
@@ -58,7 +58,7 @@ it("uses the same user initials and identity hue in the roster and attributed ch
 });
 
 it("uses the shared resolver and rejects cross-origin presence avatar metadata", async () => {
-  const avatar = document.createElement("openclaw-viewer-avatar") as ViewerAvatarElement;
+  const avatar = document.createElement("bot-viewer-avatar") as ViewerAvatarElement;
   avatar.user = {
     id: "profile-mallory",
     name: "Mallory",
@@ -75,7 +75,7 @@ it("uses the shared resolver and rejects cross-origin presence avatar metadata",
 });
 
 it("renders trusted presence avatar routes directly", async () => {
-  const avatar = document.createElement("openclaw-viewer-avatar") as ViewerAvatarElement;
+  const avatar = document.createElement("bot-viewer-avatar") as ViewerAvatarElement;
   avatar.user = {
     id: "profile-ada",
     name: "Ada Lovelace",
@@ -92,7 +92,7 @@ it("renders trusted presence avatar routes directly", async () => {
 
 it("derives a missing presence avatar from the durable profile id, not the email", async () => {
   const profileId = "c3e32452-0467-47e5-aafa-233cd5dae29f";
-  const avatar = document.createElement("openclaw-viewer-avatar") as ViewerAvatarElement;
+  const avatar = document.createElement("bot-viewer-avatar") as ViewerAvatarElement;
   avatar.user = {
     id: profileId,
     email: "ada@example.test",
@@ -123,7 +123,7 @@ it("shares an authenticated avatar blob between the same user in the roster and 
     watchedSessions: [],
   };
   const avatars = Array.from({ length: 2 }, () => {
-    const avatar = document.createElement("openclaw-viewer-avatar") as ViewerAvatarElement;
+    const avatar = document.createElement("bot-viewer-avatar") as ViewerAvatarElement;
     avatar.user = user;
     document.body.append(avatar);
     return avatar;
@@ -168,7 +168,7 @@ const BUILD_INFO: ControlUiBuildInfo = {
 };
 
 function mountFooterFacepile() {
-  const facepile = document.createElement("openclaw-viewer-facepile") as ViewerFacepileElement;
+  const facepile = document.createElement("bot-viewer-facepile") as ViewerFacepileElement;
   facepile.variant = "footer";
   facepile.selfInstanceId = "self-instance";
   facepile.buildInfo = BUILD_INFO;
@@ -205,7 +205,7 @@ it("shows one footer hover card with every online user and server details", asyn
   });
 
   const tooltip = facepile.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-    "openclaw-tooltip.sidebar-hover-tooltip",
+    "bot-tooltip.sidebar-hover-tooltip",
   );
   await tooltip?.updateComplete;
   const trigger = facepile.querySelector<HTMLElement>(".viewer-facepile-trigger");
@@ -228,7 +228,7 @@ it("shows one footer hover card with every online user and server details", asyn
     "bob@example.test",
   );
   expect(rows[2]?.querySelector(".sidebar-hover-card__person-email")).toBeNull();
-  expect(rows[1]?.querySelector("openclaw-viewer-avatar")).not.toBeNull();
+  expect(rows[1]?.querySelector("bot-viewer-avatar")).not.toBeNull();
   expect(card?.textContent).toContain("Server");
   expect(card?.querySelector(".sidebar-hover-card__summary")?.textContent).toContain(
     "v2026.7.2 · main · dirty",
@@ -244,7 +244,7 @@ it("shows one footer hover card with every online user and server details", asyn
 });
 
 it("keeps session facepiles as plain non-interactive avatar clusters", async () => {
-  const facepile = document.createElement("openclaw-viewer-facepile") as ViewerFacepileElement;
+  const facepile = document.createElement("bot-viewer-facepile") as ViewerFacepileElement;
   facepile.variant = "session";
   facepile.presencePayload = {
     presence: [
@@ -262,7 +262,7 @@ it("keeps session facepiles as plain non-interactive avatar clusters", async () 
     expect(facepile.querySelector(".viewer-facepile")).not.toBeNull();
   });
   expect(facepile.querySelector("button.viewer-facepile-trigger")).toBeNull();
-  expect(facepile.querySelectorAll("openclaw-tooltip")).toHaveLength(1);
+  expect(facepile.querySelectorAll("bot-tooltip")).toHaveLength(1);
 });
 
 it("detects only other viewers watching the requested session", () => {

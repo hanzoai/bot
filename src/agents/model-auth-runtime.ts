@@ -1,13 +1,13 @@
 /**
  * Snapshot-aware and synthetic provider-auth availability.
  */
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeUniqueStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import {
   getRuntimeConfigSnapshot,
   getRuntimeConfigSourceSnapshot,
   selectApplicableRuntimeConfig,
 } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveProviderSyntheticAuthWithPlugin } from "../plugins/provider-runtime.js";
 import { resolveRuntimeSyntheticAuthProviderRefState } from "../plugins/synthetic-auth.runtime.js";
 import {
@@ -36,7 +36,7 @@ export type RuntimeProviderAuthLookup = {
 
 /** Builds stable env/synthetic auth lookup data for repeated provider checks. */
 export function createRuntimeProviderAuthLookup(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   includePluginSyntheticAuth?: boolean;
@@ -105,7 +105,7 @@ function resolveRuntimeEnvApiKeyLookupOptions(params: {
 
 /** Reads a literal or env-secret marker for a custom provider entry. */
 export function resolveManagedSecretRefRuntimeProviderAuth(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   secretSentinels?: boolean;
 }): ResolvedProviderAuth | undefined {
@@ -151,7 +151,7 @@ export function resolveManagedSecretRefRuntimeProviderAuth(params: {
 }
 
 export function assertRuntimeProviderSecretOwnerAvailable(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
 }): void {
   const provider = normalizeProviderId(params.provider);
@@ -177,7 +177,7 @@ export function assertRuntimeProviderSecretOwnerAvailable(params: {
 
 /** True when a custom local provider can use a synthetic no-auth placeholder. */
 export function hasSyntheticLocalProviderAuthConfig(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
 }): boolean {
   const providerConfig = authConfig.resolveProviderConfig(params.cfg, params.provider);
@@ -209,7 +209,7 @@ export function hasSyntheticLocalProviderAuthConfig(params: {
 }
 
 function listProviderSyntheticAuthRefs(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   modelApi?: string;
 }): string[] {
@@ -225,7 +225,7 @@ function listProviderSyntheticAuthRefs(params: {
 }
 
 function shouldResolvePluginSyntheticAuth(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   modelApi?: string;
   runtimeLookup?: RuntimeProviderAuthLookup;
@@ -246,7 +246,7 @@ function shouldResolvePluginSyntheticAuth(params: {
 /** Fast auth-availability check for runtime provider/model selection. */
 export function hasRuntimeAvailableProviderAuth(params: {
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   allowPluginSyntheticAuth?: boolean;
@@ -311,7 +311,7 @@ type SyntheticProviderAuthResolution = {
 };
 
 function resolveProviderSyntheticRuntimeAuth(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   modelApi?: string;
   secretSentinels?: boolean;
@@ -325,7 +325,7 @@ function resolveProviderSyntheticRuntimeAuth(params: {
   }
 
   const resolveFromConfig = (
-    config: OpenClawConfig | undefined,
+    config: BotConfig | undefined,
   ): ResolvedProviderAuth | undefined => {
     const providerConfig = authConfig.resolveProviderConfig(config, params.provider);
     return (
@@ -373,7 +373,7 @@ function resolveProviderSyntheticRuntimeAuth(params: {
 }
 
 export function resolveSyntheticLocalProviderAuth(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   modelApi?: string;
   secretSentinels?: boolean;

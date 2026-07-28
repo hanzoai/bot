@@ -1,4 +1,4 @@
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 
 export const BEAM_HOST_ID = "gateway";
 export const BEAM_MAX_BODY_BYTES = 56 * 1024;

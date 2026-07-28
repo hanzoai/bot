@@ -17,7 +17,7 @@ export function formatSidebarTimestamp(timestampMs: number | null | undefined): 
   return value.endsWith(" ago") ? value.slice(0, -" ago".length) : value;
 }
 
-/** Session keys already adopted into OpenClaw sessions; the regular list hides
+/** Session keys already adopted into Bot sessions; the regular list hides
     these so each adopted session stays a single selectable catalog row. */
 export function adoptedCatalogSessionKeys(catalogs: readonly SessionCatalog[]): Set<string> {
   const keys = new Set<string>();

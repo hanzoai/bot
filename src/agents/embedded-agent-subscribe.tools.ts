@@ -1,16 +1,16 @@
 /** Sanitizes, extracts, and classifies embedded-agent tool execution results. */
-import { estimateBase64DecodedBytes } from "@openclaw/media-core/base64";
-import { asOptionalRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
+import { estimateBase64DecodedBytes } from "@hanzo/bot-media-core/base64";
+import { asOptionalRecord as readRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
   normalizeOptionalStringifiedId,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { getChannelPlugin, normalizeChannelId } from "../channels/plugins/index.js";
 import type { ChannelMessageActionName } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeTargetForProvider } from "../infra/outbound/target-normalization.js";
 import {
   normalizeLegacyInteractiveReply,
@@ -663,7 +663,7 @@ function isToolResultMediaTrusted(
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.embeddedSubscribeToolsTestApi")
+    Symbol.for("bot.embeddedSubscribeToolsTestApi")
   ] = { isToolResultMediaTrusted };
 }
 
@@ -946,7 +946,7 @@ function resolveMessagingToolThreadEvidence(params: {
   allowImplicitThread: boolean;
   threadSuppressed: boolean;
   options?: {
-    config?: OpenClawConfig;
+    config?: BotConfig;
     currentChannelId?: string;
     currentMessagingTarget?: string;
     currentThreadId?: string;
@@ -1015,7 +1015,7 @@ export function extractMessagingToolSend(
   toolName: string,
   args: Record<string, unknown>,
   options?: {
-    config?: OpenClawConfig;
+    config?: BotConfig;
     currentChannelId?: string;
     currentMessagingTarget?: string;
     currentThreadId?: string;

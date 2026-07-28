@@ -576,7 +576,7 @@ describe("matrix message actions", () => {
     expect(getEvent).toHaveBeenCalledWith("!room:example.org", "$thread-root");
     expect(result.messages.map((message) => message.eventId)).toEqual(["$thread-root"]);
     expect(result.nextBatch).toEqual(
-      expect.stringContaining("openclaw.matrix.thread-relations-start:"),
+      expect.stringContaining("bot.matrix.thread-relations-start:"),
     );
 
     const next = await readMatrixMessages("room:!room:example.org", {

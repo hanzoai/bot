@@ -79,14 +79,14 @@ export function addTraceAttributes(
   if (!normalized) {
     return;
   }
-  attributes["openclaw.traceId"] = normalized.traceId;
+  attributes["bot.traceId"] = normalized.traceId;
   if (normalized.spanId) {
-    attributes["openclaw.spanId"] = normalized.spanId;
+    attributes["bot.spanId"] = normalized.spanId;
   }
   if (normalized.parentSpanId) {
-    attributes["openclaw.parentSpanId"] = normalized.parentSpanId;
+    attributes["bot.parentSpanId"] = normalized.parentSpanId;
   }
   if (normalized.traceFlags) {
-    attributes["openclaw.traceFlags"] = normalized.traceFlags;
+    attributes["bot.traceFlags"] = normalized.traceFlags;
   }
 }

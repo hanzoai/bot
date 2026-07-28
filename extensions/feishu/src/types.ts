@@ -1,6 +1,6 @@
 // Feishu type declarations define plugin contracts.
-import type { MessageReceipt } from "openclaw/plugin-sdk/channel-outbound";
-import type { BaseProbeResult } from "openclaw/plugin-sdk/core";
+import type { MessageReceipt } from "bot/plugin-sdk/channel-outbound";
+import type { BaseProbeResult } from "bot/plugin-sdk/core";
 import type { FeishuConfigSchema, FeishuAccountConfigSchema, z } from "./config-schema.js";
 import type { MentionTarget } from "./mention-target.types.js";
 
@@ -89,7 +89,7 @@ export interface FeishuProbeResult extends BaseProbeResult {
 export type FeishuMediaInfo = {
   path?: string;
   contentType?: string;
-  kind: Exclude<import("openclaw/plugin-sdk/media-runtime").MediaKind, "unknown">;
+  kind: Exclude<import("bot/plugin-sdk/media-runtime").MediaKind, "unknown">;
 };
 
 export type FeishuToolsConfig = {

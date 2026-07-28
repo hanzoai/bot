@@ -76,7 +76,7 @@ describe("managed Codex app-server binary", () => {
   });
 
   it("keeps the pinned package ahead of stale desktop bundles for ordinary turns", async () => {
-    const pluginRoot = path.join("/tmp", "openclaw", "extensions", "codex");
+    const pluginRoot = path.join("/tmp", "bot", "extensions", "codex");
     const pluginLocalCommand = managedCommandPath(pluginRoot, "darwin");
     const pathExists = vi.fn(
       async (filePath: string) =>
@@ -103,7 +103,7 @@ describe("managed Codex app-server binary", () => {
   });
 
   it("prefers the ChatGPT.app desktop bundle for Computer Use", async () => {
-    const pluginRoot = path.join("/tmp", "openclaw", "extensions", "codex");
+    const pluginRoot = path.join("/tmp", "bot", "extensions", "codex");
     const pluginLocalCommand = managedCommandPath(pluginRoot, "darwin");
     const pathExists = vi.fn(
       async (filePath: string) =>
@@ -125,7 +125,7 @@ describe("managed Codex app-server binary", () => {
   });
 
   it("falls back to the legacy Codex.app desktop bundle when ChatGPT.app is absent", async () => {
-    const pluginRoot = path.join("/tmp", "openclaw", "extensions", "codex");
+    const pluginRoot = path.join("/tmp", "bot", "extensions", "codex");
     const pluginLocalCommand = managedCommandPath(pluginRoot, "darwin");
     const pathExists = vi.fn(
       async (filePath: string) =>
@@ -147,7 +147,7 @@ describe("managed Codex app-server binary", () => {
   });
 
   it("falls back to the plugin-local binary when neither desktop bundle exists", async () => {
-    const pluginRoot = path.join("/tmp", "openclaw", "extensions", "codex");
+    const pluginRoot = path.join("/tmp", "bot", "extensions", "codex");
     const pluginLocalCommand = managedCommandPath(pluginRoot, "darwin");
     const pathExists = vi.fn(async (filePath: string) => filePath === pluginLocalCommand);
 
@@ -167,7 +167,7 @@ describe("managed Codex app-server binary", () => {
   });
 
   it("finds Codex in the package install root used by packaged plugins", async () => {
-    const installRoot = path.join("/tmp", "openclaw-plugin-package", "codex");
+    const installRoot = path.join("/tmp", "bot-plugin-package", "codex");
     const pluginRoot = path.join(installRoot, "dist", "extensions", "codex");
     const installedCommand = managedCommandPath(installRoot, "linux");
     const pathExists = vi.fn(async (filePath: string) => filePath === installedCommand);
@@ -186,8 +186,8 @@ describe("managed Codex app-server binary", () => {
   });
 
   it("finds Codex bins hoisted into an isolated npm project root", async () => {
-    const projectRoot = path.join("/tmp", "state", "npm", "projects", "openclaw-codex-hash");
-    const pluginRoot = path.join(projectRoot, "node_modules", "@openclaw", "codex");
+    const projectRoot = path.join("/tmp", "state", "npm", "projects", "bot-codex-hash");
+    const pluginRoot = path.join(projectRoot, "node_modules", "@bot", "codex");
     const installedCommand = managedCommandPath(projectRoot, "linux");
     const pathExists = vi.fn(async (filePath: string) => filePath === installedCommand);
 
@@ -209,12 +209,12 @@ describe("managed Codex app-server binary", () => {
       "C:\\",
       "Users",
       "test",
-      ".openclaw",
+      ".bot",
       "npm",
       "projects",
-      "openclaw-codex-hash",
+      "bot-codex-hash",
     );
-    const pluginRoot = path.win32.join(projectRoot, "node_modules", "@openclaw", "codex");
+    const pluginRoot = path.win32.join(projectRoot, "node_modules", "@bot", "codex");
     const installedCommand = managedCommandPath(projectRoot, "win32");
     const pathExists = vi.fn(async (filePath: string) => filePath === installedCommand);
 
@@ -232,7 +232,7 @@ describe("managed Codex app-server binary", () => {
   });
 
   it("falls back to the resolved Codex package bin when no command shim exists", async () => {
-    const installRoot = await mkdtemp(path.join(os.tmpdir(), "openclaw-codex-package-"));
+    const installRoot = await mkdtemp(path.join(os.tmpdir(), "bot-codex-package-"));
     const pluginRoot = path.join(installRoot, "dist", "extensions", "codex");
     const packageRoot = path.join(installRoot, "node_modules", "@openai", "codex");
     const packageBin = path.join(packageRoot, "bin", "codex.js");
@@ -268,7 +268,7 @@ describe("managed Codex app-server binary", () => {
     await expect(
       resolveManagedCodexAppServerStartOptions(startOptions("managed"), {
         platform: "darwin",
-        pluginRoot: path.join("/tmp", "openclaw", "extensions", "codex"),
+        pluginRoot: path.join("/tmp", "bot", "extensions", "codex"),
         pathExists: vi.fn(async () => false),
       }),
     ).rejects.toThrow("Managed Codex app-server binary was not found");

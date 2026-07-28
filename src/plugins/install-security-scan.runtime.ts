@@ -1,10 +1,10 @@
 // Runtime bridge for plugin install security scanning.
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { tryReadJson } from "../infra/json-files.js";
-import { resolveOpenClawPackageRootSync } from "../infra/openclaw-root.js";
+import { resolveBotPackageRootSync } from "../infra/bot-root.js";
 import { parseStrictPositiveInteger } from "../infra/parse-finite-number.js";
 import {
   runInstallPolicy,
@@ -181,13 +181,13 @@ function pathContainsNodeModulesSegment(relativePath: string): boolean {
     .includes("node_modules");
 }
 
-function isPackageRootOpenClawPeerSymlink(segments: string[]): boolean {
+function isPackageRootBotPeerSymlink(segments: string[]): boolean {
   return (
-    (segments.length === 2 && segments[0] === "node_modules" && segments[1] === "openclaw") ||
+    (segments.length === 2 && segments[0] === "node_modules" && segments[1] === "bot") ||
     (segments.length === 3 &&
       segments[0] === "node_modules" &&
       segments[1] === ".bin" &&
-      segments[2] === "openclaw")
+      segments[2] === "bot")
   );
 }
 
@@ -203,23 +203,23 @@ function isManagedNpmRootPackagePeerSymlink(segments: string[]): boolean {
   ) {
     return false;
   }
-  return isPackageRootOpenClawPeerSymlink(segments.slice(packageEndIndex));
+  return isPackageRootBotPeerSymlink(segments.slice(packageEndIndex));
 }
 
-function isTrustedOpenClawPeerSymlink(params: {
+function isTrustedBotPeerSymlink(params: {
   allowManagedNpmRootPackagePeerSymlinks?: boolean;
   relativePath: string;
 }): boolean {
   const segments = params.relativePath.split(/[\\/]+/);
   return (
-    isPackageRootOpenClawPeerSymlink(segments) ||
+    isPackageRootBotPeerSymlink(segments) ||
     (params.allowManagedNpmRootPackagePeerSymlinks === true &&
       isManagedNpmRootPackagePeerSymlink(segments))
   );
 }
 
-async function resolveTrustedHostOpenClawRootRealPath(): Promise<string | null> {
-  const hostRoot = resolveOpenClawPackageRootSync({
+async function resolveTrustedHostBotRootRealPath(): Promise<string | null> {
+  const hostRoot = resolveBotPackageRootSync({
     argv1: process.argv[1],
     cwd: process.cwd(),
     moduleUrl: import.meta.url,
@@ -230,13 +230,13 @@ async function resolveTrustedHostOpenClawRootRealPath(): Promise<string | null> 
   return await fs.realpath(hostRoot).catch(() => path.resolve(hostRoot));
 }
 
-function isTrustedHostOpenClawPath(params: {
+function isTrustedHostBotPath(params: {
   resolvedTargetPath: string;
-  trustedHostOpenClawRootRealPath: string | null;
+  trustedHostBotRootRealPath: string | null;
 }): boolean {
   return (
-    params.trustedHostOpenClawRootRealPath !== null &&
-    isPathInside(params.trustedHostOpenClawRootRealPath, params.resolvedTargetPath)
+    params.trustedHostBotRootRealPath !== null &&
+    isPathInside(params.trustedHostBotRootRealPath, params.resolvedTargetPath)
   );
 }
 
@@ -245,7 +245,7 @@ async function inspectNodeModulesSymlinkTarget(params: {
   rootRealPath: string;
   symlinkPath: string;
   symlinkRelativePath: string;
-  trustedHostOpenClawRootRealPath: string | null;
+  trustedHostBotRootRealPath: string | null;
 }): Promise<
   Pick<PackageManifestTraversalResult, "blockedDirectoryFinding" | "blockedFileFinding">
 > {
@@ -263,13 +263,13 @@ async function inspectNodeModulesSymlinkTarget(params: {
 
   if (!isPathInside(params.rootRealPath, resolvedTargetPath)) {
     if (
-      isTrustedOpenClawPeerSymlink({
+      isTrustedBotPeerSymlink({
         allowManagedNpmRootPackagePeerSymlinks: params.allowManagedNpmRootPackagePeerSymlinks,
         relativePath: params.symlinkRelativePath,
       }) &&
-      isTrustedHostOpenClawPath({
+      isTrustedHostBotPath({
         resolvedTargetPath,
-        trustedHostOpenClawRootRealPath: params.trustedHostOpenClawRootRealPath,
+        trustedHostBotRootRealPath: params.trustedHostBotRootRealPath,
       })
     ) {
       return {};
@@ -306,15 +306,15 @@ function readPositiveIntegerEnv(name: string, fallback: number): number {
 function resolvePackageManifestTraversalLimits(): PackageManifestTraversalLimits {
   return {
     maxDepth: readPositiveIntegerEnv(
-      "OPENCLAW_INSTALL_SCAN_MAX_DEPTH",
+      "BOT_INSTALL_SCAN_MAX_DEPTH",
       DEFAULT_PACKAGE_MANIFEST_TRAVERSAL_LIMITS.maxDepth,
     ),
     maxDirectories: readPositiveIntegerEnv(
-      "OPENCLAW_INSTALL_SCAN_MAX_DIRECTORIES",
+      "BOT_INSTALL_SCAN_MAX_DIRECTORIES",
       DEFAULT_PACKAGE_MANIFEST_TRAVERSAL_LIMITS.maxDirectories,
     ),
     maxManifests: readPositiveIntegerEnv(
-      "OPENCLAW_INSTALL_SCAN_MAX_MANIFESTS",
+      "BOT_INSTALL_SCAN_MAX_MANIFESTS",
       DEFAULT_PACKAGE_MANIFEST_TRAVERSAL_LIMITS.maxManifests,
     ),
   };
@@ -354,7 +354,7 @@ function collectManifestRuntimeDependencyNames(manifest: PackageManifest): strin
     }
   }
   for (const dependencyName of Object.keys(manifest.peerDependencies ?? {})) {
-    if (dependencyName !== "openclaw" && isInstallScannableDependencyName(dependencyName)) {
+    if (dependencyName !== "bot" && isInstallScannableDependencyName(dependencyName)) {
       dependencyNames.add(dependencyName);
     }
   }
@@ -485,7 +485,7 @@ async function collectPackageManifestPaths(params: {
   const limits = resolvePackageManifestTraversalLimits();
   const rootDir = params.rootDir;
   const rootRealPath = await fs.realpath(rootDir).catch(() => rootDir);
-  const trustedHostOpenClawRootRealPath = await resolveTrustedHostOpenClawRootRealPath();
+  const trustedHostBotRootRealPath = await resolveTrustedHostBotRootRealPath();
   const queue: Array<{ depth: number; dir: string }> = [{ depth: 0, dir: rootDir }];
   const packageManifestPaths: string[] = [];
   const visitedDirectories = new Set<string>();
@@ -554,7 +554,7 @@ async function collectPackageManifestPaths(params: {
             rootRealPath,
             symlinkPath: nextPath,
             symlinkRelativePath: relativeNextPath,
-            trustedHostOpenClawRootRealPath,
+            trustedHostBotRootRealPath,
           });
           if (symlinkTargetInspection.blockedDirectoryFinding) {
             firstBlockedDirectoryFinding ??= symlinkTargetInspection.blockedDirectoryFinding;
@@ -792,7 +792,7 @@ function resolvePolicySource(params: {
   if (params.requestKind === "skill-install") {
     switch (params.origin?.type) {
       case "clawhub":
-        return { kind: "clawhub", authority: "openclaw", mutable: false, network: true };
+        return { kind: "clawhub", authority: "bot", mutable: false, network: true };
       case "git":
         return {
           kind: "git",
@@ -804,11 +804,11 @@ function resolvePolicySource(params: {
         return { kind: "local-path", authority: "user", mutable: true, network: false };
       case "upload":
         return { kind: "upload", authority: "user", mutable: false, network: false };
-      case "openclaw-bundled":
-        return { kind: "bundled", authority: "openclaw", mutable: false, network: false };
-      case "openclaw-managed":
-      case "openclaw-extra":
-        return { kind: "managed", authority: "openclaw", mutable: false, network: false };
+      case "bot-bundled":
+        return { kind: "bundled", authority: "bot", mutable: false, network: false };
+      case "bot-managed":
+      case "bot-extra":
+        return { kind: "managed", authority: "bot", mutable: false, network: false };
       default:
         return { kind: "workspace", authority: "user", mutable: true, network: false };
     }
@@ -829,7 +829,7 @@ function resolvePolicySource(params: {
   return { kind: "local-path", authority: "unknown", mutable: true, network: false };
 }
 
-function shouldBypassOpenClawInstallFriction(params: {
+function shouldBypassBotInstallFriction(params: {
   source?: InstallPolicySource;
   trustedSourceLinkedOfficialInstall?: boolean;
 }): boolean {
@@ -844,12 +844,12 @@ function shouldBypassOpenClawInstallFriction(params: {
     return source.kind === "clawhub" || source.kind === "git" || source.kind === "npm";
   }
   return (
-    source.authority === "openclaw" && (source.kind === "bundled" || source.kind === "managed")
+    source.authority === "bot" && (source.kind === "bundled" || source.kind === "managed")
   );
 }
 
 async function runOperatorInstallPolicy(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   logger: InstallScanLogger;
   origin: InstallPolicyOrigin;
   source?: InstallPolicySource;
@@ -906,7 +906,7 @@ async function runOperatorInstallPolicy(params: {
 
 export async function scanBundleInstallSourceRuntime(
   params: InstallSafetyOverrides & {
-    config?: OpenClawConfig;
+    config?: BotConfig;
     logger: InstallScanLogger;
     pluginId: string;
     sourceDir: string;
@@ -938,7 +938,7 @@ export async function scanBundleInstallSourceRuntime(
         ...(params.version ? { version: params.version } : {}),
       },
     });
-  if (shouldBypassOpenClawInstallFriction({ source: params.source })) {
+  if (shouldBypassBotInstallFriction({ source: params.source })) {
     return await runPolicy();
   }
   const dependencyBlocked = await scanPluginDependencyDenylist({
@@ -978,7 +978,7 @@ export async function scanBundleInstallSourceRuntime(
 
 export async function scanPackageInstallSourceRuntime(
   params: InstallSafetyOverrides & {
-    config?: OpenClawConfig;
+    config?: BotConfig;
     extensions: string[];
     logger: InstallScanLogger;
     packageDir: string;
@@ -1022,7 +1022,7 @@ export async function scanPackageInstallSourceRuntime(
       },
     });
   if (
-    shouldBypassOpenClawInstallFriction({
+    shouldBypassBotInstallFriction({
       source: params.source,
       trustedSourceLinkedOfficialInstall: params.trustedSourceLinkedOfficialInstall,
     })
@@ -1069,7 +1069,7 @@ export async function scanPackageInstallSourceRuntime(
 export async function scanInstalledPackageDependencyTreeRuntime(params: {
   additionalPackageDirs?: string[];
   allowManagedNpmRootPackagePeerSymlinks?: boolean;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   dangerouslyForceUnsafeInstall?: boolean;
   dependencyScanRootDir?: string;
   logger: InstallScanLogger;
@@ -1102,7 +1102,7 @@ export async function scanInstalledPackageDependencyTreeRuntime(params: {
       trustedSourceLinkedOfficialInstall: params.trustedSourceLinkedOfficialInstall,
     });
   if (
-    shouldBypassOpenClawInstallFriction({
+    shouldBypassBotInstallFriction({
       source: params.source,
       trustedSourceLinkedOfficialInstall: params.trustedSourceLinkedOfficialInstall,
     })
@@ -1135,7 +1135,7 @@ export async function scanInstalledPackageDependencyTreeRuntime(params: {
 
 export async function scanFileInstallSourceRuntime(
   params: InstallSafetyOverrides & {
-    config?: OpenClawConfig;
+    config?: BotConfig;
     filePath: string;
     logger: InstallScanLogger;
     mode?: "install" | "update";
@@ -1187,7 +1187,7 @@ export async function scanFileInstallSourceRuntime(
 }
 
 export async function preflightPluginNpmInstallPolicyRuntime(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   logger: InstallScanLogger;
   mode?: "install" | "update";
   packageName: string;
@@ -1219,7 +1219,7 @@ export async function preflightPluginNpmInstallPolicyRuntime(params: {
 }
 
 export async function preflightPluginGitInstallPolicyRuntime(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   logger: InstallScanLogger;
   mode?: "install" | "update";
   pluginId: string;
@@ -1247,7 +1247,7 @@ export async function preflightPluginGitInstallPolicyRuntime(params: {
 }
 
 export async function evaluateSkillInstallPolicyRuntime(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   installId: string;
   installSpec?: SkillInstallSpec;
   logger: InstallScanLogger;
@@ -1278,7 +1278,7 @@ export async function evaluateSkillInstallPolicyRuntime(params: {
         ...(params.installSpec ? { installSpec: params.installSpec } : {}),
       },
     });
-  if (shouldBypassOpenClawInstallFriction({ source: params.source })) {
+  if (shouldBypassBotInstallFriction({ source: params.source })) {
     return await runPolicy();
   }
   const policyResult = await runPolicy();

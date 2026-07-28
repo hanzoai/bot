@@ -7,18 +7,18 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
 source "$ROOT_DIR/scripts/lib/docker-e2e-package.sh"
 
-IMAGE_NAME="$(docker_e2e_resolve_image "openclaw-update-channel-switch-e2e" OPENCLAW_UPDATE_CHANNEL_SWITCH_E2E_IMAGE)"
-SKIP_BUILD="${OPENCLAW_UPDATE_CHANNEL_SWITCH_E2E_SKIP_BUILD:-0}"
+IMAGE_NAME="$(docker_e2e_resolve_image "bot-update-channel-switch-e2e" BOT_UPDATE_CHANNEL_SWITCH_E2E_IMAGE)"
+SKIP_BUILD="${BOT_UPDATE_CHANNEL_SWITCH_E2E_SKIP_BUILD:-0}"
 cleanup() {
   docker_e2e_cleanup_package_tgz "${PACKAGE_TGZ:-}"
 }
 trap cleanup EXIT
 
-PACKAGE_TGZ="$(docker_e2e_prepare_package_tgz update-channel-switch "${OPENCLAW_CURRENT_PACKAGE_TGZ:-}")"
+PACKAGE_TGZ="$(docker_e2e_prepare_package_tgz update-channel-switch "${BOT_CURRENT_PACKAGE_TGZ:-}")"
 # Bare lanes mount the package artifact instead of baking app sources into the image.
 docker_e2e_package_mount_args "$PACKAGE_TGZ"
-OPENCLAW_TEST_STATE_SCRIPT_B64="$(
-  node "$ROOT_DIR/scripts/lib/openclaw-test-state.mjs" shell \
+BOT_TEST_STATE_SCRIPT_B64="$(
+  node "$ROOT_DIR/scripts/lib/bot-test-state.mjs" shell \
     --label update-channel-switch \
     --scenario update-stable |
     base64 |
@@ -30,13 +30,13 @@ docker_e2e_build_or_reuse "$IMAGE_NAME" update-channel-switch "$ROOT_DIR/scripts
 echo "Running update channel switch E2E..."
 docker_e2e_run_with_harness \
   -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
-  -e OPENCLAW_SKIP_CHANNELS=1 \
-  -e OPENCLAW_SKIP_PROVIDERS=1 \
-  -e "OPENCLAW_TEST_STATE_SCRIPT_B64=$OPENCLAW_TEST_STATE_SCRIPT_B64" \
+  -e BOT_SKIP_CHANNELS=1 \
+  -e BOT_SKIP_PROVIDERS=1 \
+  -e "BOT_TEST_STATE_SCRIPT_B64=$BOT_TEST_STATE_SCRIPT_B64" \
   "${DOCKER_E2E_PACKAGE_ARGS[@]}" \
   "$IMAGE_NAME" \
   bash -lc 'set -euo pipefail
-source scripts/lib/openclaw-e2e-instance.sh
+source scripts/lib/bot-e2e-instance.sh
 
 export npm_config_loglevel=error
 export npm_config_fund=false
@@ -46,12 +46,12 @@ export NPM_CONFIG_PREFIX=/tmp/npm-prefix
 export PNPM_HOME=/tmp/pnpm-home
 export PATH="/tmp/npm-prefix/bin:/tmp/pnpm-home:$PATH"
 export CI=true
-export OPENCLAW_DISABLE_BUNDLED_PLUGINS=1
-export OPENCLAW_NO_ONBOARD=1
-export OPENCLAW_NO_PROMPT=1
+export BOT_DISABLE_BUNDLED_PLUGINS=1
+export BOT_NO_ONBOARD=1
+export BOT_NO_PROMPT=1
 
-package_tgz="${OPENCLAW_CURRENT_PACKAGE_TGZ:?missing OPENCLAW_CURRENT_PACKAGE_TGZ}"
-git_root="/tmp/openclaw-git"
+package_tgz="${BOT_CURRENT_PACKAGE_TGZ:?missing BOT_CURRENT_PACKAGE_TGZ}"
+git_root="/tmp/bot-git"
 mkdir -p "$git_root"
 # Build the fake git install from the packed package contents, not the checkout.
 tar -xzf "$package_tgz" -C "$git_root" --strip-components=1
@@ -61,15 +61,15 @@ node scripts/e2e/lib/package-git-fixture.mjs prepare "$git_root"
 node scripts/e2e/lib/update-channel-switch/assertions.mjs prepare-git-fixture "$git_root"
 (
   cd "$git_root"
-  if ! openclaw_e2e_maybe_timeout "${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install --omit=optional --no-fund --no-audit >/tmp/openclaw-git-install.log 2>&1; then
-    openclaw_e2e_print_log /tmp/openclaw-git-install.log >&2
+  if ! bot_e2e_maybe_timeout "${BOT_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install --omit=optional --no-fund --no-audit >/tmp/bot-git-install.log 2>&1; then
+    bot_e2e_print_log /tmp/bot-git-install.log >&2
     exit 1
   fi
 )
 node scripts/e2e/lib/update-channel-switch/assertions.mjs write-control-ui "$git_root"
 
-git config --global user.email "docker-e2e@openclaw.local"
-git config --global user.name "OpenClaw Docker E2E"
+git config --global user.email "docker-e2e@bot.local"
+git config --global user.name "Bot Docker E2E"
 git config --global gc.auto 0
 git -C "$git_root" init -q
 git -C "$git_root" config gc.auto 0
@@ -80,27 +80,27 @@ fixture_sha="$(git -C "$git_root" rev-parse HEAD)"
 
 pkg_tgz_path="$package_tgz"
 
-package_install_log="/tmp/openclaw-update-channel-switch-package-install.log"
-if ! openclaw_e2e_maybe_timeout "${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install -g --prefix /tmp/npm-prefix --omit=optional "$pkg_tgz_path" >"$package_install_log" 2>&1; then
-  openclaw_e2e_print_log "$package_install_log" >&2
+package_install_log="/tmp/bot-update-channel-switch-package-install.log"
+if ! bot_e2e_maybe_timeout "${BOT_E2E_NPM_INSTALL_TIMEOUT:-600s}" npm install -g --prefix /tmp/npm-prefix --omit=optional "$pkg_tgz_path" >"$package_install_log" 2>&1; then
+  bot_e2e_print_log "$package_install_log" >&2
   exit 1
 fi
-package_version="$(node -p "JSON.parse(require(\"node:fs\").readFileSync(\"/tmp/npm-prefix/lib/node_modules/openclaw/package.json\", \"utf8\")).version")"
-OPENCLAW_PACKAGE_ACCEPTANCE_LEGACY_COMPAT="$(
+package_version="$(node -p "JSON.parse(require(\"node:fs\").readFileSync(\"/tmp/npm-prefix/lib/node_modules/bot/package.json\", \"utf8\")).version")"
+BOT_PACKAGE_ACCEPTANCE_LEGACY_COMPAT="$(
   node scripts/e2e/lib/package-compat.mjs "$package_version"
 )"
-export OPENCLAW_PACKAGE_ACCEPTANCE_LEGACY_COMPAT
-command -v openclaw >/dev/null
-openclaw_e2e_enable_openclaw_cli_timeout
+export BOT_PACKAGE_ACCEPTANCE_LEGACY_COMPAT
+command -v bot >/dev/null
+bot_e2e_enable_bot_cli_timeout
 
-openclaw_e2e_eval_test_state_from_b64 "${OPENCLAW_TEST_STATE_SCRIPT_B64:?missing OPENCLAW_TEST_STATE_SCRIPT_B64}"
+bot_e2e_eval_test_state_from_b64 "${BOT_TEST_STATE_SCRIPT_B64:?missing BOT_TEST_STATE_SCRIPT_B64}"
 
-export OPENCLAW_GIT_DIR="$git_root"
-export OPENCLAW_UPDATE_DEV_TARGET_REF="$fixture_sha"
+export BOT_GIT_DIR="$git_root"
+export BOT_UPDATE_DEV_TARGET_REF="$fixture_sha"
 
 echo "==> package -> git dev channel"
 set +e
-dev_json="$(openclaw update --channel dev --yes --json --no-restart)"
+dev_json="$(bot update --channel dev --yes --json --no-restart)"
 dev_status=$?
 set -e
 printf "%s\n" "$dev_json"
@@ -110,13 +110,13 @@ fi
 UPDATE_JSON="$dev_json" node scripts/e2e/lib/update-channel-switch/assertions.mjs assert-update dev
 node scripts/e2e/lib/update-channel-switch/assertions.mjs assert-config-channel dev
 
-status_json="$(openclaw update status --json)"
+status_json="$(bot update status --json)"
 printf "%s\n" "$status_json"
 STATUS_JSON="$status_json" node scripts/e2e/lib/update-channel-switch/assertions.mjs assert-status-kind git
 
 echo "==> git -> package stable channel"
 set +e
-stable_json="$(openclaw update --channel stable --tag "$pkg_tgz_path" --yes --json --no-restart)"
+stable_json="$(bot update --channel stable --tag "$pkg_tgz_path" --yes --json --no-restart)"
 stable_status=$?
 set -e
 printf "%s\n" "$stable_json"
@@ -126,7 +126,7 @@ fi
 UPDATE_JSON="$stable_json" node scripts/e2e/lib/update-channel-switch/assertions.mjs assert-update stable
 node scripts/e2e/lib/update-channel-switch/assertions.mjs assert-config-channel stable
 
-status_json="$(openclaw update status --json)"
+status_json="$(bot update status --json)"
 printf "%s\n" "$status_json"
 STATUS_JSON="$status_json" node scripts/e2e/lib/update-channel-switch/assertions.mjs assert-status-kind package
 

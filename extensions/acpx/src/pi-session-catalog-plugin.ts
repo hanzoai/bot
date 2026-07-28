@@ -1,18 +1,18 @@
 import process from "node:process";
-import { resolveAcpSessionAvailability } from "openclaw/plugin-sdk/acp-runtime";
-import { resolveDefaultAgentId } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { resolveAcpSessionAvailability } from "bot/plugin-sdk/acp-runtime";
+import { resolveDefaultAgentId } from "bot/plugin-sdk/agent-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   decodeNodePtyResumeParams,
   resolveNodeHostExecutable,
   runNodePtyCommand,
-} from "openclaw/plugin-sdk/node-host";
+} from "bot/plugin-sdk/node-host";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicy,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+  BotPluginApi,
+  BotPluginNodeHostCommand,
+  BotPluginNodeInvokePolicy,
+} from "bot/plugin-sdk/plugin-entry";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
 import type {
   SessionCatalogHost,
   SessionCatalogProvider,
@@ -20,15 +20,15 @@ import type {
   SessionCatalogTerminalPlan,
   SessionCatalogTranscriptItem,
   SessionsCatalogReadResult,
-} from "openclaw/plugin-sdk/session-catalog";
+} from "bot/plugin-sdk/session-catalog";
 import {
   createSessionCatalogAdoptionCoordinator,
   importSessionCatalogHistory,
   listAdoptedSessionCatalogSessions,
   sessionCatalogAdoptedSessionKey,
   sessionCatalogAdoptedSourceKey,
-} from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/session-catalog";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   isExactPiSessionCursor,
   listLocalPiSessionPage,
@@ -146,7 +146,7 @@ function isPiSessionCatalogEnabled(pluginConfig: unknown): boolean {
   );
 }
 
-function createPiSessionNodeHostCommands(): OpenClawPluginNodeHostCommand[] {
+function createPiSessionNodeHostCommands(): BotPluginNodeHostCommand[] {
   const storeAvailable = ({ config, env }: { config: unknown; env: NodeJS.ProcessEnv }) =>
     fullConfigCatalogEnabled(config) && piSessionStoreAvailable(env);
   return [
@@ -211,7 +211,7 @@ function createPiSessionNodeHostCommands(): OpenClawPluginNodeHostCommand[] {
   ];
 }
 
-function createPiSessionNodeInvokePolicies(): OpenClawPluginNodeInvokePolicy[] {
+function createPiSessionNodeInvokePolicies(): BotPluginNodeInvokePolicy[] {
   return [
     {
       commands: [PI_SESSIONS_LIST_COMMAND, PI_SESSION_READ_COMMAND, PI_TERMINAL_RESUME_COMMAND],
@@ -339,7 +339,7 @@ function parseNodeTranscriptPage(value: unknown, threadId: string): SessionsCata
 }
 
 async function listPiHosts(
-  api: OpenClawPluginApi,
+  api: BotPluginApi,
   query: Parameters<SessionCatalogProvider["list"]>[0],
 ): Promise<SessionCatalogHost[]> {
   const runtime = api.runtime;
@@ -407,12 +407,12 @@ async function requireLocalPiSession(threadId: string): Promise<SessionCatalogSe
   return record;
 }
 
-function currentPiCatalogConfig(api: OpenClawPluginApi): OpenClawConfig {
-  return (api.runtime.config?.current?.() ?? api.config ?? {}) as OpenClawConfig;
+function currentPiCatalogConfig(api: BotPluginApi): BotConfig {
+  return (api.runtime.config?.current?.() ?? api.config ?? {}) as BotConfig;
 }
 
 function resolvePiContinuationAvailability(
-  api: OpenClawPluginApi,
+  api: BotPluginApi,
 ): { available: true } | { available: false; message: string } {
   const availability = resolveAcpSessionAvailability({
     config: currentPiCatalogConfig(api),
@@ -430,7 +430,7 @@ function resolvePiContinuationAvailability(
   return executable ? { available: true } : { available: false, message: "Pi CLI is unavailable" };
 }
 
-function listAdoptedPiSessions(api: OpenClawPluginApi): Map<string, string> {
+function listAdoptedPiSessions(api: BotPluginApi): Map<string, string> {
   return listAdoptedSessionCatalogSessions({
     config: currentPiCatalogConfig(api),
     pluginId: api.id,
@@ -446,7 +446,7 @@ function listAdoptedPiSessions(api: OpenClawPluginApi): Map<string, string> {
 }
 
 async function continuePiSession(
-  api: OpenClawPluginApi,
+  api: BotPluginApi,
   hostId: string,
   threadId: string,
 ): Promise<Awaited<ReturnType<typeof linkContinuedPiSession>>> {
@@ -642,7 +642,7 @@ async function readPiTranscript(
   };
 }
 
-export function registerPiSessionCatalog(api: OpenClawPluginApi): void {
+export function registerPiSessionCatalog(api: BotPluginApi): void {
   if (!isPiSessionCatalogEnabled(api.pluginConfig)) {
     return;
   }

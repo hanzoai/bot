@@ -85,7 +85,7 @@ function restoreEnvValue(key: string, value: string | undefined): void {
 }
 
 beforeAll(async () => {
-  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-qmd-win-spawn-"));
+  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-qmd-win-spawn-"));
   platformSpy = vi.spyOn(process, "platform", "get").mockReturnValue("win32");
 });
 

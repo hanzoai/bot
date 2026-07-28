@@ -8,7 +8,7 @@ import {
   type ChannelIngressQueueClaim,
   type ChannelIngressQueueCorruptClaim,
   type ChannelIngressQueueRecord,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "bot/plugin-sdk/channel-outbound";
 import type { TelegramBotInfo } from "./bot-info.js";
 import {
   openTelegramIngressQueue,

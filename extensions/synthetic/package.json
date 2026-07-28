@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/synthetic-provider",
+  "name": "@hanzo/bot-synthetic-provider",
   "version": "2026.7.2",
   "private": true,
-  "description": "OpenClaw Synthetic provider plugin",
+  "description": "Bot Synthetic provider plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

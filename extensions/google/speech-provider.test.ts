@@ -2,13 +2,13 @@
 import {
   getProviderHttpMocks,
   installProviderHttpMockCleanup,
-} from "openclaw/plugin-sdk/provider-http-test-mocks";
+} from "bot/plugin-sdk/provider-http-test-mocks";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 const transcodeAudioBufferToOpusMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/media-runtime", async () => {
-  const { canonicalizeBase64 } = await import("@openclaw/media-core/base64");
+vi.mock("bot/plugin-sdk/media-runtime", async () => {
+  const { canonicalizeBase64 } = await import("@hanzo/bot-media-core/base64");
   return {
     canonicalizeBase64,
     transcodeAudioBufferToOpus: transcodeAudioBufferToOpusMock,
@@ -119,7 +119,7 @@ describe("Google speech provider", () => {
   });
 
   afterAll(() => {
-    vi.doUnmock("openclaw/plugin-sdk/media-runtime");
+    vi.doUnmock("bot/plugin-sdk/media-runtime");
     vi.resetModules();
   });
 
@@ -288,7 +288,7 @@ describe("Google speech provider", () => {
     );
   });
 
-  it("does not wrap an OpenClaw audio-profile-v1 prompt twice", async () => {
+  it("does not wrap an Bot audio-profile-v1 prompt twice", async () => {
     const provider = buildGoogleSpeechProvider();
     const text = [
       "Synthesize speech from the TRANSCRIPT section only. Use the other sections only",

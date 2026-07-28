@@ -3,9 +3,9 @@
  *
  * Lists configured accounts and resolves default-account behavior for plugin configs.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { normalizeUniqueStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   resolveAccountEntry,
   resolveNormalizedAccountEntry,
@@ -29,17 +29,17 @@ export function createAccountListHelpers<
     omitKeys?: Array<(keyof TConfig & string) | "defaultAccount">;
     nestedObjectKeys?: Array<keyof TConfig & string>;
     allowUnlistedDefaultAccount?: boolean;
-    additionalAccountIds?: (cfg: OpenClawConfig) => Iterable<string>;
+    additionalAccountIds?: (cfg: BotConfig) => Iterable<string>;
     fallbackAccountIdWhenEmpty?: string | false;
     implicitDefaultAccount?: {
       channelKeys?: readonly string[];
       envVars?: readonly string[];
     };
-    hasImplicitDefaultAccount?: (cfg: OpenClawConfig) => boolean;
-    resolveImplicitAccountId?: (cfg: OpenClawConfig) => string | undefined;
+    hasImplicitDefaultAccount?: (cfg: BotConfig) => boolean;
+    resolveImplicitAccountId?: (cfg: BotConfig) => string | undefined;
   },
 ) {
-  function hasImplicitDefaultAccount(cfg: OpenClawConfig): boolean {
+  function hasImplicitDefaultAccount(cfg: BotConfig): boolean {
     // Legacy single-account configs and env-only setup imply the default account even when
     // channels.<id>.accounts is absent.
     if (options?.hasImplicitDefaultAccount?.(cfg)) {
@@ -59,7 +59,7 @@ export function createAccountListHelpers<
     return false;
   }
 
-  function resolveConfiguredDefaultAccountId(cfg: OpenClawConfig): string | undefined {
+  function resolveConfiguredDefaultAccountId(cfg: BotConfig): string | undefined {
     const channel = cfg.channels?.[channelKey] as Record<string, unknown> | undefined;
     const preferred = normalizeOptionalAccountId(
       typeof channel?.defaultAccount === "string" ? channel.defaultAccount : undefined,
@@ -78,7 +78,7 @@ export function createAccountListHelpers<
     return undefined;
   }
 
-  function listConfiguredAccountIds(cfg: OpenClawConfig): string[] {
+  function listConfiguredAccountIds(cfg: BotConfig): string[] {
     const channel = cfg.channels?.[channelKey];
     const accounts = (channel as Record<string, unknown> | undefined)?.accounts;
     if (!accounts || typeof accounts !== "object") {
@@ -92,7 +92,7 @@ export function createAccountListHelpers<
     return normalizeUniqueStringEntries(ids.map((id) => normalizeConfiguredAccountId(id)));
   }
 
-  function listAccountIds(cfg: OpenClawConfig): string[] {
+  function listAccountIds(cfg: BotConfig): string[] {
     return listCombinedAccountIds({
       configuredAccountIds: listConfiguredAccountIds(cfg),
       additionalAccountIds: options?.additionalAccountIds?.(cfg),
@@ -108,7 +108,7 @@ export function createAccountListHelpers<
     });
   }
 
-  function resolveDefaultAccountId(cfg: OpenClawConfig): string {
+  function resolveDefaultAccountId(cfg: BotConfig): string {
     return resolveListedDefaultAccountId({
       accountIds: listAccountIds(cfg),
       configuredDefaultAccountId: resolveConfiguredDefaultAccountId(cfg),
@@ -121,7 +121,7 @@ export function createAccountListHelpers<
     listAccountIds,
     resolveDefaultAccountId,
     // Channel owners destructure this resolver; an arrow keeps it independent of `this`.
-    resolveAccountConfig: (cfg: OpenClawConfig, accountId: string): TConfig => {
+    resolveAccountConfig: (cfg: BotConfig, accountId: string): TConfig => {
       const channelConfig = cfg.channels?.[channelKey] as TConfig | undefined;
       const accounts = (
         channelConfig as (TConfig & { accounts?: Record<string, Partial<TConfig>> }) | undefined

@@ -12,7 +12,7 @@ import {
 import { resolveStorePath } from "../config/sessions/paths.js";
 import { listSessionEntriesReadOnly } from "../config/sessions/session-accessor.js";
 import { resolveSessionTotalTokens, type SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import { listGatewayAgentsBasic } from "../gateway/agent-list.js";
 import { resolveHeartbeatSummaryForAgent } from "../infra/heartbeat-summary.js";
 import { peekSystemEvents } from "../infra/system-events.js";
@@ -253,8 +253,8 @@ export async function getStatusSummary(
   options: {
     includeSensitive?: boolean;
     includeChannelSummary?: boolean;
-    config?: OpenClawConfig;
-    sourceConfig?: OpenClawConfig;
+    config?: BotConfig;
+    sourceConfig?: BotConfig;
   } = {},
 ): Promise<StatusSummary> {
   const { includeSensitive = true, includeChannelSummary = true } = options;

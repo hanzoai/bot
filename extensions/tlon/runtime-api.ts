@@ -1,10 +1,10 @@
 // Private runtime barrel for the bundled Tlon extension.
 // Keep this barrel thin and aligned with the local extension surface.
 
-export type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-export type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-export type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-export { createDedupeCache } from "openclaw/plugin-sdk/core";
+export type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
+export type { BotConfig } from "bot/plugin-sdk/config-contracts";
+export type { RuntimeEnv } from "bot/plugin-sdk/runtime";
+export { createDedupeCache } from "bot/plugin-sdk/core";
 export { createLoggerBackedRuntime } from "./src/logger-runtime.js";
 export {
   fetchWithSsrFGuard,
@@ -12,5 +12,5 @@ export {
   ssrfPolicyFromDangerouslyAllowPrivateNetwork,
   type LookupFn,
   type SsrFPolicy,
-} from "openclaw/plugin-sdk/ssrf-runtime";
-export { SsrFBlockedError } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/ssrf-runtime";
+export { SsrFBlockedError } from "bot/plugin-sdk/ssrf-runtime";

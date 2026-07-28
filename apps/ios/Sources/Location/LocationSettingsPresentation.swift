@@ -1,14 +1,14 @@
 import CoreLocation
 import Foundation
-import OpenClawKit
+import BotKit
 
 enum LocationSettingsAction: Equatable {
-    case setMode(OpenClawLocationMode)
-    case openAppSettings(OpenClawLocationMode)
+    case setMode(BotLocationMode)
+    case openAppSettings(BotLocationMode)
 }
 
 struct LocationSettingsPresentation: Equatable {
-    var selectedMode: OpenClawLocationMode
+    var selectedMode: BotLocationMode
     var summary: LocationPermissionSummary
 
     var sharingControlIsOn: Bool {
@@ -43,11 +43,11 @@ struct LocationSettingsPresentation: Equatable {
         case .authorizedWhenInUse, .authorizedAlways:
             return nil
         default:
-            return String(localized: "OpenClaw cannot determine the current iOS location permission.")
+            return String(localized: "Bot cannot determine the current iOS location permission.")
         }
     }
 
-    func toggleAction(defaultEnabledMode: OpenClawLocationMode = .whileUsing) -> LocationSettingsAction {
+    func toggleAction(defaultEnabledMode: BotLocationMode = .whileUsing) -> LocationSettingsAction {
         if self.sharingControlIsOn {
             return .setMode(.off)
         }
@@ -55,11 +55,11 @@ struct LocationSettingsPresentation: Equatable {
         return self.enableAction(mode: mode)
     }
 
-    func accessLevelAction(mode: OpenClawLocationMode) -> LocationSettingsAction {
+    func accessLevelAction(mode: BotLocationMode) -> LocationSettingsAction {
         self.enableAction(mode: mode)
     }
 
-    private func enableAction(mode: OpenClawLocationMode) -> LocationSettingsAction {
+    private func enableAction(mode: BotLocationMode) -> LocationSettingsAction {
         if !self.summary.locationServicesEnabled {
             return .openAppSettings(mode)
         }
@@ -73,7 +73,7 @@ struct LocationSettingsPresentation: Equatable {
     }
 }
 
-extension OpenClawLocationMode {
+extension BotLocationMode {
     var locationAccessLevelText: String? {
         switch self {
         case .off:

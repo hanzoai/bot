@@ -197,7 +197,7 @@ function clearUsageBarTemplateCacheForTest(): void {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.usageBarTemplateTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.usageBarTemplateTestApi")] = {
     clearUsageBarTemplateCacheForTest,
   };
 }

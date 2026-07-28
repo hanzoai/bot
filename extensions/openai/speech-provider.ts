@@ -1,18 +1,18 @@
 // Openai provider module implements model/runtime integration.
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
-import { isVoiceMessageCompatibleAudio } from "openclaw/plugin-sdk/media-runtime";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import { resolveGeneratedMediaMaxBytes } from "bot/plugin-sdk/media-generation-runtime";
+import { isVoiceMessageCompatibleAudio } from "bot/plugin-sdk/media-runtime";
+import { normalizeResolvedSecretInputString } from "bot/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
   SpeechProviderOverrides,
   SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech-core";
-import { parseSpeechDirectiveNumberOverride } from "openclaw/plugin-sdk/speech-core";
+} from "bot/plugin-sdk/speech-core";
+import { parseSpeechDirectiveNumberOverride } from "bot/plugin-sdk/speech-core";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import {
   asFiniteNumber,
   asObjectRecord,

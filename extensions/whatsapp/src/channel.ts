@@ -1,12 +1,12 @@
 // Whatsapp plugin module implements channel behavior.
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
-import { buildDmGroupAccountAllowlistAdapter } from "openclaw/plugin-sdk/allowlist-config-edit";
-import { createChatChannelPlugin, type ChannelPlugin } from "openclaw/plugin-sdk/channel-core";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { DEFAULT_ACCOUNT_ID } from "bot/plugin-sdk/account-id";
+import { buildDmGroupAccountAllowlistAdapter } from "bot/plugin-sdk/allowlist-config-edit";
+import { createChatChannelPlugin, type ChannelPlugin } from "bot/plugin-sdk/channel-core";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 import {
   createAsyncComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "bot/plugin-sdk/status-helpers";
 import { resolveWhatsAppAccount, type ResolvedWhatsAppAccount } from "./accounts.js";
 import { createWhatsAppLoginTool } from "./agent-tools-login.js";
 import { whatsappApprovalCapability } from "./approval-native.js";

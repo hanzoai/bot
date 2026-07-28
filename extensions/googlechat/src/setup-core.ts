@@ -1,10 +1,10 @@
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+import { defineChannelSetupContract } from "bot/plugin-sdk/channel-setup";
 // Googlechat plugin module implements setup core behavior.
-import type { ChannelSetupInput } from "openclaw/plugin-sdk/channel-setup";
+import type { ChannelSetupInput } from "bot/plugin-sdk/channel-setup";
 import {
   createPatchedAccountSetupAdapter,
   createSetupInputPresenceValidator,
-} from "openclaw/plugin-sdk/setup-runtime";
+} from "bot/plugin-sdk/setup-runtime";
 
 const channel = "googlechat" as const;
 

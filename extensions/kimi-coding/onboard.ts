@@ -1,8 +1,8 @@
 // Kimi Coding setup module handles plugin onboarding behavior.
 import {
   createDefaultModelPresetAppliers,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/provider-onboard";
+  type BotConfig,
+} from "bot/plugin-sdk/provider-onboard";
 import {
   buildKimiCodingProvider,
   KIMI_CODING_BASE_URL,
@@ -18,7 +18,7 @@ function resolveKimiCodingDefaultModel() {
 
 const kimiCodingPresetAppliers = createDefaultModelPresetAppliers({
   primaryModelRef: KIMI_MODEL_REF,
-  resolveParams: (_cfg: OpenClawConfig) => {
+  resolveParams: (_cfg: BotConfig) => {
     const defaultModel = resolveKimiCodingDefaultModel();
     if (!defaultModel) {
       return null;
@@ -34,6 +34,6 @@ const kimiCodingPresetAppliers = createDefaultModelPresetAppliers({
   },
 });
 
-export function applyKimiCodeConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyKimiCodeConfig(cfg: BotConfig): BotConfig {
   return kimiCodingPresetAppliers.applyConfig(cfg);
 }

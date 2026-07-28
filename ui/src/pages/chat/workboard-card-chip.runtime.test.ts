@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import "./workboard-card-chip.runtime.ts";
 
-type WorkboardCardChipElement = HTMLElementTagNameMap["openclaw-workboard-card-chip"] & {
+type WorkboardCardChipElement = HTMLElementTagNameMap["bot-workboard-card-chip"] & {
   updateComplete: Promise<boolean>;
 };
 
@@ -40,7 +40,7 @@ describe("Workboard card chip", () => {
       request,
       addEventListener,
     } as unknown as GatewayBrowserClient;
-    const element = document.createElement("openclaw-workboard-card-chip");
+    const element = document.createElement("bot-workboard-card-chip");
     element.basePath = "/control";
     element.client = client;
     element.sessionKey = "agent:main:workboard-card";

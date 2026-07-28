@@ -1,13 +1,13 @@
-# Mattermost OpenClaw channel
+# Mattermost Bot channel
 
-Official OpenClaw channel plugin for Mattermost.
+Official Bot channel plugin for Mattermost.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/mattermost
+bot plugins install @hanzo/bot-mattermost
 ```
 
 ## Docs
 
-See `docs/channels/mattermost.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/channels/mattermost`.
+See `docs/channels/mattermost.md` in the Bot repository, or the published docs at `https://docs.bot.ai/channels/mattermost`.

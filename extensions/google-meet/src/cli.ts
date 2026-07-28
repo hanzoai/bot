@@ -1,5 +1,5 @@
 import type { Command } from "commander";
-import { callGatewayFromCli } from "openclaw/plugin-sdk/gateway-runtime";
+import { callGatewayFromCli } from "bot/plugin-sdk/gateway-runtime";
 import {
   buildGoogleMeetCalendarDayWindow,
   findGoogleMeetCalendarEvent,
@@ -219,7 +219,7 @@ export function registerGoogleMeetCli(params: {
   const root = params.program
     .command("googlemeet")
     .description("Google Meet participant utilities")
-    .addHelpText("after", () => `\nDocs: https://docs.openclaw.ai/plugins/google-meet\n`);
+    .addHelpText("after", () => `\nDocs: https://docs.bot.ai/plugins/google-meet\n`);
 
   const auth = root.command("auth").description("Google Meet OAuth helpers");
 

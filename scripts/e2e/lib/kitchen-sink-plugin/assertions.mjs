@@ -140,7 +140,7 @@ function formatFindingLine(line, pattern, info = {}) {
 }
 
 function shouldScanLogFile(entry) {
-  if (!(/\.(?:log|jsonl)$/u.test(entry) || /openclaw-kitchen-sink-/u.test(path.basename(entry)))) {
+  if (!(/\.(?:log|jsonl)$/u.test(entry) || /bot-kitchen-sink-/u.test(path.basename(entry)))) {
     return false;
   }
   return !normalizedPath(entry).includes("/.npm/_logs/");
@@ -210,7 +210,7 @@ function scanLogs() {
   if (!process.env.KITCHEN_SINK_TMP_DIR) {
     throw new Error("KITCHEN_SINK_TMP_DIR is required for kitchen-sink log scans");
   }
-  const roots = [scratchRoot, path.join(process.env.HOME, ".openclaw")];
+  const roots = [scratchRoot, path.join(process.env.HOME, ".bot")];
   const deny = [
     /\buncaught exception\b/iu,
     /\bunhandled rejection\b/iu,
@@ -248,7 +248,7 @@ function scanLogs() {
   });
   if (scannedFiles === 0) {
     throw new Error(
-      "kitchen-sink log scan found no files under the isolated scratch root or OpenClaw home",
+      "kitchen-sink log scan found no files under the isolated scratch root or Bot home",
     );
   }
   if (findings.length > 0) {
@@ -259,7 +259,7 @@ function scanLogs() {
 }
 
 function readConfig() {
-  const configPath = path.join(process.env.HOME, ".openclaw", "openclaw.json");
+  const configPath = path.join(process.env.HOME, ".bot", "bot.json");
   return {
     configPath,
     exists: fs.existsSync(configPath),
@@ -394,17 +394,17 @@ function assertRealPathInside(parentPath, childPath, label) {
 }
 
 function assertClawHubExternalInstallContract(installPath) {
-  const openclawPeerPath = path.join(installPath, "node_modules", "openclaw");
-  if (!fs.existsSync(openclawPeerPath)) {
-    throw new Error(`missing kitchen-sink openclaw peer symlink: ${openclawPeerPath}`);
+  const botPeerPath = path.join(installPath, "node_modules", "bot");
+  if (!fs.existsSync(botPeerPath)) {
+    throw new Error(`missing kitchen-sink bot peer symlink: ${botPeerPath}`);
   }
-  if (!fs.lstatSync(openclawPeerPath).isSymbolicLink()) {
-    throw new Error(`kitchen-sink openclaw peer is not a symlink: ${openclawPeerPath}`);
+  if (!fs.lstatSync(botPeerPath).isSymbolicLink()) {
+    throw new Error(`kitchen-sink bot peer is not a symlink: ${botPeerPath}`);
   }
   const hostRoot = fs.realpathSync(process.cwd());
-  const linkedHostRoot = fs.realpathSync(openclawPeerPath);
+  const linkedHostRoot = fs.realpathSync(botPeerPath);
   if (linkedHostRoot !== hostRoot) {
-    throw new Error(`expected kitchen-sink openclaw peer ${linkedHostRoot} to target ${hostRoot}`);
+    throw new Error(`expected kitchen-sink bot peer ${linkedHostRoot} to target ${hostRoot}`);
   }
 
   const dependencyPackagePath = path.join(installPath, "node_modules", "is-number", "package.json");
@@ -637,7 +637,7 @@ function assertInstalled() {
     throw new Error(`kitchen-sink install path missing: ${record.installPath}`);
   }
   if (source === "clawhub") {
-    const extensionsRoot = path.join(process.env.HOME, ".openclaw", "extensions");
+    const extensionsRoot = path.join(process.env.HOME, ".bot", "extensions");
     assertRealPathInside(extensionsRoot, installPath, "kitchen-sink ClawHub install path");
   }
   if (source === "clawhub" && record.artifactKind === "npm-pack") {

@@ -1,4 +1,4 @@
-import type { PluginStateLeaseContext } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginStateLeaseContext } from "bot/plugin-sdk/plugin-state-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QmdMemoryManager } from "./qmd-manager.js";
 

@@ -13,7 +13,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 let browser: Browser;
@@ -77,7 +77,7 @@ async function proxyReconnect(
   await expect
     .poll(() =>
       page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("bot-app") as HTMLElement & {
           runtime?: { context: { gateway: { snapshot: { phase: string } } } };
         };
         return app.runtime?.context.gateway.snapshot.phase;
@@ -93,7 +93,7 @@ async function proxyReconnect(
   await expect
     .poll(() =>
       page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("bot-app") as HTMLElement & {
           runtime?: { context: { gateway: { snapshot: { phase: string } } } };
         };
         return app.runtime?.context.gateway.snapshot.phase;
@@ -106,7 +106,7 @@ async function proxyReconnect(
 async function readSettingsMirror(page: Page): Promise<Record<string, unknown> | null> {
   return page.evaluate(() => {
     const key = Object.keys(localStorage).find((candidate) =>
-      candidate.startsWith("openclaw.control.settings.v1:"),
+      candidate.startsWith("bot.control.settings.v1:"),
     );
     if (!key) {
       return null;
@@ -130,7 +130,7 @@ describeControlUiE2e("Control UI server prefs reconnect sync", () => {
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(
-        `Playwright Chromium is not available at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+        `Playwright Chromium is not available at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set BOT_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
       );
     }
     server = await startControlUiE2eServer();
@@ -216,7 +216,7 @@ describeControlUiE2e("Control UI server prefs reconnect sync", () => {
       await gatewayB.resolveDeferred("config.patch", combined);
       await gatewayA.setMethodResponse("config.get", combined);
       await gatewayA.emitGatewayEvent("config.changed", {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/bot.json",
         hash: "prefs-b-3",
         ts: Date.now(),
       });
@@ -263,7 +263,7 @@ describeControlUiE2e("Control UI server prefs reconnect sync", () => {
       const serverChanged = configResponse({ locale: "de", theme: "claw" }, "prefs-c-2");
       await gateway.setMethodResponse("config.get", serverChanged);
       await gateway.emitGatewayEvent("config.changed", {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/bot.json",
         hash: "prefs-c-2",
         ts: Date.now(),
       });

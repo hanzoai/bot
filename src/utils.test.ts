@@ -20,7 +20,7 @@ import {
 
 describe("ensureDir", () => {
   it("creates nested directory", async () => {
-    await withTempDir({ prefix: "openclaw-test-" }, async (tmp) => {
+    await withTempDir({ prefix: "bot-test-" }, async (tmp) => {
       const target = path.join(tmp, "nested", "dir");
       await ensureDir(target);
       expect(fs.existsSync(target)).toBe(true);
@@ -71,79 +71,79 @@ describe("normalizeE164", () => {
 });
 
 describe("resolveConfigDir", () => {
-  it("prefers ~/.openclaw when legacy dir is missing", async () => {
-    await withTempDir({ prefix: "openclaw-config-dir-" }, async (root) => {
-      const newDir = path.join(root, ".openclaw");
+  it("prefers ~/.bot when legacy dir is missing", async () => {
+    await withTempDir({ prefix: "bot-config-dir-" }, async (root) => {
+      const newDir = path.join(root, ".bot");
       await fs.promises.mkdir(newDir, { recursive: true });
       const resolved = resolveConfigDir({} as NodeJS.ProcessEnv, () => root);
       expect(resolved).toBe(newDir);
     });
   });
 
-  it("expands OPENCLAW_STATE_DIR using the provided env", () => {
+  it("expands BOT_STATE_DIR using the provided env", () => {
     const env = {
-      HOME: "/tmp/openclaw-home",
-      OPENCLAW_STATE_DIR: "~/state",
+      HOME: "/tmp/bot-home",
+      BOT_STATE_DIR: "~/state",
     } as NodeJS.ProcessEnv;
 
-    expect(resolveConfigDir(env)).toBe(path.resolve("/tmp/openclaw-home", "state"));
+    expect(resolveConfigDir(env)).toBe(path.resolve("/tmp/bot-home", "state"));
   });
 
-  it("falls back to the config file directory when only OPENCLAW_CONFIG_PATH is set", () => {
+  it("falls back to the config file directory when only BOT_CONFIG_PATH is set", () => {
     const env = {
-      HOME: "/tmp/openclaw-home",
-      OPENCLAW_CONFIG_PATH: "~/profiles/dev/openclaw.json",
+      HOME: "/tmp/bot-home",
+      BOT_CONFIG_PATH: "~/profiles/dev/bot.json",
     } as NodeJS.ProcessEnv;
 
-    expect(resolveConfigDir(env)).toBe(path.resolve("/tmp/openclaw-home", "profiles", "dev"));
+    expect(resolveConfigDir(env)).toBe(path.resolve("/tmp/bot-home", "profiles", "dev"));
   });
 
   it("re-pins the exported configuration root after startup environment selection", () => {
     const originalConfigDir = CONFIG_DIR;
-    const selectedConfigDir = path.resolve("/tmp/openclaw-selected-config-root");
+    const selectedConfigDir = path.resolve("/tmp/bot-selected-config-root");
     try {
       expect(
         pinConfigDir({
-          OPENCLAW_STATE_DIR: selectedConfigDir,
-          OPENCLAW_TEST_FAST: "1",
+          BOT_STATE_DIR: selectedConfigDir,
+          BOT_TEST_FAST: "1",
         }),
       ).toBe(selectedConfigDir);
       expect(CONFIG_DIR).toBe(selectedConfigDir);
     } finally {
       pinConfigDir({
-        OPENCLAW_STATE_DIR: originalConfigDir,
-        OPENCLAW_TEST_FAST: "1",
+        BOT_STATE_DIR: originalConfigDir,
+        BOT_TEST_FAST: "1",
       });
     }
   });
 });
 
 describe("resolveHomeDir", () => {
-  it("prefers OPENCLAW_HOME over HOME", () => {
-    withEnv({ OPENCLAW_HOME: "/srv/openclaw-home", HOME: "/home/other" }, () => {
-      expect(resolveHomeDir()).toBe(path.resolve("/srv/openclaw-home"));
+  it("prefers BOT_HOME over HOME", () => {
+    withEnv({ BOT_HOME: "/srv/bot-home", HOME: "/home/other" }, () => {
+      expect(resolveHomeDir()).toBe(path.resolve("/srv/bot-home"));
     });
   });
 });
 
 describe("shortenHomePath", () => {
-  it("uses $OPENCLAW_HOME prefix when OPENCLAW_HOME is set", () => {
-    withEnv({ OPENCLAW_HOME: "/srv/openclaw-home", HOME: "/home/other" }, () => {
-      expect(shortenHomePath(`${path.resolve("/srv/openclaw-home")}/.openclaw/openclaw.json`)).toBe(
-        "$OPENCLAW_HOME/.openclaw/openclaw.json",
+  it("uses $BOT_HOME prefix when BOT_HOME is set", () => {
+    withEnv({ BOT_HOME: "/srv/bot-home", HOME: "/home/other" }, () => {
+      expect(shortenHomePath(`${path.resolve("/srv/bot-home")}/.hanzoai/bot.json`)).toBe(
+        "$BOT_HOME/.hanzoai/bot.json",
       );
     });
   });
 });
 
 describe("shortenHomeInString", () => {
-  it("uses $OPENCLAW_HOME replacement when OPENCLAW_HOME is set", () => {
-    withEnv({ OPENCLAW_HOME: "/srv/openclaw-home", HOME: "/home/other" }, () => {
+  it("uses $BOT_HOME replacement when BOT_HOME is set", () => {
+    withEnv({ BOT_HOME: "/srv/bot-home", HOME: "/home/other" }, () => {
       expect(
         shortenHomeInString(
-          `config: ${path.resolve("/srv/openclaw-home")}/.openclaw/openclaw.json`,
+          `config: ${path.resolve("/srv/bot-home")}/.hanzoai/bot.json`,
         ),
-      ).toBe("config: $OPENCLAW_HOME/.openclaw/openclaw.json");
+      ).toBe("config: $BOT_HOME/.hanzoai/bot.json");
     });
   });
 });
@@ -154,8 +154,8 @@ describe("resolveUserPath", () => {
   });
 
   it("expands ~/ to home dir", () => {
-    expect(resolveUserPath("~/openclaw", {}, () => "/Users/thoffman")).toBe(
-      path.resolve("/Users/thoffman", "openclaw"),
+    expect(resolveUserPath("~/bot", {}, () => "/Users/thoffman")).toBe(
+      path.resolve("/Users/thoffman", "bot"),
     );
   });
 
@@ -163,19 +163,19 @@ describe("resolveUserPath", () => {
     expect(resolveUserPath("tmp/dir")).toBe(path.resolve("tmp/dir"));
   });
 
-  it("prefers OPENCLAW_HOME for tilde expansion", () => {
-    withEnv({ OPENCLAW_HOME: "/srv/openclaw-home", HOME: "/home/other" }, () => {
-      expect(resolveUserPath("~/openclaw")).toBe(path.resolve("/srv/openclaw-home", "openclaw"));
+  it("prefers BOT_HOME for tilde expansion", () => {
+    withEnv({ BOT_HOME: "/srv/bot-home", HOME: "/home/other" }, () => {
+      expect(resolveUserPath("~/bot")).toBe(path.resolve("/srv/bot-home", "bot"));
     });
   });
 
   it("uses the provided env for tilde expansion", () => {
     const env = {
-      HOME: "/tmp/openclaw-home",
-      OPENCLAW_HOME: "/srv/openclaw-home",
+      HOME: "/tmp/bot-home",
+      BOT_HOME: "/srv/bot-home",
     } as NodeJS.ProcessEnv;
 
-    expect(resolveUserPath("~/openclaw", env)).toBe(path.resolve("/srv/openclaw-home", "openclaw"));
+    expect(resolveUserPath("~/bot", env)).toBe(path.resolve("/srv/bot-home", "bot"));
   });
 
   it("keeps blank paths blank", () => {

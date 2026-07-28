@@ -247,7 +247,7 @@ export function parseApprovalRequestedEvent(
   if (event === "plugin.approval.requested") {
     return parsePluginApprovalRequested(payload);
   }
-  return event === "openclaw.approval.requested"
+  return event === "bot.approval.requested"
     ? parseSystemAgentApprovalRequested(payload)
     : null;
 }
@@ -476,7 +476,7 @@ export async function refreshPendingApprovalQueue(
     const [execResult, pluginResult, systemAgentResult] = await Promise.allSettled([
       client.request("exec.approval.list", {}),
       client.request("plugin.approval.list", {}),
-      client.request("openclaw.approval.list", {}),
+      client.request("bot.approval.list", {}),
     ]);
     const execApprovals =
       execResult.status === "fulfilled"

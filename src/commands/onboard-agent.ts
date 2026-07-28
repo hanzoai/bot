@@ -8,9 +8,9 @@ import {
 import { readConfigFileSnapshot } from "../config/config.js";
 import { createMergePatch } from "../config/merge-patch.js";
 import { applyMergePatch } from "../config/merge-patch.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
-function isInjectedMainRoster(config: OpenClawConfig): boolean {
+function isInjectedMainRoster(config: BotConfig): boolean {
   const roster = listAgentEntries(config);
   const entry = roster[0];
   return (
@@ -22,14 +22,14 @@ function isInjectedMainRoster(config: OpenClawConfig): boolean {
 }
 
 function mergeOnboardingCandidate(params: {
-  base: OpenClawConfig;
-  candidate: OpenClawConfig;
-  currentRuntime: OpenClawConfig;
-}): OpenClawConfig {
+  base: BotConfig;
+  candidate: BotConfig;
+  currentRuntime: BotConfig;
+}): BotConfig {
   const proposalPatch = createMergePatch(params.base, params.candidate);
   // Keep this runtime-shaped. The canonical config writer projects only this
   // patch onto snapshot.parsed, preserving include ownership and env refs.
-  const merged = applyMergePatch(params.currentRuntime, proposalPatch) as OpenClawConfig;
+  const merged = applyMergePatch(params.currentRuntime, proposalPatch) as BotConfig;
   const { list: _legacyList, ...agents } = merged.agents ?? {};
   return {
     ...merged,
@@ -41,12 +41,12 @@ function mergeOnboardingCandidate(params: {
 }
 
 export async function ensureOnboardingAgent(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   workspace: string;
   preserveCandidateRoster?: boolean;
-  baseConfig?: OpenClawConfig;
+  baseConfig?: BotConfig;
 }): Promise<{
-  config: OpenClawConfig;
+  config: BotConfig;
   agentId: string;
   bootstrapPending: boolean;
   /**
@@ -70,7 +70,7 @@ export async function ensureOnboardingAgent(params: {
   }
   const before = await readConfigFileSnapshot();
   if (before.exists && !before.valid) {
-    throw new Error("Cannot create the first agent from an invalid OpenClaw config.");
+    throw new Error("Cannot create the first agent from an invalid Bot config.");
   }
   const effective = before.config;
   const candidateBase = params.baseConfig ?? effective;
@@ -100,7 +100,7 @@ export async function ensureOnboardingAgent(params: {
   }
   const after = await readConfigFileSnapshot();
   if (!after.valid) {
-    throw new Error("Agent creation wrote an invalid OpenClaw config.");
+    throw new Error("Agent creation wrote an invalid Bot config.");
   }
   return {
     config: mergeOnboardingCandidate({
@@ -115,10 +115,10 @@ export async function ensureOnboardingAgent(params: {
 }
 
 export function ensureOnboardingConfig(
-  config: OpenClawConfig,
+  config: BotConfig,
   workspace: string,
   preserveCandidateRoster = false,
-  baseConfig?: OpenClawConfig,
+  baseConfig?: BotConfig,
 ) {
   return ensureOnboardingAgent({ config, workspace, preserveCandidateRoster, baseConfig });
 }

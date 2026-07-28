@@ -201,20 +201,20 @@ describe("applySessionModelSelection", () => {
     {
       name: "set",
       initial: undefined,
-      runtime: { kind: "set", runtime: "openclaw" } as const,
-      expected: "openclaw",
-      runtimeChange: { kind: "set", runtime: "openclaw" },
+      runtime: { kind: "set", runtime: "bot" } as const,
+      expected: "bot",
+      runtimeChange: { kind: "set", runtime: "bot" },
     },
     {
       name: "set idempotently",
-      initial: "openclaw",
-      runtime: { kind: "set", runtime: "openclaw" } as const,
-      expected: "openclaw",
-      runtimeChange: { kind: "set", runtime: "openclaw" },
+      initial: "bot",
+      runtime: { kind: "set", runtime: "bot" } as const,
+      expected: "bot",
+      runtimeChange: { kind: "set", runtime: "bot" },
     },
     {
       name: "clear",
-      initial: "openclaw",
+      initial: "bot",
       runtime: { kind: "clear" } as const,
       expected: undefined,
       runtimeChange: { kind: "clear" },
@@ -228,9 +228,9 @@ describe("applySessionModelSelection", () => {
     },
     {
       name: "unchanged",
-      initial: "openclaw",
+      initial: "bot",
       runtime: { kind: "unchanged" } as const,
-      expected: "openclaw",
+      expected: "bot",
       runtimeChange: undefined,
     },
   ])("supports runtime $name", async ({ initial, runtime, expected, runtimeChange }) => {
@@ -309,7 +309,7 @@ describe("applySessionModelSelection", () => {
   });
 
   it("rejects when the authoritative persisted row became locked", async () => {
-    const tempRoot = tempDirs.make("openclaw-model-picker-lock-");
+    const tempRoot = tempDirs.make("bot-model-picker-lock-");
     const storePath = path.join(tempRoot, "sessions.json");
     const sessionKey = "agent:main:dm:locked-disk";
     const sessionEntry = createEntry();
@@ -419,7 +419,7 @@ describe("applySessionModelSelection", () => {
       }),
     },
   ])("returns conflict without a hybrid row after concurrent $name", async ({ concurrent }) => {
-    const tempRoot = tempDirs.make("openclaw-model-picker-service-");
+    const tempRoot = tempDirs.make("bot-model-picker-service-");
     const storePath = path.join(tempRoot, "sessions.json");
     const sessionEntry = createEntry({
       providerOverride: "anthropic",

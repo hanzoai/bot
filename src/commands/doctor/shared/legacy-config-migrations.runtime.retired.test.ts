@@ -613,7 +613,7 @@ describe("retired runtime config migrations", () => {
         controlUi: { allowInsecureAuth: true, dangerouslyDisableDeviceAuth: true },
       },
       proxy: { enabled: true, proxyUrl: "http://proxy.example" },
-      discovery: { wideArea: { enabled: true, domain: "openclaw.internal" } },
+      discovery: { wideArea: { enabled: true, domain: "bot.internal" } },
     });
 
     expect(result.raw).toMatchObject({
@@ -658,7 +658,7 @@ describe("retired runtime config migrations", () => {
         },
       },
       proxy: { proxyUrl: "http://proxy.example" },
-      discovery: { wideArea: { domain: "openclaw.internal" } },
+      discovery: { wideArea: { domain: "bot.internal" } },
     });
     expect(result.raw).toHaveProperty("messages.responsePrefix", "[bot]");
     expect(result.raw).not.toHaveProperty("web");

@@ -1,6 +1,6 @@
 // Tests session lifecycle commands for fork, reset, restart, and cleanup.
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type { SessionBindingRecord } from "../../infra/outbound/session-binding-service.js";
 import type { HandleCommandsParams } from "./commands-types.js";
 import { parseInlineDirectives } from "./directive-handling.parse.js";
@@ -284,7 +284,7 @@ vi.mock("../../infra/outbound/session-binding-service.js", () => {
 let handleSessionCommand: (typeof import("./commands-session.js"))["handleSessionCommand"];
 const baseCfg = {
   session: { mainKey: "main", scope: "per-sender" },
-} satisfies OpenClawConfig;
+} satisfies BotConfig;
 
 function buildSessionCommandParams(
   commandBody: string,

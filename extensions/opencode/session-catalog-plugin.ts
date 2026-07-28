@@ -1,31 +1,31 @@
 import { accessSync, constants, statSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { resolveAcpSessionAvailability } from "openclaw/plugin-sdk/acp-runtime";
-import { resolveDefaultAgentId } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveNodeHostExecutable } from "openclaw/plugin-sdk/node-host";
+import { resolveAcpSessionAvailability } from "bot/plugin-sdk/acp-runtime";
+import { resolveDefaultAgentId } from "bot/plugin-sdk/agent-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { resolveNodeHostExecutable } from "bot/plugin-sdk/node-host";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicy,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+  BotPluginApi,
+  BotPluginNodeHostCommand,
+  BotPluginNodeInvokePolicy,
+} from "bot/plugin-sdk/plugin-entry";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
 import type {
   SessionCatalogHost,
   SessionCatalogProvider,
   SessionCatalogSession,
   SessionCatalogTranscriptItem,
   SessionsCatalogReadResult,
-} from "openclaw/plugin-sdk/session-catalog";
+} from "bot/plugin-sdk/session-catalog";
 import {
   createSessionCatalogAdoptionCoordinator,
   importSessionCatalogHistory,
   listAdoptedSessionCatalogSessions,
   sessionCatalogAdoptedSessionKey,
   sessionCatalogAdoptedSourceKey,
-} from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/session-catalog";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   OPENCODE_LOCAL_SESSION_HOST_ID as LOCAL_HOST_ID,
   OPENCODE_NODE_INVOKE_TIMEOUT_MS as NODE_TIMEOUT_MS,
@@ -171,7 +171,7 @@ function isOpenCodeSessionCatalogEnabled(pluginConfig: unknown): boolean {
   );
 }
 
-function createOpenCodeSessionNodeHostCommands(): OpenClawPluginNodeHostCommand[] {
+function createOpenCodeSessionNodeHostCommands(): BotPluginNodeHostCommand[] {
   const available = ({ config, env }: { config: unknown; env: NodeJS.ProcessEnv }) =>
     fullConfigCatalogEnabled(config) && executableOnPath("opencode", env);
   return [
@@ -195,7 +195,7 @@ function createOpenCodeSessionNodeHostCommands(): OpenClawPluginNodeHostCommand[
   ];
 }
 
-function createOpenCodeSessionNodeInvokePolicies(): OpenClawPluginNodeInvokePolicy[] {
+function createOpenCodeSessionNodeInvokePolicies(): BotPluginNodeInvokePolicy[] {
   return [
     {
       commands: [
@@ -330,7 +330,7 @@ function parseNodeTranscriptPage(value: unknown, threadId: string): SessionsCata
 }
 
 async function listOpenCodeHosts(
-  api: OpenClawPluginApi,
+  api: BotPluginApi,
   query: Parameters<SessionCatalogProvider["list"]>[0],
 ): Promise<SessionCatalogHost[]> {
   const runtime = api.runtime;
@@ -438,11 +438,11 @@ async function readOpenCodeTranscript(
   };
 }
 
-function currentOpenCodeCatalogConfig(api: OpenClawPluginApi): OpenClawConfig {
-  return (api.runtime.config?.current?.() ?? api.config ?? {}) as OpenClawConfig;
+function currentOpenCodeCatalogConfig(api: BotPluginApi): BotConfig {
+  return (api.runtime.config?.current?.() ?? api.config ?? {}) as BotConfig;
 }
 
-function listAdoptedOpenCodeSessions(api: OpenClawPluginApi): Map<string, string> {
+function listAdoptedOpenCodeSessions(api: BotPluginApi): Map<string, string> {
   return listAdoptedSessionCatalogSessions({
     config: currentOpenCodeCatalogConfig(api),
     pluginId: api.id,
@@ -461,7 +461,7 @@ function listAdoptedOpenCodeSessions(api: OpenClawPluginApi): Map<string, string
 }
 
 async function continueOpenCodeSession(
-  api: OpenClawPluginApi,
+  api: BotPluginApi,
   hostId: string,
   threadId: string,
 ): Promise<Awaited<ReturnType<typeof linkContinuedOpenCodeSession>>> {
@@ -544,7 +544,7 @@ async function continueOpenCodeSession(
   });
 }
 
-export function registerOpenCodeSessionCatalog(api: OpenClawPluginApi): void {
+export function registerOpenCodeSessionCatalog(api: BotPluginApi): void {
   if (!isOpenCodeSessionCatalogEnabled(api.pluginConfig)) {
     return;
   }

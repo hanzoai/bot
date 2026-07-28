@@ -102,7 +102,7 @@ if (typeof process.getuid !== "function") throw new Error("workspace quiescence 
 const uid = process.getuid();
 if (uid === 0) throw new Error("workspace quiescence refuses root-owned worker sessions");
 const sleeper = new Int32Array(new SharedArrayBuffer(4));
-const leaseDirectory = path.join(os.homedir(), ".openclaw-worker", "quiescence");
+const leaseDirectory = path.join(os.homedir(), ".bot-worker", "quiescence");
 fs.mkdirSync(leaseDirectory, { recursive: true, mode: 0o700 });
 fs.chmodSync(leaseDirectory, 0o700);
 const workspaceKey = crypto.createHash("sha256").update(root).digest("hex");
@@ -280,7 +280,7 @@ const uid = process.getuid();
 if (!/^[a-f0-9]{32}$/.test(nonce || "")) throw new Error("invalid workspace quiescence nonce");
 if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 10 * 1000) throw new Error("invalid watchdog timeout");
 if (validationMode !== "heartbeat" && validationMode !== "final") throw new Error("invalid workspace quiescence validation mode");
-const leasePath = path.join(os.homedir(), ".openclaw-worker", "quiescence", crypto.createHash("sha256").update(root).digest("hex") + "." + nonce + ".json");
+const leasePath = path.join(os.homedir(), ".bot-worker", "quiescence", crypto.createHash("sha256").update(root).digest("hex") + "." + nonce + ".json");
 ${REMOTE_QUIESCENCE_PS_JS}
 ${REMOTE_QUIESCENCE_LEASE_JS}
 const input = parseLease(fs.readFileSync(leasePath, "utf8"), nonce, {
@@ -383,7 +383,7 @@ if (typeof process.getuid !== "function") throw new Error("workspace quiescence 
 const root = fs.realpathSync(process.argv[1]);
 const nonce = process.argv[2];
 if (!/^[a-f0-9]{32}$/.test(nonce || "")) throw new Error("invalid workspace quiescence nonce");
-const leasePath = path.join(os.homedir(), ".openclaw-worker", "quiescence", crypto.createHash("sha256").update(root).digest("hex") + "." + nonce + ".json");
+const leasePath = path.join(os.homedir(), ".bot-worker", "quiescence", crypto.createHash("sha256").update(root).digest("hex") + "." + nonce + ".json");
 let raw;
 try { raw = fs.readFileSync(leasePath, "utf8"); } catch (error) {
   if (error && error.code === "ENOENT") process.exit(0);

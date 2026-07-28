@@ -8,7 +8,7 @@ import {
 
 describe("managed npm plugin install paths", () => {
   it("keeps generation project names compact for nested Windows runtime binaries", () => {
-    const packageName = "@openclaw/codex";
+    const packageName = "@hanzo/bot-codex";
     const generationKey = [
       packageName,
       "2026.6.10",
@@ -17,22 +17,22 @@ describe("managed npm plugin install paths", () => {
       "codexshasum",
     ].join("\n");
     const projectDir = resolvePluginNpmGenerationProjectDir({
-      npmDir: String.raw`C:\Users\Administrator\.openclaw\npm`,
+      npmDir: String.raw`C:\Users\Administrator\.bot\npm`,
       packageName,
       generationKey,
     });
     const projectName = path.basename(projectDir);
 
     expect(projectName).toMatch(
-      /^openclaw-codex-[a-f0-9]{10}__openclaw-generation__g-[a-f0-9]{16}$/u,
+      /^bot-codex-[a-f0-9]{10}__bot-generation__g-[a-f0-9]{16}$/u,
     );
     expect(projectName.length).toBeLessThanOrEqual(66);
 
     const nestedCodexBinaryPath = path.win32.join(
-      String.raw`C:\Users\Administrator\.openclaw\npm\projects`,
+      String.raw`C:\Users\Administrator\.bot\npm\projects`,
       projectName,
       "node_modules",
-      "@openclaw",
+      "@bot",
       "codex",
       "node_modules",
       "@openai",
@@ -46,9 +46,9 @@ describe("managed npm plugin install paths", () => {
   });
 
   it("keeps generation project names under the recoverable package prefix", () => {
-    const packageName = "@openclaw/codex";
+    const packageName = "@hanzo/bot-codex";
     const projectDir = resolvePluginNpmGenerationProjectDir({
-      npmDir: "/tmp/openclaw/npm",
+      npmDir: "/tmp/bot/npm",
       packageName,
       generationKey: "codex-v2",
     });

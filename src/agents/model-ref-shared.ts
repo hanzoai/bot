@@ -7,7 +7,7 @@ import {
   findNormalizedProviderKey as findNormalizedProviderKeyCore,
   normalizeProviderId as normalizeProviderIdCore,
   normalizeProviderIdForAuth as normalizeProviderIdForAuthCore,
-} from "@openclaw/model-catalog-core/provider-id";
+} from "@hanzo/bot-model-catalog-core/provider-id";
 import {
   collectManifestModelIdNormalizationPolicies,
   normalizeBuiltInProviderModelId,
@@ -15,8 +15,8 @@ import {
   normalizeConfiguredProviderCatalogModelId as normalizeConfiguredProviderCatalogModelIdShared,
   normalizeStaticProviderModelIdWithPolicies,
   stripSelfProviderModelPrefix,
-} from "@openclaw/model-catalog-core/provider-model-id-normalization";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-model-catalog-core/provider-model-id-normalization";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { normalizeProviderModelIdWithManifest } from "../plugins/manifest-model-id-normalization.js";
 import type { PluginManifestRecord } from "../plugins/manifest-registry.js";
 import { modelKey } from "../shared/model-key.js";

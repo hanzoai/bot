@@ -1,5 +1,5 @@
-import { createAssistantMessageEventStream } from "@openclaw/llm-core";
-import type { Api, Model, StreamFn } from "@openclaw/llm-core";
+import { createAssistantMessageEventStream } from "@hanzo/bot-llm-core";
+import type { Api, Model, StreamFn } from "@hanzo/bot-llm-core";
 // Simple completion transport tests cover provider-specific stream alias
 // selection before the generic completion helper invokes the LLM layer.
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -11,7 +11,7 @@ const ensureCustomApiRegistered = vi.fn();
 const resolveProviderStreamFn = vi.fn();
 const wrapProviderSimpleCompletionStreamFn = vi.fn();
 const buildTransportAwareSimpleStreamFn = vi.fn();
-const createOpenClawTransportStreamFnForModel = vi.fn();
+const createBotTransportStreamFnForModel = vi.fn();
 const createTransportAwareStreamFnForModel = vi.fn();
 const prepareTransportAwareSimpleModel = vi.fn();
 const resolveTransportAwareSimpleApi = vi.fn();
@@ -24,7 +24,7 @@ const initialHost = getAiTransportHost();
 
 vi.mock("./provider-transport-stream.js", () => ({
   buildTransportAwareSimpleStreamFn,
-  createOpenClawTransportStreamFnForModel,
+  createBotTransportStreamFnForModel,
   createTransportAwareStreamFnForModel,
   prepareTransportAwareSimpleModel,
   resolveTransportAwareSimpleApi,
@@ -71,7 +71,7 @@ describe("prepareModelForSimpleCompletion", () => {
     pluginStreamFn.mockClear();
     wrapProviderSimpleCompletionStreamFn.mockReset();
     buildTransportAwareSimpleStreamFn.mockReset();
-    createOpenClawTransportStreamFnForModel.mockReset();
+    createBotTransportStreamFnForModel.mockReset();
     createTransportAwareStreamFnForModel.mockReset();
     prepareTransportAwareSimpleModel.mockReset();
     resolveTransportAwareSimpleApi.mockReset();
@@ -81,7 +81,7 @@ describe("prepareModelForSimpleCompletion", () => {
     resolveProviderStreamFn.mockReturnValue(pluginStreamFn);
     wrapProviderSimpleCompletionStreamFn.mockReturnValue(undefined);
     buildTransportAwareSimpleStreamFn.mockReturnValue(undefined);
-    createOpenClawTransportStreamFnForModel.mockReturnValue(undefined);
+    createBotTransportStreamFnForModel.mockReturnValue(undefined);
     createTransportAwareStreamFnForModel.mockReturnValue(undefined);
     prepareTransportAwareSimpleModel.mockImplementation((model) => model);
     resolveTransportAwareSimpleApi.mockReturnValue(undefined);
@@ -149,7 +149,7 @@ describe("prepareModelForSimpleCompletion", () => {
     expect(wrapProviderSimpleCompletionStreamFn).toHaveBeenCalledTimes(1);
     expect(wrapProviderSimpleCompletionStreamFn.mock.results[0]?.value).toBeTypeOf("function");
     expect(result.api).toBe(
-      "openclaw-provider-simple:moonshot:kimi-k2.7-code:moonshot-simple-source:https%3A%2F%2Fapi.moonshot.ai%2Fv1",
+      "bot-provider-simple:moonshot:kimi-k2.7-code:moonshot-simple-source:https%3A%2F%2Fapi.moonshot.ai%2Fv1",
     );
     expect(inheritManagedTransport).toHaveBeenCalledWith(model, result);
     expect(wrapProviderSimpleCompletionStreamFn).toHaveBeenCalledWith(
@@ -259,12 +259,12 @@ describe("prepareModelForSimpleCompletion", () => {
     expect(createAnthropicVertexStreamFnForModel).toHaveBeenCalledWith(model);
     expect(ensureCustomApiRegistered).toHaveBeenCalledWith(
       apiRegistry,
-      "openclaw-anthropic-vertex-simple:https%3A%2F%2Fus-central1-aiplatform.googleapis.com",
+      "bot-anthropic-vertex-simple:https%3A%2F%2Fus-central1-aiplatform.googleapis.com",
       "vertex-stream",
     );
     expect(result).toEqual({
       ...model,
-      api: "openclaw-anthropic-vertex-simple:https%3A%2F%2Fus-central1-aiplatform.googleapis.com",
+      api: "bot-anthropic-vertex-simple:https%3A%2F%2Fus-central1-aiplatform.googleapis.com",
     });
     expect(inheritManagedTransport).toHaveBeenCalledWith(model, result);
   });
@@ -287,7 +287,7 @@ describe("prepareModelForSimpleCompletion", () => {
     buildTransportAwareSimpleStreamFn.mockReturnValueOnce("transport-stream");
     prepareTransportAwareSimpleModel.mockReturnValueOnce({
       ...model,
-      api: "openclaw-openai-responses-transport",
+      api: "bot-openai-responses-transport",
     });
 
     const result = prepareModelForSimpleCompletion({ model });
@@ -296,12 +296,12 @@ describe("prepareModelForSimpleCompletion", () => {
     expect(buildTransportAwareSimpleStreamFn).toHaveBeenCalledWith(model, { cfg: undefined });
     expect(ensureCustomApiRegistered).toHaveBeenCalledWith(
       apiRegistry,
-      "openclaw-openai-responses-transport",
+      "bot-openai-responses-transport",
       "transport-stream",
     );
     expect(result).toEqual({
       ...model,
-      api: "openclaw-openai-responses-transport",
+      api: "bot-openai-responses-transport",
     });
   });
 
@@ -321,7 +321,7 @@ describe("prepareModelForSimpleCompletion", () => {
     };
     prepareGoogleSimpleCompletionModel.mockImplementationOnce((_registry: unknown, m: unknown) => ({
       ...(m as Model<"google-generative-ai">),
-      api: "openclaw-google-generative-ai-simple",
+      api: "bot-google-generative-ai-simple",
     }));
     resolveProviderStreamFn.mockReturnValueOnce(undefined);
 
@@ -332,7 +332,7 @@ describe("prepareModelForSimpleCompletion", () => {
     expect(buildTransportAwareSimpleStreamFn).not.toHaveBeenCalled();
     expect(result).toEqual({
       ...model,
-      api: "openclaw-google-generative-ai-simple",
+      api: "bot-google-generative-ai-simple",
     });
   });
 
@@ -353,7 +353,7 @@ describe("prepareModelForSimpleCompletion", () => {
 
     const transportModel = {
       ...model,
-      api: "openclaw-google-generative-ai-transport",
+      api: "bot-google-generative-ai-transport",
     };
     resolveProviderStreamFn.mockReturnValueOnce(undefined);
     buildTransportAwareSimpleStreamFn.mockReturnValueOnce("google-transport-stream");
@@ -364,7 +364,7 @@ describe("prepareModelForSimpleCompletion", () => {
     expect(buildTransportAwareSimpleStreamFn).toHaveBeenCalledWith(model, { cfg: undefined });
     expect(ensureCustomApiRegistered).toHaveBeenCalledWith(
       apiRegistry,
-      "openclaw-google-generative-ai-transport",
+      "bot-google-generative-ai-transport",
       "google-transport-stream",
     );
     expect(prepareGoogleSimpleCompletionModel).not.toHaveBeenCalled();
@@ -383,7 +383,7 @@ describe("prepareModelForSimpleCompletion", () => {
       "https://proxy.example.test/openai/codex",
     ],
   ])(
-    "uses OpenClaw transport for OpenAI Codex-response simple completions with baseUrl %s",
+    "uses Bot transport for OpenAI Codex-response simple completions with baseUrl %s",
     (baseUrl, expectedBaseUrl) => {
       const model: Model<"openai-chatgpt-responses"> = {
         id: "gpt-5.5",
@@ -399,16 +399,16 @@ describe("prepareModelForSimpleCompletion", () => {
       };
 
       resolveProviderStreamFn.mockReturnValueOnce(undefined);
-      createOpenClawTransportStreamFnForModel.mockReturnValueOnce("codex-transport-stream");
+      createBotTransportStreamFnForModel.mockReturnValueOnce("codex-transport-stream");
       resolveTransportAwareSimpleApi.mockReturnValueOnce(
-        "openclaw-openai-chatgpt-responses-transport",
+        "bot-openai-chatgpt-responses-transport",
       );
 
       const result = prepareModelForSimpleCompletion({ model });
 
       // ChatGPT/Codex response endpoints share the transport stream, but the
       // simple-completion API must normalize caller-supplied base URLs first.
-      expect(createOpenClawTransportStreamFnForModel).toHaveBeenCalledWith(
+      expect(createBotTransportStreamFnForModel).toHaveBeenCalledWith(
         {
           ...model,
           baseUrl: expectedBaseUrl,
@@ -417,13 +417,13 @@ describe("prepareModelForSimpleCompletion", () => {
       );
       expect(ensureCustomApiRegistered).toHaveBeenCalledWith(
         apiRegistry,
-        "openclaw-openai-chatgpt-responses-transport",
+        "bot-openai-chatgpt-responses-transport",
         "codex-transport-stream",
       );
       expect(result).toEqual({
         ...model,
         baseUrl: expectedBaseUrl,
-        api: "openclaw-openai-chatgpt-responses-transport",
+        api: "bot-openai-chatgpt-responses-transport",
       });
       expect(prepareTransportAwareSimpleModel).not.toHaveBeenCalled();
     },

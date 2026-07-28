@@ -1,4 +1,4 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { inspectMainSessionRecoveryHealth } from "../agents/main-session-recovery-lifecycle.js";
 import { transitionMainSessionRecovery } from "../agents/main-session-recovery-state.js";
 import {
@@ -31,7 +31,7 @@ export async function noteMainSessionRecoveryIntegrity(
   params.warnings.push(
     [
       `- Found ${wedgedCount} with automatic restart recovery tombstoned.`,
-      "  OpenClaw will not auto-resume these sessions again; inspect the failed turn, then use /new or reset to replace the session.",
+      "  Bot will not auto-resume these sessions again; inspect the failed turn, then use /new or reset to replace the session.",
       `  Examples: ${wedged
         .slice(0, 3)
         .map(({ key }) => key)

@@ -1,7 +1,7 @@
 // Qa Lab helper module supports run config behavior.
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 import type {
   QaLabExecutionKind,
   QaLabResolvedRunPlan,
@@ -187,17 +187,17 @@ function normalizeQaRuntimePair(input: unknown): QaLabRunSelection["runtimePair"
   if (
     !Array.isArray(input) ||
     input.length !== 2 ||
-    !input.every((runtime) => runtime === "openclaw" || runtime === "codex")
+    !input.every((runtime) => runtime === "bot" || runtime === "codex")
   ) {
-    throw new Error('QA runner runtimePair must be ["openclaw", "codex"]');
+    throw new Error('QA runner runtimePair must be ["bot", "codex"]');
   }
   if (input[0] === input[1]) {
     throw new Error("QA runner runtimePair must compare two different runtimes");
   }
-  if (input[0] !== "openclaw" || input[1] !== "codex") {
-    throw new Error('QA runner runtimePair must be ["openclaw", "codex"]');
+  if (input[0] !== "bot" || input[1] !== "codex") {
+    throw new Error('QA runner runtimePair must be ["bot", "codex"]');
   }
-  return ["openclaw", "codex"];
+  return ["bot", "codex"];
 }
 
 function normalizeQaRuntimePairLane(input: unknown): QaLabRunSelection["runtimePairLane"] {

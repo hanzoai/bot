@@ -44,7 +44,7 @@ function createPage(params: {
     patchForm: vi.fn(),
     removeFormValue: vi.fn(),
   };
-  const element = document.createElement("openclaw-memory-dreaming") as DreamingPageElement;
+  const element = document.createElement("bot-memory-dreaming") as DreamingPageElement;
   (element as unknown as { context: ApplicationContext }).context = {
     runtimeConfig,
     agents: {

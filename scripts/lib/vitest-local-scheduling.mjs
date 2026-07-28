@@ -24,7 +24,7 @@ function parsePositiveInt(value, label) {
 }
 
 function isSystemThrottleDisabled(env) {
-  const normalized = env.OPENCLAW_VITEST_DISABLE_SYSTEM_THROTTLE?.trim().toLowerCase();
+  const normalized = env.BOT_VITEST_DISABLE_SYSTEM_THROTTLE?.trim().toLowerCase();
   return normalized === "1" || normalized === "true";
 }
 
@@ -39,14 +39,14 @@ export function isCiLikeEnv(env = process.env) {
 
 /** @internal Shared repository-script contract. */
 export function resolveLocalVitestEnv(env = process.env) {
-  const normalizedLocalCheck = env.OPENCLAW_LOCAL_CHECK?.trim().toLowerCase();
+  const normalizedLocalCheck = env.BOT_LOCAL_CHECK?.trim().toLowerCase();
   if (isCiLikeEnv(env) || (normalizedLocalCheck !== "0" && normalizedLocalCheck !== "false")) {
     return env;
   }
 
   return {
     ...env,
-    OPENCLAW_LOCAL_CHECK: "1",
+    BOT_LOCAL_CHECK: "1",
   };
 }
 
@@ -97,10 +97,10 @@ export function resolveLocalVitestScheduling(
   pool = "threads",
 ) {
   const override = parsePositiveInt(
-    env.OPENCLAW_VITEST_MAX_WORKERS ?? env.OPENCLAW_TEST_WORKERS,
-    env.OPENCLAW_VITEST_MAX_WORKERS === undefined
-      ? "OPENCLAW_TEST_WORKERS"
-      : "OPENCLAW_VITEST_MAX_WORKERS",
+    env.BOT_VITEST_MAX_WORKERS ?? env.BOT_TEST_WORKERS,
+    env.BOT_VITEST_MAX_WORKERS === undefined
+      ? "BOT_TEST_WORKERS"
+      : "BOT_VITEST_MAX_WORKERS",
   );
   if (override !== null) {
     const maxWorkers = clamp(override, 1, 16);

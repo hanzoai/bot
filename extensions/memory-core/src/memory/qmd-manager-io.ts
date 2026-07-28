@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import readline from "node:readline";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   buildMemoryReadResult,
   buildMemoryReadResultFromSlice,
@@ -11,8 +11,8 @@ import {
   type MemoryReadResult,
   type MemorySource,
   statRegularFile,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { openNodeSqliteDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
+import { openNodeSqliteDatabase } from "bot/plugin-sdk/sqlite-runtime";
 import { isDefaultQmdMemoryPath as isDefaultMemoryPath } from "./qmd-document-resolver.js";
 import { qmdManagerLog } from "./qmd-manager-base.js";
 import {

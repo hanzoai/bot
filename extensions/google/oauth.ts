@@ -1,5 +1,5 @@
 // Google plugin module implements oauth behavior.
-import type { OAuthCredential } from "openclaw/plugin-sdk/provider-auth";
+import type { OAuthCredential } from "bot/plugin-sdk/provider-auth";
 import {
   buildAuthUrl,
   generateOAuthState,

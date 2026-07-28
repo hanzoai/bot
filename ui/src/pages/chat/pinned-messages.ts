@@ -1,7 +1,7 @@
 // Control UI chat module implements pinned messages behavior.
 import { PersistedSet } from "./persisted-set.ts";
 
-const PREFIX = "openclaw:pinned:";
+const PREFIX = "bot:pinned:";
 
 export class PinnedMessages extends PersistedSet<number> {
   constructor(sessionKey: string) {

@@ -1,13 +1,13 @@
 // Gradium provider module implements model/runtime integration.
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import { resolveGeneratedMediaMaxBytes } from "bot/plugin-sdk/media-generation-runtime";
+import { normalizeResolvedSecretInputString } from "bot/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
   SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech";
-import { asObject, trimToUndefined } from "openclaw/plugin-sdk/speech";
-import { resolveSpeechProviderApiKey } from "openclaw/plugin-sdk/speech-core";
+} from "bot/plugin-sdk/speech";
+import { asObject, trimToUndefined } from "bot/plugin-sdk/speech";
+import { resolveSpeechProviderApiKey } from "bot/plugin-sdk/speech-core";
 import { DEFAULT_GRADIUM_VOICE_ID, GRADIUM_VOICES, normalizeGradiumBaseUrl } from "./shared.js";
 import { gradiumTTS } from "./tts.js";
 

@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 struct LicenseDocumentLoaderTests {
     @Test func `loads only utf8 text licenses sorted alphabetically by title`() throws {
@@ -34,7 +34,7 @@ struct LicenseDocumentLoaderTests {
     @Test func `derives readable titles from license filenames`() {
         #expect(LicenseDocumentLoader.title(from: "WebRTC.txt") == "WebRTC")
         #expect(LicenseDocumentLoader.title(from: "SwiftUI Siri Waveform.txt") == "SwiftUI Siri Waveform")
-        #expect(LicenseDocumentLoader.title(from: "openclaw_plugin_sdk.txt") == "openclaw plugin sdk")
+        #expect(LicenseDocumentLoader.title(from: "bot_plugin_sdk.txt") == "bot plugin sdk")
         #expect(LicenseDocumentLoader.title(from: "010-WebRTC.txt") == "010 WebRTC")
     }
 
@@ -48,7 +48,7 @@ struct LicenseDocumentLoaderTests {
 
     private static func makeTemporaryDirectory() throws -> URL {
         let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("OpenClawLicenseDocumentLoaderTests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("BotLicenseDocumentLoaderTests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         return directory
     }

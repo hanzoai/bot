@@ -2,7 +2,7 @@
 import {
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import type { Command } from "commander";
 import { formatDocsLink } from "../../packages/terminal-core/src/links.js";
 import { getTerminalTableWidth, renderTable } from "../../packages/terminal-core/src/table.js";
@@ -70,19 +70,19 @@ export function registerDirectoryCli(program: Command) {
       "after",
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
-          ["openclaw directory self --channel slack", "Show the connected account identity."],
+          ["bot directory self --channel slack", "Show the connected account identity."],
           [
-            'openclaw directory peers list --channel slack --query "alice"',
+            'bot directory peers list --channel slack --query "alice"',
             "Search contact/user IDs by name.",
           ],
-          ["openclaw directory groups list --channel discord", "List available groups/channels."],
+          ["bot directory groups list --channel discord", "List available groups/channels."],
           [
-            "openclaw directory groups members --channel discord --group-id <id>",
+            "bot directory groups members --channel discord --group-id <id>",
             "List members for a specific group.",
           ],
         ])}\n\n${theme.muted("Docs:")} ${formatDocsLink(
           "/cli/directory",
-          "docs.openclaw.ai/cli/directory",
+          "docs.bot.ai/cli/directory",
         )}\n`,
     )
     .action(() => {

@@ -92,8 +92,8 @@ function mockReadyDashboard() {
     port: 18789,
     status: "busy",
     listeners: [
-      { pid: 4242, commandLine: "openclaw-gateway", address: "10.0.0.5:18789" },
-      { pid: 4242, commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
+      { pid: 4242, commandLine: "bot-gateway", address: "10.0.0.5:18789" },
+      { pid: 4242, commandLine: "bot-gateway", address: "127.0.0.1:18789" },
     ],
     hints: [],
   });

@@ -1,6 +1,6 @@
 /** Tests plugin version drift detection between package, manifest, and install records. */
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import {
   detectPluginVersionDrift,
@@ -11,7 +11,7 @@ function npmRecord(
   version: string,
   overrides: Partial<PluginInstallRecord> = {},
 ): PluginInstallRecord {
-  const resolvedName = overrides.resolvedName ?? "@openclaw/whatsapp";
+  const resolvedName = overrides.resolvedName ?? "@hanzo/bot-whatsapp";
   return {
     source: "npm",
     spec: `${resolvedName}@latest`,
@@ -27,8 +27,8 @@ function clawhubRecord(
 ): PluginInstallRecord {
   return {
     source: "clawhub",
-    spec: "clawhub:@openclaw/whatsapp",
-    clawhubPackage: "@openclaw/whatsapp",
+    spec: "clawhub:@hanzo/bot-whatsapp",
+    clawhubPackage: "@hanzo/bot-whatsapp",
     resolvedVersion: version,
     ...overrides,
   };
@@ -40,7 +40,7 @@ describe("detectPluginVersionDrift", () => {
       gatewayVersion: "2026.5.4",
       installRecords: {
         whatsapp: npmRecord("2026.5.4"),
-        discord: npmRecord("2026.5.4", { resolvedName: "@openclaw/discord" }),
+        discord: npmRecord("2026.5.4", { resolvedName: "@hanzo/bot-discord" }),
       },
     });
 
@@ -53,10 +53,10 @@ describe("detectPluginVersionDrift", () => {
       gatewayVersion: "2026.5.4",
       installRecords: {
         whatsapp: npmRecord("2026.5.3", {
-          resolvedName: "@openclaw/whatsapp",
-          spec: "@openclaw/whatsapp@2026.5.3",
+          resolvedName: "@hanzo/bot-whatsapp",
+          spec: "@hanzo/bot-whatsapp@2026.5.3",
         }),
-        discord: npmRecord("2026.5.4", { resolvedName: "@openclaw/discord" }),
+        discord: npmRecord("2026.5.4", { resolvedName: "@hanzo/bot-discord" }),
       },
     });
 
@@ -66,8 +66,8 @@ describe("detectPluginVersionDrift", () => {
       installedVersion: "2026.5.3",
       gatewayVersion: "2026.5.4",
       source: "npm",
-      packageName: "@openclaw/whatsapp",
-      spec: "@openclaw/whatsapp@2026.5.3",
+      packageName: "@hanzo/bot-whatsapp",
+      spec: "@hanzo/bot-whatsapp@2026.5.3",
     });
   });
 
@@ -77,7 +77,7 @@ describe("detectPluginVersionDrift", () => {
       installRecords: {
         whatsapp: npmRecord("2026.5.4"),
         // ...and the inverse direction
-        discord: npmRecord("2026.5.4-1", { resolvedName: "@openclaw/discord" }),
+        discord: npmRecord("2026.5.4-1", { resolvedName: "@hanzo/bot-discord" }),
       },
     });
 
@@ -101,8 +101,8 @@ describe("detectPluginVersionDrift", () => {
       gatewayVersion: "2026.5.4",
       installRecords: {
         discord: clawhubRecord("2026.5.3", {
-          spec: "clawhub:@openclaw/discord",
-          clawhubPackage: "@openclaw/discord",
+          spec: "clawhub:@hanzo/bot-discord",
+          clawhubPackage: "@hanzo/bot-discord",
           clawhubChannel: "official",
           clawhubUrl: "https://clawhub.ai",
         }),
@@ -144,9 +144,9 @@ describe("detectPluginVersionDrift", () => {
     const result = detectPluginVersionDrift({
       gatewayVersion: "2026.5.4",
       installRecords: {
-        "openclaw-plugin-yuanbao": npmRecord("2.13.1", {
-          resolvedName: "openclaw-plugin-yuanbao",
-          spec: "openclaw-plugin-yuanbao@2.13.1",
+        "bot-plugin-yuanbao": npmRecord("2.13.1", {
+          resolvedName: "bot-plugin-yuanbao",
+          spec: "bot-plugin-yuanbao@2.13.1",
         }),
       },
     });
@@ -158,9 +158,9 @@ describe("detectPluginVersionDrift", () => {
     const result = detectPluginVersionDrift({
       gatewayVersion: "2026.5.7",
       installRecords: {
-        "wecom-openclaw-plugin": npmRecord("2026.5.6", {
-          resolvedName: "@wecom/wecom-openclaw-plugin",
-          spec: "@wecom/wecom-openclaw-plugin@2026.5.6",
+        "wecom-bot-plugin": npmRecord("2026.5.6", {
+          resolvedName: "@wecom/wecom-bot-plugin",
+          spec: "@wecom/wecom-bot-plugin@2026.5.6",
         }),
       },
     });
@@ -177,19 +177,19 @@ describe("detectPluginVersionDrift", () => {
         // bump alone.
         archive: {
           source: "archive",
-          resolvedName: "@openclaw/whatsapp",
+          resolvedName: "@hanzo/bot-whatsapp",
           resolvedVersion: "2026.5.3",
-          spec: "@openclaw/whatsapp@archive",
+          spec: "@hanzo/bot-whatsapp@archive",
         },
         local: {
           source: "path",
-          resolvedName: "@openclaw/whatsapp",
+          resolvedName: "@hanzo/bot-whatsapp",
           resolvedVersion: "2026.5.3",
           spec: "/tmp/local-plugin",
         },
         forked: {
           source: "git",
-          resolvedName: "@openclaw/whatsapp",
+          resolvedName: "@hanzo/bot-whatsapp",
           resolvedVersion: "2026.5.3",
           spec: "git+ssh://example/forked",
         },
@@ -205,8 +205,8 @@ describe("detectPluginVersionDrift", () => {
       installRecords: {
         whatsapp: {
           source: "npm",
-          spec: "@openclaw/whatsapp@latest",
-          resolvedName: "@openclaw/whatsapp",
+          spec: "@hanzo/bot-whatsapp@latest",
+          resolvedName: "@hanzo/bot-whatsapp",
           version: "2026.5.3",
         },
       },
@@ -220,7 +220,7 @@ describe("detectPluginVersionDrift", () => {
     const result = detectPluginVersionDrift({
       gatewayVersion: "2026.5.4",
       installRecords: {
-        whatsapp: { source: "npm", spec: "@openclaw/whatsapp@latest" },
+        whatsapp: { source: "npm", spec: "@hanzo/bot-whatsapp@latest" },
       },
     });
 
@@ -228,20 +228,20 @@ describe("detectPluginVersionDrift", () => {
   });
 
   it("skips plugins that are explicitly disabled in config", () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       plugins: {
         entries: {
           whatsapp: { enabled: false },
           discord: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = detectPluginVersionDrift({
       gatewayVersion: "2026.5.4",
       installRecords: {
         whatsapp: npmRecord("2026.5.3"),
-        discord: npmRecord("2026.5.3", { resolvedName: "@openclaw/discord" }),
+        discord: npmRecord("2026.5.3", { resolvedName: "@hanzo/bot-discord" }),
       },
       config,
     });
@@ -250,11 +250,11 @@ describe("detectPluginVersionDrift", () => {
   });
 
   it("skips plugins disabled by the global plugin activation policy", () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       plugins: {
         enabled: false,
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = detectPluginVersionDrift({
       gatewayVersion: "2026.5.4",
@@ -277,7 +277,7 @@ describe("detectPluginVersionDrift", () => {
         plugins: {
           deny: ["whatsapp"],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
     const notAllowed = detectPluginVersionDrift({
       gatewayVersion: "2026.5.4",
@@ -288,7 +288,7 @@ describe("detectPluginVersionDrift", () => {
         plugins: {
           allow: ["discord"],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
 
     expect(denied.drifts).toEqual([]);
@@ -296,7 +296,7 @@ describe("detectPluginVersionDrift", () => {
   });
 
   it("includes plugins with no entry in config (default-enabled)", () => {
-    const config: OpenClawConfig = { plugins: { entries: {} } } as OpenClawConfig;
+    const config: BotConfig = { plugins: { entries: {} } } as BotConfig;
     const result = detectPluginVersionDrift({
       gatewayVersion: "2026.5.4",
       installRecords: {
@@ -313,8 +313,8 @@ describe("detectPluginVersionDrift", () => {
       gatewayVersion: "2026.5.4",
       installRecords: {
         whatsapp: npmRecord("2026.5.3"),
-        discord: npmRecord("2026.5.3", { resolvedName: "@openclaw/discord" }),
-        matrix: npmRecord("2026.5.3", { resolvedName: "@openclaw/matrix" }),
+        discord: npmRecord("2026.5.3", { resolvedName: "@hanzo/bot-discord" }),
+        matrix: npmRecord("2026.5.3", { resolvedName: "@hanzo/bot-matrix" }),
       },
     });
 
@@ -330,10 +330,10 @@ describe("resolvePluginVersionDriftUpdateCommand", () => {
         installedVersion: "2026.6.9",
         gatewayVersion: "2026.6.10-beta.1",
         source: "npm",
-        packageName: "@openclaw/brave-plugin",
-        spec: "@openclaw/brave-plugin@2026.6.9",
+        packageName: "@hanzo/bot-brave-plugin",
+        spec: "@hanzo/bot-brave-plugin@2026.6.9",
       }),
-    ).toBe("openclaw plugins update @openclaw/brave-plugin@2026.6.10-beta.1");
+    ).toBe("bot plugins update @hanzo/bot-brave-plugin@2026.6.10-beta.1");
   });
 
   it("parses the package name from exact npm specs when drift metadata is sparse", () => {
@@ -343,9 +343,9 @@ describe("resolvePluginVersionDriftUpdateCommand", () => {
         installedVersion: "2026.6.9",
         gatewayVersion: "2026.6.10-beta.1",
         source: "npm",
-        spec: "@openclaw/brave-plugin@2026.6.9",
+        spec: "@hanzo/bot-brave-plugin@2026.6.9",
       }),
-    ).toBe("openclaw plugins update @openclaw/brave-plugin@2026.6.10-beta.1");
+    ).toBe("bot plugins update @hanzo/bot-brave-plugin@2026.6.10-beta.1");
   });
 
   it("prefers the parsed exact npm spec package over inconsistent drift metadata", () => {
@@ -355,10 +355,10 @@ describe("resolvePluginVersionDriftUpdateCommand", () => {
         installedVersion: "2026.6.9",
         gatewayVersion: "2026.6.10-beta.1",
         source: "npm",
-        packageName: "@openclaw/other-plugin",
-        spec: "@openclaw/brave-plugin@2026.6.9",
+        packageName: "@hanzo/bot-other-plugin",
+        spec: "@hanzo/bot-brave-plugin@2026.6.9",
       }),
-    ).toBe("openclaw plugins update @openclaw/brave-plugin@2026.6.10-beta.1");
+    ).toBe("bot plugins update @hanzo/bot-brave-plugin@2026.6.10-beta.1");
   });
 
   it("keeps plugin-id updates for floating npm install records", () => {
@@ -368,10 +368,10 @@ describe("resolvePluginVersionDriftUpdateCommand", () => {
         installedVersion: "2026.6.9",
         gatewayVersion: "2026.6.10-beta.1",
         source: "npm",
-        packageName: "@openclaw/brave-plugin",
-        spec: "@openclaw/brave-plugin",
+        packageName: "@hanzo/bot-brave-plugin",
+        spec: "@hanzo/bot-brave-plugin",
       }),
-    ).toBe("openclaw plugins update brave");
+    ).toBe("bot plugins update brave");
   });
 
   it("keeps plugin-id updates when the gateway version is not a registry version", () => {
@@ -381,9 +381,9 @@ describe("resolvePluginVersionDriftUpdateCommand", () => {
         installedVersion: "2026.6.9",
         gatewayVersion: "unknown",
         source: "npm",
-        packageName: "@openclaw/brave-plugin",
-        spec: "@openclaw/brave-plugin@2026.6.9",
+        packageName: "@hanzo/bot-brave-plugin",
+        spec: "@hanzo/bot-brave-plugin@2026.6.9",
       }),
-    ).toBe("openclaw plugins update brave");
+    ).toBe("bot plugins update brave");
   });
 });

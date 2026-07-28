@@ -72,7 +72,7 @@ describe("docker build cache layout", () => {
         dockerfile,
         `${path} should use a shared pnpm store cache under the active user's home`,
       ).toMatch(
-        /--mount=type=cache,id=openclaw-pnpm-store,target=\/(?:root|home\/appuser)\/\.local\/share\/pnpm\/store,sharing=locked/,
+        /--mount=type=cache,id=bot-pnpm-store,target=\/(?:root|home\/appuser)\/\.local\/share\/pnpm\/store,sharing=locked/,
       );
     }
   });
@@ -127,22 +127,22 @@ describe("docker build cache layout", () => {
     expect(dockerfile).not.toContain("pnpm install --frozen-lockfile");
     expect(dockerfile).not.toContain("COPY . .");
     expect(dockerfile).toMatch(
-      /^COPY --from=openclaw_package --chown=appuser:appuser openclaw-current\.tgz \/tmp\/openclaw-current\.tgz$/m,
+      /^COPY --from=bot_package --chown=appuser:appuser bot-current\.tgz \/tmp\/bot-current\.tgz$/m,
     );
     // The dependency reify layer must key on the extracted manifest, not the
     // per-PR tarball bytes, so warm builders skip the full npm install.
     expect(dockerfile).toContain(
-      "COPY --from=functional-manifest --chown=appuser:appuser /tmp/openclaw-deps /tmp/openclaw-deps",
+      "COPY --from=functional-manifest --chown=appuser:appuser /tmp/bot-deps /tmp/bot-deps",
     );
     expect(dockerfile).toContain("npm install --omit=dev --no-fund --no-audit");
     expect(dockerfile).not.toContain("npm install -g --prefix");
     expect(dockerfile).toContain(
-      "COPY --from=functional-deps --chown=appuser:appuser /tmp/openclaw-deps/node_modules /app/node_modules",
+      "COPY --from=functional-deps --chown=appuser:appuser /tmp/bot-deps/node_modules /app/node_modules",
     );
     // Packaged prune/hotfix logic must run before the self-link exists so its
-    // walks cannot cycle through /app/node_modules/openclaw -> /app.
+    // walks cannot cycle through /app/node_modules/bot -> /app.
     const postinstallIndex = dockerfile.indexOf("runBundledPluginPostinstall");
-    const selfLinkIndex = dockerfile.indexOf("ln -sfn /app /app/node_modules/openclaw");
+    const selfLinkIndex = dockerfile.indexOf("ln -sfn /app /app/node_modules/bot");
     expect(postinstallIndex).toBeGreaterThan(-1);
     expect(selfLinkIndex).toBeGreaterThan(postinstallIndex);
   });

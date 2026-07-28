@@ -12,7 +12,7 @@ import {
 
 const executablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const available = canRunPlaywrightChromium(executablePath);
-const allowMissing = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissing = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const suite = available || !allowMissing ? describe : describe.skip;
 
 let browser: Browser;
@@ -124,7 +124,7 @@ suite("OpenCode and Pi external session catalogs", () => {
     expect(await page.locator(".agent-chat__composer-combobox > textarea").isDisabled()).toBe(true);
     expect(await gateway.getRequests("sessions.catalog.read")).toHaveLength(2);
 
-    const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDir = process.env.BOT_UI_E2E_ARTIFACT_DIR?.trim();
     if (artifactDir) {
       await fs.mkdir(artifactDir, { recursive: true });
       await page.screenshot({

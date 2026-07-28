@@ -1,6 +1,6 @@
 // Registers provider plugins into the provider registry.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
+import { sortUniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { splitTrailingAuthProfile } from "../agents/model-ref-profile.js";
 import { compileSafeRegex } from "../security/safe-regex.js";
 import { withBundledPluginVitestCompat } from "./bundled-compat.js";

@@ -1,8 +1,8 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import { normalizeTrimmedStringList } from "@hanzo/bot-normalization-core/string-normalization";
 import { isRecord } from "../utils.js";
 import {
   TimeoutSecondsFieldSchema,

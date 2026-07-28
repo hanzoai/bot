@@ -7,7 +7,7 @@ import { resolveNodeHostedSkillDirectory, scanNodeHostedSkills } from "./skills.
 const roots: string[] = [];
 
 function createRoot(): string {
-  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-node-skills-")));
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "bot-node-skills-")));
   roots.push(root);
   return root;
 }
@@ -37,7 +37,7 @@ describe("scanNodeHostedSkills", () => {
     const stateDir = createRoot();
     const skillDir = path.join(stateDir, "skills", "profile-skill");
     writeSkill(path.join(stateDir, "skills"), "profile-skill", "Profile skill");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("BOT_STATE_DIR", stateDir);
 
     expect(resolveNodeHostedSkillDirectory("node://node-1/skills/profile-skill", "node-1")).toBe(
       fs.realpathSync(skillDir),
@@ -58,10 +58,10 @@ describe("scanNodeHostedSkills", () => {
     }
   });
 
-  it("uses the active OpenClaw profile skills directory by default", () => {
+  it("uses the active Bot profile skills directory by default", () => {
     const stateDir = createRoot();
     const content = writeSkill(path.join(stateDir, "skills"), "profile-skill", "Profile skill");
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("BOT_STATE_DIR", stateDir);
 
     expect(scanNodeHostedSkills()).toEqual([
       { name: "profile-skill", description: "Profile skill", content },
@@ -86,7 +86,7 @@ name: json5-metadata
 description: JSON5-style metadata
 metadata:
   {
-    "openclaw":
+    "bot":
       {
         "requires":
           {

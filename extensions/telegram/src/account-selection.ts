@@ -3,13 +3,13 @@ import {
   createAccountListHelpers,
   hasConfiguredAccountValue,
   resolveListedDefaultAccountId,
-} from "openclaw/plugin-sdk/account-core";
+} from "bot/plugin-sdk/account-core";
 import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   normalizeOptionalAccountId,
-} from "openclaw/plugin-sdk/account-id";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/account-id";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 
 const DEFAULT_AGENT_ID = "main";
 
@@ -27,7 +27,7 @@ function normalizeChannelId(value: unknown): string {
   return typeof value === "string" ? value.trim().toLowerCase() : "";
 }
 
-function resolveDefaultAgentId(cfg: OpenClawConfig): string {
+function resolveDefaultAgentId(cfg: BotConfig): string {
   const agents = Array.isArray(cfg.agents?.list) ? cfg.agents.list : [];
   const chosen = (agents.find((agent) => agent?.default) ?? agents[0])?.id;
   return normalizeAgentId(chosen);
@@ -57,7 +57,7 @@ function resolveBindingAccount(params: {
   };
 }
 
-function listBoundAccountIds(cfg: OpenClawConfig, channelId: string): string[] {
+function listBoundAccountIds(cfg: BotConfig, channelId: string): string[] {
   const ids = new Set<string>();
   for (const binding of cfg.bindings ?? []) {
     const resolved = resolveBindingAccount({ binding, channelId });
@@ -68,7 +68,7 @@ function listBoundAccountIds(cfg: OpenClawConfig, channelId: string): string[] {
   return [...ids].toSorted((left, right) => left.localeCompare(right));
 }
 
-function resolveDefaultAgentBoundAccountId(cfg: OpenClawConfig, channelId: string): string | null {
+function resolveDefaultAgentBoundAccountId(cfg: BotConfig, channelId: string): string | null {
   const defaultAgentId = resolveDefaultAgentId(cfg);
   for (const binding of cfg.bindings ?? []) {
     const resolved = resolveBindingAccount({ binding, channelId });
@@ -79,7 +79,7 @@ function resolveDefaultAgentBoundAccountId(cfg: OpenClawConfig, channelId: strin
   return null;
 }
 
-function hasImplicitDefaultTelegramAccount(cfg: OpenClawConfig): boolean {
+function hasImplicitDefaultTelegramAccount(cfg: BotConfig): boolean {
   const telegram = cfg.channels?.telegram;
   if (!telegram) {
     return false;
@@ -99,7 +99,7 @@ const { listAccountIds: listTelegramAccountIds } = createAccountListHelpers("tel
 
 export { listTelegramAccountIds };
 
-export function resolveDefaultTelegramAccountSelection(cfg: OpenClawConfig): {
+export function resolveDefaultTelegramAccountSelection(cfg: BotConfig): {
   accountId: string;
   accountIds: string[];
   shouldWarnMissingDefault: boolean;
@@ -133,6 +133,6 @@ export function resolveDefaultTelegramAccountSelection(cfg: OpenClawConfig): {
   };
 }
 
-export function resolveDefaultTelegramAccountId(cfg: OpenClawConfig): string {
+export function resolveDefaultTelegramAccountId(cfg: BotConfig): string {
   return resolveDefaultTelegramAccountSelection(cfg).accountId;
 }

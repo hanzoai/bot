@@ -3,7 +3,7 @@ import { normalizeAssistantIdentity, type AssistantIdentity } from "../lib/assis
 import { normalizeOptionalString } from "../lib/string-coerce.ts";
 import { getSafeLocalStorage } from "../local-storage.ts";
 
-const LOCAL_ASSISTANT_IDENTITY_KEY = "openclaw.control.assistant.v1";
+const LOCAL_ASSISTANT_IDENTITY_KEY = "bot.control.assistant.v1";
 
 type LocalAssistantIdentity = { avatar: string | null; agentId?: string | null };
 

@@ -11,7 +11,7 @@ import {
   registerNativeHookRelay,
   testing as nativeHookRelayTesting,
 } from "../agents/harness/native-hook-relay.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 const activeChildren = new Set<ChildProcessWithoutNullStreams>();
@@ -39,7 +39,7 @@ async function createLingeringPluginFixture(): Promise<{
   markerPath: string;
   stateDir: string;
 }> {
-  const root = tempDirs.make("openclaw-hooks-cli-");
+  const root = tempDirs.make("bot-hooks-cli-");
   const stateDir = path.join(root, "state");
   const pluginDir = path.join(root, "linger-plugin");
   const markerPath = path.join(root, "registered");
@@ -51,11 +51,11 @@ async function createLingeringPluginFixture(): Promise<{
       name: "linger-plugin",
       version: "1.0.0",
       type: "module",
-      openclaw: { extensions: ["./index.js"] },
+      bot: { extensions: ["./index.js"] },
     }),
   );
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "bot.plugin.json"),
     JSON.stringify({
       id: "linger",
       name: "Linger",
@@ -77,7 +77,7 @@ async function createLingeringPluginFixture(): Promise<{
       "",
     ].join("\n"),
   );
-  const configPath = path.join(stateDir, "openclaw.json");
+  const configPath = path.join(stateDir, "bot.json");
   await fs.writeFile(
     configPath,
     JSON.stringify({
@@ -95,7 +95,7 @@ async function createLingeringPreloadFixture(): Promise<{
   preloadPath: string;
   stateDir: string;
 }> {
-  const root = tempDirs.make("openclaw-hooks-relay-");
+  const root = tempDirs.make("bot-hooks-relay-");
   const markerPath = path.join(root, "loaded");
   const preloadPath = path.join(root, "linger.mjs");
   const stateDir = path.join(root, "state");
@@ -119,7 +119,7 @@ async function createTimeoutOwnershipFixture(): Promise<{
   readyMarkerPath: string;
   stateDir: string;
 }> {
-  const root = tempDirs.make("openclaw-hooks-timeout-owner-");
+  const root = tempDirs.make("bot-hooks-timeout-owner-");
   const nodeWrapperPath = path.join(root, "node-with-tsx");
   const pidLogPath = path.join(root, "pids");
   const preloadPath = path.join(root, "track-relay-pid.mjs");
@@ -141,7 +141,7 @@ async function createTimeoutOwnershipFixture(): Promise<{
   );
   await fs.writeFile(
     nodeWrapperPath,
-    ["#!/bin/sh", 'exec "$OPENCLAW_TEST_NODE" --import tsx "$@"', ""].join("\n"),
+    ["#!/bin/sh", 'exec "$BOT_TEST_NODE" --import tsx "$@"', ""].join("\n"),
   );
   await fs.chmod(nodeWrapperPath, 0o755);
   return { nodeWrapperPath, pidLogPath, preloadPath, readyMarkerPath, stateDir };
@@ -264,8 +264,8 @@ async function runHooksRelay(params: { event: "post_tool_use" | "pre_tool_use"; 
     env: {
       LINGER_MARKER: fixture.markerPath,
       NODE_OPTIONS: `--import=${pathToFileURL(fixture.preloadPath).href}`,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_STATE_DIR: fixture.stateDir,
+      BOT_DISABLE_BUNDLED_PLUGINS: "1",
+      BOT_STATE_DIR: fixture.stateDir,
     },
     stdin: params.stdin,
   });
@@ -294,9 +294,9 @@ describe("hooks CLI process lifecycle", () => {
           VITEST: undefined,
           NODE_COMPILE_CACHE: path.join(fixture.stateDir, "node-compile-cache"),
           NODE_OPTIONS: `--import=${pathToFileURL(fixture.preloadPath).href}`,
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-          OPENCLAW_STATE_DIR: fixture.stateDir,
-          OPENCLAW_TEST_NODE: process.execPath,
+          BOT_DISABLE_BUNDLED_PLUGINS: "1",
+          BOT_STATE_DIR: fixture.stateDir,
+          BOT_TEST_NODE: process.execPath,
           RELAY_PID_LOG: fixture.pidLogPath,
           RELAY_READY_MARKER: fixture.readyMarkerPath,
         },
@@ -355,7 +355,7 @@ describe("hooks CLI process lifecycle", () => {
       .poll(() => nativeHookRelayTesting.getNativeHookRelayBridgeRecordForTests(relay.relayId))
       .toBeDefined();
 
-    const childStateDir = path.join(tempDirs.make("openclaw-hooks-relay-other-state-"), "state");
+    const childStateDir = path.join(tempDirs.make("bot-hooks-relay-other-state-"), "state");
     await fs.mkdir(childStateDir, { recursive: true });
     const result = await runHooksCli({
       args: [
@@ -366,7 +366,7 @@ describe("hooks CLI process lifecycle", () => {
         "--relay-id",
         relay.relayId,
         "--state-db",
-        resolveOpenClawStateSqlitePath(),
+        resolveBotStateSqlitePath(),
         "--generation",
         relay.generation,
         "--event",
@@ -377,8 +377,8 @@ describe("hooks CLI process lifecycle", () => {
       completion: "exit",
       label: "hooks relay explicit state database",
       env: {
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_STATE_DIR: childStateDir,
+        BOT_DISABLE_BUNDLED_PLUGINS: "1",
+        BOT_STATE_DIR: childStateDir,
       },
       stdin: JSON.stringify({ hook_event_name: "PostToolUse" }),
     });
@@ -399,9 +399,9 @@ describe("hooks CLI process lifecycle", () => {
       label: "hooks list",
       env: {
         LINGER_MARKER: fixture.markerPath,
-        OPENCLAW_CONFIG_PATH: fixture.configPath,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-        OPENCLAW_STATE_DIR: fixture.stateDir,
+        BOT_CONFIG_PATH: fixture.configPath,
+        BOT_DISABLE_BUNDLED_PLUGINS: "1",
+        BOT_STATE_DIR: fixture.stateDir,
       },
     });
     const relayResult = await runHooksRelay({ event: "pre_tool_use", stdin: "{}" });

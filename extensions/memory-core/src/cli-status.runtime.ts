@@ -1,8 +1,8 @@
-import type { MemoryEmbeddingProbeResult } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import type { MemoryEmbeddingProbeResult } from "bot/plugin-sdk/memory-core-host-engine-storage";
 import {
   resolveMemoryLightDreamingConfig,
   resolveMemoryRemDreamingConfig,
-} from "openclaw/plugin-sdk/memory-core-host-status";
+} from "bot/plugin-sdk/memory-core-host-status";
 import {
   emitMemorySecretResolveDiagnostics,
   formatAuditCounts,
@@ -24,7 +24,7 @@ import {
   theme,
   withProgress,
   withProgressTotals,
-  type OpenClawConfig,
+  type BotConfig,
 } from "./cli.host.runtime.js";
 import type { MemoryCommandOptions } from "./cli.types.js";
 import {
@@ -89,7 +89,7 @@ function formatMemoryIndexIdentityWarning(
   }
   return {
     reason,
-    fix: `Run: openclaw memory status --index --agent ${agentId}`,
+    fix: `Run: bot memory status --index --agent ${agentId}`,
   };
 }
 function formatRuntimeBytes(bytes: number): string {
@@ -105,7 +105,7 @@ function formatRuntimeBytes(bytes: number): string {
   }
   return `${value >= 10 ? value.toFixed(0) : value.toFixed(1)} ${unit}`;
 }
-function formatDreamingSummary(cfg: OpenClawConfig): string {
+function formatDreamingSummary(cfg: BotConfig): string {
   const pluginConfig = resolveMemoryPluginConfig(cfg);
   const light = resolveMemoryLightDreamingConfig({ pluginConfig, cfg });
   const deep = resolveShortTermPromotionDreamingConfig({ pluginConfig, cfg });
@@ -564,7 +564,7 @@ export async function runMemoryStatus(
         lines.push(`  ${issue.severity === "error" ? warn(issue.message) : muted(issue.message)}`);
       }
       if (!opts.fix) {
-        lines.push(`  ${muted(`Fix: openclaw memory status --fix --agent ${agentId}`)}`);
+        lines.push(`  ${muted(`Fix: bot memory status --fix --agent ${agentId}`)}`);
       }
     }
     if (dreamingAudit?.issues.length) {
@@ -575,7 +575,7 @@ export async function runMemoryStatus(
         lines.push(`  ${issue.severity === "error" ? warn(issue.message) : muted(issue.message)}`);
       }
       if (!opts.fix) {
-        lines.push(`  ${muted(`Fix: openclaw memory status --fix --agent ${agentId}`)}`);
+        lines.push(`  ${muted(`Fix: bot memory status --fix --agent ${agentId}`)}`);
       }
     }
     defaultRuntime.log(lines.join("\n"));

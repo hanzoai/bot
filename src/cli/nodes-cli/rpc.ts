@@ -1,6 +1,6 @@
 // Gateway RPC helpers for node CLI commands, including lazy runtime loading and option parsing.
 import { randomUUID } from "node:crypto";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import type { Command } from "commander";
 import { readConnectErrorDetailCode } from "../../../packages/gateway-protocol/src/connect-error-details.js";
 import { readMissingScopeError } from "../../../packages/gateway-protocol/src/gateway-error-details.js";

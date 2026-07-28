@@ -1,14 +1,14 @@
 // Discord tests cover send.webhook activity plugin behavior.
-import { isRecentOutboundMessageIdentity } from "openclaw/plugin-sdk/channel-outbound";
+import { isRecentOutboundMessageIdentity } from "bot/plugin-sdk/channel-outbound";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const recordChannelActivityMock = vi.hoisted(() => vi.fn());
 const loadConfigMock = vi.hoisted(() => vi.fn(() => ({ channels: { discord: {} } })));
 let dateNowSpy: ReturnType<typeof vi.spyOn>;
 
-vi.mock("openclaw/plugin-sdk/plugin-config-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/plugin-config-runtime")>(
-    "openclaw/plugin-sdk/plugin-config-runtime",
+vi.mock("bot/plugin-sdk/plugin-config-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/plugin-config-runtime")>(
+    "bot/plugin-sdk/plugin-config-runtime",
   );
   return {
     ...actual,
@@ -16,10 +16,10 @@ vi.mock("openclaw/plugin-sdk/plugin-config-runtime", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/channel-activity-runtime", async () => {
+vi.mock("bot/plugin-sdk/channel-activity-runtime", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/channel-activity-runtime")
-  >("openclaw/plugin-sdk/channel-activity-runtime");
+    typeof import("bot/plugin-sdk/channel-activity-runtime")
+  >("bot/plugin-sdk/channel-activity-runtime");
   return {
     ...actual,
     recordChannelActivity: (...args: unknown[]) => recordChannelActivityMock(...args),

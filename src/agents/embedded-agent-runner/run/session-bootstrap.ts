@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { sanitizeForLog } from "../../../../packages/terminal-core/src/ansi.js";
 import { resolveStorePath } from "../../../config/sessions.js";
 import { loadSessionEntry, updateSessionEntry } from "../../../config/sessions/session-accessor.js";

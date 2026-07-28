@@ -2,12 +2,12 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { GPT5_BEHAVIOR_CONTRACT as CODEX_GPT5_BEHAVIOR_CONTRACT } from "openclaw/plugin-sdk/provider-model-shared";
+import type { EmbeddedRunAttemptParams } from "bot/plugin-sdk/agent-harness-runtime";
+import { GPT5_BEHAVIOR_CONTRACT as CODEX_GPT5_BEHAVIOR_CONTRACT } from "bot/plugin-sdk/provider-model-shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CodexAppServerRpcError } from "./client.js";
 import { buildCodexAppServerConnectionFingerprint } from "./plugin-app-cache-key.js";
-import { CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE } from "./protocol.js";
+import { CODEX_BOT_DIRECT_DYNAMIC_TOOL_NAMESPACE } from "./protocol.js";
 import {
   sessionBindingIdentity,
   type CodexAppServerBindingStore,
@@ -59,7 +59,7 @@ describe("Codex incognito thread persistence", () => {
 describe("Codex ring-zero thread config", () => {
   it("applies the restriction to both thread start and resume", () => {
     const params = createAttemptParams({ provider: "openai" });
-    params.toolsAllow = ["openclaw"];
+    params.toolsAllow = ["bot"];
     const appServer = createAppServerOptions() as never;
     const start = buildThreadStartParams(params, {
       appServer,
@@ -436,7 +436,7 @@ function expectSingleLogMessage(
 }
 
 describe("Codex app-server native code mode config", () => {
-  it("keeps Codex-native subagents primary while limiting OpenClaw spawn to OpenClaw delegation", () => {
+  it("keeps Codex-native subagents primary while limiting Bot spawn to Bot delegation", () => {
     const instructions = buildDeveloperInstructions(createAttemptParams({ provider: "openai" }));
 
     expect(instructions).toContain("Use Codex native `spawn_agent` for Codex subagents");
@@ -447,7 +447,7 @@ describe("Codex app-server native code mode config", () => {
       "when `spawn_agent` is not directly listed, load it with `tool_search` before spawning",
     );
     expect(instructions).toContain(
-      "Use OpenClaw `sessions_spawn` only for OpenClaw or ACP delegation, never as a substitute for `spawn_agent`.",
+      "Use Bot `sessions_spawn` only for Bot or ACP delegation, never as a substitute for `spawn_agent`.",
     );
   });
 
@@ -462,7 +462,7 @@ describe("Codex app-server native code mode config", () => {
         },
         {
           type: "namespace",
-          name: "openclaw",
+          name: "bot",
           description: "",
           tools: [
             {
@@ -485,7 +485,7 @@ describe("Codex app-server native code mode config", () => {
     });
 
     expect(instructions).toContain(
-      "Deferred searchable OpenClaw dynamic tools available: image_generate, music_generate.",
+      "Deferred searchable Bot dynamic tools available: image_generate, music_generate.",
     );
     expect(instructions).toContain("Use `tool_search` to load exact callable specs before use.");
     expect(instructions).not.toContain("message,");
@@ -496,7 +496,7 @@ describe("Codex app-server native code mode config", () => {
       dynamicTools: [
         {
           type: "namespace",
-          name: "openclaw",
+          name: "bot",
           description: "",
           tools: [
             {
@@ -530,7 +530,7 @@ describe("Codex app-server native code mode config", () => {
       ],
     });
 
-    expect(instructions).not.toContain("Deferred searchable OpenClaw dynamic tools available");
+    expect(instructions).not.toContain("Deferred searchable Bot dynamic tools available");
   });
 
   it("instructs Codex to mark only completed message-tool-only source replies final", () => {
@@ -572,7 +572,7 @@ describe("Codex app-server native code mode config", () => {
     const searchableFingerprint = codexDynamicToolsFingerprint([
       {
         type: "namespace",
-        name: "openclaw",
+        name: "bot",
         description: "",
         tools: [
           {
@@ -619,7 +619,7 @@ describe("Codex app-server native code mode config", () => {
     ).toBe(true);
   });
 
-  it("keeps OpenClaw skill catalogs out of developer instructions", () => {
+  it("keeps Bot skill catalogs out of developer instructions", () => {
     const params = createAttemptParams({ provider: "openai" });
     params.skillsSnapshot = {
       prompt: "<available_skills><skill><name>demo</name></skill></available_skills>",
@@ -823,11 +823,11 @@ describe("Codex app-server native code mode config", () => {
     expect(request.personality).toBe("none");
   });
 
-  it("omits OpenClaw model selection when adopting a native Codex thread", () => {
+  it("omits Bot model selection when adopting a native Codex thread", () => {
     const request = buildThreadResumeParams(createAttemptParams({ provider: "codex" }), {
       threadId: "thread-adopted",
-      model: "openclaw-model",
-      modelProvider: "openclaw-provider",
+      model: "bot-model",
+      modelProvider: "bot-provider",
       preserveNativeModel: true,
       appServer: createAppServerOptions() as never,
       developerInstructions: "test instructions",
@@ -952,7 +952,7 @@ describe("Codex app-server native code mode config", () => {
       const dynamicTools = [
         {
           type: "namespace" as const,
-          name: CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+          name: CODEX_BOT_DIRECT_DYNAMIC_TOOL_NAMESPACE,
           description: "",
           tools: [],
         },
@@ -980,7 +980,7 @@ describe("Codex app-server native code mode config", () => {
       for (const request of [startRequest, resumeRequest]) {
         expect(request.config?.["code_mode.direct_only_tool_namespaces"]).toEqual([
           "vendor_direct",
-          CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+          CODEX_BOT_DIRECT_DYNAMIC_TOOL_NAMESPACE,
         ]);
         expect(request.config?.["features.code_mode_only"]).toBe(nativeCodeModeOnlyEnabled);
       }
@@ -1260,7 +1260,7 @@ describe("Codex app-server turn input image sanitizing", () => {
 });
 
 describe("Codex app-server turn params", () => {
-  it("builds resume and turn params from the currently selected OpenClaw model", () => {
+  it("builds resume and turn params from the currently selected Bot model", () => {
     const params = createAttemptParams({ provider: "codex" });
     params.modelId = "gpt-5.4-codex";
     params.thinkLevel = "medium";
@@ -1342,7 +1342,7 @@ describe("Codex app-server turn params", () => {
     expect(heartbeatCollaborationMode.settings.model).toBe("gpt-5.4-codex");
     expect(heartbeatCollaborationMode.settings.reasoning_effort).toBe("medium");
     expect(heartbeatCollaborationMode.settings.developer_instructions).toContain(
-      "This is an OpenClaw heartbeat turn. Apply these instructions only to this heartbeat wake",
+      "This is an Bot heartbeat turn. Apply these instructions only to this heartbeat wake",
     );
     expect(heartbeatCollaborationMode.settings.developer_instructions).toContain(
       "Heartbeat = useful proactive progress",
@@ -1362,7 +1362,7 @@ describe("Codex app-server turn params", () => {
       "Turn-only workspace instructions.",
     );
     expect(commitmentCollaborationMode.settings.developer_instructions).not.toContain(
-      "This is an OpenClaw heartbeat turn",
+      "This is an Bot heartbeat turn",
     );
 
     params.trigger = "user";
@@ -1391,7 +1391,7 @@ describe("Codex app-server turn params", () => {
     expect(cronCollaborationMode.settings.model).toBe("gpt-5.4-codex");
     expect(cronCollaborationMode.settings.reasoning_effort).toBe("medium");
     expect(cronCollaborationMode.settings.developer_instructions).toContain(
-      "This is an OpenClaw cron automation turn",
+      "This is an Bot cron automation turn",
     );
     expect(cronCollaborationMode.settings.developer_instructions).toContain(
       "If it asks you to run an exact command, run that command before doing any investigation",
@@ -1572,7 +1572,7 @@ describe("Codex app-server model provider selection", () => {
 
 describe("Codex plugin binding recovery", () => {
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-plugin-recovery-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-codex-plugin-recovery-"));
     resetCodexTestBindingStore();
   });
 
@@ -1719,7 +1719,7 @@ describe("Codex plugin binding recovery", () => {
 
 describe("Codex app-server adopted thread lifecycle", () => {
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-thread-adoption-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-codex-thread-adoption-"));
     resetCodexTestBindingStore();
   });
 
@@ -1728,7 +1728,7 @@ describe("Codex app-server adopted thread lifecycle", () => {
     vi.restoreAllMocks();
   });
 
-  it("keeps OpenClaw from overriding App Server model selection across resumes", async () => {
+  it("keeps Bot from overriding App Server model selection across resumes", async () => {
     const sessionFile = path.join(tempDir, "session.jsonl");
     const workspaceDir = path.join(tempDir, "workspace");
     const params = createThreadLifecycleParams(sessionFile, workspaceDir);
@@ -1826,7 +1826,7 @@ describe("Codex app-server adopted thread lifecycle", () => {
 
 describe("Codex app-server supervised branch lifecycle", () => {
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-supervision-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-codex-supervision-"));
     resetCodexTestBindingStore();
   });
 
@@ -2949,7 +2949,7 @@ describe("Codex app-server supervised branch lifecycle", () => {
 
 describe("Codex app-server thread lifecycle timing", () => {
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-thread-lifecycle-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-codex-thread-lifecycle-"));
     // Bindings are keyed by session identity, not tempDir, so sibling tests
     // would otherwise leak resumable threads into fresh-start expectations.
     resetCodexTestBindingStore();

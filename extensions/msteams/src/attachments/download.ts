@@ -3,7 +3,7 @@ import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import {
   resolveMSTeamsRequestTimeoutMs,
   type MSTeamsRequestDeadline,

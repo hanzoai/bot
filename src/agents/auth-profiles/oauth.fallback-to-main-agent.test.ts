@@ -8,7 +8,7 @@ import os from "node:os";
 import path from "node:path";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetFileLockStateForTest } from "../../infra/file-lock.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeBotAgentDatabasesForTest } from "../../state/bot-agent-db.js";
 import { captureEnv, setTestEnvValue } from "../../test-utils/env.js";
 import { resolveApiKeyForProfile } from "./oauth.js";
 import { loadPersistedAuthProfileStore } from "./persisted.js";
@@ -63,7 +63,7 @@ function createUsableOAuthExpiry(): number {
 }
 
 describe("resolveApiKeyForProfile fallback to main agent", () => {
-  const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR", "OPENCLAW_AGENT_DIR"]);
+  const envSnapshot = captureEnv(["BOT_STATE_DIR", "BOT_AGENT_DIR"]);
   let tmpDir: string;
   let mainAgentDir: string;
   let secondaryAgentDir: string;
@@ -81,8 +81,8 @@ describe("resolveApiKeyForProfile fallback to main agent", () => {
     await fs.mkdir(secondaryAgentDir, { recursive: true });
 
     // Set environment variables so the default agent dir resolves under tmpDir.
-    setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
-    setTestEnvValue("OPENCLAW_AGENT_DIR", mainAgentDir);
+    setTestEnvValue("BOT_STATE_DIR", tmpDir);
+    setTestEnvValue("BOT_AGENT_DIR", mainAgentDir);
     clearRuntimeAuthProfileStoreSnapshots();
   });
 
@@ -144,7 +144,7 @@ describe("resolveApiKeyForProfile fallback to main agent", () => {
   afterEach(async () => {
     resetFileLockStateForTest();
     clearRuntimeAuthProfileStoreSnapshots();
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
     vi.unstubAllGlobals();
 
     envSnapshot.restore();

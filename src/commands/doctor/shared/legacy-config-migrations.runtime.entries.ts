@@ -55,10 +55,10 @@ export const LEGACY_CONFIG_MIGRATIONS_RUNTIME_ENTRIES: LegacyConfigMigrationSpec
     legacyRules: [
       {
         path: ["agents", "list"],
-        message: 'agents.list moved to keyed agents.entries. Run "openclaw doctor --fix".',
+        message: 'agents.list moved to keyed agents.entries. Run "bot doctor --fix".',
       },
     ],
     apply: migrateAgentEntries,
   }),
 ];
-import { normalizeAgentId } from "@openclaw/normalization-core/agent-id";
+import { normalizeAgentId } from "@hanzo/bot-normalization-core/agent-id";

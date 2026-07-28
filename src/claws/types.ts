@@ -1,10 +1,10 @@
-// Shared types for grouped OpenClaw Claw manifests and read-only add plans.
+// Shared types for grouped Bot Claw manifests and read-only add plans.
 import type { ToolProfileId } from "../agents/tool-policy-shared.js";
 import type { AgentConfig } from "../config/types.agents.js";
 
 export const CLAW_SCHEMA_VERSION = 1 as const;
-export const CLAW_ADD_PLAN_SCHEMA_VERSION = "openclaw.clawAddPlan.v1" as const;
-export const CLAW_INSPECT_RESULT_SCHEMA_VERSION = "openclaw.clawInspect.v1" as const;
+export const CLAW_ADD_PLAN_SCHEMA_VERSION = "bot.clawAddPlan.v1" as const;
+export const CLAW_INSPECT_RESULT_SCHEMA_VERSION = "bot.clawInspect.v1" as const;
 export const CLAW_OUTPUT_STABILITY = "experimental" as const;
 
 type ClawDiagnosticLevel = "error" | "warning";
@@ -29,7 +29,7 @@ type ClawAgent = {
   };
 };
 
-export type ClawOpenClawProfile = {
+export type ClawBotProfile = {
   schemaVersion: 1;
   agent: {
     groupChat?: {
@@ -180,7 +180,7 @@ export type ClawReadResult =
       ok: true;
       manifest: ClawManifest;
       clawMarkdownBody?: Buffer;
-      openClawProfile?: ClawOpenClawProfile;
+      botProfile?: ClawBotProfile;
       source: ClawSourceIdentity;
       snapshot: ClawSourceSnapshot;
       diagnostics: ClawDiagnostic[];

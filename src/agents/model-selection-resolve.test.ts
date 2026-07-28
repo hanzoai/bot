@@ -1,6 +1,6 @@
 // Verifies configured model ref resolution and OpenRouter compatibility aliases.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import { resolveAllowedModelRef, resolveConfiguredModelRef } from "./model-selection-resolve.js";
 
 describe("model-selection-resolve OpenRouter compat aliases", () => {
@@ -23,7 +23,7 @@ describe("model-selection-resolve OpenRouter compat aliases", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const catalog = [
       { provider: "openai", id: "gpt-5.5", name: "GPT 5.5" },
       { provider: "anthropic", id: "claude-sonnet-4-6", name: "Claude Sonnet 4.6" },
@@ -68,7 +68,7 @@ describe("model-selection-resolve OpenRouter compat aliases", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const catalog = [
       { provider: "openai", id: "gpt-5.5", name: "GPT 5.5" },
       { provider: "anthropic", id: "claude-sonnet-4-6", name: "Claude Sonnet 4.6" },
@@ -117,7 +117,7 @@ describe("model-selection-resolve OpenRouter compat aliases", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     expect(
       resolveAllowedModelRef({
@@ -141,7 +141,7 @@ describe("model-selection-resolve OpenRouter compat aliases", () => {
           model: { primary: "openrouter:auto" },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveConfiguredModelRef({
@@ -161,7 +161,7 @@ describe("model-selection-resolve OpenRouter compat aliases", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const catalog = [
       {

@@ -41,7 +41,7 @@ describe("MCP App sandbox HTTP origin", () => {
     expect(result.end).toHaveBeenCalledWith(expect.stringContaining("sandbox-proxy-ready"));
     expect(result.end).toHaveBeenCalledWith(expect.stringContaining("allow-scripts allow-forms"));
     expect(result.end).toHaveBeenCalledWith(
-      expect.stringContaining("openclaw:widget-bridge-port-offer"),
+      expect.stringContaining("bot:widget-bridge-port-offer"),
     );
     expect(result.end).toHaveBeenCalledWith(expect.stringContaining("widgetBridgePortOffered"));
     const proxyHtml = String(result.end.mock.calls.at(-1)?.[0]);

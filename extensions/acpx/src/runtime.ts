@@ -1,6 +1,6 @@
 /**
- * OpenClaw ACPX runtime adapter. It wraps the upstream acpx runtime with
- * OpenClaw session metadata, lease tracking, model scoping, and cleanup policy.
+ * Bot ACPX runtime adapter. It wraps the upstream acpx runtime with
+ * Bot session metadata, lease tracking, model scoping, and cleanup policy.
  */
 import { AsyncLocalStorage } from "node:async_hooks";
 import fs from "node:fs/promises";
@@ -24,12 +24,12 @@ import {
   type AcpRuntimeTurnResult,
   type SessionAgentOptions,
 } from "acpx/runtime";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { redactSensitiveText } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { parseStrictPositiveInteger } from "bot/plugin-sdk/number-runtime";
+import { redactSensitiveText } from "bot/plugin-sdk/security-runtime";
+import { normalizeStringEntries } from "bot/plugin-sdk/string-coerce-runtime";
+import { sliceUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { AcpRuntimeError, type AcpRuntime, type AcpRuntimeErrorCode } from "../runtime-api.js";
-import { CODEX_ACP_PACKAGE, OPENCLAW_CODEX_CONFIG_ARG } from "./codex-adapter.js";
+import { CODEX_ACP_PACKAGE, BOT_CODEX_CONFIG_ARG } from "./codex-adapter.js";
 import { splitCommandParts } from "./command-line.js";
 import {
   createAcpxProcessLeaseId,
@@ -39,8 +39,8 @@ import {
   type AcpxProcessLeaseStore,
 } from "./process-lease.js";
 import {
-  cleanupOpenClawOwnedAcpxProcessTree,
-  isOpenClawLeaseAwareAcpxProcessCommand,
+  cleanupBotOwnedAcpxProcessTree,
+  isBotLeaseAwareAcpxProcessCommand,
   type AcpxProcessCleanupDeps,
 } from "./process-reaper.js";
 
@@ -48,37 +48,37 @@ type AcpSessionStore = AcpRuntimeOptions["sessionStore"];
 type AcpSessionRecord = Parameters<AcpSessionStore["save"]>[0];
 type AcpLoadedSessionRecord = Awaited<ReturnType<AcpSessionStore["load"]>>;
 type BaseAcpxRuntimeTestOptions = ConstructorParameters<typeof BaseAcpxRuntime>[1];
-type OpenClawAcpxRuntimeOptions = AcpRuntimeOptions & {
-  openclawWrapperRoot?: string;
-  openclawGatewayInstanceId?: string;
-  openclawProcessLeaseStore?: AcpxProcessLeaseStore;
+type BotAcpxRuntimeOptions = AcpRuntimeOptions & {
+  botWrapperRoot?: string;
+  botGatewayInstanceId?: string;
+  botProcessLeaseStore?: AcpxProcessLeaseStore;
   pluginToolsMcpBridgeEnabled?: boolean;
-  openclawToolsMcpBridgeEnabled?: boolean;
+  botToolsMcpBridgeEnabled?: boolean;
 };
 type AcpxRuntimeTestOptions = Record<string, unknown> & {
-  openclawProcessCleanup?: AcpxProcessCleanupDeps;
+  botProcessCleanup?: AcpxProcessCleanupDeps;
 };
-type OpenClawRuntimeTurnInput = Parameters<NonNullable<AcpRuntime["startTurn"]>>[0];
-type OpenClawRuntimeEnsureInput = Parameters<AcpRuntime["ensureSession"]>[0];
-type OpenClawRuntimeHandle = Awaited<ReturnType<AcpRuntime["ensureSession"]>>;
+type BotRuntimeTurnInput = Parameters<NonNullable<AcpRuntime["startTurn"]>>[0];
+type BotRuntimeEnsureInput = Parameters<AcpRuntime["ensureSession"]>[0];
+type BotRuntimeHandle = Awaited<ReturnType<AcpRuntime["ensureSession"]>>;
 type AcpxDelegateEnsureInput = Parameters<BaseAcpxRuntime["ensureSession"]>[0];
 type AcpxMcpServer = NonNullable<AcpRuntimeOptions["mcpServers"]>[number];
 
-const ACPX_PLUGIN_TOOLS_MCP_SERVER_NAME = "openclaw-plugin-tools";
-const ACPX_OPENCLAW_TOOLS_MCP_SERVER_NAME = "openclaw-tools";
-const OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY_ENV = "OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY";
+const ACPX_PLUGIN_TOOLS_MCP_SERVER_NAME = "bot-plugin-tools";
+const ACPX_BOT_TOOLS_MCP_SERVER_NAME = "bot-tools";
+const BOT_TOOLS_MCP_AGENT_SESSION_KEY_ENV = "BOT_TOOLS_MCP_AGENT_SESSION_KEY";
 
 type ResetAwareSessionStore = AcpSessionStore & {
   markFresh: (sessionKey: string) => void;
 };
 
-type OpenClawLeaseSessionMetadata = {
-  openclawLeaseId: string;
-  openclawGatewayInstanceId: string;
+type BotLeaseSessionMetadata = {
+  botLeaseId: string;
+  botGatewayInstanceId: string;
 };
 
-function withOpenClawManagedTurnTimeout<T extends object>(input: T): T & { timeoutMs: 0 } {
-  // OpenClaw owns ACP turn deadlines. acpx treats timeout after partial agent
+function withBotManagedTurnTimeout<T extends object>(input: T): T & { timeoutMs: 0 } {
+  // Bot owns ACP turn deadlines. acpx treats timeout after partial agent
   // output as a completed turn, which can mark background work done early.
   return {
     ...input,
@@ -86,14 +86,14 @@ function withOpenClawManagedTurnTimeout<T extends object>(input: T): T & { timeo
   };
 }
 
-function withOpenClawLeaseSessionMetadata<T extends object>(
+function withBotLeaseSessionMetadata<T extends object>(
   record: T,
-  metadata: OpenClawLeaseSessionMetadata,
-): T & OpenClawLeaseSessionMetadata {
+  metadata: BotLeaseSessionMetadata,
+): T & BotLeaseSessionMetadata {
   return {
     ...record,
-    openclawLeaseId: metadata.openclawLeaseId,
-    openclawGatewayInstanceId: metadata.openclawGatewayInstanceId,
+    botLeaseId: metadata.botLeaseId,
+    botGatewayInstanceId: metadata.botGatewayInstanceId,
   };
 }
 
@@ -201,21 +201,21 @@ function readRecordAgentPid(record: unknown): number | undefined {
   return numericPid && Number.isInteger(numericPid) && numericPid > 0 ? numericPid : undefined;
 }
 
-function readOpenClawLeaseIdFromRecord(record: unknown): string | undefined {
+function readBotLeaseIdFromRecord(record: unknown): string | undefined {
   if (typeof record !== "object" || record === null) {
     return undefined;
   }
-  const { openclawLeaseId } = record as { openclawLeaseId?: unknown };
-  return typeof openclawLeaseId === "string" ? openclawLeaseId.trim() || undefined : undefined;
+  const { botLeaseId } = record as { botLeaseId?: unknown };
+  return typeof botLeaseId === "string" ? botLeaseId.trim() || undefined : undefined;
 }
 
-function readOpenClawGatewayInstanceIdFromRecord(record: unknown): string | undefined {
+function readBotGatewayInstanceIdFromRecord(record: unknown): string | undefined {
   if (typeof record !== "object" || record === null) {
     return undefined;
   }
-  const { openclawGatewayInstanceId } = record as { openclawGatewayInstanceId?: unknown };
-  return typeof openclawGatewayInstanceId === "string"
-    ? openclawGatewayInstanceId.trim() || undefined
+  const { botGatewayInstanceId } = record as { botGatewayInstanceId?: unknown };
+  return typeof botGatewayInstanceId === "string"
+    ? botGatewayInstanceId.trim() || undefined
     : undefined;
 }
 
@@ -278,9 +278,9 @@ function createResetAwareSessionStore(
       if (!lease) {
         return record;
       }
-      return withOpenClawLeaseSessionMetadata(record, {
-        openclawLeaseId: lease.leaseId,
-        openclawGatewayInstanceId: lease.gatewayInstanceId,
+      return withBotLeaseSessionMetadata(record, {
+        botLeaseId: lease.leaseId,
+        botGatewayInstanceId: lease.gatewayInstanceId,
       });
     },
     async save(record: AcpSessionRecord): Promise<void> {
@@ -309,7 +309,7 @@ function createResetAwareSessionStore(
           state: "open",
         };
         await params.leaseStore.save(lease);
-        recordToSave = withOpenClawLeaseSessionMetadata(
+        recordToSave = withBotLeaseSessionMetadata(
           {
             ...record,
             // ACPX uses agentCommand as reuse identity. Lease metadata belongs to
@@ -317,8 +317,8 @@ function createResetAwareSessionStore(
             agentCommand: stableAgentCommand,
           },
           {
-            openclawLeaseId: launch.leaseId,
-            openclawGatewayInstanceId: launch.gatewayInstanceId,
+            botLeaseId: launch.leaseId,
+            botGatewayInstanceId: launch.gatewayInstanceId,
           },
         );
       }
@@ -336,11 +336,11 @@ function createResetAwareSessionStore(
   };
 }
 
-const OPENCLAW_BRIDGE_EXECUTABLE = "openclaw";
-const OPENCLAW_BRIDGE_SUBCOMMAND = "acp";
+const BOT_BRIDGE_EXECUTABLE = "bot";
+const BOT_BRIDGE_SUBCOMMAND = "acp";
 const CODEX_ACP_AGENT_ID = "codex";
-const CODEX_ACP_OPENCLAW_PREFIX = "openai/";
-const CLAUDE_ACP_OPENCLAW_PREFIX = "anthropic/";
+const CODEX_ACP_BOT_PREFIX = "openai/";
+const CLAUDE_ACP_BOT_PREFIX = "anthropic/";
 const CODEX_ACP_THINKING_ALIASES = new Map<string, string | undefined>([
   ["off", undefined],
   ["minimal", "low"],
@@ -460,19 +460,19 @@ function isAcpCommand(
   return scriptName === params.executableName || scriptName === `${params.executableName}-wrapper`;
 }
 
-function isOpenClawBridgeCommand(command: string | undefined): boolean {
+function isBotBridgeCommand(command: string | undefined): boolean {
   if (!command) {
     return false;
   }
   const parts = unwrapEnvCommand(splitCommandParts(command.trim()));
-  if (basename(parts[0] ?? "") === OPENCLAW_BRIDGE_EXECUTABLE) {
-    return parts[1] === OPENCLAW_BRIDGE_SUBCOMMAND;
+  if (basename(parts[0] ?? "") === BOT_BRIDGE_EXECUTABLE) {
+    return parts[1] === BOT_BRIDGE_SUBCOMMAND;
   }
   if (basename(parts[0] ?? "") !== "node") {
     return false;
   }
   const scriptName = basename(parts[1] ?? "");
-  return /^openclaw(?:\.[cm]?js)?$/i.test(scriptName) && parts[2] === OPENCLAW_BRIDGE_SUBCOMMAND;
+  return /^bot(?:\.[cm]?js)?$/i.test(scriptName) && parts[2] === BOT_BRIDGE_SUBCOMMAND;
 }
 
 function isCodexAcpCommand(command: string | undefined): boolean {
@@ -500,7 +500,7 @@ function failUnsupportedCodexAcpModel(rawModel: string, detail?: string): never 
 // acpx's `decodeAcpxRuntimeHandleState` only accepts `persistent` and `oneshot`; any other
 // value silently round-trips through the encoded handle as `persistent` and later throws
 // `SessionResumeRequiredError` on agent restart. Fail fast at this boundary instead.
-// See openclaw/openclaw#73071.
+// See hanzoai/bot#73071.
 const SUPPORTED_RUNTIME_SESSION_MODES = new Set(["persistent", "oneshot"] as const);
 const WIRE_TIMEOUT_CONFIG_KEYS = new Set(["timeout", "timeout_seconds"]);
 
@@ -555,8 +555,8 @@ function classifyCodexAcpModelRequest(
 
   let value = raw;
   let hadOpenAiQualifier = false;
-  if (value.toLowerCase().startsWith(CODEX_ACP_OPENCLAW_PREFIX)) {
-    value = value.slice(CODEX_ACP_OPENCLAW_PREFIX.length);
+  if (value.toLowerCase().startsWith(CODEX_ACP_BOT_PREFIX)) {
+    value = value.slice(CODEX_ACP_BOT_PREFIX.length);
     hadOpenAiQualifier = true;
   }
 
@@ -608,13 +608,13 @@ function normalizeClaudeAcpModelOverride(rawModel: string | undefined): string |
   if (!raw) {
     return undefined;
   }
-  if (!raw.toLowerCase().startsWith(CLAUDE_ACP_OPENCLAW_PREFIX)) {
+  if (!raw.toLowerCase().startsWith(CLAUDE_ACP_BOT_PREFIX)) {
     return raw;
   }
-  return raw.slice(CLAUDE_ACP_OPENCLAW_PREFIX.length).trim() || undefined;
+  return raw.slice(CLAUDE_ACP_BOT_PREFIX.length).trim() || undefined;
 }
 
-function withAcpxSessionOptions(input: OpenClawRuntimeEnsureInput): AcpxDelegateEnsureInput {
+function withAcpxSessionOptions(input: BotRuntimeEnsureInput): AcpxDelegateEnsureInput {
   const existingOptions = (input as { sessionOptions?: SessionAgentOptions }).sessionOptions;
   const model = input.model?.trim() || existingOptions?.model;
   const sessionOptions = model ? { ...existingOptions, model } : existingOptions;
@@ -633,7 +633,7 @@ function isAcpModelCapabilityMissingError(error: unknown): boolean {
 // Retry only the former so explicit model mistakes remain visible to the caller.
 async function ensureDelegateSessionWithModelFallback(
   delegate: BaseAcpxRuntime,
-  input: OpenClawRuntimeEnsureInput,
+  input: BotRuntimeEnsureInput,
 ): Promise<AcpRuntimeHandle> {
   try {
     return await delegate.ensureSession(withAcpxSessionOptions(input));
@@ -660,7 +660,7 @@ function appendCodexAcpConfigOverrides(command: string, override: CodexAcpModelO
   if (Object.keys(config).length === 0) {
     return command;
   }
-  return `${command} ${OPENCLAW_CODEX_CONFIG_ARG} ${quoteShellArg(JSON.stringify(config))}`;
+  return `${command} ${BOT_CODEX_CONFIG_ARG} ${quoteShellArg(JSON.stringify(config))}`;
 }
 
 function createModelScopedAgentRegistry(params: {
@@ -700,7 +700,7 @@ function resolveAgentCommand(params: {
 }
 
 function shouldUseBridgeSafeDelegateForCommand(command: string | undefined): boolean {
-  return isOpenClawBridgeCommand(command);
+  return isBotBridgeCommand(command);
 }
 
 function shouldUseDistinctBridgeDelegate(options: AcpRuntimeOptions): boolean {
@@ -710,13 +710,13 @@ function shouldUseDistinctBridgeDelegate(options: AcpRuntimeOptions): boolean {
 
 function withManagedToolsMcpSessionEnv(params: {
   pluginToolsEnabled: boolean;
-  openclawToolsEnabled: boolean;
+  botToolsEnabled: boolean;
   mcpServers: AcpRuntimeOptions["mcpServers"];
   sessionKey: string;
 }): AcpRuntimeOptions["mcpServers"] {
   const sessionKey = params.sessionKey.trim();
   if (
-    (!params.pluginToolsEnabled && !params.openclawToolsEnabled) ||
+    (!params.pluginToolsEnabled && !params.botToolsEnabled) ||
     !sessionKey ||
     !params.mcpServers?.length
   ) {
@@ -726,16 +726,16 @@ function withManagedToolsMcpSessionEnv(params: {
   const nextServers = params.mcpServers.map((server): AcpxMcpServer => {
     const isManagedPluginTools =
       params.pluginToolsEnabled && server.name === ACPX_PLUGIN_TOOLS_MCP_SERVER_NAME;
-    const isManagedOpenClawTools =
-      params.openclawToolsEnabled && server.name === ACPX_OPENCLAW_TOOLS_MCP_SERVER_NAME;
-    if ((!isManagedPluginTools && !isManagedOpenClawTools) || !("command" in server)) {
+    const isManagedBotTools =
+      params.botToolsEnabled && server.name === ACPX_BOT_TOOLS_MCP_SERVER_NAME;
+    if ((!isManagedPluginTools && !isManagedBotTools) || !("command" in server)) {
       return server;
     }
     changed = true;
     const env = [
-      ...server.env.filter((entry) => entry.name !== OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY_ENV),
+      ...server.env.filter((entry) => entry.name !== BOT_TOOLS_MCP_AGENT_SESSION_KEY_ENV),
       {
-        name: OPENCLAW_TOOLS_MCP_AGENT_SESSION_KEY_ENV,
+        name: BOT_TOOLS_MCP_AGENT_SESSION_KEY_ENV,
         value: sessionKey,
       },
     ];
@@ -744,7 +744,7 @@ function withManagedToolsMcpSessionEnv(params: {
   return changed ? nextServers : params.mcpServers;
 }
 
-/** OpenClaw-managed ACP runtime implementation backed by the upstream acpx runtime. */
+/** Bot-managed ACP runtime implementation backed by the upstream acpx runtime. */
 export class AcpxRuntime implements AcpRuntime {
   private readonly sessionStore: ResetAwareSessionStore;
   private readonly agentRegistry: AcpAgentRegistry;
@@ -758,7 +758,7 @@ export class AcpxRuntime implements AcpRuntime {
   private readonly delegateOptions: AcpRuntimeOptions;
   private readonly delegateTestOptions: BaseAcpxRuntimeTestOptions;
   private readonly pluginToolsMcpBridgeEnabled: boolean;
-  private readonly openclawToolsMcpBridgeEnabled: boolean;
+  private readonly botToolsMcpBridgeEnabled: boolean;
   private readonly managedToolsMcpBridgeEnabled: boolean;
   private readonly managedToolsSessionDelegates = new Map<string, BaseAcpxRuntime>();
   private readonly processCleanupDeps: AcpxProcessCleanupDeps | undefined;
@@ -768,16 +768,16 @@ export class AcpxRuntime implements AcpRuntime {
   private readonly launchLeaseScope = new AsyncLocalStorage<AcpxLaunchLeaseContext | undefined>();
   private readonly cwd: string;
 
-  constructor(options: OpenClawAcpxRuntimeOptions, testOptions?: AcpxRuntimeTestOptions) {
-    const { openclawProcessCleanup, ...delegateTestOptions } = testOptions ?? {};
-    this.processCleanupDeps = openclawProcessCleanup;
-    this.wrapperRoot = options.openclawWrapperRoot;
-    this.gatewayInstanceId = options.openclawGatewayInstanceId;
-    this.processLeaseStore = options.openclawProcessLeaseStore;
+  constructor(options: BotAcpxRuntimeOptions, testOptions?: AcpxRuntimeTestOptions) {
+    const { botProcessCleanup, ...delegateTestOptions } = testOptions ?? {};
+    this.processCleanupDeps = botProcessCleanup;
+    this.wrapperRoot = options.botWrapperRoot;
+    this.gatewayInstanceId = options.botGatewayInstanceId;
+    this.processLeaseStore = options.botProcessLeaseStore;
     this.pluginToolsMcpBridgeEnabled = options.pluginToolsMcpBridgeEnabled === true;
-    this.openclawToolsMcpBridgeEnabled = options.openclawToolsMcpBridgeEnabled === true;
+    this.botToolsMcpBridgeEnabled = options.botToolsMcpBridgeEnabled === true;
     this.managedToolsMcpBridgeEnabled =
-      this.pluginToolsMcpBridgeEnabled || this.openclawToolsMcpBridgeEnabled;
+      this.pluginToolsMcpBridgeEnabled || this.botToolsMcpBridgeEnabled;
     this.cwd = options.cwd;
     this.sessionStore = createResetAwareSessionStore(options.sessionStore, {
       gatewayInstanceId: this.gatewayInstanceId,
@@ -846,7 +846,7 @@ export class AcpxRuntime implements AcpRuntime {
         ...this.delegateOptions,
         mcpServers: withManagedToolsMcpSessionEnv({
           pluginToolsEnabled: this.pluginToolsMcpBridgeEnabled,
-          openclawToolsEnabled: this.openclawToolsMcpBridgeEnabled,
+          botToolsEnabled: this.botToolsMcpBridgeEnabled,
           mcpServers: this.delegateOptions.mcpServers,
           sessionKey: normalizedSessionKey,
         }),
@@ -957,7 +957,7 @@ export class AcpxRuntime implements AcpRuntime {
       !this.wrapperRoot ||
       !this.gatewayInstanceId ||
       !this.processLeaseStore ||
-      !isOpenClawLeaseAwareAcpxProcessCommand({
+      !isBotLeaseAwareAcpxProcessCommand({
         command: params.command,
         wrapperRoot: this.wrapperRoot,
       })
@@ -1017,7 +1017,7 @@ export class AcpxRuntime implements AcpRuntime {
     );
     return readCodexWrapperStderrTail({
       wrapperRoot: this.wrapperRoot,
-      leaseId: readOpenClawLeaseIdFromRecord(record),
+      leaseId: readBotLeaseIdFromRecord(record),
     });
   }
 
@@ -1025,7 +1025,7 @@ export class AcpxRuntime implements AcpRuntime {
     handle: AcpRuntimeHandle,
     record: AcpLoadedSessionRecord,
   ): Promise<void> {
-    const leaseId = readOpenClawLeaseIdFromRecord(record);
+    const leaseId = readBotLeaseIdFromRecord(record);
     const rootPid = readAgentPidFromRecord(record);
     const sessionKeys = [handle.sessionKey, readSessionRecordName(record)];
     const openLeases =
@@ -1048,7 +1048,7 @@ export class AcpxRuntime implements AcpRuntime {
         : undefined);
     if (lease && lease.gatewayInstanceId === this.gatewayInstanceId && lease.rootPid > 0) {
       await this.processLeaseStore?.markState(lease.leaseId, "closing");
-      const result = await cleanupOpenClawOwnedAcpxProcessTree({
+      const result = await cleanupBotOwnedAcpxProcessTree({
         rootPid: lease.rootPid,
         rootCommand: readAgentCommandFromRecord(record),
         expectedLeaseId: lease.leaseId,
@@ -1074,8 +1074,8 @@ export class AcpxRuntime implements AcpRuntime {
     if (!rootPid || !rootCommand) {
       return;
     }
-    const expectedGatewayInstanceId = readOpenClawGatewayInstanceIdFromRecord(record);
-    await cleanupOpenClawOwnedAcpxProcessTree({
+    const expectedGatewayInstanceId = readBotGatewayInstanceIdFromRecord(record);
+    await cleanupBotOwnedAcpxProcessTree({
       rootPid,
       rootCommand,
       ...(leaseId ? { expectedLeaseId: leaseId } : {}),
@@ -1099,7 +1099,7 @@ export class AcpxRuntime implements AcpRuntime {
 
   async ensureSession(
     input: Parameters<AcpRuntime["ensureSession"]>[0],
-  ): Promise<OpenClawRuntimeHandle> {
+  ): Promise<BotRuntimeHandle> {
     assertSupportedRuntimeSessionMode(input.mode);
     const command = resolveAgentCommand({
       agentName: input.agent,
@@ -1126,7 +1126,7 @@ export class AcpxRuntime implements AcpRuntime {
         ? classifiedCodexOverride
         : undefined;
     const requestedModel = input.model?.trim();
-    const appliedModel: OpenClawRuntimeHandle["appliedModel"] =
+    const appliedModel: BotRuntimeHandle["appliedModel"] =
       isCodexAcp && requestedModel
         ? codexModelOverride?.model
           ? { kind: "applied", model: requestedModel }
@@ -1181,7 +1181,7 @@ export class AcpxRuntime implements AcpRuntime {
     const command = await this.resolveCommandForHandle(input.handle);
     const delegate = await this.resolveDelegateForHandle(input.handle);
     try {
-      for await (const event of delegate.runTurn(withOpenClawManagedTurnTimeout(input))) {
+      for await (const event of delegate.runTurn(withBotManagedTurnTimeout(input))) {
         if (
           event.type !== "error" ||
           !isCodexAcpCommand(command) ||
@@ -1215,7 +1215,7 @@ export class AcpxRuntime implements AcpRuntime {
     }
   }
 
-  startTurn(input: OpenClawRuntimeTurnInput): AcpRuntimeTurn {
+  startTurn(input: BotRuntimeTurnInput): AcpRuntimeTurn {
     const readCodexTurnFailureStderr = () =>
       this.readCodexTurnFailureStderr({
         handle: input.handle,
@@ -1227,7 +1227,7 @@ export class AcpxRuntime implements AcpRuntime {
       try {
         return {
           command,
-          turn: delegate.startTurn(withOpenClawManagedTurnTimeout(input)),
+          turn: delegate.startTurn(withBotManagedTurnTimeout(input)),
         };
       } catch (error) {
         if (!isCodexAcpCommand(command) || !isGenericInternalAcpError(error)) {

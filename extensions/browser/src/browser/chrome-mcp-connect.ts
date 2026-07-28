@@ -56,7 +56,7 @@ async function createRealSession(
   });
   const client = new Client(
     {
-      name: "openclaw-browser",
+      name: "bot-browser",
       version: "0.0.0",
     },
     {},

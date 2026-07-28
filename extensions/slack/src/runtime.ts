@@ -1,6 +1,6 @@
 // Slack plugin module implements runtime behavior.
-import type { PluginRuntime } from "openclaw/plugin-sdk/channel-core";
-import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
+import type { PluginRuntime } from "bot/plugin-sdk/channel-core";
+import { createPluginRuntimeStore } from "bot/plugin-sdk/runtime-store";
 
 type SlackChannelRuntime = {
   handleSlackAction?: typeof import("./action-runtime.js").handleSlackAction;

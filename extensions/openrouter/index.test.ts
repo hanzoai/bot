@@ -1,15 +1,15 @@
 // Openrouter tests cover index plugin behavior.
 import { readFileSync } from "node:fs";
-import { createAssistantMessageEventStream } from "openclaw/plugin-sdk/llm";
+import { createAssistantMessageEventStream } from "bot/plugin-sdk/llm";
 import {
   registerProviderPlugin,
   registerSingleProviderPlugin,
   resolveProviderPluginChoice,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-test-runtime";
 import {
   expectPassthroughReplayPolicy,
   expectUnifiedModelCatalogProviderRegistration,
-} from "openclaw/plugin-sdk/provider-test-contracts";
+} from "bot/plugin-sdk/provider-test-contracts";
 import { describe, expect, it, vi } from "vitest";
 
 const { getOpenRouterModelCapabilitiesMock, loadOpenRouterModelCapabilitiesMock } = vi.hoisted(
@@ -19,9 +19,9 @@ const { getOpenRouterModelCapabilitiesMock, loadOpenRouterModelCapabilitiesMock 
   }),
 );
 
-vi.mock("openclaw/plugin-sdk/provider-stream-family", async (importOriginal) => {
+vi.mock("bot/plugin-sdk/provider-stream-family", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/provider-stream-family")>();
+    await importOriginal<typeof import("bot/plugin-sdk/provider-stream-family")>();
   return {
     ...actual,
     getOpenRouterModelCapabilities: getOpenRouterModelCapabilitiesMock,
@@ -67,8 +67,8 @@ async function captureOpenRouterWrappedPayload(params: {
   let capturedPayload: Record<string, unknown> | undefined;
   const baseStreamFn = vi.fn(
     (
-      ...args: Parameters<import("openclaw/plugin-sdk/agent-core").StreamFn>
-    ): ReturnType<import("openclaw/plugin-sdk/agent-core").StreamFn> => {
+      ...args: Parameters<import("bot/plugin-sdk/agent-core").StreamFn>
+    ): ReturnType<import("bot/plugin-sdk/agent-core").StreamFn> => {
       void args[2]?.onPayload?.(params.payload, args[0]);
       if (!params.forwardPayload) {
         capturedPayload = params.payload;
@@ -123,7 +123,7 @@ type OpenRouterManifest = {
 };
 
 function readManifest(): OpenRouterManifest {
-  return JSON.parse(readFileSync(new URL("./openclaw.plugin.json", import.meta.url), "utf8"));
+  return JSON.parse(readFileSync(new URL("./bot.plugin.json", import.meta.url), "utf8"));
 }
 
 describe("openrouter provider hooks", () => {
@@ -764,8 +764,8 @@ describe("openrouter provider hooks", () => {
     let capturedPayload: Record<string, unknown> | undefined;
     const baseStreamFn = vi.fn(
       (
-        ...args: Parameters<import("openclaw/plugin-sdk/agent-core").StreamFn>
-      ): ReturnType<import("openclaw/plugin-sdk/agent-core").StreamFn> => {
+        ...args: Parameters<import("bot/plugin-sdk/agent-core").StreamFn>
+      ): ReturnType<import("bot/plugin-sdk/agent-core").StreamFn> => {
         const payload: Record<string, unknown> = {};
         void args[2]?.onPayload?.(payload, args[0]);
         capturedPayload = payload;
@@ -838,8 +838,8 @@ describe("openrouter provider hooks", () => {
     const options = baseStreamFn.mock.calls[0]?.[2] as { headers?: HeadersInit } | undefined;
     const headers = new Headers(options?.headers);
     expect(headers.get("authorization")).toBe("Bearer or-test-key");
-    expect(headers.get("http-referer")).toBe("https://openclaw.ai");
-    expect(headers.get("x-openrouter-title")).toBe("OpenClaw");
+    expect(headers.get("http-referer")).toBe("https://bot.ai");
+    expect(headers.get("x-openrouter-title")).toBe("Bot");
   });
 
   it("merges resolved OpenRouter model params into transport params", async () => {
@@ -936,8 +936,8 @@ describe("openrouter provider hooks", () => {
     const payloads: Array<Record<string, unknown>> = [];
     const baseStreamFn = vi.fn(
       (
-        ...args: Parameters<import("openclaw/plugin-sdk/agent-core").StreamFn>
-      ): ReturnType<import("openclaw/plugin-sdk/agent-core").StreamFn> => {
+        ...args: Parameters<import("bot/plugin-sdk/agent-core").StreamFn>
+      ): ReturnType<import("bot/plugin-sdk/agent-core").StreamFn> => {
         const payload = { reasoning: { effort: "high" }, messages: [] };
         void args[2]?.onPayload?.(payload, args[0]);
         payloads.push(payload);
@@ -1000,8 +1000,8 @@ describe("openrouter provider hooks", () => {
     const payloads: Array<Record<string, unknown>> = [];
     const baseStreamFn = vi.fn(
       (
-        ...args: Parameters<import("openclaw/plugin-sdk/agent-core").StreamFn>
-      ): ReturnType<import("openclaw/plugin-sdk/agent-core").StreamFn> => {
+        ...args: Parameters<import("bot/plugin-sdk/agent-core").StreamFn>
+      ): ReturnType<import("bot/plugin-sdk/agent-core").StreamFn> => {
         const payload = {
           messages: [{ role: "assistant", tool_calls: [{ id: "call_1", type: "function" }] }],
         };
@@ -1097,8 +1097,8 @@ describe("openrouter provider hooks", () => {
     const payloads: Array<Record<string, unknown>> = [];
     const baseStreamFn = vi.fn(
       (
-        ...args: Parameters<import("openclaw/plugin-sdk/agent-core").StreamFn>
-      ): ReturnType<import("openclaw/plugin-sdk/agent-core").StreamFn> => {
+        ...args: Parameters<import("bot/plugin-sdk/agent-core").StreamFn>
+      ): ReturnType<import("bot/plugin-sdk/agent-core").StreamFn> => {
         const payload = {
           messages: [
             { role: "user", content: "Return JSON." },

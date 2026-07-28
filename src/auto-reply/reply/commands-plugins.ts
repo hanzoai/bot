@@ -1,8 +1,8 @@
 // Implements plugin command listing and configuration helpers.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import { readConfigFileSnapshot, readConfigFileSnapshotForWrite } from "../../config/config.js";
 import { assertConfigWriteAllowedInCurrentMode } from "../../config/nix-mode-write-guard.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { PluginInstallRecord } from "../../config/types.plugins.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import {
@@ -39,7 +39,7 @@ function renderJsonBlock(label: string, value: unknown): string {
 
 function buildPluginInspectJson(params: {
   id: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   installRecords: Record<string, PluginInstallRecord>;
   report: PluginStatusReport;
 }): {
@@ -71,7 +71,7 @@ function buildPluginInspectJson(params: {
 }
 
 function buildAllPluginInspectJson(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   installRecords: Record<string, PluginInstallRecord>;
   report: PluginStatusReport;
 }): Array<{
@@ -114,8 +114,8 @@ function formatPluginsList(report: PluginStatusReport): string {
     `🔌 Plugins (${loaded}/${report.plugins.length} loaded)`,
     ...report.plugins.map((plugin) => {
       const format = plugin.bundleFormat
-        ? `${plugin.format ?? "openclaw"}/${plugin.bundleFormat}`
-        : (plugin.format ?? "openclaw");
+        ? `${plugin.format ?? "bot"}/${plugin.bundleFormat}`
+        : (plugin.format ?? "bot");
       return `- ${formatPluginLabel(plugin)} [${plugin.status}] ${format}`;
     }),
   ];
@@ -164,7 +164,7 @@ async function loadPluginCommandState(
   | {
       ok: true;
       path: string;
-      config: OpenClawConfig;
+      config: BotConfig;
       report: PluginStatusReport;
     }
   | { ok: false; path: string; error: string }

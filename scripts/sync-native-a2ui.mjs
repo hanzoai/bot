@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Keeps the native OpenClawKit Canvas A2UI resources in sync with the plugin-owned bundle.
+// Keeps the native BotKit Canvas A2UI resources in sync with the plugin-owned bundle.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -17,9 +17,9 @@ export function getNativeA2uiResourcePaths(repoRoot = rootDir) {
       repoRoot,
       "apps",
       "shared",
-      "OpenClawKit",
+      "BotKit",
       "Sources",
-      "OpenClawKit",
+      "BotKit",
       "Resources",
       "CanvasA2UI",
     ),
@@ -30,8 +30,8 @@ export function getNativeA2uiResourcePaths(repoRoot = rootDir) {
 export async function checkLinuxCanvasA2uiReferences({ linuxConsumerFile }) {
   const source = await fs.readFile(linuxConsumerFile, "utf8");
   const expectedReferences = [
-    "../../../../apps/shared/OpenClawKit/Sources/OpenClawKit/Resources/CanvasA2UI/index.html",
-    "../../../../apps/shared/OpenClawKit/Sources/OpenClawKit/Resources/CanvasA2UI/a2ui.bundle.js",
+    "../../../../apps/shared/BotKit/Sources/BotKit/Resources/CanvasA2UI/index.html",
+    "../../../../apps/shared/BotKit/Sources/BotKit/Resources/CanvasA2UI/a2ui.bundle.js",
   ];
   const missing = expectedReferences.filter((reference) => !source.includes(reference));
   if (missing.length > 0) {
@@ -157,15 +157,15 @@ function bundleA2ui(repoRoot = rootDir, env = process.env) {
 }
 
 async function withFreshBundleCheckSource(sourceDir, run) {
-  const tempDir = await fs.mkdtemp(path.join(tmpdir(), "openclaw-a2ui-native-check-"));
+  const tempDir = await fs.mkdtemp(path.join(tmpdir(), "bot-a2ui-native-check-"));
   try {
     const checkSourceDir = path.join(tempDir, "a2ui");
     await fs.mkdir(checkSourceDir, { recursive: true });
     await fs.copyFile(path.join(sourceDir, "index.html"), path.join(checkSourceDir, "index.html"));
     bundleA2ui(rootDir, {
       ...process.env,
-      OPENCLAW_A2UI_BUNDLE_OUT: path.join(checkSourceDir, "a2ui.bundle.js"),
-      OPENCLAW_A2UI_BUNDLE_HASH_FILE: path.join(tempDir, ".bundle.hash"),
+      BOT_A2UI_BUNDLE_OUT: path.join(checkSourceDir, "a2ui.bundle.js"),
+      BOT_A2UI_BUNDLE_HASH_FILE: path.join(tempDir, ".bundle.hash"),
     });
     await run(checkSourceDir);
   } finally {

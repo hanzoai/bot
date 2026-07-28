@@ -1,6 +1,6 @@
 // Route resolution tests cover resolving channel route targets from input.
 import { describe, expect, test, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import * as routingBindings from "./bindings.js";
 import {
   deriveLastRoutePolicy,
@@ -21,7 +21,7 @@ type CompatRoutePeerKind =
   | "dm";
 
 const resolveRoute = (
-  params: Omit<Parameters<typeof resolveAgentRoute>[0], "cfg"> & { cfg?: OpenClawConfig },
+  params: Omit<Parameters<typeof resolveAgentRoute>[0], "cfg"> & { cfg?: BotConfig },
 ) =>
   resolveAgentRoute({
     cfg: params.cfg ?? {},
@@ -51,7 +51,7 @@ function createCompatPeer(kind: CompatRoutePeerKind, id: string) {
 
 describe("resolveAgentRoute", () => {
   const expectDirectRouteSessionKey = (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     channel: Parameters<typeof resolveAgentRoute>[0]["channel"];
     peerId: string;
     expected: string;
@@ -67,7 +67,7 @@ describe("resolveAgentRoute", () => {
   };
 
   const expectRouteResolutionCase = (params: {
-    routeParams: Omit<Parameters<typeof resolveRoute>[0], "cfg"> & { cfg: OpenClawConfig };
+    routeParams: Omit<Parameters<typeof resolveRoute>[0], "cfg"> & { cfg: BotConfig };
     expected: ResolvedRouteExpectation;
   }) => {
     expectResolvedRoute(resolveRoute(params.routeParams), params.expected);
@@ -100,7 +100,7 @@ describe("resolveAgentRoute", () => {
   };
 
   test("defaults to main/default when no bindings exist", () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: BotConfig = {};
     const route = resolveAgentRoute({
       cfg,
       channel: "whatsapp",
@@ -153,7 +153,7 @@ describe("resolveAgentRoute", () => {
       expected: "agent:main:whatsapp:direct:+15551234567",
     },
   ])("dmScope=%s controls direct-message session key isolation", ({ dmScope, expected }) => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       session: { dmScope },
     };
     const route = expectDirectRouteSessionKey({
@@ -170,7 +170,7 @@ describe("resolveAgentRoute", () => {
   });
 
   test("route binding session dmScope isolates selected direct peers without changing agent", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       session: { dmScope: "main" },
       bindings: [
         {
@@ -328,7 +328,7 @@ describe("resolveAgentRoute", () => {
   ])(
     "identityLinks applies to direct-message scopes: $channel $dmScope",
     ({ dmScope, channel, peerId, expected }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         session: {
           dmScope,
           identityLinks: {
@@ -364,7 +364,7 @@ describe("resolveAgentRoute", () => {
               match: { channel: "whatsapp", accountId: "biz" },
             },
           ],
-        } satisfies OpenClawConfig,
+        } satisfies BotConfig,
         channel: "whatsapp" as const,
         accountId: "biz",
         peer: { kind: "direct" as const, id: "+1000" },
@@ -397,7 +397,7 @@ describe("resolveAgentRoute", () => {
               },
             },
           ],
-        } satisfies OpenClawConfig,
+        } satisfies BotConfig,
         channel: "discord" as const,
         accountId: "default",
         guildId: "g1",
@@ -427,7 +427,7 @@ describe("resolveAgentRoute", () => {
               match: { channel: "discord", accountId: "default" },
             },
           ],
-        } satisfies OpenClawConfig,
+        } satisfies BotConfig,
         channel: "discord" as const,
         accountId: "default",
         guildId: "g1",
@@ -443,7 +443,7 @@ describe("resolveAgentRoute", () => {
   });
 
   test("coerces numeric peer ids to stable session keys", () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: BotConfig = {};
     const route = resolveAgentRoute({
       cfg,
       channel: "discord",
@@ -487,7 +487,7 @@ describe("resolveAgentRoute", () => {
               },
             },
           ],
-        } satisfies OpenClawConfig,
+        } satisfies BotConfig,
         channel: "discord" as const,
         guildId: "GUILD_1",
         peer: { kind: "channel" as const, id: "CHANNEL_B" },
@@ -518,7 +518,7 @@ describe("resolveAgentRoute", () => {
               },
             },
           ],
-        } satisfies OpenClawConfig,
+        } satisfies BotConfig,
         channel: "discord" as const,
         guildId: "g2",
         peer: { kind: "channel" as const, id: "c1" },
@@ -549,7 +549,7 @@ describe("resolveAgentRoute", () => {
               },
             },
           ],
-        } satisfies OpenClawConfig,
+        } satisfies BotConfig,
         channel: "slack" as const,
         teamId: "T1",
         peer: { kind: "channel" as const, id: "C_B" },
@@ -580,7 +580,7 @@ describe("resolveAgentRoute", () => {
               },
             },
           ],
-        } satisfies OpenClawConfig,
+        } satisfies BotConfig,
         channel: "slack" as const,
         teamId: "T2",
         peer: { kind: "channel" as const, id: "C1" },
@@ -595,7 +595,7 @@ describe("resolveAgentRoute", () => {
   });
 
   test("missing accountId in binding matches default account only", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       bindings: [{ agentId: "defaultAcct", match: { channel: "whatsapp" } }],
     };
 
@@ -636,7 +636,7 @@ describe("resolveAgentRoute", () => {
             match: { channel: "whatsapp", accountId: "*" },
           },
         ],
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
       channel: "whatsapp" as const,
       accountId: "biz",
       peer: { kind: "direct" as const, id: "+1000" },
@@ -649,7 +649,7 @@ describe("resolveAgentRoute", () => {
       name: "binding accountId matching is canonicalized",
       cfg: {
         bindings: [{ agentId: "biz", match: { channel: "discord", accountId: "BIZ" } }],
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
       channel: "discord" as const,
       accountId: " biz ",
       peer: { kind: "direct" as const, id: "u-1" },
@@ -663,9 +663,9 @@ describe("resolveAgentRoute", () => {
       name: "defaultAgentId is used when no binding matches",
       cfg: {
         agents: {
-          list: [{ id: "home", default: true, workspace: "~/openclaw-home" }],
+          list: [{ id: "home", default: true, workspace: "~/bot-home" }],
         },
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
       channel: "whatsapp" as const,
       accountId: "biz",
       peer: { kind: "direct" as const, id: "+1000" },
@@ -736,7 +736,7 @@ describe("parentPeer binding inheritance (thread support)", () => {
   }
 
   function resolveDiscordThreadRoute(params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     parentPeer?: { kind: "channel"; id: string } | null;
     guildId?: string;
   }) {
@@ -751,7 +751,7 @@ describe("parentPeer binding inheritance (thread support)", () => {
   }
 
   function expectDiscordThreadRoute(params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     parentPeer?: { kind: "channel"; id: string } | null;
     guildId?: string;
     expectedAgentId: string;
@@ -809,7 +809,7 @@ describe("parentPeer binding inheritance (thread support)", () => {
           makeDiscordPeerBinding("other-parent-agent", "other-parent-999"),
           makeDiscordGuildBinding("guild-agent", "guild-789"),
         ],
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
       guildId: "guild-789",
       expectedAgentId: "guild-agent",
       expectedMatchedBy: "binding.guild",
@@ -818,7 +818,7 @@ describe("parentPeer binding inheritance (thread support)", () => {
       name: "parentPeer with empty id is ignored",
       cfg: {
         bindings: [makeDiscordPeerBinding("parent-agent", defaultParentPeer.id)],
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
       parentPeer: { kind: "channel" as const, id: "" },
       expectedAgentId: "main",
       expectedMatchedBy: "default",
@@ -827,7 +827,7 @@ describe("parentPeer binding inheritance (thread support)", () => {
       name: "null parentPeer is handled gracefully",
       cfg: {
         bindings: [makeDiscordPeerBinding("parent-agent", defaultParentPeer.id)],
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
       parentPeer: null,
       expectedAgentId: "main",
       expectedMatchedBy: "default",
@@ -927,7 +927,7 @@ describe("backward compatibility: peer.kind group ↔ channel", () => {
 });
 
 describe("role-based agent routing", () => {
-  type DiscordBinding = NonNullable<OpenClawConfig["bindings"]>[number];
+  type DiscordBinding = NonNullable<BotConfig["bindings"]>[number];
 
   function makeDiscordRoleBinding(
     agentId: string,
@@ -1070,7 +1070,7 @@ describe("role-based agent routing", () => {
 
 describe("wildcard peer bindings (peer.id=*)", () => {
   test("peer.id=* matches any direct peer and routes to the bound agent", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { list: [{ id: "second-ana" }] },
       bindings: [
         {
@@ -1095,7 +1095,7 @@ describe("wildcard peer bindings (peer.id=*)", () => {
   });
 
   test("peer.id=* does not match group peers when kind is direct", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { list: [{ id: "main", default: true }, { id: "dm-only" }] },
       bindings: [
         {
@@ -1119,7 +1119,7 @@ describe("wildcard peer bindings (peer.id=*)", () => {
   });
 
   test("exact peer binding wins over wildcard peer binding", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { list: [{ id: "exact" }, { id: "wild" }] },
       bindings: [
         {
@@ -1151,7 +1151,7 @@ describe("wildcard peer bindings (peer.id=*)", () => {
   });
 
   test("wildcard peer binding wins over default fallback for unmatched peers", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { list: [{ id: "exact" }, { id: "wild" }] },
       bindings: [
         {
@@ -1183,7 +1183,7 @@ describe("wildcard peer bindings (peer.id=*)", () => {
   });
 
   test("group wildcard peer matches any group peer", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { list: [{ id: "grp" }] },
       bindings: [
         {
@@ -1209,7 +1209,7 @@ describe("wildcard peer bindings (peer.id=*)", () => {
 
 describe("resolved route cache keys", () => {
   test("does not reuse a cached route when peer and guild fields contain cache separators", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { list: [{ id: "whole-peer" }, { id: "guild-room" }] },
       bindings: [
         {
@@ -1254,7 +1254,7 @@ describe("resolved route cache keys", () => {
   });
 
   test("does not reuse a cached route when role IDs contain cache separators", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { list: [{ id: "comma-role" }, { id: "suffix-role" }] },
       bindings: [
         {
@@ -1301,7 +1301,7 @@ describe("resolved route cache keys", () => {
   });
 
   test("does not reuse a cached route when guildId is omitted versus the literal hyphen string", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { list: [{ id: "main", default: true }, { id: "hyphen-guild" }] },
       bindings: [
         {
@@ -1340,7 +1340,7 @@ describe("resolved route cache keys", () => {
 describe("binding evaluation cache scalability", () => {
   test("does not rescan full bindings across distinct channel/account cache entries (#36915)", () => {
     const cacheKeyCount = 64;
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       bindings: [
         {
           agentId: "agent-0",
@@ -1389,7 +1389,7 @@ describe("binding evaluation cache scalability", () => {
 
   test("uses indexed channel/account bindings without per-route scans", () => {
     const bindingCount = 101;
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       bindings: Array.from({ length: bindingCount }, (_, idx) => ({
         agentId: `agent-${idx}`,
         match: {

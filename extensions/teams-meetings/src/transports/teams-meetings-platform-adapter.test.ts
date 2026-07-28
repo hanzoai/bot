@@ -1,4 +1,4 @@
-import { MeetingPlatformAdapter } from "openclaw/plugin-sdk/meeting-runtime";
+import { MeetingPlatformAdapter } from "bot/plugin-sdk/meeting-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { TEAMS_MEETINGS_PLATFORM_ADAPTER } from "./teams-meetings-platform-adapter.js";
 import {
@@ -268,7 +268,7 @@ describe("Microsoft Teams meeting platform adapter", () => {
     });
 
     expect(result.inCall).toBe(false);
-    expect(window).not.toHaveProperty("__openclawTeamsMeeting");
+    expect(window).not.toHaveProperty("__botTeamsMeeting");
   });
 
   it("verifies the consumer prejoin redirect from its encoded meeting coordinates", async () => {
@@ -408,7 +408,7 @@ describe("Microsoft Teams meeting platform adapter", () => {
     expect(result).toEqual({ departed: false, urlMatched: false });
     expect(currentLeave.clicks).toBe(0);
     expect(bridge.pause).not.toHaveBeenCalled();
-    expect(window["__openclawTeamsAudioOutputs"]).toHaveLength(1);
+    expect(window["__botTeamsAudioOutputs"]).toHaveLength(1);
   });
 
   it("does not use initiated-leave proof to act on a replacement SPA call", () => {
@@ -430,7 +430,7 @@ describe("Microsoft Teams meeting platform adapter", () => {
     expect(currentLeave.clicks).toBe(0);
   });
 
-  it("does not leave a call owned by a newer OpenClaw session", () => {
+  it("does not leave a call owned by a newer Bot session", () => {
     const leave = control({ label: "Leave" });
     const inCallUrl = "https://teams.microsoft.com/v2/";
     const { result } = runLeaveScript({
@@ -545,7 +545,7 @@ describe("Microsoft Teams meeting platform adapter", () => {
     expect(detachedSource.pause).toHaveBeenCalledOnce();
     expect(detachedSource.srcObject).toBeNull();
     expect(detachedBridge.remove).toHaveBeenCalledOnce();
-    expect(window["__openclawTeamsAudioOutputs"]).toEqual([foreignBridge]);
+    expect(window["__botTeamsAudioOutputs"]).toEqual([foreignBridge]);
   });
 
   it("does not unmute a replacement stream during leave cleanup", () => {
@@ -654,7 +654,7 @@ describe("Microsoft Teams meeting platform adapter", () => {
     expect(source.muted).toBe(false);
     expect(bridge.pause).toHaveBeenCalledOnce();
     expect(bridge.remove).toHaveBeenCalledOnce();
-    expect(window).not.toHaveProperty("__openclawTeamsAudioOutputs");
+    expect(window).not.toHaveProperty("__botTeamsAudioOutputs");
   });
 
   it.each([
@@ -976,8 +976,8 @@ describe("Microsoft Teams meeting platform adapter", () => {
     expect(result.manualAction).toBeUndefined();
     expect(bridge.sinkId).toBe("blackhole-output");
     expect(source.muted).toBe(true);
-    expect(window).toHaveProperty("__openclawTeamsAudioOutputs");
-    expect((window["__openclawTeamsAudioOutputs"] as Array<{ bridge: PageMedia }>)[0]?.bridge).toBe(
+    expect(window).toHaveProperty("__botTeamsAudioOutputs");
+    expect((window["__botTeamsAudioOutputs"] as Array<{ bridge: PageMedia }>)[0]?.bridge).toBe(
       bridge,
     );
 
@@ -992,12 +992,12 @@ describe("Microsoft Teams meeting platform adapter", () => {
       media: [source, bridge],
       microphone: control({ label: "Turn microphone off", pressed: true }),
       microphoneDevice: control({ label: "BlackHole 2ch" }),
-      priorAudioOutputs: window["__openclawTeamsAudioOutputs"] as unknown[],
+      priorAudioOutputs: window["__botTeamsAudioOutputs"] as unknown[],
       priorMeeting: window[MEETING_STATE_KEY] as Record<string, unknown>,
     });
     expect(repeated.result.audioOutputRouted).toBe(true);
     expect(
-      (repeated.window["__openclawTeamsAudioOutputs"] as Array<{ bridge: PageMedia }>)[0]?.bridge,
+      (repeated.window["__botTeamsAudioOutputs"] as Array<{ bridge: PageMedia }>)[0]?.bridge,
     ).toBe(bridge);
   });
 });

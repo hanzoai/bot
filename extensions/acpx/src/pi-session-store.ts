@@ -1,8 +1,8 @@
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { SessionCatalogSession } from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { SessionCatalogSession } from "bot/plugin-sdk/session-catalog";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import { piAcpSessionStoreRoot, piSessionStore } from "./pi-session-paths.js";
 
 const MAX_DISCOVERY_FILES = 10_000;

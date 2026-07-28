@@ -23,7 +23,7 @@ function readTranscriptMetadata(message: unknown): Record<string, unknown> | nul
   if (!message || typeof message !== "object" || Array.isArray(message)) {
     return null;
   }
-  const metadata = (message as Record<string, unknown>)["__openclaw"];
+  const metadata = (message as Record<string, unknown>)["__bot"];
   return metadata && typeof metadata === "object" && !Array.isArray(metadata)
     ? (metadata as Record<string, unknown>)
     : null;

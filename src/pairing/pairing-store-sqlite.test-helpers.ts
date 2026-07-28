@@ -1,4 +1,4 @@
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { runBotStateWriteTransaction } from "../state/bot-state-db.js";
 import {
   readChannelPairingState,
   sqliteOptionsForEnv,
@@ -20,7 +20,7 @@ export function writeChannelPairingStateSnapshot(
   state: ChannelPairingState,
   env: NodeJS.ProcessEnv = process.env,
 ): void {
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     (database) => writeChannelPairingStateToDatabase(database, channel, state),
     sqliteOptionsForEnv(env),
   );

@@ -1,7 +1,7 @@
-/** Tool Search catalog compaction for large OpenClaw, MCP, and client tool inventories. */
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+/** Tool Search catalog compaction for large Bot, MCP, and client tool inventories. */
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import { Type } from "typebox";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { HookContext } from "./agent-tools.before-tool-call.js";
 import type { AgentToolResult, AgentToolUpdateCallback } from "./runtime/index.js";
 import type { ToolDefinition } from "./sessions/index.js";
@@ -93,7 +93,7 @@ function shouldExposeControlTool(name: string, mode: ToolSearchMode): boolean {
 /** Replace visible tools with Tool Search controls and register hidden catalog entries. */
 export function applyToolSearchCatalog(params: {
   tools: AnyAgentTool[];
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionId?: string;
   sessionKey?: string;
   agentId?: string;
@@ -120,7 +120,7 @@ export { applyToolSchemaDirectoryCatalog };
 /** Move client-provided tools into an existing Tool Search catalog. */
 export function addClientToolsToToolSearchCatalog(params: {
   tools: ToolDefinition[];
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionId?: string;
   sessionKey?: string;
   agentId?: string;
@@ -143,11 +143,11 @@ export function createToolSearchTools(ctx: ToolSearchToolContext): AnyAgentTool[
       name: TOOL_SEARCH_CODE_MODE_TOOL_NAME,
       label: "Tool Search Code",
       description:
-        "Run JavaScript in an isolated Node subprocess over a large tool catalog. APIs: `openclaw.tools.search(query: string, options?)`, `openclaw.tools.describe(id: string)`, and `openclaw.tools.call(id: string, args?)`. Search takes a positional query string, which must be in English: matching is lexical against tool names and descriptions, which are written in English. Call returns `{ tool, result }`; JSON values normally live in `result.details`.",
+        "Run JavaScript in an isolated Node subprocess over a large tool catalog. APIs: `bot.tools.search(query: string, options?)`, `bot.tools.describe(id: string)`, and `bot.tools.call(id: string, args?)`. Search takes a positional query string, which must be in English: matching is lexical against tool names and descriptions, which are written in English. Call returns `{ tool, result }`; JSON values normally live in `result.details`.",
       parameters: Type.Object({
         code: Type.String({
           description:
-            "JavaScript body for an async function. Use return to return the final value. The openclaw.tools bridge is available.",
+            "JavaScript body for an async function. Use return to return the final value. The bot.tools bridge is available.",
         }),
       }),
       execute: async (
@@ -199,7 +199,7 @@ export function createToolSearchTools(ctx: ToolSearchToolContext): AnyAgentTool[
     {
       name: TOOL_CALL_RAW_TOOL_NAME,
       label: "Tool Call",
-      description: "Call an exact Tool Search result id or name through OpenClaw.",
+      description: "Call an exact Tool Search result id or name through Bot.",
       parameters: Type.Object({
         id: Type.String({ description: "Tool search result id or tool name." }),
         args: Type.Optional(
@@ -240,5 +240,5 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.toolSearchTestApi")] = testing;
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.toolSearchTestApi")] = testing;
 }

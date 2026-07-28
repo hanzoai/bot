@@ -2,7 +2,7 @@
 #
 # Shared Docker E2E image resolver/builder.
 # Suite-specific scripts call this to resolve overrides, reuse pulled images, or
-# build the runner/functional images with the prepared OpenClaw package tarball.
+# build the runner/functional images with the prepared Bot package tarball.
 
 DOCKER_E2E_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="${ROOT_DIR:-$(cd "$DOCKER_E2E_LIB_DIR/../.." && pwd)}"
@@ -25,8 +25,8 @@ docker_e2e_resolve_image() {
     fi
   done
 
-  if [ -n "${OPENCLAW_DOCKER_E2E_IMAGE:-}" ]; then
-    printf '%s\n' "$OPENCLAW_DOCKER_E2E_IMAGE"
+  if [ -n "${BOT_DOCKER_E2E_IMAGE:-}" ]; then
+    printf '%s\n' "$BOT_DOCKER_E2E_IMAGE"
     return 0
   fi
 
@@ -90,10 +90,10 @@ docker_e2e_build_or_reuse() {
     target="functional"
   fi
 
-  if [ "${OPENCLAW_SKIP_DOCKER_BUILD:-0}" = "1" ] || [ "$skip_build" = "1" ]; then
+  if [ "${BOT_SKIP_DOCKER_BUILD:-0}" = "1" ] || [ "$skip_build" = "1" ]; then
     echo "Reusing Docker image: $image_name"
     if ! docker_e2e_docker_cmd image inspect "$image_name" >/dev/null 2>&1; then
-      if [ "${OPENCLAW_DOCKER_E2E_REQUIRE_LOCAL_IMAGE:-0}" = "1" ]; then
+      if [ "${BOT_DOCKER_E2E_REQUIRE_LOCAL_IMAGE:-0}" = "1" ]; then
         echo "Required local Docker E2E image not found: $image_name" >&2
         return 1
       fi
@@ -102,10 +102,10 @@ docker_e2e_build_or_reuse() {
         return 0
       fi
       if docker_build_on_missing_enabled; then
-        echo "Docker image not available; building because OPENCLAW_DOCKER_BUILD_ON_MISSING/OPENCLAW_TESTBOX allows fallback."
+        echo "Docker image not available; building because BOT_DOCKER_BUILD_ON_MISSING/BOT_TESTBOX allows fallback."
       else
         echo "Docker image not found: $image_name" >&2
-        echo "Build it first or unset OPENCLAW_SKIP_DOCKER_BUILD." >&2
+        echo "Build it first or unset BOT_SKIP_DOCKER_BUILD." >&2
         return 1
       fi
     else
@@ -123,7 +123,7 @@ docker_e2e_build_or_reuse() {
   fi
   if [ "$target" = "functional" ]; then
     package_tgz="$(docker_e2e_prepare_package_tgz "$label")"
-    if [ -z "${OPENCLAW_CURRENT_PACKAGE_TGZ:-}" ]; then
+    if [ -z "${BOT_CURRENT_PACKAGE_TGZ:-}" ]; then
       package_pack_dir="$(dirname "$package_tgz")"
     fi
     local context_status=0
@@ -136,7 +136,7 @@ docker_e2e_build_or_reuse() {
     fi
     # The Dockerfile never sees repo sources as app input; functional installs
     # exactly this tarball through a named BuildKit context.
-    build_args+=(--build-context "openclaw_package=$package_context")
+    build_args+=(--build-context "bot_package=$package_context")
   fi
   build_args+=(-t "$image_name" -f "$dockerfile" "$context")
   local build_status=0
@@ -153,7 +153,7 @@ docker_e2e_build_or_reuse() {
 docker_e2e_test_state_shell_b64() {
   local label="${1:?missing test-state label}"
   local scenario="${2:-empty}"
-  node "$ROOT_DIR/scripts/lib/openclaw-test-state.mjs" shell \
+  node "$ROOT_DIR/scripts/lib/bot-test-state.mjs" shell \
     --label "$label" \
     --scenario "$scenario" |
     base64 |
@@ -161,7 +161,7 @@ docker_e2e_test_state_shell_b64() {
 }
 
 docker_e2e_test_state_function_b64() {
-  node "$ROOT_DIR/scripts/lib/openclaw-test-state.mjs" shell-function |
+  node "$ROOT_DIR/scripts/lib/bot-test-state.mjs" shell-function |
     base64 |
     tr -d '\n'
 }

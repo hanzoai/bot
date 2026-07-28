@@ -3,7 +3,7 @@ import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   resolveAccountEntry,
-} from "openclaw/plugin-sdk/account-resolution";
+} from "bot/plugin-sdk/account-resolution";
 import {
   buildChannelConfigSchema,
   buildChannelReactionShape,
@@ -15,8 +15,8 @@ import {
   ReplyToModeSchema,
   requireAllowlistAllowFrom,
   requireOpenAllowFrom,
-} from "openclaw/plugin-sdk/channel-config-schema";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/channel-config-schema";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { z } from "zod";
 import { signalChannelConfigUiHints } from "./config-ui-hints.js";
 
@@ -49,7 +49,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function projectSignalConfigForUpdateValidation(value: unknown): unknown {
-  if (process.env.OPENCLAW_UPDATE_IN_PROGRESS !== "1" || !isRecord(value)) {
+  if (process.env.BOT_UPDATE_IN_PROGRESS !== "1" || !isRecord(value)) {
     return value;
   }
   const next = { ...value };

@@ -2,15 +2,15 @@
 import {
   createCapturedPluginRegistration,
   registerSingleProviderPlugin,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import type { ProviderCatalogContext } from "openclaw/plugin-sdk/provider-catalog-shared";
+} from "bot/plugin-sdk/plugin-test-runtime";
+import { clearLiveCatalogCacheForTests } from "bot/plugin-sdk/provider-catalog-live-runtime";
+import type { ProviderCatalogContext } from "bot/plugin-sdk/provider-catalog-shared";
 import { describe, expect, it, vi } from "vitest";
 import deepinfraPlugin from "./index.js";
 import { DEEPINFRA_MODEL_CATALOG } from "./provider-models.js";
 
 const DEEPINFRA_MODELS_URL =
-  "https://api.deepinfra.com/v1/openai/models?sort_by=openclaw&filter=with_meta";
+  "https://api.deepinfra.com/v1/openai/models?sort_by=bot&filter=with_meta";
 
 function buildSyntheticDeepInfraEntries(count: number) {
   return Array.from({ length: count }, (_unused, index) => ({
@@ -24,7 +24,7 @@ function buildDeepInfraCatalogContext(): ProviderCatalogContext {
   return {
     config: {},
     env: {},
-    agentDir: "/tmp/openclaw-agent",
+    agentDir: "/tmp/bot-agent",
     resolveProviderApiKey: () => ({ apiKey: "profile-key" }),
     resolveProviderAuth: () => ({
       apiKey: "profile-key",
@@ -220,7 +220,7 @@ describe("deepinfra augmentModelCatalog", () => {
 });
 
 describe("deepinfra capability registration", () => {
-  it("registers all DeepInfra-backed OpenClaw provider surfaces", () => {
+  it("registers all DeepInfra-backed Bot provider surfaces", () => {
     const captured = createCapturedPluginRegistration();
     deepinfraPlugin.register(captured.api);
 

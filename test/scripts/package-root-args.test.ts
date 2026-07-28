@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { parsePackageRootArg } from "../../scripts/lib/package-root-args.mjs";
 import { withEnv } from "../../src/test-utils/env.js";
 
-const ENV_NAME = "OPENCLAW_PACKAGE_ROOT_ARGS_TEST";
+const ENV_NAME = "BOT_PACKAGE_ROOT_ARGS_TEST";
 
 describe("package-root-args", () => {
   it("uses the package root flag before the environment fallback", () => {

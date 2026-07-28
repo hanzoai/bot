@@ -2,14 +2,14 @@ import {
   resolveAllowedModelRef,
   resolveDefaultAgentId,
   resolveDefaultModelForAgent,
-} from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/agent-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 
 const CODEX_AGENT_RUNTIME_ID = "codex";
 const CODEX_CATALOG_DEFAULT_MODEL_REF = "openai/gpt-5.6-sol";
 
 export function resolveCodexCatalogCreateSession(
-  config: OpenClawConfig | undefined,
+  config: BotConfig | undefined,
   requestedAgentId?: string,
 ): { model: string; agentRuntime: string } | undefined {
   if (!config) {

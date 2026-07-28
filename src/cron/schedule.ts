@@ -1,5 +1,5 @@
 /** Computes at/every/cron schedule timestamps with bounded Croner caching. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { Cron } from "croner";
 import { parseAbsoluteTimeMs } from "./parse.js";
 import { coerceFiniteScheduleNumber } from "./schedule-number.js";
@@ -151,7 +151,7 @@ function hasCronInCacheForTest(expr: string, tz: string): boolean {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.cronScheduleTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.cronScheduleTestApi")] = {
     clearCronScheduleCacheForTest,
     getCronScheduleCacheSizeForTest,
     getCronScheduleCacheMaxForTest,

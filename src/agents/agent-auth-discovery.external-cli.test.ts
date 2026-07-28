@@ -1,6 +1,6 @@
 /** Tests external CLI scoping during agent auth-profile credential discovery. */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 const storeMocks = vi.hoisted(() => ({
   ensureAuthProfileStore: vi.fn(() => ({ version: 1, profiles: {} })),
@@ -47,19 +47,19 @@ describe("resolveAgentCredentialsForDiscovery external CLI scoping", () => {
   });
 
   it("threads scoped external CLI discovery into writable auth store loading", () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
     const externalCli = externalCliDiscoveryForProviders({
       cfg,
       providers: ["fireworks"],
     });
 
-    resolveAgentCredentialsForDiscovery("/tmp/openclaw-agent", {
+    resolveAgentCredentialsForDiscovery("/tmp/bot-agent", {
       config: cfg,
       env: {},
       externalCli,
     });
 
-    expect(storeMocks.ensureAuthProfileStore).toHaveBeenCalledWith("/tmp/openclaw-agent", {
+    expect(storeMocks.ensureAuthProfileStore).toHaveBeenCalledWith("/tmp/bot-agent", {
       allowKeychainPrompt: false,
       config: cfg,
       externalCli,
@@ -68,20 +68,20 @@ describe("resolveAgentCredentialsForDiscovery external CLI scoping", () => {
   });
 
   it("preserves scoped external CLI discovery for read-only auth store loading", () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
     const externalCli = externalCliDiscoveryForProviders({
       cfg,
       providers: ["fireworks"],
     });
 
-    resolveAgentCredentialsForDiscovery("/tmp/openclaw-agent", {
+    resolveAgentCredentialsForDiscovery("/tmp/bot-agent", {
       config: cfg,
       env: {},
       externalCli,
       readOnly: true,
     });
 
-    expect(storeMocks.loadAuthProfileStoreForRuntime).toHaveBeenCalledWith("/tmp/openclaw-agent", {
+    expect(storeMocks.loadAuthProfileStoreForRuntime).toHaveBeenCalledWith("/tmp/bot-agent", {
       allowKeychainPrompt: false,
       config: cfg,
       externalCli,
@@ -90,14 +90,14 @@ describe("resolveAgentCredentialsForDiscovery external CLI scoping", () => {
   });
 
   it("can skip runtime external auth overlays and scope synthetic auth discovery", () => {
-    resolveAgentCredentialsForDiscovery("/tmp/openclaw-agent", {
+    resolveAgentCredentialsForDiscovery("/tmp/bot-agent", {
       env: {},
       skipExternalAuthProfiles: true,
       syntheticAuthProviderRefs: ["fireworks"],
     });
 
     expect(storeMocks.ensureAuthProfileStoreWithoutExternalProfiles).toHaveBeenCalledWith(
-      "/tmp/openclaw-agent",
+      "/tmp/bot-agent",
       {
         allowKeychainPrompt: false,
       },

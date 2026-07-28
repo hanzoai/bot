@@ -1,11 +1,11 @@
 // Model/auth provider selection step shared by the classic wizard and bootstrap onboarding.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import {
   applyOnboardingPrimaryModel,
   resolveOnboardingAgentTarget,
 } from "../commands/onboard-agent-target.js";
 import type { AuthChoice, OnboardOptions } from "../commands/onboard-types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { createLazyRuntimeModule } from "../shared/lazy-runtime.js";
@@ -19,7 +19,7 @@ type PreparedAuthChoiceResult = Awaited<
 >;
 
 export type SetupModelAuthCandidate = {
-  config: OpenClawConfig;
+  config: BotConfig;
   authProfiles: PreparedAuthChoiceResult["authProfiles"];
   persistAuthProfiles: PreparedAuthChoiceResult["persistAuthProfiles"];
 };
@@ -37,12 +37,12 @@ function isAuthChoiceSelected(
 
 async function resolveAuthChoiceModelSelectionPolicy(params: {
   authChoice: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   resolvePreferredProviderForAuthChoice: (params: {
     choice: string;
-    config?: OpenClawConfig;
+    config?: BotConfig;
     workspaceDir?: string;
     env?: NodeJS.ProcessEnv;
   }) => Promise<string | undefined>;
@@ -126,7 +126,7 @@ async function resolveAuthChoiceModelSelectionPolicy(params: {
  * (public onboarding automation contract).
  */
 export async function runSetupModelAuthStep(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   stagedCandidate?: SetupModelAuthCandidate;
   opts: OnboardOptions;
   prompter: WizardPrompter;
@@ -135,7 +135,7 @@ export async function runSetupModelAuthStep(params: {
   stateDir?: string;
 }): Promise<SetupModelAuthCandidate> {
   const { opts, prompter, runtime } = params;
-  const env = params.stateDir ? { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } : undefined;
+  const env = params.stateDir ? { ...process.env, BOT_STATE_DIR: params.stateDir } : undefined;
   let nextConfig = params.stagedCandidate?.config ?? params.config;
   let replacementBaseConfig = params.config;
   let authProfiles: PreparedAuthChoiceResult["authProfiles"] =

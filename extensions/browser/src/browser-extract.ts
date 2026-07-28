@@ -1,8 +1,8 @@
 /** Page capture, conversion, and one-shot answer flow for Browser extract. */
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import type { JsonSchemaObject } from "openclaw/plugin-sdk/json-schema-runtime";
-import type { Message } from "openclaw/plugin-sdk/llm";
-import { readPositiveIntegerParam } from "openclaw/plugin-sdk/param-readers";
+import type { AgentToolResult } from "bot/plugin-sdk/agent-core";
+import type { JsonSchemaObject } from "bot/plugin-sdk/json-schema-runtime";
+import type { Message } from "bot/plugin-sdk/llm";
+import { readPositiveIntegerParam } from "bot/plugin-sdk/param-readers";
 import {
   browserPageContent,
   getRuntimeConfig,
@@ -35,14 +35,14 @@ const EXTRACT_SCHEMA_MAX_DEPTH = 24;
 const EXTRACT_SCHEMA_MAX_NODES = 512;
 
 type BrowserExtractCompletionDeps = {
-  completeWithPreparedSimpleCompletionModel: typeof import("openclaw/plugin-sdk/simple-completion-runtime").completeWithPreparedSimpleCompletionModel;
-  extractAssistantText: typeof import("openclaw/plugin-sdk/simple-completion-runtime").extractAssistantText;
+  completeWithPreparedSimpleCompletionModel: typeof import("bot/plugin-sdk/simple-completion-runtime").completeWithPreparedSimpleCompletionModel;
+  extractAssistantText: typeof import("bot/plugin-sdk/simple-completion-runtime").extractAssistantText;
   getRuntimeConfig: typeof getRuntimeConfig;
-  htmlToMarkdown: typeof import("openclaw/plugin-sdk/web-content-extractor").htmlToMarkdown;
-  normalizeWhitespace: typeof import("openclaw/plugin-sdk/web-content-extractor").normalizeWhitespace;
-  prepareSimpleCompletionModelForAgent: typeof import("openclaw/plugin-sdk/simple-completion-runtime").prepareSimpleCompletionModelForAgent;
-  sanitizeHtml: typeof import("openclaw/plugin-sdk/web-content-extractor").sanitizeHtml;
-  validateJsonSchemaValue: typeof import("openclaw/plugin-sdk/json-schema-runtime").validateJsonSchemaValue;
+  htmlToMarkdown: typeof import("bot/plugin-sdk/web-content-extractor").htmlToMarkdown;
+  normalizeWhitespace: typeof import("bot/plugin-sdk/web-content-extractor").normalizeWhitespace;
+  prepareSimpleCompletionModelForAgent: typeof import("bot/plugin-sdk/simple-completion-runtime").prepareSimpleCompletionModelForAgent;
+  sanitizeHtml: typeof import("bot/plugin-sdk/web-content-extractor").sanitizeHtml;
+  validateJsonSchemaValue: typeof import("bot/plugin-sdk/json-schema-runtime").validateJsonSchemaValue;
 };
 
 type BrowserExtractDeps = BrowserExtractCompletionDeps & {

@@ -1,10 +1,10 @@
 // Qqbot API module exposes the plugin public contract.
-export type { ChannelPlugin, OpenClawPluginApi, PluginRuntime } from "openclaw/plugin-sdk/core";
-export type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+export type { ChannelPlugin, BotPluginApi, PluginRuntime } from "bot/plugin-sdk/core";
+export type { BotConfig } from "bot/plugin-sdk/config-contracts";
 export type {
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
+  BotPluginService,
+  BotPluginServiceContext,
   PluginLogger,
-} from "openclaw/plugin-sdk/core";
+} from "bot/plugin-sdk/core";
 export type { ResolvedQQBotAccount, QQBotAccountConfig } from "./src/types.js";
 export { getQQBotRuntime, setQQBotRuntime } from "./src/bridge/runtime.js";

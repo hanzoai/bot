@@ -6,7 +6,7 @@ read_when:
 title: "Camera capture"
 ---
 
-OpenClaw supports camera capture for agent workflows on paired **iOS**, **Android**, **macOS**, and **Linux** nodes: capture a photo (`jpg`) or a short video clip (`mp4`, with optional audio) via Gateway `node.invoke`.
+Bot supports camera capture for agent workflows on paired **iOS**, **Android**, **macOS**, and **Linux** nodes: capture a photo (`jpg`) or a short video clip (`mp4`, with optional audio) via Gateway `node.invoke`.
 
 All camera access is gated behind a user-controlled setting per platform.
 
@@ -52,10 +52,10 @@ Like `canvas.*`, the iOS node only allows `camera.*` commands in the **foregroun
 The easiest way to get media files is via the CLI helper, which writes decoded media to a temp file and prints the saved path.
 
 ```bash
-openclaw nodes camera snap --node <id>                 # default: both front + back (2 MEDIA lines)
-openclaw nodes camera snap --node <id> --facing front
-openclaw nodes camera clip --node <id> --duration 3000
-openclaw nodes camera clip --node <id> --no-audio
+bot nodes camera snap --node <id>                 # default: both front + back (2 MEDIA lines)
+bot nodes camera snap --node <id> --facing front
+bot nodes camera clip --node <id> --duration 3000
+bot nodes camera clip --node <id> --no-audio
 ```
 
 `nodes camera snap` defaults to `--facing both`, capturing both front and back to give the agent both views; pass `--device-id` with a single explicit facing (`both` is rejected when `--device-id` is set). Output files are temporary (in the OS temp directory) unless you build your own wrapper.
@@ -100,33 +100,33 @@ Like `canvas.*`, the Android node only allows `camera.*` commands in the **foreg
 
 The macOS companion app exposes a checkbox:
 
-- **Settings → General → Allow Camera** (`openclaw.cameraEnabled`).
+- **Settings → General → Allow Camera** (`bot.cameraEnabled`).
   - Default: **off**.
   - When off: camera requests return `CAMERA_DISABLED: enable Camera in Settings`.
 
 ### CLI helper (node invoke)
 
-Use the main `openclaw` CLI to invoke camera commands on the macOS node.
+Use the main `bot` CLI to invoke camera commands on the macOS node.
 
 ```bash
-openclaw nodes camera list --node <id>                     # list camera ids
-openclaw nodes camera snap --node <id>                     # prints saved path
-openclaw nodes camera snap --node <id> --max-width 1280
-openclaw nodes camera snap --node <id> --delay-ms 2000
-openclaw nodes camera snap --node <id> --device-id <id>
-openclaw nodes camera clip --node <id> --duration 10s       # prints saved path
-openclaw nodes camera clip --node <id> --duration-ms 3000   # prints saved path (legacy flag)
-openclaw nodes camera clip --node <id> --device-id <id>
-openclaw nodes camera clip --node <id> --no-audio
+bot nodes camera list --node <id>                     # list camera ids
+bot nodes camera snap --node <id>                     # prints saved path
+bot nodes camera snap --node <id> --max-width 1280
+bot nodes camera snap --node <id> --delay-ms 2000
+bot nodes camera snap --node <id> --device-id <id>
+bot nodes camera clip --node <id> --duration 10s       # prints saved path
+bot nodes camera clip --node <id> --duration-ms 3000   # prints saved path (legacy flag)
+bot nodes camera clip --node <id> --device-id <id>
+bot nodes camera clip --node <id> --no-audio
 ```
 
-- `openclaw nodes camera snap` defaults to `maxWidth=1600` unless overridden.
+- `bot nodes camera snap` defaults to `maxWidth=1600` unless overridden.
 - `camera.snap` waits `delayMs` (default 2000ms, clamped to `[0, 10000]`) after warm-up/exposure settle before capturing.
 - Photo payloads are recompressed to keep base64 under 5MB.
 
 ## Linux node host
 
-The bundled Linux Node plugin adds camera capture to the CLI `openclaw node` service. It works on a headless host and does not require the Linux desktop app.
+The bundled Linux Node plugin adds camera capture to the CLI `bot node` service. It works on a headless host and does not require the Linux desktop app.
 
 Camera access defaults to off. Enable it under the plugin entry, then restart the node service so its Gateway advertisement is rebuilt:
 
@@ -150,7 +150,7 @@ Requirements:
 - a `/dev/video*` device readable by the node-service user; on common distributions, add that user to the `video` group
 - for clips with the default `includeAudio: true`, a working PulseAudio server or PipeWire PulseAudio compatibility layer with a default source
 
-Linux returns capture-capable, readable V4L2 device paths from `camera.list`; FFmpeg probes each `/dev/video*` candidate and omits metadata or output-only nodes. Device `position` is `unknown`, so facing requests without `deviceId` produce one `unknown`-position photo or clip instead of claiming a front or back camera. Use `deviceId` when a host has multiple cameras. `camera.snap` uses FFmpeg input warm-up for `delayMs` and preserves aspect ratio while limiting width. `camera.clip` records microphone audio as the MP4 audio track; OpenClaw deliberately exposes no standalone microphone command.
+Linux returns capture-capable, readable V4L2 device paths from `camera.list`; FFmpeg probes each `/dev/video*` candidate and omits metadata or output-only nodes. Device `position` is `unknown`, so facing requests without `deviceId` produce one `unknown`-position photo or clip instead of claiming a front or back camera. Use `deviceId` when a host has multiple cameras. `camera.snap` uses FFmpeg input warm-up for `delayMs` and preserves aspect ratio while limiting width. `camera.clip` records microphone audio as the MP4 audio track; Bot deliberately exposes no standalone microphone command.
 
 The plugin uses `libx264` for MP4 video and does not silently change codecs. An FFmpeg build without the required input or encoders returns `CAMERA_UNAVAILABLE`. Photos and clips that would exceed the 25MB base64 payload budget fail with `PAYLOAD_TOO_LARGE`.
 
@@ -166,7 +166,7 @@ The plugin uses `libx264` for MP4 video and does not silently change codecs. An 
 For _screen_ video (not camera), use the macOS companion:
 
 ```bash
-openclaw nodes screen record --node <id> --duration 10s --fps 15   # prints saved path
+bot nodes screen record --node <id> --duration 10s --fps 15   # prints saved path
 ```
 
 Requires macOS **Screen Recording** permission (TCC).

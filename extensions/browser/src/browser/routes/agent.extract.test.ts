@@ -7,8 +7,8 @@ import type { BrowserRequest } from "./types.js";
 const routeState = vi.hoisted(() => ({
   profileCtx: {
     profile: {
-      name: "openclaw",
-      driver: "openclaw" as "openclaw" | "existing-session",
+      name: "bot",
+      driver: "bot" as "bot" | "existing-session",
       cdpUrl: "http://127.0.0.1:18800",
       cdpIsLoopback: true,
     },
@@ -59,7 +59,7 @@ function getExtractHandler() {
 
 describe("browser extract route", () => {
   beforeEach(() => {
-    routeState.profileCtx.profile.driver = "openclaw";
+    routeState.profileCtx.profile.driver = "bot";
     routeState.pageContentViaPlaywright.mockClear();
     routeState.withPlaywrightRouteContext
       .mockReset()

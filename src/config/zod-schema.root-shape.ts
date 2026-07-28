@@ -1,4 +1,4 @@
-import { normalizeStringifiedOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeStringifiedOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { z } from "zod";
 import { parseDurationMs } from "../cli/parse-duration.js";
 import { SilentReplyPolicyConfigSchema } from "./zod-schema.agent-defaults.js";
@@ -32,7 +32,7 @@ import {
 import { sensitive } from "./zod-schema.sensitive.js";
 import { CommandsSchema, MessagesSchema, SessionSchema } from "./zod-schema.session.js";
 
-export const OpenClawSchemaShape = {
+export const BotSchemaShape = {
   $schema: z.string().optional(),
   meta: z
     .strictObject({
@@ -161,7 +161,7 @@ export const OpenClawSchemaShape = {
               mcpArgs: z.array(z.string()).optional(),
               driver: z
                 .union([
-                  z.literal("openclaw"),
+                  z.literal("bot"),
                   z.literal("clawd"),
                   z.literal("existing-session"),
                   z.literal("extension"),

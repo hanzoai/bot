@@ -10,7 +10,7 @@ scenario:
     secondary:
       - channels.channel-native-commands
   regressionRefs:
-    - openclaw/openclaw#87392
+    - hanzoai/bot#87392
   objective: Verify Telegram usage mode decorates a message-tool-only visible reply.
   successCriteria:
     - The usage command enables token footer mode.
@@ -36,7 +36,7 @@ flow:
             senderId: qa-command-operator
             senderName: QA Command Operator
             text:
-              expr: "transport.id === 'telegram' ? '/usage@openclaw tokens' : '/usage tokens'"
+              expr: "transport.id === 'telegram' ? '/usage@bot tokens' : '/usage tokens'"
         - waitForOutbound:
             conversation: { id: telegram-command-room, kind: channel }
             textIncludes: tokens
@@ -51,7 +51,7 @@ flow:
                   senderId: qa-command-operator
                   senderName: QA Command Operator
                   text:
-                    expr: "`@openclaw Telegram usage footer QA. Reply exactly: ${config.marker}`"
+                    expr: "`@bot Telegram usage footer QA. Reply exactly: ${config.marker}`"
               - waitForOutbound:
                   conversation: { id: telegram-command-room, kind: channel }
                   sinceIndex: { ref: startIndex }
@@ -72,7 +72,7 @@ flow:
                   senderId: qa-command-operator
                   senderName: QA Command Operator
                   text:
-                    expr: "transport.id === 'telegram' ? '/usage@openclaw off' : '/usage off'"
+                    expr: "transport.id === 'telegram' ? '/usage@bot off' : '/usage off'"
               - waitForOutbound:
                   conversation: { id: telegram-command-room, kind: channel }
                   textIncludes: "Usage footer: off"

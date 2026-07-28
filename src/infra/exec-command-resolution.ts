@@ -2,7 +2,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { matchesExecAllowlistPattern } from "./exec-allowlist-pattern.js";
 import type { ExecAllowlistEntry } from "./exec-approvals.types.js";
 import { resolveExecWrapperTrustPlan } from "./exec-wrapper-trust-plan.js";

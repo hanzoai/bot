@@ -2,7 +2,7 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import type { AgentHarnessAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentHarnessAttemptParams } from "bot/plugin-sdk/agent-harness-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { resolveCopilotWorkspaceBootstrapContext } from "./workspace-bootstrap.js";
 
@@ -117,7 +117,7 @@ describe("resolveCopilotWorkspaceBootstrapContext sandbox remap (PR #86155 [P2] 
 
   it("rewrites rendered context paths from host workspace to sandbox workspace when effective differs", async () => {
     // Readonly sandbox: bootstrap files live on the host workspace
-    // (the canonical source of SOUL.md / .openclaw conventions), but
+    // (the canonical source of SOUL.md / .bot conventions), but
     // the SDK session's workingDirectory and bridged tools see the
     // sandbox copy. The rendered systemMessage must show the model
     // sandbox paths, not host paths, so it matches what the native

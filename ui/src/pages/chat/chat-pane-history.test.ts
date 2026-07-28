@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import type {
   SessionCatalogSession,
@@ -67,7 +67,7 @@ function createSessionContext(
 }
 
 function createTestChatPane(params: { client: GatewayBrowserClient; sessions: SessionCapability }) {
-  const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+  const pane = document.createElement("bot-chat-pane") as unknown as TestChatPane;
   Object.defineProperty(pane, "isConnected", {
     configurable: true,
     value: true,
@@ -146,12 +146,12 @@ function nativeHistoryMessage(seq: number, text = `message ${seq}`) {
   return {
     role: seq % 2 === 0 ? "assistant" : "user",
     content: [{ type: "text", text }],
-    __openclaw: { seq },
+    __bot: { seq },
   };
 }
 
 function nativeHistorySeq(message: unknown): number | undefined {
-  const metadata = (message as Record<string, unknown>)["__openclaw"] as
+  const metadata = (message as Record<string, unknown>)["__bot"] as
     | Record<string, unknown>
     | undefined;
   return typeof metadata?.seq === "number" ? metadata.seq : undefined;

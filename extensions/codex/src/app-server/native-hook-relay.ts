@@ -1,6 +1,6 @@
 /**
- * Bridges Codex native hook callbacks into OpenClaw's native hook relay so
- * app-server tool events can still run OpenClaw policy and diagnostics.
+ * Bridges Codex native hook callbacks into Bot's native hook relay so
+ * app-server tool events can still run Bot policy and diagnostics.
  */
 import { createHash } from "node:crypto";
 import {
@@ -9,19 +9,19 @@ import {
   type EmbeddedRunAttemptParams,
   type NativeHookRelayEvent,
   type NativeHookRelayRegistrationHandle,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { emitTrustedDiagnosticEvent } from "openclaw/plugin-sdk/diagnostic-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { emitTrustedDiagnosticEvent } from "bot/plugin-sdk/diagnostic-runtime";
 import {
   addTimerTimeoutGraceMs,
   finiteSecondsToTimerSafeMilliseconds,
-} from "openclaw/plugin-sdk/number-runtime";
-import type { PluginHookToolContext } from "openclaw/plugin-sdk/types";
+} from "bot/plugin-sdk/number-runtime";
+import type { PluginHookToolContext } from "bot/plugin-sdk/types";
 import type { CodexAppServerRuntimeOptions } from "./config.js";
 import { resolveCodexToolAbortTerminalReason } from "./dynamic-tool-execution.js";
 import { nativeHookRelayUnregisterQueue } from "./native-hook-relay-state.js";
 import type { JsonObject, JsonValue } from "./protocol.js";
 
-/** Codex hook events that can be registered through OpenClaw's native relay. */
+/** Codex hook events that can be registered through Bot's native relay. */
 export const CODEX_NATIVE_HOOK_RELAY_EVENTS: readonly NativeHookRelayEvent[] = [
   "pre_tool_use",
   "post_tool_use",
@@ -119,7 +119,7 @@ export function emitCodexNativePreToolUseFailureDiagnostic(params: {
   });
 }
 
-/** Registers an OpenClaw native hook relay for a Codex app-server turn. */
+/** Registers an Bot native hook relay for a Codex app-server turn. */
 export function createCodexNativeHookRelay(params: {
   options:
     | {
@@ -196,7 +196,7 @@ export function resolveCodexNativeHookRelayEvents(params: {
   // Codex emits PermissionRequest before the app-server approval reviewer has
   // resolved the command. In native approval modes, let Codex's app-server
   // approval bridge own the real escalation instead of surfacing a stale
-  // pre-guardian OpenClaw plugin approval prompt.
+  // pre-guardian Bot plugin approval prompt.
   return params.appServer.approvalPolicy === "never"
     ? CODEX_NATIVE_HOOK_RELAY_EVENTS
     : CODEX_NATIVE_HOOK_RELAY_EVENTS_WITH_APP_SERVER_APPROVALS;
@@ -227,7 +227,7 @@ function buildCodexNativeHookRelayId(params: {
   sessionKey: string | undefined;
 }): string {
   const hash = createHash("sha256");
-  hash.update("openclaw:codex:native-hook-relay:v1");
+  hash.update("bot:codex:native-hook-relay:v1");
   hash.update("\0");
   hash.update(params.agentId?.trim() || "");
   hash.update("\0");
@@ -301,7 +301,7 @@ export function buildCodexNativeHookRelayConfig(params: {
             command,
             timeout,
             async: false,
-            statusMessage: "OpenClaw native hook relay",
+            statusMessage: "Bot native hook relay",
           },
         ],
       },
@@ -312,7 +312,7 @@ export function buildCodexNativeHookRelayConfig(params: {
         event,
         command,
         timeout,
-        statusMessage: "OpenClaw native hook relay",
+        statusMessage: "Bot native hook relay",
       }),
     };
     for (const sourcePath of CODEX_SESSION_FLAGS_HOOK_SOURCE_PATHS) {

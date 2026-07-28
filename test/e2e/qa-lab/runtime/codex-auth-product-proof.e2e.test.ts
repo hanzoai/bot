@@ -2,12 +2,12 @@
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createJsonlRequestTailer } from "../../../../scripts/e2e/lib/codex-media-path/jsonl-request-tail.mjs";
-import { closeOpenClawAgentDatabasesForTest } from "../../../../src/state/openclaw-agent-db.js";
+import { closeBotAgentDatabasesForTest } from "../../../../src/state/bot-agent-db.js";
 import { connectGatewayStatusClient, postJson } from "../../../helpers/gateway-e2e-harness.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../../helpers/openclaw-test-instance.js";
+  createBotTestInstance,
+  type BotTestInstance,
+} from "../../../helpers/bot-test-instance.js";
 import { runCodexAuthDoctorMigrationProof } from "./codex-auth-product-proof.test-support.js";
 
 const oauthAccess = "test-oauth-access";
@@ -16,7 +16,7 @@ const MODEL = "openai/gpt-5.6-luna";
 const PRODUCT_OUTPUT = "QA_CODEX_AUTH_PRODUCT_PROOF_OK";
 const REQUEST_TIMEOUT_MS = 60_000;
 
-let instance: OpenClawTestInstance | undefined;
+let instance: BotTestInstance | undefined;
 
 type AppServerLogEntry = {
   id?: number | string;
@@ -30,7 +30,7 @@ type AppServerRequestLog = { read(): AppServerLogEntry[] };
 type GatewayHistory = Record<string, unknown> & { messages?: unknown[] };
 
 afterEach(async () => {
-  closeOpenClawAgentDatabasesForTest();
+  closeBotAgentDatabasesForTest();
   await instance?.cleanup();
   instance = undefined;
 });
@@ -48,7 +48,7 @@ function waitForRequest(requestLog: AppServerRequestLog, method: string) {
   );
 }
 
-async function waitForAssistantHistory(testInstance: OpenClawTestInstance, expected: string) {
+async function waitForAssistantHistory(testInstance: BotTestInstance, expected: string) {
   const client = await connectGatewayStatusClient(testInstance);
   try {
     return await vi.waitFor(
@@ -106,11 +106,11 @@ describe("Codex auth product proof", () => {
       const appServerFixture = fileURLToPath(
         new URL("./codex-auth-app-server.fixture.mjs", import.meta.url),
       );
-      instance = await createOpenClawTestInstance({
+      instance = await createBotTestInstance({
         name: "qa-codex-auth-product-proof",
         env: {
-          OPENCLAW_AGENT_HARNESS_FALLBACK: "none",
-          OPENCLAW_SKIP_PROVIDERS: undefined,
+          BOT_AGENT_HARNESS_FALLBACK: "none",
+          BOT_SKIP_PROVIDERS: undefined,
         },
         config: {
           plugins: {
@@ -145,7 +145,7 @@ describe("Codex auth product proof", () => {
       });
 
       const requestLog = instance.state.path("codex-auth-app-server.jsonl");
-      instance.env.OPENCLAW_QA_CODEX_AUTH_APP_SERVER_LOG = requestLog;
+      instance.env.BOT_QA_CODEX_AUTH_APP_SERVER_LOG = requestLog;
       const appServerLog = createJsonlRequestTailer<AppServerLogEntry>(requestLog);
       const canonicalStore = await runCodexAuthDoctorMigrationProof(instance, {
         accountId: ACCOUNT_ID,

@@ -1,5 +1,5 @@
 /** Builds doctor/install repair hints for missing official external plugin owners. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveConfiguredChannelPresencePolicy } from "./channel-plugin-ids.js";
 import {
   getOfficialExternalPluginCatalogEntry,
@@ -40,8 +40,8 @@ export function resolveOfficialExternalPluginRepairHint(
   const pluginId = resolveOfficialExternalPluginId(entry) ?? pluginIdOrChannelId.trim();
   const channelId = manifest?.channel?.id?.trim();
   const label = resolveOfficialExternalPluginLabel(entry);
-  const installCommand = `openclaw plugins install ${installSpec}`;
-  const doctorFixCommand = "openclaw doctor --fix";
+  const installCommand = `bot plugins install ${installSpec}`;
+  const doctorFixCommand = "bot doctor --fix";
   return {
     pluginId,
     ...(channelId ? { channelId } : {}),
@@ -55,8 +55,8 @@ export function resolveOfficialExternalPluginRepairHint(
 
 /** Resolves a repair hint only when a missing configured channel is blocked by no plugin owner. */
 export function resolveMissingOfficialExternalChannelPluginRepairHint(params: {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: BotConfig;
+  activationSourceConfig?: BotConfig;
   channelId: string;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;

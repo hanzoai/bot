@@ -7,7 +7,7 @@ import {
   resolveAmbientTranscriptWatermarkKey,
   updateAmbientTranscriptWatermark,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
+} from "bot/plugin-sdk/session-store-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildTelegramMessageContextForTest } from "./bot-message-context.test-harness.js";
 import type { TelegramPromptContextEntry } from "./bot-message-context.types.js";
@@ -33,7 +33,7 @@ const telegramChatWindowContext: TelegramPromptContextEntry = {
 const tempDirs: string[] = [];
 
 function createTempSessionStorePath(): string {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-telegram-watermark-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-telegram-watermark-"));
   tempDirs.push(tempDir);
   return path.join(tempDir, "sessions.json");
 }

@@ -1,6 +1,6 @@
 // @vitest-environment node
 // Control UI tests cover build chat items behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import { markInboundContextLabel } from "../../../../src/auto-reply/reply/inbound-context-marker.js";
 import type { MessageGroup } from "../../lib/chat/chat-types.ts";
@@ -47,10 +47,10 @@ describe("persistedMessageEntryId", () => {
     expect(
       persistedMessageEntryId({
         role: "user",
-        __openclaw: { id: "pending-send:1", kind: "pending-send" },
+        __bot: { id: "pending-send:1", kind: "pending-send" },
       }),
     ).toBeNull();
-    expect(persistedMessageEntryId({ role: "user", __openclaw: { id: "entry-1", seq: 2 } })).toBe(
+    expect(persistedMessageEntryId({ role: "user", __bot: { id: "entry-1", seq: 2 } })).toBe(
       "entry-1",
     );
   });
@@ -64,7 +64,7 @@ type WorkGroupItem = Extract<
 
 // Inbound context blocks are stamped with the provenance marker; strippers key
 // on the marker, so display fixtures must carry it to be recognized.
-const SENDER_METADATA_BLOCK = `${markInboundContextLabel("Sender:")}\n\`\`\`json\n{"label":"openclaw-control-ui","id":"openclaw-control-ui"}\n\`\`\``;
+const SENDER_METADATA_BLOCK = `${markInboundContextLabel("Sender:")}\n\`\`\`json\n{"label":"bot-control-ui","id":"bot-control-ui"}\n\`\`\``;
 
 function createProps(overrides: Partial<CachedChatItemsProps> = {}): CachedChatItemsProps {
   return {
@@ -161,7 +161,7 @@ describe("assistant commentary grouping", () => {
       role: "user",
       content: "Active prompt",
       timestamp: 2_000,
-      __openclaw: { idempotencyKey: "run-active:user" },
+      __bot: { idempotencyKey: "run-active:user" },
     };
     const liveTool = {
       role: "toolResult",
@@ -211,7 +211,7 @@ describe("assistant commentary grouping", () => {
       role: "user",
       content: "Active prompt",
       timestamp: 2_000,
-      __openclaw: { idempotencyKey: "run-active:user" },
+      __bot: { idempotencyKey: "run-active:user" },
     };
     const activeSend = {
       id: "active-send",
@@ -279,14 +279,14 @@ describe("assistant commentary grouping", () => {
             role: "user",
             content: "Earlier prompt",
             timestamp: 1_000,
-            __openclaw: { idempotencyKey: "run-earlier:user" },
+            __bot: { idempotencyKey: "run-earlier:user" },
           },
           { role: "assistant", content: "Earlier reply", timestamp: 1_300 },
           {
             role: "user",
             content: "Current prompt",
             timestamp: 2_000,
-            __openclaw: { idempotencyKey: "run-current:user" },
+            __bot: { idempotencyKey: "run-current:user" },
           },
         ],
         streamSegments: [
@@ -438,7 +438,7 @@ describe("assistant commentary grouping", () => {
             role: "user",
             content: "Current prompt",
             timestamp: 2_000,
-            __openclaw: { idempotencyKey: "run-active:user" },
+            __bot: { idempotencyKey: "run-active:user" },
           },
           terminal,
         ],
@@ -460,7 +460,7 @@ describe("assistant commentary grouping", () => {
           role: "assistant",
           content: "Checking the workspace.",
           timestamp: 2_000,
-          openclawStreamFallback: {
+          botStreamFallback: {
             replacementText: "Checking the workspace.",
             source: "segment",
             itemId: "preamble-1",
@@ -470,7 +470,7 @@ describe("assistant commentary grouping", () => {
           role: "assistant",
           content: "Inspecting the result.",
           timestamp: 3_000,
-          openclawStreamFallback: {
+          botStreamFallback: {
             replacementText: "Inspecting the result.",
             source: "segment",
             itemId: "preamble-2",
@@ -493,7 +493,7 @@ describe("assistant commentary grouping", () => {
         role: "assistant",
         content: "Checking the workspace.",
         timestamp: 2_000,
-        openclawStreamFallback: {
+        botStreamFallback: {
           replacementText: "Checking the workspace.",
           source: "segment",
           itemId: "preamble-1",
@@ -660,7 +660,7 @@ describe("collapseCompletedTurnWork", () => {
           role: "system",
           content: "",
           timestamp: 3_000,
-          __openclaw: { kind: "compaction", id: "c1" },
+          __bot: { kind: "compaction", id: "c1" },
         },
         { role: "assistant", content: "Done.", timestamp: 4_000 },
       ],
@@ -740,23 +740,23 @@ describe("collapseCompletedTurnWork", () => {
       messages: [
         {
           ...toolResult("call-1", 1_000),
-          __openclaw: { id: "work-1", seq: 1, turnBoundary: true },
+          __bot: { id: "work-1", seq: 1, turnBoundary: true },
         },
         {
           role: "assistant",
           content: "First run done.",
           timestamp: 3_000,
-          __openclaw: { id: "reply-1", seq: 2 },
+          __bot: { id: "reply-1", seq: 2 },
         },
         {
           ...toolResult("call-2", 4_000),
-          __openclaw: { id: "work-2", seq: 3, turnBoundary: true },
+          __bot: { id: "work-2", seq: 3, turnBoundary: true },
         },
         {
           role: "assistant",
           content: "Second run done.",
           timestamp: 9_000,
-          __openclaw: { id: "reply-2", seq: 4 },
+          __bot: { id: "reply-2", seq: 4 },
         },
       ],
     });
@@ -769,7 +769,7 @@ describe("collapseCompletedTurnWork", () => {
   it("keeps a completed-work row keyed to its final reply as older work is prepended", () => {
     resetChatThreadState();
     const finalReply = {
-      __openclaw: { id: "final-reply", seq: 3 },
+      __bot: { id: "final-reply", seq: 3 },
       role: "assistant",
       content: "Done.",
       timestamp: 3_000,
@@ -782,7 +782,7 @@ describe("collapseCompletedTurnWork", () => {
     const prepended = collapsedItems({
       messages: [
         {
-          __openclaw: { id: "older-commentary", seq: 1 },
+          __bot: { id: "older-commentary", seq: 1 },
           role: "assistant",
           content: "Checking.",
           timestamp: 1_000,
@@ -805,7 +805,7 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { idempotencyKey: "initial-send:user", seq: 1 },
+            __bot: { idempotencyKey: "initial-send:user", seq: 1 },
             role: "user",
             content: "Initial image prompt",
             timestamp: 1,
@@ -818,7 +818,7 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: {
+            __bot: {
               id: "persisted-user-message",
               idempotencyKey: "initial-send:user",
               seq: 1,
@@ -841,7 +841,7 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { id: "terminal-message" },
+            __bot: { id: "terminal-message" },
             role: "assistant",
             content: "Draft reply",
             timestamp: 1,
@@ -854,7 +854,7 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { id: "terminal-message", seq: 42 },
+            __bot: { id: "terminal-message", seq: 42 },
             role: "assistant",
             content: "Final reply",
             timestamp: 2,
@@ -873,7 +873,7 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { id: "tool-message" },
+            __bot: { id: "tool-message" },
             role: "assistant",
             toolCallId: "call-1",
             content: "Running",
@@ -887,7 +887,7 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { id: "tool-message", seq: 43 },
+            __bot: { id: "tool-message", seq: 43 },
             role: "assistant",
             toolCallId: "call-1",
             content: "Finished",
@@ -904,13 +904,13 @@ describe("buildCachedChatItems row identity", () => {
   it("preserves a same-role group key as messages are prepended and appended", () => {
     resetChatThreadState();
     const first = {
-      __openclaw: { id: "assistant-1", seq: 2 },
+      __bot: { id: "assistant-1", seq: 2 },
       role: "assistant",
       content: "First",
       timestamp: 2,
     };
     const second = {
-      __openclaw: { id: "assistant-2", seq: 3 },
+      __bot: { id: "assistant-2", seq: 3 },
       role: "assistant",
       content: "Second",
       timestamp: 3,
@@ -920,7 +920,7 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { id: "assistant-0", seq: 1 },
+            __bot: { id: "assistant-0", seq: 1 },
             role: "assistant",
             content: "Earlier",
             timestamp: 1,
@@ -936,7 +936,7 @@ describe("buildCachedChatItems row identity", () => {
         messages: [
           ...prepended.messages.map((entry) => entry.message),
           {
-            __openclaw: { id: "assistant-3", seq: 4 },
+            __bot: { id: "assistant-3", seq: 4 },
             role: "assistant",
             content: "Later",
             timestamp: 4,
@@ -954,13 +954,13 @@ describe("buildCachedChatItems row identity", () => {
     const groups = messageGroups({
       messages: [
         {
-          __openclaw: { id: "assistant-1", seq: 1 },
+          __bot: { id: "assistant-1", seq: 1 },
           role: "assistant",
           content: "First run",
           timestamp: 1,
         },
         {
-          __openclaw: { id: "assistant-2", seq: 2, turnBoundary: true },
+          __bot: { id: "assistant-2", seq: 2, turnBoundary: true },
           role: "assistant",
           content: "Second run",
           timestamp: 2,
@@ -976,14 +976,14 @@ describe("buildCachedChatItems row identity", () => {
   it("does not reclaim a group key naturally owned by another reordered group", () => {
     resetChatThreadState();
     const first = {
-      __openclaw: { id: "first", seq: 1 },
+      __bot: { id: "first", seq: 1 },
       role: "user",
       senderLabel: "same",
       content: "First",
       timestamp: 1,
     };
     const second = {
-      __openclaw: { id: "second", seq: 2 },
+      __bot: { id: "second", seq: 2 },
       role: "user",
       senderLabel: "same",
       content: "Second",
@@ -1003,13 +1003,13 @@ describe("buildCachedChatItems row identity", () => {
     resetChatThreadState();
     const siblings = [
       {
-        __openclaw: { seq: 2 },
+        __bot: { seq: 2 },
         role: "assistant",
         content: "First projection",
         timestamp: 2,
       },
       {
-        __openclaw: { seq: 2 },
+        __bot: { seq: 2 },
         role: "assistant",
         content: "Second projection",
         timestamp: 2,
@@ -1020,19 +1020,19 @@ describe("buildCachedChatItems row identity", () => {
       messageGroups({
         messages: [
           {
-            __openclaw: { id: "older-user", seq: 1 },
+            __bot: { id: "older-user", seq: 1 },
             role: "user",
             content: "Earlier",
             timestamp: 1,
           },
           {
-            __openclaw: { seq: 2 },
+            __bot: { seq: 2 },
             role: "assistant",
             content: "Earlier projection from the same record",
             timestamp: 2,
           },
           ...siblings.map((message) => ({
-            __openclaw: { seq: message["__openclaw"].seq },
+            __bot: { seq: message["__bot"].seq },
             role: message.role,
             content: message.content,
             timestamp: message.timestamp,
@@ -1061,9 +1061,9 @@ describe("buildCachedChatItems working spark", () => {
     toolCallId: "tool-1",
     content: [{ type: "toolcall", name: "exec", arguments: {} }],
     timestamp: 1_000,
-    __openclawToolStreamLive: true,
-    __openclawToolStreamResultReceived: resultReceived,
-    __openclawToolStreamReceivedAt: 1_000,
+    __botToolStreamLive: true,
+    __botToolStreamResultReceived: resultReceived,
+    __botToolStreamReceivedAt: 1_000,
   });
 
   it("shows the spark while a run works with nothing streaming", () => {
@@ -1340,14 +1340,14 @@ describe("buildCachedChatItems", () => {
           role: "user",
           content: "first",
           senderLabel: "Iris",
-          __openclaw: { senderId: "iris", senderName: "Iris" },
+          __bot: { senderId: "iris", senderName: "Iris" },
           timestamp: 1000,
         },
         {
           role: "user",
           content: "second",
           senderLabel: "Joaquin De Rojas",
-          __openclaw: { senderId: "joaquin", senderName: "Joaquin De Rojas" },
+          __bot: { senderId: "joaquin", senderName: "Joaquin De Rojas" },
           timestamp: 1001,
         },
       ],
@@ -1384,14 +1384,14 @@ describe("buildCachedChatItems", () => {
         {
           role: "user",
           content: "Alice asks",
-          __openclaw: { senderId: "alice", senderName: "Alice" },
+          __bot: { senderId: "alice", senderName: "Alice" },
           timestamp: 1000,
         },
         { role: "assistant", content: "For Alice", timestamp: 1001 },
         {
           role: "user",
           content: "Bob asks",
-          __openclaw: { senderId: "bob", senderName: "Bob" },
+          __bot: { senderId: "bob", senderName: "Bob" },
           timestamp: 1002,
         },
         { role: "user", content: "Local follow-up", timestamp: 1003 },
@@ -1412,7 +1412,7 @@ describe("buildCachedChatItems", () => {
         {
           role: "user",
           content: "Alice asks",
-          __openclaw: { senderId: "alice", senderName: "Alice" },
+          __bot: { senderId: "alice", senderName: "Alice" },
           timestamp: 1000,
         },
         { role: "assistant", content: "For Alice", timestamp: 1001 },
@@ -1520,7 +1520,7 @@ describe("buildCachedChatItems", () => {
               type: "tool_use",
               id: "call-shell",
               name: "bash",
-              input: { command: "run openclaw doctor" },
+              input: { command: "run bot doctor" },
             },
           ],
           timestamp: 1000,
@@ -1951,18 +1951,18 @@ describe("buildCachedChatItems", () => {
     ]);
   });
 
-  it("deduplicates relay-labeled assistant copies by OpenClaw transcript metadata id", () => {
+  it("deduplicates relay-labeled assistant copies by Bot transcript metadata id", () => {
     const groups = messageGroups({
       messages: [
         {
-          __openclaw: { id: "reply-3" },
+          __bot: { id: "reply-3" },
           role: "assistant",
           content: [{ type: "text", text: "Parzival On it." }],
           senderLabel: "Parzival",
           timestamp: 1,
         },
         {
-          __openclaw: { id: "reply-3" },
+          __bot: { id: "reply-3" },
           role: "assistant",
           content: [{ type: "text", text: "On it." }],
           timestamp: 2,
@@ -1978,12 +1978,12 @@ describe("buildCachedChatItems", () => {
     ]);
   });
 
-  it("deduplicates relay-labeled assistant copies by OpenClaw metadata before surface ids", () => {
+  it("deduplicates relay-labeled assistant copies by Bot metadata before surface ids", () => {
     const groups = messageGroups({
       messages: [
         {
           id: "relay-surface-copy",
-          __openclaw: { id: "reply-4" },
+          __bot: { id: "reply-4" },
           role: "assistant",
           content: [{ type: "text", text: "Parzival Ship it." }],
           senderLabel: "Parzival",
@@ -1991,7 +1991,7 @@ describe("buildCachedChatItems", () => {
         },
         {
           id: "native-surface-copy",
-          __openclaw: { id: "reply-4" },
+          __bot: { id: "reply-4" },
           role: "assistant",
           content: [{ type: "text", text: "Ship it." }],
           timestamp: 2,
@@ -2011,13 +2011,13 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         {
-          __openclaw: { id: "reply-5" },
+          __bot: { id: "reply-5" },
           role: "assistant",
           content: [{ type: "text", text: "Draft one" }],
           timestamp: 1,
         },
         {
-          __openclaw: { id: "reply-5" },
+          __bot: { id: "reply-5" },
           role: "assistant",
           content: [{ type: "text", text: "Draft two" }],
           timestamp: 2,
@@ -2039,14 +2039,14 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         {
-          __openclaw: { id: "reply-formatted" },
+          __bot: { id: "reply-formatted" },
           role: "assistant",
           content: [{ type: "text", text: "Parzival first\n\nsecond" }],
           senderLabel: "Parzival",
           timestamp: 1,
         },
         {
-          __openclaw: { id: "reply-formatted" },
+          __bot: { id: "reply-formatted" },
           role: "assistant",
           content: [{ type: "text", text: "first second" }],
           timestamp: 2,
@@ -2067,14 +2067,14 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         {
-          __openclaw: { id: "reply-case-change" },
+          __bot: { id: "reply-case-change" },
           role: "assistant",
           content: [{ type: "text", text: "PARZIVAL answer" }],
           senderLabel: "Parzival",
           timestamp: 1,
         },
         {
-          __openclaw: { id: "reply-case-change" },
+          __bot: { id: "reply-case-change" },
           role: "assistant",
           content: [{ type: "text", text: "answer" }],
           timestamp: 2,
@@ -2095,14 +2095,14 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         {
-          __openclaw: { id: "reply-6" },
+          __bot: { id: "reply-6" },
           role: "assistant",
           content: [{ type: "text", text: "Parzival Draft one" }],
           senderLabel: "Parzival",
           timestamp: 1,
         },
         {
-          __openclaw: { id: "reply-6" },
+          __bot: { id: "reply-6" },
           role: "assistant",
           content: [{ type: "text", text: "Parzival Draft two" }],
           senderLabel: "Parzival",
@@ -2152,14 +2152,14 @@ describe("buildCachedChatItems", () => {
     const groups = messageGroups({
       messages: [
         {
-          __openclaw: { id: "user-1" },
+          __bot: { id: "user-1" },
           role: "user",
           content: [{ type: "text", text: "Alice hello" }],
           senderLabel: "Alice",
           timestamp: 1,
         },
         {
-          __openclaw: { id: "user-1" },
+          __bot: { id: "user-1" },
           role: "user",
           content: [{ type: "text", text: "hello" }],
           timestamp: 2,
@@ -2471,7 +2471,7 @@ describe("buildCachedChatItems", () => {
         {
           role: "user",
           content: SENDER_METADATA_BLOCK,
-          senderLabel: "openclaw-control-ui",
+          senderLabel: "bot-control-ui",
           timestamp: 1,
         },
       ],
@@ -2817,7 +2817,7 @@ describe("buildCachedChatItems", () => {
           role: "user",
           content: "accepted prompt",
           timestamp: 1,
-          __openclaw: { idempotencyKey: "accepted-run:user", seq: 1 },
+          __bot: { idempotencyKey: "accepted-run:user", seq: 1 },
         },
       ],
       queue: [
@@ -2834,7 +2834,7 @@ describe("buildCachedChatItems", () => {
 
     expect(groups).toHaveLength(1);
     expect(groupAt(groups, 0).messages).toHaveLength(1);
-    expect(messageRecord(groupAt(groups, 0))["__openclaw"]).toMatchObject({
+    expect(messageRecord(groupAt(groups, 0))["__bot"]).toMatchObject({
       idempotencyKey: "accepted-run:user",
       seq: 1,
     });
@@ -2911,7 +2911,7 @@ describe("buildCachedChatItems", () => {
             view: {
               backend: "canvas",
               id: "cv_nearest_turn",
-              url: "/__openclaw__/canvas/documents/cv_nearest_turn/index.html",
+              url: "/__bot__/canvas/documents/cv_nearest_turn/index.html",
               title: "Nearest turn demo",
               preferred_height: 320,
             },
@@ -3000,7 +3000,7 @@ describe("buildCachedChatItems", () => {
             view: {
               backend: "canvas",
               id: "cv_empty_anchor",
-              url: "/__openclaw__/canvas/documents/cv_empty_anchor/index.html",
+              url: "/__bot__/canvas/documents/cv_empty_anchor/index.html",
               title: "Empty anchor demo",
               preferred_height: 320,
             },
@@ -3184,7 +3184,7 @@ describe("buildCachedChatItems", () => {
               view: {
                 backend: "canvas",
                 id: "cv_generic_inline",
-                url: "/__openclaw__/canvas/documents/cv_generic_inline/index.html",
+                url: "/__bot__/canvas/documents/cv_generic_inline/index.html",
                 title: "Inline generic preview",
                 preferred_height: 420,
               },
@@ -3228,7 +3228,7 @@ describe("buildCachedChatItems", () => {
                 view: {
                   backend: "canvas",
                   id: "cv_streamed_artifact",
-                  url: "/__openclaw__/canvas/documents/cv_streamed_artifact/index.html",
+                  url: "/__bot__/canvas/documents/cv_streamed_artifact/index.html",
                   title: "Streamed demo",
                   preferred_height: 320,
                 },
@@ -3260,7 +3260,7 @@ describe("buildCachedChatItems", () => {
           {
             role: "system",
             timestamp: 2_000,
-            __openclaw: {
+            __bot: {
               kind: "compaction",
               id: "checkpoint-1",
             },
@@ -3288,7 +3288,7 @@ describe("buildCachedChatItems", () => {
           {
             role: "system",
             timestamp: 2_000,
-            __openclaw: {
+            __bot: {
               kind: "compaction",
               id: "checkpoint-with-metrics",
               tokensBefore: 900_000,
@@ -3527,7 +3527,7 @@ function createAssistantCanvasBlock(params: { suffix: string }) {
       render: "url",
       viewId,
       title: "Inline demo",
-      url: `/__openclaw__/canvas/documents/${viewId}/index.html`,
+      url: `/__bot__/canvas/documents/${viewId}/index.html`,
       preferredHeight: 360,
     },
   };
@@ -3573,8 +3573,8 @@ function mcpAppLiveResult(viewId: string, toolCallId: string, timestamp: number 
       },
     ],
     ...(timestamp == null ? {} : { timestamp }),
-    __openclawToolStreamLive: true,
-    __openclawToolStreamResultReceived: true,
+    __botToolStreamLive: true,
+    __botToolStreamResultReceived: true,
   };
 }
 

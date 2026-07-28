@@ -1,6 +1,6 @@
 // Qqbot plugin module implements ws client behavior.
 import type { Agent } from "node:http";
-import { resolveAmbientNodeProxyAgent } from "openclaw/plugin-sdk/extension-shared";
+import { resolveAmbientNodeProxyAgent } from "bot/plugin-sdk/extension-shared";
 import WebSocket from "ws";
 
 // `ws` otherwise waits indefinitely for an HTTP upgrade. Keep the 30s channel

@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   appendAudit,
   appendInboxRead,

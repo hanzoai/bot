@@ -74,16 +74,16 @@ const CORE_GATEWAY_METHOD_SPECS: readonly CoreGatewayMethodSpec[] = [
   { name: "plugin.approval.resolve", scope: "operator.approvals", since: "<=2026.7" },
   { name: "plugins.uiDescriptors", scope: "operator.read", since: "<=2026.7" },
   { name: "plugins.sessionAction", scope: "dynamic", since: "<=2026.7" },
-  { name: "openclaw.chat", scope: "operator.admin", since: "<=2026.7" },
-  { name: "openclaw.chat.history", scope: "operator.admin", since: "2026.7" },
-  { name: "openclaw.changes.list", scope: "operator.admin", since: "<=2026.7" },
-  { name: "openclaw.approval.list", scope: "operator.approvals", since: "<=2026.7" },
-  { name: "openclaw.setup.detect", scope: "operator.admin", since: "<=2026.7" },
+  { name: "bot.chat", scope: "operator.admin", since: "<=2026.7" },
+  { name: "bot.chat.history", scope: "operator.admin", since: "2026.7" },
+  { name: "bot.changes.list", scope: "operator.admin", since: "<=2026.7" },
+  { name: "bot.approval.list", scope: "operator.approvals", since: "<=2026.7" },
+  { name: "bot.setup.detect", scope: "operator.admin", since: "<=2026.7" },
   // Failed activation candidates are non-mutating probes. Keep this admin-only
   // without the shared three-write budget so the automatic ladder can finish.
-  { name: "openclaw.setup.activate", scope: "operator.admin", since: "<=2026.7" },
-  { name: "openclaw.setup.auth.start", scope: "operator.admin", since: "<=2026.7" },
-  { name: "openclaw.setup.prepare.start", scope: "operator.admin", since: "<=2026.7" },
+  { name: "bot.setup.activate", scope: "operator.admin", since: "<=2026.7" },
+  { name: "bot.setup.auth.start", scope: "operator.admin", since: "<=2026.7" },
+  { name: "bot.setup.prepare.start", scope: "operator.admin", since: "<=2026.7" },
   { name: "wizard.start", scope: "operator.admin", since: "<=2026.7" },
   { name: "wizard.next", scope: "operator.admin", since: "<=2026.7" },
   { name: "wizard.cancel", scope: "operator.admin", since: "<=2026.7" },
@@ -396,7 +396,7 @@ const CORE_GATEWAY_METHOD_SPECS: readonly CoreGatewayMethodSpec[] = [
   // sessions.files.* trusted-operator read domain.
   { name: "sessions.diff", scope: "operator.read", since: "<=2026.7" },
   // Additive protocol methods append here to preserve existing advertised indices.
-  { name: "openclaw.setup.verify", scope: "operator.admin", since: "<=2026.7" },
+  { name: "bot.setup.verify", scope: "operator.admin", since: "<=2026.7" },
   // Cloud-worker mutations depend on the loaded provider registry and owned
   // reconciler, so advertise them early but gate dispatch until sidecars are ready.
   {

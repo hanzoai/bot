@@ -1,11 +1,11 @@
 // Telegram Mini App owner checks.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { expandTelegramAllowFromWithAccessGroups } from "../access-groups.js";
 import { mergeTelegramAccountConfig } from "../accounts.js";
 import { isNumericTelegramSenderUserId, normalizeTelegramAllowFromEntry } from "../allow-from.js";
 
 export async function isTelegramMiniAppOwner(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   userId: string;
 }): Promise<boolean> {

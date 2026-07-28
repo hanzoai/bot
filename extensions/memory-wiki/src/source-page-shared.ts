@@ -1,7 +1,7 @@
 // Memory Wiki plugin module implements source page shared behavior.
 import fs from "node:fs/promises";
-import { timestampMsToIsoString } from "openclaw/plugin-sdk/number-runtime";
-import { FsSafeError, root as fsRoot } from "openclaw/plugin-sdk/security-runtime";
+import { timestampMsToIsoString } from "bot/plugin-sdk/number-runtime";
+import { FsSafeError, root as fsRoot } from "bot/plugin-sdk/security-runtime";
 import { preserveHumanNotesBlock } from "./markdown.js";
 import {
   setImportedSourceEntry,

@@ -1,17 +1,17 @@
 // Googlechat plugin module implements accounts behavior.
-import { createAccountListHelpers } from "openclaw/plugin-sdk/account-helpers";
+import { createAccountListHelpers } from "bot/plugin-sdk/account-helpers";
 import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
-  type OpenClawConfig,
+  type BotConfig,
   resolveAccountEntry,
-} from "openclaw/plugin-sdk/account-resolution";
-import { safeParseJsonWithSchema, safeParseWithSchema } from "openclaw/plugin-sdk/extension-shared";
-import { mergePairLoopGuardConfig } from "openclaw/plugin-sdk/pair-loop-guard-runtime";
-import { tryReadSecretFileSync } from "openclaw/plugin-sdk/secret-file-runtime";
-import { isSecretRef } from "openclaw/plugin-sdk/secret-input";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolveUserPath } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/account-resolution";
+import { safeParseJsonWithSchema, safeParseWithSchema } from "bot/plugin-sdk/extension-shared";
+import { mergePairLoopGuardConfig } from "bot/plugin-sdk/pair-loop-guard-runtime";
+import { tryReadSecretFileSync } from "bot/plugin-sdk/secret-file-runtime";
+import { isSecretRef } from "bot/plugin-sdk/secret-input";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
+import { resolveUserPath } from "bot/plugin-sdk/text-utility-runtime";
 import { z } from "zod";
 import { MAX_GOOGLE_CHAT_SERVICE_ACCOUNT_FILE_BYTES } from "./google-auth-limits.js";
 import type { GoogleChatAccountConfig } from "./types.config.js";
@@ -58,7 +58,7 @@ const {
 export { listGoogleChatAccountIds, resolveDefaultGoogleChatAccountId };
 
 function mergeGoogleChatAccountConfig(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   accountId: string,
 ): GoogleChatAccountConfig {
   const raw = cfg.channels?.["googlechat"] ?? {};
@@ -88,7 +88,7 @@ function mergeGoogleChatAccountConfig(
 }
 
 export function resolveGoogleChatConfigAccessorAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
 }): GoogleChatConfigAccessorAccount {
   const accountId = normalizeAccountId(
@@ -192,7 +192,7 @@ function resolveCredentialsFromConfig(params: {
 }
 
 export function resolveGoogleChatAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
 }): ResolvedGoogleChatAccount {
   const accountId = normalizeAccountId(
@@ -217,7 +217,7 @@ export function resolveGoogleChatAccount(params: {
   };
 }
 
-export function listEnabledGoogleChatAccounts(cfg: OpenClawConfig): ResolvedGoogleChatAccount[] {
+export function listEnabledGoogleChatAccounts(cfg: BotConfig): ResolvedGoogleChatAccount[] {
   return listGoogleChatAccountIds(cfg)
     .map((accountId) => resolveGoogleChatAccount({ cfg, accountId }))
     .filter((account) => account.enabled);

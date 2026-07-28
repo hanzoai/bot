@@ -1,6 +1,6 @@
 // Imessage tests cover inbound processing plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { sanitizeTerminalText } from "openclaw/plugin-sdk/test-fixtures";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { sanitizeTerminalText } from "bot/plugin-sdk/test-fixtures";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import { loadFreshIMessageReplyCacheForTest } from "../test-support/runtime.js";
 import { createSelfChatCache } from "./self-chat-cache.js";
@@ -19,7 +19,7 @@ beforeAll(async () => {
 });
 
 describe("resolveIMessageInboundDecision echo detection", () => {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as BotConfig;
   type InboundDecisionParams = Parameters<
     InboundProcessingModule["resolveIMessageInboundDecision"]
   >[0];
@@ -210,7 +210,7 @@ describe("resolveIMessageInboundDecision echo detection", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const createdAt = "2026-03-02T20:58:10.649Z";
 
     expect(
@@ -742,7 +742,7 @@ describe("resolveIMessageReactionContext", () => {
 describe("buildIMessageInboundContext", () => {
   it("keeps numeric row id and provider GUID separately for action tooling", async () => {
     const decision = await resolveIMessageInboundDecision({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "default",
       message: {
         id: 12345,
@@ -772,7 +772,7 @@ describe("buildIMessageInboundContext", () => {
     }
 
     const { ctxPayload } = await buildIMessageInboundContext({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       decision,
       message: {
         id: 12345,
@@ -793,7 +793,7 @@ describe("buildIMessageInboundContext", () => {
 
   it("keeps generated media notices out of command input", async () => {
     const decision = await resolveIMessageInboundDecision({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "default",
       message: {
         id: 12347,
@@ -823,7 +823,7 @@ describe("buildIMessageInboundContext", () => {
     }
 
     const { ctxPayload } = await buildIMessageInboundContext({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       decision: {
         ...decision,
         agentBodyText: "/reset\n\n[imessage attachment unavailable]",
@@ -848,7 +848,7 @@ describe("buildIMessageInboundContext", () => {
 
   it("prepends direct-message history when supplied", async () => {
     const decision = await resolveIMessageInboundDecision({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "default",
       message: {
         id: 12346,
@@ -878,7 +878,7 @@ describe("buildIMessageInboundContext", () => {
     }
 
     const { ctxPayload, inboundHistory } = await buildIMessageInboundContext({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       decision,
       message: {
         id: 12346,
@@ -904,7 +904,7 @@ describe("buildIMessageInboundContext", () => {
 });
 
 describe("resolveIMessageInboundDecision command auth", () => {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as BotConfig;
   const resolveDmCommandDecision = (params: {
     messageId: number;
     storeAllowFrom: string[];
@@ -1057,7 +1057,7 @@ describe("buildIMessageInboundContext MessageSid handling (rowid-leak regression
       hasControlCommand: false,
     };
     return {
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       decision: decision as unknown as Parameters<
         typeof buildIMessageInboundContext
       >[0]["decision"],

@@ -4,10 +4,10 @@ import { EventEmitter } from "node:events";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { resetInboundDedupe } from "openclaw/plugin-sdk/reply-runtime";
-import { resetLogger, setLoggerOverride } from "openclaw/plugin-sdk/runtime-env";
-import { mockPinnedHostnameResolution } from "openclaw/plugin-sdk/test-env";
+import { createPluginRuntimeMock } from "bot/plugin-sdk/plugin-test-runtime";
+import { resetInboundDedupe } from "bot/plugin-sdk/reply-runtime";
+import { resetLogger, setLoggerOverride } from "bot/plugin-sdk/runtime-env";
+import { mockPinnedHostnameResolution } from "bot/plugin-sdk/test-env";
 import { afterAll, afterEach, beforeAll, beforeEach, vi, type Mock } from "vitest";
 import type { WebChannelStatus } from "./auto-reply/types.js";
 import type { WebInboundMessageInput, WebListenerCloseReason } from "./inbound.js";
@@ -64,7 +64,7 @@ type MockSessionSocket = {
 };
 
 const TEST_NET_IP = "93.184.216.34";
-const WEB_AUTO_REPLY_SOCKETS_KEY = Symbol.for("openclaw:webAutoReplySessionSockets");
+const WEB_AUTO_REPLY_SOCKETS_KEY = Symbol.for("bot:webAutoReplySessionSockets");
 
 function getSessionSockets(): MockSessionSocket[] {
   const store = globalThis as Record<PropertyKey, unknown>;
@@ -120,7 +120,7 @@ function resetWebAutoReplySessionSockets() {
   getSessionSockets().length = 0;
 }
 
-vi.mock("openclaw/plugin-sdk/agent-runtime", () => ({
+vi.mock("bot/plugin-sdk/agent-runtime", () => ({
   abortEmbeddedAgentRun: vi.fn().mockReturnValue(false),
   appendCronStyleCurrentTimeLine: (text: string) => text,
   isEmbeddedAgentRunActive: vi.fn().mockReturnValue(false),
@@ -187,7 +187,7 @@ let tempHomeId = 0;
 
 export function installWebAutoReplyTestHomeHooks() {
   beforeAll(async () => {
-    tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-web-home-suite-"));
+    tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-web-home-suite-"));
   });
 
   beforeEach(async () => {
@@ -215,7 +215,7 @@ export function installWebAutoReplyTestHomeHooks() {
 export async function makeSessionStore(
   entries: Record<string, unknown> = {},
 ): Promise<{ storePath: string; cleanup: () => Promise<void> }> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-session-"));
   const storePath = path.join(dir, "sessions.json");
   await fs.writeFile(storePath, JSON.stringify(entries));
   const cleanup = async () => {

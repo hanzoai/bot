@@ -6,17 +6,17 @@ import {
   resolveSessionAgentIds,
   resolveUserPath,
   type FastModeAutoProgressState,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveAgentDir } from "openclaw/plugin-sdk/agent-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { resolveAgentDir } from "bot/plugin-sdk/agent-runtime";
 import {
   createDiagnosticTraceContextFromActiveScope,
   freezeDiagnosticTraceContext,
   resolveDiagnosticModelContentCapturePolicy,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
-import { loadExecApprovals } from "openclaw/plugin-sdk/exec-approvals-runtime";
+} from "bot/plugin-sdk/diagnostic-runtime";
+import { loadExecApprovals } from "bot/plugin-sdk/exec-approvals-runtime";
 import {
   resolveCodexAppServerForModelProvider,
-  resolveCodexAppServerForOpenClawToolPolicy,
+  resolveCodexAppServerForBotToolPolicy,
 } from "./app-server-policy.js";
 import {
   resolveCodexAppServerAuthProfileId,
@@ -29,7 +29,7 @@ import {
   readCodexPluginConfig,
   resolveCodexComputerUseConfig,
   resolveCodexModelBackedReviewerPolicyContext,
-  resolveOpenClawExecPolicyForCodexAppServer,
+  resolveBotExecPolicyForCodexAppServer,
 } from "./config.js";
 import { createCodexDynamicToolBuildStageTracker } from "./dynamic-tool-build.js";
 import { resolveCodexNativeHookRelayEvents } from "./native-hook-relay.js";
@@ -53,7 +53,7 @@ function applyStoredBindingPermissions(params: {
   if (params.execPolicyTouched || params.binding?.connectionScope === "supervision") {
     return params.appServer;
   }
-  // `/codex permissions` owns per-session policy. Explicit OpenClaw exec config
+  // `/codex permissions` owns per-session policy. Explicit Bot exec config
   // and supervised private connections remain authoritative when present.
   return {
     ...params.appServer,
@@ -109,7 +109,7 @@ export async function prepareCodexAttemptConnection({ params, options }: CodexRu
     workspaceDir: resolvedWorkspace,
   });
   preDynamicStartupStages.mark("sandbox");
-  const execPolicy = resolveOpenClawExecPolicyForCodexAppServer({
+  const execPolicy = resolveBotExecPolicyForCodexAppServer({
     execOverrides: params.execOverrides,
     approvals: loadExecApprovals(),
     config: params.config,
@@ -161,7 +161,7 @@ export async function prepareCodexAttemptConnection({ params, options }: CodexRu
         model: selection.model,
         config: params.config,
         agentDir,
-        openClawSandboxActive: sandbox?.enabled === true,
+        botSandboxActive: sandbox?.enabled === true,
       }).appServer,
       binding: startupBinding,
       execPolicyTouched: execPolicy.touched,
@@ -249,7 +249,7 @@ export async function prepareCodexAttemptConnection({ params, options }: CodexRu
   await ensureCodexWorkspaceDirOnce(effectiveWorkspace);
   preDynamicStartupStages.mark("effective-workspace");
   const resolvePolicyAppServer = () =>
-    resolveCodexAppServerForOpenClawToolPolicy({
+    resolveCodexAppServerForBotToolPolicy({
       appServer: configuredAppServer,
       pluginConfig,
       env: process.env,
@@ -271,7 +271,7 @@ export async function prepareCodexAttemptConnection({ params, options }: CodexRu
     agentDir,
   });
   if (configuredAppServer.approvalPolicy === "never" && appServer.approvalPolicy === "untrusted") {
-    embeddedAgentLog.info("codex app-server approval policy promoted for OpenClaw tool policy", {
+    embeddedAgentLog.info("codex app-server approval policy promoted for Bot tool policy", {
       from: "never",
       to: "untrusted",
       beforeToolCallHook: beforeToolCallPolicy.hasBeforeToolCallHook,
@@ -361,7 +361,7 @@ export async function prepareCodexAttemptConnection({ params, options }: CodexRu
         model: selection.model,
         config: params.config,
         agentDir,
-        openClawSandboxActive: sandbox?.enabled === true,
+        botSandboxActive: sandbox?.enabled === true,
       }).appServer,
       binding: mutable.startupBinding,
       execPolicyTouched: execPolicy.touched,

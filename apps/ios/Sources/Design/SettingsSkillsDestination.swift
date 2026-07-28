@@ -1,4 +1,4 @@
-import OpenClawKit
+import BotKit
 import SwiftUI
 
 private enum SkillsSettingsSection: String, CaseIterable, Identifiable {
@@ -80,7 +80,7 @@ struct SettingsSkillsDestination: View {
             }
             .padding(.vertical, 12)
         }
-        .font(OpenClawType.body)
+        .font(BotType.body)
         .task(id: self.refreshID) { await self.loadInitialState() }
         .refreshable { await self.refreshVisibleSection() }
         .onChange(of: self.appModel.connectedGatewayID) { _, _ in
@@ -146,11 +146,11 @@ struct SettingsSkillsDestination: View {
     private var summaryCard: some View {
         ProCard(radius: SettingsLayout.cardRadius) {
             HStack(spacing: 12) {
-                ProIconBadge(systemName: "sparkles", color: OpenClawBrand.accent)
+                ProIconBadge(systemName: "sparkles", color: BotBrand.accent)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Skills").font(OpenClawType.headline)
+                    Text("Skills").font(BotType.headline)
                     Text(self.summaryText)
-                        .font(OpenClawType.caption)
+                        .font(BotType.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -158,7 +158,7 @@ struct SettingsSkillsDestination: View {
                 ProValuePill(value: self.summaryValue, color: self.summaryColor)
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 
     private var summaryText: String {
@@ -182,19 +182,19 @@ struct SettingsSkillsDestination: View {
 
     private var summaryColor: Color {
         guard self.canRead else { return .secondary }
-        return self.setupCount > 0 ? OpenClawBrand.warn : OpenClawBrand.ok
+        return self.setupCount > 0 ? BotBrand.warn : BotBrand.ok
     }
 
     private var sectionPicker: some View {
         Picker(selection: self.$section) {
             ForEach(SkillsSettingsSection.allCases) { section in
-                Text(verbatim: section.title).font(OpenClawType.captionSemiBold).tag(section)
+                Text(verbatim: section.title).font(BotType.captionSemiBold).tag(section)
             }
         } label: {
-            Text("Skills section").font(OpenClawType.captionSemiBold)
+            Text("Skills section").font(BotType.captionSemiBold)
         }
         .pickerStyle(.segmented)
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 
     private var installedContent: some View {
@@ -215,7 +215,7 @@ struct SettingsSkillsDestination: View {
                     self.installedRows
                 }
             }
-            .padding(.horizontal, OpenClawProMetric.pagePadding)
+            .padding(.horizontal, BotProMetric.pagePadding)
         }
     }
 
@@ -224,23 +224,23 @@ struct SettingsSkillsDestination: View {
             VStack(alignment: .leading, spacing: 10) {
                 TextField(
                     text: self.$installedQuery,
-                    prompt: Text("Search installed skills").font(OpenClawType.body))
+                    prompt: Text("Search installed skills").font(BotType.body))
                 {
-                    Text("Search installed skills").font(OpenClawType.body)
+                    Text("Search installed skills").font(BotType.body)
                 }
-                .font(OpenClawType.body)
+                .font(BotType.body)
                 .textFieldStyle(.roundedBorder)
                 Picker(selection: self.$installedFilter) {
                     ForEach(InstalledSkillFilter.allCases) { filter in
-                        Text(verbatim: filter.title).font(OpenClawType.captionSemiBold).tag(filter)
+                        Text(verbatim: filter.title).font(BotType.captionSemiBold).tag(filter)
                     }
                 } label: {
-                    Text("Installed skill filter").font(OpenClawType.captionSemiBold)
+                    Text("Installed skill filter").font(BotType.captionSemiBold)
                 }
                 .pickerStyle(.segmented)
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 
     @ViewBuilder
@@ -258,7 +258,7 @@ struct SettingsSkillsDestination: View {
                 title: "Loading skills",
                 detail: "Reading the Gateway skill catalog.",
                 value: "loading",
-                color: OpenClawBrand.accent)
+                color: BotBrand.accent)
         } else if self.filteredInstalledSkills.isEmpty {
             ProStatusRow(
                 icon: "tray",
@@ -317,7 +317,7 @@ struct SettingsSkillsDestination: View {
                     self.browseRows
                 }
             }
-            .padding(.horizontal, OpenClawProMetric.pagePadding)
+            .padding(.horizontal, BotProMetric.pagePadding)
         }
     }
 
@@ -326,27 +326,27 @@ struct SettingsSkillsDestination: View {
             VStack(alignment: .leading, spacing: 10) {
                 TextField(
                     text: self.$browseQuery,
-                    prompt: Text("Search ClawHub").font(OpenClawType.body))
+                    prompt: Text("Search ClawHub").font(BotType.body))
                 {
-                    Text("Search ClawHub").font(OpenClawType.body)
+                    Text("Search ClawHub").font(BotType.body)
                 }
-                .font(OpenClawType.body)
+                .font(BotType.body)
                 .textFieldStyle(.roundedBorder)
                 .submitLabel(.search)
                 .onSubmit { Task { await self.searchClawHub() } }
                 Button {
                     Task { await self.searchClawHub() }
                 } label: {
-                    Label("Search", systemImage: "magnifyingglass").font(OpenClawType.subheadSemiBold)
+                    Label("Search", systemImage: "magnifyingglass").font(BotType.subheadSemiBold)
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(!self.canRead || self.isSearching || self.clawHubSupported == false)
                 Text("The Gateway verifies the exact reviewed release before download.")
-                    .font(OpenClawType.caption)
+                    .font(BotType.caption)
                     .foregroundStyle(.secondary)
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 
     @ViewBuilder
@@ -364,14 +364,14 @@ struct SettingsSkillsDestination: View {
                 title: "Gateway update required",
                 detail: "Update the Gateway to search and install ClawHub skills from iOS.",
                 value: "update",
-                color: OpenClawBrand.warn)
+                color: BotBrand.warn)
         } else if self.isSearching, self.searchResults.isEmpty {
             ProStatusRow(
                 icon: "hourglass",
                 title: "Searching ClawHub",
                 detail: "Loading verified skill releases.",
                 value: "loading",
-                color: OpenClawBrand.accent)
+                color: BotBrand.accent)
         } else if self.searchResults.isEmpty {
             ProStatusRow(
                 icon: "magnifyingglass",
@@ -766,7 +766,7 @@ struct SettingsSkillsDestination: View {
                 skillKey: "github",
                 primaryEnv: nil,
                 emoji: "🐙",
-                homepage: "https://docs.openclaw.ai/tools/skills",
+                homepage: "https://docs.bot.ai/tools/skills",
                 always: false,
                 disabled: false,
                 eligible: true,
@@ -831,28 +831,28 @@ private struct InstalledSkillRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Text(self.skill.emoji ?? "✨")
-                .font(OpenClawType.title3)
+                .font(BotType.title3)
                 .frame(width: 32, height: 32)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 7) {
-                    Text(self.skill.name).font(OpenClawType.subheadSemiBold)
+                    Text(self.skill.name).font(BotType.subheadSemiBold)
                     Text(verbatim: self.statusLabel)
-                        .font(OpenClawType.caption2SemiBold)
+                        .font(BotType.caption2SemiBold)
                         .foregroundStyle(self.statusColor)
                 }
                 Text(self.skill.description)
-                    .font(OpenClawType.caption)
+                    .font(BotType.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 if !self.missingSummary.isEmpty {
                     Text(verbatim: self.missingSummary)
-                        .font(OpenClawType.caption2)
-                        .foregroundStyle(OpenClawBrand.warn)
+                        .font(BotType.caption2)
+                        .foregroundStyle(BotBrand.warn)
                 }
                 if let link = self.skill.clawhub, link.valid, let slug = link.slug {
                     Text(verbatim: [slug, link.installedVersion].compactMap(\.self).joined(separator: " · "))
-                        .font(OpenClawType.monoSmall)
+                        .font(BotType.monoSmall)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -861,7 +861,7 @@ private struct InstalledSkillRow: View {
                 self.onToggle(self.skill.disabled)
             } label: {
                 Text(self.skill.disabled ? String(localized: "Enable") : String(localized: "Disable"))
-                    .font(OpenClawType.captionSemiBold)
+                    .font(BotType.captionSemiBold)
             }
             .buttonStyle(.bordered)
             .disabled(!self.canAdmin || self.isBusy)
@@ -883,7 +883,7 @@ private struct InstalledSkillRow: View {
         if self.skill.disabled {
             return .secondary
         }
-        return SettingsSkillsDestination.isReady(self.skill) ? OpenClawBrand.ok : OpenClawBrand.warn
+        return SettingsSkillsDestination.isReady(self.skill) ? BotBrand.ok : BotBrand.warn
     }
 
     private var missingSummary: String {
@@ -904,24 +904,24 @@ private struct ClawHubSkillRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            ProIconBadge(systemName: "shippingbox", color: self.installed ? OpenClawBrand.ok : OpenClawBrand.accent)
+            ProIconBadge(systemName: "shippingbox", color: self.installed ? BotBrand.ok : BotBrand.accent)
             VStack(alignment: .leading, spacing: 4) {
-                Text(self.skill.displayName).font(OpenClawType.subheadSemiBold)
+                Text(self.skill.displayName).font(BotType.subheadSemiBold)
                 Text(self.skill.summary ?? self.skill.slug)
-                    .font(OpenClawType.caption)
+                    .font(BotType.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 6) {
-                    Text(self.skill.slug).font(OpenClawType.monoSmall).foregroundStyle(.secondary)
+                    Text(self.skill.slug).font(BotType.monoSmall).foregroundStyle(.secondary)
                     if let version = self.skill.version {
-                        Text(verbatim: version).font(OpenClawType.monoSmall).foregroundStyle(.secondary)
+                        Text(verbatim: version).font(BotType.monoSmall).foregroundStyle(.secondary)
                     }
                 }
             }
             Spacer(minLength: 8)
             Button(action: self.onReview) {
                 Text(self.installed ? String(localized: "Installed") : String(localized: "Install"))
-                    .font(OpenClawType.captionSemiBold)
+                    .font(BotType.captionSemiBold)
             }
             .buttonStyle(.bordered)
             .disabled(self.isBusy || self.installed)
@@ -946,13 +946,13 @@ private struct SkillsNoticeCard: View {
             HStack(alignment: .top, spacing: 12) {
                 ProIconBadge(
                     systemName: self.notice.isError ? "exclamationmark.triangle" : "checkmark.circle",
-                    color: self.notice.isError ? OpenClawBrand.warn : OpenClawBrand.ok)
+                    color: self.notice.isError ? BotBrand.warn : BotBrand.ok)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(self.notice.title).font(OpenClawType.subheadSemiBold)
-                    Text(self.notice.message).font(OpenClawType.caption).textSelection(.enabled)
+                    Text(self.notice.title).font(BotType.subheadSemiBold)
+                    Text(self.notice.message).font(BotType.caption).textSelection(.enabled)
                     if let warning = self.notice.warning {
                         Text(warning)
-                            .font(OpenClawType.caption)
+                            .font(BotType.caption)
                             .foregroundStyle(.secondary)
                             .textSelection(.enabled)
                     }
@@ -960,7 +960,7 @@ private struct SkillsNoticeCard: View {
                 Spacer()
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 }
 
@@ -977,12 +977,12 @@ private struct SkillsInstallReviewSheet: View {
                 VStack(alignment: .leading, spacing: 16) {
                     SkillsReviewDetails(review: self.review)
                     Text("The Gateway will verify this exact release with ClawHub before download.")
-                        .font(OpenClawType.caption)
+                        .font(BotType.caption)
                         .foregroundStyle(.secondary)
                     if !self.canInstall {
                         Text("This gateway connection needs operator.admin to install skills.")
-                            .font(OpenClawType.caption)
-                            .foregroundStyle(OpenClawBrand.warn)
+                            .font(BotType.caption)
+                            .foregroundStyle(BotBrand.warn)
                     }
                 }
                 .padding(20)
@@ -991,11 +991,11 @@ private struct SkillsInstallReviewSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(action: self.onCancel) { Text("Cancel").font(OpenClawType.subheadSemiBold) }
+                    Button(action: self.onCancel) { Text("Cancel").font(BotType.subheadSemiBold) }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: self.onInstall) {
-                        Text("Verify and install").font(OpenClawType.subheadSemiBold)
+                        Text("Verify and install").font(BotType.subheadSemiBold)
                     }
                     .disabled(!self.canInstall || self.isInstalling)
                 }
@@ -1019,25 +1019,25 @@ private struct SkillsRiskReviewSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     Label {
-                        Text("Gateway warning").font(OpenClawType.headline)
+                        Text("Gateway warning").font(BotType.headline)
                     } icon: {
                         Image(systemName: "exclamationmark.triangle.fill")
                     }
-                    .foregroundStyle(OpenClawBrand.warn)
+                    .foregroundStyle(BotBrand.warn)
                     SkillsReviewDetails(review: self.review)
-                    Text(self.message).font(OpenClawType.body)
+                    Text(self.message).font(BotType.body)
                     DisclosureGroup(isExpanded: self.$warningExpanded) {
                         Text(self
                             .warning ??
                             String(localized: "The Gateway requires explicit acknowledgement for this release."))
-                            .font(OpenClawType.caption)
+                            .font(BotType.caption)
                             .textSelection(.enabled)
                             .padding(.top, 8)
                     } label: {
-                        Text("Review warning details").font(OpenClawType.subheadSemiBold)
+                        Text("Review warning details").font(BotType.subheadSemiBold)
                     }
                     Text("Expand and review the Gateway warning before acknowledging this exact version.")
-                        .font(OpenClawType.caption)
+                        .font(BotType.caption)
                         .foregroundStyle(.secondary)
                 }
                 .padding(20)
@@ -1046,11 +1046,11 @@ private struct SkillsRiskReviewSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(action: self.onCancel) { Text("Cancel").font(OpenClawType.subheadSemiBold) }
+                    Button(action: self.onCancel) { Text("Cancel").font(BotType.subheadSemiBold) }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: self.onInstall) {
-                        Text("Acknowledge and install").font(OpenClawType.subheadSemiBold)
+                        Text("Acknowledge and install").font(BotType.subheadSemiBold)
                     }
                     .disabled(!self.warningExpanded || self.isInstalling)
                 }
@@ -1066,9 +1066,9 @@ private struct SkillsReviewDetails: View {
     var body: some View {
         ProCard(radius: SettingsLayout.cardRadius) {
             VStack(alignment: .leading, spacing: 8) {
-                Text(self.review.displayName).font(OpenClawType.headline)
+                Text(self.review.displayName).font(BotType.headline)
                 if let summary = self.review.summary {
-                    Text(summary).font(OpenClawType.body).foregroundStyle(.secondary)
+                    Text(summary).font(BotType.body).foregroundStyle(.secondary)
                 }
                 SkillsReviewLine(label: "Version", value: self.review.version)
                 SkillsReviewLine(label: "Publisher", value: self.review.author)
@@ -1083,8 +1083,8 @@ private struct SkillsReviewLine: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(self.label).font(OpenClawType.captionSemiBold).foregroundStyle(.secondary)
-            Text(self.value).font(OpenClawType.body)
+            Text(self.label).font(BotType.captionSemiBold).foregroundStyle(.secondary)
+            Text(self.value).font(BotType.body)
         }
     }
 }

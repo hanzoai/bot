@@ -4,7 +4,7 @@ This directory owns docs authoring, Mintlify link rules, and docs i18n policy.
 
 ## Mintlify Rules
 
-- Docs are hosted on Mintlify (`https://docs.openclaw.ai`).
+- Docs are hosted on Mintlify (`https://docs.bot.ai`).
 - Internal doc links in `docs/**/*.md` must stay root-relative with no `.md` or `.mdx` suffix (example: `[Config](/gateway/configuration)`).
 - Section cross-references should use anchors on root-relative paths (example: `[Hooks](/gateway/configuration-reference#hooks)`).
 - Doc headings should avoid em dashes and apostrophes because Mintlify anchor generation is brittle there.
@@ -22,23 +22,23 @@ This directory owns docs authoring, Mintlify link rules, and docs i18n policy.
 - Long-lived private operator docs belong in `~/Projects/manager/docs/`.
 - Repo-local internal scratch/mirror docs may live under ignored `docs/internal/`.
 - Never add `docs/internal/**` pages to `docs/docs.json` navigation or link them from public docs.
-- `scripts/docs-sync-publish.mjs` excludes and prunes `docs/internal/**` from the public `openclaw/docs` publish repo if a page is force-added later.
+- `scripts/docs-sync-publish.mjs` excludes and prunes `docs/internal/**` from the public `bot/docs` publish repo if a page is force-added later.
 - Internal docs may mention repo paths, private app names, 1Password item names, and runbooks, but never include secret values.
 
 ## Maturity Scorecard Editing
 
 `taxonomy.yaml` and `qa/maturity-scores.yaml` are the source inputs; generated maturity docs under `docs/maturity/` are projections and should not be hand-edited for score, LTS, taxonomy, QA profile, or evidence tables.
 `scripts/qa/render-maturity-docs.ts` owns generation; use `pnpm maturity:render` to refresh committed docs and `pnpm maturity:check` to verify them.
-`.github/workflows/maturity-scorecard.yml` renders artifact previews and can open generated-doc PRs; `.github/workflows/openclaw-release-checks.yml` dispatches it for release QA.
+`.github/workflows/maturity-scorecard.yml` renders artifact previews and can open generated-doc PRs; `.github/workflows/bot-release-checks.yml` dispatches it for release QA.
 Keep deterministic `qa-evidence.json.scorecard` data in GitHub Actions artifacts unless a maintainer explicitly asks for a sanitized committed projection.
 Human overrides must change source state in a PR and explain the reason plus public or redacted evidence.
 
 ## Docs i18n
 
-- Foreign-language docs are not maintained in this repo. The generated publish output lives in the separate `openclaw/docs` repo (often cloned locally as `../openclaw-docs`).
+- Foreign-language docs are not maintained in this repo. The generated publish output lives in the separate `bot/docs` repo (often cloned locally as `../bot-docs`).
 - Do not add or edit localized docs under `docs/<locale>/**` here.
 - Treat English docs in this repo plus glossary files as the source of truth.
-- Pipeline: update English docs here, update `docs/.i18n/glossary.<locale>.json` as needed, then let the publish-repo sync and `scripts/docs-i18n` run in `openclaw/docs`.
+- Pipeline: update English docs here, update `docs/.i18n/glossary.<locale>.json` as needed, then let the publish-repo sync and `scripts/docs-i18n` run in `bot/docs`.
 - Before rerunning `scripts/docs-i18n`, add glossary entries for any new technical terms, page titles, or short nav labels that must stay in English or use a fixed translation.
 - `pnpm docs:check-i18n-glossary` is the guard for changed English doc titles and short internal doc labels.
 - Translation memory lives in generated `docs/.i18n/*.tm.jsonl` files in the publish repo.

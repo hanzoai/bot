@@ -1,7 +1,7 @@
 [
   {
-    "source": "OpenClaw",
-    "target": "OpenClaw"
+    "source": "Bot",
+    "target": "Bot"
   },
   {
     "source": "macOS platform notes",
@@ -168,8 +168,8 @@
     "target": "构建 Gateway 客户端"
   },
   {
-    "source": "Embedding OpenClaw",
-    "target": "嵌入 OpenClaw"
+    "source": "Embedding Bot",
+    "target": "嵌入 Bot"
   },
   {
     "source": "Secure file operations",
@@ -1296,12 +1296,12 @@
     "target": "Agent runtime architecture"
   },
   {
-    "source": "OpenClaw agent runtime workflow",
-    "target": "OpenClaw agent runtime workflow"
+    "source": "Bot agent runtime workflow",
+    "target": "Bot agent runtime workflow"
   },
   {
-    "source": "OpenClaw agent runtime architecture",
-    "target": "OpenClaw agent runtime architecture"
+    "source": "Bot agent runtime architecture",
+    "target": "Bot agent runtime architecture"
   },
   {
     "source": "Install and Configure Plugins",
@@ -1564,20 +1564,20 @@
     "target": "待处理的设备配对请求"
   },
   {
-    "source": "openclaw devices list",
-    "target": "openclaw devices list"
+    "source": "bot devices list",
+    "target": "bot devices list"
   },
   {
-    "source": "openclaw devices approve",
-    "target": "openclaw devices approve"
+    "source": "bot devices approve",
+    "target": "bot devices approve"
   },
   {
-    "source": "openclaw nodes pending",
-    "target": "openclaw nodes pending"
+    "source": "bot nodes pending",
+    "target": "bot nodes pending"
   },
   {
-    "source": "openclaw nodes approve",
-    "target": "openclaw nodes approve"
+    "source": "bot nodes approve",
+    "target": "bot nodes approve"
   },
   {
     "source": "Cloud workers plan",

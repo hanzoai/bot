@@ -1,7 +1,7 @@
 // Gateway session event broadcaster.
 // Projects transcript and lifecycle updates to websocket subscribers.
-import { asPositiveSafeInteger } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { asPositiveSafeInteger } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { getRuntimeConfig } from "../config/io.js";
 import {
@@ -27,7 +27,7 @@ import {
 } from "./session-event-payload.js";
 import { resolveSessionKeyForTranscriptFile } from "./session-transcript-key.js";
 import {
-  attachOpenClawTranscriptMeta,
+  attachBotTranscriptMeta,
   readSessionMessageCountAsync,
 } from "./session-transcript-readers.js";
 import {
@@ -55,11 +55,11 @@ function readMessageSenderIsOwner(message: unknown): boolean | undefined {
   if (!message || typeof message !== "object" || Array.isArray(message)) {
     return undefined;
   }
-  const openclaw = (message as Record<string, unknown>)["__openclaw"];
-  if (!openclaw || typeof openclaw !== "object" || Array.isArray(openclaw)) {
+  const bot = (message as Record<string, unknown>)["__bot"];
+  if (!bot || typeof bot !== "object" || Array.isArray(bot)) {
     return undefined;
   }
-  const value = (openclaw as Record<string, unknown>).senderIsOwner;
+  const value = (bot as Record<string, unknown>).senderIsOwner;
   return typeof value === "boolean" ? value : undefined;
 }
 
@@ -244,7 +244,7 @@ async function handleTranscriptUpdateBroadcast(
   });
   const idempotencyKey = readMessageIdempotencyKey(update.message);
   const senderIsOwner = readMessageSenderIsOwner(update.message);
-  const rawMessage = attachOpenClawTranscriptMeta(update.message, {
+  const rawMessage = attachBotTranscriptMeta(update.message, {
     ...(typeof update.messageId === "string" ? { id: update.messageId } : {}),
     ...(idempotencyKey ? { idempotencyKey } : {}),
     ...(messageSeq !== undefined ? { seq: messageSeq } : {}),

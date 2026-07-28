@@ -3,18 +3,18 @@
  *
  * Resolves gateway URL/token overrides, local credentials, and least-privilege operator scopes.
  */
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import {
   GATEWAY_CLIENT_MODES,
   GATEWAY_CLIENT_NAMES,
 } from "../../../packages/gateway-protocol/src/client-info.js";
 import { ErrorCodes } from "../../../packages/gateway-protocol/src/schema/error-codes.js";
 import { getRuntimeConfig, resolveGatewayPort } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { mintAgentRuntimeIdentityToken } from "../../gateway/agent-runtime-identity-token.js";
 import { callGateway } from "../../gateway/call.js";
 import { resolveGatewayCredentialsFromConfig, trimToUndefined } from "../../gateway/credentials.js";
@@ -84,7 +84,7 @@ function canonicalizeToolGatewayWsUrl(raw: string): { origin: string; key: strin
   return { origin, key };
 }
 
-function resolveLocalGatewayUrlKeys(cfg: OpenClawConfig): Set<string> {
+function resolveLocalGatewayUrlKeys(cfg: BotConfig): Set<string> {
   const port = resolveGatewayPort(cfg);
   return new Set<string>([
     `ws://127.0.0.1:${port}`,
@@ -96,7 +96,7 @@ function resolveLocalGatewayUrlKeys(cfg: OpenClawConfig): Set<string> {
   ]);
 }
 
-function resolveConfiguredRemoteGatewayKey(cfg: OpenClawConfig): string | undefined {
+function resolveConfiguredRemoteGatewayKey(cfg: BotConfig): string | undefined {
   let remoteKey: string | undefined;
   const remoteUrl = normalizeOptionalString(cfg.gateway?.remote?.url) ?? "";
   if (remoteUrl) {
@@ -112,7 +112,7 @@ function resolveConfiguredRemoteGatewayKey(cfg: OpenClawConfig): string | undefi
 }
 
 function resolveDefaultGatewayTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   envGatewayUrl?: string;
 }): GatewayOverrideTarget {
   if (params.envGatewayUrl) {
@@ -130,7 +130,7 @@ function resolveDefaultGatewayTarget(params: {
 }
 
 function validateGatewayUrlOverrideForAgentTools(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   urlOverride: string;
 }): { url: string; target: GatewayOverrideTarget } {
   const { cfg } = params;
@@ -155,7 +155,7 @@ function validateGatewayUrlOverrideForAgentTools(params: {
 }
 
 function resolveGatewayOverrideToken(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   target: GatewayOverrideTarget;
   explicitToken?: string;
 }): string | undefined {
@@ -195,7 +195,7 @@ export function resolveGatewayOptions(opts?: GatewayCallOptions) {
     typeof opts?.timeoutMs === "number" && Number.isFinite(opts.timeoutMs)
       ? Math.max(1, Math.floor(opts.timeoutMs))
       : 30_000;
-  const envGatewayUrl = trimToUndefined(process.env.OPENCLAW_GATEWAY_URL);
+  const envGatewayUrl = trimToUndefined(process.env.BOT_GATEWAY_URL);
   const target =
     validatedOverride?.target ??
     resolveDefaultGatewayTarget({
@@ -317,7 +317,7 @@ function resolveApprovalRequesterDeviceIdentityForGatewayTool(params: {
       throw new Error(
         [
           "approved node gateway calls require a stable device identity.",
-          "Fix the OpenClaw state directory permissions and retry the approval.",
+          "Fix the Bot state directory permissions and retry the approval.",
         ].join(" "),
         { cause: error },
       );
@@ -328,7 +328,7 @@ function resolveApprovalRequesterDeviceIdentityForGatewayTool(params: {
     throw new Error(
       [
         "remote approval gateway calls require a stable device identity.",
-        "Fix the OpenClaw state directory permissions or use the local approval-runtime gateway.",
+        "Fix the Bot state directory permissions or use the local approval-runtime gateway.",
       ].join(" "),
       { cause: error },
     );
@@ -490,8 +490,8 @@ function isStaleGatewayNodeInvokeTurnSourceRejection(error: unknown): boolean {
 function staleGatewayAgentRuntimeIdentityError(cause: unknown): Error {
   return new Error(
     [
-      "The running Gateway is from an older OpenClaw build and rejected current agent runtime connection metadata.",
-      "Restart the Gateway with `openclaw gateway restart`, then retry.",
+      "The running Gateway is from an older Bot build and rejected current agent runtime connection metadata.",
+      "Restart the Gateway with `bot gateway restart`, then retry.",
     ].join(" "),
     { cause },
   );

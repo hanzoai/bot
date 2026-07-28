@@ -1,23 +1,23 @@
 // Discord plugin module implements reply delivery behavior.
-import { formatReasoningMessage, resolveAgentAvatar } from "openclaw/plugin-sdk/agent-runtime";
+import { formatReasoningMessage, resolveAgentAvatar } from "bot/plugin-sdk/agent-runtime";
 import {
   buildOutboundSessionContext,
   sendDurableMessageBatch,
   type OutboundDeliveryFormattingOptions,
   type OutboundIdentity,
   type OutboundSendDeps,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "bot/plugin-sdk/channel-outbound";
 import type {
   MarkdownTableMode,
-  OpenClawConfig,
+  BotConfig,
   ReplyToMode,
-} from "openclaw/plugin-sdk/config-contracts";
-import type { OutboundMediaAccess } from "openclaw/plugin-sdk/media-runtime";
-import type { ChunkMode } from "openclaw/plugin-sdk/reply-chunking";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-dispatch-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/config-contracts";
+import type { OutboundMediaAccess } from "bot/plugin-sdk/media-runtime";
+import type { ChunkMode } from "bot/plugin-sdk/reply-chunking";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-dispatch-runtime";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { RequestClient } from "../internal/discord.js";
 import { sendMessageDiscord, sendVoiceMessageDiscord } from "../send.js";
 import type { DiscordAllowedMentions } from "../send.shared.js";
@@ -97,7 +97,7 @@ function resolveBoundThreadBinding(params: {
 }
 
 function resolveBindingIdentity(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   binding: DiscordThreadBindingLookupRecord | undefined,
 ): OutboundIdentity | undefined {
   if (!binding) {
@@ -120,7 +120,7 @@ function resolveBindingIdentity(
 }
 
 function createDiscordDeliveryDeps(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   token: string;
   rest?: RequestClient;
   allowedMentions?: DiscordAllowedMentions;
@@ -161,7 +161,7 @@ type DiscordDeliveryOptions = {
 };
 
 function resolveDiscordDeliveryOptions(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   target: string;
   sessionKey?: string;
   threadBindings?: DiscordThreadBindingLookup;
@@ -209,7 +209,7 @@ function formatDiscordReasoningPayload(payload: ReplyPayload): ReplyPayload {
 }
 
 export async function deliverDiscordReply(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   replies: ReplyPayload[];
   target: string;
   token: string;

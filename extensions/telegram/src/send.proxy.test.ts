@@ -62,9 +62,9 @@ const resolveTelegramApiBase = vi.hoisted(
   () => (apiRoot?: string) => apiRoot?.trim()?.replace(/\/+$/, "") || "https://api.telegram.org",
 );
 
-vi.mock("openclaw/plugin-sdk/plugin-config-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/plugin-config-runtime")>(
-    "openclaw/plugin-sdk/plugin-config-runtime",
+vi.mock("bot/plugin-sdk/plugin-config-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/plugin-config-runtime")>(
+    "bot/plugin-sdk/plugin-config-runtime",
   );
   return {
     ...actual,

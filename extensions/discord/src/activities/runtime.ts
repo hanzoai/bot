@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   isDiscordAccountEnabledForRuntime,
   listDiscordAccountIds,
@@ -21,12 +21,12 @@ export class DiscordActivitiesRuntime {
 
   constructor(
     readonly store: DiscordActivityStore,
-    private readonly startupConfig: OpenClawConfig,
-    private readonly getCurrentConfig?: () => OpenClawConfig | undefined,
+    private readonly startupConfig: BotConfig,
+    private readonly getCurrentConfig?: () => BotConfig | undefined,
     private readonly env: NodeJS.ProcessEnv = process.env,
   ) {}
 
-  currentConfig(): OpenClawConfig {
+  currentConfig(): BotConfig {
     return this.getCurrentConfig?.() ?? this.startupConfig;
   }
 

@@ -3,13 +3,13 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { OpenKeyedStoreOptions } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { getSessionBindingService, testing } from "openclaw/plugin-sdk/session-binding-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
+import { getSessionBindingService, testing } from "bot/plugin-sdk/session-binding-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PluginRuntime } from "../../runtime-api.js";
 import { setMatrixRuntime } from "../runtime.js";
@@ -149,7 +149,7 @@ describe("matrix thread bindings", () => {
     }>("matrix", {
       namespace: "thread-bindings",
       maxEntries: 10_000,
-      env: { ...process.env, OPENCLAW_STATE_DIR: path.dirname(bindingsPath) },
+      env: { ...process.env, BOT_STATE_DIR: path.dirname(bindingsPath) },
     });
     return {
       version: 1,

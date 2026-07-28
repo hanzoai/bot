@@ -12,7 +12,7 @@ import type {
 import type { ModelCatalogEntry } from "../../agents/model-catalog.types.js";
 import type { CliDeps } from "../../cli/deps.types.js";
 import type { HealthSummary } from "../../commands/health.types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type {
   PluginApprovalRequest,
   PluginApprovalRequestPayload,
@@ -111,7 +111,7 @@ export type RespondFn = (
   meta?: Record<string, unknown>,
 ) => void;
 
-/** Minimal hosted OpenClaw contract retained by the gateway request router. */
+/** Minimal hosted Bot contract retained by the gateway request router. */
 /**
  * Structural mirror of the engine's SystemAgentAssistantTurn. Kept local as a
  * leaf contract: importing the assistant module here closes a madge cycle
@@ -154,7 +154,7 @@ export type GatewayRequestContext = {
   deps: CliDeps;
   cron: GatewayCronServiceContract;
   cronStorePath: string;
-  getRuntimeConfig: () => OpenClawConfig;
+  getRuntimeConfig: () => BotConfig;
   sessionCompanion?: import("../session-companion.js").SessionCompanionService;
   sessionObserver?: SessionObserverService;
   notifyPluginMetadataChanged: () => void;
@@ -228,7 +228,7 @@ export type GatewayRequestContext = {
   ) => void;
   hasConnectedClientsForDevice?: (deviceId: string) => boolean;
   disconnectClientsUsingSharedGatewayAuth?: () => void;
-  enforceSharedGatewayAuthGenerationForConfigWrite?: (nextConfig: OpenClawConfig) => void;
+  enforceSharedGatewayAuthGenerationForConfigWrite?: (nextConfig: BotConfig) => void;
   claimControlUiDeviceAuthMigration?: (deviceId: string) => boolean;
   releaseControlUiDeviceAuthMigrationClaim?: (deviceId: string) => void;
   completeControlUiDeviceAuthMigration?: (device: {

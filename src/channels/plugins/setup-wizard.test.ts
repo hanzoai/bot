@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../../routing/session-key.js";
 import { createChannelTestPluginBase } from "../../test-utils/channel-plugins.js";
 import {
@@ -21,18 +21,18 @@ type ChannelConfig = AccountConfig & {
   accounts?: Record<string, AccountConfig>;
 };
 
-function getChannelConfig(cfg: OpenClawConfig): ChannelConfig {
+function getChannelConfig(cfg: BotConfig): ChannelConfig {
   return ((cfg.channels as Record<string, unknown> | undefined)?.demo ?? {}) as ChannelConfig;
 }
 
-function resolveDefaultAccountId(cfg: OpenClawConfig): string {
+function resolveDefaultAccountId(cfg: BotConfig): string {
   const channel = getChannelConfig(cfg);
   return normalizeAccountId(
     channel.defaultAccount ?? Object.keys(channel.accounts ?? {})[0] ?? DEFAULT_ACCOUNT_ID,
   );
 }
 
-function resolveLegacyAccount(cfg: OpenClawConfig): AccountConfig {
+function resolveLegacyAccount(cfg: BotConfig): AccountConfig {
   const channel = getChannelConfig(cfg);
   return {
     ...channel,
@@ -40,7 +40,7 @@ function resolveLegacyAccount(cfg: OpenClawConfig): AccountConfig {
   };
 }
 
-function setLegacyAccount(cfg: OpenClawConfig, patch: AccountConfig): OpenClawConfig {
+function setLegacyAccount(cfg: BotConfig, patch: AccountConfig): BotConfig {
   const channel = getChannelConfig(cfg);
   if (!channel.accounts) {
     return {
@@ -49,7 +49,7 @@ function setLegacyAccount(cfg: OpenClawConfig, patch: AccountConfig): OpenClawCo
         ...cfg.channels,
         demo: { ...channel, ...patch },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
   }
   const accountId = resolveDefaultAccountId(cfg);
   return {
@@ -67,7 +67,7 @@ function setLegacyAccount(cfg: OpenClawConfig, patch: AccountConfig): OpenClawCo
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function createLegacyPlugin(): ChannelSetupPlugin {
@@ -172,7 +172,7 @@ describe("channel setup wizard account scoping", () => {
             accounts: { main },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       prompter: queued.prompter,
       shouldPromptAccountIds: true,
       options: { secretInputMode: "plaintext" as const },
@@ -206,7 +206,7 @@ describe("channel setup wizard account scoping", () => {
             accounts: { main: { marker: { keep: "mixed-shape" } } },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       prompter: queued.prompter,
       shouldPromptAccountIds: true,
       options: { secretInputMode: "plaintext" as const },
@@ -239,7 +239,7 @@ describe("channel setup wizard account scoping", () => {
         channels: {
           demo: { botId: "test-stale-bot-id", secret: "fixture-secret", accounts: {} },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       prompter: queued.prompter,
       options: { secretInputMode: "plaintext" as const },
     });
@@ -278,7 +278,7 @@ describe("channel setup wizard account scoping", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       prompter: queued.prompter,
       accountOverrides: { demo: "alerts" },
       options: { secretInputMode: "plaintext" as const },
@@ -314,7 +314,7 @@ describe("channel setup wizard account scoping", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       prompter: queued.prompter,
       accountOverrides: { demo: DEFAULT_ACCOUNT_ID },
       options: { secretInputMode: "plaintext" as const },
@@ -346,7 +346,7 @@ describe("channel setup wizard account scoping", () => {
             secret: "test-secret",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       prompter: queued.prompter,
       shouldPromptAccountIds: true,
       options: { secretInputMode: "plaintext" as const },

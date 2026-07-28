@@ -1,11 +1,11 @@
 // Talk shared helpers build provider configs, launch options, tool schemas, and
 // room event broadcasts used by browser and gateway-owned Talk sessions.
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { ErrorCodes } from "../../../packages/gateway-protocol/src/index.js";
 import {
   getVoiceProviderConfig,
@@ -15,7 +15,7 @@ import {
 } from "../../../packages/speech-core/voice-models.js";
 import { resolveRealtimeBootstrapContextInstructions } from "../../agents/realtime-bootstrap-context.js";
 import type { TalkRealtimeConfig } from "../../config/types.gateway.js";
-import type { OpenClawConfig } from "../../config/types.js";
+import type { BotConfig } from "../../config/types.js";
 import {
   getRealtimeTranscriptionProvider,
   listRealtimeTranscriptionProviders,
@@ -63,7 +63,7 @@ export function normalizeTalkSessionBrain(params: { mode: TalkMode; brain?: stri
 }
 
 export async function resolveTalkRealtimeProviderInstructions(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   configuredInstructions?: string;
   sessionKey?: unknown;
   /** Relay sessions bind their agent lazily; injecting a guessed profile would mix agents. */
@@ -153,7 +153,7 @@ function normalizeRealtimeTransport(value: unknown): TalkRealtimeConfig["transpo
 }
 
 function getVoiceCallProviderConfig<TConfig extends Record<string, unknown>>(
-  config: OpenClawConfig,
+  config: BotConfig,
   sectionName: "realtime" | "streaming",
 ): {
   provider?: string;
@@ -180,14 +180,14 @@ function getVoiceCallProviderConfig<TConfig extends Record<string, unknown>>(
   };
 }
 
-function getVoiceCallRealtimeConfig(config: OpenClawConfig): {
+function getVoiceCallRealtimeConfig(config: BotConfig): {
   provider?: string;
   providers?: Record<string, RealtimeVoiceProviderConfig>;
 } {
   return getVoiceCallProviderConfig(config, "realtime");
 }
 
-function getVoiceCallStreamingConfig(config: OpenClawConfig): {
+function getVoiceCallStreamingConfig(config: BotConfig): {
   provider?: string;
   providers?: Record<string, RealtimeTranscriptionProviderConfig>;
 } {
@@ -195,7 +195,7 @@ function getVoiceCallStreamingConfig(config: OpenClawConfig): {
 }
 
 export function listTalkTranscriptionProviders(
-  config: OpenClawConfig,
+  config: BotConfig,
   configuredProviderIds: Iterable<string | undefined>,
 ) {
   const providers = listRealtimeTranscriptionProviders(config);
@@ -216,12 +216,12 @@ export function listTalkTranscriptionProviders(
 }
 
 type RealtimeProviderWithConfig<TConfig extends Record<string, unknown>> = VoiceModelProvider & {
-  resolveConfig?: (ctx: { cfg: OpenClawConfig; rawConfig: TConfig }) => TConfig;
-  isConfigured: (ctx: { cfg: OpenClawConfig; providerConfig: TConfig }) => boolean;
+  resolveConfig?: (ctx: { cfg: BotConfig; rawConfig: TConfig }) => TConfig;
+  isConfigured: (ctx: { cfg: BotConfig; providerConfig: TConfig }) => boolean;
 };
 
 function resolveConfiguredVoiceModelDefaultRef<TConfig extends Record<string, unknown>>(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   provider: string | undefined;
   providerConfigs: Record<string, TConfig>;
   providers: readonly RealtimeProviderWithConfig<TConfig>[];
@@ -258,7 +258,7 @@ function resolveConfiguredVoiceModelDefaultRef<TConfig extends Record<string, un
   return undefined;
 }
 
-export function buildTalkRealtimeConfig(config: OpenClawConfig, requestedProvider?: string) {
+export function buildTalkRealtimeConfig(config: BotConfig, requestedProvider?: string) {
   const voiceCallRealtime = getVoiceCallRealtimeConfig(config);
   const talkRealtime = getRecord(config.talk?.realtime);
   const talkRealtimeProviderConfigs = talkRealtime?.providers as
@@ -317,7 +317,7 @@ export function buildTalkRealtimeConfig(config: OpenClawConfig, requestedProvide
   };
 }
 
-export function buildTalkTranscriptionConfig(config: OpenClawConfig, requestedProvider?: string) {
+export function buildTalkTranscriptionConfig(config: BotConfig, requestedProvider?: string) {
   const streamingConfig = getVoiceCallStreamingConfig(config);
   const provider = normalizeOptionalString(requestedProvider) ?? streamingConfig.provider;
   const providerConfigs = streamingConfig.providers ?? {};
@@ -344,7 +344,7 @@ export function configuredOrFalse(callback: () => boolean): boolean {
 }
 
 export function resolveConfiguredRealtimeTranscriptionProvider(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   configuredProviderId?: string;
   providerConfigs: Record<string, RealtimeTranscriptionProviderConfig>;
   defaultModel?: string;
@@ -386,12 +386,12 @@ export function resolveConfiguredRealtimeTranscriptionProvider(params: {
 }
 
 const DEFAULT_REALTIME_INSTRUCTIONS = [
-  "You are OpenClaw's realtime voice interface. Keep spoken replies concise.",
-  `If the user asks for code, repository state, files, current OpenClaw context, tool-backed actions, or deeper reasoning, call ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} and then summarize the result naturally.`,
-  `Do not claim you cannot use tools, perform actions, or reach OpenClaw unless ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} returns that failure.`,
-  `When ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} is in progress, speak one brief acknowledgement such as "Let me check that for you", then wait for the final OpenClaw result before answering with the actual result.`,
-  `If OpenClaw is already working through ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} and the user asks in any language for progress, cancellation, a redirect/change, or a follow-up, call ${REALTIME_VOICE_AGENT_CONTROL_TOOL_NAME} with the semantic mode.`,
-  "For greetings and casual chatter while OpenClaw is working, answer naturally and do not redirect the active work.",
+  "You are Bot's realtime voice interface. Keep spoken replies concise.",
+  `If the user asks for code, repository state, files, current Bot context, tool-backed actions, or deeper reasoning, call ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} and then summarize the result naturally.`,
+  `Do not claim you cannot use tools, perform actions, or reach Bot unless ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} returns that failure.`,
+  `When ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} is in progress, speak one brief acknowledgement such as "Let me check that for you", then wait for the final Bot result before answering with the actual result.`,
+  `If Bot is already working through ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} and the user asks in any language for progress, cancellation, a redirect/change, or a follow-up, call ${REALTIME_VOICE_AGENT_CONTROL_TOOL_NAME} with the semantic mode.`,
+  "For greetings and casual chatter while Bot is working, answer naturally and do not redirect the active work.",
 ].join(" ");
 
 export function buildRealtimeInstructions(configuredInstructions?: string): string {

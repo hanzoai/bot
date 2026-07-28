@@ -1,7 +1,7 @@
 // Resolves Homebrew Node binary paths to stable symlink targets.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 
 /**
  * Homebrew Cellar paths (e.g. /opt/homebrew/Cellar/node/25.7.0/bin/node)

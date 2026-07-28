@@ -4,7 +4,7 @@ import type { RetryOptions, WebClientOptions } from "@slack/web-api";
 import {
   addActiveManagedProxyTlsOptions,
   resolveEnvHttpProxyAgentOptions,
-} from "openclaw/plugin-sdk/fetch-runtime";
+} from "bot/plugin-sdk/fetch-runtime";
 import type { EnvHttpProxyAgent } from "undici";
 
 type SlackUndiciRuntime = Pick<typeof import("undici"), "EnvHttpProxyAgent" | "fetch">;

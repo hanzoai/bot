@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Baseten provider plugin."
+summary: "Bot Baseten provider plugin."
 read_when:
   - You are installing, configuring, or auditing the baseten plugin
 title: "Baseten plugin"
@@ -7,12 +7,12 @@ title: "Baseten plugin"
 
 # Baseten plugin
 
-OpenClaw Baseten provider plugin.
+Bot Baseten provider plugin.
 
 ## Distribution
 
-- Package: `@openclaw/baseten-provider`
-- Install route: npm; ClawHub: `clawhub:@openclaw/baseten-provider`
+- Package: `@hanzo/bot-baseten-provider`
+- Install route: npm; ClawHub: `clawhub:@hanzo/bot-baseten-provider`
 
 ## Surface
 

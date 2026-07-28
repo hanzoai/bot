@@ -15,9 +15,9 @@ Heartbeat runs **periodic agent turns** in the main session so the model can sur
 
 Heartbeat is a scheduled main-session turn - it does **not** create [background task](/automation/tasks) records. Task records are for detached work (ACP runs, subagents, isolated cron jobs).
 
-Under the hood, heartbeat cadence is owned by the cron scheduler: the gateway maintains one system-owned cron job per heartbeat-enabled agent (visible in `openclaw cron list --all` as `Heartbeat (agent-id)`). Heartbeat config remains the desired-state input, while the persisted monitor schedule owns the actual tick and the runner's later cooldown. The gateway writes config changes through at startup and on config reload; `openclaw doctor --fix` can materialize missing or stale monitor rows before the next gateway start. Edit `agents.*.heartbeat`, not the cron job.
+Under the hood, heartbeat cadence is owned by the cron scheduler: the gateway maintains one system-owned cron job per heartbeat-enabled agent (visible in `bot cron list --all` as `Heartbeat (agent-id)`). Heartbeat config remains the desired-state input, while the persisted monitor schedule owns the actual tick and the runner's later cooldown. The gateway writes config changes through at startup and on config reload; `bot doctor --fix` can materialize missing or stale monitor rows before the next gateway start. Edit `agents.*.heartbeat`, not the cron job.
 
-Scheduled heartbeats require cron. When `cron.enabled` is `false` or `OPENCLAW_SKIP_CRON=1`, the gateway logs a startup warning and does not run scheduled heartbeats; manual and event-driven heartbeat wakes remain available. There is no separate heartbeat fallback timer.
+Scheduled heartbeats require cron. When `cron.enabled` is `false` or `BOT_SKIP_CRON=1`, the gateway logs a startup warning and does not run scheduled heartbeats; manual and event-driven heartbeat wakes remain available. There is no separate heartbeat fallback timer.
 
 Troubleshooting: [Scheduled Tasks](/automation/cron-jobs#troubleshooting)
 
@@ -28,7 +28,7 @@ Troubleshooting: [Scheduled Tasks](/automation/cron-jobs#troubleshooting)
     Leave heartbeats enabled (default is `30m`, or `1h` when Anthropic OAuth/token auth is configured, including Claude CLI reuse) or set your own cadence.
   </Step>
   <Step title="Add monitor scratch (optional)">
-    Store a tiny checklist in the heartbeat monitor's scratch with `openclaw cron scratch <jobId> --set "..."`.
+    Store a tiny checklist in the heartbeat monitor's scratch with `bot cron scratch <jobId> --set "..."`.
   </Step>
   <Step title="Decide where heartbeat messages should go">
     `target: "none"` is the default; set `target: "last"` to route to the last contact.
@@ -63,7 +63,7 @@ Example config:
 ## Defaults
 
 - Interval: `30m`. Applying Anthropic provider defaults bumps this to `1h` when the resolved auth mode is OAuth/token (including Claude CLI reuse), but only while `heartbeat.every` is unset. Set `agents.defaults.heartbeat.every` or per-agent `agents.entries.*.heartbeat.every`; use `0m` to disable.
-- Prompt body (configurable via `agents.defaults.heartbeat.prompt`): `Follow the heartbeat monitor scratch context when provided. Recurring tasks are cron jobs; create or change their schedules with cron tools or the openclaw cron CLI, not heartbeat scratch. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.`
+- Prompt body (configurable via `agents.defaults.heartbeat.prompt`): `Follow the heartbeat monitor scratch context when provided. Recurring tasks are cron jobs; create or change their schedules with cron tools or the bot cron CLI, not heartbeat scratch. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.`
 - Timeout: unset heartbeat turns use `agents.defaults.timeoutSeconds` when set. Otherwise, they use the heartbeat cadence capped at 600 seconds. Set `agents.defaults.heartbeat.timeoutSeconds` or per-agent `agents.entries.*.heartbeat.timeoutSeconds` for longer heartbeat work.
 - The heartbeat prompt is sent **verbatim** as the user message. The system prompt automatically includes a "Heartbeats" section when cadence is enabled for the default agent; that guidance has no separate heartbeat toggle.
 - When heartbeats are disabled with `0m`, the monitor cron job stays but is disabled, and its scratch is retained for when you re-enable the cadence.
@@ -99,7 +99,7 @@ If you want a heartbeat to do something very specific (e.g. "check Gmail PubSub 
 - If nothing needs attention, reply with **`HEARTBEAT_OK`**.
 - Heartbeat runs may instead call `heartbeat_respond` with `notify: false` for no visible update, or `notify: true` plus `notificationText` for an alert. When present, the structured tool response takes precedence over the text fallback.
 - A meaningful `heartbeat_respond` result with `notify: false` remains silent but is remembered as bounded internal context for the next user turn in that session. `no_change` acknowledgments and visible notifications are not stored this way.
-- During heartbeat runs, OpenClaw treats `HEARTBEAT_OK` as an ack when it appears at the **start or end** of the reply. The token is stripped and the reply is dropped if the remaining content is at most 300 characters. This suppression budget is fixed, not configurable per heartbeat.
+- During heartbeat runs, Bot treats `HEARTBEAT_OK` as an ack when it appears at the **start or end** of the reply. The token is stripped and the reply is dropped if the remaining content is at most 300 characters. This suppression budget is fixed, not configurable per heartbeat.
 - If `HEARTBEAT_OK` appears in the **middle** of a reply, it is not treated specially.
 - For alerts, **do not** include `HEARTBEAT_OK`; return only the alert text.
 - Delivery selects the last outbound-capable non-reasoning payload. Separate reasoning or thinking payloads remain internal; a reasoning-only result produces no alert.
@@ -121,7 +121,7 @@ Outside heartbeats, stray `HEARTBEAT_OK` at the start/end of a message is stripp
         target: "last", // default: none | options: last | none | <channel id> (core or plugin, e.g. "imessage")
         to: "+15551234567", // optional channel-specific override
         accountId: "ops-bot", // optional multi-account channel id
-        prompt: "Follow the heartbeat monitor scratch context when provided. Recurring tasks are cron jobs; create or change their schedules with cron tools or the openclaw cron CLI, not heartbeat scratch. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+        prompt: "Follow the heartbeat monitor scratch context when provided. Recurring tasks are cron jobs; create or change their schedules with cron tools or the bot cron CLI, not heartbeat scratch. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
       },
     },
   },
@@ -160,7 +160,7 @@ Example: two agents, only the second agent runs heartbeats.
           target: "whatsapp",
           to: "+15551234567",
           timeoutSeconds: 45,
-          prompt: "Follow the heartbeat monitor scratch context when provided. Recurring tasks are cron jobs; create or change their schedules with cron tools or the openclaw cron CLI, not heartbeat scratch. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
+          prompt: "Follow the heartbeat monitor scratch context when provided. Recurring tasks are cron jobs; create or change their schedules with cron tools or the bot cron CLI, not heartbeat scratch. Do not infer or repeat old tasks from prior chats. If nothing needs attention, reply HEARTBEAT_OK.",
         },
       },
     ],
@@ -250,7 +250,7 @@ Use `accountId` to target a specific account on multi-account channels like Tele
   Optional session key for heartbeat runs.
 
 - `main` (default): agent main session.
-- Explicit session key (copy from `openclaw sessions --json` or the [sessions CLI](/cli/sessions)).
+- Explicit session key (copy from `bot sessions --json` or the [sessions CLI](/cli/sessions)).
 - Session key formats: see [Sessions](/concepts/session) and [Groups](/channels/groups).
 
 </ParamField>
@@ -309,8 +309,8 @@ Heartbeat configuration is strict: only the fields listed above are accepted. Ac
   </Accordion>
   <Accordion title="Visibility and skip behavior">
     - If `showOk`, `showAlerts`, and `useIndicator` are all disabled, the run is skipped up front as `reason=alerts-disabled`.
-    - If only alert delivery is disabled, OpenClaw can still run the heartbeat, update due-task timestamps, restore the session idle timestamp, and suppress the outward alert payload.
-    - If the resolved heartbeat target supports typing, OpenClaw shows typing while the heartbeat run is active. This uses the same target the heartbeat would send chat output to, and it is disabled by `typingMode: "never"`.
+    - If only alert delivery is disabled, Bot can still run the heartbeat, update due-task timestamps, restore the session idle timestamp, and suppress the outward alert payload.
+    - If the resolved heartbeat target supports typing, Bot shows typing while the heartbeat run is active. This uses the same target the heartbeat would send chat output to, and it is disabled by `typingMode: "never"`.
 
   </Accordion>
   <Accordion title="Session lifecycle and audit">
@@ -350,7 +350,7 @@ Precedence: per-account → per-channel → channel defaults → built-in defaul
 - `showAlerts`: sends the alert content when the model returns a non-OK reply.
 - `useIndicator`: emits indicator events for UI status surfaces.
 
-If **all three** are false, OpenClaw skips the heartbeat run entirely (no model call).
+If **all three** are false, Bot skips the heartbeat run entirely (no model call).
 
 ### Per-channel vs per-account examples
 
@@ -386,13 +386,13 @@ channels:
 
 Each heartbeat monitor cron job owns a private scratch document stored in the shared state database. Think of it as your "heartbeat checklist": small, stable, and safe to consider every 30 minutes. When scratch exists, its content is appended to the heartbeat prompt.
 
-Manage it with the cron CLI (the job id comes from `openclaw cron list --all`):
+Manage it with the cron CLI (the job id comes from `bot cron list --all`):
 
 ```bash
-openclaw cron scratch <jobId>                 # print the current scratch
-openclaw cron scratch <jobId> --set "..."     # replace it with exact text
-openclaw cron scratch <jobId> --file notes.md # replace it from a file (- for stdin)
-openclaw cron scratch <jobId> --unset         # remove it
+bot cron scratch <jobId>                 # print the current scratch
+bot cron scratch <jobId> --set "..."     # replace it with exact text
+bot cron scratch <jobId> --file notes.md # replace it from a file (- for stdin)
+bot cron scratch <jobId> --unset         # remove it
 ```
 
 Writes are compare-and-swap guarded: pass `--expected-revision <n>` to fail instead of overwriting a concurrent edit. Scratch is capped at 256 KiB and never appears in `cron list`/`cron runs` output.
@@ -400,10 +400,10 @@ Writes are compare-and-swap guarded: pass `--expected-revision <n>` to fail inst
 The agent can also update its own scratch: during a heartbeat turn, `heartbeat_respond` accepts an optional `scratch` string that fully replaces the monitor's scratch for future heartbeats.
 
 <Note>
-**Migrating from HEARTBEAT.md or config-only cadence?** Run `openclaw doctor --fix`. Doctor first creates or updates the system-owned monitor rows from `agents.*.heartbeat`, then imports each agent's workspace `HEARTBEAT.md` into the monitor's scratch, converts any valid legacy `tasks:` entries into cron jobs, archives the original under the state directory (`backups/heartbeat-migration/`), and removes the file. Runtime heartbeat instructions come from database scratch only; the runtime never reads `HEARTBEAT.md`.
+**Migrating from HEARTBEAT.md or config-only cadence?** Run `bot doctor --fix`. Doctor first creates or updates the system-owned monitor rows from `agents.*.heartbeat`, then imports each agent's workspace `HEARTBEAT.md` into the monitor's scratch, converts any valid legacy `tasks:` entries into cron jobs, archives the original under the state directory (`backups/heartbeat-migration/`), and removes the file. Runtime heartbeat instructions come from database scratch only; the runtime never reads `HEARTBEAT.md`.
 </Note>
 
-If scratch exists but is effectively empty (only blank lines, Markdown/HTML comments, Markdown headings like `# Heading`, fence markers, or empty checklist stubs), OpenClaw skips the heartbeat run to save API calls. That skip is reported as `reason=empty-heartbeat-file`. If no scratch exists, the heartbeat still runs and the model decides what to do.
+If scratch exists but is effectively empty (only blank lines, Markdown/HTML comments, Markdown headings like `# Heading`, fence markers, or empty checklist stubs), Bot skips the heartbeat run to save API calls. That skip is reported as `reason=empty-heartbeat-file`. If no scratch exists, the heartbeat still runs and the model decides what to do.
 
 Keep it tiny (short checklist or reminders) to avoid prompt bloat.
 
@@ -421,13 +421,13 @@ Example scratch:
 
 Heartbeat scratch is prompt context, not a scheduler. Create each recurring check as a [cron job](/automation/cron-jobs) so it has its own cadence, enable/disable state, and run history. Cron jobs can still target the main session when the check should use the normal conversation context.
 
-Older scratch may contain a structured `tasks:` block. Run `openclaw doctor --fix` once after upgrading: Doctor converts every valid entry into an independently scheduled cron job, preserves its interval and previous last-run timing, and removes the retired block while keeping surrounding scratch prose. Runtime heartbeat turns do not parse `tasks:` text as schedules.
+Older scratch may contain a structured `tasks:` block. Run `bot doctor --fix` once after upgrading: Doctor converts every valid entry into an independently scheduled cron job, preserves its interval and previous last-run timing, and removes the retired block while keeping surrounding scratch prose. Runtime heartbeat turns do not parse `tasks:` text as schedules.
 
 Doctor-created heartbeat task jobs keep heartbeat active-hours, cooldown, flood, and busy guards. Jobs due together can coalesce into one heartbeat turn. An occurrence outside active hours is skipped and tried again at its next cron occurrence.
 
 ### Can the agent update its scratch?
 
-Yes. During a heartbeat turn, the agent can pass a `scratch` value to `heartbeat_respond` to fully replace the monitor prose for future heartbeats. You can also ask it in a normal chat to run `openclaw cron scratch <jobId> --set ...`, or edit the scratch yourself with the same command. Manage recurring schedules with cron instead of writing scheduler syntax into scratch.
+Yes. During a heartbeat turn, the agent can pass a `scratch` value to `heartbeat_respond` to fully replace the monitor prose for future heartbeats. You can also ask it in a normal chat to run `bot cron scratch <jobId> --set ...`, or edit the scratch yourself with the same command. Manage recurring schedules with cron instead of writing scheduler syntax into scratch.
 
 <Warning>
 Don't put secrets (API keys, phone numbers, private tokens) into monitor scratch - it becomes part of the prompt context.
@@ -435,10 +435,10 @@ Don't put secrets (API keys, phone numbers, private tokens) into monitor scratch
 
 ## Manual wake (on-demand)
 
-Use `openclaw system event` to enqueue a system event and optionally trigger an immediate heartbeat:
+Use `bot system event` to enqueue a system event and optionally trigger an immediate heartbeat:
 
 ```bash
-openclaw system event --text "Check for urgent follow-ups" --mode now
+bot system event --text "Check for urgent follow-ups" --mode now
 ```
 
 | Flag                         | Description                                                                                      |
@@ -453,9 +453,9 @@ If no `--session-key` is given and multiple agents have `heartbeat` configured, 
 Related heartbeat controls in the same CLI group:
 
 ```bash
-openclaw system heartbeat last     # show the last heartbeat event
-openclaw system heartbeat enable   # enable heartbeats
-openclaw system heartbeat disable  # disable heartbeats
+bot system heartbeat last     # show the last heartbeat event
+bot system heartbeat enable   # enable heartbeats
+bot system heartbeat disable  # disable heartbeats
 ```
 
 ## Cost awareness
@@ -470,7 +470,7 @@ Heartbeats run full agent turns. Shorter intervals burn more tokens. To reduce c
 
 ## Context overflow after heartbeat
 
-Heartbeats preserve the shared session's existing runtime model after the run completes, so a heartbeat that switched a session to a smaller local model (for example an Ollama model with a 32k window) can leave that model in place for the next main-session turn. If that next turn then reports context overflow, and the session's last runtime model matches configured `heartbeat.model`, OpenClaw's recovery message calls out heartbeat model bleed as the likely cause and suggests a fix.
+Heartbeats preserve the shared session's existing runtime model after the run completes, so a heartbeat that switched a session to a smaller local model (for example an Ollama model with a 32k window) can leave that model in place for the next main-session turn. If that next turn then reports context overflow, and the session's last runtime model matches configured `heartbeat.model`, Bot's recovery message calls out heartbeat model bleed as the likely cause and suggests a fix.
 
 To avoid this: use `isolatedSession: true` to run heartbeats in a fresh session (optionally combined with `lightContext: true` for the smallest prompt), or choose a heartbeat model with a context window large enough for the shared session.
 

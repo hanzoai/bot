@@ -1,13 +1,13 @@
-// Venice plugin entrypoint registers its OpenClaw integration.
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
+// Venice plugin entrypoint registers its Bot integration.
+import { defineSingleProviderPluginEntry } from "bot/plugin-sdk/provider-entry";
 import {
   applyModelCompatPatch,
   type ModelCompatConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/provider-model-shared";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import { VENICE_MODEL_DISCOVERY_OPTIONS } from "./models.js";
 import { applyVeniceConfig } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 import { buildStaticVeniceProvider } from "./provider-catalog.js";
 import { createVeniceDeepSeekV4Wrapper } from "./stream.js";
 import { fetchVeniceUsage } from "./usage.js";

@@ -86,9 +86,9 @@ export function zoomMeetingTranscriptScript(
   const expectedIdentity = ${JSON.stringify(expectedIdentity)};
   const expectedSessionId = ${JSON.stringify(meetingSessionId)};
   const currentIdentity = meetingIdentity(location.href);
-  const state = window.__openclawZoomMeeting;
-  const activeCaptions = window.__openclawZoomCaptions;
-  const archivedCaptions = window.__openclawZoomCaptionArchive?.[expectedSessionId];
+  const state = window.__botZoomMeeting;
+  const activeCaptions = window.__botZoomCaptions;
+  const archivedCaptions = window.__botZoomCaptionArchive?.[expectedSessionId];
   const captions = activeCaptions &&
       (!activeCaptions.sessionId || activeCaptions.sessionId === expectedSessionId)
     ? activeCaptions
@@ -177,7 +177,7 @@ export function zoomMeetingLeaveScript(params: {
   const expectedSessionId = ${JSON.stringify(params.meetingSessionId)};
   const leaveInitiated = ${JSON.stringify(params.leaveInitiated)};
   const currentIdentity = meetingIdentity(location.href);
-  const state = window.__openclawZoomMeeting;
+  const state = window.__botZoomMeeting;
   const enforceSessionOwnership = Boolean(expectedSessionId);
   if (enforceSessionOwnership && state?.sessionId && state.sessionId !== expectedSessionId) {
     return JSON.stringify({ departed: false, sessionConflict: true, sessionMatched: false, urlMatched: true });
@@ -196,8 +196,8 @@ export function zoomMeetingLeaveScript(params: {
     return JSON.stringify({ departed: false, sessionMatched: false, urlMatched: true });
   }
   const retireOwnedAudioBridges = () => {
-    const entries = Array.isArray(window.__openclawZoomAudioOutputs)
-      ? window.__openclawZoomAudioOutputs
+    const entries = Array.isArray(window.__botZoomAudioOutputs)
+      ? window.__botZoomAudioOutputs
       : [];
     const retained = [];
     const activeSessionId = expectedSessionId || state?.sessionId;
@@ -243,8 +243,8 @@ export function zoomMeetingLeaveScript(params: {
       if (entry?.bridge) entry.bridge.srcObject = null;
       entry?.bridge?.remove?.();
     }
-    if (retained.length > 0) window.__openclawZoomAudioOutputs = retained;
-    else delete window.__openclawZoomAudioOutputs;
+    if (retained.length > 0) window.__botZoomAudioOutputs = retained;
+    else delete window.__botZoomAudioOutputs;
   };
   const first = (list) => {
     for (const selector of list) {
@@ -309,7 +309,7 @@ export function zoomMeetingLeaveScript(params: {
   );
   if ((postCall || webClientHome) && (meetingIdentityMatches || initiatedLeaveTransitionMatches)) {
     retireOwnedAudioBridges();
-    if (sessionMatched) delete window.__openclawZoomMeeting;
+    if (sessionMatched) delete window.__botZoomMeeting;
     return JSON.stringify({ departed: true, sessionMatched: true, urlMatched: true });
   }
   if (!meetingIdentityMatches && !initiatedLeaveTransitionMatches) {
@@ -323,7 +323,7 @@ export function zoomMeetingLeaveScript(params: {
     return JSON.stringify({ departed: false, leaveAction: "confirm", urlMatched: true });
   }
   if (leave) {
-    window.__openclawZoomMeeting = {
+    window.__botZoomMeeting = {
       ...state,
       identity: expectedIdentity,
       sessionId: expectedSessionId || state?.sessionId,

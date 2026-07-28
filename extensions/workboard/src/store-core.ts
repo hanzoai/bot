@@ -6,7 +6,7 @@ import type {
   WorkboardLink,
   WorkboardMetadata,
   WorkboardStatus,
-} from "@openclaw/workboard-contract";
+} from "@hanzo/bot-workboard-contract";
 import type {
   PersistedWorkboardAttachment,
   PersistedWorkboardBoard,

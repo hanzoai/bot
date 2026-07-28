@@ -20,7 +20,7 @@ const secretSentinelCipherKey = secretSentinelKeys.subarray(0, 32);
 const secretSentinelNonceKey = secretSentinelKeys.subarray(32);
 
 function secretSentinelsEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  const configured = env.OPENCLAW_SECRET_SENTINELS?.trim().toLowerCase();
+  const configured = env.BOT_SECRET_SENTINELS?.trim().toLowerCase();
   return configured !== "off" && configured !== "0" && configured !== "false";
 }
 

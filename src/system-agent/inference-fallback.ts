@@ -1,8 +1,8 @@
-// Provider-neutral live inference ladder for delegated OpenClaw sessions.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+// Provider-neutral live inference ladder for delegated Bot sessions.
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import { listAgentIds, tryResolveDefaultAgentId } from "../agents/agent-scope.js";
 import { hasAvailableAuthForProvider } from "../agents/model-auth.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import type { RuntimeEnv } from "../runtime.js";
 import {
@@ -27,9 +27,9 @@ const RETRYABLE_INFERENCE_STATUSES = new Set([
 const CREDENTIAL_SCOPED_FAILURE_STATUSES = new Set(["auth", "billing", "rate_limit"]);
 
 type InferenceFallbackDeps = {
-  readConfig?: () => Promise<OpenClawConfig>;
+  readConfig?: () => Promise<BotConfig>;
   resolveRoute?: (
-    config: OpenClawConfig,
+    config: BotConfig,
     agentId: string,
   ) => Promise<SystemAgentConfiguredRoute | null>;
   hasAuth?: typeof hasAvailableAuthForProvider;
@@ -40,7 +40,7 @@ type InferenceFallbackDeps = {
   }) => Promise<BoundVerifySetupInferenceResult>;
 };
 
-async function readCurrentConfig(): Promise<OpenClawConfig> {
+async function readCurrentConfig(): Promise<BotConfig> {
   const { readConfigFileSnapshot } = await import("../config/config.js");
   const snapshot = await readConfigFileSnapshot();
   if (!snapshot.exists || !snapshot.valid) {

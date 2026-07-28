@@ -161,7 +161,7 @@ export async function runPackageInstallUpdate(params: {
             serviceEnv: params.managedServiceEnv,
             invocationCwd: params.invocationCwd,
           }),
-          OPENCLAW_UPDATE_IN_PROGRESS: "1",
+          BOT_UPDATE_IN_PROGRESS: "1",
           [UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR_ENV]: "1",
           [UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE_ENV]: "1",
           [UPDATE_PARENT_SUPPORTS_GATEWAY_RESTART_ENV]: "1",
@@ -170,12 +170,12 @@ export async function runPackageInstallUpdate(params: {
             : "0",
           [UPDATE_PARENT_ALLOWS_GATEWAY_ACTIVATION_ENV]: params.allowGatewayActivation ? "1" : "0",
           ...(doctorPolicy.serviceRepairPolicy
-            ? { OPENCLAW_SERVICE_REPAIR_POLICY: doctorPolicy.serviceRepairPolicy }
+            ? { BOT_SERVICE_REPAIR_POLICY: doctorPolicy.serviceRepairPolicy }
             : {}),
           [UPDATE_POST_INSTALL_DOCTOR_RESULT_PATH_ENV]: doctorResultPath,
           ...(candidateHostVersion === null
             ? {}
-            : { OPENCLAW_COMPATIBILITY_HOST_VERSION: candidateHostVersion }),
+            : { BOT_COMPATIBILITY_HOST_VERSION: candidateHostVersion }),
         },
         timeoutMs: params.timeoutMs,
       });

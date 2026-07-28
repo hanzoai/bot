@@ -1,10 +1,10 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   createPluginStateKeyedStoreForTests,
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
+import { resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   createTelegramMessageCache,
@@ -20,8 +20,8 @@ import {
 import type { TelegramRuntime } from "./runtime.types.js";
 
 const cfg = {
-  session: { store: "/tmp/openclaw-telegram-outbound-context-test.json" },
-} satisfies OpenClawConfig;
+  session: { store: "/tmp/bot-telegram-outbound-context-test.json" },
+} satisfies BotConfig;
 
 function installTelegramStateRuntimeForTest(): void {
   setTelegramRuntime({
@@ -84,7 +84,7 @@ describe("recordOutboundMessageForPromptContext", () => {
           is_bot: true,
           first_name: "Provisioning",
           last_name: "Placeholder",
-          username: "openclaw_bot",
+          username: "bot_bot",
         },
         message_id: 700,
         text: "Bot just replied",
@@ -96,13 +96,13 @@ describe("recordOutboundMessageForPromptContext", () => {
     expect(cached).toMatchObject({
       sender: "Configured Agent (you)",
       senderId: "999",
-      senderUsername: "openclaw_bot",
+      senderUsername: "bot_bot",
       sourceMessage: {
         from: {
           id: 999,
           is_bot: true,
           first_name: "Configured Agent (you)",
-          username: "openclaw_bot",
+          username: "bot_bot",
         },
       },
     });
@@ -123,7 +123,7 @@ describe("recordOutboundMessageForPromptContext", () => {
       message: {
         chat: { id: -1001, type: "supergroup", title: "QA" },
         date: 1_736_380_700,
-        from: { id: 999, is_bot: true, first_name: "OpenClaw" },
+        from: { id: 999, is_bot: true, first_name: "Bot" },
         message_id: 700,
         text: "Bot just replied",
       },
@@ -136,7 +136,7 @@ describe("recordOutboundMessageForPromptContext", () => {
       message: {
         chat: { id: -1001, type: "supergroup", title: "QA" },
         date: 1_736_380_701,
-        from: { id: 999, is_bot: true, first_name: "OpenClaw" },
+        from: { id: 999, is_bot: true, first_name: "Bot" },
         message_id: 701,
         message_thread_id: 77,
         text: "Bot replied in the topic",
@@ -152,7 +152,7 @@ describe("recordOutboundMessageForPromptContext", () => {
       message: {
         chat: { id: -1001, type: "supergroup", title: "QA" },
         date: 1_736_380_700,
-        from: { id: 999, is_bot: true, first_name: "OpenClaw" },
+        from: { id: 999, is_bot: true, first_name: "Bot" },
         message_id: 702,
         text: "Bot replied in General",
       },
@@ -171,7 +171,7 @@ describe("recordOutboundMessageForPromptContext", () => {
       message: {
         chat: { id: 42, type: "private" },
         date: 1_736_380_700,
-        from: { id: 999, is_bot: true, first_name: "OpenClaw" },
+        from: { id: 999, is_bot: true, first_name: "Bot" },
         message_id: 703,
         text: "Bot replied in a DM topic",
       },
@@ -227,7 +227,7 @@ describe("recordOutboundMessageForPromptContext", () => {
           id: 999,
           is_bot: true,
           first_name: "Telegram Bot Name",
-          username: "openclaw_bot",
+          username: "bot_bot",
         },
         message_id: 702,
         text: "Business reply",
@@ -241,7 +241,7 @@ describe("recordOutboundMessageForPromptContext", () => {
       senderId: "777",
       senderUsername: "business_account",
       sourceMessage: {
-        sender_business_bot: { id: 999, is_bot: true, username: "openclaw_bot" },
+        sender_business_bot: { id: 999, is_bot: true, username: "bot_bot" },
       },
     });
   });
@@ -280,7 +280,7 @@ describe("recordOutboundMessageForPromptContext", () => {
       messageId: 1498,
       text: "Channel announcement",
     });
-    expect(initial).toMatchObject({ sender: "OpenClaw (you)", senderId: "0" });
+    expect(initial).toMatchObject({ sender: "Bot (you)", senderId: "0" });
 
     const cache = createPromptContextCache();
     await cache.record({
@@ -302,10 +302,10 @@ describe("recordOutboundMessageForPromptContext", () => {
       messageId: "1498",
     });
     expect(merged).toMatchObject({
-      sender: "OpenClaw (you)",
+      sender: "Bot (you)",
       senderId: "0",
       sourceMessage: {
-        from: { id: 0, is_bot: true, first_name: "OpenClaw (you)" },
+        from: { id: 0, is_bot: true, first_name: "Bot (you)" },
         sender_chat: { id: -1001, type: "channel", title: "Announcements" },
       },
     });

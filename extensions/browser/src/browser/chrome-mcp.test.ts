@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
-import { createOpenClawTestState } from "openclaw/plugin-sdk/test-state";
+import { MAX_TIMER_TIMEOUT_MS } from "bot/plugin-sdk/number-runtime";
+import { createBotTestState } from "bot/plugin-sdk/test-state";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ChromeMcpDocumentUnavailableError,
@@ -91,7 +91,7 @@ function createFakeSession(): ChromeMcpSession {
       const pageLines = [
         "## Pages",
         `1: ${currentUrl} [selected]`,
-        "2: https://github.com/openclaw/openclaw/pull/45318",
+        "2: https://github.com/hanzoai/bot/pull/45318",
       ];
       if (createdPageOpen) {
         pageLines.push(`3: ${currentUrl}`);
@@ -115,7 +115,7 @@ function createFakeSession(): ChromeMcpSession {
             text: [
               "## Pages",
               "1: https://developer.chrome.com/blog/chrome-devtools-mcp-debug-your-browser-session",
-              "2: https://github.com/openclaw/openclaw/pull/45318",
+              "2: https://github.com/hanzoai/bot/pull/45318",
               `3: ${currentUrl} [selected]`,
             ].join("\n"),
           },
@@ -374,7 +374,7 @@ describe("chrome MCP page parsing", () => {
       {
         targetId: FAKE_TARGET_2,
         title: "",
-        url: "https://github.com/openclaw/openclaw/pull/45318",
+        url: "https://github.com/hanzoai/bot/pull/45318",
         type: "page",
       },
     ]);
@@ -1468,12 +1468,12 @@ describe("chrome MCP page parsing", () => {
     const user = "browser-user";
     const password = "browser-password-1234567890"; // pragma: allowlist secret
     const cdpUrl = `wss://${user}:${password}@browserless.example/chrome?token=${secretToken}`;
-    const openClawState = await createOpenClawTestState({
+    const botState = await createBotTestState({
       layout: "state-only",
-      prefix: "openclaw-chrome-mcp-test-",
+      prefix: "bot-chrome-mcp-test-",
     });
-    await openClawState.writeConfig({ logging: { redactSensitive: "off" } });
-    const tempDir = openClawState.root;
+    await botState.writeConfig({ logging: { redactSensitive: "off" } });
+    const tempDir = botState.root;
     const fakeMcpCommand = path.join(tempDir, "fake-mcp.mjs");
     await fs.writeFile(
       fakeMcpCommand,
@@ -1508,7 +1508,7 @@ describe("chrome MCP page parsing", () => {
     } catch (err) {
       message = err instanceof Error ? err.message : String(err);
     } finally {
-      await openClawState.cleanup();
+      await botState.cleanup();
     }
 
     expect(message).toContain("Chrome MCP existing-session attach failed");
@@ -1521,7 +1521,7 @@ describe("chrome MCP page parsing", () => {
   });
 
   it("redacts home-relative user data dirs from attach failures", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-chrome-mcp-test-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-chrome-mcp-test-"));
     const homeDir = os.homedir();
     const userDataDir = path.join(
       homeDir,

@@ -14,14 +14,14 @@ type InstallTestEnvOptions =
   | { mode?: "live-aware"; loadProfileEnv?: boolean }
   | { mode: "hermetic" };
 
-const LIVE_TEST_TRIGGER_ENV_KEYS = ["LIVE", "OPENCLAW_LIVE_TEST", "OPENCLAW_LIVE_GATEWAY"] as const;
+const LIVE_TEST_TRIGGER_ENV_KEYS = ["LIVE", "BOT_LIVE_TEST", "BOT_LIVE_GATEWAY"] as const;
 const HERMETIC_TEST_ENV_KEYS = [
   ...LIVE_TEST_TRIGGER_ENV_KEYS,
-  "OPENCLAW_LIVE_USE_REAL_HOME",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
-  "OPENCLAW_HOME",
+  "BOT_LIVE_USE_REAL_HOME",
+  "BOT_BUNDLED_PLUGINS_DIR",
+  "BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR",
+  "BOT_DISABLE_BUNDLED_PLUGINS",
+  "BOT_HOME",
 ] as const;
 const LIVE_EXTERNAL_AUTH_DIRS = [".claude/backups", ".gemini", ".minimax"] as const;
 const LIVE_EXTERNAL_AUTH_FILES = [
@@ -132,7 +132,7 @@ function loadProfileEnv(homeDir = os.homedir()): void {
       { encoding: "utf8" },
     );
     const applied = countAppliedEntries(output.split("\0").filter(Boolean));
-    if (applied > 0 && !isTruthyEnvValue(process.env.OPENCLAW_LIVE_TEST_QUIET)) {
+    if (applied > 0 && !isTruthyEnvValue(process.env.BOT_LIVE_TEST_QUIET)) {
       console.log(`[live] loaded ${applied} env vars from ~/.profile`);
     }
   } catch {
@@ -164,7 +164,7 @@ function loadProfileEnv(homeDir = os.homedir()): void {
         })
         .filter(Boolean);
       const applied = countAppliedEntries(fallbackEntries);
-      if (applied > 0 && !isTruthyEnvValue(process.env.OPENCLAW_LIVE_TEST_QUIET)) {
+      if (applied > 0 && !isTruthyEnvValue(process.env.BOT_LIVE_TEST_QUIET)) {
         console.log(`[live] loaded ${applied} env vars from ~/.profile`);
       }
     } catch {
@@ -176,18 +176,18 @@ function loadProfileEnv(homeDir = os.homedir()): void {
 function resolveRestoreEntries(): RestoreEntry[] {
   return [
     ...HERMETIC_TEST_ENV_KEYS.map((key) => ({ key, value: process.env[key] })),
-    { key: "OPENCLAW_TEST_FAST", value: process.env.OPENCLAW_TEST_FAST },
+    { key: "BOT_TEST_FAST", value: process.env.BOT_TEST_FAST },
     {
-      key: "OPENCLAW_STRICT_FAST_REPLY_CONFIG",
-      value: process.env.OPENCLAW_STRICT_FAST_REPLY_CONFIG,
+      key: "BOT_STRICT_FAST_REPLY_CONFIG",
+      value: process.env.BOT_STRICT_FAST_REPLY_CONFIG,
     },
     {
-      key: "OPENCLAW_ALLOW_SLOW_REPLY_TESTS",
-      value: process.env.OPENCLAW_ALLOW_SLOW_REPLY_TESTS,
+      key: "BOT_ALLOW_SLOW_REPLY_TESTS",
+      value: process.env.BOT_ALLOW_SLOW_REPLY_TESTS,
     },
     {
-      key: "OPENCLAW_LIVE_TEST_NORMALIZE_CONFIG",
-      value: process.env.OPENCLAW_LIVE_TEST_NORMALIZE_CONFIG,
+      key: "BOT_LIVE_TEST_NORMALIZE_CONFIG",
+      value: process.env.BOT_LIVE_TEST_NORMALIZE_CONFIG,
     },
     { key: "HOME", value: process.env.HOME },
     { key: "USERPROFILE", value: process.env.USERPROFILE },
@@ -195,15 +195,15 @@ function resolveRestoreEntries(): RestoreEntry[] {
     { key: "XDG_DATA_HOME", value: process.env.XDG_DATA_HOME },
     { key: "XDG_STATE_HOME", value: process.env.XDG_STATE_HOME },
     { key: "XDG_CACHE_HOME", value: process.env.XDG_CACHE_HOME },
-    { key: "OPENCLAW_STATE_DIR", value: process.env.OPENCLAW_STATE_DIR },
-    { key: "OPENCLAW_CONFIG_PATH", value: process.env.OPENCLAW_CONFIG_PATH },
-    { key: "OPENCLAW_GATEWAY_PORT", value: process.env.OPENCLAW_GATEWAY_PORT },
-    { key: "OPENCLAW_BRIDGE_ENABLED", value: process.env.OPENCLAW_BRIDGE_ENABLED },
-    { key: "OPENCLAW_BRIDGE_HOST", value: process.env.OPENCLAW_BRIDGE_HOST },
-    { key: "OPENCLAW_BRIDGE_PORT", value: process.env.OPENCLAW_BRIDGE_PORT },
-    { key: "OPENCLAW_CANVAS_HOST_PORT", value: process.env.OPENCLAW_CANVAS_HOST_PORT },
-    { key: "OPENCLAW_TEST_HOME", value: process.env.OPENCLAW_TEST_HOME },
-    { key: "OPENCLAW_AGENT_DIR", value: process.env.OPENCLAW_AGENT_DIR },
+    { key: "BOT_STATE_DIR", value: process.env.BOT_STATE_DIR },
+    { key: "BOT_CONFIG_PATH", value: process.env.BOT_CONFIG_PATH },
+    { key: "BOT_GATEWAY_PORT", value: process.env.BOT_GATEWAY_PORT },
+    { key: "BOT_BRIDGE_ENABLED", value: process.env.BOT_BRIDGE_ENABLED },
+    { key: "BOT_BRIDGE_HOST", value: process.env.BOT_BRIDGE_HOST },
+    { key: "BOT_BRIDGE_PORT", value: process.env.BOT_BRIDGE_PORT },
+    { key: "BOT_CANVAS_HOST_PORT", value: process.env.BOT_CANVAS_HOST_PORT },
+    { key: "BOT_TEST_HOME", value: process.env.BOT_TEST_HOME },
+    { key: "BOT_AGENT_DIR", value: process.env.BOT_AGENT_DIR },
     { key: "TELEGRAM_BOT_TOKEN", value: process.env.TELEGRAM_BOT_TOKEN },
     { key: "DISCORD_BOT_TOKEN", value: process.env.DISCORD_BOT_TOKEN },
     { key: "SLACK_BOT_TOKEN", value: process.env.SLACK_BOT_TOKEN },
@@ -220,28 +220,28 @@ function createIsolatedTestHome(restore: RestoreEntry[]): {
   cleanup: () => void;
   tempHome: string;
 } {
-  const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-test-home-"));
+  const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "bot-test-home-"));
 
   setTestEnvValue("HOME", tempHome);
   setTestEnvValue("USERPROFILE", tempHome);
-  setTestEnvValue("OPENCLAW_TEST_HOME", tempHome);
-  setTestEnvValue("OPENCLAW_TEST_FAST", "1");
-  setTestEnvValue("OPENCLAW_STRICT_FAST_REPLY_CONFIG", "1");
-  deleteTestEnvValue("OPENCLAW_ALLOW_SLOW_REPLY_TESTS");
+  setTestEnvValue("BOT_TEST_HOME", tempHome);
+  setTestEnvValue("BOT_TEST_FAST", "1");
+  setTestEnvValue("BOT_STRICT_FAST_REPLY_CONFIG", "1");
+  deleteTestEnvValue("BOT_ALLOW_SLOW_REPLY_TESTS");
 
-  // OPENCLAW_HOME takes precedence over HOME, so both must be isolated together.
-  deleteTestEnvValue("OPENCLAW_HOME");
+  // BOT_HOME takes precedence over HOME, so both must be isolated together.
+  deleteTestEnvValue("BOT_HOME");
   // Ensure test runs never touch the developer's real config/state, even if they have overrides set.
-  deleteTestEnvValue("OPENCLAW_CONFIG_PATH");
+  deleteTestEnvValue("BOT_CONFIG_PATH");
   // Prefer deriving state dir from HOME so nested tests that change HOME also isolate correctly.
-  deleteTestEnvValue("OPENCLAW_STATE_DIR");
-  deleteTestEnvValue("OPENCLAW_AGENT_DIR");
+  deleteTestEnvValue("BOT_STATE_DIR");
+  deleteTestEnvValue("BOT_AGENT_DIR");
   // Prefer test-controlled ports over developer overrides (avoid port collisions across tests/workers).
-  deleteTestEnvValue("OPENCLAW_GATEWAY_PORT");
-  deleteTestEnvValue("OPENCLAW_BRIDGE_ENABLED");
-  deleteTestEnvValue("OPENCLAW_BRIDGE_HOST");
-  deleteTestEnvValue("OPENCLAW_BRIDGE_PORT");
-  deleteTestEnvValue("OPENCLAW_CANVAS_HOST_PORT");
+  deleteTestEnvValue("BOT_GATEWAY_PORT");
+  deleteTestEnvValue("BOT_BRIDGE_ENABLED");
+  deleteTestEnvValue("BOT_BRIDGE_HOST");
+  deleteTestEnvValue("BOT_BRIDGE_PORT");
+  deleteTestEnvValue("BOT_CANVAS_HOST_PORT");
   // Avoid leaking real GitHub/Copilot tokens into non-live test runs.
   deleteTestEnvValue("TELEGRAM_BOT_TOKEN");
   deleteTestEnvValue("DISCORD_BOT_TOKEN");
@@ -256,7 +256,7 @@ function createIsolatedTestHome(restore: RestoreEntry[]): {
 
   // Windows: prefer the default state dir so auth/profile tests match real paths.
   if (process.platform === "win32") {
-    setTestEnvValue("OPENCLAW_STATE_DIR", path.join(tempHome, ".openclaw"));
+    setTestEnvValue("BOT_STATE_DIR", path.join(tempHome, ".bot"));
   }
 
   setTestEnvValue("XDG_CONFIG_HOME", path.join(tempHome, ".config"));
@@ -376,7 +376,7 @@ function sanitizeLiveConfig(raw: string): string {
       });
     }
 
-    if (!isTruthyEnvValue(process.env.OPENCLAW_LIVE_TEST_NORMALIZE_CONFIG)) {
+    if (!isTruthyEnvValue(process.env.BOT_LIVE_TEST_NORMALIZE_CONFIG)) {
       return `${JSON.stringify(parsed, null, 2)}\n`;
     }
 
@@ -414,33 +414,33 @@ function stageLiveTestState(params: {
   realHome: string;
   tempHome: string;
 }): void {
-  const realOpenClawHome =
+  const realBotHome =
     resolveEffectiveHomeDir(params.env, () => params.realHome) ?? params.realHome;
-  const rawStateDir = params.env.OPENCLAW_STATE_DIR?.trim();
+  const rawStateDir = params.env.BOT_STATE_DIR?.trim();
   let realStateDir = rawStateDir
-    ? resolveHomeRelativePath(rawStateDir, realOpenClawHome)
-    : path.join(realOpenClawHome, ".openclaw");
-  const priorIsolatedHome = params.env.OPENCLAW_TEST_HOME?.trim();
+    ? resolveHomeRelativePath(rawStateDir, realBotHome)
+    : path.join(realBotHome, ".bot");
+  const priorIsolatedHome = params.env.BOT_TEST_HOME?.trim();
   const snapshotHome = params.env.HOME?.trim();
   if (
     priorIsolatedHome &&
     snapshotHome &&
     snapshotHome !== priorIsolatedHome &&
-    realStateDir === path.join(priorIsolatedHome, ".openclaw")
+    realStateDir === path.join(priorIsolatedHome, ".bot")
   ) {
-    realStateDir = path.join(realOpenClawHome, ".openclaw");
+    realStateDir = path.join(realBotHome, ".bot");
   }
-  const tempStateDir = path.join(params.tempHome, ".openclaw");
+  const tempStateDir = path.join(params.tempHome, ".bot");
   fs.mkdirSync(tempStateDir, { recursive: true });
   fs.mkdirSync(path.join(params.tempHome, ".gemini"), { recursive: true });
 
-  const realConfigPath = params.env.OPENCLAW_CONFIG_PATH?.trim()
-    ? resolveHomeRelativePath(params.env.OPENCLAW_CONFIG_PATH, realOpenClawHome)
-    : path.join(realStateDir, "openclaw.json");
+  const realConfigPath = params.env.BOT_CONFIG_PATH?.trim()
+    ? resolveHomeRelativePath(params.env.BOT_CONFIG_PATH, realBotHome)
+    : path.join(realStateDir, "bot.json");
   if (fs.existsSync(realConfigPath)) {
     const rawConfig = fs.readFileSync(realConfigPath, "utf8");
     fs.writeFileSync(
-      path.join(tempStateDir, "openclaw.json"),
+      path.join(tempStateDir, "bot.json"),
       sanitizeLiveConfig(rawConfig),
       "utf8",
     );
@@ -473,7 +473,7 @@ export function installTestEnv(options?: InstallTestEnvOptions): {
 } {
   const hermetic = options?.mode === "hermetic";
   const live = !hermetic && LIVE_TEST_TRIGGER_ENV_KEYS.some((key) => process.env[key] === "1");
-  const allowRealHome = !hermetic && isTruthyEnvValue(process.env.OPENCLAW_LIVE_USE_REAL_HOME);
+  const allowRealHome = !hermetic && isTruthyEnvValue(process.env.BOT_LIVE_USE_REAL_HOME);
   const realHome = process.env.HOME ?? os.homedir();
   const liveEnvSnapshot = { ...process.env };
 
@@ -496,9 +496,9 @@ export function installTestEnv(options?: InstallTestEnvOptions): {
     }
     // Keep non-isolated workers on this checkout's manifests, never a caller's
     // staged plugin tree or a sibling worktree resolved through shared node_modules.
-    setTestEnvValue("OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
+    setTestEnvValue("BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
     setTestEnvValue(
-      "OPENCLAW_BUNDLED_PLUGINS_DIR",
+      "BOT_BUNDLED_PLUGINS_DIR",
       path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "extensions"),
     );
   } else if (live) {

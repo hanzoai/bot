@@ -92,7 +92,7 @@ describe("Microsoft Teams meeting audio routing", () => {
       manualAction: { reason: "teams-audio-choice-required" },
     });
     expect(result.audioOutputRouteError).toBeUndefined();
-    expect(window["__openclawTeamsAudioOutputs"]).toEqual([
+    expect(window["__botTeamsAudioOutputs"]).toEqual([
       expect.objectContaining({ source: pending, suspended: true }),
     ]);
   });
@@ -136,7 +136,7 @@ describe("Microsoft Teams meeting audio routing", () => {
     const first = await runStatusScript(params);
     const second = await runStatusScript({
       ...params,
-      priorAudioOutputs: first.window["__openclawTeamsAudioOutputs"] as unknown[],
+      priorAudioOutputs: first.window["__botTeamsAudioOutputs"] as unknown[],
       priorMeeting: first.window[MEETING_STATE_KEY] as Record<string, unknown>,
     });
 
@@ -175,7 +175,7 @@ describe("Microsoft Teams meeting audio routing", () => {
     expect(first.result.audioOutputRouteError).toBeUndefined();
     expect(first.result.audioOutputRouteRetryable).toBe(true);
     expect(source.muted).toBe(true);
-    expect(first.window["__openclawTeamsAudioOutputs"]).toEqual([
+    expect(first.window["__botTeamsAudioOutputs"]).toEqual([
       expect.objectContaining({ pending: true, source, sourceMuted: false }),
     ]);
 
@@ -183,18 +183,18 @@ describe("Microsoft Teams meeting audio routing", () => {
     source.srcObject = stream;
     expect(source.sinkId).toBe("built-in-output");
     expect(source.muted).toBe(true);
-    expect(first.window["__openclawTeamsAudioOutputs"]).toEqual([
+    expect(first.window["__botTeamsAudioOutputs"]).toEqual([
       expect.objectContaining({ pending: true, source, sourceMuted: false }),
     ]);
 
     const second = await runStatusScript({
       ...params,
-      priorAudioOutputs: first.window["__openclawTeamsAudioOutputs"] as unknown[],
+      priorAudioOutputs: first.window["__botTeamsAudioOutputs"] as unknown[],
       priorMeeting: first.window[MEETING_STATE_KEY] as Record<string, unknown>,
     });
     expect(second.result.audioOutputRouted).toBe(true);
     expect(source.muted).toBe(false);
-    expect(second.window).not.toHaveProperty("__openclawTeamsAudioOutputs");
+    expect(second.window).not.toHaveProperty("__botTeamsAudioOutputs");
   });
 
   it("does not route a pending source after the tab changes meetings", async () => {
@@ -226,14 +226,14 @@ describe("Microsoft Teams meeting audio routing", () => {
     const conflict = await runStatusScript({
       ...params,
       currentUrl: "https://teams.microsoft.com/l/meetup-join/19%3ameeting_other%40thread.v2/0",
-      priorAudioOutputs: first.window["__openclawTeamsAudioOutputs"] as unknown[],
+      priorAudioOutputs: first.window["__botTeamsAudioOutputs"] as unknown[],
       priorMeeting: first.window[MEETING_STATE_KEY] as Record<string, unknown>,
     });
 
     expect(source.sinkId).toBe("built-in-output");
     expect(source.muted).toBe(true);
     expect(conflict.result.manualAction).toMatchObject({ reason: "teams-session-conflict" });
-    expect(conflict.window).not.toHaveProperty("__openclawTeamsAudioOutputs");
+    expect(conflict.window).not.toHaveProperty("__botTeamsAudioOutputs");
   });
 
   it("keeps the source muted when a previously working bridge fails", async () => {
@@ -278,7 +278,7 @@ describe("Microsoft Teams meeting audio routing", () => {
     failPlayback = true;
     const second = await runStatusScript({
       ...params,
-      priorAudioOutputs: first.window["__openclawTeamsAudioOutputs"] as unknown[],
+      priorAudioOutputs: first.window["__botTeamsAudioOutputs"] as unknown[],
       priorMeeting: first.window[MEETING_STATE_KEY] as Record<string, unknown>,
     });
     expect(second.result.audioOutputRouted).toBe(false);
@@ -288,7 +288,7 @@ describe("Microsoft Teams meeting audio routing", () => {
     failPlayback = false;
     const third = await runStatusScript({
       ...params,
-      priorAudioOutputs: second.window["__openclawTeamsAudioOutputs"] as unknown[],
+      priorAudioOutputs: second.window["__botTeamsAudioOutputs"] as unknown[],
       priorMeeting: second.window[MEETING_STATE_KEY] as Record<string, unknown>,
     });
     expect(third.result.audioOutputRouted).toBe(true);
@@ -340,8 +340,8 @@ describe("Microsoft Teams meeting audio routing", () => {
     expect(result.audioOutputRouted).toBe(true);
     expect(bridgedSource.muted).toBe(true);
     expect(directSource.muted).toBe(false);
-    expect(window["__openclawTeamsAudioOutputs"]).toHaveLength(1);
-    expect((window["__openclawTeamsAudioOutputs"] as Array<{ source: unknown }>)[0]?.source).toBe(
+    expect(window["__botTeamsAudioOutputs"]).toHaveLength(1);
+    expect((window["__botTeamsAudioOutputs"] as Array<{ source: unknown }>)[0]?.source).toBe(
       bridgedSource,
     );
   });
@@ -387,7 +387,7 @@ describe("Microsoft Teams meeting audio routing", () => {
     expect(result.audioOutputRouted).toBe(true);
     expect(current.muted).toBe(false);
     expect(unclaimed.muted).toBe(false);
-    expect(window).not.toHaveProperty("__openclawTeamsAudioOutputs");
+    expect(window).not.toHaveProperty("__botTeamsAudioOutputs");
   });
 
   it("reroutes a replacement stream on an element muted by its prior bridge", async () => {
@@ -439,25 +439,25 @@ describe("Microsoft Teams meeting audio routing", () => {
     source.srcObject = undefined;
     const second = await runStatusScript({
       ...params,
-      priorAudioOutputs: first.window["__openclawTeamsAudioOutputs"] as unknown[],
+      priorAudioOutputs: first.window["__botTeamsAudioOutputs"] as unknown[],
       priorMeeting: first.window[MEETING_STATE_KEY] as Record<string, unknown>,
     });
     expect(second.result.audioOutputRouted).toBe(false);
     expect(source.muted).toBe(true);
-    expect(second.window["__openclawTeamsAudioOutputs"]).toEqual([
+    expect(second.window["__botTeamsAudioOutputs"]).toEqual([
       expect.objectContaining({ pending: true, source, sourceMuted: false }),
     ]);
 
     source.srcObject = replacementStream;
     const third = await runStatusScript({
       ...params,
-      priorAudioOutputs: second.window["__openclawTeamsAudioOutputs"] as unknown[],
+      priorAudioOutputs: second.window["__botTeamsAudioOutputs"] as unknown[],
       priorMeeting: second.window[MEETING_STATE_KEY] as Record<string, unknown>,
     });
     expect(third.result.audioOutputRouted).toBe(true);
     expect(source.muted).toBe(true);
     expect(
-      (third.window["__openclawTeamsAudioOutputs"] as Array<{ stream: unknown }>)[0]?.stream,
+      (third.window["__botTeamsAudioOutputs"] as Array<{ stream: unknown }>)[0]?.stream,
     ).toBe(replacementStream);
   });
 
@@ -505,12 +505,12 @@ describe("Microsoft Teams meeting audio routing", () => {
     const second = await runStatusScript({
       ...params,
       media: [directSource],
-      priorAudioOutputs: first.window["__openclawTeamsAudioOutputs"] as unknown[],
+      priorAudioOutputs: first.window["__botTeamsAudioOutputs"] as unknown[],
       priorMeeting: first.window[MEETING_STATE_KEY] as Record<string, unknown>,
     });
     expect(second.result.audioOutputRouted).toBe(true);
     expect(source.muted).toBe(true);
-    expect(second.window["__openclawTeamsAudioOutputs"]).toEqual([
+    expect(second.window["__botTeamsAudioOutputs"]).toEqual([
       expect.objectContaining({ detached: true, source, sourceMuted: false, suspended: true }),
     ]);
 
@@ -518,11 +518,11 @@ describe("Microsoft Teams meeting audio routing", () => {
     const third = await runStatusScript({
       ...params,
       media: [directSource],
-      priorAudioOutputs: second.window["__openclawTeamsAudioOutputs"] as unknown[],
+      priorAudioOutputs: second.window["__botTeamsAudioOutputs"] as unknown[],
       priorMeeting: second.window[MEETING_STATE_KEY] as Record<string, unknown>,
     });
     expect(source.muted).toBe(true);
-    expect(third.window).not.toHaveProperty("__openclawTeamsAudioOutputs");
+    expect(third.window).not.toHaveProperty("__botTeamsAudioOutputs");
   });
 
   it("tears down audio bridges and restores sources after the call ends", async () => {
@@ -563,13 +563,13 @@ describe("Microsoft Teams meeting audio routing", () => {
 
     const ended = await runStatusScript({
       allowMicrophone: true,
-      priorAudioOutputs: first.window["__openclawTeamsAudioOutputs"] as unknown[],
+      priorAudioOutputs: first.window["__botTeamsAudioOutputs"] as unknown[],
       priorMeeting: first.window[MEETING_STATE_KEY] as Record<string, unknown>,
     });
     expect(source.muted).toBe(false);
     expect(pauses).toBe(1);
     expect(removals).toBe(1);
-    expect(ended.window).not.toHaveProperty("__openclawTeamsAudioOutputs");
+    expect(ended.window).not.toHaveProperty("__botTeamsAudioOutputs");
   });
 
   it("does not restore a reused media element carrying a replacement stream", async () => {
@@ -609,7 +609,7 @@ describe("Microsoft Teams meeting audio routing", () => {
     expect(source.srcObject).toBe(replacementStream);
     expect(pauses).toBe(1);
     expect(removals).toBe(1);
-    expect(ended.window).not.toHaveProperty("__openclawTeamsAudioOutputs");
+    expect(ended.window).not.toHaveProperty("__botTeamsAudioOutputs");
   });
 
   it("does not restore a reused URL-backed media element", async () => {
@@ -639,7 +639,7 @@ describe("Microsoft Teams meeting audio routing", () => {
     });
 
     expect(source.muted).toBe(true);
-    expect(ended.window).not.toHaveProperty("__openclawTeamsAudioOutputs");
+    expect(ended.window).not.toHaveProperty("__botTeamsAudioOutputs");
   });
 
   it("does not infer identity for a legacy URL-backed entry", async () => {
@@ -732,7 +732,7 @@ describe("Microsoft Teams meeting audio routing", () => {
     expect(source.srcObject).toBe(stream);
     expect(pauses).toBe(1);
     expect(removals).toBe(1);
-    expect(window["__openclawTeamsAudioOutputs"]).toEqual([
+    expect(window["__botTeamsAudioOutputs"]).toEqual([
       expect.objectContaining({ source, sourceMuted: false, stream, suspended: true }),
     ]);
   });
@@ -777,7 +777,7 @@ describe("Microsoft Teams meeting audio routing", () => {
     expect(result.audioOutputRouteRetryable).toBe(false);
     expect(pauses).toBe(1);
     expect(removals).toBe(1);
-    expect(window["__openclawTeamsAudioOutputs"]).toEqual([
+    expect(window["__botTeamsAudioOutputs"]).toEqual([
       expect.objectContaining({ source, sourceMuted: false, suspended: true }),
     ]);
   });
@@ -821,7 +821,7 @@ describe("Microsoft Teams meeting audio routing", () => {
     expect(source.muted).toBe(true);
     expect(pauses).toBe(0);
     expect(removals).toBe(0);
-    expect(window["__openclawTeamsAudioOutputs"]).toEqual([activeBridge]);
+    expect(window["__botTeamsAudioOutputs"]).toEqual([activeBridge]);
   });
 
   it("reassigns a prior session bridge source after the new session identity is verified", async () => {
@@ -868,7 +868,7 @@ describe("Microsoft Teams meeting audio routing", () => {
     expect(emptySource.muted).toBe(true);
     expect(pauses).toBe(2);
     expect(removals).toBe(2);
-    expect(window["__openclawTeamsAudioOutputs"]).toEqual([
+    expect(window["__botTeamsAudioOutputs"]).toEqual([
       expect.objectContaining({
         sessionId: "session-1",
         source,

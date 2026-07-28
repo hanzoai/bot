@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  readConfigFileSnapshot: vi.fn(async () => ({ path: "/tmp/openclaw.json" })),
+  readConfigFileSnapshot: vi.fn(async () => ({ path: "/tmp/bot.json" })),
 }));
 
 vi.mock("../../agents/exec-defaults.js", () => ({

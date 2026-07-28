@@ -2,7 +2,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import type { SubagentRunRecord } from "../../agents/subagent-registry.js";
 import { sanitizeTaskStatusText } from "../../tasks/task-status.js";
 import { truncateUtf16Safe } from "../../utils.js";

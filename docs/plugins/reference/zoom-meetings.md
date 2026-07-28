@@ -11,8 +11,8 @@ Join Zoom meetings as a Chrome browser guest.
 
 ## Distribution
 
-- Package: `@openclaw/zoom-meetings`
-- Install route: included in OpenClaw
+- Package: `@hanzo/bot-zoom-meetings`
+- Install route: included in Bot
 
 ## Surface
 

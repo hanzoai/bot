@@ -1,14 +1,14 @@
 // Telegram plugin module owns answer/reasoning draft lanes and rotation state.
 import type { Bot } from "grammy";
-import { resolveChannelStreamingBlockEnabled } from "openclaw/plugin-sdk/channel-outbound";
+import { resolveChannelStreamingBlockEnabled } from "bot/plugin-sdk/channel-outbound";
 import type {
-  OpenClawConfig,
+  BotConfig,
   ReplyToMode,
   TelegramAccountConfig,
-} from "openclaw/plugin-sdk/config-contracts";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-payload";
-import type { BlockReplyContext } from "openclaw/plugin-sdk/reply-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/config-contracts";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-payload";
+import type { BlockReplyContext } from "bot/plugin-sdk/reply-runtime";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
 import type { TelegramBotDeps } from "./bot-deps.js";
 import { resolveMarkdownTableMode } from "./bot-message-dispatch.runtime.js";
 import type {
@@ -62,7 +62,7 @@ export function createTelegramDraftController(params: {
   accountId: string;
   allowProviderPreview: boolean;
   bot: Bot;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   chatId: number;
   draftReplyToMessageId?: number;
   forceBlockStreamingForReasoning: boolean;

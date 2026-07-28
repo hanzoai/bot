@@ -3,7 +3,7 @@ import { isAtLeast, parseSemver } from "../infra/runtime-guard.js";
 
 /** Validation message for plugin minHostVersion manifest fields. */
 const MIN_HOST_VERSION_FORMAT =
-  'openclaw.install.minHostVersion must use a semver floor in the form ">=x.y.z[-prerelease][+build]"';
+  'bot.install.minHostVersion must use a semver floor in the form ">=x.y.z[-prerelease][+build]"';
 const SEMVER_LABEL_RE = String.raw`\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?`;
 const MIN_HOST_VERSION_RE = new RegExp(`^>=(${SEMVER_LABEL_RE})$`);
 const LEGACY_MIN_HOST_VERSION_RE = /^(\d+)\.(\d+)\.(\d+)$/;
@@ -14,7 +14,7 @@ type MinHostVersionRequirement = {
   minimumLabel: string;
 };
 
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 
 /** Result of checking a plugin minHostVersion against the current host. */
 type MinHostVersionCheckResult =

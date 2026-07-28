@@ -3,15 +3,15 @@ import { spawn, type ChildProcess } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import { doctorCommand } from "../../commands/doctor.js";
 import {
   assertConfigWriteAllowedInCurrentMode,
   readConfigFileSnapshot,
 } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { PluginInstallRecord } from "../../config/types.plugins.js";
 import { resolveGatewayInstallEntrypoint } from "../../daemon/gateway-entrypoint.js";
 import { hasErrnoCode } from "../../infra/errors.js";
@@ -84,12 +84,12 @@ import {
 
 const DEFAULT_UPDATE_STEP_TIMEOUT_MS = 30 * 60_000;
 export { POST_CORE_UPDATE_ENV };
-export const POST_CORE_UPDATE_CHANNEL_ENV = "OPENCLAW_UPDATE_POST_CORE_CHANNEL";
-export const POST_CORE_UPDATE_REQUESTED_CHANNEL_ENV = "OPENCLAW_UPDATE_POST_CORE_REQUESTED_CHANNEL";
-export const POST_CORE_UPDATE_RESULT_PATH_ENV = "OPENCLAW_UPDATE_POST_CORE_RESULT_PATH";
+export const POST_CORE_UPDATE_CHANNEL_ENV = "BOT_UPDATE_POST_CORE_CHANNEL";
+export const POST_CORE_UPDATE_REQUESTED_CHANNEL_ENV = "BOT_UPDATE_POST_CORE_REQUESTED_CHANNEL";
+export const POST_CORE_UPDATE_RESULT_PATH_ENV = "BOT_UPDATE_POST_CORE_RESULT_PATH";
 export const POST_CORE_UPDATE_INSTALL_RECORDS_PATH_ENV =
-  "OPENCLAW_UPDATE_POST_CORE_INSTALL_RECORDS_PATH";
-export const POST_CORE_UPDATE_STARTED_AT_ENV = "OPENCLAW_UPDATE_POST_CORE_STARTED_AT_MS";
+  "BOT_UPDATE_POST_CORE_INSTALL_RECORDS_PATH";
+export const POST_CORE_UPDATE_STARTED_AT_ENV = "BOT_UPDATE_POST_CORE_STARTED_AT_MS";
 const POST_CORE_UPDATE_RESULT_POLL_MS = 100;
 
 export async function reportPreMutationUpdateFailure(params: {
@@ -160,7 +160,7 @@ export async function updateFinalizeCommand(opts: UpdateFinalizeOptions): Promis
       ? {
           sourceConfig: configSnapshot.sourceConfig,
           authoredConfig: isRecord(configSnapshot.parsed)
-            ? (configSnapshot.parsed as OpenClawConfig)
+            ? (configSnapshot.parsed as BotConfig)
             : configSnapshot.sourceConfig,
         }
       : undefined);
@@ -325,7 +325,7 @@ export async function readPostCorePluginInstallRecordsFile(
       return undefined;
     }
     throw new Error(
-      `Unable to read plugin install records file: ${filePath}. Run openclaw doctor to inspect and repair plugin installation state.`,
+      `Unable to read plugin install records file: ${filePath}. Run bot doctor to inspect and repair plugin installation state.`,
       { cause: err },
     );
   }
@@ -334,7 +334,7 @@ export async function readPostCorePluginInstallRecordsFile(
     parsed = JSON.parse(raw);
   } catch (err) {
     throw new Error(
-      `Malformed JSON in plugin install records file: ${filePath}. Run openclaw doctor to inspect and repair plugin installation state.`,
+      `Malformed JSON in plugin install records file: ${filePath}. Run bot doctor to inspect and repair plugin installation state.`,
       { cause: err },
     );
   }
@@ -503,7 +503,7 @@ export async function continuePostCoreUpdateInFreshProcess(params: {
   if (params.opts.timeout) {
     argv.push("--timeout", params.opts.timeout);
   }
-  const resultDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-post-core-"));
+  const resultDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-update-post-core-"));
   const resultPath = path.join(resultDir, "plugins.json");
   const installRecordsPath = path.join(resultDir, "plugin-install-records.json");
   const sourceConfigPath = path.join(resultDir, "source-config.json");
@@ -526,7 +526,7 @@ export async function continuePostCoreUpdateInFreshProcess(params: {
       stdio: childStdio,
       env: {
         ...stripGatewayServiceMarkerEnv(disableUpdatedPackageCompileCacheEnv(process.env)),
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
+        BOT_UPDATE_IN_PROGRESS: "1",
         [POST_CORE_UPDATE_ENV]: "1",
         [POST_CORE_UPDATE_CHANNEL_ENV]: params.channel,
         ...(params.requestedChannel
@@ -537,7 +537,7 @@ export async function continuePostCoreUpdateInFreshProcess(params: {
         [POST_CORE_UPDATE_STARTED_AT_ENV]: String(params.updateStartedAtMs),
         ...(postCoreHostVersion === null
           ? {}
-          : { OPENCLAW_COMPATIBILITY_HOST_VERSION: postCoreHostVersion }),
+          : { BOT_COMPATIBILITY_HOST_VERSION: postCoreHostVersion }),
         ...(params.preUpdateConfig
           ? { [POST_CORE_UPDATE_SOURCE_CONFIG_PATH_ENV]: sourceConfigPath }
           : {}),

@@ -5,13 +5,13 @@ import os from "node:os";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { setTimeout as scheduleNativeTimeout } from "node:timers";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import type {
   PluginStateLeaseContext,
   PluginStateLeaseOptions,
   PluginStateLeaseRunner,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
-import { withMockedWindowsPlatform } from "openclaw/plugin-sdk/test-node-mocks";
+} from "bot/plugin-sdk/plugin-state-runtime";
+import { withMockedWindowsPlatform } from "bot/plugin-sdk/test-node-mocks";
 import type { Mock } from "vitest";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -45,10 +45,10 @@ const { withLeaseMock } = vi.hoisted(() => {
     withLeaseMock: vi.fn(implementation) as Mock<PluginStateLeaseRunner> & PluginStateLeaseRunner,
   };
 });
-const MEMORY_EMBEDDING_PROVIDERS_KEY = Symbol.for("openclaw.memoryEmbeddingProviders");
-const MCPORTER_STATE_KEY = Symbol.for("openclaw.mcporterState");
-const QMD_EMBED_QUEUE_KEY = Symbol.for("openclaw.qmdEmbedQueueTail");
-const QMD_UPDATE_QUEUE_KEY = Symbol.for("openclaw.qmdUpdateQueueState");
+const MEMORY_EMBEDDING_PROVIDERS_KEY = Symbol.for("bot.memoryEmbeddingProviders");
+const MCPORTER_STATE_KEY = Symbol.for("bot.mcporterState");
+const QMD_EMBED_QUEUE_KEY = Symbol.for("bot.qmdEmbedQueueTail");
+const QMD_UPDATE_QUEUE_KEY = Symbol.for("bot.qmdUpdateQueueState");
 const BUILT_IN_WATCH_DEBOUNCE_MS = 1_500;
 
 type WatchOptions = {
@@ -57,7 +57,7 @@ type WatchOptions = {
 
 type LeaseCall = Parameters<PluginStateLeaseRunner>;
 
-type QmdTestConfig = NonNullable<NonNullable<OpenClawConfig["memory"]>["qmd"]> & {
+type QmdTestConfig = NonNullable<NonNullable<BotConfig["memory"]>["qmd"]> & {
   mcporter?: { enabled?: boolean; serverName?: string; startDaemon?: boolean };
   update?: {
     commandTimeoutMs?: number;
@@ -74,8 +74,8 @@ type QmdTestConfig = NonNullable<NonNullable<OpenClawConfig["memory"]>["qmd"]> &
 };
 
 type QmdConfigOverrides = {
-  agents?: OpenClawConfig["agents"];
-  search?: NonNullable<NonNullable<OpenClawConfig["memory"]>["search"]> & {
+  agents?: BotConfig["agents"];
+  search?: NonNullable<NonNullable<BotConfig["memory"]>["search"]> & {
     sync?: { watch?: boolean; onSessionStart?: boolean; onSearch?: boolean };
   };
 };
@@ -190,10 +190,10 @@ function firstWriteLeaseCall(): LeaseCall {
   return call;
 }
 
-vi.mock("openclaw/plugin-sdk/memory-core-host-engine-foundation", async () => {
+vi.mock("bot/plugin-sdk/memory-core-host-engine-foundation", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/memory-core-host-engine-foundation")
-  >("openclaw/plugin-sdk/memory-core-host-engine-foundation");
+    typeof import("bot/plugin-sdk/memory-core-host-engine-foundation")
+  >("bot/plugin-sdk/memory-core-host-engine-foundation");
   return {
     ...actual,
     createSubsystemLogger: () => {
@@ -222,21 +222,21 @@ vi.mock("chokidar", () => ({
 }));
 
 import { spawn as mockedSpawn } from "node:child_process";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import type { BotConfig } from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import {
   type MemorySearchRuntimeDebug,
   requireNodeSqlite,
   resolveMemoryBackendConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
-import { PluginStateLeaseError } from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
+import { MAX_TIMER_TIMEOUT_MS } from "bot/plugin-sdk/number-runtime";
+import { PluginStateLeaseError } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   formatSqliteSessionFileMarker,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { formatSessionTranscriptMemoryHitKey } from "openclaw/plugin-sdk/session-transcript-hit";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "bot/plugin-sdk/session-store-runtime";
+import { formatSessionTranscriptMemoryHitKey } from "bot/plugin-sdk/session-transcript-hit";
+import { appendSessionTranscriptMessageByIdentity } from "bot/plugin-sdk/session-transcript-runtime";
+import { closeBotAgentDatabasesForTest } from "bot/plugin-sdk/sqlite-runtime-testing";
 import { configureMemoryCoreDreamingState } from "../dreaming-state.js";
 import { resolveQmdSessionArtifactIdentity } from "../qmd-session-artifacts.js";
 import {
@@ -251,10 +251,10 @@ const spawnMock = mockedSpawn as unknown as Mock;
 const originalPath = process.env.PATH;
 const originalPathExt = process.env.PATHEXT;
 const originalWindowsPath = process.env.Path;
-const originalQmdStateDir = process.env.OPENCLAW_STATE_DIR;
+const originalQmdStateDir = process.env.BOT_STATE_DIR;
 
 function setQmdStateDir(stateDir: string): void {
-  Reflect.set(process.env, "OPENCLAW_STATE_DIR", stateDir);
+  Reflect.set(process.env, "BOT_STATE_DIR", stateDir);
 }
 
 async function seedQmdSessionTranscript(params: {
@@ -304,9 +304,9 @@ async function seedQmdSessionTranscript(params: {
 
 function restoreQmdStateDir(): void {
   if (originalQmdStateDir === undefined) {
-    Reflect.deleteProperty(process.env, "OPENCLAW_STATE_DIR");
+    Reflect.deleteProperty(process.env, "BOT_STATE_DIR");
   } else {
-    Reflect.set(process.env, "OPENCLAW_STATE_DIR", originalQmdStateDir);
+    Reflect.set(process.env, "BOT_STATE_DIR", originalQmdStateDir);
   }
 }
 
@@ -316,7 +316,7 @@ describe("QmdMemoryManager", () => {
   let tmpRoot: string;
   let workspaceDir: string;
   let stateDir: string;
-  let cfg: OpenClawConfig;
+  let cfg: BotConfig;
   const agentId = "main";
   const openManagers = new Set<QmdMemoryManager>();
   let embedStartupJitterSpy: { mockRestore: () => void } | null = null;
@@ -393,7 +393,7 @@ describe("QmdMemoryManager", () => {
         },
         ...(overrides.search ? { search: overrides.search } : {}),
       },
-    } as OpenClawConfig;
+    } as BotConfig;
   }
 
   it("caps mcporter search process timeout grace", () => {
@@ -554,7 +554,7 @@ describe("QmdMemoryManager", () => {
           paths: [{ path: otherWorkspaceDir, pattern: "**/*.md", name: "workspace" }],
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     spawnMock.mockClear();
     const second = await createManager({ mode: "cli", cfg: changedCfg });
@@ -869,7 +869,7 @@ describe("QmdMemoryManager", () => {
     return path.join(stateDir, "agents", selectedAgentId, "qmd", "xdg-config", "qmd", "index.yml");
   }
 
-  function resolveMemoryBackendConfigForTest(sourceCfg: OpenClawConfig, selectedAgentId: string) {
+  function resolveMemoryBackendConfigForTest(sourceCfg: BotConfig, selectedAgentId: string) {
     const resolved = resolveMemoryBackendConfig({ cfg: sourceCfg, agentId: selectedAgentId });
     const qmdTestConfig = sourceCfg.memory?.qmd as
       | {
@@ -938,11 +938,11 @@ describe("QmdMemoryManager", () => {
 
   async function createManager(params?: {
     mode?: "full" | "status" | "cli";
-    cfg?: OpenClawConfig;
+    cfg?: BotConfig;
     agentId?: string;
   }) {
     const sourceCfg = params?.cfg ?? cfg;
-    const cfgToUse: OpenClawConfig = {
+    const cfgToUse: BotConfig = {
       ...sourceCfg,
       memory: {
         ...sourceCfg.memory,
@@ -1226,7 +1226,7 @@ describe("QmdMemoryManager", () => {
     delete (globalThis as Record<PropertyKey, unknown>)[QMD_EMBED_QUEUE_KEY];
     delete (globalThis as Record<PropertyKey, unknown>)[MEMORY_EMBEDDING_PROVIDERS_KEY];
     resetMemoryCoreDreamingStateForTests();
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
   });
 
   it("debounces back-to-back sync calls", async () => {
@@ -3748,7 +3748,7 @@ describe("QmdMemoryManager", () => {
             mcporter: { enabled: true, serverName: "qmd", startDaemon: false },
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
       const { manager } = await createManager({ cfg: testConfig });
       const inner = manager as unknown as {
         db: { prepare: () => { all: () => unknown }; close: () => void };
@@ -6154,7 +6154,7 @@ describe("QmdMemoryManager", () => {
           ...cfg.memory,
           qmd: { ...cfg.memory?.qmd, searchMode: "query" },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
 
     await expect(manager.probeVectorAvailability()).resolves.toBe(false);
@@ -6188,7 +6188,7 @@ describe("QmdMemoryManager", () => {
           ...cfg.memory,
           qmd: { ...cfg.memory?.qmd, searchMode: "query" },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
 
     await expect(manager.probeVectorAvailability()).resolves.toBe(true);
@@ -6227,7 +6227,7 @@ describe("QmdMemoryManager", () => {
           ...cfg.memory,
           qmd: { ...cfg.memory?.qmd, searchMode: "query" },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
 
     await expect(manager.probeVectorAvailability()).resolves.toBe(true);
@@ -6251,7 +6251,7 @@ describe("QmdMemoryManager", () => {
           ...cfg.memory,
           qmd: { ...cfg.memory?.qmd, searchMode: "query" },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
 
     await expect(manager.probeVectorAvailability()).resolves.toBe(false);
@@ -6272,7 +6272,7 @@ describe("QmdMemoryManager", () => {
           ...cfg.memory,
           qmd: { ...cfg.memory?.qmd, searchMode: "search" },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
     const baselineCalls = spawnMock.mock.calls.length;
 
@@ -6442,10 +6442,10 @@ describe("QmdMemoryManager", () => {
 
   it("rebinds a stale in-container collection root to the host workspace (sandbox-mode transition)", async () => {
     // Sandbox coverage: an agent that previously ran with its workspace bind-mounted under
-    // /home/node/.openclaw/... stored that in-container path as the collection root. Resolved
+    // /home/node/.bot/... stored that in-container path as the collection root. Resolved
     // with host paths, `collection show` reveals the stale container path; the rebind is
     // path-namespace-agnostic and re-binds to the current host root.
-    const containerRoot = "/home/node/.openclaw/teams/x/workspace";
+    const containerRoot = "/home/node/.bot/teams/x/workspace";
     const newWorkspaceDir = workspaceDir; // host path the manager is configured for
 
     configureQmd({
@@ -6500,13 +6500,13 @@ describe("QmdMemoryManager", () => {
   it("parseShownQmdCollection extracts path and pattern from qmd collection show output", () => {
     const sampleOutput = [
       "Collection: memory-dir-example",
-      "  Path:     /home/node/.openclaw/teams/example-team/workspace-example/memory",
+      "  Path:     /home/node/.bot/teams/example-team/workspace-example/memory",
       "  Pattern:  **/*.md",
       "  Include:  yes (default)",
     ].join("\n");
 
     const result = parseShownQmdCollection(sampleOutput);
-    expect(result.path).toBe("/home/node/.openclaw/teams/example-team/workspace-example/memory");
+    expect(result.path).toBe("/home/node/.bot/teams/example-team/workspace-example/memory");
     expect(result.pattern).toBe("**/*.md");
 
     // Tolerant of missing fields.

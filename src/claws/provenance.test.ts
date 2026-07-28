@@ -3,11 +3,11 @@ import { access, mkdir, rmdir, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
 import { applyClawAddPlan, ClawAddMutationError } from "./add.js";
 import { ClawCronInstallError } from "./cron.js";
 import { buildClawAddPlan } from "./lifecycle.js";
@@ -22,19 +22,19 @@ import {
   updateClawPackageRefStatus,
 } from "./provenance.js";
 import { parseClawManifest } from "./schema.js";
-import type { ClawOpenClawProfile, ClawSourceIdentity } from "./types.js";
+import type { ClawBotProfile, ClawSourceIdentity } from "./types.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
 });
 
 async function makePlan(
   manifestValue: unknown = { schemaVersion: 1, agent: { id: "worker" } },
-  options: { workspace?: string; openClawProfile?: ClawOpenClawProfile } = {},
+  options: { workspace?: string; botProfile?: ClawBotProfile } = {},
 ) {
-  const root = tempDirs.make("openclaw-claw-add-");
+  const root = tempDirs.make("bot-claw-add-");
   const parsed = parseClawManifest(manifestValue);
   if (!parsed.ok) {
     throw new Error(JSON.stringify(parsed.diagnostics));
@@ -44,14 +44,14 @@ async function makePlan(
     name: "@acme/worker",
     version: "1.0.0",
     packageRoot: root,
-    manifestPath: join(root, "openclaw.claw.json"),
+    manifestPath: join(root, "bot.claw.json"),
     integrityKind: "artifact",
     integrity: "sha256:manifest",
     byteLength: 123,
   };
   const plan = await buildClawAddPlan({
     manifest: parsed.manifest,
-    openClawProfile: options.openClawProfile,
+    botProfile: options.botProfile,
     source,
     context: { workspace: options.workspace ?? join(root, "workspace-worker") },
   });
@@ -59,11 +59,11 @@ async function makePlan(
 }
 
 function stateEnv(root: string) {
-  return { OPENCLAW_STATE_DIR: join(root, "state") };
+  return { BOT_STATE_DIR: join(root, "state") };
 }
 
 function readInstallRow(agentId: string, root: string) {
-  return openOpenClawStateDatabase({ env: stateEnv(root) })
+  return openBotStateDatabase({ env: stateEnv(root) })
     .db.prepare(
       `SELECT agent_id, schema_version, claw_name, claw_version, integrity, plan_integrity,
               workspace, agent_config_digest, agent_owned_paths_json, status, added_at_ms
@@ -132,7 +132,7 @@ describe("Claw root install provenance", () => {
     const record = persistClawInstallRecord(plan, { env: stateEnv(root), nowMs: 42 });
 
     expect(record).toMatchObject({
-      schemaVersion: "openclaw.clawInstallRecord.v1",
+      schemaVersion: "bot.clawInstallRecord.v1",
       claw: { name: "@acme/worker", version: "1.0.0", integrity: "sha256:manifest" },
       manifestSchemaVersion: 1,
       planIntegrity: plan.planIntegrity,
@@ -273,7 +273,7 @@ describe("Claw root install provenance", () => {
     const record = persistClawPackageRef(plan, pkg, { env: stateEnv(root), nowMs: 43 });
 
     expect(record).toMatchObject({
-      schemaVersion: "openclaw.clawPackageRef.v1",
+      schemaVersion: "bot.clawPackageRef.v1",
       agentId: "worker",
       clawName: "@acme/worker",
       ...pkg,
@@ -360,13 +360,13 @@ describe("applyClawAddPlan", () => {
         },
       },
       {
-        openClawProfile: {
+        botProfile: {
           schemaVersion: 1,
           agent: { tools: { deny: ["exec"] } },
         },
       },
     );
-    let config: OpenClawConfig = {
+    let config: BotConfig = {
       agents: {
         defaults: { workspace: "/operator/default" },
         entries: { main: { default: true } },
@@ -383,7 +383,7 @@ describe("applyClawAddPlan", () => {
     });
 
     expect(result).toMatchObject({
-      schemaVersion: "openclaw.clawAddResult.v1",
+      schemaVersion: "bot.clawAddResult.v1",
       stability: "experimental",
       status: "complete",
       workspaceCreated: true,
@@ -405,7 +405,7 @@ describe("applyClawAddPlan", () => {
 
   it("materializes the implicit main agent before appending the first configured agent", async () => {
     const { root, plan } = await makePlan();
-    let config: OpenClawConfig = {};
+    let config: BotConfig = {};
 
     await applyClawAddPlan(plan, {
       consentPlanIntegrity: plan.planIntegrity,
@@ -422,7 +422,7 @@ describe("applyClawAddPlan", () => {
   });
 
   it("rejects overlap with the implicit main workspace before materializing it", async () => {
-    const root = tempDirs.make("openclaw-claw-implicit-main-");
+    const root = tempDirs.make("bot-claw-implicit-main-");
     const mainWorkspace = join(root, "main-workspace");
     const { root: planRoot, plan } = await makePlan(undefined, {
       workspace: join(mainWorkspace, "nested-claw"),
@@ -486,7 +486,7 @@ describe("applyClawAddPlan", () => {
   });
 
   it("rechecks aliased workspace collisions during the config commit", async () => {
-    const root = tempDirs.make("openclaw-claw-workspace-alias-");
+    const root = tempDirs.make("bot-claw-workspace-alias-");
     const canonicalParent = join(root, "canonical");
     const aliasParent = join(root, "alias");
     await mkdir(canonicalParent);
@@ -517,7 +517,7 @@ describe("applyClawAddPlan", () => {
   });
 
   it("rejects workspace ancestry changes after planning", async () => {
-    const root = tempDirs.make("openclaw-claw-workspace-swap-");
+    const root = tempDirs.make("bot-claw-workspace-swap-");
     const canonicalParent = join(root, "canonical");
     const alternateParent = join(root, "alternate");
     await mkdir(canonicalParent);
@@ -561,7 +561,7 @@ describe("applyClawAddPlan", () => {
   });
 
   it("records parent-directory creation failures before workspace mutation", async () => {
-    const root = tempDirs.make("openclaw-claw-add-");
+    const root = tempDirs.make("bot-claw-add-");
     const blockedParent = join(root, "blocked-parent");
     await writeFile(blockedParent, "not a directory", "utf8");
     const { plan } = await makePlan(undefined, {
@@ -601,7 +601,7 @@ describe("applyClawAddPlan", () => {
 
   it("resumes a matching partial add with an existing non-empty workspace", async () => {
     const { root, plan } = await makePlan();
-    let config: OpenClawConfig = {};
+    let config: BotConfig = {};
     let attempts = 0;
 
     const first = await applyClawAddPlan(plan, {
@@ -647,7 +647,7 @@ describe("applyClawAddPlan", () => {
       status: "workspace_ready",
       nowMs: 1,
     });
-    let config: OpenClawConfig = {};
+    let config: BotConfig = {};
 
     const result = await applyClawAddPlan(plan, {
       consentPlanIntegrity: plan.planIntegrity,
@@ -670,7 +670,7 @@ describe("applyClawAddPlan", () => {
       nowMs: 1,
     });
     await writeFile(plan.agent.workspace, "not a directory", "utf8");
-    let config: OpenClawConfig = {};
+    let config: BotConfig = {};
 
     await expect(
       applyClawAddPlan(plan, {
@@ -712,7 +712,7 @@ describe("applyClawAddPlan", () => {
 
   it("fails before mutation when the pending provenance record cannot be persisted", async () => {
     const { plan } = await makePlan();
-    let config: OpenClawConfig = {};
+    let config: BotConfig = {};
 
     await expect(
       applyClawAddPlan(plan, {
@@ -751,7 +751,7 @@ describe("applyClawAddPlan", () => {
       ],
     });
     const failedRef = {
-      schemaVersion: "openclaw.clawCronRef.v1" as const,
+      schemaVersion: "bot.clawCronRef.v1" as const,
       agentId: "worker",
       manifestId: "daily-report",
       declarationKey: "claw:worker:daily-report",

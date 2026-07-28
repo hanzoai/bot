@@ -39,7 +39,7 @@ async function readLaunchDescriptor(input: Readable): Promise<WorkerLaunchDescri
   return parseWorkerLaunchDescriptor(decoded);
 }
 
-/** Process shell for `openclaw worker`: stdin descriptor in, JSON result out, signals abort the run. */
+/** Process shell for `bot worker`: stdin descriptor in, JSON result out, signals abort the run. */
 export async function runWorkerCommand(options: RunWorkerCommandOptions): Promise<void> {
   const descriptor = await readLaunchDescriptor(options.input);
   const abortController = new AbortController();

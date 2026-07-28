@@ -1,12 +1,12 @@
 // Gateway HTTP session history endpoint.
 // Serves JSON and SSE history snapshots backed by transcript files.
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { parseStrictPositiveInteger } from "@hanzo/bot-normalization-core/number-coercion";
+import { err, ok, type Result } from "@hanzo/bot-normalization-core/result";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { getRuntimeConfig } from "../config/io.js";
 import { isSessionTranscriptProjectionUnavailableError } from "../config/sessions/session-accessor.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";

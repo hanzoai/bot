@@ -3,7 +3,7 @@ import path from "node:path";
 import {
   normalizeOptionalString,
   readStringValue,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { toErrorObject } from "../infra/errors.js";
 import { redactToolPayloadText } from "../logging/redact.js";
 import { asRecord } from "../record-shared.js";

@@ -3,9 +3,9 @@ import { randomUUID } from "node:crypto";
 import {
   resolveDateTimestampMs,
   resolveTimestampMsToIsoString,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import type { CliDeps } from "../../cli/deps.types.js";
 import { getRuntimeConfig } from "../../config/io.js";
@@ -14,7 +14,7 @@ import {
   resolveMainSessionKey,
   resolveMainSessionKeyFromConfig,
 } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { RunCronAgentTurnResult } from "../../cron/isolated-agent/run.types.js";
 import { resolveCronAgentSessionKey } from "../../cron/isolated-agent/session-key.js";
 import type { CronJob } from "../../cron/types.js";
@@ -32,7 +32,7 @@ import { createHooksRequestHandler, type HookClientIpConfig } from "./hooks-requ
  */
 type SubsystemLogger = ReturnType<typeof createSubsystemLogger>;
 
-function resolveHookEventSessionKey(params: { cfg: OpenClawConfig; agentId?: string }): string {
+function resolveHookEventSessionKey(params: { cfg: BotConfig; agentId?: string }): string {
   return params.agentId
     ? resolveAgentMainSessionKey({ cfg: params.cfg, agentId: params.agentId })
     : resolveMainSessionKey(params.cfg);
@@ -194,7 +194,7 @@ export function createGatewayHooksRequestHandler(params: {
         });
       }
     };
-    let dispatchCfg: OpenClawConfig;
+    let dispatchCfg: BotConfig;
     try {
       dispatchCfg = getRuntimeConfig();
     } catch (err) {

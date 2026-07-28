@@ -5,9 +5,9 @@ import { pathToFileURL } from "node:url";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 import {
   defineBundledChannelEntry,
-  type OpenClawPluginApi,
+  type BotPluginApi,
 } from "../plugin-sdk/channel-entry-contract.js";
-import { loadOpenClawPluginCliRegistry, loadOpenClawPlugins } from "./loader.js";
+import { loadBotPluginCliRegistry, loadBotPlugins } from "./loader.js";
 import {
   cleanupPluginLoaderFixturesForTest,
   EMPTY_PLUGIN_SCHEMA,
@@ -49,7 +49,7 @@ describe("plugin loader CLI metadata", () => {
       });
       const errors: string[] = [];
 
-      const registry = await loadOpenClawPluginCliRegistry({
+      const registry = await loadBotPluginCliRegistry({
         cache: false,
         logger: {
           info: () => {},
@@ -105,8 +105,8 @@ describe("plugin loader CLI metadata", () => {
     });
 
     const warnings: string[] = [];
-    const registry = await loadOpenClawPluginCliRegistry({
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    const registry = await loadBotPluginCliRegistry({
+      env: { ...process.env, BOT_STATE_DIR: stateDir },
       logger: {
         info: () => {},
         warn: (msg: string) => warnings.push(msg),
@@ -148,7 +148,7 @@ describe("plugin loader CLI metadata", () => {
 };`,
     });
     fs.writeFileSync(
-      path.join(plugin.dir, "openclaw.plugin.json"),
+      path.join(plugin.dir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "Config-Cli",
@@ -167,7 +167,7 @@ describe("plugin loader CLI metadata", () => {
       "utf-8",
     );
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadBotPluginCliRegistry({
       config: {
         plugins: {
           load: { paths: [plugin.file] },
@@ -198,8 +198,8 @@ describe("plugin loader CLI metadata", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/cli-metadata-channel",
-          openclaw: { extensions: ["./index.cjs"], setupEntry: "./setup-entry.cjs" },
+          name: "@hanzo/bot-cli-metadata-channel",
+          bot: { extensions: ["./index.cjs"], setupEntry: "./setup-entry.cjs" },
         },
         null,
         2,
@@ -207,7 +207,7 @@ describe("plugin loader CLI metadata", () => {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "cli-metadata-channel",
@@ -276,7 +276,7 @@ module.exports = {
       "utf-8",
     );
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadBotPluginCliRegistry({
       config: {
         plugins: {
           load: { paths: [pluginDir] },
@@ -299,14 +299,14 @@ module.exports = {
     const fullMarker = path.join(pluginDir, "full-loaded.txt");
 
     fs.mkdirSync(pluginDir, { recursive: true });
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledRoot;
+    process.env.BOT_BUNDLED_PLUGINS_DIR = bundledRoot;
 
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/bundled-skip-channel",
-          openclaw: { extensions: ["./index.cjs"] },
+          name: "@hanzo/bot-bundled-skip-channel",
+          bot: { extensions: ["./index.cjs"] },
         },
         null,
         2,
@@ -314,7 +314,7 @@ module.exports = {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "bundled-skip-channel",
@@ -338,7 +338,7 @@ module.exports = {
       "utf-8",
     );
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadBotPluginCliRegistry({
       config: {
         plugins: {
           allow: ["bundled-skip-channel"],
@@ -367,14 +367,14 @@ module.exports = {
     const cliMarker = path.join(pluginDir, "cli-loaded.txt");
 
     fs.mkdirSync(pluginDir, { recursive: true });
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledRoot;
+    process.env.BOT_BUNDLED_PLUGINS_DIR = bundledRoot;
 
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/bundled-cli-channel",
-          openclaw: { extensions: ["./index.cjs"] },
+          name: "@hanzo/bot-bundled-cli-channel",
+          bot: { extensions: ["./index.cjs"] },
         },
         null,
         2,
@@ -382,7 +382,7 @@ module.exports = {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "bundled-cli-channel",
@@ -426,7 +426,7 @@ module.exports = {
       "utf-8",
     );
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadBotPluginCliRegistry({
       config: {
         plugins: {
           allow: ["bundled-cli-channel"],
@@ -446,7 +446,7 @@ module.exports = {
     );
     expect(
       registry.cliRegistrars[0]?.descriptors[0]?.machineOutput?.({
-        argv: ["node", "openclaw", "bundled-cli-channel", "--machine"],
+        argv: ["node", "bot", "bundled-cli-channel", "--machine"],
         stdoutIsTTY: true,
       }),
     ).toBe(true);
@@ -458,14 +458,14 @@ module.exports = {
     const fullMarker = path.join(pluginDir, "full-loaded.txt");
 
     fs.mkdirSync(pluginDir, { recursive: true });
-    process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledRoot;
+    process.env.BOT_BUNDLED_PLUGINS_DIR = bundledRoot;
 
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/bundled-skip-provider",
-          openclaw: { extensions: ["./index.cjs"] },
+          name: "@hanzo/bot-bundled-skip-provider",
+          bot: { extensions: ["./index.cjs"] },
         },
         null,
         2,
@@ -473,7 +473,7 @@ module.exports = {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "bundled-skip-provider",
@@ -496,7 +496,7 @@ module.exports = {
       "utf-8",
     );
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadBotPluginCliRegistry({
       config: {
         plugins: {
           allow: ["bundled-skip-provider"],
@@ -528,8 +528,8 @@ module.exports = {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/full-cli-metadata-channel",
-          openclaw: { extensions: ["./index.cjs"] },
+          name: "@hanzo/bot-full-cli-metadata-channel",
+          bot: { extensions: ["./index.cjs"] },
         },
         null,
         2,
@@ -537,7 +537,7 @@ module.exports = {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "full-cli-metadata-channel",
@@ -597,7 +597,7 @@ module.exports = {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -625,8 +625,8 @@ module.exports = {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/discovery-cli-metadata-channel",
-          openclaw: { extensions: ["./index.cjs"] },
+          name: "@hanzo/bot-discovery-cli-metadata-channel",
+          bot: { extensions: ["./index.cjs"] },
         },
         null,
         2,
@@ -634,7 +634,7 @@ module.exports = {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "discovery-cli-metadata-channel",
@@ -697,7 +697,7 @@ module.exports = {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       activate: false,
       cache: false,
       config: {
@@ -731,8 +731,8 @@ module.exports = {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/force-runtime-cli-channel",
-          openclaw: { extensions: ["./index.cjs"], setupEntry: "./setup-entry.cjs" },
+          name: "@hanzo/bot-force-runtime-cli-channel",
+          bot: { extensions: ["./index.cjs"], setupEntry: "./setup-entry.cjs" },
         },
         null,
         2,
@@ -740,7 +740,7 @@ module.exports = {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "force-runtime-cli-channel",
@@ -802,7 +802,7 @@ module.exports = {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       activate: false,
       cache: false,
       forceFullRuntimeForChannelPlugins: true,
@@ -892,7 +892,7 @@ module.exports = {
 
     entry.register({
       registrationMode: "discovery",
-      runtime: {} as OpenClawPluginApi["runtime"],
+      runtime: {} as BotPluginApi["runtime"],
       registerChannel: (registration) => {
         const plugin = "plugin" in registration ? registration.plugin : registration;
         channels.push(plugin.id);
@@ -900,7 +900,7 @@ module.exports = {
       registerCli: (_register, options) => {
         commands.push(...(options?.descriptors ?? []).map((descriptor) => descriptor.name));
       },
-    } as OpenClawPluginApi);
+    } as BotPluginApi);
 
     expect(channels).toEqual(["bundled-discovery-cli"]);
     expect(fs.existsSync(runtimeMarker)).toBe(true);
@@ -936,7 +936,7 @@ module.exports = {
 };`,
     });
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadBotPluginCliRegistry({
       cache: false,
       config: {
         plugins: {
@@ -996,16 +996,16 @@ module.exports = {
       },
     };
 
-    const metadataRegistry = await loadOpenClawPluginCliRegistry({ cache: false, config });
-    const fullRegistry = loadOpenClawPlugins({ cache: false, config });
+    const metadataRegistry = await loadBotPluginCliRegistry({ cache: false, config });
+    const fullRegistry = loadBotPlugins({ cache: false, config });
     for (const registry of [metadataRegistry, fullRegistry]) {
       const resolver = registry.cliRegistrars[0]?.descriptors[0]?.machineOutput;
       expect(
-        resolver?.({ argv: ["node", "openclaw", "machine-output-cli"], stdoutIsTTY: false }),
+        resolver?.({ argv: ["node", "bot", "machine-output-cli"], stdoutIsTTY: false }),
       ).toBe(true);
       expect(
         resolver?.({
-          argv: ["node", "openclaw", "machine-output-cli", "--machine"],
+          argv: ["node", "bot", "machine-output-cli", "--machine"],
           stdoutIsTTY: true,
         }),
       ).toBe(true);
@@ -1036,7 +1036,7 @@ module.exports = {
 };`,
     });
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadBotPluginCliRegistry({
       config: {
         plugins: {
           load: { paths: [plugin.file] },
@@ -1074,7 +1074,7 @@ module.exports = {
 };`,
     });
     fs.writeFileSync(
-      path.join(plugin.dir, "openclaw.plugin.json"),
+      path.join(plugin.dir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "memory-external",
@@ -1087,7 +1087,7 @@ module.exports = {
       "utf-8",
     );
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadBotPluginCliRegistry({
       config: {
         plugins: {
           load: { paths: [plugin.file] },
@@ -1127,7 +1127,7 @@ module.exports = {
 };`,
     });
 
-    const registry = await loadOpenClawPluginCliRegistry({
+    const registry = await loadBotPluginCliRegistry({
       config: {
         plugins: {
           load: { paths: [plugin.file] },

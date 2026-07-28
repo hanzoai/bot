@@ -175,9 +175,9 @@ type DeviceIdentity = {
   privateKey: string;
 };
 
-const LEGACY_DEVICE_AUTH_STORAGE_KEY = "openclaw.device.auth.v1";
+const LEGACY_DEVICE_AUTH_STORAGE_KEY = "bot.device.auth.v1";
 const DEVICE_AUTH_STORAGE_KEY_PREFIX = `${LEGACY_DEVICE_AUTH_STORAGE_KEY}:`;
-const DEVICE_IDENTITY_STORAGE_KEY = "openclaw-device-identity-v1";
+const DEVICE_IDENTITY_STORAGE_KEY = "bot-device-identity-v1";
 
 export function createInitialNodesState(
   snapshot: Partial<NodesGatewaySnapshot> = {},

@@ -3,11 +3,11 @@ summary: "Pairing overview: approve who can DM you + which nodes can join"
 read_when:
   - Setting up DM access control
   - Pairing a new iOS/Android node
-  - Reviewing OpenClaw security posture
+  - Reviewing Bot security posture
 title: "Pairing"
 ---
 
-"Pairing" is OpenClaw's explicit access approval step.
+"Pairing" is Bot's explicit access approval step.
 It is used in two places:
 
 1. **DM pairing** (who is allowed to talk to the bot)
@@ -52,8 +52,8 @@ not a permanent block; the sender can request access again later.
 ### Approve from the CLI
 
 ```bash
-openclaw pairing list telegram
-openclaw pairing approve telegram <CODE>
+bot pairing list telegram
+bot pairing approve telegram <CODE>
 ```
 
 Add `--notify` to tell the requester on the same channel. Multi-account channels
@@ -66,11 +66,11 @@ privileged commands and exec approval prompts. After an owner exists, later
 pairing approvals only grant DM access; they do not add more owners.
 
 <Note>
-WhatsApp's login QR links a WhatsApp account to OpenClaw. DM access requests
+WhatsApp's login QR links a WhatsApp account to Bot. DM access requests
 approve people who message that account. These are separate flows.
 </Note>
 
-Supported channels (any installed channel plugin that declares pairing; external plugins such as `openclaw-weixin` can add more): `discord`, `feishu`, `googlechat`, `imessage`, `irc`, `line`, `matrix`, `mattermost`, `msteams`, `nextcloud-talk`, `nostr`, `signal`, `slack`, `sms`, `synology-chat`, `telegram`, `twitch`, `whatsapp`, `zalo`, `zalouser`.
+Supported channels (any installed channel plugin that declares pairing; external plugins such as `bot-weixin` can add more): `discord`, `feishu`, `googlechat`, `imessage`, `irc`, `line`, `matrix`, `mattermost`, `msteams`, `nextcloud-talk`, `nostr`, `signal`, `slack`, `sms`, `synology-chat`, `telegram`, `twitch`, `whatsapp`, `zalo`, `zalouser`.
 
 ### Reusable sender groups
 
@@ -104,7 +104,7 @@ Access groups are documented in detail here: [Access groups](/channels/access-gr
 ### Where the state lives
 
 Stored in the shared SQLite state database at
-`~/.openclaw/state/openclaw.sqlite`:
+`~/.bot/state/bot.sqlite`:
 
 - pending requests in `channel_pairing_requests`
 - approved senders in `channel_pairing_allow_entries`
@@ -115,8 +115,8 @@ Account scoping behavior:
 - runtime reads only the canonical SQLite rows; it does not merge legacy files
 
 Older gateways wrote `<channel>-pairing.json` and
-`<channel>-<accountId>-allowFrom.json` under `~/.openclaw/credentials/`.
-Startup migration and `openclaw doctor --fix` import those files into SQLite and
+`<channel>-<accountId>-allowFrom.json` under `~/.bot/credentials/`.
+Startup migration and `bot doctor --fix` import those files into SQLite and
 remove each source after a successful import. Treat the SQLite database as
 sensitive because these rows gate access to your assistant.
 
@@ -143,10 +143,10 @@ Use an already connected Control UI session with `operator.admin` access:
 3. Keep **Full access (recommended)**, or select **Limited access** to omit
    administrative Gateway controls.
 4. Click **Create setup code**.
-5. On your phone, open the OpenClaw app → **Settings** → **Gateway**.
+5. On your phone, open the Bot app → **Settings** → **Gateway**.
 6. Scan the QR code or paste the setup code, then connect.
 
-Official OpenClaw iOS and Android apps are approved automatically when their
+Official Bot iOS and Android apps are approved automatically when their
 setup-code metadata matches. If **Pending approval** shows a request (for
 example, for a non-official client or mismatched metadata), review its role and
 scopes before approving it.
@@ -161,7 +161,7 @@ If you use the `device-pair` plugin, you can do first-time device pairing entire
 
 1. In Telegram, message your bot: `/pair`
 2. The bot replies with two messages: an instruction message and a separate **setup code** message (easy to copy/paste in Telegram).
-3. On your phone, open the OpenClaw iOS app → Settings → Gateway.
+3. On your phone, open the Bot iOS app → Settings → Gateway.
 4. Scan the QR code (`/pair qr`) or paste the setup code and connect.
 5. The official mobile app connects automatically. If `/pair pending` shows a
    request, review its role and scopes before approving it.
@@ -182,7 +182,7 @@ That bootstrap token carries the built-in pairing bootstrap profile:
 - the default handed-off `operator` token includes `operator.admin`,
   `operator.approvals`, `operator.read`, `operator.talk.secrets`, and
   `operator.write`
-- Control UI **Limited access** and `openclaw qr --limited` omit
+- Control UI **Limited access** and `bot qr --limited` omit
   `operator.admin` while keeping the other operator scopes
 - plaintext LAN `ws://` setup automatically uses the same limited profile;
   configure `wss://` or Tailscale Serve and generate a new code for full access
@@ -203,7 +203,7 @@ emulator host. Non-loopback plaintext routes receive limited access. Tailnet
 CGNAT addresses, `.ts.net` names, and public hosts still fail closed before
 QR/setup-code issuance.
 
-For `gateway.bind=lan` setup URLs, OpenClaw detects persistent Tailscale Serve
+For `gateway.bind=lan` setup URLs, Bot detects persistent Tailscale Serve
 HTTPS roots that proxy the active Gateway's loopback port and advertises them
 alongside the LAN route. The setup command adds this fallback only
 for `lan`; `custom` and `tailnet` keep their explicitly advertised routes. The
@@ -213,9 +213,9 @@ endpoint.
 ### Approve a node device
 
 ```bash
-openclaw devices list
-openclaw devices approve <requestId>
-openclaw devices reject <requestId>
+bot devices list
+bot devices approve <requestId>
+bot devices reject <requestId>
 ```
 
 When an explicit approval is denied because the approving paired-device session
@@ -230,7 +230,7 @@ role/scopes/public key), the previous pending request is superseded and a new
 `requestId` is created.
 
 <Note>
-An already paired device does not get broader access silently. If it reconnects asking for more scopes or a broader role, OpenClaw keeps the existing approval as-is and creates a fresh pending upgrade request. Use `openclaw devices list` to compare the currently approved access with the newly requested access before you approve.
+An already paired device does not get broader access silently. If it reconnects asking for more scopes or a broader role, Bot keeps the existing approval as-is and creates a fresh pending upgrade request. Use `bot devices list` to compare the currently approved access with the newly requested access before you approve.
 </Note>
 
 ### Optional trusted-CIDR node auto-approve
@@ -257,17 +257,17 @@ approval.
 
 ### Node pairing state storage
 
-Stored in the shared SQLite state database at `~/.openclaw/state/openclaw.sqlite`:
+Stored in the shared SQLite state database at `~/.bot/state/bot.sqlite`:
 
 - pending device pairing requests (short-lived; they expire after 5 minutes)
 - paired devices + tokens
 
-Older gateways kept this state in `~/.openclaw/devices/*.json`; those files are
+Older gateways kept this state in `~/.bot/devices/*.json`; those files are
 imported into SQLite at gateway startup and archived with a `.migrated` suffix.
 
 ### Notes
 
-- The `node.pair.*` API (CLI: `openclaw nodes pending|approve|reject|remove|rename`) manages
+- The `node.pair.*` API (CLI: `bot nodes pending|approve|reject|remove|rename`) manages
   node capability approvals stored on the same paired device records. WS nodes
   still require device pairing; see [Node pairing](/gateway/pairing).
 - The pairing record is the durable source of truth for approved roles. Active

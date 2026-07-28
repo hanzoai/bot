@@ -1,42 +1,42 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Build and bundle OpenClaw into a minimal .app we can open.
-# Outputs to dist/OpenClaw.app
+# Build and bundle Bot into a minimal .app we can open.
+# Outputs to dist/Bot.app
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 source "$ROOT_DIR/scripts/lib/plistbuddy.sh"
 source "$ROOT_DIR/scripts/lib/swift-toolchain.sh"
 source "$ROOT_DIR/scripts/lib/build-metadata.sh"
-DEFAULT_APP_ROOT="$ROOT_DIR/dist/OpenClaw.app"
-APP_ROOT="${OPENCLAW_PACKAGE_APP_ROOT:-$DEFAULT_APP_ROOT}"
+DEFAULT_APP_ROOT="$ROOT_DIR/dist/Bot.app"
+APP_ROOT="${BOT_PACKAGE_APP_ROOT:-$DEFAULT_APP_ROOT}"
 case "$APP_ROOT" in
   "$ROOT_DIR/dist/"*) ;;
   *)
-    echo "ERROR: OPENCLAW_PACKAGE_APP_ROOT must stay under $ROOT_DIR/dist" >&2
+    echo "ERROR: BOT_PACKAGE_APP_ROOT must stay under $ROOT_DIR/dist" >&2
     exit 1
     ;;
 esac
 BUILD_ROOT="$ROOT_DIR/apps/macos/.build"
-PRODUCT="OpenClaw"
-MLX_TTS_HELPER_PRODUCT="openclaw-mlx-tts"
+PRODUCT="Bot"
+MLX_TTS_HELPER_PRODUCT="bot-mlx-tts"
 MLX_TTS_HELPER_ROOT="$ROOT_DIR/apps/macos-mlx-tts"
 MLX_TTS_HELPER_BUILD_ROOT="$MLX_TTS_HELPER_ROOT/.build"
-BUNDLE_ID="${BUNDLE_ID:-ai.openclaw.mac.debug}"
+BUNDLE_ID="${BUNDLE_ID:-ai.bot.mac.debug}"
 PKG_VERSION="$(cd "$ROOT_DIR" && node -p "require('./package.json').version" 2>/dev/null || echo "0.0.0")"
 BUILD_CONFIG="${BUILD_CONFIG:-debug}"
-BUILD_TS="$(openclaw_resolve_build_timestamp)"
+BUILD_TS="$(bot_resolve_build_timestamp)"
 if [[ "$BUILD_CONFIG" == "release" ]]; then
-  OPENCLAW_REQUIRE_BUILD_METADATA=1
+  BOT_REQUIRE_BUILD_METADATA=1
 fi
-BUILD_GIT_COMMIT="$(openclaw_resolve_git_commit "$ROOT_DIR")"
+BUILD_GIT_COMMIT="$(bot_resolve_git_commit "$ROOT_DIR")"
 if [[ "$BUILD_CONFIG" == "release" ]]; then
   bash "$ROOT_DIR/scripts/apple-release-source-check.sh" \
     --root "$ROOT_DIR" \
     --expected-commit "$BUILD_GIT_COMMIT"
 fi
-export OPENCLAW_BUILD_TIMESTAMP="$BUILD_TS"
-if openclaw_is_full_git_commit "$BUILD_GIT_COMMIT"; then
+export BOT_BUILD_TIMESTAMP="$BUILD_TS"
+if bot_is_full_git_commit "$BUILD_GIT_COMMIT"; then
   export GIT_COMMIT="$BUILD_GIT_COMMIT"
 else
   unset GIT_COMMIT
@@ -58,7 +58,7 @@ fi
 IFS=' ' read -r -a BUILD_ARCHS <<< "$BUILD_ARCHS_VALUE"
 PRIMARY_ARCH="${BUILD_ARCHS[0]}"
 SPARKLE_PUBLIC_ED_KEY="${SPARKLE_PUBLIC_ED_KEY:-AGCY8w5vHirVfGGDGc8Szc5iuOqupZSh9pMj/Qs67XI=}"
-SPARKLE_FEED_URL="${SPARKLE_FEED_URL:-https://raw.githubusercontent.com/openclaw/openclaw/main/appcast.xml}"
+SPARKLE_FEED_URL="${SPARKLE_FEED_URL:-https://raw.githubusercontent.com/hanzoai/bot/main/appcast.xml}"
 AUTO_CHECKS=true
 if [[ "$BUNDLE_ID" == *.debug ]]; then
   SPARKLE_FEED_URL=""
@@ -118,7 +118,7 @@ restore_swiftpm_resource_sources() {
   local backup_file
   for source_file in "${PATCHED_SWIFTPM_RESOURCE_SOURCES[@]:-}"; do
     [[ -n "$source_file" ]] || continue
-    backup_file="$source_file.openclaw-original"
+    backup_file="$source_file.bot-original"
     if [[ -f "$backup_file" ]]; then
       mv "$backup_file" "$source_file"
     fi
@@ -141,11 +141,11 @@ patch_swiftpm_resource_lookups() {
       echo "ERROR: SwiftPM resource source not found at $source_file" >&2
       return 1
     fi
-    if [[ -e "$source_file.openclaw-original" ]]; then
-      echo "ERROR: Stale SwiftPM resource source backup at $source_file.openclaw-original" >&2
+    if [[ -e "$source_file.bot-original" ]]; then
+      echo "ERROR: Stale SwiftPM resource source backup at $source_file.bot-original" >&2
       return 1
     fi
-    cp -p "$source_file" "$source_file.openclaw-original"
+    cp -p "$source_file" "$source_file.bot-original"
     chmod u+w "$source_file"
     PATCHED_SWIFTPM_RESOURCE_SOURCES+=("$source_file")
   done
@@ -385,24 +385,24 @@ mkdir -p "$APP_ROOT/Contents/Resources"
 mkdir -p "$APP_ROOT/Contents/Frameworks"
 
 echo "📄 Copying Info.plist template"
-INFO_PLIST_SRC="$ROOT_DIR/apps/macos/Sources/OpenClaw/Resources/Info.plist"
+INFO_PLIST_SRC="$ROOT_DIR/apps/macos/Sources/Bot/Resources/Info.plist"
 if [ ! -f "$INFO_PLIST_SRC" ]; then
   echo "ERROR: Info.plist template missing at $INFO_PLIST_SRC" >&2
   exit 1
 fi
 cp "$INFO_PLIST_SRC" "$APP_ROOT/Contents/Info.plist"
-PORT_GUARDIAN_STORAGE_VERSION="$(plist_print_required "$APP_ROOT/Contents/Info.plist" OpenClawPortGuardianStorageVersion)"
+PORT_GUARDIAN_STORAGE_VERSION="$(plist_print_required "$APP_ROOT/Contents/Info.plist" BotPortGuardianStorageVersion)"
 if [[ ! "$PORT_GUARDIAN_STORAGE_VERSION" =~ ^[1-9][0-9]*$ ]]; then
-  echo "ERROR: OpenClawPortGuardianStorageVersion must be a positive integer." >&2
+  echo "ERROR: BotPortGuardianStorageVersion must be a positive integer." >&2
   exit 1
 fi
 plist_set_string_required "$APP_ROOT/Contents/Info.plist" CFBundleIdentifier "$BUNDLE_ID"
 plist_set_string_required "$APP_ROOT/Contents/Info.plist" CFBundleShortVersionString "$APP_VERSION"
 plist_set_string_required "$APP_ROOT/Contents/Info.plist" CFBundleVersion "$APP_BUILD"
-plist_set_string_required "$APP_ROOT/Contents/Info.plist" OpenClawBuildTimestamp "$BUILD_TS"
-plist_set_string_required "$APP_ROOT/Contents/Info.plist" OpenClawGitCommit "$BUILD_GIT_COMMIT"
+plist_set_string_required "$APP_ROOT/Contents/Info.plist" BotBuildTimestamp "$BUILD_TS"
+plist_set_string_required "$APP_ROOT/Contents/Info.plist" BotGitCommit "$BUILD_GIT_COMMIT"
 if [[ "$BUILD_CONFIG" == "release" ]]; then
-  EMBEDDED_GIT_COMMIT="$(plist_print_required "$APP_ROOT/Contents/Info.plist" OpenClawGitCommit)"
+  EMBEDDED_GIT_COMMIT="$(plist_print_required "$APP_ROOT/Contents/Info.plist" BotGitCommit)"
   if [[ "$EMBEDDED_GIT_COMMIT" != "$BUILD_GIT_COMMIT" ]]; then
     echo "ERROR: Release app embedded Git commit '$EMBEDDED_GIT_COMMIT', expected '$BUILD_GIT_COMMIT'." >&2
     exit 1
@@ -413,17 +413,17 @@ plist_set_or_add_string "$APP_ROOT/Contents/Info.plist" SUPublicEDKey "$SPARKLE_
 plist_set_or_add_bool "$APP_ROOT/Contents/Info.plist" SUEnableAutomaticChecks "$AUTO_CHECKS"
 
 echo "🚚 Copying binary"
-cp "$BIN_PRIMARY" "$APP_ROOT/Contents/MacOS/OpenClaw"
+cp "$BIN_PRIMARY" "$APP_ROOT/Contents/MacOS/Bot"
 if [[ "${#BUILD_ARCHS[@]}" -gt 1 ]]; then
   BIN_INPUTS=()
   for arch in "${BUILD_ARCHS[@]}"; do
     BIN_INPUTS+=("$(bin_for_arch "$arch")")
   done
-  /usr/bin/lipo -create "${BIN_INPUTS[@]}" -output "$APP_ROOT/Contents/MacOS/OpenClaw"
+  /usr/bin/lipo -create "${BIN_INPUTS[@]}" -output "$APP_ROOT/Contents/MacOS/Bot"
 fi
-chmod +x "$APP_ROOT/Contents/MacOS/OpenClaw"
+chmod +x "$APP_ROOT/Contents/MacOS/Bot"
 # SwiftPM outputs ad-hoc signed binaries; strip the signature before install_name_tool to avoid warnings.
-/usr/bin/codesign --remove-signature "$APP_ROOT/Contents/MacOS/OpenClaw" 2>/dev/null || true
+/usr/bin/codesign --remove-signature "$APP_ROOT/Contents/MacOS/Bot" 2>/dev/null || true
 
 echo "🚚 Copying MLX TTS helper"
 cp "$(helper_bin_for_arch "$PRIMARY_ARCH")" "$APP_ROOT/Contents/MacOS/$MLX_TTS_HELPER_PRODUCT"
@@ -467,14 +467,14 @@ else
 fi
 
 echo "🖼  Copying app icon"
-cp "$ROOT_DIR/apps/macos/Sources/OpenClaw/Resources/OpenClaw.icns" "$APP_ROOT/Contents/Resources/OpenClaw.icns"
+cp "$ROOT_DIR/apps/macos/Sources/Bot/Resources/Bot.icns" "$APP_ROOT/Contents/Resources/Bot.icns"
 
 echo "📦 Copying device model resources"
 rm -rf "$APP_ROOT/Contents/Resources/DeviceModels"
-cp -R "$ROOT_DIR/apps/macos/Sources/OpenClaw/Resources/DeviceModels" "$APP_ROOT/Contents/Resources/DeviceModels"
+cp -R "$ROOT_DIR/apps/macos/Sources/Bot/Resources/DeviceModels" "$APP_ROOT/Contents/Resources/DeviceModels"
 
 echo "📦 Copying provider icon resources"
-PROVIDER_ICONS_SRC="$ROOT_DIR/apps/macos/Sources/OpenClaw/Resources/ProviderIcons"
+PROVIDER_ICONS_SRC="$ROOT_DIR/apps/macos/Sources/Bot/Resources/ProviderIcons"
 if [ ! -d "$PROVIDER_ICONS_SRC" ]; then
   echo "ERROR: Provider icon resources missing at $PROVIDER_ICONS_SRC" >&2
   exit 1
@@ -519,8 +519,8 @@ done
 REQUIRED_SWIFTPM_RESOURCE_BUNDLES=(
   "GRDB_GRDB.bundle"
   "KeyboardShortcuts_KeyboardShortcuts.bundle"
-  "OpenClaw_OpenClaw.bundle"
-  "OpenClawKit_OpenClawKit.bundle"
+  "Bot_Bot.bundle"
+  "BotKit_BotKit.bundle"
   "SwiftMath_SwiftMath.bundle"
 )
 for resource_bundle in "${REQUIRED_SWIFTPM_RESOURCE_BUNDLES[@]}"; do
@@ -532,7 +532,7 @@ done
 
 running_packaged_app_pids() {
   command -v pgrep >/dev/null 2>&1 || return 0
-  local app_binary="$APP_ROOT/Contents/MacOS/OpenClaw"
+  local app_binary="$APP_ROOT/Contents/MacOS/Bot"
   local pid
   pgrep -x "$PRODUCT" 2>/dev/null | while IFS= read -r pid; do
     [[ "$pid" =~ ^[0-9]+$ ]] || continue
@@ -559,7 +559,7 @@ stop_packaged_app_if_running() {
     return 0
   fi
 
-  echo "⏹  Stopping packaged OpenClaw bundle (${pids[*]})"
+  echo "⏹  Stopping packaged Bot bundle (${pids[*]})"
   kill "${pids[@]}" 2>/dev/null || true
   for _ in $(seq 1 40); do
     local alive=0
@@ -582,7 +582,7 @@ stop_packaged_app_if_running() {
     [[ "$alive" == "0" ]] && return 0
     sleep 0.1
   done
-  echo "ERROR: Packaged OpenClaw bundle did not exit: ${pids[*]}" >&2
+  echo "ERROR: Packaged Bot bundle did not exit: ${pids[*]}" >&2
   return 1
 }
 

@@ -9,8 +9,8 @@ import {
 import { parseSqliteSessionFileMarker } from "../../../config/sessions/sqlite-marker.js";
 import { resolveQuotaSuspensionEntryMaintenance } from "../../../config/sessions/store-maintenance.js";
 import type { SessionEntry as ConfigSessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
-import { isTranscriptOnlyOpenClawAssistantMessage } from "../../../shared/transcript-only-openclaw-assistant.js";
+import type { BotConfig } from "../../../config/types.bot.js";
+import { isTranscriptOnlyBotAssistantMessage } from "../../../shared/transcript-only-bot-assistant.js";
 import type { AgentMessage } from "../../runtime/index.js";
 import { guardSessionManager } from "../../session-tool-result-guard-wrapper.js";
 import { sanitizeToolUseResultPairing } from "../../session-transcript-repair.js";
@@ -61,7 +61,7 @@ export function removeTrailingMidTurnPrecheckAssistantError(params: {
           entry.type === "custom" ||
           entry.type === "label" ||
           entry.type === "session_info" ||
-          (entry.type === "message" && isTranscriptOnlyOpenClawAssistantMessage(entry.message)),
+          (entry.type === "message" && isTranscriptOnlyBotAssistantMessage(entry.message)),
       },
     ) > 0;
   if (removedActiveError && !removedPersistedError) {
@@ -87,7 +87,7 @@ export function normalizeCompactionRecoveryTranscriptTail(params: {
         entry.type === "custom" ||
         entry.type === "label" ||
         entry.type === "session_info" ||
-        (entry.type === "message" && isTranscriptOnlyOpenClawAssistantMessage(entry.message)),
+        (entry.type === "message" && isTranscriptOnlyBotAssistantMessage(entry.message)),
     },
   );
   params.activeSession.agent.state.messages =
@@ -136,7 +136,7 @@ export async function loadAttemptSessionEntryAfterQuotaMaintenance(params: {
 
 export async function resolveAttemptTrajectorySessionFile(params: {
   agentId: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionFile: string;
   sessionId: string;
   sessionKey?: string;
@@ -174,7 +174,7 @@ function isTranscriptMessageEvent(event: unknown): boolean {
 
 export async function resolveExistingAttemptTranscriptState(params: {
   agentId: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionFile: string;
   sessionId: string;
   sessionKey?: string;

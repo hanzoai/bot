@@ -1,6 +1,6 @@
 // Tavily plugin module implements tavily client behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { readProviderJsonResponse } from "bot/plugin-sdk/provider-http";
 import {
   DEFAULT_CACHE_TTL_MINUTES,
   normalizeCacheKey,
@@ -8,8 +8,8 @@ import {
   readCache,
   resolveCacheTtlMs,
   writeCache,
-} from "openclaw/plugin-sdk/provider-web-search";
-import { wrapExternalContent, wrapWebContent } from "openclaw/plugin-sdk/security-runtime";
+} from "bot/plugin-sdk/provider-web-search";
+import { wrapExternalContent, wrapWebContent } from "bot/plugin-sdk/security-runtime";
 import {
   DEFAULT_TAVILY_BASE_URL,
   resolveTavilyApiKey,
@@ -30,7 +30,7 @@ const DEFAULT_SEARCH_COUNT = 5;
 const TAVILY_EXTRACT_RESPONSE_MAX_BYTES = 64 * 1024 * 1024;
 
 export type TavilySearchParams = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   query: string;
   searchDepth?: string;
   topic?: string;
@@ -43,7 +43,7 @@ export type TavilySearchParams = {
 };
 
 export type TavilyExtractParams = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   urls: string[];
   query?: string;
   extractDepth?: string;
@@ -84,7 +84,7 @@ async function postTavilyJson(params: {
       apiKey: params.apiKey,
       body: params.body,
       errorLabel: params.errorLabel,
-      extraHeaders: { "X-Client-Source": "openclaw" },
+      extraHeaders: { "X-Client-Source": "bot" },
     },
     async (response) =>
       readTavilyJsonResponse(response, params.errorLabel, {

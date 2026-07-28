@@ -47,7 +47,7 @@ describe("processDiscordMessage deliver-lambda abort logging", () => {
         messages: {
           ackReaction: "👀",
         },
-        session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+        session: { store: "/tmp/bot-discord-process-test-sessions.json" },
       },
     });
 

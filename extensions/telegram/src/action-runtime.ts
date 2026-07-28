@@ -1,6 +1,6 @@
 // Telegram plugin module implements action runtime behavior.
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import { readBooleanParam } from "openclaw/plugin-sdk/boolean-param";
+import type { AgentToolResult } from "bot/plugin-sdk/agent-core";
+import { readBooleanParam } from "bot/plugin-sdk/boolean-param";
 import {
   jsonResult,
   readPositiveIntegerParam,
@@ -10,22 +10,22 @@ import {
   readStringParam,
   resolvePollMaxSelections,
   resolveReactionMessageId,
-} from "openclaw/plugin-sdk/channel-actions";
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
-import { normalizeOutboundLocation } from "openclaw/plugin-sdk/channel-inbound";
+} from "bot/plugin-sdk/channel-actions";
+import type { ChannelMessageActionContext } from "bot/plugin-sdk/channel-contract";
+import { normalizeOutboundLocation } from "bot/plugin-sdk/channel-inbound";
 import {
   buildOutboundSessionContext,
   sendDurableMessageBatch,
   type DurableMessageBatchSendResult,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-outbound";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   normalizeMessagePresentation,
   renderMessagePresentationFallbackText,
-} from "openclaw/plugin-sdk/interactive-runtime";
-import type { MessagePresentation } from "openclaw/plugin-sdk/interactive-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "bot/plugin-sdk/interactive-runtime";
+import type { MessagePresentation } from "bot/plugin-sdk/interactive-runtime";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
+import { resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
 import {
   createTelegramActionGate,
   resolveDefaultTelegramAccountId,
@@ -147,7 +147,7 @@ function readTelegramThreadId(params: Record<string, unknown>) {
   );
 }
 
-function resolveActionTopicNameCacheScope(cfg: OpenClawConfig, accountId?: string | null): string {
+function resolveActionTopicNameCacheScope(cfg: BotConfig, accountId?: string | null): string {
   const storePath = resolveStorePath(cfg.session?.store, {
     agentId: accountId ?? resolveDefaultTelegramAccountId(cfg),
   });
@@ -344,7 +344,7 @@ function getLastDurableTelegramActionResult(
 
 export async function handleTelegramAction(
   params: Record<string, unknown>,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   options?: {
     mediaLocalRoots?: readonly string[];
     mediaReadFile?: (filePath: string) => Promise<Buffer>;

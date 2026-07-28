@@ -4,31 +4,31 @@ import path from "node:path";
 import {
   embeddedAgentLog,
   type EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { replaceRuntimeAuthProfileStoreSnapshots } from "openclaw/plugin-sdk/agent-runtime";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { replaceRuntimeAuthProfileStoreSnapshots } from "bot/plugin-sdk/agent-runtime";
+import { SessionManager } from "bot/plugin-sdk/agent-sessions";
 import {
   onInternalDiagnosticEvent,
   waitForDiagnosticEventsDrained,
   type DiagnosticEventPayload,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
-import { initializeGlobalHookRunner, registerInternalHook } from "openclaw/plugin-sdk/hook-runtime";
-import { registerMemoryCapability } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import { MESSAGE_TOOL_DELIVERY_HINTS } from "openclaw/plugin-sdk/message-tool-delivery-hints";
-import { registerPluginCommand } from "openclaw/plugin-sdk/plugin-runtime";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { GPT5_BEHAVIOR_CONTRACT as CODEX_GPT5_BEHAVIOR_CONTRACT } from "openclaw/plugin-sdk/provider-model-shared";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { readSessionTranscriptEvents } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "bot/plugin-sdk/diagnostic-runtime";
+import { initializeGlobalHookRunner, registerInternalHook } from "bot/plugin-sdk/hook-runtime";
+import { registerMemoryCapability } from "bot/plugin-sdk/memory-core-host-runtime-core";
+import { MESSAGE_TOOL_DELIVERY_HINTS } from "bot/plugin-sdk/message-tool-delivery-hints";
+import { registerPluginCommand } from "bot/plugin-sdk/plugin-runtime";
+import { createMockPluginRegistry } from "bot/plugin-sdk/plugin-test-runtime";
+import { GPT5_BEHAVIOR_CONTRACT as CODEX_GPT5_BEHAVIOR_CONTRACT } from "bot/plugin-sdk/provider-model-shared";
+import { upsertSessionEntry } from "bot/plugin-sdk/session-store-runtime";
+import { readSessionTranscriptEvents } from "bot/plugin-sdk/session-transcript-runtime";
 import { describe, expect, it, vi } from "vitest";
 import WebSocket from "ws";
 import { defaultCodexAppInventoryCache } from "./app-inventory-cache.js";
 import {
-  buildCodexOpenClawPromptContext,
+  buildCodexBotPromptContext,
   buildCodexSystemPromptReport,
   buildCodexWorkspaceBootstrapContext,
   getCodexWorkspaceMemoryToolNames,
-  prependCodexOpenClawPromptContext,
+  prependCodexBotPromptContext,
 } from "./attempt-context.js";
 import { readAttemptTerminal } from "./attempt-terminal.test-helper.js";
 import { withCodexStartupTimeout } from "./attempt-timeouts.js";
@@ -118,19 +118,19 @@ const testing = {
     if (
       hostSystemAgentActive &&
       params.toolsAllow?.length === 1 &&
-      params.toolsAllow[0] === "openclaw"
+      params.toolsAllow[0] === "bot"
     ) {
-      names.push("openclaw");
+      names.push("bot");
     }
     if (params.sourceReplyDeliveryMode === "message_tool_only") {
       names.push("message");
     }
     return names;
   },
-  setOpenClawCodingToolsFactoryForTests(
-    factory: NonNullable<typeof dynamicToolBuildState.openClawCodingToolsFactory>,
+  setBotCodingToolsFactoryForTests(
+    factory: NonNullable<typeof dynamicToolBuildState.botCodingToolsFactory>,
   ): void {
-    dynamicToolBuildState.openClawCodingToolsFactory = factory;
+    dynamicToolBuildState.botCodingToolsFactory = factory;
   },
   shouldEnableCodexAppServerNativeToolSurface,
   withCodexStartupTimeout,
@@ -377,13 +377,13 @@ async function buildCodexTurnContextForTest(
     memoryToolNames,
   });
   const threadDeveloperInstructions = testing.buildDeveloperInstructions(params, { dynamicTools });
-  const openClawPromptContext = buildCodexOpenClawPromptContext({
+  const botPromptContext = buildCodexBotPromptContext({
     params,
     workspacePromptContext: workspaceBootstrapContext.promptContext,
   });
-  const codexTurnPromptText = prependCodexOpenClawPromptContext(
+  const codexTurnPromptText = prependCodexBotPromptContext(
     params.prompt,
-    openClawPromptContext,
+    botPromptContext,
   );
   const turnStartParams = buildTurnStartParams(params, {
     threadId: "thread-1",
@@ -1022,8 +1022,8 @@ describe("runCodexAppServerAttempt", () => {
     });
     expect(authProfileStore.profiles[authProfileId]).toHaveProperty("keyRef");
   });
-  it("starts active OpenClaw sandbox threads with Codex native execution disabled", async () => {
-    testing.setOpenClawCodingToolsFactoryForTests(() => [
+  it("starts active Bot sandbox threads with Codex native execution disabled", async () => {
+    testing.setBotCodingToolsFactoryForTests(() => [
       createRuntimeDynamicTool("exec"),
       createRuntimeDynamicTool("process"),
       createRuntimeDynamicTool("message"),
@@ -1085,7 +1085,7 @@ describe("runCodexAppServerAttempt", () => {
     ]);
   });
 
-  it("routes native Codex execution through an OpenClaw sandbox exec-server when opted in", async () => {
+  it("routes native Codex execution through an Bot sandbox exec-server when opted in", async () => {
     const appServer = {
       ...createThreadLifecycleAppServerOptions(),
       sandbox: "danger-full-access" as const,
@@ -1116,7 +1116,7 @@ describe("runCodexAppServerAttempt", () => {
       request,
     };
     try {
-      testing.setOpenClawCodingToolsFactoryForTests(() => [
+      testing.setBotCodingToolsFactoryForTests(() => [
         createRuntimeDynamicTool("exec"),
         createRuntimeDynamicTool("process"),
         createRuntimeDynamicTool("message"),
@@ -1208,7 +1208,7 @@ describe("runCodexAppServerAttempt", () => {
           }
         | undefined;
       expect(nativeToolSurfaceEnabled).toBe(true);
-      expect(environmentAddParams?.environmentId).toMatch(/^openclaw-sandbox-/);
+      expect(environmentAddParams?.environmentId).toMatch(/^bot-sandbox-/);
       expect(environmentAddParams?.execServerUrl).toMatch(/^ws:\/\/127\.0\.0\.1:/);
       expect(startParams?.cwd).toBe("/workspace");
       expect(startParams?.config?.["features.code_mode"]).toBe(true);
@@ -1342,7 +1342,7 @@ describe("runCodexAppServerAttempt", () => {
     }
   });
 
-  it("starts Codex threads without duplicate OpenClaw workspace tools by default", async () => {
+  it("starts Codex threads without duplicate Bot workspace tools by default", async () => {
     const { sessionFile, workspaceDir } = createRunPaths();
     const appServer = createThreadLifecycleAppServerOptions();
     const request = vi.fn(async (method: string, _params: unknown) => {
@@ -1566,8 +1566,8 @@ describe("runCodexAppServerAttempt", () => {
           text: "Unscoped structured command guidance.",
         },
         {
-          text: "OpenClaw main command guidance.",
-          surfaces: ["openclaw_main"],
+          text: "Bot main command guidance.",
+          surfaces: ["bot_main"],
         },
       ],
       handler: async () => ({ text: "ok" }),
@@ -1578,14 +1578,14 @@ describe("runCodexAppServerAttempt", () => {
     expect(instructions).toContain("Codex app-server command guidance.");
     expect(instructions).not.toContain("Legacy global command guidance.");
     expect(instructions).not.toContain("Unscoped structured command guidance.");
-    expect(instructions).not.toContain("OpenClaw main command guidance.");
+    expect(instructions).not.toContain("Bot main command guidance.");
   });
-  it("passes OpenClaw skills as turn collaboration developer instructions", async () => {
+  it("passes Bot skills as turn collaboration developer instructions", async () => {
     const llmInput = vi.fn();
     initializeGlobalHookRunner(
       createMockPluginRegistry([{ hookName: "llm_input", handler: llmInput }]),
     );
-    vi.stubEnv("OPENCLAW_TRAJECTORY", "1");
+    vi.stubEnv("BOT_TRAJECTORY", "1");
     const { sessionFile, workspaceDir } = createRunPaths();
     const harness = createStartedThreadHarness();
     const params = createParams(sessionFile, workspaceDir);
@@ -1594,7 +1594,7 @@ describe("runCodexAppServerAttempt", () => {
       type: string;
     }> = [];
     Object.assign(params, {
-      trajectorySessionFile: `sqlite:main:session-1:${path.join(tempDir, "openclaw-agent.sqlite")}`,
+      trajectorySessionFile: `sqlite:main:session-1:${path.join(tempDir, "bot-agent.sqlite")}`,
       trajectoryRecorder: {
         recordEvent: (type: string, data?: { prompt?: string; systemPrompt?: string }) => {
           trajectoryEvents.push({ type, data });
@@ -1627,17 +1627,17 @@ describe("runCodexAppServerAttempt", () => {
     };
     const collaborationInstructions =
       turnStartParams.collaborationMode?.settings?.developer_instructions ?? "";
-    expect(collaborationInstructions).toContain("## OpenClaw Skills");
+    expect(collaborationInstructions).toContain("## Bot Skills");
     expect(collaborationInstructions).toContain("<available_skills>");
     const inputText = turnStartParams.input?.[0]?.text ?? "";
-    expect(inputText).not.toContain("## OpenClaw Skills");
+    expect(inputText).not.toContain("## Bot Skills");
     expect(inputText).not.toContain("<available_skills>");
     expect(inputText).toBe("hello");
     const [llmInputPayload] = mockCall(llmInput, "llm_input") as [{ prompt?: string }, unknown];
     expect(llmInputPayload.prompt).toBe(inputText);
     const compiledContext = trajectoryEvents.find((event) => event.type === "context.compiled");
     expect(compiledContext?.data?.prompt).toBe(inputText);
-    expect(compiledContext?.data?.systemPrompt).toContain("## OpenClaw Skills");
+    expect(compiledContext?.data?.systemPrompt).toContain("## Bot Skills");
     expect(trajectoryEvents.find((event) => event.type === "prompt.submitted")?.data?.prompt).toBe(
       inputText,
     );
@@ -1675,7 +1675,7 @@ describe("runCodexAppServerAttempt", () => {
     ]);
     expect(firstResponse).toMatchObject({
       success: false,
-      contentItems: [{ type: "inputText", text: "Unknown OpenClaw tool: python" }],
+      contentItems: [{ type: "inputText", text: "Unknown Bot tool: python" }],
     });
     expect(replayedResponse).toEqual(firstResponse);
     await harness.completeTurn({ threadId: "thread-1", turnId: "turn-1" });
@@ -1697,7 +1697,7 @@ describe("runCodexAppServerAttempt", () => {
         toolCallId: "call-1",
         isError: true,
         result: {
-          content: [{ type: "text", text: "Unknown OpenClaw tool: python" }],
+          content: [{ type: "text", text: "Unknown Bot tool: python" }],
         },
       },
     });
@@ -1745,7 +1745,7 @@ describe("runCodexAppServerAttempt", () => {
         input?: Array<{ text?: string }>;
       };
       const inputText = turnStartParams.input?.[0]?.text ?? "";
-      expect(inputText).toContain("OpenClaw delivery metadata:");
+      expect(inputText).toContain("Bot delivery metadata:");
       expect(inputText).toContain(
         "This delivery metadata is runtime routing guidance, not the user's request.",
       );
@@ -1906,7 +1906,7 @@ describe("runCodexAppServerAttempt", () => {
     expect(snapshotJson).toContain('"isError":true');
     expect(snapshotJson).toContain("without a matching tool.result");
   });
-  it("keeps OpenClaw control-path tools direct when code-mode-only is enabled", () => {
+  it("keeps Bot control-path tools direct when code-mode-only is enabled", () => {
     const tools = [
       createRuntimeDynamicTool("message"),
       createRuntimeDynamicTool("web_search"),
@@ -1929,9 +1929,9 @@ describe("runCodexAppServerAttempt", () => {
     const sessionsYield = specs.find((tool) => tool.name === "sessions_yield");
     expect(message).not.toHaveProperty("namespace");
     expect(message).not.toHaveProperty("deferLoading");
-    expect(webSearch?.namespace).toBe("openclaw");
+    expect(webSearch?.namespace).toBe("bot");
     expect(webSearch?.deferLoading).toBe(true);
-    expect(heartbeat?.namespace).toBe("openclaw");
+    expect(heartbeat?.namespace).toBe("bot");
     expect(heartbeat?.deferLoading).toBe(true);
     expect(agentsList).not.toHaveProperty("namespace");
     expect(agentsList).not.toHaveProperty("deferLoading");
@@ -1942,7 +1942,7 @@ describe("runCodexAppServerAttempt", () => {
   });
 
   it("keeps the heartbeat schema deferred and stable across normal and heartbeat turns", async () => {
-    testing.setOpenClawCodingToolsFactoryForTests((options) => [
+    testing.setBotCodingToolsFactoryForTests((options) => [
       createRuntimeDynamicTool("message"),
       ...(options?.enableHeartbeatTool === true
         ? [createRuntimeDynamicTool("heartbeat_respond")]
@@ -1990,16 +1990,16 @@ describe("runCodexAppServerAttempt", () => {
     expect(registeredToolNames).toContain("message");
     expect(registeredToolNames).toContain("heartbeat_respond");
     expect(normalInstructions).not.toContain(
-      "Deferred searchable OpenClaw dynamic tools available: heartbeat_respond",
+      "Deferred searchable Bot dynamic tools available: heartbeat_respond",
     );
     expect(heartbeatInstructions).toContain(
-      "Deferred searchable OpenClaw dynamic tools available: heartbeat_respond.",
+      "Deferred searchable Bot dynamic tools available: heartbeat_respond.",
     );
     for (const bridge of [normalBridge, heartbeatBridge, nextNormalBridge]) {
       const heartbeat = flattenSpecsWithNamespace(bridge.specs).find(
         (tool) => tool.name === "heartbeat_respond",
       );
-      expect(heartbeat?.namespace).toBe("openclaw");
+      expect(heartbeat?.namespace).toBe("bot");
       expect(heartbeat?.deferLoading).toBe(true);
     }
     expect(codexDynamicToolsFingerprint(heartbeatBridge.specs)).toBe(
@@ -2079,14 +2079,14 @@ describe("runCodexAppServerAttempt", () => {
       contentItems: [
         {
           type: "inputText",
-          text: "OpenClaw tool is not available for this turn: message",
+          text: "Bot tool is not available for this turn: message",
         },
       ],
     });
   });
 
   it("keeps the persistent dynamic schema stable across heartbeat-only turns", async () => {
-    testing.setOpenClawCodingToolsFactoryForTests((options) => [
+    testing.setBotCodingToolsFactoryForTests((options) => [
       createRuntimeDynamicTool("message"),
       createRuntimeDynamicTool("web_search"),
       ...(options?.enableHeartbeatTool === true
@@ -2138,7 +2138,7 @@ describe("runCodexAppServerAttempt", () => {
     expect(specNames(nextNormalBridge.specs)).toEqual(specNames(normalBridge.specs));
   });
   it("disables Codex native tool surfaces when runtime toolsAllow is empty", async () => {
-    testing.setOpenClawCodingToolsFactoryForTests(() => [
+    testing.setBotCodingToolsFactoryForTests(() => [
       createRuntimeDynamicTool("message"),
       createRuntimeDynamicTool("web_search"),
     ]);
@@ -2199,7 +2199,7 @@ describe("runCodexAppServerAttempt", () => {
   });
 
   it("fails closed for Codex app defaults when restricted native tools have no plugin config", async () => {
-    testing.setOpenClawCodingToolsFactoryForTests(() => [createRuntimeDynamicTool("message")]);
+    testing.setBotCodingToolsFactoryForTests(() => [createRuntimeDynamicTool("message")]);
     const params = createRunParams();
     params.disableTools = false;
     params.runtimePlan = createCodexRuntimePlanFixture();
@@ -2408,7 +2408,7 @@ describe("runCodexAppServerAttempt", () => {
     const threadStart = harness.requests.find((request) => request.method === "thread/start");
     const threadStartParams = threadStart?.params as { developerInstructions?: string } | undefined;
     const wrappedPluginSystemContext = (text: string) =>
-      `---\n\nOpenClaw plugin-injected system context. This block is not workspace file content.\n\n${text}\n\n---`;
+      `---\n\nBot plugin-injected system context. This block is not workspace file content.\n\n${text}\n\n---`;
     expect(threadStartParams?.developerInstructions).toContain(
       `${wrappedPluginSystemContext("pre system")}\n\ncustom codex system\n\n${wrappedPluginSystemContext("post system")}`,
     );
@@ -2450,7 +2450,7 @@ describe("runCodexAppServerAttempt", () => {
     }
     const harness = createStartedThreadHarness();
     const params = createParams(sessionFile, workspaceDir);
-    params.prompt = "make the default webpage openclaw";
+    params.prompt = "make the default webpage bot";
     const run = runCodexAppServerAttempt(params);
     await harness.waitForMethod("turn/start");
     await new Promise<void>((resolve) => {
@@ -2462,12 +2462,12 @@ describe("runCodexAppServerAttempt", () => {
     const inputText =
       (turnStart?.params as { input?: Array<{ text?: string }> } | undefined)?.input?.[0]?.text ??
       "";
-    expect(inputText).toContain("OpenClaw assembled context for this turn:");
+    expect(inputText).toContain("Bot assembled context for this turn:");
     expect(inputText).toContain("older next-step anchor: keep the handoff checklist");
     expect(inputText).toContain("we are fixing the Opik default project");
     expect(inputText).toContain("Opik default project context");
     expect(inputText).toContain("Current user request:");
-    expect(inputText).toContain("make the default webpage openclaw");
+    expect(inputText).toContain("make the default webpage bot");
   });
   it("keeps large fresh-thread continuity under the Codex turn/start input limit", async () => {
     const { sessionFile, workspaceDir } = createRunPaths();
@@ -2502,7 +2502,7 @@ describe("runCodexAppServerAttempt", () => {
       (turnStart?.params as { input?: Array<{ text?: string }> } | undefined)?.input?.[0]?.text ??
       "";
     expect(inputText.length).toBeLessThanOrEqual(1 << 20);
-    expect(inputText).toContain("OpenClaw assembled context for this turn:");
+    expect(inputText).toContain("Bot assembled context for this turn:");
     expect(inputText).toContain("recent continuity anchor: resume the database migration");
     expect(inputText).toContain("Current user request:");
     expect(inputText).toContain("current prompt survives");
@@ -2593,7 +2593,7 @@ describe("runCodexAppServerAttempt", () => {
     const inputText =
       (turnStart?.params as { input?: Array<{ text?: string }> } | undefined)?.input?.[0]?.text ??
       "";
-    expect(inputText).not.toContain("OpenClaw assembled context for this turn:");
+    expect(inputText).not.toContain("Bot assembled context for this turn:");
     expect(inputText).not.toContain("we were discussing the Sonnet leak screenshots");
     expect(inputText).not.toContain("David Ondrej was mentioned in that prior thread");
     expect(inputText).not.toContain("Current user request:");
@@ -2714,8 +2714,8 @@ describe("runCodexAppServerAttempt", () => {
     );
     const copilotMirrorMessage = {
       ...assistantMessage("copilot mirror context also matters", bindingUpdatedAt + 3_000),
-      __openclaw: { mirrorIdentity: "copilot:assistant-1" },
-    } as ReturnType<typeof assistantMessage> & { __openclaw: { mirrorIdentity: string } };
+      __bot: { mirrorIdentity: "copilot:assistant-1" },
+    } as ReturnType<typeof assistantMessage> & { __bot: { mirrorIdentity: string } };
     sessionManager.appendMessage(copilotMirrorMessage);
     const harness = createResumeHarness();
     const params = createParams(sessionFile, workspaceDir);
@@ -2732,7 +2732,7 @@ describe("runCodexAppServerAttempt", () => {
     const inputText =
       (turnStart?.params as { input?: Array<{ text?: string }> } | undefined)?.input?.[0]?.text ??
       "";
-    expect(inputText).toContain("OpenClaw assembled context for this turn:");
+    expect(inputText).toContain("Bot assembled context for this turn:");
     expect(inputText).not.toContain("old native-owned context");
     expect(inputText).toContain("we were discussing the Sonnet leak screenshots");
     expect(inputText).toContain("David Ondrej was mentioned in that prior thread");
@@ -2752,16 +2752,16 @@ describe("runCodexAppServerAttempt", () => {
     const codexMirrorUserMessage = {
       ...userMessage("codex mirrored user echo", bindingUpdatedAt + 1_000),
       idempotencyKey: "client-run:user",
-      __openclaw: { mirrorIdentity: "turn-1:prompt", mirrorOrigin: "codex-app-server" },
+      __bot: { mirrorIdentity: "turn-1:prompt", mirrorOrigin: "codex-app-server" },
     } as ReturnType<typeof userMessage> & {
       idempotencyKey: string;
-      __openclaw: { mirrorIdentity: string; mirrorOrigin: string };
+      __bot: { mirrorIdentity: string; mirrorOrigin: string };
     };
     sessionManager.appendMessage(codexMirrorUserMessage);
     const codexMirrorAssistantMessage = {
       ...assistantMessage("codex mirrored assistant echo", bindingUpdatedAt + 2_000),
-      __openclaw: { mirrorIdentity: "codex-app-server:assistant-1" },
-    } as ReturnType<typeof assistantMessage> & { __openclaw: { mirrorIdentity: string } };
+      __bot: { mirrorIdentity: "codex-app-server:assistant-1" },
+    } as ReturnType<typeof assistantMessage> & { __bot: { mirrorIdentity: string } };
     sessionManager.appendMessage(codexMirrorAssistantMessage);
     const harness = createResumeHarness();
     const params = createParams(sessionFile, workspaceDir);
@@ -2777,7 +2777,7 @@ describe("runCodexAppServerAttempt", () => {
     const inputText =
       (turnStart?.params as { input?: Array<{ text?: string }> } | undefined)?.input?.[0]?.text ??
       "";
-    expect(inputText).not.toContain("OpenClaw assembled context for this turn:");
+    expect(inputText).not.toContain("Bot assembled context for this turn:");
     expect(inputText).not.toContain("codex mirrored user echo");
     expect(inputText).not.toContain("codex mirrored assistant echo");
     expect(inputText).toContain("continue from the real user message");
@@ -2817,7 +2817,7 @@ describe("runCodexAppServerAttempt", () => {
     const inputText =
       (turnStart?.params as { input?: Array<{ text?: string }> } | undefined)?.input?.[0]?.text ??
       "";
-    expect(inputText).not.toContain("OpenClaw assembled context for this turn:");
+    expect(inputText).not.toContain("Bot assembled context for this turn:");
     expect(inputText).not.toContain("steered into active native turn");
     expect(inputText).toContain("continue after steering");
   });
@@ -2854,7 +2854,7 @@ describe("runCodexAppServerAttempt", () => {
     const firstInputText =
       (firstTurnStart?.params as { input?: Array<{ text?: string }> } | undefined)?.input?.[0]
         ?.text ?? "";
-    expect(firstInputText).toContain("OpenClaw assembled context for this turn:");
+    expect(firstInputText).toContain("Bot assembled context for this turn:");
     expect(firstInputText).toContain("we were discussing the Sonnet leak screenshots");
     expect(firstInputText).toContain("is the previous message trustworthy?");
     const secondHarness = createResumeHarness();
@@ -2870,7 +2870,7 @@ describe("runCodexAppServerAttempt", () => {
     const secondInputText =
       (secondTurnStart?.params as { input?: Array<{ text?: string }> } | undefined)?.input?.[0]
         ?.text ?? "";
-    expect(secondInputText).not.toContain("OpenClaw assembled context for this turn:");
+    expect(secondInputText).not.toContain("Bot assembled context for this turn:");
     expect(secondInputText).not.toContain("we were discussing the Sonnet leak screenshots");
     expect(secondInputText).not.toContain("is the previous message trustworthy?");
     expect(secondInputText).toContain("continue from there");
@@ -2890,7 +2890,7 @@ describe("runCodexAppServerAttempt", () => {
     await fs.writeFile(path.join(workspaceDir, "USER.md"), userProfile);
     await fs.writeFile(path.join(workspaceDir, "MEMORY.md"), memorySummary);
     registerMemoryPromptForTest();
-    testing.setOpenClawCodingToolsFactoryForTests(() => [
+    testing.setBotCodingToolsFactoryForTests(() => [
       createRuntimeDynamicTool("memory_search"),
       createRuntimeDynamicTool("memory_get"),
     ]);
@@ -2913,7 +2913,7 @@ describe("runCodexAppServerAttempt", () => {
     expect(threadDeveloperInstructions).not.toContain(agentsGuidance);
     expect(collaborationInstructions).toContain("# Collaboration Mode: Default");
     expect(collaborationInstructions).toContain("request_user_input availability");
-    expect(collaborationInstructions).toContain("OpenClaw Agent Soul");
+    expect(collaborationInstructions).toContain("Bot Agent Soul");
     expect(collaborationInstructions).toContain("<AGENT_SOUL>");
     expect(collaborationInstructions).toContain("</AGENT_SOUL>");
     expect(collaborationInstructions).toContain(soulGuidance);
@@ -2921,7 +2921,7 @@ describe("runCodexAppServerAttempt", () => {
     expect(collaborationInstructions).toContain(userProfile);
     expect(collaborationInstructions).toContain("## Memory Recall");
     expect(collaborationInstructions).toContain("MEMORY.md + memory/*.md");
-    expect(collaborationInstructions).toContain("OpenClaw Workspace Memory");
+    expect(collaborationInstructions).toContain("Bot Workspace Memory");
     expect(collaborationInstructions).toContain(
       "MEMORY.md exists in the active agent workspace as a memory file, not an instruction file",
     );
@@ -2934,14 +2934,14 @@ describe("runCodexAppServerAttempt", () => {
       "If the needed memory tool is deferred and not currently callable, use `tool_search` to load it, then call that memory tool.",
     );
     expect(collaborationInstructions).not.toContain(memorySummary);
-    expect(inputText).not.toContain("OpenClaw runtime context for this turn:");
+    expect(inputText).not.toContain("Bot runtime context for this turn:");
     expect(inputText).not.toContain("does not override Codex system/developer instructions");
     expect(inputText).not.toContain("not developer policy");
     expect(inputText).not.toContain(soulGuidance);
     expect(inputText).not.toContain(identityGuidance);
     expect(inputText).not.toContain(userProfile);
     expect(inputText).not.toContain(memorySummary);
-    expect(inputText).not.toContain("OpenClaw Workspace Memory");
+    expect(inputText).not.toContain("Bot Workspace Memory");
     expect(inputText).not.toContain("MEMORY.md exists in the active agent workspace");
     expect(inputText).not.toContain("memory_search");
     expect(inputText).not.toContain("memory_get");
@@ -2986,7 +2986,7 @@ describe("runCodexAppServerAttempt", () => {
     await fs.mkdir(path.join(workspaceDir, "memory"), { recursive: true });
     await fs.writeFile(path.join(workspaceDir, "memory/2026-06-09.md"), datedMemory);
     registerMemoryPromptForTest();
-    testing.setOpenClawCodingToolsFactoryForTests(() => [
+    testing.setBotCodingToolsFactoryForTests(() => [
       createRuntimeDynamicTool("memory_search"),
       createRuntimeDynamicTool("memory_get"),
     ]);
@@ -3003,7 +3003,7 @@ describe("runCodexAppServerAttempt", () => {
     expect(collaborationInstructions).toContain("MEMORY.md + memory/*.md");
     expect(collaborationInstructions).toContain("memory_search");
     expect(collaborationInstructions).toContain("memory_get");
-    expect(collaborationInstructions).not.toContain("OpenClaw Workspace Memory");
+    expect(collaborationInstructions).not.toContain("Bot Workspace Memory");
     expect(collaborationInstructions).not.toContain(datedMemory);
     expect(inputText).toBe("hello");
     expect(inputText).not.toContain(datedMemory);
@@ -3014,7 +3014,7 @@ describe("runCodexAppServerAttempt", () => {
     const memorySummary = "User avoids Chase cards while over 5/24.";
     await fs.mkdir(workspaceDir, { recursive: true });
     await fs.writeFile(path.join(workspaceDir, "MEMORY.md"), memorySummary);
-    testing.setOpenClawCodingToolsFactoryForTests(() => [
+    testing.setBotCodingToolsFactoryForTests(() => [
       createRuntimeDynamicTool("memory_search"),
       createRuntimeDynamicTool("memory_get"),
     ]);
@@ -3028,7 +3028,7 @@ describe("runCodexAppServerAttempt", () => {
       workspaceDir,
     );
     expect(collaborationInstructions).not.toContain("## Memory Recall");
-    expect(collaborationInstructions).toContain("OpenClaw Workspace Memory");
+    expect(collaborationInstructions).toContain("Bot Workspace Memory");
     expect(collaborationInstructions).not.toContain("Use `tool_search` first");
     expect(collaborationInstructions).not.toContain(memorySummary);
     expect(inputText).toBe("hello");
@@ -3076,7 +3076,7 @@ describe("runCodexAppServerAttempt", () => {
     };
     const collaborationInstructions =
       turnStartParams.collaborationMode?.settings?.developer_instructions ?? "";
-    expect(collaborationInstructions).toContain("OpenClaw Agent Soul");
+    expect(collaborationInstructions).toContain("Bot Agent Soul");
     expect(collaborationInstructions).toContain("<AGENT_SOUL>");
     expect(collaborationInstructions).toContain("</AGENT_SOUL>");
     expect(collaborationInstructions).toContain(soulGuidance);
@@ -3109,7 +3109,7 @@ describe("runCodexAppServerAttempt", () => {
       input?: Array<{ text?: string }>;
     };
     const inputText = turnStartParams.input?.[0]?.text ?? "";
-    expect(inputText).not.toContain("OpenClaw Workspace Memory");
+    expect(inputText).not.toContain("Bot Workspace Memory");
     expect(inputText).not.toContain("memory_search");
     expect(inputText).toContain(memorySummary);
     const fileStats = new Map(
@@ -3127,7 +3127,7 @@ describe("runCodexAppServerAttempt", () => {
     await fs.mkdir(workspaceDir, { recursive: true });
     await fs.writeFile(path.join(workspaceDir, "MEMORY.md"), memorySummary);
     registerMemoryPromptForTest();
-    testing.setOpenClawCodingToolsFactoryForTests(() => [createRuntimeDynamicTool("memory_get")]);
+    testing.setBotCodingToolsFactoryForTests(() => [createRuntimeDynamicTool("memory_get")]);
     const params = createParams(sessionFile, workspaceDir);
     params.disableTools = false;
     setCodexTestModelSupportsTools(params, true);
@@ -3135,12 +3135,12 @@ describe("runCodexAppServerAttempt", () => {
     setAgentWorkspaceForTest(params, workspaceDir);
     const { collaborationInstructions, inputText, systemPromptReport } =
       await buildCodexTurnContextForTest(params, workspaceDir);
-    expect(inputText).not.toContain("OpenClaw Workspace Memory");
+    expect(inputText).not.toContain("Bot Workspace Memory");
     expect(inputText).not.toContain("memory_get");
     expect(inputText).not.toContain("memory_search");
     expect(inputText).not.toContain(memorySummary);
     expect(collaborationInstructions).toContain("## Memory Recall");
-    expect(collaborationInstructions).toContain("OpenClaw Workspace Memory");
+    expect(collaborationInstructions).toContain("Bot Workspace Memory");
     expect(collaborationInstructions).toContain("memory_get");
     expect(collaborationInstructions).not.toContain("memory_search");
     expect(collaborationInstructions).not.toContain(memorySummary);
@@ -3221,16 +3221,16 @@ describe("runCodexAppServerAttempt", () => {
         },
       },
     } as EmbeddedRunAttemptParams["config"];
-    testing.setOpenClawCodingToolsFactoryForTests(() => [
+    testing.setBotCodingToolsFactoryForTests(() => [
       createRuntimeDynamicTool("memory_search"),
       createRuntimeDynamicTool("memory_get"),
     ]);
     const { collaborationInstructions, inputText, systemPromptReport } =
       await buildCodexTurnContextForTest(params, workspaceDir);
-    expect(inputText).not.toContain("OpenClaw Workspace Memory");
+    expect(inputText).not.toContain("Bot Workspace Memory");
     expect(inputText).not.toContain(memorySummary);
     expect(inputText).toContain(hookContext);
-    expect(collaborationInstructions).toContain("OpenClaw Workspace Memory");
+    expect(collaborationInstructions).toContain("Bot Workspace Memory");
     expect(collaborationInstructions).not.toContain(memorySummary);
     const fileStats = new Map(
       systemPromptReport.injectedWorkspaceFiles.map((file) => [file.name, file]),
@@ -3269,7 +3269,7 @@ describe("runCodexAppServerAttempt", () => {
         },
       ];
     });
-    testing.setOpenClawCodingToolsFactoryForTests(() => [
+    testing.setBotCodingToolsFactoryForTests(() => [
       createRuntimeDynamicTool("memory_search"),
       createRuntimeDynamicTool("memory_get"),
     ]);
@@ -3280,10 +3280,10 @@ describe("runCodexAppServerAttempt", () => {
     setAgentWorkspaceForTest(params, workspaceDir);
     const { collaborationInstructions, inputText, systemPromptReport } =
       await buildCodexTurnContextForTest(params, workspaceDir);
-    expect(inputText).not.toContain("OpenClaw Workspace Memory");
+    expect(inputText).not.toContain("Bot Workspace Memory");
     expect(inputText).not.toContain(rootMemory);
     expect(inputText).toContain(nestedMemory);
-    expect(collaborationInstructions).toContain("OpenClaw Workspace Memory");
+    expect(collaborationInstructions).toContain("Bot Workspace Memory");
     expect(collaborationInstructions).not.toContain(rootMemory);
     expect(collaborationInstructions).not.toContain(nestedMemory);
     const files = systemPromptReport.injectedWorkspaceFiles;
@@ -3308,7 +3308,7 @@ describe("runCodexAppServerAttempt", () => {
     await fs.mkdir(workspaceDir, { recursive: true });
     await fs.writeFile(path.join(workspaceDir, "MEMORY.md"), memorySummary);
     registerMemoryPromptForTest();
-    testing.setOpenClawCodingToolsFactoryForTests(() => [
+    testing.setBotCodingToolsFactoryForTests(() => [
       createRuntimeDynamicTool("memory_search"),
       createRuntimeDynamicTool("memory_get"),
     ]);
@@ -3319,8 +3319,8 @@ describe("runCodexAppServerAttempt", () => {
     const { collaborationInstructions, inputText, systemPromptReport } =
       await buildCodexTurnContextForTest(params, workspaceDir);
     expect(collaborationInstructions).not.toContain("## Memory Recall");
-    expect(collaborationInstructions).not.toContain("OpenClaw Workspace Memory");
-    expect(inputText).not.toContain("OpenClaw Workspace Memory");
+    expect(collaborationInstructions).not.toContain("Bot Workspace Memory");
+    expect(inputText).not.toContain("Bot Workspace Memory");
     expect(inputText).toContain(memorySummary);
     const fileStats = new Map(
       systemPromptReport.injectedWorkspaceFiles.map((file) => [file.name, file]),
@@ -3400,7 +3400,7 @@ describe("runCodexAppServerAttempt", () => {
     };
     const collaborationInstructions =
       turnStartParams.collaborationMode?.settings?.developer_instructions ?? "";
-    expect(collaborationInstructions).toContain("This is an OpenClaw heartbeat turn");
+    expect(collaborationInstructions).toContain("This is an Bot heartbeat turn");
     expect(collaborationInstructions).not.toContain("HEARTBEAT.md exists");
     expect(collaborationInstructions).not.toContain(heartbeatPath);
     const legacyContent = contents.trim();
@@ -3410,10 +3410,10 @@ describe("runCodexAppServerAttempt", () => {
       expect(collaborationInstructions).not.toContain(legacyContent);
     }
   });
-  it("keeps lightweight cron Codex turns out of OpenClaw bootstrap context", async () => {
+  it("keeps lightweight cron Codex turns out of Bot bootstrap context", async () => {
     const { sessionFile, workspaceDir } = createRunPaths();
     const exactCommand =
-      "cd /Users/phaedrus/Projects/openclaw && /Users/phaedrus/clawd/scripts/clawsweeper-related-scan.py";
+      "cd /Users/phaedrus/Projects/bot && /Users/phaedrus/clawd/scripts/clawsweeper-related-scan.py";
     await fs.mkdir(workspaceDir, { recursive: true });
     await fs.writeFile(path.join(workspaceDir, "AGENTS.md"), "Follow AGENTS guidance.");
     await fs.writeFile(path.join(workspaceDir, "SOUL.md"), "Soul voice goes here.");
@@ -3452,7 +3452,7 @@ describe("runCodexAppServerAttempt", () => {
     expect(result.systemPromptReport?.skills.hash).toMatch(/^[a-f0-9]{64}$/u);
   });
 
-  it("keeps lightweight cron delivery hints byte-for-byte without OpenClaw prompt context", async () => {
+  it("keeps lightweight cron delivery hints byte-for-byte without Bot prompt context", async () => {
     const sessionFile = path.join(tempDir, "session-lightweight-cron-delivery.jsonl");
     const workspaceDir = path.join(tempDir, "workspace-lightweight-cron-delivery");
     const exactPrompt =
@@ -3572,7 +3572,7 @@ describe("runCodexAppServerAttempt", () => {
     await harness.completeTurn({ threadId: "thread-1", turnId: "turn-1" });
     const result = await run;
     expect(result.settledTurnFinalizationContext).toMatchObject({
-      source: "openclaw-transcript",
+      source: "bot-transcript",
       messages: [
         expect.objectContaining({ role: "user" }),
         expect.objectContaining({ role: "assistant" }),
@@ -3620,7 +3620,7 @@ describe("runCodexAppServerAttempt", () => {
     expect(result.toolMetas.filter((meta) => meta.isError === true)).toHaveLength(2);
   });
 
-  it("promotes implicit Codex yolo approval policy when OpenClaw tool policy exists", async () => {
+  it("promotes implicit Codex yolo approval policy when Bot tool policy exists", async () => {
     initializeGlobalHookRunner(
       createMockPluginRegistry([{ hookName: "before_tool_call", handler: vi.fn() }]),
     );
@@ -3636,7 +3636,7 @@ describe("runCodexAppServerAttempt", () => {
     expect(startParams?.approvalPolicy).toBe("untrusted");
     expect(startParams?.sandbox).toBe("danger-full-access");
     expect(info).toHaveBeenCalledWith(
-      "codex app-server approval policy promoted for OpenClaw tool policy",
+      "codex app-server approval policy promoted for Bot tool policy",
       {
         from: "never",
         to: "untrusted",
@@ -3645,7 +3645,7 @@ describe("runCodexAppServerAttempt", () => {
       },
     );
   });
-  it("keeps explicit Codex yolo mode unpromoted when OpenClaw tool policy exists", async () => {
+  it("keeps explicit Codex yolo mode unpromoted when Bot tool policy exists", async () => {
     initializeGlobalHookRunner(
       createMockPluginRegistry([{ hookName: "before_tool_call", handler: vi.fn() }]),
     );
@@ -3685,7 +3685,7 @@ describe("runCodexAppServerAttempt", () => {
     expect(turnParams?.approvalPolicy).toBe("never");
     expect(turnParams?.sandboxPolicy).toEqual({ type: "dangerFullAccess" });
   });
-  it("keeps normalized full exec mode unpromoted when OpenClaw tool policy exists", async () => {
+  it("keeps normalized full exec mode unpromoted when Bot tool policy exists", async () => {
     initializeGlobalHookRunner(
       createMockPluginRegistry([{ hookName: "before_tool_call", handler: vi.fn() }]),
     );
@@ -3707,8 +3707,8 @@ describe("runCodexAppServerAttempt", () => {
     initializeGlobalHookRunner(
       createMockPluginRegistry([{ hookName: "before_tool_call", handler: vi.fn() }]),
     );
-    vi.stubEnv("OPENCLAW_CODEX_APP_SERVER_MODE", " ");
-    vi.stubEnv("OPENCLAW_CODEX_APP_SERVER_APPROVAL_POLICY", "always");
+    vi.stubEnv("BOT_CODEX_APP_SERVER_MODE", " ");
+    vi.stubEnv("BOT_CODEX_APP_SERVER_APPROVAL_POLICY", "always");
     const { sessionFile, workspaceDir } = createRunPaths();
     const harness = createStartedThreadHarness();
     const run = runCodexAppServerAttempt(createParams(sessionFile, workspaceDir));
@@ -5121,7 +5121,7 @@ describe("runCodexAppServerAttempt", () => {
       return {};
     });
     const clientFactory = vi.fn(async () => harness.client);
-    testing.setOpenClawCodingToolsFactoryForTests(() => []);
+    testing.setBotCodingToolsFactoryForTests(() => []);
     const params = createParams(sessionFile, workspaceDir);
     params.provider = "anthropic";
     params.modelId = "claude-opus-4-6";
@@ -5400,10 +5400,10 @@ describe("runCodexAppServerAttempt", () => {
       true,
     );
     expect(payloads[offIndex]?.channelData).toEqual({
-      openclawProgressKind: "fast-mode-auto",
+      botProgressKind: "fast-mode-auto",
     });
     expect(payloads[onIndex]?.channelData).toEqual({
-      openclawProgressKind: "fast-mode-auto",
+      botProgressKind: "fast-mode-auto",
     });
     expect(fastProgressEventSummaries(onAgentEvent)).toEqual([
       "💨Fast: auto-off(34s>=30s)",

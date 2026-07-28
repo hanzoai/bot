@@ -6,7 +6,7 @@ import type {
   ChannelThreadingAdapter,
 } from "../../channels/plugins/types.public.js";
 import type { CliDeps } from "../../cli/outbound-send-deps.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import { createOutboundTestPlugin, createTestRegistry } from "../../test-utils/channel-plugins.js";
 import { normalizeSessionDeliveryState } from "../../utils/delivery-context.shared.js";
@@ -198,7 +198,7 @@ async function deliverMediaReplyForTest(
       agents: {
         list: [{ id: "tester", workspace: "/tmp/agent-workspace" }],
       },
-    } as OpenClawConfig,
+    } as BotConfig,
     deps: {} as CliDeps,
     runtime: runtime as never,
     opts: {
@@ -248,7 +248,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
           agents: {
             list: [{ id: "tester", workspace: "/tmp/agent-workspace" }],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         deps: {} as CliDeps,
         runtime: { log: vi.fn(), error: vi.fn() } as never,
         opts: {
@@ -360,7 +360,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     const delivered = await deliverAgentCommandResult({
       cfg: {
         channels: { slack: { responsePrefix: "[{modelFull}]" } },
-      } as OpenClawConfig,
+      } as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn() } as never,
       opts: { message: "test", channel: "slack" } as AgentCommandOpts,
@@ -452,7 +452,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
         agents: {
           list: [{ id: "tester", workspace: "/tmp/agent-workspace" }],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       deps: {} as CliDeps,
       runtime: runtime as never,
       opts: {
@@ -511,7 +511,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
         agents: {
           list: [{ id: "tester", workspace: "/tmp/agent-workspace" }],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       deps: {} as CliDeps,
       runtime: runtime as never,
       opts: {
@@ -586,7 +586,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
         agents: {
           list: [{ id: "tester", workspace: "/tmp/agent-workspace" }],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       deps: {} as CliDeps,
       runtime: runtime as never,
       opts: {
@@ -637,7 +637,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     };
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: runtime as never,
       opts: {
@@ -669,7 +669,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     const runtime = { log: vi.fn(), error: vi.fn() };
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: runtime as never,
       opts: {
@@ -715,7 +715,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
 
   it("does not automatically redeliver text and media already sent to the same target", async () => {
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -764,7 +764,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     const delivery = { pin: { enabled: true, required: true } };
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -800,7 +800,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
 
   it("drops audioAsVoice when its media was already delivered", async () => {
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -841,7 +841,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     );
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -874,7 +874,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
 
   it("dedupes media encoded in a final MEDIA directive", async () => {
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -907,7 +907,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     deliverOutboundPayloadsMock.mockResolvedValue([{ channel: "slack", messageId: "msg-1" }]);
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -949,7 +949,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     const delivered = await deliverAgentCommandResult({
       cfg: {
         channels: { slack: { responsePrefix: "Bot:" } },
-      } as OpenClawConfig,
+      } as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -984,7 +984,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     const delivered = await deliverAgentCommandResult({
       cfg: {
         channels: { slack: { responsePrefix: "[{modelFull}]" } },
-      } as OpenClawConfig,
+      } as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1022,7 +1022,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
 
   it("dedupes exact short text on a confirmed matching route", async () => {
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1053,7 +1053,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
 
   it("dedupes visible text after parsing a final reply directive", async () => {
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1086,7 +1086,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     deliverOutboundPayloadsMock.mockResolvedValue([{ channel: "slack", messageId: "msg-1" }]);
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1122,7 +1122,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     deliverOutboundPayloadsMock.mockResolvedValue([{ channel: "slack", messageId: "msg-1" }]);
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1167,7 +1167,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     deliverOutboundPayloadsMock.mockResolvedValue([{ channel: "slack", messageId: "msg-1" }]);
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1202,7 +1202,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     deliverOutboundPayloadsMock.mockResolvedValue([{ channel: "slack", messageId: "msg-1" }]);
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1241,7 +1241,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     };
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1280,7 +1280,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     const location = { latitude: 48.858844, longitude: 2.294351 };
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1318,7 +1318,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     deliverOutboundPayloadsMock.mockResolvedValue([{ channel: "slack", messageId: "msg-1" }]);
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1356,7 +1356,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     const delivery = { pin: { enabled: true, required: true } };
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1391,7 +1391,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     "dedupes text for disabled delivery metadata: $delivery",
     async ({ delivery }) => {
       const delivered = await deliverAgentCommandResult({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         deps: {} as CliDeps,
         runtime: { log: vi.fn(), error: vi.fn() } as never,
         opts: {
@@ -1425,7 +1425,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     deliverOutboundPayloadsMock.mockResolvedValue([{ channel: "slack", messageId: "msg-1" }]);
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1460,7 +1460,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     deliverOutboundPayloadsMock.mockResolvedValue([{ channel: "slack", messageId: "msg-1" }]);
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1495,7 +1495,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     deliverOutboundPayloadsMock.mockResolvedValue([{ channel: "slack", messageId: "msg-1" }]);
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1534,7 +1534,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     deliverOutboundPayloadsMock.mockResolvedValue([{ channel: "slack", messageId: "msg-1" }]);
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1574,7 +1574,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     deliverOutboundPayloadsMock.mockResolvedValue([{ channel: "slack", messageId: "msg-1" }]);
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1604,7 +1604,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     deliverOutboundPayloadsMock.mockResolvedValue([{ channel: "slack", messageId: "msg-1" }]);
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1656,7 +1656,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
         agents: {
           list: [{ id: "tester", workspace: "/tmp/agent-workspace" }],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       deps: {} as CliDeps,
       runtime: runtime as never,
       opts: {
@@ -1783,7 +1783,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
 
   it("marks no-payload deliveryStatus as terminal delivery success", async () => {
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1811,7 +1811,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
 
   it("surfaces no-visible-payload deliveryStatus after payload normalization suppresses output", async () => {
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: { log: vi.fn(), error: vi.fn() } as never,
       opts: {
@@ -1842,7 +1842,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
     const runtime = { log: vi.fn(), error: vi.fn() };
 
     const delivered = await deliverAgentCommandResult({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       deps: {} as CliDeps,
       runtime: runtime as never,
       opts: {
@@ -1887,7 +1887,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
           agents: {
             list: [{ id: "tester", workspace: "/tmp/agent-workspace" }],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         deps: {} as CliDeps,
         runtime: runtime as never,
         opts: {
@@ -1939,7 +1939,7 @@ describe("deliverAgentCommandResult payload normalization", () => {
           agents: {
             list: [{ id: "tester", workspace: "/tmp/agent-workspace" }],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         deps: {} as CliDeps,
         runtime: runtime as never,
         opts: {

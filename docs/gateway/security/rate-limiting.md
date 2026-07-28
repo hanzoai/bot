@@ -57,7 +57,7 @@ While locked out, connection attempts fail with:
 
 Attempts from other IPs (including loopback) are unaffected during a lockout.
 
-Tune it under `gateway.auth.rateLimit` in `openclaw.json`:
+Tune it under `gateway.auth.rateLimit` in `bot.json`:
 
 ```json
 {

@@ -1,9 +1,9 @@
 /**
- * Blocks direct Codex app-server requests that would bypass OpenClaw sandbox or
+ * Blocks direct Codex app-server requests that would bypass Bot sandbox or
  * node-exec routing guarantees.
  */
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveSandboxRuntimeStatus } from "openclaw/plugin-sdk/sandbox";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { resolveSandboxRuntimeStatus } from "bot/plugin-sdk/sandbox";
 import {
   formatCodexNativeNodeExecBlock,
   resolveCodexNativeExecutionPolicy,
@@ -12,7 +12,7 @@ import {
 type DirectMethodPolicy =
   | "allowed-control-plane"
   | "blocked-native-bypass"
-  | "requires-openclaw-environment";
+  | "requires-bot-environment";
 
 const DIRECT_METHOD_POLICIES = new Map<string, DirectMethodPolicy>([
   ["account/rateLimits/read", "allowed-control-plane"],
@@ -40,7 +40,7 @@ const DIRECT_METHOD_POLICIES = new Map<string, DirectMethodPolicy>([
   ["thread/name/set", "allowed-control-plane"],
   ["thread/read", "allowed-control-plane"],
   ["thread/rollback", "allowed-control-plane"],
-  ["thread/start", "requires-openclaw-environment"],
+  ["thread/start", "requires-bot-environment"],
   ["thread/unarchive", "allowed-control-plane"],
   ["thread/unsubscribe", "allowed-control-plane"],
   ["turn/interrupt", "allowed-control-plane"],
@@ -71,11 +71,11 @@ const NODE_EXEC_BLOCKED_CONTROL_PLANE_METHODS = new Set<string>([
   "config/mcpServer/reload",
 ]);
 
-/** Returns a block message when a direct app-server method would bypass OpenClaw execution policy. */
+/** Returns a block message when a direct app-server method would bypass Bot execution policy. */
 export function resolveCodexAppServerDirectSandboxBypassBlock(params: {
   method: string;
   requestParams?: unknown;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionKey?: string;
   sessionId?: string;
 }): string | undefined {
@@ -116,8 +116,8 @@ export function resolveCodexAppServerDirectSandboxBypassBlock(params: {
     return undefined;
   }
   if (
-    policy === "requires-openclaw-environment" &&
-    hasOpenClawSandboxEnvironmentSelection(params.requestParams)
+    policy === "requires-bot-environment" &&
+    hasBotSandboxEnvironmentSelection(params.requestParams)
   ) {
     return undefined;
   }
@@ -126,7 +126,7 @@ export function resolveCodexAppServerDirectSandboxBypassBlock(params: {
 
 /** Resolves the generic native-execution block for sandboxed or node-hosted sessions. */
 export function resolveCodexNativeExecutionBlock(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionKey?: string;
   sessionId?: string;
   agentId?: string;
@@ -137,7 +137,7 @@ export function resolveCodexNativeExecutionBlock(params: {
 
 /** Returns a block message when native Codex execution cannot honor active sandboxing. */
 export function resolveCodexNativeSandboxBlock(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionKey?: string;
   sessionId?: string;
   surface: string;
@@ -167,7 +167,7 @@ function resolveDirectMethodPolicy(method: string): DirectMethodPolicy {
   return "blocked-native-bypass";
 }
 
-function hasOpenClawSandboxEnvironmentSelection(value: unknown): boolean {
+function hasBotSandboxEnvironmentSelection(value: unknown): boolean {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return false;
   }
@@ -182,7 +182,7 @@ function hasOpenClawSandboxEnvironmentSelection(value: unknown): boolean {
       const environment = entry as { environmentId?: unknown; cwd?: unknown };
       return (
         typeof environment.environmentId === "string" &&
-        environment.environmentId.startsWith("openclaw-sandbox-") &&
+        environment.environmentId.startsWith("bot-sandbox-") &&
         typeof environment.cwd === "string" &&
         environment.cwd.trim().length > 0
       );
@@ -192,14 +192,14 @@ function hasOpenClawSandboxEnvironmentSelection(value: unknown): boolean {
 
 function formatCodexNativeSandboxBlock(params: { surface: string }): string {
   return [
-    `Codex-native ${params.surface} is unavailable because OpenClaw sandboxing is active for this session.`,
-    "This mode cannot route execution through the OpenClaw sandbox backend.",
+    `Codex-native ${params.surface} is unavailable because Bot sandboxing is active for this session.`,
+    "This mode cannot route execution through the Bot sandbox backend.",
     "Use a normal Codex harness turn, or run an intentionally unsandboxed session.",
   ].join(" ");
 }
 
 function resolveCodexNativeNodeExecBlock(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionKey?: string;
   sessionId?: string;
   agentId?: string;

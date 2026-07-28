@@ -1,7 +1,7 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 // Tavily provider module implements model/runtime integration.
-import { readPositiveIntegerParam } from "openclaw/plugin-sdk/param-readers";
-import type { WebSearchProviderPlugin } from "openclaw/plugin-sdk/provider-web-search-contract";
+import { readPositiveIntegerParam } from "bot/plugin-sdk/param-readers";
+import type { WebSearchProviderPlugin } from "bot/plugin-sdk/provider-web-search-contract";
 import {
   buildTavilyWebSearchProviderBase,
   TAVILY_GENERIC_SEARCH_DESCRIPTION,

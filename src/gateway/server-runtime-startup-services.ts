@@ -1,6 +1,6 @@
 // Gateway startup-time runtime services.
 // Starts mode-dependent background monitors with inert handles for disabled paths.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import type { ChannelHealthMonitor } from "./channel-health-monitor.js";
 import { startChannelHealthMonitor } from "./channel-health-monitor.js";
@@ -18,7 +18,7 @@ export type GatewayChannelManager = Parameters<
 
 /** Starts channel health monitoring when gateway config enables it. */
 export function startGatewayChannelHealthMonitor(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelManager: GatewayChannelManager;
   env?: NodeJS.ProcessEnv;
 }): ChannelHealthMonitor | null {
@@ -26,8 +26,8 @@ export function startGatewayChannelHealthMonitor(params: {
   // Process-level channel suppression also owns recovery: otherwise the health
   // monitor restarts configured transports after the startup grace period.
   if (
-    isTruthyEnvValue(env.OPENCLAW_SKIP_CHANNELS) ||
-    isTruthyEnvValue(env.OPENCLAW_SKIP_PROVIDERS)
+    isTruthyEnvValue(env.BOT_SKIP_CHANNELS) ||
+    isTruthyEnvValue(env.BOT_SKIP_PROVIDERS)
   ) {
     return null;
   }
@@ -39,7 +39,7 @@ export function startGatewayChannelHealthMonitor(params: {
 /** Starts background runtime services and returns their stop/update handles. */
 export function startGatewayRuntimeServices(params: {
   minimalTestGateway: boolean;
-  cfgAtStart: OpenClawConfig;
+  cfgAtStart: BotConfig;
   channelManager: GatewayChannelManager;
   log: GatewayRuntimeServiceLogger;
 }): {

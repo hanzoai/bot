@@ -3,7 +3,7 @@
 // block-reply (text_end) channels — otherwise the mid-drain or the pre-tool
 // flushBlockReplyBuffer posts the narration as an answer. A non-tool answer must
 // still be delivered in full.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import { createStubSessionHarness } from "./embedded-agent-subscribe.e2e-harness.js";
 import { subscribeEmbeddedAgentSession } from "./embedded-agent-subscribe.js";

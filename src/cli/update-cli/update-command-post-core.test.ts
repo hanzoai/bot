@@ -16,7 +16,7 @@ afterEach(async () => {
 });
 
 async function withTempDir(): Promise<string> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-post-core-records-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-post-core-records-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -40,7 +40,7 @@ describe("readPostCorePluginInstallRecordsFile", () => {
       `${JSON.stringify({
         demo: {
           source: "npm",
-          spec: "@openclaw/demo@1.0.0",
+          spec: "@hanzo/bot-demo@1.0.0",
           installPath: "/tmp/demo-plugin",
         },
       })}\n`,
@@ -50,7 +50,7 @@ describe("readPostCorePluginInstallRecordsFile", () => {
     await expect(readPostCorePluginInstallRecordsFile(filePath)).resolves.toEqual({
       demo: {
         source: "npm",
-        spec: "@openclaw/demo@1.0.0",
+        spec: "@hanzo/bot-demo@1.0.0",
         installPath: "/tmp/demo-plugin",
       },
     });
@@ -65,7 +65,7 @@ describe("readPostCorePluginInstallRecordsFile", () => {
       `Malformed JSON in plugin install records file: ${filePath}`,
     );
     await expect(readPostCorePluginInstallRecordsFile(filePath)).rejects.toThrow(
-      "Run openclaw doctor to inspect and repair plugin installation state.",
+      "Run bot doctor to inspect and repair plugin installation state.",
     );
   });
 

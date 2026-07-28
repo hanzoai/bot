@@ -1,58 +1,58 @@
 ---
 summary: "ClickClack bot-token channel setup and target syntax"
 read_when:
-  - Connecting OpenClaw to a ClickClack workspace
+  - Connecting Bot to a ClickClack workspace
   - Testing ClickClack bot identities
 title: "ClickClack"
 ---
 
-ClickClack connects OpenClaw to a self-hosted ClickClack workspace through first-class ClickClack bot tokens.
+ClickClack connects Bot to a self-hosted ClickClack workspace through first-class ClickClack bot tokens.
 
-Use this when you want an OpenClaw agent to appear as a ClickClack bot user. ClickClack supports independent service bots and user-owned bots; user-owned bots keep an `owner_user_id` and receive only the token scopes you grant.
+Use this when you want an Bot agent to appear as a ClickClack bot user. ClickClack supports independent service bots and user-owned bots; user-owned bots keep an `owner_user_id` and receive only the token scopes you grant.
 
 ## Quick setup
 
-In ClickClack, open **Workspace settings → Integrations → OpenClaw**, create a
+In ClickClack, open **Workspace settings → Integrations → Bot**, create a
 bot using **Setup code (recommended)**, and copy the generated command:
 
 ```bash
-openclaw channels add clickclack --code 'https://clickclack.example.com/#XXXX-XXXX-XXXX'
+bot channels add clickclack --code 'https://clickclack.example.com/#XXXX-XXXX-XXXX'
 ```
 
 For separate frontend and API origins or a path-mounted API, ClickClack emits an
 exact claim endpoint instead:
 
 ```bash
-openclaw channels add clickclack --code 'https://api.example.com/services/clickclack/api/bot-setup-codes/claim#XXXX-XXXX-XXXX'
+bot channels add clickclack --code 'https://api.example.com/services/clickclack/api/bot-setup-codes/claim#XXXX-XXXX-XXXX'
 ```
 
-The setup code is single-use and expires after 10 minutes. OpenClaw claims it,
+The setup code is single-use and expires after 10 minutes. Bot claims it,
 receives the newly minted bot token and workspace settings, saves the account,
 verifies the connection, and reports whether the running gateway picked it up.
-For versioned exact endpoints, OpenClaw validates and saves the canonical API
+For versioned exact endpoints, Bot validates and saves the canonical API
 base returned by ClickClack, including any path prefix. The setup code itself is
-not stored in OpenClaw config.
+not stored in Bot config.
 
 Setup-code claims use HTTPS for public servers. Plain HTTP is also supported for
 local installations on loopback addresses such as `localhost` and `127.0.0.1`.
 
-If OpenClaw is already running, ClickClack connects automatically and no second
+If Bot is already running, ClickClack connects automatically and no second
 command is needed. Otherwise, start it with:
 
 ```bash
-openclaw gateway
+bot gateway
 ```
 
 You can also pass the code separately from the server URL:
 
 ```bash
-openclaw channels add clickclack --code XXXX-XXXX-XXXX --base-url https://clickclack.example.com
+bot channels add clickclack --code XXXX-XXXX-XXXX --base-url https://clickclack.example.com
 ```
 
 For guided setup, run:
 
 ```bash
-openclaw onboard
+bot onboard
 ```
 
 Select ClickClack, then enter the server URL, bot token, and workspace when
@@ -61,11 +61,11 @@ failed check does not discard the configuration.
 
 ### Alternative: manual token
 
-Choose **Manual token** in ClickClack when configuring a non-OpenClaw client or
+Choose **Manual token** in ClickClack when configuring a non-Bot client or
 when you explicitly need to manage the token yourself:
 
 ```bash
-openclaw channels add clickclack --base-url https://clickclack.example.com --token ccb_... --workspace default
+bot channels add clickclack --base-url https://clickclack.example.com --token ccb_... --workspace default
 ```
 
 `workspace` accepts a workspace id (`wsp_...`), slug, or display name.
@@ -78,8 +78,8 @@ in config:
 
 ```bash
 export CLICKCLACK_BOT_TOKEN="ccb_..."
-openclaw channels add clickclack --base-url https://clickclack.example.com --workspace default --use-env
-openclaw gateway
+bot channels add clickclack --base-url https://clickclack.example.com --workspace default --use-env
+bot gateway
 ```
 
 Named accounts must use a configured token or token file; the shared env
@@ -130,7 +130,7 @@ id (`wsp_...`), slug, or name; the gateway resolves it to the id at startup.
 
 ### Keep an auth-gated public hostname
 
-Use `apiBaseUrl` when ClickClack and the OpenClaw gateway run on the same host
+Use `apiBaseUrl` when ClickClack and the Bot gateway run on the same host
 but the public ClickClack hostname is protected by an authentication gateway
 such as Cloudflare Access:
 
@@ -138,7 +138,7 @@ such as Cloudflare Access:
 {
   channels: {
     clickclack: {
-      baseUrl: "https://clack.openclaw.ai",
+      baseUrl: "https://clack.bot.ai",
       apiBaseUrl: "http://127.0.0.1:8484",
       token: { source: "env", provider: "default", id: "CLICKCLACK_BOT_TOKEN" },
       workspace: "default",
@@ -147,18 +147,18 @@ such as Cloudflare Access:
 }
 ```
 
-The public hostname can remain fully auth-gated for browser users. OpenClaw
+The public hostname can remain fully auth-gated for browser users. Bot
 uses the loopback endpoint for REST requests, setup verification, and the
 realtime WebSocket, while discussion `embedUrl` and `openUrl` links continue to
 use the public `baseUrl`. If `apiBaseUrl` is omitted, all traffic uses
 `baseUrl`, preserving existing behavior.
 
 If `plugins.allow` is a non-empty restrictive list, explicitly selecting
-ClickClack in channel setup or running `openclaw plugins enable clickclack`
+ClickClack in channel setup or running `bot plugins enable clickclack`
 appends `clickclack` to that list. Onboarding installation uses the same
 explicit-selection behavior. These paths do not override `plugins.deny` or a
 global `plugins.enabled: false` setting. Direct
-`openclaw plugins install @openclaw/clickclack` follows the normal
+`bot plugins install @hanzo/bot-clickclack` follows the normal
 plugin-install policy and also records ClickClack in an existing allowlist.
 
 ## Multiple bots
@@ -193,7 +193,7 @@ Each account opens its own ClickClack realtime connection and uses its own bot t
 
 ## Session discussions
 
-Enable discussions on one ClickClack account to give each OpenClaw session a
+Enable discussions on one ClickClack account to give each Bot session a
 dedicated ClickClack channel. The account token must include
 `channels:write` (the `bot:admin` bundle includes it); the normal `bot:write`
 setup token cannot create or synchronize channels.
@@ -209,7 +209,7 @@ setup token cannot create or synchronize channels.
       discussions: {
         enabled: true,
         workspace: "default",
-        controlUrlBase: "https://team.openclaw.ai",
+        controlUrlBase: "https://team.bot.ai",
         section: "Sessions",
       },
     },
@@ -231,7 +231,7 @@ Opening a discussion creates a public ClickClack channel marked as externally
 managed. The plugin keeps the session label, category, and archive state in
 sync. Restoring a session restores its channel; clearing the session category
 moves the channel back to the configured default section. Deleting an
-OpenClaw session archives the ClickClack channel instead of deleting it, so its
+Bot session archives the ClickClack channel instead of deleting it, so its
 history remains available. The plugin reconciles bindings when discussion RPCs
 are used and approximately once per minute while any bindings exist.
 
@@ -241,7 +241,7 @@ main session to observe and can use `sessions_history` and `session_status`
 (`changesSince` is useful for incremental checks). It uses `sessions_send` only
 when people in the discussion ask it to relay or steer the main session.
 The binding, managed ownership reference, and side-session peer identity include
-the concrete OpenClaw session id along with the pinned ClickClack server and
+the concrete Bot session id along with the pinned ClickClack server and
 channel. Resetting a reusable session key or retargeting an account revokes the
 old channel locally, archives it when the old credential remains usable, and
 cannot reuse its side transcript. Messages arriving through an
@@ -262,14 +262,14 @@ and hook are the authorization boundary.
 
 The ClickClack server must support managed-channel fields (`external_managed`,
 `external_ref`, `external_url`, and `sidebar_section`) on channel creation and
-updates and return them in channel responses. OpenClaw verifies that contract
+updates and return them in channel responses. Bot verifies that contract
 before persisting a binding. If a create response is lost, the next open adopts
 the channel by its server-enforced `external_ref` instead of creating another.
 Until that outcome is reconciled, the pending reservation quarantines
 otherwise-unbound events in the destination workspace. The coarse reconciler
 adopts the channel when the same session is still live or archives it after a
 reset; it clears the reservation when no remote channel was created.
-That reference contains a durable per-OpenClaw-installation namespace plus a
+That reference contains a durable per-Bot-installation namespace plus a
 hash of the session key, concrete session id, ClickClack destination, and durable
 binding generation. Separate gateways cannot adopt each other's channels,
 reset sessions cannot inherit old channel history, and an account or workspace
@@ -280,7 +280,7 @@ channel link on the next reconciliation pass. Changing
 `discussions.workspace` archives and releases the old binding before a channel
 can be opened in the new workspace when the old workspace credential remains
 configured. If the token was replaced with a workspace-scoped credential that
-cannot access the old workspace, OpenClaw records the old channel as revoked and
+cannot access the old workspace, Bot records the old channel as revoked and
 releases the binding without trying the replacement token; archive that leftover
 channel from ClickClack.
 
@@ -318,7 +318,7 @@ not needed there.
 
 ## Command menu
 
-At gateway startup, each configured account publishes OpenClaw's native
+At gateway startup, each configured account publishes Bot's native
 commands to ClickClack. They appear in composer autocomplete labeled with the
 bot's handle. The published set is replaced wholesale on each startup,
 including clearing a stale menu when the native command catalog is empty.
@@ -358,7 +358,7 @@ delivery.
 
 Use `agent` mode for cross-service correlation evidence. For an authoritative
 ClickClack message id in its canonical `msg_<ulid>` shape, the channel derives
-the deterministic OpenClaw run id `clickclack:<message-id>`. Each model call is
+the deterministic Bot run id `clickclack:<message-id>`. Each model call is
 then visible in diagnostics as `clickclack:<message-id>:model:<n>`; when that
 turn uses ClawRouter, the same model-call id is sent as `X-Request-ID`.
 `model` mode bypasses the normal agent run/session diagnostics and is therefore
@@ -373,11 +373,11 @@ prompts, completions, credentials, or tool output.
 
 ## Durable media delivery
 
-Agent replies containing media use required durable delivery. OpenClaw assigns
+Agent replies containing media use required durable delivery. Bot assigns
 stable per-part message and upload nonces before the first ClickClack write, so
 a retry reuses the same upload and message instead of consuming storage quota
 or publishing duplicates. If an upload already exists after a restart,
-OpenClaw does not reread the original local path or remote media URL.
+Bot does not reread the original local path or remote media URL.
 
 This recovery contract requires a ClickClack server that supports:
 
@@ -389,7 +389,7 @@ This recovery contract requires a ClickClack server that supports:
   owner-scoped nonce and upload.
 
 An older server's generic 404 is not treated as proof that a send is absent.
-OpenClaw leaves the delivery unresolved rather than risking a duplicate; update
+Bot leaves the delivery unresolved rather than risking a duplicate; update
 ClickClack before enabling media-producing agent replies.
 
 ## Agent activity rows
@@ -427,7 +427,7 @@ Explicit outbound targets may also carry the `clickclack:` or `cc:` provider pre
 
 Outbound media uses ClickClack's upload API and then attaches the durable upload
 to the created channel message, thread reply, or DM. Local files and supported
-remote media URLs follow OpenClaw's normal media-access policy, with a 64 MiB
+remote media URLs follow Bot's normal media-access policy, with a 64 MiB
 per-file limit. Durable queued sends use separate owner-scoped nonces for each
 upload and message part, then retry attachment association with those same
 objects. See [Durable media delivery](#durable-media-delivery) for the server
@@ -436,9 +436,9 @@ contract and recovery behavior.
 Examples:
 
 ```bash
-openclaw message send --channel clickclack --target channel:general --message "hello"
-openclaw message send --channel clickclack --target dm:usr_123 --message "hello"
-openclaw message send --channel clickclack --target thread:msg_123 --message "following up"
+bot message send --channel clickclack --target channel:general --message "hello"
+bot message send --channel clickclack --target dm:usr_123 --message "hello"
+bot message send --channel clickclack --target thread:msg_123 --message "following up"
 ```
 
 ## Permissions
@@ -451,7 +451,7 @@ ClickClack token scopes are enforced by the ClickClack API.
 - `commands:write`: publish the bot's command menu. Included in current `bot:write` and `bot:admin` bundles and grantable individually.
 - `agent_activity:write`: durable agent activity rows (`agent_commentary` / `agent_tool`). Not inherited by `bot:write` or `bot:admin`; required only when `agentActivity: true` is set.
 
-OpenClaw only needs current `bot:write` for normal agent chat and command-menu sync. Add `agent_activity:write` when enabling [agent activity rows](#agent-activity-rows).
+Bot only needs current `bot:write` for normal agent chat and command-menu sync. Add `agent_activity:write` when enabling [agent activity rows](#agent-activity-rows).
 
 ## Troubleshooting
 

@@ -198,7 +198,7 @@ describe("cron disable hint", () => {
       patch: { enabled: params.command === "enable" },
     });
     if (params.expectedHint) {
-      expect(stderrWrite).toHaveBeenCalledWith(expect.stringContaining("openclaw cron list --all"));
+      expect(stderrWrite).toHaveBeenCalledWith(expect.stringContaining("bot cron list --all"));
     } else {
       expect(stderrWrite).not.toHaveBeenCalled();
     }

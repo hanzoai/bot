@@ -1,8 +1,8 @@
 // Fal tests cover video generation provider plugin behavior.
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
-import * as providerAuth from "openclaw/plugin-sdk/provider-auth-runtime";
-import * as providerHttp from "openclaw/plugin-sdk/provider-http";
-import { expectExplicitVideoGenerationCapabilities } from "openclaw/plugin-sdk/provider-test-contracts";
+import { MAX_TIMER_TIMEOUT_MS } from "bot/plugin-sdk/number-runtime";
+import * as providerAuth from "bot/plugin-sdk/provider-auth-runtime";
+import * as providerHttp from "bot/plugin-sdk/provider-http";
+import { expectExplicitVideoGenerationCapabilities } from "bot/plugin-sdk/provider-test-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { setFalVideoFetchGuardForTesting } from "./test-support.js";
 import { buildFalVideoGenerationProvider } from "./video-generation-provider.js";
@@ -401,7 +401,7 @@ describe("fal video generation provider", () => {
     const result = await provider.generateVideo({
       provider: "fal",
       model: "fal-ai/heygen/v2/video-agent",
-      prompt: "A founder explains OpenClaw in a concise studio video",
+      prompt: "A founder explains Bot in a concise studio video",
       durationSeconds: 8,
       aspectRatio: "16:9",
       resolution: "720P",
@@ -411,7 +411,7 @@ describe("fal video generation provider", () => {
 
     expect(fetchGuardUrl(1)).toBe("https://queue.fal.run/fal-ai/heygen/v2/video-agent");
     expect(getSubmitBody()).toEqual({
-      prompt: "A founder explains OpenClaw in a concise studio video",
+      prompt: "A founder explains Bot in a concise studio video",
     });
     expect(result.metadata).toEqual({
       requestId: "heygen-req-123",

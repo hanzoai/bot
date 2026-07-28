@@ -1,15 +1,15 @@
 import Foundation
-import OpenClawChatUI
-import OpenClawKit
-import OpenClawProtocol
+import BotChatUI
+import BotKit
+import BotProtocol
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 struct IOSGatewayChatTransportTests {
     private actor RequestRecorder {
-        private var requests: [OpenClawChatGatewayRequest] = []
+        private var requests: [BotChatGatewayRequest] = []
 
-        func record(_ request: OpenClawChatGatewayRequest) -> Data {
+        func record(_ request: BotChatGatewayRequest) -> Data {
             self.requests.append(request)
             if request.method == "sessions.create" {
                 return Data(#"{"key":"forked"}"#.utf8)
@@ -17,12 +17,12 @@ struct IOSGatewayChatTransportTests {
             return Data(#"{"entry":{}}"#.utf8)
         }
 
-        func record(_ request: OpenClawChatGatewayRequest, response: Data) -> Data {
+        func record(_ request: BotChatGatewayRequest, response: Data) -> Data {
             self.requests.append(request)
             return response
         }
 
-        func all() -> [OpenClawChatGatewayRequest] {
+        func all() -> [BotChatGatewayRequest] {
             self.requests
         }
     }
@@ -50,23 +50,23 @@ struct IOSGatewayChatTransportTests {
     }
 
     @Test func `live routing guard permits an identity still loading`() {
-        #expect(OpenClawChatSessionRoutingContract.expectedValue(
+        #expect(BotChatSessionRoutingContract.expectedValue(
             nil,
             serverSupportsGuard: true) == nil)
-        #expect(OpenClawChatSessionRoutingContract.expectedValue(
+        #expect(BotChatSessionRoutingContract.expectedValue(
             " per-sender|main|reviewer ",
             serverSupportsGuard: true) == "per-sender|main|reviewer")
-        #expect(OpenClawChatSessionRoutingContract.expectedValue(
+        #expect(BotChatSessionRoutingContract.expectedValue(
             "per-sender|main|reviewer",
             serverSupportsGuard: false) == nil)
     }
 
     @Test func `routing contract round trips a delimited legacy main key`() throws {
-        let contract = try #require(OpenClawChatSessionRoutingContract.make(
+        let contract = try #require(BotChatSessionRoutingContract.make(
             scope: "per-sender",
             mainKey: "team|primary",
             defaultAgentID: "main"))
-        let components = try #require(OpenClawChatSessionRoutingContract.parse(contract))
+        let components = try #require(BotChatSessionRoutingContract.parse(contract))
         #expect(components.scope == "per-sender")
         #expect(components.mainKey == "team|primary")
         #expect(components.defaultAgentID == "main")
@@ -195,11 +195,11 @@ struct IOSGatewayChatTransportTests {
         _ = try await transport.patchSessionSettings(
             sessionKey: "global",
             agentID: nil,
-            patch: OpenClawChatSessionSettingsPatch(verboseLevel: .some("full")))
+            patch: BotChatSessionSettingsPatch(verboseLevel: .some("full")))
         _ = try await transport.patchSessionSettings(
             sessionKey: "global",
             agentID: nil,
-            patch: OpenClawChatSessionSettingsPatch(verboseLevel: .some(nil)))
+            patch: BotChatSessionSettingsPatch(verboseLevel: .some(nil)))
 
         let requests = await recorder.all()
         #expect(requests.count == 2)
@@ -224,11 +224,11 @@ struct IOSGatewayChatTransportTests {
         _ = try await transport.patchSessionSettings(
             sessionKey: "global",
             agentID: nil,
-            patch: OpenClawChatSessionSettingsPatch(fastMode: .some(.on)))
+            patch: BotChatSessionSettingsPatch(fastMode: .some(.on)))
         _ = try await transport.patchSessionSettings(
             sessionKey: "global",
             agentID: nil,
-            patch: OpenClawChatSessionSettingsPatch(fastMode: .some(nil)))
+            patch: BotChatSessionSettingsPatch(fastMode: .some(nil)))
 
         let requests = await recorder.all()
         #expect(requests.count == 2)
@@ -299,7 +299,7 @@ struct IOSGatewayChatTransportTests {
                 idempotencyKey: "guarded-idempotency",
                 attachments: [])
             Issue.record("Expected guarded sendMessage to fail before dispatch")
-        } catch is OpenClawChatTransportSendError {
+        } catch is BotChatTransportSendError {
             // Expected: a missing route never reached chat.send.
         } catch {
             Issue.record("Expected a typed pre-dispatch failure, got \(error)")
@@ -344,7 +344,7 @@ struct IOSGatewayChatTransportTests {
             payload: payload,
             seq: 1,
             stateversion: nil)
-        let mapped = OpenClawChatGatewayPayloadCodec.event(from: frame)
+        let mapped = BotChatGatewayPayloadCodec.event(from: frame)
 
         switch mapped {
         case let .sessionMessage(message):
@@ -372,7 +372,7 @@ struct IOSGatewayChatTransportTests {
             seq: 1,
             stateversion: nil)
 
-        let mapped = OpenClawChatGatewayPayloadCodec.event(from: frame)
+        let mapped = BotChatGatewayPayloadCodec.event(from: frame)
         guard case let .sessionsChanged(change) = mapped else {
             Issue.record("expected .sessionsChanged, got \(String(describing: mapped))")
             return
@@ -390,7 +390,7 @@ struct IOSGatewayChatTransportTests {
             "state": AnyCodable("final"),
         ])
         let frame = EventFrame(type: "event", event: "chat", payload: payload, seq: 1, stateversion: nil)
-        let mapped = OpenClawChatGatewayPayloadCodec.event(from: frame)
+        let mapped = BotChatGatewayPayloadCodec.event(from: frame)
 
         switch mapped {
         case let .chat(chat):
@@ -409,7 +409,7 @@ struct IOSGatewayChatTransportTests {
             payload: AnyCodable(["a": AnyCodable(1)]),
             seq: 1,
             stateversion: nil)
-        let mapped = OpenClawChatGatewayPayloadCodec.event(from: frame)
+        let mapped = BotChatGatewayPayloadCodec.event(from: frame)
         #expect(mapped == nil)
     }
 }
@@ -425,9 +425,9 @@ struct LocalFixtureChatTransportTests {
             idempotencyKey: "fixture-run",
             attachments: [])
         let history = try await transport.requestHistory(sessionKey: "main")
-        let decoded = try #require(history.messages).compactMap { payload -> OpenClawChatMessage? in
+        let decoded = try #require(history.messages).compactMap { payload -> BotChatMessage? in
             guard let data = try? JSONEncoder().encode(payload) else { return nil }
-            return try? JSONDecoder().decode(OpenClawChatMessage.self, from: data)
+            return try? JSONDecoder().decode(BotChatMessage.self, from: data)
         }
 
         #expect(decoded.last(where: { $0.role == "user" })?.idempotencyKey == "fixture-run:user")

@@ -1,13 +1,13 @@
 /**
  * Model-level auth diagnostics and request-header preparation.
  */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   getRuntimeConfigSnapshot,
   getRuntimeConfigSourceSnapshot,
   selectApplicableRuntimeConfig,
 } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { coerceSecretRef } from "../config/types.secrets.js";
 import type { Model } from "../llm/types.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
@@ -47,7 +47,7 @@ export type ModelAuthMode = "api-key" | "oauth" | "token" | "mixed" | "aws-sdk" 
 /** Reports the strongest configured auth mode for provider-list UI and diagnostics. */
 export function resolveModelAuthMode(
   provider?: string,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
   store?: AuthProfileStore,
   options?: { workspaceDir?: string },
 ): ModelAuthMode | undefined {
@@ -113,7 +113,7 @@ export function resolveModelAuthMode(
 /** Checks provider auth availability, including profile fallback order. */
 export async function hasAvailableAuthForProvider(params: {
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   preferredProfile?: string;
   store?: AuthProfileStore;
   agentDir?: string;
@@ -208,7 +208,7 @@ export async function hasAvailableAuthForProvider(params: {
 /** Resolves request credentials from the provider attached to a model descriptor. */
 export async function getApiKeyForModel(params: {
   model: Model;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   profileId?: string;
   preferredProfile?: string;
   store?: AuthProfileStore;
@@ -263,7 +263,7 @@ export function applyLocalNoAuthHeaderOverride<T extends Model>(
 
 export function applySecretRefHeaderSentinels<T extends Model>(
   model: T,
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
 ): T {
   if (!model.headers) {
     return model;
@@ -412,7 +412,7 @@ export function applySecretRefHeaderSentinels<T extends Model>(
 export function applyAuthHeaderOverride<T extends Model>(
   model: T,
   auth: ResolvedProviderAuth | null | undefined,
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
 ): T {
   const sentinelModel = applySecretRefHeaderSentinels(model, cfg);
   if (!auth?.apiKey) {

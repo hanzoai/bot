@@ -2,7 +2,7 @@
  * Tests for gateway diagnostics methods and their request-handler responses.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   emitDiagnosticEvent,

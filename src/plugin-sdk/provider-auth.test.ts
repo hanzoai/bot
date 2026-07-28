@@ -76,7 +76,7 @@ async function runFallbackStoreCase(): Promise<FallbackStoreCaseResult> {
   );
 
   vi.doMock("../agents/agent-scope-config.js", () => ({
-    resolveDefaultAgentDir: () => "/tmp/openclaw-agent",
+    resolveDefaultAgentDir: () => "/tmp/bot-agent",
   }));
   vi.doMock("../agents/auth-profiles/oauth.js", () => ({
     resolveApiKeyForProfile,
@@ -127,7 +127,7 @@ describe("provider auth profile helpers", () => {
     expect(fallbackStoreCase.resolvedKey).toBe("fallback-key");
     expect(fallbackStoreCase.resolveApiKeyCalls).toContainEqual([
       expect.objectContaining({
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         profileId: "openai:default",
         store: expect.objectContaining({
           profiles: expect.objectContaining({
@@ -182,7 +182,7 @@ describe("provider auth profile helpers", () => {
     );
 
     vi.doMock("../agents/agent-scope-config.js", () => ({
-      resolveDefaultAgentDir: () => "/tmp/openclaw-agent",
+      resolveDefaultAgentDir: () => "/tmp/bot-agent",
     }));
     vi.doMock("../agents/auth-profiles/oauth.js", () => ({
       resolveApiKeyForProfile,
@@ -247,7 +247,7 @@ describe("provider auth profile helpers", () => {
     );
 
     vi.doMock("../agents/agent-scope-config.js", () => ({
-      resolveDefaultAgentDir: () => "/tmp/openclaw-agent",
+      resolveDefaultAgentDir: () => "/tmp/bot-agent",
     }));
     vi.doMock("../agents/auth-profiles/external-cli-discovery.js", () => ({
       externalCliDiscoveryForProviderAuth: vi.fn(() => externalCli),
@@ -284,10 +284,10 @@ describe("provider auth profile helpers", () => {
         includeExternalCliAuth: true,
       }),
     ).toBe(true);
-    expect(loadAuthProfileStoreForSecretsRuntime).toHaveBeenNthCalledWith(1, "/tmp/openclaw-agent");
+    expect(loadAuthProfileStoreForSecretsRuntime).toHaveBeenNthCalledWith(1, "/tmp/bot-agent");
     expect(loadAuthProfileStoreForSecretsRuntime).toHaveBeenNthCalledWith(
       2,
-      "/tmp/openclaw-agent",
+      "/tmp/bot-agent",
       { externalCli },
     );
   });
@@ -837,7 +837,7 @@ describe("provider auth profile helpers", () => {
   it("retains valid Copilot exchanges across A to B to A profile rotation", async () => {
     vi.resetModules();
 
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-copilot-cache-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-copilot-cache-"));
     try {
       const fetchImpl = vi.fn(async (_url: string, init?: RequestInit) => {
         const authorization = new Headers(init?.headers).get("authorization");
@@ -857,7 +857,7 @@ describe("provider auth profile helpers", () => {
         );
       });
       const { resolveCopilotApiToken } = await import("./provider-auth.js");
-      const env = { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
+      const env = { BOT_STATE_DIR: stateDir } as NodeJS.ProcessEnv;
 
       const firstA = await resolveCopilotApiToken({
         githubToken: "test-auth-token",

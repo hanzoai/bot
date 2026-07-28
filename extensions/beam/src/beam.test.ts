@@ -175,7 +175,7 @@ describe("Beam receiver", () => {
       createBeamRequestHandler({
         store,
         resolveClient: writeClient,
-        resolveControlUiBasePath: () => "/openclaw/",
+        resolveControlUiBasePath: () => "/bot/",
       }),
     );
     const response = await fetch(endpoint, {
@@ -188,7 +188,7 @@ describe("Beam receiver", () => {
     expect(await response.json()).toEqual({
       ok: true,
       beamId: "0123456789abcdef0123456789abcdef",
-      url: "/openclaw/chat?session=catalog%3Abeam%3Agateway%3A0123456789abcdef0123456789abcdef",
+      url: "/bot/chat?session=catalog%3Abeam%3Agateway%3A0123456789abcdef0123456789abcdef",
     });
   });
 

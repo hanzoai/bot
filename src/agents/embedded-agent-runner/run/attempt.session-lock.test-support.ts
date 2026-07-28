@@ -6,7 +6,7 @@ type EmbeddedAttemptSessionFileOwnersTestApi = {
 
 function getTestApi(): EmbeddedAttemptSessionFileOwnersTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.embeddedAttemptSessionFileOwnersTestApi")
+    Symbol.for("bot.embeddedAttemptSessionFileOwnersTestApi")
   ] as EmbeddedAttemptSessionFileOwnersTestApi;
 }
 

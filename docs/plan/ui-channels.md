@@ -172,7 +172,7 @@ type ChannelOutboundAdapter = {
   deliveryCapabilities?: ChannelDeliveryCapabilities;
 
   pinDeliveredMessage?: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string | null;
     to: string;
     threadId?: string | number | null;

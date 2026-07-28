@@ -77,7 +77,7 @@ export function lanesNeedE2eImageKind(
   poolLanes: DockerE2eLane[],
   kind: DockerE2eImageKind,
 ): boolean;
-export function lanesNeedOpenClawPackage(poolLanes: DockerE2eLane[]): boolean;
+export function lanesNeedBotPackage(poolLanes: DockerE2eLane[]): boolean;
 export function findLaneByName(name: string): DockerE2eLane | undefined;
 export function resolveDockerE2ePlan(options: DockerE2ePlanOptions): {
   omittedUnsupportedLaneNames: string[];

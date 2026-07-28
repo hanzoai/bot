@@ -1,6 +1,6 @@
 // Msteams tests cover message handler media recovery behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../runtime-api.js";
+import type { BotConfig } from "../../runtime-api.js";
 import type { resolveMSTeamsInboundMedia } from "./inbound-media.js";
 import "./message-handler-mock-support.test-support.js";
 import { getRuntimeApiMockState } from "./message-handler-mock-support.test-support.js";
@@ -40,7 +40,7 @@ describe("msteams message handler Graph media recovery", () => {
     channels: {
       msteams: { groupPolicy: "open", requireMention: false, graphMediaFallback: true },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 
   beforeEach(() => {
     inboundMediaMockState.resolve.mockReset();
@@ -120,7 +120,7 @@ describe("msteams message handler Graph media recovery", () => {
     ]);
     const defaultCfg = {
       channels: { msteams: { groupPolicy: "open", requireMention: false } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const { deps, getTeamDetails } = createMessageHandlerDeps(defaultCfg);
     const handler = createMSTeamsMessageHandler(deps);
 
@@ -264,7 +264,7 @@ describe("msteams message handler Graph media recovery", () => {
   it("does not create a ghost event for unmentioned empty HTML", async () => {
     const mentionCfg = {
       channels: { msteams: { groupPolicy: "open", requireMention: true } },
-    } as OpenClawConfig;
+    } as BotConfig;
     inboundMediaMockState.resolve.mockResolvedValue([]);
     const { deps, enqueueSystemEvent, getTeamDetails } = createMessageHandlerDeps(mentionCfg);
     const handler = createMSTeamsMessageHandler(deps);

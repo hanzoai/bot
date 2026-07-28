@@ -1,10 +1,10 @@
 // Ollama tests cover doctor contract config compatibility.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { legacyConfigRules, normalizeCompatibilityConfig } from "./doctor-contract-api.js";
 
 type ModelDefinition = NonNullable<
-  NonNullable<OpenClawConfig["models"]>["providers"]
+  NonNullable<BotConfig["models"]>["providers"]
 >[string]["models"][number];
 
 const cloudModel: ModelDefinition = {
@@ -22,7 +22,7 @@ const cloudModel: ModelDefinition = {
   maxTokens: 8192,
 };
 
-function readOllamaCloudProvider(config: OpenClawConfig): Record<string, unknown> | undefined {
+function readOllamaCloudProvider(config: BotConfig): Record<string, unknown> | undefined {
   return config.models?.providers?.["ollama-cloud"] as Record<string, unknown> | undefined;
 }
 
@@ -48,7 +48,7 @@ describe("ollama doctor contract", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = normalizeCompatibilityConfig({ cfg: config });
 
@@ -75,7 +75,7 @@ describe("ollama doctor contract", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = normalizeCompatibilityConfig({ cfg: config });
 
@@ -107,7 +107,7 @@ describe("ollama doctor contract", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = normalizeCompatibilityConfig({ cfg: config });
 
@@ -139,7 +139,7 @@ describe("ollama doctor contract", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = normalizeCompatibilityConfig({ cfg: config });
 
@@ -170,7 +170,7 @@ describe("ollama doctor contract", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = normalizeCompatibilityConfig({ cfg: config });
 

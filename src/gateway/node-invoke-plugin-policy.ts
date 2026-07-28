@@ -1,16 +1,16 @@
 // Plugin-provided node.invoke policy adapter.
 // Lets plugin policies gate dangerous node commands before transport dispatch.
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import type { PluginApprovalRequestPayload } from "../infra/plugin-approvals.js";
 import { resolvePluginApprovalTimeoutMs } from "../infra/plugin-approvals.js";
 import type { PluginRegistry } from "../plugins/registry-types.js";
 import { getActivePluginGatewayNodePolicyRegistry } from "../plugins/runtime.js";
 import type {
-  OpenClawPluginNodeInvokePolicyContext,
-  OpenClawPluginNodeInvokePolicyResult,
-  OpenClawPluginNodeInvokeTransportResult,
+  BotPluginNodeInvokePolicyContext,
+  BotPluginNodeInvokePolicyResult,
+  BotPluginNodeInvokeTransportResult,
 } from "../plugins/types.js";
 import { isNodeCommandAllowed, resolveNodeCommandAllowlist } from "./node-command-policy.js";
 import type { NodeSession } from "./node-registry.js";
@@ -89,7 +89,7 @@ function createApprovalRuntime(params: {
   client: GatewayClient | null;
   pluginId: string;
   turnSource: Parameters<typeof resolveNodeInvokeTurnSourceFields>[0];
-}): OpenClawPluginNodeInvokePolicyContext["approvals"] | undefined {
+}): BotPluginNodeInvokePolicyContext["approvals"] | undefined {
   const manager = params.context.pluginApprovalManager;
   if (!manager) {
     return undefined;
@@ -191,7 +191,7 @@ export async function applyPluginNodeInvokePolicy(params: {
   timeoutMs?: number;
   idempotencyKey?: string;
   isInvocationCurrent?: () => boolean | Promise<boolean>;
-}): Promise<OpenClawPluginNodeInvokePolicyResult | null> {
+}): Promise<BotPluginNodeInvokePolicyResult | null> {
   const registry = getActivePluginGatewayNodePolicyRegistry();
   // Route metadata is authority-bearing: only a signed agent-runtime caller may nominate it.
   const trustedTurnSource = params.client?.internal?.agentRuntimeIdentity
@@ -214,9 +214,9 @@ export async function applyPluginNodeInvokePolicy(params: {
   }
 
   let nodeCommandDispatched = false;
-  const invokeNode: OpenClawPluginNodeInvokePolicyContext["invokeNode"] = async (
+  const invokeNode: BotPluginNodeInvokePolicyContext["invokeNode"] = async (
     override = {},
-  ): Promise<OpenClawPluginNodeInvokeTransportResult> => {
+  ): Promise<BotPluginNodeInvokeTransportResult> => {
     // Policies invoke the real node through this narrowed transport wrapper so
     // they can retry/override params without getting direct registry access.
     if (params.isInvocationCurrent && !(await params.isInvocationCurrent())) {

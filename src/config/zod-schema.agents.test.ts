@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { AgentsSchema } from "./zod-schema.agents.js";
-import { OpenClawSchema } from "./zod-schema.js";
+import { BotSchema } from "./zod-schema.js";
 
 describe("agent roster defaults", () => {
   it("rejects an empty roster after load-time migration", () => {
@@ -35,7 +35,7 @@ describe("explicit ambient agent targets", () => {
     },
     { agents: { entries: { main: { default: true } } }, talk: { agentId: "missing" } },
   ])("rejects an unknown explicit target", (target) => {
-    const result = OpenClawSchema.safeParse(target);
+    const result = BotSchema.safeParse(target);
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues[0]?.message).toContain("Unknown agent id");
@@ -44,7 +44,7 @@ describe("explicit ambient agent targets", () => {
 
   it("accepts configured heartbeat, system-agent, and Talk targets", () => {
     expect(
-      OpenClawSchema.safeParse({
+      BotSchema.safeParse({
         agents: {
           defaults: {
             heartbeat: { agentId: "ops" },
@@ -72,11 +72,11 @@ describe("explicit ambient agent targets", () => {
     },
     { agents: { entries: { main: { default: true } } }, talk: { agentId: " " } },
   ])("rejects blank explicit targets", (config) => {
-    expect(OpenClawSchema.safeParse(config).success).toBe(false);
+    expect(BotSchema.safeParse(config).success).toBe(false);
   });
 
   it("validates targets against the implicit main roster", () => {
-    expect(OpenClawSchema.safeParse({ talk: { agentId: "main" } }).success).toBe(true);
-    expect(OpenClawSchema.safeParse({ talk: { agentId: "missing" } }).success).toBe(false);
+    expect(BotSchema.safeParse({ talk: { agentId: "main" } }).success).toBe(true);
+    expect(BotSchema.safeParse({ talk: { agentId: "missing" } }).success).toBe(false);
   });
 });

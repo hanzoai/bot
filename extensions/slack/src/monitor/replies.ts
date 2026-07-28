@@ -1,23 +1,23 @@
 // Slack plugin module implements replies behavior.
 import type { MessageMetadata } from "@slack/types";
 import type { Block, KnownBlock } from "@slack/web-api";
-import { createChannelPartialDeliveryError } from "openclaw/plugin-sdk/channel-inbound";
-import type { MarkdownTableMode, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { createChannelPartialDeliveryError } from "bot/plugin-sdk/channel-inbound";
+import type { MarkdownTableMode, BotConfig } from "bot/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   chunkMarkdownTextWithMode,
   isSilentReplyText,
   SILENT_REPLY_TOKEN,
   type ChunkMode,
-} from "openclaw/plugin-sdk/reply-chunking";
+} from "bot/plugin-sdk/reply-chunking";
 import {
   deliverTextOrMediaReply,
   getReplyPayloadTtsSupplement,
   resolveSendableOutboundReplyParts,
   type ReplyPayload,
-} from "openclaw/plugin-sdk/reply-payload";
-import { createReplyReferencePlanner } from "openclaw/plugin-sdk/reply-reference";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/reply-payload";
+import { createReplyReferencePlanner } from "bot/plugin-sdk/reply-reference";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
 import { buildSlackBlocksFallbackText } from "../blocks-fallback.js";
 import { markdownToSlackMrkdwnChunks } from "../format.js";
 import { SLACK_TEXT_LIMIT } from "../limits.js";
@@ -67,7 +67,7 @@ export function resolveDeliveredSlackReplyThreadTs(params: {
 }
 
 export async function deliverReplies(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   replies: ReplyPayload[];
   target: string;
   token: string;

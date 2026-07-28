@@ -28,7 +28,7 @@ type PluginListEntry = {
 };
 
 function createPackageRoot(): string {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bundled-probe-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-bundled-probe-"));
   fs.writeFileSync(path.join(root, "package.json"), '{"type":"module"}\n', "utf8");
   fs.mkdirSync(path.join(root, "dist"), { recursive: true });
   return root;
@@ -60,7 +60,7 @@ function writePluginManifest(root: string, pluginRoot: string, manifest: Record<
   const dir = path.join(root, pluginRoot);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(
-    path.join(dir, "openclaw.plugin.json"),
+    path.join(dir, "bot.plugin.json"),
     `${JSON.stringify(manifest, null, 2)}\n`,
     "utf8",
   );
@@ -73,7 +73,7 @@ function runProbe(root: string, env: Record<string, string | undefined> = {}) {
       delete childEnv[key];
     }
   }
-  childEnv.OPENCLAW_ENTRY = path.join(root, "dist", "index.js");
+  childEnv.BOT_ENTRY = path.join(root, "dist", "index.js");
   return spawnSync(process.execPath, [probePath, "select"], {
     cwd: root,
     encoding: "utf8",
@@ -88,7 +88,7 @@ function runProbeCommand(root: string, args: string[], env: Record<string, strin
       delete childEnv[key];
     }
   }
-  childEnv.OPENCLAW_ENTRY = path.join(root, "dist", "index.js");
+  childEnv.BOT_ENTRY = path.join(root, "dist", "index.js");
   return spawnSync(process.execPath, [probePath, ...args], {
     cwd: root,
     encoding: "utf8",
@@ -102,7 +102,7 @@ function runRuntimeSmoke(root: string, args: string[]) {
     encoding: "utf8",
     env: {
       ...process.env,
-      OPENCLAW_ENTRY: path.join(root, "dist", "index.js"),
+      BOT_ENTRY: path.join(root, "dist", "index.js"),
     },
   });
 }
@@ -281,8 +281,8 @@ describe("bundled plugin install/uninstall probe", () => {
     const sweep = fs.readFileSync(sweepPath, "utf8");
 
     expect(sweep).toContain("source scripts/lib/docker-e2e-logs.sh");
-    expect(sweep).toContain("OPENCLAW_BUNDLED_PLUGIN_SWEEP_COMMAND_TIMEOUT:-300s");
-    expect(sweep.match(/openclaw_e2e_maybe_timeout/g)).toHaveLength(1);
+    expect(sweep).toContain("BOT_BUNDLED_PLUGIN_SWEEP_COMMAND_TIMEOUT:-300s");
+    expect(sweep.match(/bot_e2e_maybe_timeout/g)).toHaveLength(1);
     expect(sweep).toContain('run_logged_sweep_command "install $plugin_id"');
     expect(sweep).toContain('run_logged_sweep_command "uninstall $plugin_id"');
     expect(sweep.match(/docker_e2e_print_log/g)).toHaveLength(3);
@@ -344,26 +344,26 @@ describe("bundled plugin install/uninstall probe", () => {
   it("rejects unsafe bundled plugin runtime limit env values", async () => {
     await expect(
       importRuntimeSmokeWithEnv({
-        OPENCLAW_BUNDLED_PLUGIN_RUNTIME_READY_MS: String(Number.MAX_SAFE_INTEGER + 1),
+        BOT_BUNDLED_PLUGIN_RUNTIME_READY_MS: String(Number.MAX_SAFE_INTEGER + 1),
       }),
-    ).rejects.toThrow("invalid OPENCLAW_BUNDLED_PLUGIN_RUNTIME_READY_MS: 9007199254740992");
+    ).rejects.toThrow("invalid BOT_BUNDLED_PLUGIN_RUNTIME_READY_MS: 9007199254740992");
   });
 
   it("rejects bundled plugin runtime ports outside the TCP range", async () => {
     const runtimeSmoke = await import(pathToFileURL(runtimeSmokePath).href);
     const env = {
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_PORT_BASE: "65533",
+      BOT_BUNDLED_PLUGIN_RUNTIME_PORT_BASE: "65533",
     };
 
     expect(runtimeSmoke.resolveRuntimeSmokePort(0, 2, env)).toBe(65535);
     expect(() => runtimeSmoke.resolveRuntimeSmokePort(1, 0, env)).toThrow(
-      "OPENCLAW_BUNDLED_PLUGIN_RUNTIME_PORT_BASE with bundled plugin runtime index 1 and offset 0 must resolve to a TCP port from 1 to 65535. Got: 65536",
+      "BOT_BUNDLED_PLUGIN_RUNTIME_PORT_BASE with bundled plugin runtime index 1 and offset 0 must resolve to a TCP port from 1 to 65535. Got: 65536",
     );
   });
 
   it("caps noisy runtime gateway logs", async () => {
     const runtimeSmoke = await importRuntimeSmokeWithEnv({
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_GATEWAY_LOG_BYTES: "64",
+      BOT_BUNDLED_PLUGIN_RUNTIME_GATEWAY_LOG_BYTES: "64",
     });
     const root = makePackageRoot();
     const entrypoint = path.join(root, "dist", "noisy-gateway.js");
@@ -475,9 +475,9 @@ describe("bundled plugin install/uninstall probe", () => {
   it("rejects loose runtime output limit env values instead of parsing prefixes", async () => {
     await expect(
       importRuntimeSmokeWithEnv({
-        OPENCLAW_BUNDLED_PLUGIN_RUNTIME_OUTPUT_CHARS: "5chars",
+        BOT_BUNDLED_PLUGIN_RUNTIME_OUTPUT_CHARS: "5chars",
       }),
-    ).rejects.toThrow("invalid OPENCLAW_BUNDLED_PLUGIN_RUNTIME_OUTPUT_CHARS: 5chars");
+    ).rejects.toThrow("invalid BOT_BUNDLED_PLUGIN_RUNTIME_OUTPUT_CHARS: 5chars");
   });
 
   it("keeps runtime log tail reads bounded", async () => {
@@ -497,9 +497,9 @@ describe("bundled plugin install/uninstall probe", () => {
   it("rejects loose runtime log scan byte env values instead of parsing prefixes", async () => {
     await expect(
       importRuntimeSmokeWithEnv({
-        OPENCLAW_BUNDLED_PLUGIN_RUNTIME_LOG_SCAN_BYTES: "64bytes",
+        BOT_BUNDLED_PLUGIN_RUNTIME_LOG_SCAN_BYTES: "64bytes",
       }),
-    ).rejects.toThrow("invalid OPENCLAW_BUNDLED_PLUGIN_RUNTIME_LOG_SCAN_BYTES: 64bytes");
+    ).rejects.toThrow("invalid BOT_BUNDLED_PLUGIN_RUNTIME_LOG_SCAN_BYTES: 64bytes");
   });
 
   it("remembers runtime ready logs after they fall outside the tail", async () => {
@@ -604,8 +604,8 @@ describe("bundled plugin install/uninstall probe", () => {
 
   it.runIf(process.platform !== "win32")("stops runtime gateway process groups", async () => {
     const runtimeSmoke = await importRuntimeSmokeWithEnv({
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS: "50",
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_KILL_GRACE_MS: "1000",
+      BOT_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS: "50",
+      BOT_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_KILL_GRACE_MS: "1000",
     });
     const root = makePackageRoot();
     const entrypoint = path.join(root, "dist", "gateway-with-sidecar.js");
@@ -657,8 +657,8 @@ describe("bundled plugin install/uninstall probe", () => {
     "rejects package-manager grandchildren under runtime gateways",
     async () => {
       const runtimeSmoke = await importRuntimeSmokeWithEnv({
-        OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS: "50",
-        OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_KILL_GRACE_MS: "1000",
+        BOT_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS: "50",
+        BOT_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_KILL_GRACE_MS: "1000",
       });
       const root = makePackageRoot();
       const entrypoint = path.join(root, "dist", "gateway-with-package-manager-grandchild.js");
@@ -1020,8 +1020,8 @@ describe("bundled plugin install/uninstall probe", () => {
       const runner = spawn(process.execPath, [runnerPath], {
         env: {
           ...process.env,
-          OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS: "50",
-          OPENCLAW_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_KILL_GRACE_MS: "1000",
+          BOT_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_GRACE_MS: "50",
+          BOT_BUNDLED_PLUGIN_RUNTIME_TEARDOWN_KILL_GRACE_MS: "1000",
         },
         stdio: "ignore",
       });
@@ -1125,7 +1125,7 @@ describe("bundled plugin install/uninstall probe", () => {
       entrypoint,
       [
         "import fs from 'node:fs';",
-        "fs.writeFileSync(process.env.OPENCLAW_TEST_RPC_STATE_PATH, process.env.OPENCLAW_STATE_DIR);",
+        "fs.writeFileSync(process.env.BOT_TEST_RPC_STATE_PATH, process.env.BOT_STATE_DIR);",
         "console.log(JSON.stringify({ ok: true, result: { status: 'ok' } }));",
         "",
       ].join("\n"),
@@ -1138,14 +1138,14 @@ describe("bundled plugin install/uninstall probe", () => {
         {},
         {
           entrypoint,
-          env: { OPENCLAW_TEST_RPC_STATE_PATH: statePath },
+          env: { BOT_TEST_RPC_STATE_PATH: statePath },
           port: 19001,
         },
       ),
     ).resolves.toEqual({ status: "ok" });
 
     const rpcStateDir = fs.readFileSync(statePath, "utf8");
-    expect(path.basename(rpcStateDir)).toMatch(/^openclaw-plugin-runtime-rpc-/u);
+    expect(path.basename(rpcStateDir)).toMatch(/^bot-plugin-runtime-rpc-/u);
     expect(fs.existsSync(rpcStateDir)).toBe(false);
   });
 
@@ -1194,8 +1194,8 @@ describe("bundled plugin install/uninstall probe", () => {
 
   it("allows degraded runtime readiness only for expected channel failures", async () => {
     const runtimeSmoke = await importRuntimeSmokeWithEnv({
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_HTTP_MS: "100",
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS: "50",
+      BOT_BUNDLED_PLUGIN_RUNTIME_HTTP_MS: "100",
+      BOT_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS: "50",
     });
     const server = createHttpServer((_request, response) => {
       response.writeHead(503, { "content-type": "application/json" });
@@ -1219,8 +1219,8 @@ describe("bundled plugin install/uninstall probe", () => {
 
   it("rejects degraded runtime readiness for unexpected channel failures", async () => {
     const runtimeSmoke = await importRuntimeSmokeWithEnv({
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_HTTP_MS: "100",
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS: "50",
+      BOT_BUNDLED_PLUGIN_RUNTIME_HTTP_MS: "100",
+      BOT_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS: "50",
     });
     const server = createHttpServer((_request, response) => {
       response.writeHead(503, { "content-type": "application/json" });
@@ -1244,8 +1244,8 @@ describe("bundled plugin install/uninstall probe", () => {
 
   it("rejects generic readyz server errors in degraded runtime mode", async () => {
     const runtimeSmoke = await importRuntimeSmokeWithEnv({
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_HTTP_MS: "100",
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS: "50",
+      BOT_BUNDLED_PLUGIN_RUNTIME_HTTP_MS: "100",
+      BOT_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS: "50",
     });
     const server = createHttpServer((_request, response) => {
       response.writeHead(500, { "content-type": "application/json" });
@@ -1269,8 +1269,8 @@ describe("bundled plugin install/uninstall probe", () => {
 
   it("keeps readyz HTTP status diagnostics when the body is malformed", async () => {
     const runtimeSmoke = await importRuntimeSmokeWithEnv({
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_HTTP_MS: "100",
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS: "50",
+      BOT_BUNDLED_PLUGIN_RUNTIME_HTTP_MS: "100",
+      BOT_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS: "50",
     });
     const server = createHttpServer((_request, response) => {
       response.writeHead(503, { "content-type": "application/json" });
@@ -1294,8 +1294,8 @@ describe("bundled plugin install/uninstall probe", () => {
 
   it("bounds readyz diagnostic response bodies", async () => {
     const runtimeSmoke = await importRuntimeSmokeWithEnv({
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_HTTP_MS: "100",
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS: "50",
+      BOT_BUNDLED_PLUGIN_RUNTIME_HTTP_MS: "100",
+      BOT_BUNDLED_PLUGIN_RUNTIME_RPC_READY_MS: "50",
     });
     const server = createHttpServer((_request, response) => {
       response.writeHead(503, {
@@ -1347,8 +1347,8 @@ describe("bundled plugin install/uninstall probe", () => {
 
   it("keeps stalled runtime readiness probes inside the ready deadline", async () => {
     const runtimeSmoke = await importRuntimeSmokeWithEnv({
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_HTTP_MS: "1000",
-      OPENCLAW_BUNDLED_PLUGIN_RUNTIME_READY_MS: "50",
+      BOT_BUNDLED_PLUGIN_RUNTIME_HTTP_MS: "1000",
+      BOT_BUNDLED_PLUGIN_RUNTIME_READY_MS: "50",
     });
     const sockets = new Set<Socket>();
     const server = createNetServer((socket) => {
@@ -1382,14 +1382,14 @@ describe("bundled plugin install/uninstall probe", () => {
     }
   });
 
-  it("creates runtime smoke state with OPENCLAW_HOME at the test home", async () => {
+  it("creates runtime smoke state with BOT_HOME at the test home", async () => {
     const runtimeSmoke = await import(pathToFileURL(runtimeSmokePath).href);
     const env = runtimeSmoke.createIsolatedStateEnv("runtime-env");
 
     expect(env.USERPROFILE).toBe(env.HOME);
-    expect(env.OPENCLAW_HOME).toBe(env.HOME);
-    expect(env.OPENCLAW_STATE_DIR).toBe(path.join(env.HOME, ".openclaw"));
-    expect(env.OPENCLAW_CONFIG_PATH).toBe(path.join(env.OPENCLAW_STATE_DIR, "openclaw.json"));
+    expect(env.BOT_HOME).toBe(env.HOME);
+    expect(env.BOT_STATE_DIR).toBe(path.join(env.HOME, ".bot"));
+    expect(env.BOT_CONFIG_PATH).toBe(path.join(env.BOT_STATE_DIR, "bot.json"));
     expect(fs.existsSync(path.dirname(env.HOME))).toBe(true);
 
     runtimeSmoke.cleanupIsolatedStateEnv(env);
@@ -1401,7 +1401,7 @@ describe("bundled plugin install/uninstall probe", () => {
     const root = makePackageRoot();
     fs.mkdirSync(path.join(root, "dist", "extensions", "qa-channel"), { recursive: true });
     fs.writeFileSync(
-      path.join(root, "dist", "extensions", "qa-channel", "openclaw.plugin.json"),
+      path.join(root, "dist", "extensions", "qa-channel", "bot.plugin.json"),
       '{"id":"qa-channel"}\n',
       "utf8",
     );
@@ -1418,7 +1418,7 @@ describe("bundled plugin install/uninstall probe", () => {
     ]);
 
     const result = runProbe(root, {
-      OPENCLAW_BUNDLED_PLUGIN_SWEEP_IDS: undefined,
+      BOT_BUNDLED_PLUGIN_SWEEP_IDS: undefined,
     });
 
     expect(result.status).toBe(0);
@@ -1452,7 +1452,7 @@ describe("bundled plugin install/uninstall probe", () => {
     );
 
     const result = runProbe(root, {
-      OPENCLAW_BUNDLED_PLUGIN_SWEEP_IDS: undefined,
+      BOT_BUNDLED_PLUGIN_SWEEP_IDS: undefined,
     });
 
     expect(result.status).toBe(0);
@@ -1481,12 +1481,12 @@ describe("bundled plugin install/uninstall probe", () => {
     ]);
 
     const result = runProbe(root, {
-      OPENCLAW_BUNDLED_PLUGIN_SWEEP_IDS: "qa-channel",
+      BOT_BUNDLED_PLUGIN_SWEEP_IDS: "qa-channel",
     });
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain(
-      "OPENCLAW_BUNDLED_PLUGIN_SWEEP_IDS entry is not an installable bundled plugin in this package: qa-channel",
+      "BOT_BUNDLED_PLUGIN_SWEEP_IDS entry is not an installable bundled plugin in this package: qa-channel",
     );
     expect(result.stderr).toContain("Available: clickclack");
   });
@@ -1505,12 +1505,12 @@ describe("bundled plugin install/uninstall probe", () => {
     ]);
 
     const result = runProbe(root, {
-      OPENCLAW_BUNDLED_PLUGIN_SWEEP_IDS: "qa-channel",
+      BOT_BUNDLED_PLUGIN_SWEEP_IDS: "qa-channel",
     });
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain(
-      "OPENCLAW_BUNDLED_PLUGIN_SWEEP_IDS entry is not an installable bundled plugin in this package: qa-channel",
+      "BOT_BUNDLED_PLUGIN_SWEEP_IDS entry is not an installable bundled plugin in this package: qa-channel",
     );
     expect(result.stderr).toContain("Available: admin-http-rpc");
   });
@@ -1519,17 +1519,17 @@ describe("bundled plugin install/uninstall probe", () => {
     const root = makePackageRoot();
 
     const timeout = runProbe(root, {
-      OPENCLAW_BUNDLED_PLUGIN_LIST_TIMEOUT_MS: "100ms",
+      BOT_BUNDLED_PLUGIN_LIST_TIMEOUT_MS: "100ms",
     });
     expect(timeout.status).toBe(1);
-    expect(timeout.stderr).toContain("invalid OPENCLAW_BUNDLED_PLUGIN_LIST_TIMEOUT_MS: 100ms");
+    expect(timeout.stderr).toContain("invalid BOT_BUNDLED_PLUGIN_LIST_TIMEOUT_MS: 100ms");
 
     const maxBuffer = runProbe(root, {
-      OPENCLAW_BUNDLED_PLUGIN_LIST_MAX_BUFFER_BYTES: "64bytes",
+      BOT_BUNDLED_PLUGIN_LIST_MAX_BUFFER_BYTES: "64bytes",
     });
     expect(maxBuffer.status).toBe(1);
     expect(maxBuffer.stderr).toContain(
-      "invalid OPENCLAW_BUNDLED_PLUGIN_LIST_MAX_BUFFER_BYTES: 64bytes",
+      "invalid BOT_BUNDLED_PLUGIN_LIST_MAX_BUFFER_BYTES: 64bytes",
     );
   });
 
@@ -1547,16 +1547,16 @@ describe("bundled plugin install/uninstall probe", () => {
     ]);
 
     const total = runProbe(root, {
-      OPENCLAW_BUNDLED_PLUGIN_SWEEP_TOTAL: "2shards",
+      BOT_BUNDLED_PLUGIN_SWEEP_TOTAL: "2shards",
     });
     expect(total.status).toBe(1);
-    expect(total.stderr).toContain("invalid OPENCLAW_BUNDLED_PLUGIN_SWEEP_TOTAL: 2shards");
+    expect(total.stderr).toContain("invalid BOT_BUNDLED_PLUGIN_SWEEP_TOTAL: 2shards");
 
     const index = runProbe(root, {
-      OPENCLAW_BUNDLED_PLUGIN_SWEEP_INDEX: "0of2",
+      BOT_BUNDLED_PLUGIN_SWEEP_INDEX: "0of2",
     });
     expect(index.status).toBe(1);
-    expect(index.stderr).toContain("invalid OPENCLAW_BUNDLED_PLUGIN_SWEEP_INDEX: 0of2");
+    expect(index.stderr).toContain("invalid BOT_BUNDLED_PLUGIN_SWEEP_INDEX: 0of2");
   });
 
   it("bounds plugin list selection when the CLI hangs", () => {
@@ -1569,7 +1569,7 @@ describe("bundled plugin install/uninstall probe", () => {
 
     const startedAt = Date.now();
     const result = runProbe(root, {
-      OPENCLAW_BUNDLED_PLUGIN_LIST_TIMEOUT_MS: "100",
+      BOT_BUNDLED_PLUGIN_LIST_TIMEOUT_MS: "100",
     });
 
     expect(Date.now() - startedAt).toBeLessThan(2_500);
@@ -1587,7 +1587,7 @@ describe("bundled plugin install/uninstall probe", () => {
       recursive: true,
     });
     fs.writeFileSync(
-      path.join(root, "dist-runtime", "extensions", "runtime-only", "openclaw.plugin.json"),
+      path.join(root, "dist-runtime", "extensions", "runtime-only", "bot.plugin.json"),
       '{"id":"runtime-only"}\n',
       "utf8",
     );
@@ -1614,7 +1614,7 @@ describe("bundled plugin install/uninstall probe", () => {
     const windowsSourcePath = "C:\\crabbox\\qa-windows\\dist\\extensions\\nostr";
     fs.mkdirSync(path.join(stateDir, "plugins"), { recursive: true });
     fs.writeFileSync(
-      path.join(stateDir, "openclaw.json"),
+      path.join(stateDir, "bot.json"),
       JSON.stringify({ plugins: { entries: { nostr: { enabled: true } } } }),
       "utf8",
     );
@@ -1635,7 +1635,7 @@ describe("bundled plugin install/uninstall probe", () => {
 
     const result = runProbeCommand(root, ["assert-installed", "nostr", "nostr", "0"], {
       HOME: undefined,
-      OPENCLAW_STATE_DIR: stateDir,
+      BOT_STATE_DIR: stateDir,
     });
 
     expect(result.status).toBe(0);
@@ -1650,7 +1650,7 @@ describe("bundled plugin install/uninstall probe", () => {
     fs.mkdirSync(selectedRoot, { recursive: true });
     fs.mkdirSync(staleRoot, { recursive: true });
     fs.writeFileSync(
-      path.join(stateDir, "openclaw.json"),
+      path.join(stateDir, "bot.json"),
       JSON.stringify({ plugins: { entries: { nostr: { enabled: true } } } }),
       "utf8",
     );
@@ -1674,7 +1674,7 @@ describe("bundled plugin install/uninstall probe", () => {
       ["assert-installed", "nostr", "nostr", "0", selectedRoot],
       {
         HOME: undefined,
-        OPENCLAW_STATE_DIR: stateDir,
+        BOT_STATE_DIR: stateDir,
       },
     );
 
@@ -1688,7 +1688,7 @@ describe("bundled plugin install/uninstall probe", () => {
     const selectedRoot = path.join(root, "dist-runtime", "extensions", "nostr");
     fs.mkdirSync(path.join(stateDir, "plugins"), { recursive: true });
     fs.writeFileSync(
-      path.join(stateDir, "openclaw.json"),
+      path.join(stateDir, "bot.json"),
       JSON.stringify({ plugins: { entries: { nostr: { enabled: true } } } }),
       "utf8",
     );
@@ -1712,7 +1712,7 @@ describe("bundled plugin install/uninstall probe", () => {
       ["assert-installed", "nostr", "nostr", "0", selectedRoot],
       {
         HOME: undefined,
-        OPENCLAW_STATE_DIR: stateDir,
+        BOT_STATE_DIR: stateDir,
       },
     );
 
@@ -1725,7 +1725,7 @@ describe("bundled plugin install/uninstall probe", () => {
     const stateDir = path.join(root, "state");
     fs.mkdirSync(path.join(stateDir, "plugins"), { recursive: true });
     fs.writeFileSync(
-      path.join(stateDir, "openclaw.json"),
+      path.join(stateDir, "bot.json"),
       JSON.stringify({
         plugins: { load: { paths: ["C:\\crabbox\\qa-windows\\dist\\extensions\\nostr"] } },
       }),
@@ -1740,7 +1740,7 @@ describe("bundled plugin install/uninstall probe", () => {
 
     const result = runProbeCommand(root, ["assert-uninstalled", "nostr", "nostr"], {
       HOME: undefined,
-      OPENCLAW_STATE_DIR: stateDir,
+      BOT_STATE_DIR: stateDir,
     });
 
     expect(result.status).toBe(1);

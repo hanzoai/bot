@@ -22,7 +22,7 @@ import {
 type PluginHandlerLog = Parameters<typeof createGatewayPluginRequestHandler>[0]["log"];
 
 const IMESSAGE_WEBHOOK_PATH = "/imessage-webhook";
-const CANVAS_WS_PATH = "/__openclaw__/canvas/ws";
+const CANVAS_WS_PATH = "/__bot__/canvas/ws";
 
 function createPluginLog(): PluginHandlerLog {
   return { warn: vi.fn() } as unknown as PluginHandlerLog;

@@ -1,25 +1,25 @@
 // Gateway credentials tests cover config/env/secret-ref resolution for local and
 // remote gateway auth values.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import {
   resolveGatewayCredentialsFromConfig,
   resolveGatewayCredentialsFromValues,
 } from "./credentials.js";
 
-function cfg(input: Partial<OpenClawConfig>): OpenClawConfig {
-  return input as OpenClawConfig;
+function cfg(input: Partial<BotConfig>): BotConfig {
+  return input as BotConfig;
 }
 
 type ResolveFromConfigInput = Parameters<typeof resolveGatewayCredentialsFromConfig>[0];
-type GatewayConfig = NonNullable<OpenClawConfig["gateway"]>;
+type GatewayConfig = NonNullable<BotConfig["gateway"]>;
 type ResolveFromConfigOverrides = Partial<Omit<ResolveFromConfigInput, "cfg" | "env">>;
 
 const DEFAULT_GATEWAY_AUTH = { token: "config-token", password: "config-password" }; // pragma: allowlist secret
 const DEFAULT_REMOTE_AUTH = { token: "remote-token", password: "remote-password" }; // pragma: allowlist secret
 const DEFAULT_GATEWAY_ENV = {
-  OPENCLAW_GATEWAY_TOKEN: "env-token",
-  OPENCLAW_GATEWAY_PASSWORD: "env-password", // pragma: allowlist secret
+  BOT_GATEWAY_TOKEN: "env-token",
+  BOT_GATEWAY_PASSWORD: "env-password", // pragma: allowlist secret
 } as NodeJS.ProcessEnv;
 const EMPTY_GATEWAY_ENV = {} as NodeJS.ProcessEnv;
 
@@ -27,7 +27,7 @@ function envSecretRef(id: string) {
   return { source: "env", provider: "default", id } as const;
 }
 
-function cfgWithDefaultEnvSecretProvider(gateway: GatewayConfig): OpenClawConfig {
+function cfgWithDefaultEnvSecretProvider(gateway: GatewayConfig): BotConfig {
   return {
     gateway,
     secrets: {
@@ -35,11 +35,11 @@ function cfgWithDefaultEnvSecretProvider(gateway: GatewayConfig): OpenClawConfig
         default: { source: "env" },
       },
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as BotConfig;
 }
 
 function resolveGatewayCredentialsWithEmptyEnv(
-  config: OpenClawConfig,
+  config: BotConfig,
   overrides: ResolveFromConfigOverrides = {},
 ) {
   return resolveGatewayCredentialsFromConfig({
@@ -205,9 +205,9 @@ describe("resolveGatewayCredentialsFromConfig", () => {
         },
       }),
       env: {
-        OPENCLAW_GATEWAY_TOKEN: "env-token",
-        OPENCLAW_GATEWAY_PASSWORD: "env-password", // pragma: allowlist secret
-        OPENCLAW_SERVICE_KIND: "gateway",
+        BOT_GATEWAY_TOKEN: "env-token",
+        BOT_GATEWAY_PASSWORD: "env-password", // pragma: allowlist secret
+        BOT_SERVICE_KIND: "gateway",
       } as NodeJS.ProcessEnv,
     });
     expect(resolved).toEqual({
@@ -267,12 +267,12 @@ describe("resolveGatewayCredentialsFromConfig", () => {
             mode: "local",
             auth: {
               mode: "token",
-              token: "${OPENCLAW_GATEWAY_TOKEN}",
+              token: "${BOT_GATEWAY_TOKEN}",
             },
           },
         }),
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "env-token",
+          BOT_GATEWAY_TOKEN: "env-token",
         } as NodeJS.ProcessEnv,
       }),
     ).toThrow("gateway.auth.token");
@@ -286,7 +286,7 @@ describe("resolveGatewayCredentialsFromConfig", () => {
             mode: "local",
             auth: {
               mode: "token",
-              token: "${OPENCLAW_GATEWAY_TOKEN}",
+              token: "${BOT_GATEWAY_TOKEN}",
             },
           },
         }),
@@ -409,7 +409,7 @@ describe("resolveGatewayCredentialsFromConfig", () => {
         },
       }),
       env: {
-        OPENCLAW_GATEWAY_TOKEN: "env-token",
+        BOT_GATEWAY_TOKEN: "env-token",
       } as NodeJS.ProcessEnv,
       remoteTokenFallback: "remote-only",
     });
@@ -449,7 +449,7 @@ describe("resolveGatewayCredentialsFromConfig", () => {
           default: { source: "env" },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
   }
 
   it("ignores unresolved local token ref in remote-only mode when local auth mode is token", () => {
@@ -529,8 +529,8 @@ describe("resolveGatewayCredentialsFromValues", () => {
 
   it("rejects unresolved env var placeholders in config credentials", () => {
     const resolved = resolveGatewayCredentialsFromValues({
-      configToken: "${OPENCLAW_GATEWAY_TOKEN}",
-      configPassword: "${OPENCLAW_GATEWAY_PASSWORD}",
+      configToken: "${BOT_GATEWAY_TOKEN}",
+      configPassword: "${BOT_GATEWAY_PASSWORD}",
       env: {} as NodeJS.ProcessEnv,
       tokenPrecedence: "config-first",
       passwordPrecedence: "config-first", // pragma: allowlist secret

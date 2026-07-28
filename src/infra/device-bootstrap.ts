@@ -2,7 +2,7 @@
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@hanzo/bot-normalization-core/number-coercion";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import {
   deviceBootstrapProfilesEqual,

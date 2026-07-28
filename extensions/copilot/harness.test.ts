@@ -1,16 +1,16 @@
 // Copilot tests cover harness plugin behavior.
 import type { CopilotClient } from "@github/copilot-sdk";
-import { attachModelProviderRequestTransport } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { attachModelProviderRequestTransport } from "bot/plugin-sdk/agent-harness-runtime";
 import type {
   AgentHarnessAttemptParams,
   AgentHarnessAttemptResult,
   AgentHarnessCompactParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
-} from "openclaw/plugin-sdk/hook-runtime";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/hook-runtime";
+import { createMockPluginRegistry } from "bot/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createCopilotAgentHarness, type CopilotSessionBinding } from "./harness.js";
 import type { resolvePoolAcquire } from "./src/attempt.js";
@@ -306,7 +306,7 @@ describe("createCopilotAgentHarness", () => {
       ["deepinfra", ["deepinfra"]],
       ["fireworks", ["fireworks"]],
       ["github", ["github"]],
-      ["openclaw", ["openclaw"]],
+      ["bot", ["bot"]],
       ["sglang", ["sglang"]],
       ["together", ["together"]],
       ["vllm", ["vllm"]],
@@ -416,7 +416,7 @@ describe("createCopilotAgentHarness", () => {
       onAgentEvent: vi.fn(),
       onAssistantDelta: vi.fn(),
       onPartialReply: vi.fn(),
-      sessionId: "openclaw-session-finalize",
+      sessionId: "bot-session-finalize",
     });
     mocks.runCopilotAttempt
       .mockImplementationOnce(async (_params, deps) => {
@@ -439,7 +439,7 @@ describe("createCopilotAgentHarness", () => {
     expect(mocks.runCopilotAttempt.mock.calls[1]?.[0]).toMatchObject({
       disableTools: true,
       initialReplayState: { sdkSessionId: "sdk-session-finalize" },
-      sessionId: "openclaw-session-finalize",
+      sessionId: "bot-session-finalize",
     });
     expect(mocks.runCopilotAttempt.mock.calls[1]?.[0]?.initialReplayState).not.toHaveProperty(
       "replayInvalid",
@@ -460,7 +460,7 @@ describe("createCopilotAgentHarness", () => {
     const harness = createCopilotAgentHarness({ pool: makePoolMock() });
     const params = asAttemptParams({
       ...ATTEMPT_PARAMS,
-      sessionId: "openclaw-session-missing",
+      sessionId: "bot-session-missing",
     });
 
     await expect(
@@ -713,7 +713,7 @@ describe("createCopilotAgentHarness", () => {
       expect(deleteSession).toHaveBeenCalledTimes(1);
     });
 
-    it("does not invoke deleteSession for a session belonging to a different openclawSessionId", async () => {
+    it("does not invoke deleteSession for a session belonging to a different botSessionId", async () => {
       const pool = makePoolMock();
       const deleteSession = vi.fn().mockResolvedValue(undefined);
       const client = createMockCopilotClient({ deleteSession });
@@ -777,7 +777,7 @@ describe("createCopilotAgentHarness", () => {
     expect(abort).toHaveBeenCalledTimes(1);
   });
 
-  it("aborts deferred compaction cleanup when the OpenClaw session resets", async () => {
+  it("aborts deferred compaction cleanup when the Bot session resets", async () => {
     const cleanup = createDeferred<"aborted" | "completed" | "deadline">();
     const abort = vi.fn(() => cleanup.resolve("aborted"));
     mocks.runCopilotAttempt.mockImplementation(async (_params, deps) => {
@@ -918,7 +918,7 @@ describe("createCopilotAgentHarness", () => {
 
   describe("session reuse across turns (dogfood finding #4)", () => {
     // These tests pin the harness's session-reuse contract: subsequent
-    // `runAttempt` calls within the same OpenClaw session should pass
+    // `runAttempt` calls within the same Bot session should pass
     // the tracked `sdkSessionId` to the attempt via `initialReplayState`
     // so the SDK can `resumeSession` and keep its prompt cache + thread
     // history warm. Compatibility-fingerprint mismatch (provider/model/

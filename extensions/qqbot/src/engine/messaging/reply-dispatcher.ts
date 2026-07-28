@@ -7,8 +7,8 @@
 
 import crypto from "node:crypto";
 import path from "node:path";
-import { resolveLocalPathFromRootsSync } from "openclaw/plugin-sdk/security-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { resolveLocalPathFromRootsSync } from "bot/plugin-sdk/security-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { MediaFileType, type GatewayAccount } from "../types.js";
 import { formatFileSize, getImageMimeType, getMaxUploadSize } from "../utils/file-utils.js";
 import { formatErrorMessage } from "../utils/format.js";

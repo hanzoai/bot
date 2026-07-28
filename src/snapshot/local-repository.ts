@@ -38,12 +38,12 @@ import {
 import { readSqliteUserVersion } from "../infra/sqlite-user-version.js";
 import { runExec } from "../process/exec.js";
 import { isValidAgentId, normalizeAgentId } from "../routing/session-key.js";
-import { assertOpenClawAgentDatabaseForMaintenance } from "../state/openclaw-agent-db.js";
-import { assertOpenClawStateDatabaseForMaintenance } from "../state/openclaw-state-db.js";
+import { assertBotAgentDatabaseForMaintenance } from "../state/bot-agent-db.js";
+import { assertBotStateDatabaseForMaintenance } from "../state/bot-state-db.js";
 import {
-  sanitizeOpenClawGlobalStateSnapshot,
-  sanitizeOpenClawStateLeaseRows,
-} from "../state/openclaw-state-snapshot-sanitizer.js";
+  sanitizeBotGlobalStateSnapshot,
+  sanitizeBotStateLeaseRows,
+} from "../state/bot-state-snapshot-sanitizer.js";
 import {
   containsAsciiControlCharacter,
   copySnapshotArtifact,
@@ -291,9 +291,9 @@ class LocalSqliteSnapshotProvider implements SqliteSnapshotProvider {
         requireNonEmptySource: identity.role !== "generic",
         transform:
           identity.role === "global"
-            ? sanitizeOpenClawGlobalStateSnapshot
+            ? sanitizeBotGlobalStateSnapshot
             : identity.role === "agent"
-              ? sanitizeOpenClawStateLeaseRows
+              ? sanitizeBotStateLeaseRows
               : undefined,
         validate: buildDatabaseValidator(identity),
       });
@@ -763,11 +763,11 @@ function buildDatabaseValidator(
 ): SqliteSnapshotValidator {
   if (identity.role === "global") {
     return (database, pathname) =>
-      assertOpenClawStateDatabaseForMaintenance(database, { pathname });
+      assertBotStateDatabaseForMaintenance(database, { pathname });
   }
   if (identity.role === "agent") {
     return (database, pathname) =>
-      assertOpenClawAgentDatabaseForMaintenance(database, {
+      assertBotAgentDatabaseForMaintenance(database, {
         agentId: identity.agentId,
         pathname,
       });

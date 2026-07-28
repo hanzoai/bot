@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import { resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import { hasGeneratedMediaCompletionEvent } from "../../agents/internal-event-contract.js";
@@ -25,7 +25,7 @@ import { readTranscriptStatsSync } from "../../config/sessions/session-accessor.
 import { parseSqliteSessionFileMarker } from "../../config/sessions/sqlite-marker.js";
 import { resolveMaintenanceConfigFromInput } from "../../config/sessions/store-maintenance.js";
 import { isRecoverableTerminalSessionStatus } from "../../config/sessions/terminal-status.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { parseCronRunScopeSuffix } from "../../sessions/session-key-utils.js";
 import { sessionDeliveryChannel } from "../../utils/delivery-context.shared.js";
 import { loadSessionEntry } from "../session-utils.js";
@@ -37,7 +37,7 @@ import type { AgentRunRequest } from "./agent-request-types.js";
 import type { GatewayRequestHandlerOptions } from "./types.js";
 
 type PreparedAgentSession = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   storePath: string;
   entry?: SessionEntry;
   canonicalKey: string;

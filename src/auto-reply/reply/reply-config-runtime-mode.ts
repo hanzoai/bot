@@ -1,10 +1,10 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 
 // Reply completeness is process-local metadata. Keep it off config objects so
 // frozen runtime snapshots and identity-keyed caches remain valid.
-const replyConfigRuntimeModes = new WeakMap<OpenClawConfig, "fast" | "full">();
+const replyConfigRuntimeModes = new WeakMap<BotConfig, "fast" | "full">();
 
-export function markReplyConfigRuntimeMode<T extends OpenClawConfig>(
+export function markReplyConfigRuntimeMode<T extends BotConfig>(
   config: T,
   runtimeMode: "fast" | "full",
 ): T {
@@ -12,9 +12,9 @@ export function markReplyConfigRuntimeMode<T extends OpenClawConfig>(
   return config;
 }
 
-export function isCompleteReplyConfig(config: unknown): config is OpenClawConfig {
+export function isCompleteReplyConfig(config: unknown): config is BotConfig {
   return Boolean(
-    config && typeof config === "object" && replyConfigRuntimeModes.has(config as OpenClawConfig),
+    config && typeof config === "object" && replyConfigRuntimeModes.has(config as BotConfig),
   );
 }
 
@@ -22,6 +22,6 @@ export function usesFullReplyRuntime(config: unknown): boolean {
   return Boolean(
     config &&
     typeof config === "object" &&
-    replyConfigRuntimeModes.get(config as OpenClawConfig) === "full",
+    replyConfigRuntimeModes.get(config as BotConfig) === "full",
   );
 }

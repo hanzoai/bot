@@ -41,7 +41,7 @@ import {
   type PluginMutationResult,
   type PluginSearchResult,
 } from "../../lib/plugins/index.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { fetchPluginIconBlobUrl } from "./icon-loader.ts";
 import type { ConnectorSuggestion } from "./presentation.ts";
@@ -97,7 +97,7 @@ function mutationSuccessMessage(
   return lines.filter(Boolean).join("\n");
 }
 
-class PluginsPage extends OpenClawLightDomElement {
+class PluginsPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -554,7 +554,7 @@ class PluginsPage extends OpenClawLightDomElement {
     }
   }
 
-  private openClawHubSearch(query: string) {
+  private botHubSearch(query: string) {
     this.query = query;
     this.changeTab("discover");
   }
@@ -932,7 +932,7 @@ class PluginsPage extends OpenClawLightDomElement {
       mcp.followUp === "oauth"
         ? t("pluginsPage.connectorAddedOauth", {
             name: connector.name,
-            command: `openclaw mcp login ${mcp.serverName}`,
+            command: `bot mcp login ${mcp.serverName}`,
           })
         : mcp.followUp === "endpoint"
           ? t("pluginsPage.connectorAddedEndpoint", { name: connector.name })
@@ -1006,7 +1006,7 @@ class PluginsPage extends OpenClawLightDomElement {
           onCancelUninstall: (rowKey) => this.setPendingRemoval(rowKey, false),
           onUninstall: (pluginId, rowKey) => void this.uninstall(pluginId, rowKey),
           onAddConnector: (connector) => void this.addConnector(connector),
-          onSearchClawHub: (query) => this.openClawHubSearch(query),
+          onSearchClawHub: (query) => this.botHubSearch(query),
           onMcpToggle: (name, enabled) => void this.toggleMcpServer(name, enabled),
           onMcpRemove: (name) => void this.removeMcpServer(name),
           onMcpFormToggle: (open) => {
@@ -1022,13 +1022,13 @@ class PluginsPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-plugins-page")) {
-  customElements.define("openclaw-plugins-page", PluginsPage);
+if (!customElements.get("bot-plugins-page")) {
+  customElements.define("bot-plugins-page", PluginsPage);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-plugins-page": PluginsPage;
+    "bot-plugins-page": PluginsPage;
   }
 }
 

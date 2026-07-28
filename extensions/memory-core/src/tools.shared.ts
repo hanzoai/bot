@@ -1,24 +1,24 @@
 // Memory Core plugin module implements tools.shared behavior.
-import { optionalFiniteNumberSchema, stringEnum } from "openclaw/plugin-sdk/channel-actions";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { optionalFiniteNumberSchema, stringEnum } from "bot/plugin-sdk/channel-actions";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 import {
   listMemoryCorpusSupplements,
   resolveMemorySearchConfig,
   resolveSessionAgentIds,
   type MemoryCorpusSearchResult,
   type AnyAgentTool,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import type { PluginStateLeaseRunner } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+  type BotConfig,
+} from "bot/plugin-sdk/memory-core-host-runtime-core";
+import type { PluginStateLeaseRunner } from "bot/plugin-sdk/plugin-state-runtime";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import { Type } from "typebox";
 import type { MemoryCoreAcquireLocalService } from "./memory/embedding-local-service.js";
 type MemorySearchManagerResult = Awaited<
   ReturnType<(typeof import("./memory/index.js"))["getMemorySearchManager"]>
 >;
 type MemoryToolOptions = {
-  config?: OpenClawConfig;
-  getConfig?: () => OpenClawConfig | undefined;
+  config?: BotConfig;
+  getConfig?: () => BotConfig | undefined;
   agentId?: string;
   agentSessionKey?: string;
   sandboxed?: boolean;
@@ -60,7 +60,7 @@ function resolveMemoryToolContext(options: MemoryToolOptions) {
 }
 
 export async function getMemoryManagerContextWithPurpose(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   purpose?: "default" | "status" | "cli";
   acquireLocalService?: MemoryCoreAcquireLocalService;
@@ -100,7 +100,7 @@ export function createMemoryTool(params: {
   name: string;
   description: string;
   parameters: typeof MemorySearchSchema | typeof MemoryGetSchema;
-  execute: (ctx: { cfg: OpenClawConfig; agentId: string }) => AnyAgentTool["execute"];
+  execute: (ctx: { cfg: BotConfig; agentId: string }) => AnyAgentTool["execute"];
 }): AnyAgentTool | null {
   const ctx = resolveMemoryToolContext(params.options);
   if (!ctx) {
@@ -136,14 +136,14 @@ export function buildMemorySearchUnavailableResult(
     (isQuotaError
       ? "Memory search is unavailable because the embedding provider quota is exhausted."
       : isMissingNodeSqlite
-        ? "Memory search is unavailable because this OpenClaw Node runtime does not provide SQLite support."
+        ? "Memory search is unavailable because this Bot Node runtime does not provide SQLite support."
         : "Memory search is unavailable due to an embedding/provider error.");
   const action =
     overrides?.action ??
     (isQuotaError
       ? "Top up or switch embedding provider, then retry memory_search."
       : isMissingNodeSqlite
-        ? "Run OpenClaw with a Node runtime that includes node:sqlite, then retry memory_search."
+        ? "Run Bot with a Node runtime that includes node:sqlite, then retry memory_search."
         : "Check embedding provider configuration and retry memory_search.");
   return {
     results: [],

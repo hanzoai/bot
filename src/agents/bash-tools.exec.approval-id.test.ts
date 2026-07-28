@@ -14,7 +14,7 @@ import {
   type ExecApprovalsFile,
 } from "../infra/exec-approvals.js";
 import { sendMessage } from "../infra/outbound/message.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
 import { buildSystemRunPreparePayload } from "../test-utils/system-run-prepare-payload.js";
 import { createExecTool as createExecToolImpl } from "./bash-tools.exec-run.js";
@@ -407,32 +407,32 @@ describe("exec approvals", () => {
   let tempCaseIndex = 0;
 
   beforeAll(async () => {
-    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-exec-approvals-"));
+    tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-exec-approvals-"));
   });
 
   beforeEach(async () => {
     envSnapshot = captureEnv([
       "HOME",
       "USERPROFILE",
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_BUNDLED_PLUGINS_DIR",
-      "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
+      "BOT_STATE_DIR",
+      "BOT_BUNDLED_PLUGINS_DIR",
+      "BOT_DISABLE_BUNDLED_PLUGINS",
     ]);
     const tempDir = path.join(tempRoot, `case-${++tempCaseIndex}`);
     await fs.mkdir(tempDir, { recursive: true });
     setTestEnvValue("HOME", tempDir);
     // Windows uses USERPROFILE for os.homedir()
     setTestEnvValue("USERPROFILE", tempDir);
-    setTestEnvValue("OPENCLAW_STATE_DIR", path.join(tempDir, ".openclaw"));
-    deleteTestEnvValue("OPENCLAW_BUNDLED_PLUGINS_DIR");
-    setTestEnvValue("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
+    setTestEnvValue("BOT_STATE_DIR", path.join(tempDir, ".bot"));
+    deleteTestEnvValue("BOT_BUNDLED_PLUGINS_DIR");
+    setTestEnvValue("BOT_DISABLE_BUNDLED_PLUGINS", "1");
     vi.mocked(callGatewayTool).mockReset();
     vi.mocked(sendMessage).mockClear();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     envSnapshot?.restore();
     envSnapshot = undefined;
   });
@@ -500,7 +500,7 @@ describe("exec approvals", () => {
   });
 
   it("skips approval when node allowlist is satisfied", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-test-bin-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-test-bin-"));
     const binDir = path.join(tempDir, "bin");
     await fs.mkdir(binDir, { recursive: true });
     const exeName = process.platform === "win32" ? "tool.cmd" : "tool";
@@ -1358,7 +1358,7 @@ describe("exec approvals", () => {
     if (process.platform === "win32") {
       return;
     }
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-wrapper-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-skill-wrapper-"));
     try {
       const binDir = path.join(tempDir, "bin");
       const wrapperPath = path.join(binDir, "gog-wrapper");
@@ -1438,9 +1438,9 @@ describe("exec approvals", () => {
     if (process.platform === "win32") {
       return;
     }
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-prelude-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-skill-prelude-"));
     try {
-      const skillDir = path.join(tempDir, ".openclaw", "skills", "gog");
+      const skillDir = path.join(tempDir, ".bot", "skills", "gog");
       const skillPath = path.join(skillDir, "SKILL.md");
       const binDir = path.join(tempDir, "bin");
       const wrapperPath = path.join(binDir, "gog-wrapper");

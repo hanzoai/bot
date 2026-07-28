@@ -1,7 +1,7 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { MeetingPlatformAdapter } from "openclaw/plugin-sdk/meeting-runtime";
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { MeetingPlatformAdapter } from "bot/plugin-sdk/meeting-runtime";
+import { definePluginEntry } from "bot/plugin-sdk/plugin-entry";
+import { normalizeAgentId } from "bot/plugin-sdk/routing";
 import { Type } from "typebox";
 import { ZOOM_MEETINGS_CLI_DESCRIPTOR } from "./src/cli-output-mode.js";
 import {
@@ -26,7 +26,7 @@ const zoomMeetingsConfigSchema = {
   uiHints: {
     defaultMode: {
       label: "Default Mode",
-      help: "Agent consults OpenClaw, bidi uses direct realtime voice, and transcribe observes only.",
+      help: "Agent consults Bot, bidi uses direct realtime voice, and transcribe observes only.",
     },
     "chrome.browserProfile": { label: "Chrome Profile", advanced: true },
     "chrome.guestName": { label: "Guest Name" },
@@ -89,7 +89,7 @@ export default definePluginEntry(
     toolName: "zoom_meetings",
     toolLabel: "Zoom meetings",
     toolDescription:
-      "Join and manage Zoom meeting browser guests. Guest admission, tenant sign-in, and media permissions may require manual action in the OpenClaw Chrome profile.",
+      "Join and manage Zoom meeting browser guests. Guest admission, tenant sign-in, and media permissions may require manual action in the Bot Chrome profile.",
     toolParameters: ZoomMeetingsToolSchema,
     transcriptSource: {
       id: "zoom",

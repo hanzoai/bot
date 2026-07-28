@@ -23,10 +23,10 @@ troubleshooting, see the main [FAQ](/help/faq).
 
     Models are `provider/model` refs (example: `openai/gpt-5.5`,
     `anthropic/claude-sonnet-4-6`). Always set `provider/model` explicitly. If
-    you omit the provider, OpenClaw tries an alias match first, then a unique
+    you omit the provider, Bot tries an alias match first, then a unique
     configured-provider match for that model id, then falls back to the
     configured default provider (deprecated compatibility path). If that
-    provider no longer has the configured default model, OpenClaw falls back
+    provider no longer has the configured default model, Bot falls back
     to the first configured provider/model instead of a stale default.
 
   </Accordion>
@@ -49,14 +49,14 @@ troubleshooting, see the main [FAQ](/help/faq).
     Change only the model fields — avoid full config replaces.
 
     - `/model` in chat (per-session, see [Slash commands](/tools/slash-commands))
-    - `openclaw models set ...` (updates just model config)
-    - `openclaw configure --section model` (interactive)
-    - edit `agents.defaults.model` in `~/.openclaw/openclaw.json` directly
+    - `bot models set ...` (updates just model config)
+    - `bot configure --section model` (interactive)
+    - edit `agents.defaults.model` in `~/.hanzoai/bot.json` directly
 
     For RPC edits, inspect with `config.schema.lookup` first (normalized
     path, shallow schema docs, child summaries), then prefer `config.patch`
     over `config.apply` with a partial object. If you did overwrite config,
-    restore from backup or run `openclaw doctor` to repair.
+    restore from backup or run `bot doctor` to repair.
 
     Docs: [Models](/concepts/models), [Configure](/cli/configure),
     [Config](/cli/config), [Doctor](/gateway/doctor).
@@ -69,11 +69,11 @@ troubleshooting, see the main [FAQ](/help/faq).
     1. Install Ollama from `https://ollama.com/download`
     2. Pull a local model, e.g. `ollama pull gemma4`
     3. For cloud models too, run `ollama signin`
-    4. Run `openclaw onboard`, choose `Ollama`, then `Local` or `Cloud + Local`
+    4. Run `bot onboard`, choose `Ollama`, then `Local` or `Cloud + Local`
 
     `Cloud + Local` gives you cloud models plus your local Ollama models;
     cloud models such as `kimi-k2.5:cloud` need no local pull. To switch
-    manually: `openclaw models list`, then `openclaw models set ollama/<model>`.
+    manually: `bot models list`, then `bot models set ollama/<model>`.
 
     Smaller/heavily quantized models are more vulnerable to prompt injection.
     Use large models for any bot with tool access; if you use small models
@@ -108,7 +108,7 @@ troubleshooting, see the main [FAQ](/help/faq).
   <Accordion title="If two providers expose the same model id, which one does /model use?">
     `/model provider/model` selects that exact provider route. For example,
     `qianfan/deepseek-v4-flash` and `deepseek/deepseek-v4-flash` are different
-    refs even though the model id matches — OpenClaw does not silently switch
+    refs even though the model id matches — Bot does not silently switch
     providers on a bare id match.
 
     A user-selected `/model` ref is strict for fallback: if that
@@ -116,7 +116,7 @@ troubleshooting, see the main [FAQ](/help/faq).
     falling back to `agents.defaults.model.fallbacks`. Configured fallback
     chains still apply to configured defaults, cron job primaries, and
     auto-selected fallback state. When a non-session-override run is allowed
-    to use fallback, OpenClaw tries the requested provider/model first, then
+    to use fallback, Bot tries the requested provider/model first, then
     configured fallbacks, then the configured primary — so duplicate bare
     model ids never jump straight back to the default provider.
 
@@ -128,7 +128,7 @@ troubleshooting, see the main [FAQ](/help/faq).
     Yes — model choice and runtime choice are separate:
 
     - **Native Codex coding agent:** set `agents.defaults.model.primary` to
-      `openai/gpt-5.5`. Sign in with `openclaw models auth login --provider
+      `openai/gpt-5.5`. Sign in with `bot models auth login --provider
       openai` for ChatGPT/Codex subscription auth.
     - **Direct OpenAI API tasks outside the agent loop:** configure
       `OPENAI_API_KEY` for images, embeddings, speech, realtime, and other
@@ -197,7 +197,7 @@ troubleshooting, see the main [FAQ](/help/faq).
   </Accordion>
 
   <Accordion title='Why do I see "Unknown model: minimax/MiniMax-M3"?'>
-    If you're on an older OpenClaw release, upgrade first (or run from source
+    If you're on an older Bot release, upgrade first (or run from source
     `main`) and restart the gateway — `MiniMax-M3` may not be in your
     installed release's catalog yet. Otherwise the MiniMax provider is not
     configured (no provider entry or auth profile found), so the model can't
@@ -316,10 +316,10 @@ troubleshooting, see the main [FAQ](/help/faq).
     A new agent has an empty auth store — auth is per-agent, stored at:
 
     ```text
-    ~/.openclaw/agents/<agentId>/agent/auth-profiles.json
+    ~/.bot/agents/<agentId>/agent/auth-profiles.json
     ```
 
-    Fix: run `openclaw agents add <id>` and configure auth in the wizard, or
+    Fix: run `bot agents add <id>` and configure auth in the wizard, or
     copy only portable static `api_key`/`token` profiles from the main
     agent's store. For OAuth, sign in from the new agent when it needs its
     own account. See [Multi-Agent Routing](/concepts/multi-agent) for the
@@ -338,7 +338,7 @@ troubleshooting, see the main [FAQ](/help/faq).
     1. **Auth profile rotation** within the same provider.
     2. **Model fallback** to the next model in `agents.defaults.model.fallbacks`.
 
-    Cooldowns apply to failing profiles (exponential backoff), so OpenClaw
+    Cooldowns apply to failing profiles (exponential backoff), so Bot
     keeps responding when a provider is rate-limited or temporarily failing.
 
     The rate-limit bucket covers more than plain `429`: `Too many concurrent
@@ -382,28 +382,28 @@ troubleshooting, see the main [FAQ](/help/faq).
     **Fix checklist:**
 
     - Confirm where profiles live — current:
-      `~/.openclaw/agents/<agentId>/agent/auth-profiles.json`; legacy:
-      `~/.openclaw/agent/*` (migrated by `openclaw doctor`).
+      `~/.bot/agents/<agentId>/agent/auth-profiles.json`; legacy:
+      `~/.bot/agent/*` (migrated by `bot doctor`).
     - Confirm the Gateway loads your env var. `ANTHROPIC_API_KEY` set only in
       your shell won't reach a Gateway run via systemd/launchd — put it in
-      `~/.openclaw/.env` or enable `env.shellEnv`.
+      `~/.bot/.env` or enable `env.shellEnv`.
     - Confirm you're editing the right agent — multi-agent setups have
       multiple `auth-profiles.json` files.
-    - Run `openclaw models status` to see configured models and provider
+    - Run `bot models status` to see configured models and provider
       auth state.
 
     **For "No credentials found for profile anthropic" (no email suffix):**
 
     The run is pinned to an Anthropic profile the Gateway can't find.
 
-    - Use Claude CLI: run `openclaw models auth login --provider anthropic
+    - Use Claude CLI: run `bot models auth login --provider anthropic
       --method cli --set-default` on the gateway host.
     - Prefer an API key instead: put `ANTHROPIC_API_KEY` in
-      `~/.openclaw/.env` on the gateway host, then clear any pinned order
+      `~/.bot/.env` on the gateway host, then clear any pinned order
       that forces the missing profile:
 
       ```bash
-      openclaw models auth order clear --provider anthropic
+      bot models auth order clear --provider anthropic
       ```
 
     - Remote mode: auth profiles live on the gateway machine, not your
@@ -413,7 +413,7 @@ troubleshooting, see the main [FAQ](/help/faq).
 
   <Accordion title="Why did it also try Google Gemini and fail?">
     If your model config includes Google Gemini as a fallback (or you
-    switched to a Gemini shorthand), OpenClaw tries it during fallback. No
+    switched to a Gemini shorthand), Bot tries it during fallback. No
     Google credentials configured gives `No API key found for provider
     "google"`. Fix: add Google auth, or remove Google models from
     `agents.defaults.model.fallbacks`/aliases.
@@ -422,7 +422,7 @@ troubleshooting, see the main [FAQ](/help/faq).
 
     Cause: session history has thinking blocks without signatures (often
     from an aborted/partial stream); Google Antigravity requires signatures
-    on thinking blocks. OpenClaw strips unsigned thinking blocks for Google
+    on thinking blocks. Bot strips unsigned thinking blocks for Google
     Antigravity Claude; if it still appears, start a new session or set
     `/thinking off` for that agent.
 
@@ -439,10 +439,10 @@ Related: [/concepts/oauth](/concepts/oauth) (OAuth flows, token storage, multi-a
     at:
 
     ```text
-    ~/.openclaw/agents/<agentId>/agent/auth-profiles.json
+    ~/.bot/agents/<agentId>/agent/auth-profiles.json
     ```
 
-    Inspect saved profiles without dumping secrets: `openclaw models auth
+    Inspect saved profiles without dumping secrets: `bot models auth
     list` (optionally `--provider <id>` or `--json`). See
     [Models CLI](/cli/models#auth-profiles).
 
@@ -459,9 +459,9 @@ Related: [/concepts/oauth](/concepts/oauth) (OAuth flows, token storage, multi-a
     Yes. `auth.order.<provider>` config sets rotation order per provider
     (metadata only — no secrets stored).
 
-    OpenClaw may skip a profile in a short **cooldown** (rate limits,
+    Bot may skip a profile in a short **cooldown** (rate limits,
     timeouts, auth failures) or a longer **disabled** state
-    (billing/insufficient credits). Inspect with `openclaw models status
+    (billing/insufficient credits). Inspect with `bot models status
     --json` and check `auth.unusableProfiles`. Rate-limit cooldowns can be
     model-scoped — a profile cooling down for one model can still serve a
     sibling model on the same provider; billing/disabled windows block the
@@ -471,22 +471,22 @@ Related: [/concepts/oauth](/concepts/oauth) (OAuth flows, token storage, multi-a
 
     ```bash
     # Defaults to the configured default agent (omit --agent)
-    openclaw models auth order get --provider anthropic
+    bot models auth order get --provider anthropic
 
     # Lock rotation to a single profile
-    openclaw models auth order set --provider anthropic anthropic:default
+    bot models auth order set --provider anthropic anthropic:default
 
     # Or set an explicit order (fallback within provider)
-    openclaw models auth order set --provider anthropic anthropic:work anthropic:default
+    bot models auth order set --provider anthropic anthropic:work anthropic:default
 
     # Clear override (fall back to config auth.order / round-robin)
-    openclaw models auth order clear --provider anthropic
+    bot models auth order clear --provider anthropic
 
     # Target a specific agent
-    openclaw models auth order set --provider anthropic --agent main anthropic:default
+    bot models auth order set --provider anthropic --agent main anthropic:default
     ```
 
-    Verify what will actually be tried: `openclaw models status --probe`. A
+    Verify what will actually be tried: `bot models status --probe`. A
     stored profile omitted from an explicit order reports
     `excluded_by_auth_order` instead of being tried silently.
 
@@ -494,7 +494,7 @@ Related: [/concepts/oauth](/concepts/oauth) (OAuth flows, token storage, multi-a
 
   <Accordion title="OAuth vs API key - what is the difference?">
     - **OAuth / CLI login** often uses subscription access where the
-      provider supports it. For Anthropic, OpenClaw's Claude CLI backend
+      provider supports it. For Anthropic, Bot's Claude CLI backend
       uses Claude Code `claude -p`, which Anthropic currently treats as
       Agent SDK/programmatic usage drawing from subscription usage limits —
       see [Anthropic](/providers/anthropic) for the current billing-pause

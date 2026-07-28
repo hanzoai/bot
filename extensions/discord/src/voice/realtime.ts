@@ -1,10 +1,10 @@
 // Discord plugin module implements realtime behavior.
 import { PassThrough, pipeline } from "node:stream";
-import type { DiscordAccountConfig, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { DiscordAccountConfig, BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/number-runtime";
 import {
   buildRealtimeVoiceAgentConsultChatMessage,
   buildRealtimeVoiceAgentConsultPolicyInstructions,
@@ -34,10 +34,10 @@ import {
   type RealtimeVoiceTurnContextHandle,
   type RealtimeVoiceTurnContextTracker,
   type RealtimeVoiceActivationNameTranscriptResult,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
-import { asBoolean } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/realtime-voice";
+import { createSubsystemLogger } from "bot/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "bot/plugin-sdk/ssrf-runtime";
+import { asBoolean } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   isDiscordRealtimeWakeNameRequired,
   resolveDiscordRealtimeWakeNamePolicy,
@@ -95,7 +95,7 @@ const DISCORD_REALTIME_OUTPUT_PREROLL_FRAMES = 25;
 const DISCORD_REALTIME_TRAILING_SILENCE_MIN_MS = 700;
 const DISCORD_REALTIME_TRAILING_SILENCE_MAX_MS = 3_000;
 const DISCORD_REALTIME_FORCED_CONSULT_REASON =
-  "provider_final_transcript_without_openclaw_agent_consult";
+  "provider_final_transcript_without_bot_agent_consult";
 const DISCORD_REALTIME_VERBOSE_OMITTED_EVENTS = new Set([
   "conversation.output_audio.delta",
   "input_audio_buffer.append",
@@ -244,9 +244,9 @@ function resolveDiscordRealtimeBargeIn(params: {
 
 function buildDiscordSpeakExactUserMessage(text: string): string {
   return [
-    "Internal OpenClaw voice playback result.",
-    "Do not call openclaw_agent_consult or any other tool for this message.",
-    "Speak this exact OpenClaw answer to the Discord voice channel, without adding, removing, or rephrasing words.",
+    "Internal Bot voice playback result.",
+    "Do not call bot_agent_consult or any other tool for this message.",
+    "Speak this exact Bot answer to the Discord voice channel, without adding, removing, or rephrasing words.",
     `Answer: ${JSON.stringify(text)}`,
   ].join("\n");
 }
@@ -299,7 +299,7 @@ function collectRealtimeConsultArgStrings(args: unknown): string[] {
 function extractDiscordExactSpeechConsultText(args: unknown): string | undefined {
   const message = collectRealtimeConsultArgStrings(args).join("\n");
   if (
-    !message.includes("Speak this exact OpenClaw answer") &&
+    !message.includes("Speak this exact Bot answer") &&
     !message.includes("Speak the provided exact answer verbatim")
   ) {
     return undefined;
@@ -366,7 +366,7 @@ export class DiscordRealtimeVoiceSession implements VoiceRealtimeSession {
 
   constructor(
     private readonly params: {
-      cfg: OpenClawConfig;
+      cfg: BotConfig;
       discordConfig: DiscordAccountConfig;
       entry: VoiceSessionEntry;
       mode: Exclude<DiscordVoiceMode, "stt-tts">;
@@ -1126,7 +1126,7 @@ export class DiscordRealtimeVoiceSession implements VoiceRealtimeSession {
     ) {
       await this.submitTerminalRealtimeToolResult(callId, session, {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Bot cancelled this consult before completion. Do not restart it.",
       });
       return;
     }
@@ -1652,7 +1652,7 @@ export class DiscordRealtimeVoiceSession implements VoiceRealtimeSession {
     const submitAlreadyDelivered = async (): Promise<void> => {
       await this.submitTerminalRealtimeToolResult(callId, session, {
         status: "already_delivered",
-        message: "OpenClaw already delivered this answer to Discord voice. Do not repeat it.",
+        message: "Bot already delivered this answer to Discord voice. Do not repeat it.",
       });
     };
     const submitResult = async (result: RecentAgentProxyConsultResult): Promise<void> => {
@@ -1764,21 +1764,21 @@ function buildDiscordRealtimeInstructions(params: {
   const base =
     params.instructions ??
     [
-      "You are OpenClaw's Discord voice interface.",
+      "You are Bot's Discord voice interface.",
       "Keep spoken replies concise, natural, and suitable for a live Discord voice channel.",
     ].join("\n");
   if (isDiscordAgentProxyVoiceMode(params.mode)) {
     return [
       base,
       params.bootstrapContextInstructions?.trim(),
-      "Mode: OpenClaw agent proxy.",
-      "You are the realtime voice surface for the same OpenClaw agent the user can message directly.",
+      "Mode: Bot agent proxy.",
+      "You are the realtime voice surface for the same Bot agent the user can message directly.",
       "Do not mention a backend, supervisor, helper, or separate system. Present the result as your own work.",
-      "Delegate substantive requests, actions, tool work, current facts, memory, workspace context, and user-specific context with openclaw_agent_consult.",
-      "Do not block, refuse, or downscope at the voice layer. Delegate to OpenClaw and treat its result as authoritative.",
+      "Delegate substantive requests, actions, tool work, current facts, memory, workspace context, and user-specific context with bot_agent_consult.",
+      "Do not block, refuse, or downscope at the voice layer. Delegate to Bot and treat its result as authoritative.",
       "Answer directly only for greetings, acknowledgements, brief latency tests, or filler while waiting.",
-      'While waiting for OpenClaw data or tool results, use at most one short natural backchannel such as "yeah", "mm-hmm", "got it", or "one sec"; vary it and do not treat it as the final answer.',
-      "When OpenClaw sends an internal exact answer to speak, do not call tools. Say only that answer.",
+      'While waiting for Bot data or tool results, use at most one short natural backchannel such as "yeah", "mm-hmm", "got it", or "one sec"; vary it and do not treat it as the final answer.',
+      "When Bot sends an internal exact answer to speak, do not call tools. Say only that answer.",
       buildRealtimeVoiceAgentConsultPolicyInstructions({
         toolPolicy: params.toolPolicy,
         consultPolicy: params.consultPolicy,
@@ -1788,7 +1788,7 @@ function buildDiscordRealtimeInstructions(params: {
   return [
     base,
     params.bootstrapContextInstructions?.trim(),
-    'While waiting for OpenClaw data or tool results, use at most one short natural backchannel such as "yeah", "mm-hmm", "got it", or "one sec"; vary it and do not treat it as the final answer.',
+    'While waiting for Bot data or tool results, use at most one short natural backchannel such as "yeah", "mm-hmm", "got it", or "one sec"; vary it and do not treat it as the final answer.',
     buildRealtimeVoiceAgentConsultPolicyInstructions({
       toolPolicy: params.toolPolicy,
       consultPolicy: params.consultPolicy,

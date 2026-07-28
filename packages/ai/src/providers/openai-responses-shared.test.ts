@@ -121,7 +121,7 @@ async function* responseEvents(events: Array<Record<string, unknown>>) {
 
 describe("convertResponsesToolPayload", () => {
   beforeEach(() => {
-    // Mimic the OpenClaw host strict-tool policy: native OpenAI routes force
+    // Mimic the Bot host strict-tool policy: native OpenAI routes force
     // strict=true, proxy-like routes leave the flag unset.
     configureAiTransportHost({
       resolveOpenAIStrictToolSetting: (model, options) => {
@@ -410,7 +410,7 @@ describe("convertResponsesMessages", () => {
       role: "developer",
       content: [{ type: "input_text", text: "Stable\nDynamic" }],
     });
-    expect(JSON.stringify(input)).not.toContain("OPENCLAW_CACHE_BOUNDARY");
+    expect(JSON.stringify(input)).not.toContain("BOT_CACHE_BOUNDARY");
   });
 
   it("omits phase-tagged assistant replay ids without reasoning", () => {

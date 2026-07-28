@@ -1,11 +1,11 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { resolveContextTokensForModel } from "../agents/context.js";
 import { normalizeStoredOverrideModel } from "../agents/model-selection.js";
 import { resolveSessionModelRef } from "../agents/session-model-ref.js";
 import { buildSubagentRunReadIndex } from "../agents/subagent-registry-read.js";
 import { resolveStorePath, type SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";
 import { readRecentSessionUsageFromTranscript as readScopedRecentSessionUsageFromTranscript } from "./session-transcript-readers.js";
 import type { SessionListRowContext } from "./session-utils-contracts.js";
@@ -72,7 +72,7 @@ export function buildSingleRowStoreChildSessionsByKey(params: {
 }
 
 export function resolveSessionSelectedModelRef(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry?: SessionEntry;
   agentId: string;
   rowContext?: SessionListRowContext;
@@ -137,7 +137,7 @@ export function resolveChildSessionKeys(
 }
 
 export function resolveTranscriptUsageFallback(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   key: string;
   entry?: SessionEntry;
   storePath: string;

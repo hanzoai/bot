@@ -2,11 +2,11 @@
 import type {
   ProviderResolveDynamicModelContext,
   ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { buildProviderReplayFamilyHooks } from "openclaw/plugin-sdk/provider-model-shared";
-import { buildProviderToolCompatFamilyHooks } from "openclaw/plugin-sdk/provider-tools";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+} from "bot/plugin-sdk/plugin-entry";
+import { defineSingleProviderPluginEntry } from "bot/plugin-sdk/provider-entry";
+import { buildProviderReplayFamilyHooks } from "bot/plugin-sdk/provider-model-shared";
+import { buildProviderToolCompatFamilyHooks } from "bot/plugin-sdk/provider-tools";
+import manifest from "./bot.plugin.json" with { type: "json" };
 import {
   buildClawRouterProviderConfig,
   normalizeClawRouterApiBaseUrl,
@@ -105,7 +105,7 @@ export default defineSingleProviderPluginEntry({
         noteTitle: "ClawRouter",
         noteMessage: [
           "Use the proxy key issued by your ClawRouter administrator.",
-          "OpenClaw discovers only the models granted to that key.",
+          "Bot discovers only the models granted to that key.",
         ].join("\n"),
       },
       catalog: {
@@ -116,7 +116,7 @@ export default defineSingleProviderPluginEntry({
           if (!discoveryApiKey) {
             try {
               const { resolveApiKeyForProvider } =
-                await import("openclaw/plugin-sdk/provider-auth-runtime");
+                await import("bot/plugin-sdk/provider-auth-runtime");
               discoveryApiKey = (
                 await resolveApiKeyForProvider({
                   provider: PROVIDER_ID,
@@ -166,7 +166,7 @@ export default defineSingleProviderPluginEntry({
       prepareDynamicModel: async (ctx) => {
         const scope = dynamicModelScope(ctx);
         const { resolveApiKeyForProvider } =
-          await import("openclaw/plugin-sdk/provider-auth-runtime");
+          await import("bot/plugin-sdk/provider-auth-runtime");
         const apiKey = (
           await resolveApiKeyForProvider({
             provider: PROVIDER_ID,

@@ -20,7 +20,7 @@ describe("finalizeEmbeddedAttempt media trajectory capture", () => {
         {
           role: "user",
           content: "inspect",
-          __openclaw: {
+          __bot: {
             media: [{ path: "/media/canonical.png", contentType: "image/png" }],
           },
         },
@@ -41,7 +41,7 @@ describe("finalizeEmbeddedAttempt media trajectory capture", () => {
     const captured = modelCompleted?.messagesSnapshot?.[0];
     expect(captured).not.toHaveProperty("MediaPath");
     expect(captured).not.toHaveProperty("MediaType");
-    expect(captured?.["__openclaw"]).toMatchObject({
+    expect(captured?.["__bot"]).toMatchObject({
       media: [{ path: "/media/canonical.png", contentType: "image/png" }],
     });
   });

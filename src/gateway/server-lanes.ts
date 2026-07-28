@@ -6,7 +6,7 @@ import {
 // Pushes config-derived agent/cron limits into the process command queue.
 import { resolveAgentMaxConcurrent, resolveSubagentMaxConcurrent } from "../config/agent-limits.js";
 import { resolveCronMaxConcurrentRuns } from "../config/cron-limits.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { setCommandLaneConcurrency } from "../process/command-queue.js";
 import { CommandLane } from "../process/lanes.js";
 
@@ -16,7 +16,7 @@ type GatewayLaneConcurrency = {
   subagent: number;
 };
 
-export function resolveGatewayLaneConcurrency(cfg: OpenClawConfig): GatewayLaneConcurrency {
+export function resolveGatewayLaneConcurrency(cfg: BotConfig): GatewayLaneConcurrency {
   return {
     cron: resolveCronMaxConcurrentRuns(),
     main: resolveAgentMaxConcurrent(cfg),

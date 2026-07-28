@@ -605,11 +605,11 @@ describe("configured plugin install release step", () => {
   it("does not stamp config during update-time deferred install repair", async () => {
     mocks.repairMissingPluginInstallsForIds.mockResolvedValue({
       changes: [
-        'Skipped package-manager repair for configured plugin "codex" during package update; rerun "openclaw doctor --fix" after the update completes.',
+        'Skipped package-manager repair for configured plugin "codex" during package update; rerun "bot doctor --fix" after the update completes.',
       ],
       warnings: [],
       deferredRepairDetails: [
-        'Skipped package-manager repair for configured plugin "codex" during package update; rerun "openclaw doctor --fix" after the update completes.',
+        'Skipped package-manager repair for configured plugin "codex" during package update; rerun "bot doctor --fix" after the update completes.',
       ],
     });
     const result = await maybeRunConfiguredPluginInstallReleaseStep({
@@ -624,20 +624,20 @@ describe("configured plugin install release step", () => {
       currentVersion: "2026.5.2-beta.1",
       touchedVersion: "2026.5.1",
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
+        BOT_UPDATE_IN_PROGRESS: "1",
+        BOT_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
       },
     });
 
     const repairCall = readOnlyMissingPluginInstallRepairCall();
     expect(repairCall.pluginIds).toEqual(["codex"]);
     expect(repairCall.env).toEqual({
-      OPENCLAW_UPDATE_IN_PROGRESS: "1",
-      OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
+      BOT_UPDATE_IN_PROGRESS: "1",
+      BOT_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
     });
     expect(result).toEqual({
       changes: [
-        'Skipped package-manager repair for configured plugin "codex" during package update; rerun "openclaw doctor --fix" after the update completes.',
+        'Skipped package-manager repair for configured plugin "codex" during package update; rerun "bot doctor --fix" after the update completes.',
       ],
       warnings: [],
       completed: false,
@@ -648,7 +648,7 @@ describe("configured plugin install release step", () => {
           kind: "package-post-install-doctor",
           reason: "deferred-configured-plugin-repair",
           details: [
-            'Skipped package-manager repair for configured plugin "codex" during package update; rerun "openclaw doctor --fix" after the update completes.',
+            'Skipped package-manager repair for configured plugin "codex" during package update; rerun "bot doctor --fix" after the update completes.',
           ],
         }),
       },
@@ -671,8 +671,8 @@ describe("configured plugin install release step", () => {
       currentVersion: "2026.5.2-beta.1",
       touchedVersion: "2026.5.1",
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
+        BOT_UPDATE_IN_PROGRESS: "1",
+        BOT_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
       },
     });
 
@@ -687,11 +687,11 @@ describe("configured plugin install release step", () => {
   it("defers package-manager plugin release completion for writable legacy parents", async () => {
     mocks.repairMissingPluginInstallsForIds.mockResolvedValue({
       changes: [
-        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "openclaw doctor --fix" after the update completes.',
+        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "bot doctor --fix" after the update completes.',
       ],
       warnings: [],
       deferredRepairDetails: [
-        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "openclaw doctor --fix" after the update completes.',
+        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "bot doctor --fix" after the update completes.',
       ],
     });
     const result = await maybeRunConfiguredPluginInstallReleaseStep({
@@ -705,18 +705,18 @@ describe("configured plugin install release step", () => {
       currentVersion: "2026.5.2-beta.1",
       touchedVersion: "2026.5.1",
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
+        BOT_UPDATE_IN_PROGRESS: "1",
+        BOT_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
       },
     });
 
     expect(readOnlyMissingPluginInstallRepairCall().env).toEqual({
-      OPENCLAW_UPDATE_IN_PROGRESS: "1",
-      OPENCLAW_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
+      BOT_UPDATE_IN_PROGRESS: "1",
+      BOT_UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE: "1",
     });
     expect(result).toEqual({
       changes: [
-        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "openclaw doctor --fix" after the update completes.',
+        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "bot doctor --fix" after the update completes.',
       ],
       warnings: [],
       completed: false,
@@ -727,7 +727,7 @@ describe("configured plugin install release step", () => {
           kind: "package-post-install-doctor",
           reason: "deferred-configured-plugin-repair",
           details: [
-            'Skipped package-manager repair for configured plugin "discord" during package update; rerun "openclaw doctor --fix" after the update completes.',
+            'Skipped package-manager repair for configured plugin "discord" during package update; rerun "bot doctor --fix" after the update completes.',
           ],
         }),
       },
@@ -819,7 +819,7 @@ describe("configured plugin install release step", () => {
   it("includes allow-only official plugin ids in the repair set", async () => {
     mocks.getOfficialExternalPluginCatalogEntry.mockImplementation((pluginId: string) => {
       if (pluginId === "lobster") {
-        return { name: "@openclaw/lobster" };
+        return { name: "@hanzo/bot-lobster" };
       }
       return undefined;
     });
@@ -839,7 +839,7 @@ describe("configured plugin install release step", () => {
   it("skips allow-only plugin ids that already have material plugin entries", async () => {
     mocks.getOfficialExternalPluginCatalogEntry.mockImplementation((pluginId: string) => {
       if (pluginId === "lobster") {
-        return { name: "@openclaw/lobster" };
+        return { name: "@hanzo/bot-lobster" };
       }
       return undefined;
     });

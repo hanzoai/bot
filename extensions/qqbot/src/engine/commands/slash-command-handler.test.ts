@@ -1,5 +1,5 @@
 // Qqbot tests cover slash command handler plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { QueuedMessage } from "../gateway/message-queue.js";
 import type { GatewayAccount } from "../gateway/types.js";
@@ -71,8 +71,8 @@ describe("trySlashCommand", () => {
   });
 
   it("honors commands.allowFrom for pre-dispatch bot-streaming in open DM configs", async () => {
-    const writes: OpenClawConfig[] = [];
-    const config: OpenClawConfig = {
+    const writes: BotConfig[] = [];
+    const config: BotConfig = {
       commands: {
         allowFrom: {
           qqbot: ["TRUSTED_OPENID"],

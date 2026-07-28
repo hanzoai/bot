@@ -17,7 +17,7 @@ vi.mock("./plugin-skills.js", () => ({
   resolvePluginSkillDirs: () => [],
 }));
 
-const fixtureSuite = createFixtureSuite("openclaw-skills-snapshot-suite-");
+const fixtureSuite = createFixtureSuite("bot-skills-snapshot-suite-");
 let truncationWorkspaceTemplateDir = "";
 let nestedRepoTemplateDir = "";
 let tempHome: TempHomeEnv | null = null;
@@ -25,7 +25,7 @@ let skillsHomeEnv: SkillsHomeEnvSnapshot | null = null;
 
 beforeAll(async () => {
   await fixtureSuite.setup();
-  tempHome = await createTempHomeEnv("openclaw-skills-snapshot-home-");
+  tempHome = await createTempHomeEnv("bot-skills-snapshot-home-");
   skillsHomeEnv = setMockSkillsHomeEnv(tempHome.home);
   truncationWorkspaceTemplateDir = await fixtureSuite.createCaseDir(
     "template-truncation-workspace",

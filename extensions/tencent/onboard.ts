@@ -1,8 +1,8 @@
-import { readManifestProviderDefaultModelRef } from "openclaw/plugin-sdk/provider-catalog-shared";
+import { readManifestProviderDefaultModelRef } from "bot/plugin-sdk/provider-catalog-shared";
 import {
   createModelCatalogPresetAppliers,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/provider-onboard";
+  type BotConfig,
+} from "bot/plugin-sdk/provider-onboard";
 import {
   TOKENHUB_BASE_URL,
   TOKENHUB_MODEL_CATALOG,
@@ -11,7 +11,7 @@ import {
   TOKENPLAN_MODEL_CATALOG,
   TOKENPLAN_PROVIDER_ID,
 } from "./models.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 
 const TOKENHUB_PREVIEW_MODEL_REF = `${TOKENHUB_PROVIDER_ID}/hy3-preview`;
 export const TOKENHUB_DEFAULT_MODEL_REF = readManifestProviderDefaultModelRef(
@@ -21,7 +21,7 @@ export const TOKENHUB_DEFAULT_MODEL_REF = readManifestProviderDefaultModelRef(
 
 const tokenHubPresetAppliers = createModelCatalogPresetAppliers({
   primaryModelRef: TOKENHUB_DEFAULT_MODEL_REF,
-  resolveParams: (_cfg: OpenClawConfig) => ({
+  resolveParams: (_cfg: BotConfig) => ({
     providerId: TOKENHUB_PROVIDER_ID,
     api: "openai-completions",
     baseUrl: TOKENHUB_BASE_URL,
@@ -33,7 +33,7 @@ const tokenHubPresetAppliers = createModelCatalogPresetAppliers({
   }),
 });
 
-export function applyTokenHubConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyTokenHubConfig(cfg: BotConfig): BotConfig {
   return tokenHubPresetAppliers.applyConfig(cfg);
 }
 
@@ -44,7 +44,7 @@ export const TOKENPLAN_DEFAULT_MODEL_REF = readManifestProviderDefaultModelRef(
 
 const tokenPlanPresetAppliers = createModelCatalogPresetAppliers({
   primaryModelRef: TOKENPLAN_DEFAULT_MODEL_REF,
-  resolveParams: (_cfg: OpenClawConfig) => ({
+  resolveParams: (_cfg: BotConfig) => ({
     providerId: TOKENPLAN_PROVIDER_ID,
     api: "openai-completions",
     baseUrl: TOKENPLAN_BASE_URL,
@@ -53,6 +53,6 @@ const tokenPlanPresetAppliers = createModelCatalogPresetAppliers({
   }),
 });
 
-export function applyTokenPlanConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyTokenPlanConfig(cfg: BotConfig): BotConfig {
   return tokenPlanPresetAppliers.applyConfig(cfg);
 }

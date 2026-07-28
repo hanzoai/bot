@@ -1,13 +1,13 @@
-# OpenClaw Cohere Provider
+# Bot Cohere Provider
 
-Official OpenClaw provider plugin for Cohere's OpenAI-compatible Compatibility
+Official Bot provider plugin for Cohere's OpenAI-compatible Compatibility
 API.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/cohere-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-cohere-provider
+bot gateway restart
 ```
 
 Configure a Cohere API key, then select `cohere/command-a-plus-05-2026`,

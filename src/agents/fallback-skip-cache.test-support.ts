@@ -5,21 +5,21 @@ type FallbackSkipCacheState = {
 
 function getFallbackSkipCacheGlobals() {
   return globalThis as typeof globalThis & {
-    openclawFallbackSkipCache?: Map<string, Map<string, unknown>>;
-    openclawFallbackSkipCacheState?: FallbackSkipCacheState;
+    botFallbackSkipCache?: Map<string, Map<string, unknown>>;
+    botFallbackSkipCacheState?: FallbackSkipCacheState;
   };
 }
 
 export function resetFallbackSkipCacheForTest(): void {
   const globals = getFallbackSkipCacheGlobals();
-  globals.openclawFallbackSkipCache?.clear();
-  globals.openclawFallbackSkipCacheState?.buckets.clear();
-  if (globals.openclawFallbackSkipCacheState) {
-    globals.openclawFallbackSkipCacheState.lastGlobalPruneAtMs = 0;
+  globals.botFallbackSkipCache?.clear();
+  globals.botFallbackSkipCacheState?.buckets.clear();
+  if (globals.botFallbackSkipCacheState) {
+    globals.botFallbackSkipCacheState.lastGlobalPruneAtMs = 0;
   }
 }
 
 export function listFallbackSkipCacheSessionIdsForTest(): string[] {
   const globals = getFallbackSkipCacheGlobals();
-  return [...(globals.openclawFallbackSkipCacheState?.buckets.keys() ?? [])];
+  return [...(globals.botFallbackSkipCacheState?.buckets.keys() ?? [])];
 }

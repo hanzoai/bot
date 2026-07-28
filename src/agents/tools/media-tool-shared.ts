@@ -1,18 +1,18 @@
 /** Shared media tool routing, auth, path, and reference helpers. */
-import { normalizeInboundPathRoots } from "@openclaw/media-core/inbound-path-policy";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { parseBoolean } from "@openclaw/normalization-core/boolean-coercion";
+import { normalizeInboundPathRoots } from "@hanzo/bot-media-core/inbound-path-policy";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
+import { parseBoolean } from "@hanzo/bot-normalization-core/boolean-coercion";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import {
   findCapabilityProviderById,
   resolveCapabilityModelRefForProviders,
 } from "../../../packages/media-generation-core/src/capability-model-ref.js";
 import type { AgentModelConfig } from "../../config/types.agents-shared.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { SsrFPolicy } from "../../infra/net/ssrf.js";
 import type { Model } from "../../llm/types.js";
 import { resolveChannelInboundAttachmentRootsForChannel } from "../../media/channel-inbound-roots.js";
@@ -78,7 +78,7 @@ type TaskRunDetailHandle = {
 
 type MediaToolLocalRootOptions = {
   workspaceOnly?: boolean;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   channelId?: string | null;
   accountId?: string | null;
 };
@@ -89,9 +89,9 @@ export const REMOTE_MEDIA_READ_IDLE_TIMEOUT_MS = 120_000;
  * Applies an image-editing model as the agent default without mutating the loaded config.
  */
 export function applyImageModelConfigDefaults(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   imageModelConfig: ImageModelConfig,
-): OpenClawConfig | undefined {
+): BotConfig | undefined {
   return applyAgentDefaultModelConfig(cfg, "imageModel", imageModelConfig);
 }
 
@@ -99,9 +99,9 @@ export function applyImageModelConfigDefaults(
  * Applies an image-generation model as the agent default for downstream tool calls.
  */
 export function applyImageGenerationModelConfigDefaults(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   imageGenerationModelConfig: ToolModelConfig,
-): OpenClawConfig | undefined {
+): BotConfig | undefined {
   return applyAgentDefaultModelConfig(cfg, "image", imageGenerationModelConfig);
 }
 
@@ -109,9 +109,9 @@ export function applyImageGenerationModelConfigDefaults(
  * Applies a video-generation model as the agent default for downstream tool calls.
  */
 export function applyVideoGenerationModelConfigDefaults(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   videoGenerationModelConfig: ToolModelConfig,
-): OpenClawConfig | undefined {
+): BotConfig | undefined {
   return applyAgentDefaultModelConfig(cfg, "video", videoGenerationModelConfig);
 }
 
@@ -119,9 +119,9 @@ export function applyVideoGenerationModelConfigDefaults(
  * Applies a music-generation model as the agent default for downstream tool calls.
  */
 export function applyMusicGenerationModelConfigDefaults(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   musicGenerationModelConfig: ToolModelConfig,
-): OpenClawConfig | undefined {
+): BotConfig | undefined {
   return applyAgentDefaultModelConfig(cfg, "music", musicGenerationModelConfig);
 }
 
@@ -138,16 +138,16 @@ export function readGenerationTimeoutMs(args: Record<string, unknown>): number |
  * Resolves the shared remote-media SSRF policy used by media tools that fetch URLs.
  */
 export function resolveRemoteMediaSsrfPolicy(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
 ): SsrFPolicy | undefined {
   return cfg?.tools?.web?.fetch?.ssrfPolicy;
 }
 
 function applyAgentDefaultModelConfig(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   key: "imageModel" | "image" | "video" | "music",
   modelConfig: ToolModelConfig,
-): OpenClawConfig | undefined {
+): BotConfig | undefined {
   if (!cfg) {
     return undefined;
   }
@@ -177,7 +177,7 @@ type CapabilityProvider = {
   aliases?: string[];
   defaultModel?: string;
   models?: readonly string[];
-  isConfigured?: (ctx: { cfg?: OpenClawConfig; agentDir?: string }) => boolean;
+  isConfigured?: (ctx: { cfg?: BotConfig; agentDir?: string }) => boolean;
 };
 
 type CapabilityProviderSource = CapabilityProvider[] | (() => CapabilityProvider[]);
@@ -208,7 +208,7 @@ export function isCapabilityProviderConfigured<T extends CapabilityProvider>(par
   providers: T[];
   provider?: T;
   providerId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   agentDir?: string;
   authStore?: AuthProfileStore;
@@ -290,7 +290,7 @@ export function resolveSelectedCapabilityProvider<T extends CapabilityProvider>(
 }
 
 function resolveCapabilityModelCandidatesForTool(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   agentDir?: string;
   authStore?: AuthProfileStore;
@@ -354,7 +354,7 @@ function resolveCapabilityModelCandidatesForTool(params: {
  * provider defaults ordered around the agent's primary provider.
  */
 export function resolveCapabilityModelConfigForTool(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   agentDir?: string;
   authStore?: AuthProfileStore;
@@ -400,7 +400,7 @@ export function resolveCapabilityModelConfigForTool(params: {
  * Reports whether a generation tool should be offered for the current config and auth state.
  */
 export function hasGenerationToolAvailability(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
   workspaceDir?: string;
   authStore?: AuthProfileStore;
@@ -644,7 +644,7 @@ export async function resolveMediaToolReferenceAccess(params: {
  */
 export function resolveMediaToolInboundRoots(options?: {
   workspaceOnly?: boolean;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   channelId?: string | null;
   accountId?: string | null;
 }): string[] {
@@ -724,7 +724,7 @@ export function resolveModelFromRegistry(params: {
  */
 export async function resolveModelRuntimeApiKey(params: {
   model: Model;
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   agentDir: string;
   authStorage: {
     setRuntimeApiKey: (provider: string, apiKey: string) => void;

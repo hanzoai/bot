@@ -1,7 +1,7 @@
 // Control UI chat module implements deleted messages behavior.
 import { PersistedSet } from "./persisted-set.ts";
 
-const PREFIX = "openclaw:deleted:";
+const PREFIX = "bot:deleted:";
 
 export class DeletedMessages extends PersistedSet<string> {
   constructor(sessionKey: string) {

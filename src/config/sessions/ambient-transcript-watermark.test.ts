@@ -20,7 +20,7 @@ describe("ambient transcript watermark", () => {
   });
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-ambient-watermark-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-ambient-watermark-"));
     storePath = path.join(tempDir, "sessions.json");
   });
 

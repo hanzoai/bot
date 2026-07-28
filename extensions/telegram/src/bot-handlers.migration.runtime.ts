@@ -1,7 +1,7 @@
 // Telegram group-to-supergroup config migration handler.
-import { resolveChannelConfigWrites } from "openclaw/plugin-sdk/channel-config-helpers";
-import { mutateConfigFile } from "openclaw/plugin-sdk/config-mutation";
-import { danger, warn } from "openclaw/plugin-sdk/runtime-env";
+import { resolveChannelConfigWrites } from "bot/plugin-sdk/channel-config-helpers";
+import { mutateConfigFile } from "bot/plugin-sdk/config-mutation";
+import { danger, warn } from "bot/plugin-sdk/runtime-env";
 import type { RegisterTelegramHandlerParams } from "./bot-native-commands.js";
 import { migrateTelegramGroupConfig } from "./group-migration.js";
 

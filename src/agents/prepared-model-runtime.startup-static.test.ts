@@ -30,7 +30,7 @@ const mocks = vi.hoisted(() => {
     metadataSnapshot,
     discoverAuthStorage: vi.fn(() => authStorage),
     discoverModels: vi.fn(() => modelRegistry),
-    ensureOpenClawModelsJson: vi.fn(async () => ({ agentDir: "/tmp/agent", wrote: false })),
+    ensureBotModelsJson: vi.fn(async () => ({ agentDir: "/tmp/agent", wrote: false })),
     buildPreparedModelCatalogSnapshot: vi.fn(async () => ({ entries: [], routeVariants: [] })),
     ensureRuntimePluginsLoaded: vi.fn(),
     loadStaticCatalog: vi.fn(async () => []),
@@ -71,7 +71,7 @@ vi.mock("./model-catalog.js", () => ({
 }));
 
 vi.mock("./models-config.js", () => ({
-  ensureOpenClawModelsJson: mocks.ensureOpenClawModelsJson,
+  ensureBotModelsJson: mocks.ensureBotModelsJson,
 }));
 
 vi.mock("./runtime-plugins.js", () => ({
@@ -101,7 +101,7 @@ describe("prepared model runtime Gateway catalog mode", () => {
       agents: {
         defaults: {
           model: { primary: "openai/gpt-5.5" },
-          models: { "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } } },
+          models: { "openai/gpt-5.5": { agentRuntime: { id: "bot" } } },
         },
       },
     };
@@ -116,7 +116,7 @@ describe("prepared model runtime Gateway catalog mode", () => {
       providerDiscoveryEntriesOnly: true,
       providerDiscoveryProviderIds: ["openai"],
     });
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenLastCalledWith(
+    expect(mocks.ensureBotModelsJson).toHaveBeenLastCalledWith(
       config,
       "/tmp/prepared-static-agent",
       expectedStaticOptions,
@@ -137,8 +137,8 @@ describe("prepared model runtime Gateway catalog mode", () => {
       agentDir: "/tmp/prepared-static-agent",
       affectsInheritedStores: false,
     });
-    await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2));
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenLastCalledWith(
+    await vi.waitFor(() => expect(mocks.ensureBotModelsJson).toHaveBeenCalledTimes(2));
+    expect(mocks.ensureBotModelsJson).toHaveBeenLastCalledWith(
       config,
       "/tmp/prepared-static-agent",
       expectedStaticOptions,

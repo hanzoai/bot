@@ -1,28 +1,28 @@
 // Holds current plugin metadata snapshots for process-scoped consumers.
-import { setCurrentManifestModelIdNormalizationRecords } from "@openclaw/model-catalog-core/provider-model-id-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { setCurrentManifestModelIdNormalizationRecords } from "@hanzo/bot-model-catalog-core/provider-model-id-normalization";
+import type { BotConfig } from "../config/types.bot.js";
 
 let currentPluginMetadataSnapshot: unknown;
 let currentPluginMetadataSnapshotConfigFingerprint: string | undefined;
 let currentPluginMetadataSnapshotCompatiblePolicyHashes: readonly string[] | undefined;
 let currentPluginMetadataSnapshotCompatibleConfigFingerprints: readonly string[] | undefined;
-let currentPluginMetadataConfigIdentities = new WeakSet<OpenClawConfig>();
+let currentPluginMetadataConfigIdentities = new WeakSet<BotConfig>();
 
 /** Owns config identity reuse for the current immutable metadata snapshot. */
 export const currentPluginMetadataConfigIdentityCache = {
-  add(config: OpenClawConfig): void {
+  add(config: BotConfig): void {
     currentPluginMetadataConfigIdentities.add(config);
   },
-  capture(): WeakSet<OpenClawConfig> {
+  capture(): WeakSet<BotConfig> {
     return currentPluginMetadataConfigIdentities;
   },
   clear(): void {
     currentPluginMetadataConfigIdentities = new WeakSet();
   },
-  has(config: OpenClawConfig): boolean {
+  has(config: BotConfig): boolean {
     return currentPluginMetadataConfigIdentities.has(config);
   },
-  restore(identities: WeakSet<OpenClawConfig>): void {
+  restore(identities: WeakSet<BotConfig>): void {
     currentPluginMetadataConfigIdentities = identities;
   },
 };

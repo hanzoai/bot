@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { clearPluginHostRuntimeState } from "./host-hook-runtime.js";
 import { listPluginSessionSchedulerJobs } from "./host-hook-runtime.test-fixtures.js";
 import { clearActivatedPluginRuntimeState } from "./loader-shared.js";
@@ -37,7 +37,7 @@ function createSchedulerPlugin(pluginId: string) {
     runtime: {} as PluginRuntime,
   });
   const api = pluginRegistry.createApi(createPluginRecord({ id: pluginId }), {
-    config: {} as OpenClawConfig,
+    config: {} as BotConfig,
   });
   return { api, pluginRegistry };
 }

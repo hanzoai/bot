@@ -1,5 +1,5 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import { readAcpSessionMeta } from "../../acp/runtime/session-meta.js";
 import { resolveDefaultAgentId } from "../../agents/agent-scope.js";
@@ -8,7 +8,7 @@ import {
   resolveAgentMainSessionKey,
   resolveExplicitAgentSessionKey,
 } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   loadVoiceWakeRoutingConfig,
   resolveVoiceWakeRouteByTrigger,
@@ -68,7 +68,7 @@ type AgentContentPhaseResult = {
 
 export async function prepareAgentContentPhase(params: {
   request: AgentRunRequest;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   context: GatewayRequestHandlerOptions["context"];
   respond: GatewayRequestHandlerOptions["respond"];
   isRawModelRun: boolean;

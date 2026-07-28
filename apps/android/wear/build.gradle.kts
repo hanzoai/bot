@@ -7,26 +7,26 @@ plugins {
   alias(libs.plugins.kotlin.serialization)
 }
 
-val openClawAndroidVersionFile = rootProject.file("Config/Version.properties")
-val openClawAndroidVersionProperties =
+val botAndroidVersionFile = rootProject.file("Config/Version.properties")
+val botAndroidVersionProperties =
   Properties().apply {
-    if (!openClawAndroidVersionFile.isFile) {
+    if (!botAndroidVersionFile.isFile) {
       error("Missing Android version properties. Run `pnpm android:version:sync`.")
     }
-    openClawAndroidVersionFile.inputStream().use(::load)
+    botAndroidVersionFile.inputStream().use(::load)
   }
 
-fun requireOpenClawAndroidVersionProperty(name: String): String =
-  openClawAndroidVersionProperties.getProperty(name)?.trim()?.takeIf { it.isNotEmpty() }
+fun requireBotAndroidVersionProperty(name: String): String =
+  botAndroidVersionProperties.getProperty(name)?.trim()?.takeIf { it.isNotEmpty() }
     ?: error("Missing $name in Config/Version.properties. Run `pnpm android:version:sync`.")
 
-val openClawAndroidPhoneVersionCode = requireOpenClawAndroidVersionProperty("OPENCLAW_ANDROID_VERSION_CODE").toInt()
-val openClawAndroidBuildNumber = openClawAndroidPhoneVersionCode % 100
-check(openClawAndroidBuildNumber in 1..49) {
+val botAndroidPhoneVersionCode = requireBotAndroidVersionProperty("BOT_ANDROID_VERSION_CODE").toInt()
+val botAndroidBuildNumber = botAndroidPhoneVersionCode % 100
+check(botAndroidBuildNumber in 1..49) {
   "Android build number must be 01 through 49; Wear reserves 51 through 99."
 }
-val openClawAndroidWearVersionCode = openClawAndroidPhoneVersionCode + 50
-check(openClawAndroidWearVersionCode <= 2_100_000_000) { "Wear versionCode exceeds the Android platform maximum." }
+val botAndroidWearVersionCode = botAndroidPhoneVersionCode + 50
+check(botAndroidWearVersionCode <= 2_100_000_000) { "Wear versionCode exceeds the Android platform maximum." }
 
 // Data Layer delivery requires the phone and watch packages to share one certificate.
 evaluationDependsOn(":app")
@@ -38,16 +38,16 @@ val phoneReleaseSigning =
     .findByName("release")
 
 android {
-  namespace = "ai.openclaw.wear"
+  namespace = "ai.bot.wear"
   compileSdk = 37
 
   defaultConfig {
     // Data Layer traffic is scoped to matching package names and signatures.
-    applicationId = "ai.openclaw.app"
+    applicationId = "ai.bot.app"
     minSdk = 31
     targetSdk = 36
-    versionCode = openClawAndroidWearVersionCode
-    versionName = requireOpenClawAndroidVersionProperty("OPENCLAW_ANDROID_VERSION_NAME")
+    versionCode = botAndroidWearVersionCode
+    versionName = requireBotAndroidVersionProperty("BOT_ANDROID_VERSION_NAME")
   }
 
   buildTypes {

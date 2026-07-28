@@ -8,7 +8,7 @@ scenario:
     primary:
       - channels.channel-native-commands
   regressionRefs:
-    - openclaw/openclaw#74698
+    - hanzoai/bot#74698
   objective: Verify Telegram status returns model, session, and activation details.
   successCriteria:
     - The status command succeeds in the Telegram group path.
@@ -28,7 +28,7 @@ scenario:
     channel: telegram
     summary: Run Telegram status and verify representative status fields.
     config:
-      expectedAny: [OpenClaw, "Model:", "Session:", "Activation:"]
+      expectedAny: [Bot, "Model:", "Session:", "Activation:"]
 
 flow:
   steps:
@@ -43,11 +43,11 @@ flow:
             senderId: qa-command-operator
             senderName: QA Command Operator
             text:
-              expr: "transport.id === 'telegram' ? '/status@openclaw' : '/status'"
+              expr: "transport.id === 'telegram' ? '/status@bot' : '/status'"
         - waitForOutbound:
             conversation: { id: telegram-command-room, kind: channel }
             sinceIndex: { ref: startIndex }
-            textIncludes: OpenClaw
+            textIncludes: Bot
             timeoutMs: 60000
           saveAs: reply
         - assert:

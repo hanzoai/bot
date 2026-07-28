@@ -1,13 +1,13 @@
 // Device-pairing setup-code method produces the connect QR/setup code a mobile
 // or companion client scans to connect to this gateway. It reuses the same
-// pairing helpers as `openclaw qr` so non-terminal clients can display the
+// pairing helpers as `bot qr` so non-terminal clients can display the
 // connect QR that was previously only renderable in a terminal.
 import {
   ErrorCodes,
   errorShape,
   validateDevicePairSetupCodeParams,
 } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { renderQrPngDataUrl } from "../../media/qr-image.js";
 import { encodePairingSetupCode, resolvePairingSetupFromConfig } from "../../pairing/setup-code.js";
 import { runCommandWithTimeout } from "../../process/exec.js";
@@ -25,7 +25,7 @@ import { assertValidParams } from "./validation.js";
 // rather than return a response that violates the protocol schema.
 const MAX_QR_DATA_URL_LENGTH = 16_384;
 
-function readConfiguredDevicePairPublicUrl(config: OpenClawConfig): string | undefined {
+function readConfiguredDevicePairPublicUrl(config: BotConfig): string | undefined {
   const value = config.plugins?.entries?.["device-pair"]?.config?.["publicUrl"];
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
@@ -61,7 +61,7 @@ export const devicePairSetupHandlers: GatewayRequestHandlers = {
                   : PAIRING_SETUP_BOOTSTRAP_PROFILE,
             }
           : {}),
-        // Lets Tailscale serve/funnel URLs resolve, mirroring the `openclaw qr` CLI.
+        // Lets Tailscale serve/funnel URLs resolve, mirroring the `bot qr` CLI.
         runCommandWithTimeout: async (argv, runOpts) =>
           await runCommandWithTimeout(argv, { timeoutMs: runOpts.timeoutMs }),
       });

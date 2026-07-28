@@ -2,7 +2,7 @@
 import {
   createPluginRegistryFixture,
   registerVirtualTestPlugin,
-} from "openclaw/plugin-sdk/plugin-test-contracts";
+} from "bot/plugin-sdk/plugin-test-contracts";
 import { describe, expect, it } from "vitest";
 import {
   getRegisteredMemoryEmbeddingProvider,

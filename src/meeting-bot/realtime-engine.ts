@@ -1,5 +1,5 @@
 // Shared meeting bot realtime engines own provider and audio-transport orchestration.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import type { PluginRuntime, RuntimeLogger } from "../plugins/runtime/types.js";
 import type {
@@ -108,7 +108,7 @@ export function meetingOutputBytesPerMs(audioFormat: MeetingRealtimeAudioFormat)
 
 function resolveMeetingRealtimeProvider(params: {
   config: MeetingRealtimeEngineConfig;
-  fullConfig: OpenClawConfig;
+  fullConfig: BotConfig;
   providers?: RealtimeVoiceProviderPlugin[];
 }): ResolvedRealtimeProvider {
   const providerId = params.config.realtime.voiceProvider ?? params.config.realtime.provider;
@@ -124,7 +124,7 @@ function resolveMeetingRealtimeProvider(params: {
 
 export function resolveMeetingRealtimeTranscriptionProvider(params: {
   config: MeetingRealtimeEngineConfig;
-  fullConfig: OpenClawConfig;
+  fullConfig: BotConfig;
   providers?: RealtimeTranscriptionProviderPlugin[];
 }): ResolvedRealtimeTranscriptionProvider {
   const providers = params.providers ?? listRealtimeTranscriptionProviders(params.fullConfig);
@@ -158,7 +158,7 @@ export function resolveMeetingRealtimeTranscriptionProvider(params: {
 
 function buildMeetingSpeakExactUserMessage(text: string): string {
   return [
-    "Speak this exact OpenClaw answer to the meeting, without adding, removing, or rephrasing words.",
+    "Speak this exact Bot answer to the meeting, without adding, removing, or rephrasing words.",
     `Answer: ${JSON.stringify(text)}`,
   ].join("\n");
 }
@@ -275,7 +275,7 @@ export function normalizeMeetingTtsPromptText(text: string | undefined): string 
 
 export async function startMeetingRealtimeEngine(params: {
   config: MeetingRealtimeEngineConfig;
-  fullConfig: OpenClawConfig;
+  fullConfig: BotConfig;
   runtime: PluginRuntime;
   platform: MeetingRuntimePlatform;
   meetingSessionId: string;

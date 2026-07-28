@@ -26,7 +26,7 @@ function createDeferred<T = void>(): {
   return { promise, resolve, reject };
 }
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime-internal", () => ({
+vi.mock("bot/plugin-sdk/ssrf-runtime-internal", () => ({
   registerManagedProxyBrowserCdpBypass: registerManagedProxyBrowserCdpBypassMock,
 }));
 

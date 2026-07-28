@@ -1,4 +1,4 @@
-// Ios Version script supports OpenClaw repository automation.
+// Ios Version script supports Bot repository automation.
 import { renderIosReleaseNotesForVersion, resolveIosVersion } from "./lib/ios-version.ts";
 import { parseVersionQueryArgs } from "./lib/version-script-args.ts";
 
@@ -43,11 +43,11 @@ function main(argv = process.argv.slice(2)): number {
   if (options.format === "shell") {
     process.stdout.write(
       [
-        `OPENCLAW_IOS_VERSION=${version.canonicalVersion}`,
-        `OPENCLAW_APP_STORE_REVISION=${version.appStoreRevision ?? ""}`,
-        `OPENCLAW_APP_STORE_VERSION=${version.appStoreVersion ?? ""}`,
-        `OPENCLAW_MARKETING_VERSION=${version.marketingVersion}`,
-        `OPENCLAW_BUILD_VERSION=${version.buildVersion}`,
+        `BOT_IOS_VERSION=${version.canonicalVersion}`,
+        `BOT_APP_STORE_REVISION=${version.appStoreRevision ?? ""}`,
+        `BOT_APP_STORE_VERSION=${version.appStoreVersion ?? ""}`,
+        `BOT_MARKETING_VERSION=${version.marketingVersion}`,
+        `BOT_BUILD_VERSION=${version.buildVersion}`,
       ].join("\n") + "\n",
     );
   } else {

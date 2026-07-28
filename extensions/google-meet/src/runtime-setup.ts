@@ -1,7 +1,7 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
+import { uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 import type { GoogleMeetConfig, GoogleMeetModeInput, GoogleMeetTransport } from "./config.js";
 import { addGoogleMeetSetupCheck, getGoogleMeetSetupStatus } from "./setup.js";
 import { resolveChromeNodeInfo } from "./transports/chrome-browser-proxy.js";
@@ -29,7 +29,7 @@ async function commandExists(runtime: PluginRuntime, command: string): Promise<b
 
 export async function getGoogleMeetRuntimeSetupStatus(params: {
   config: GoogleMeetConfig;
-  fullConfig: OpenClawConfig;
+  fullConfig: BotConfig;
   runtime: PluginRuntime;
   options?: {
     transport?: GoogleMeetTransport;

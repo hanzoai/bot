@@ -2,24 +2,24 @@
 set -euo pipefail
 
 SCRIPT_ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ROOT_DIR="${OPENCLAW_LIVE_DOCKER_REPO_ROOT:-$SCRIPT_ROOT_DIR}"
+ROOT_DIR="${BOT_LIVE_DOCKER_REPO_ROOT:-$SCRIPT_ROOT_DIR}"
 ROOT_DIR="$(cd "$ROOT_DIR" && pwd)"
-TRUSTED_HARNESS_DIR="${OPENCLAW_LIVE_DOCKER_TRUSTED_HARNESS_DIR:-$SCRIPT_ROOT_DIR}"
+TRUSTED_HARNESS_DIR="${BOT_LIVE_DOCKER_TRUSTED_HARNESS_DIR:-$SCRIPT_ROOT_DIR}"
 if [[ -z "$TRUSTED_HARNESS_DIR" || ! -d "$TRUSTED_HARNESS_DIR" ]]; then
   echo "ERROR: trusted live Docker harness directory not found: ${TRUSTED_HARNESS_DIR:-<empty>}." >&2
   exit 1
 fi
 TRUSTED_HARNESS_DIR="$(cd "$TRUSTED_HARNESS_DIR" && pwd)"
 source "$TRUSTED_HARNESS_DIR/scripts/lib/live-docker-auth.sh"
-IMAGE_NAME="${OPENCLAW_IMAGE:-openclaw:local}"
-LIVE_IMAGE_NAME="${OPENCLAW_LIVE_IMAGE:-${IMAGE_NAME}-live}"
-CONFIG_DIR="${OPENCLAW_CONFIG_DIR:-$HOME/.openclaw}"
-WORKSPACE_DIR="${OPENCLAW_WORKSPACE_DIR:-$HOME/.openclaw/workspace}"
-PROFILE_FILE="$(openclaw_live_default_profile_file)"
-DOCKER_USER="${OPENCLAW_DOCKER_USER:-node}"
-LIVE_GATEWAY_MAX_MODELS="$(openclaw_live_read_positive_int_env OPENCLAW_LIVE_GATEWAY_MAX_MODELS 8)"
-LIVE_GATEWAY_STEP_TIMEOUT_MS="$(openclaw_live_read_positive_int_env OPENCLAW_LIVE_GATEWAY_STEP_TIMEOUT_MS 45000)"
-LIVE_GATEWAY_MODEL_TIMEOUT_MS="$(openclaw_live_read_positive_int_env OPENCLAW_LIVE_GATEWAY_MODEL_TIMEOUT_MS 90000)"
+IMAGE_NAME="${BOT_IMAGE:-bot:local}"
+LIVE_IMAGE_NAME="${BOT_LIVE_IMAGE:-${IMAGE_NAME}-live}"
+CONFIG_DIR="${BOT_CONFIG_DIR:-$HOME/.bot}"
+WORKSPACE_DIR="${BOT_WORKSPACE_DIR:-$HOME/.bot/workspace}"
+PROFILE_FILE="$(bot_live_default_profile_file)"
+DOCKER_USER="${BOT_DOCKER_USER:-node}"
+LIVE_GATEWAY_MAX_MODELS="$(bot_live_read_positive_int_env BOT_LIVE_GATEWAY_MAX_MODELS 8)"
+LIVE_GATEWAY_STEP_TIMEOUT_MS="$(bot_live_read_positive_int_env BOT_LIVE_GATEWAY_STEP_TIMEOUT_MS 45000)"
+LIVE_GATEWAY_MODEL_TIMEOUT_MS="$(bot_live_read_positive_int_env BOT_LIVE_GATEWAY_MODEL_TIMEOUT_MS 90000)"
 TEMP_DIRS=()
 DOCKER_HOME_MOUNT=()
 DOCKER_AUTH_PRESTAGED=0
@@ -31,20 +31,20 @@ cleanup_temp_dirs() {
   fi
 }
 trap cleanup_temp_dirs EXIT
-if [[ -n "${OPENCLAW_DOCKER_CACHE_HOME_DIR:-}" ]]; then
-  CACHE_HOME_DIR="${OPENCLAW_DOCKER_CACHE_HOME_DIR}"
-elif openclaw_live_is_ci; then
-  CACHE_HOME_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/openclaw-docker-cache.XXXXXX")"
+if [[ -n "${BOT_DOCKER_CACHE_HOME_DIR:-}" ]]; then
+  CACHE_HOME_DIR="${BOT_DOCKER_CACHE_HOME_DIR}"
+elif bot_live_is_ci; then
+  CACHE_HOME_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/bot-docker-cache.XXXXXX")"
   TEMP_DIRS+=("$CACHE_HOME_DIR")
 else
-  CACHE_HOME_DIR="$HOME/.cache/openclaw/docker-cache"
+  CACHE_HOME_DIR="$HOME/.cache/bot/docker-cache"
 fi
-openclaw_live_prepare_bind_dir_for_container_user "$CACHE_HOME_DIR"
-if openclaw_live_uses_managed_bind_dirs; then
+bot_live_prepare_bind_dir_for_container_user "$CACHE_HOME_DIR"
+if bot_live_uses_managed_bind_dirs; then
   DOCKER_USER="$(id -u):$(id -g)"
-  DOCKER_HOME_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/openclaw-docker-home.XXXXXX")"
+  DOCKER_HOME_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/bot-docker-home.XXXXXX")"
   TEMP_DIRS+=("$DOCKER_HOME_DIR")
-  openclaw_live_prepare_bind_dir_for_container_user "$DOCKER_HOME_DIR"
+  bot_live_prepare_bind_dir_for_container_user "$DOCKER_HOME_DIR"
   DOCKER_HOME_MOUNT=(-v "$DOCKER_HOME_DIR":/home/node)
 fi
 
@@ -52,7 +52,7 @@ PROFILE_MOUNT=()
 PROFILE_STATUS="none"
 if [[ -f "$PROFILE_FILE" && -r "$PROFILE_FILE" ]]; then
   if [[ -n "${DOCKER_HOME_DIR:-}" ]]; then
-    openclaw_live_stage_profile_into_home "$DOCKER_HOME_DIR" "$PROFILE_FILE"
+    bot_live_stage_profile_into_home "$DOCKER_HOME_DIR" "$PROFILE_FILE"
   else
     PROFILE_MOUNT=(-v "$PROFILE_FILE":/home/node/.profile:ro)
   fi
@@ -61,53 +61,53 @@ fi
 
 AUTH_DIRS=()
 AUTH_FILES=()
-if [[ -n "${OPENCLAW_DOCKER_AUTH_DIRS:-}" ]]; then
+if [[ -n "${BOT_DOCKER_AUTH_DIRS:-}" ]]; then
   while IFS= read -r auth_dir; do
     [[ -n "$auth_dir" ]] || continue
     AUTH_DIRS+=("$auth_dir")
-  done < <(openclaw_live_collect_auth_dirs)
+  done < <(bot_live_collect_auth_dirs)
   while IFS= read -r auth_file; do
     [[ -n "$auth_file" ]] || continue
     AUTH_FILES+=("$auth_file")
-  done < <(openclaw_live_collect_auth_files)
-elif [[ -n "${OPENCLAW_LIVE_GATEWAY_PROVIDERS:-}" ]]; then
+  done < <(bot_live_collect_auth_files)
+elif [[ -n "${BOT_LIVE_GATEWAY_PROVIDERS:-}" ]]; then
   while IFS= read -r auth_dir; do
     [[ -n "$auth_dir" ]] || continue
     AUTH_DIRS+=("$auth_dir")
-  done < <(openclaw_live_collect_auth_dirs_from_csv "${OPENCLAW_LIVE_GATEWAY_PROVIDERS:-}")
+  done < <(bot_live_collect_auth_dirs_from_csv "${BOT_LIVE_GATEWAY_PROVIDERS:-}")
   while IFS= read -r auth_file; do
     [[ -n "$auth_file" ]] || continue
     AUTH_FILES+=("$auth_file")
-  done < <(openclaw_live_collect_auth_files_from_csv "${OPENCLAW_LIVE_GATEWAY_PROVIDERS:-}")
+  done < <(bot_live_collect_auth_files_from_csv "${BOT_LIVE_GATEWAY_PROVIDERS:-}")
 else
   while IFS= read -r auth_dir; do
     [[ -n "$auth_dir" ]] || continue
     AUTH_DIRS+=("$auth_dir")
-  done < <(openclaw_live_collect_auth_dirs)
+  done < <(bot_live_collect_auth_dirs)
   while IFS= read -r auth_file; do
     [[ -n "$auth_file" ]] || continue
     AUTH_FILES+=("$auth_file")
-  done < <(openclaw_live_collect_auth_files)
+  done < <(bot_live_collect_auth_files)
 fi
 AUTH_DIRS_CSV=""
 if ((${#AUTH_DIRS[@]} > 0)); then
-  AUTH_DIRS_CSV="$(openclaw_live_join_csv "${AUTH_DIRS[@]}")"
+  AUTH_DIRS_CSV="$(bot_live_join_csv "${AUTH_DIRS[@]}")"
 fi
 AUTH_FILES_CSV=""
 if ((${#AUTH_FILES[@]} > 0)); then
-  AUTH_FILES_CSV="$(openclaw_live_join_csv "${AUTH_FILES[@]}")"
+  AUTH_FILES_CSV="$(bot_live_join_csv "${AUTH_FILES[@]}")"
 fi
 
 if [[ -n "${DOCKER_HOME_DIR:-}" ]]; then
-  openclaw_live_stage_auth_into_home "$DOCKER_HOME_DIR" "${AUTH_DIRS[@]}" --files "${AUTH_FILES[@]}"
+  bot_live_stage_auth_into_home "$DOCKER_HOME_DIR" "${AUTH_DIRS[@]}" --files "${AUTH_FILES[@]}"
   DOCKER_AUTH_PRESTAGED=1
 fi
-CONTAINER_NODE_OPTIONS="$(openclaw_live_container_node_options)"
+CONTAINER_NODE_OPTIONS="$(bot_live_container_node_options)"
 
 EXTERNAL_AUTH_MOUNTS=()
 if ((${#AUTH_DIRS[@]} > 0)); then
   for auth_dir in "${AUTH_DIRS[@]}"; do
-    auth_dir="$(openclaw_live_validate_relative_home_path "$auth_dir")"
+    auth_dir="$(bot_live_validate_relative_home_path "$auth_dir")"
     host_path="$HOME/$auth_dir"
     if [[ -d "$host_path" ]]; then
       EXTERNAL_AUTH_MOUNTS+=(-v "$host_path":/host-auth/"$auth_dir":ro)
@@ -116,7 +116,7 @@ if ((${#AUTH_DIRS[@]} > 0)); then
 fi
 if ((${#AUTH_FILES[@]} > 0)); then
   for auth_file in "${AUTH_FILES[@]}"; do
-    auth_file="$(openclaw_live_validate_relative_home_path "$auth_file")"
+    auth_file="$(bot_live_validate_relative_home_path "$auth_file")"
     host_path="$HOME/$auth_file"
     if [[ -f "$host_path" ]]; then
       EXTERNAL_AUTH_MOUNTS+=(-v "$host_path":/host-auth-files/"$auth_file":ro)
@@ -133,9 +133,9 @@ export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-$XDG_CACHE_HOME/npm}"
 export npm_config_cache="$NPM_CONFIG_CACHE"
 mkdir -p "$XDG_CACHE_HOME" "$COREPACK_HOME" "$NPM_CONFIG_CACHE"
 chmod 700 "$XDG_CACHE_HOME" "$COREPACK_HOME" "$NPM_CONFIG_CACHE" || true
-if [ "${OPENCLAW_DOCKER_AUTH_PRESTAGED:-0}" != "1" ]; then
-  IFS=',' read -r -a auth_dirs <<<"${OPENCLAW_DOCKER_AUTH_DIRS_RESOLVED:-}"
-  IFS=',' read -r -a auth_files <<<"${OPENCLAW_DOCKER_AUTH_FILES_RESOLVED:-}"
+if [ "${BOT_DOCKER_AUTH_PRESTAGED:-0}" != "1" ]; then
+  IFS=',' read -r -a auth_dirs <<<"${BOT_DOCKER_AUTH_DIRS_RESOLVED:-}"
+  IFS=',' read -r -a auth_files <<<"${BOT_DOCKER_AUTH_FILES_RESOLVED:-}"
   if ((${#auth_dirs[@]} > 0)); then
     for auth_dir in "${auth_dirs[@]}"; do
       [ -n "$auth_dir" ] || continue
@@ -158,20 +158,20 @@ if [ "${OPENCLAW_DOCKER_AUTH_PRESTAGED:-0}" != "1" ]; then
   fi
 fi
 tmp_dir="$(mktemp -d)"
-trusted_scripts_dir="${OPENCLAW_LIVE_DOCKER_SCRIPTS_DIR:-/src/scripts}"
+trusted_scripts_dir="${BOT_LIVE_DOCKER_SCRIPTS_DIR:-/src/scripts}"
 source "$trusted_scripts_dir/lib/live-docker-stage.sh"
-openclaw_live_stage_source_tree "$tmp_dir"
-openclaw_live_stage_node_modules "$tmp_dir"
-openclaw_live_link_runtime_tree "$tmp_dir"
-openclaw_live_stage_state_dir "$tmp_dir/.openclaw-state"
-openclaw_live_prepare_staged_config
+bot_live_stage_source_tree "$tmp_dir"
+bot_live_stage_node_modules "$tmp_dir"
+bot_live_link_runtime_tree "$tmp_dir"
+bot_live_stage_state_dir "$tmp_dir/.bot-state"
+bot_live_prepare_staged_config
 cd "$tmp_dir"
 node scripts/test-live.mjs -- src/gateway/gateway-models.profiles.live.test.ts
 EOF
 
-OPENCLAW_LIVE_DOCKER_REPO_ROOT="$ROOT_DIR" "$TRUSTED_HARNESS_DIR/scripts/test-live-build-docker.sh"
-if openclaw_live_uses_managed_bind_dirs; then
-  openclaw_live_chown_bind_dirs_for_container_user \
+BOT_LIVE_DOCKER_REPO_ROOT="$ROOT_DIR" "$TRUSTED_HARNESS_DIR/scripts/test-live-build-docker.sh"
+if bot_live_uses_managed_bind_dirs; then
+  bot_live_chown_bind_dirs_for_container_user \
     "$LIVE_IMAGE_NAME" \
     "$DOCKER_USER" \
     "$CACHE_HOME_DIR" \
@@ -184,7 +184,7 @@ echo "==> Profile file: $PROFILE_STATUS"
 echo "==> External auth dirs: ${AUTH_DIRS_CSV:-none}"
 echo "==> External auth files: ${AUTH_FILES_CSV:-none}"
 DOCKER_RUN_ARGS=()
-openclaw_live_init_docker_run_args DOCKER_RUN_ARGS "${OPENCLAW_LIVE_GATEWAY_DOCKER_RUN_TIMEOUT:-2100s}"
+bot_live_init_docker_run_args DOCKER_RUN_ARGS "${BOT_LIVE_GATEWAY_DOCKER_RUN_TIMEOUT:-2100s}"
 DOCKER_RUN_ARGS+=(--rm -t \
   -u "$DOCKER_USER" \
   --entrypoint bash \
@@ -203,35 +203,35 @@ DOCKER_RUN_ARGS+=(--rm -t \
   -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
   -e HOME=/home/node \
   -e NODE_OPTIONS="$CONTAINER_NODE_OPTIONS" \
-  -e OPENCLAW_SKIP_CHANNELS=1 \
-  -e OPENCLAW_SUPPRESS_NOTES=1 \
-  -e OPENCLAW_DOCKER_AUTH_PRESTAGED="$DOCKER_AUTH_PRESTAGED" \
-  -e OPENCLAW_DOCKER_AUTH_DIRS_RESOLVED="$AUTH_DIRS_CSV" \
-  -e OPENCLAW_DOCKER_AUTH_FILES_RESOLVED="$AUTH_FILES_CSV" \
-  -e OPENCLAW_LIVE_DOCKER_SCRIPTS_DIR="${DOCKER_TRUSTED_HARNESS_CONTAINER_DIR}/scripts" \
-  -e OPENCLAW_LIVE_DOCKER_SOURCE_STAGE_MODE="${OPENCLAW_LIVE_DOCKER_SOURCE_STAGE_MODE:-copy}" \
-  -e OPENCLAW_LIVE_TEST=1 \
-  -e OPENCLAW_LIVE_TEST_QUIET="${OPENCLAW_LIVE_TEST_QUIET:-}" \
-  -e OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS="${OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS:-}" \
-  -e OPENCLAW_LIVE_REQUIRE_PROFILE_KEYS="${OPENCLAW_LIVE_REQUIRE_PROFILE_KEYS:-}" \
-  -e OPENCLAW_LIVE_GATEWAY_MODELS="${OPENCLAW_LIVE_GATEWAY_MODELS:-modern}" \
-  -e OPENCLAW_LIVE_GATEWAY_PROVIDERS="${OPENCLAW_LIVE_GATEWAY_PROVIDERS:-}" \
-  -e OPENCLAW_LIVE_GATEWAY_THINKING="${OPENCLAW_LIVE_GATEWAY_THINKING:-}" \
-  -e OPENCLAW_LIVE_GATEWAY_SMOKE="${OPENCLAW_LIVE_GATEWAY_SMOKE:-1}" \
-  -e OPENCLAW_LIVE_GATEWAY_MAX_MODELS="$LIVE_GATEWAY_MAX_MODELS" \
-  -e OPENCLAW_LIVE_GATEWAY_HEARTBEAT_MS="${OPENCLAW_LIVE_GATEWAY_HEARTBEAT_MS:-}" \
-  -e OPENCLAW_LIVE_GATEWAY_STEP_TIMEOUT_MS="$LIVE_GATEWAY_STEP_TIMEOUT_MS" \
-  -e OPENCLAW_LIVE_GATEWAY_MODEL_TIMEOUT_MS="$LIVE_GATEWAY_MODEL_TIMEOUT_MS" \
-  -e OPENCLAW_VITEST_FS_MODULE_CACHE=0)
-openclaw_live_append_array DOCKER_RUN_ARGS DOCKER_HOME_MOUNT
-openclaw_live_append_array DOCKER_RUN_ARGS DOCKER_TRUSTED_HARNESS_MOUNT
+  -e BOT_SKIP_CHANNELS=1 \
+  -e BOT_SUPPRESS_NOTES=1 \
+  -e BOT_DOCKER_AUTH_PRESTAGED="$DOCKER_AUTH_PRESTAGED" \
+  -e BOT_DOCKER_AUTH_DIRS_RESOLVED="$AUTH_DIRS_CSV" \
+  -e BOT_DOCKER_AUTH_FILES_RESOLVED="$AUTH_FILES_CSV" \
+  -e BOT_LIVE_DOCKER_SCRIPTS_DIR="${DOCKER_TRUSTED_HARNESS_CONTAINER_DIR}/scripts" \
+  -e BOT_LIVE_DOCKER_SOURCE_STAGE_MODE="${BOT_LIVE_DOCKER_SOURCE_STAGE_MODE:-copy}" \
+  -e BOT_LIVE_TEST=1 \
+  -e BOT_LIVE_TEST_QUIET="${BOT_LIVE_TEST_QUIET:-}" \
+  -e BOT_LIVE_WRAPPER_HEARTBEAT_MS="${BOT_LIVE_WRAPPER_HEARTBEAT_MS:-}" \
+  -e BOT_LIVE_REQUIRE_PROFILE_KEYS="${BOT_LIVE_REQUIRE_PROFILE_KEYS:-}" \
+  -e BOT_LIVE_GATEWAY_MODELS="${BOT_LIVE_GATEWAY_MODELS:-modern}" \
+  -e BOT_LIVE_GATEWAY_PROVIDERS="${BOT_LIVE_GATEWAY_PROVIDERS:-}" \
+  -e BOT_LIVE_GATEWAY_THINKING="${BOT_LIVE_GATEWAY_THINKING:-}" \
+  -e BOT_LIVE_GATEWAY_SMOKE="${BOT_LIVE_GATEWAY_SMOKE:-1}" \
+  -e BOT_LIVE_GATEWAY_MAX_MODELS="$LIVE_GATEWAY_MAX_MODELS" \
+  -e BOT_LIVE_GATEWAY_HEARTBEAT_MS="${BOT_LIVE_GATEWAY_HEARTBEAT_MS:-}" \
+  -e BOT_LIVE_GATEWAY_STEP_TIMEOUT_MS="$LIVE_GATEWAY_STEP_TIMEOUT_MS" \
+  -e BOT_LIVE_GATEWAY_MODEL_TIMEOUT_MS="$LIVE_GATEWAY_MODEL_TIMEOUT_MS" \
+  -e BOT_VITEST_FS_MODULE_CACHE=0)
+bot_live_append_array DOCKER_RUN_ARGS DOCKER_HOME_MOUNT
+bot_live_append_array DOCKER_RUN_ARGS DOCKER_TRUSTED_HARNESS_MOUNT
 DOCKER_RUN_ARGS+=(\
   -v "$CACHE_HOME_DIR":/home/node/.cache \
   -v "$ROOT_DIR":/src:ro \
-  -v "$CONFIG_DIR":/home/node/.openclaw \
-  -v "$WORKSPACE_DIR":/home/node/.openclaw/workspace)
-openclaw_live_append_array DOCKER_RUN_ARGS EXTERNAL_AUTH_MOUNTS
-openclaw_live_append_array DOCKER_RUN_ARGS PROFILE_MOUNT
+  -v "$CONFIG_DIR":/home/node/.bot \
+  -v "$WORKSPACE_DIR":/home/node/.bot/workspace)
+bot_live_append_array DOCKER_RUN_ARGS EXTERNAL_AUTH_MOUNTS
+bot_live_append_array DOCKER_RUN_ARGS PROFILE_MOUNT
 DOCKER_RUN_ARGS+=(\
   "$LIVE_IMAGE_NAME" \
   -lc "$LIVE_TEST_CMD")

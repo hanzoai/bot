@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import BotKit
 
 enum ShareDraftComposer {
     /// These lines came from the legacy generated share template. Match the

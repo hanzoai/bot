@@ -8,19 +8,19 @@ import {
   buildLiveCronProbeMessage,
   createLiveCronProbeSpec,
   isClaudeLikeLiveAgent,
-  resolveOpenClawCliProcessArgs,
+  resolveBotCliProcessArgs,
   shouldRunLiveImageProbe,
 } from "./live-agent-probes.js";
 
 describe("live-agent-probes", () => {
   it("uses the source runner when packaged CLI output is absent", () => {
-    expect(resolveOpenClawCliProcessArgs(["cron", "list"], false)).toEqual([
+    expect(resolveBotCliProcessArgs(["cron", "list"], false)).toEqual([
       "scripts/run-node.mjs",
       "cron",
       "list",
     ]);
-    expect(resolveOpenClawCliProcessArgs(["cron", "list"], true)).toEqual([
-      "openclaw.mjs",
+    expect(resolveBotCliProcessArgs(["cron", "list"], true)).toEqual([
+      "bot.mjs",
       "cron",
       "list",
     ]);
@@ -67,10 +67,10 @@ describe("live-agent-probes", () => {
     expect(claudeRetryPrompt).toContain(
       "Preserve job.sessionTarget and job.sessionKey exactly as provided.",
     );
-    expect(claudeRetryPrompt).toContain("search/load MCP tools for `openclaw cron` or `cron`");
-    expect(claudeRetryPrompt).toContain("mcp__openclaw__cron");
+    expect(claudeRetryPrompt).toContain("search/load MCP tools for `bot cron` or `cron`");
+    expect(claudeRetryPrompt).toContain("mcp__bot__cron");
     expect(claudeRetryPrompt).toContain("Do not use Claude native `CronCreate`");
-    expect(claudeRetryPrompt).not.toContain("openclaw-tools");
+    expect(claudeRetryPrompt).not.toContain("bot-tools");
     expect(
       buildLiveCronProbeMessage({
         agent: "future-agent",
@@ -86,7 +86,7 @@ describe("live-agent-probes", () => {
         attempt: 1,
         exactReply: spec.name,
       }),
-    ).toContain("previous OpenClaw cron MCP tool call was cancelled");
+    ).toContain("previous Bot cron MCP tool call was cancelled");
     const args = JSON.parse(spec.argsJson) as {
       job?: {
         sessionTarget?: string;

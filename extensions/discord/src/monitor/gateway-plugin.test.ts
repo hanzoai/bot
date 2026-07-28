@@ -63,14 +63,14 @@ vi.mock("../internal/gateway.js", () => ({
   GatewayPlugin,
 }));
 
-vi.mock("openclaw/plugin-sdk/proxy-capture", () => ({
+vi.mock("bot/plugin-sdk/proxy-capture", () => ({
   captureHttpExchange: vi.fn(),
   captureWsEvent: vi.fn(),
   resolveEffectiveDebugProxyUrl: () => undefined,
   resolveDebugProxySettings: () => ({ enabled: false }),
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-env", () => ({
+vi.mock("bot/plugin-sdk/runtime-env", () => ({
   danger: (value: string) => value,
   warn: (value: string) => value,
 }));
@@ -142,7 +142,7 @@ describe("createDiscordGatewayPlugin", () => {
   it("resolves gateway metadata timeout from env, then default", () => {
     expect(
       resolveDiscordGatewayInfoTimeoutMs({
-        env: { OPENCLAW_DISCORD_GATEWAY_INFO_TIMEOUT_MS: "25000" },
+        env: { BOT_DISCORD_GATEWAY_INFO_TIMEOUT_MS: "25000" },
       }),
     ).toBe(25_000);
     expect(resolveDiscordGatewayInfoTimeoutMs({ env: {} })).toBe(30_000);
@@ -222,7 +222,7 @@ describe("createDiscordGatewayPlugin", () => {
     );
   });
 
-  it("leaves autoInteractions disabled so OpenClaw owns interaction handoff", () => {
+  it("leaves autoInteractions disabled so Bot owns interaction handoff", () => {
     const plugin = createPlugin();
 
     expect(

@@ -3,7 +3,7 @@
  *
  * Combines plugin inspection hooks, read-only fallbacks, and configured credential status.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   hasConfiguredUnavailableCredentialStatus,
   hasResolvedCredentialValue,
@@ -25,7 +25,7 @@ type AccountInspectionFields = {
  */
 export async function inspectChannelAccount(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
 }): Promise<unknown> {
   return (
@@ -43,8 +43,8 @@ export async function inspectChannelAccount(params: {
  */
 export async function resolveInspectedChannelAccount(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+  cfg: BotConfig;
+  sourceConfig: BotConfig;
   accountId: string;
 }): Promise<{
   account: unknown;

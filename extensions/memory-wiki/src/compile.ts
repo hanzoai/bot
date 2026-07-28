@@ -1,17 +1,17 @@
 // Memory Wiki plugin module implements compile behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { runTasksWithConcurrency } from "openclaw/plugin-sdk/concurrency-runtime";
-import { retryTransientMemoryRead } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import { runTasksWithConcurrency } from "bot/plugin-sdk/concurrency-runtime";
+import { retryTransientMemoryRead } from "bot/plugin-sdk/memory-core-host-engine-storage";
 import {
   replaceManagedMarkdownBlock,
   withTrailingNewline,
-} from "openclaw/plugin-sdk/memory-host-markdown";
-import { root as fsRoot } from "openclaw/plugin-sdk/security-runtime";
+} from "bot/plugin-sdk/memory-host-markdown";
+import { root as fsRoot } from "bot/plugin-sdk/security-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import {
   assessClaimFreshness,
   assessPageFreshness,
@@ -974,8 +974,8 @@ async function writeDashboardPage(params: {
   const updatedBody = replaceManagedMarkdownBlock({
     original: originalBody,
     heading: "## Generated",
-    startMarker: `<!-- openclaw:wiki:${path.basename(params.definition.relativePath, ".md")}:start -->`,
-    endMarker: `<!-- openclaw:wiki:${path.basename(params.definition.relativePath, ".md")}:end -->`,
+    startMarker: `<!-- bot:wiki:${path.basename(params.definition.relativePath, ".md")}:start -->`,
+    endMarker: `<!-- bot:wiki:${path.basename(params.definition.relativePath, ".md")}:end -->`,
     body: params.definition.buildBody({
       config: params.config,
       managedImportedSourcePagePaths: params.managedImportedSourcePagePaths,
@@ -1286,8 +1286,8 @@ async function compileMemoryWikiVaultUnlocked(
       rootDir,
       relativePath: "index.md",
       title: "Wiki Index",
-      startMarker: "<!-- openclaw:wiki:index:start -->",
-      endMarker: "<!-- openclaw:wiki:index:end -->",
+      startMarker: "<!-- bot:wiki:index:start -->",
+      endMarker: "<!-- bot:wiki:index:end -->",
       body: buildRootIndexBody({ config, pages, counts }),
     })
   ) {
@@ -1302,8 +1302,8 @@ async function compileMemoryWikiVaultUnlocked(
         rootDir,
         relativePath,
         title: group.heading,
-        startMarker: `<!-- openclaw:wiki:${group.dir}:index:start -->`,
-        endMarker: `<!-- openclaw:wiki:${group.dir}:index:end -->`,
+        startMarker: `<!-- bot:wiki:${group.dir}:index:start -->`,
+        endMarker: `<!-- bot:wiki:${group.dir}:index:end -->`,
         body: buildDirectoryIndexBody({ config, pages, group }),
       })
     ) {

@@ -1,7 +1,7 @@
 /** Shared attempt, error, and harness helpers for model fallback execution. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { TRANSCRIPT_NOT_CONTINUABLE_ERROR_CODE } from "../../packages/agent-core/src/errors.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isCronTerminalAbortReasonText } from "../cron/service/execution-errors.js";
 import { formatErrorMessage, toErrorObject } from "../infra/errors.js";
 import { isCommandLaneTaskTimeoutError } from "../process/command-queue.js";
@@ -10,7 +10,7 @@ import { externalCliDiscoveryForProviders } from "./auth-profiles/external-cli-d
 import type { AuthProfileStore } from "./auth-profiles/types.js";
 import { isLikelyContextOverflowError } from "./embedded-agent-helpers/errors.js";
 import type { FailoverReason } from "./embedded-agent-helpers/types.js";
-import { isOpenClawAbortableWrapper } from "./embedded-agent-runner/run/abortable.js";
+import { isBotAbortableWrapper } from "./embedded-agent-runner/run/abortable.js";
 import {
   FailoverError,
   buildFailoverRemediationHint,
@@ -74,7 +74,7 @@ export type ModelFallbackRunOptions = {
 };
 
 type ModelFallbackRuntimeContext = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentId?: string;
   sessionKey?: string;
   resolveAgentHarnessRuntimeOverride?: (provider: string, model: string) => string | undefined;
@@ -205,7 +205,7 @@ function isTerminalAbortFromError(err: unknown): boolean {
   if (causeCandidates.some(isAgentRunRestartAbortReason)) {
     return true;
   }
-  return isOpenClawAbortableWrapper(err) && causeCandidates.some(isTerminalAbortCandidate);
+  return isBotAbortableWrapper(err) && causeCandidates.some(isTerminalAbortCandidate);
 }
 
 function isCallerAbortSignal(signal: AbortSignal | undefined): boolean {
@@ -381,7 +381,7 @@ export function resolveNextFallbackCandidateIndex(params: {
   return params.candidates.length;
 }
 
-function isCliAgentRuntime(runtime: string | undefined, cfg: OpenClawConfig | undefined): boolean {
+function isCliAgentRuntime(runtime: string | undefined, cfg: BotConfig | undefined): boolean {
   const normalized = normalizeOptionalString(runtime);
   if (!normalized) {
     return false;
@@ -421,7 +421,7 @@ export async function resolveModelFallbackCandidateHarnessAuthPrecheck(
   const agentRuntime = explicitAgentRuntime ?? harnessPolicy.runtime;
   const agentRuntimeSource = explicitAgentRuntime ? "model" : harnessPolicy.runtimeSource;
   if (
-    agentRuntime === "openclaw" ||
+    agentRuntime === "bot" ||
     agentRuntime === "auto" ||
     (agentRuntime === "codex" && agentRuntimeSource === "implicit")
   ) {
@@ -438,7 +438,7 @@ export async function resolveModelFallbackCandidateHarnessAuthPrecheck(
     return result(true);
   }
   if (isCliAgentRuntime(agentRuntime, params.cfg)) {
-    // CLI runtimes own their transport/auth, so stale OpenClaw provider
+    // CLI runtimes own their transport/auth, so stale Bot provider
     // profile state must not block the candidate before the CLI starts.
     return result(true);
   }
@@ -561,7 +561,7 @@ export function throwFallbackFailureSummary(params: {
   formatAttempt: (attempt: FallbackAttempt) => string;
   soonestCooldownExpiry?: number | null;
   attribution?: FailoverAttribution;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
 }): never {
   if (params.attempts.length <= 1 && params.lastError) {
@@ -597,7 +597,7 @@ export function resolveFallbackSoonestCooldownExpiry(params: {
   authRuntime: ModelFallbackAuthRuntime | null;
   authStore: AuthProfileStore | null;
   agentDir?: string;
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   candidates: ModelCandidate[];
 }): number | null {
   if (!params.authRuntime || !params.authStore) {

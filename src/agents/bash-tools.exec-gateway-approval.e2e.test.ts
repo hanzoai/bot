@@ -24,17 +24,17 @@ import type { ExecApprovalFollowupOutcome } from "./bash-tools.exec-types.js";
 
 const TEST_ENV_KEYS = [
   "HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_GATEWAY_PORT",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_GMAIL_WATCHER",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_SKIP_CANVAS_HOST",
-  "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_TEST_MINIMAL_GATEWAY",
+  "BOT_STATE_DIR",
+  "BOT_CONFIG_PATH",
+  "BOT_GATEWAY_TOKEN",
+  "BOT_GATEWAY_PORT",
+  "BOT_SKIP_CHANNELS",
+  "BOT_SKIP_GMAIL_WATCHER",
+  "BOT_SKIP_CRON",
+  "BOT_SKIP_CANVAS_HOST",
+  "BOT_SKIP_BROWSER_CONTROL_SERVER",
+  "BOT_SKIP_PROVIDERS",
+  "BOT_TEST_MINIMAL_GATEWAY",
 ];
 const GATEWAY_CONNECT_TIMEOUT_MS = 120_000;
 const EXEC_APPROVAL_E2E_TIMEOUT_MS = 180_000;
@@ -54,21 +54,21 @@ describe("gateway-hosted exec approvals", () => {
   });
 
   it(
-    "lets OpenClaw-style gateway tool calls request and wait for approval over separate connections",
+    "lets Bot-style gateway tool calls request and wait for approval over separate connections",
     async () => {
       const envSnapshot = captureEnv(TEST_ENV_KEYS);
       cleanup.push(() => envSnapshot.restore());
 
-      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-exec-approval-e2e-"));
+      const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "bot-exec-approval-e2e-"));
       cleanup.push(() => fs.rm(tempHome, { recursive: true, force: true, maxRetries: 5 }));
 
-      const stateDir = path.join(tempHome, ".openclaw");
+      const stateDir = path.join(tempHome, ".bot");
       const workspaceDir = path.join(tempHome, "workspace");
       await fs.mkdir(workspaceDir, { recursive: true });
 
       const port = await getFreeGatewayPort();
       const token = "exec-approval-e2e-token";
-      const configPath = path.join(stateDir, "openclaw.json");
+      const configPath = path.join(stateDir, "bot.json");
       await fs.mkdir(stateDir, { recursive: true });
       await fs.writeFile(
         configPath,
@@ -93,17 +93,17 @@ describe("gateway-hosted exec approvals", () => {
       );
 
       setTestEnvValue("HOME", tempHome);
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", token);
-      setTestEnvValue("OPENCLAW_GATEWAY_PORT", String(port));
-      setTestEnvValue("OPENCLAW_SKIP_CHANNELS", "1");
-      setTestEnvValue("OPENCLAW_SKIP_GMAIL_WATCHER", "1");
-      setTestEnvValue("OPENCLAW_SKIP_CRON", "1");
-      setTestEnvValue("OPENCLAW_SKIP_CANVAS_HOST", "1");
-      setTestEnvValue("OPENCLAW_SKIP_BROWSER_CONTROL_SERVER", "1");
-      setTestEnvValue("OPENCLAW_SKIP_PROVIDERS", "1");
-      setTestEnvValue("OPENCLAW_TEST_MINIMAL_GATEWAY", "1");
+      setTestEnvValue("BOT_STATE_DIR", stateDir);
+      setTestEnvValue("BOT_CONFIG_PATH", configPath);
+      setTestEnvValue("BOT_GATEWAY_TOKEN", token);
+      setTestEnvValue("BOT_GATEWAY_PORT", String(port));
+      setTestEnvValue("BOT_SKIP_CHANNELS", "1");
+      setTestEnvValue("BOT_SKIP_GMAIL_WATCHER", "1");
+      setTestEnvValue("BOT_SKIP_CRON", "1");
+      setTestEnvValue("BOT_SKIP_CANVAS_HOST", "1");
+      setTestEnvValue("BOT_SKIP_BROWSER_CONTROL_SERVER", "1");
+      setTestEnvValue("BOT_SKIP_PROVIDERS", "1");
+      setTestEnvValue("BOT_TEST_MINIMAL_GATEWAY", "1");
       clearRuntimeConfigSnapshot();
       clearConfigCache();
       clearSessionStoreCacheForTest();

@@ -1,6 +1,6 @@
 /** Canonical projection from heartbeat config to system-owned cron monitor jobs. */
 import { DEFAULT_HEARTBEAT_EVERY } from "../auto-reply/heartbeat.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   resolveHeartbeatAgents,
   resolveHeartbeatSchedulerSeed,
@@ -24,7 +24,7 @@ export function heartbeatMonitorAgentId(job: CronJob): string | undefined {
 }
 
 export function resolveHeartbeatMonitorSpecs(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   existingJobs: readonly CronJob[],
   options: { schedulerSeed?: string } = {},
 ): Array<{ agentId: string; input: CronJobCreate }> {

@@ -42,7 +42,7 @@ scenario:
     - src/gateway/server-restart-sentinel.ts
   execution:
     kind: flow
-    runtime: openclaw
+    runtime: bot
     timeoutMs: 420000
     summary: Restart while replay-safe Code Mode wait is executing, then verify automatic reconstruction and delivery.
     config:
@@ -179,7 +179,7 @@ flow:
             expr: "recoveryRequests.some((request) => String(request.allInputText ?? '').includes('Your previous turn was interrupted by a gateway restart'))"
             message: restart recovery prompt did not reach the provider
         - assert:
-            expr: "recoveryRequests.every((request) => !String(request.allInputText ?? '').includes('[OpenClaw heartbeat poll]'))"
+            expr: "recoveryRequests.every((request) => !String(request.allInputText ?? '').includes('[Bot heartbeat poll]'))"
             message: heartbeat poll raced the restart recovery proof
         - set: recoveryLogs
           value:

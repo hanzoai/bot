@@ -1,7 +1,7 @@
 /** Builds installed-index records from normalized plugin manifest registry entries. */
 import path from "node:path";
-import { normalizeSortedUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.js";
+import { normalizeSortedUniqueStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
+import type { BotConfig } from "../config/types.js";
 import type { PluginCompatCode } from "./compat/registry.js";
 import { normalizePluginsConfig, resolveEffectiveEnableState } from "./config-state.js";
 import { isPluginEnabledByDefaultForPlatform } from "./default-enablement.js";
@@ -238,7 +238,7 @@ function buildCandidateLookup(
 export function buildInstalledPluginIndexRecords(params: {
   candidates: readonly PluginCandidate[];
   registry: PluginManifestRegistry;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   diagnostics: PluginDiagnostic[];
   installRecords: Record<string, InstalledPluginInstallRecordInfo>;
 }): InstalledPluginIndexRecord[] {
@@ -284,7 +284,7 @@ export function buildInstalledPluginIndexRecords(params: {
       contributions: buildContributionInfo(record),
       compat: collectPluginManifestCompatCodes(record),
     };
-    if (record.format && record.format !== "openclaw") {
+    if (record.format && record.format !== "bot") {
       indexRecord.format = record.format;
     }
     if (record.bundleFormat) {

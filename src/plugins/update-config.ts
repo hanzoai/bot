@@ -1,9 +1,9 @@
 import path from "node:path";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
-import { isOpenClawOrgNpmSpec } from "../infra/npm-registry-spec.js";
+import { isBotOrgNpmSpec } from "../infra/npm-registry-spec.js";
 import {
-  installedPackageNeedsOpenClawPeerLinkRepair,
+  installedPackageNeedsBotPeerLinkRepair,
   readInstalledPackagePeerDependencies,
 } from "../infra/package-update-utils.js";
 import { resolveUserPath } from "../utils.js";
@@ -17,7 +17,7 @@ import {
 import { resolvePluginInstallDir } from "./install.js";
 import { resolvePackageExtensionEntries, type PackageManifest } from "./manifest.js";
 import { validatePackageExtensionEntriesForInstall } from "./package-entry-resolution.js";
-import { linkOpenClawPeerDependencies } from "./plugin-peer-link.js";
+import { linkBotPeerDependencies } from "./plugin-peer-link.js";
 import { resetPluginSlotsToDefaults } from "./slots.js";
 import { setPluginEnabledInConfig } from "./toggle-config.js";
 import type { PluginUpdateLogger } from "./update-source.js";
@@ -193,7 +193,7 @@ export function resolveBridgeInstallRecord(params: {
 }
 
 function isBridgeChannelEnabledByConfig(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   bridge: ExternalizedBundledPluginBridge;
 }): boolean {
   const channels = params.config.channels;
@@ -213,7 +213,7 @@ function isBridgeChannelEnabledByConfig(params: {
 }
 
 export function isExternalizedBundledPluginEnabled(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   bridge: ExternalizedBundledPluginBridge;
 }): boolean {
   const normalized = normalizePluginsConfig(params.config.plugins);
@@ -253,7 +253,7 @@ export function shouldFallbackClawHubBridgeToNpm(params: {
   result: { ok: false; code?: string };
   npmSpec?: string;
 }): boolean {
-  if (!isOpenClawOrgNpmSpec(params.npmSpec)) {
+  if (!isBotOrgNpmSpec(params.npmSpec)) {
     return false;
   }
   return (
@@ -283,10 +283,10 @@ function replacePluginIdInList(
 }
 
 export function migratePluginConfigId(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   fromId: string,
   toId: string,
-): OpenClawConfig {
+): BotConfig {
   const plugins = cfg.plugins;
   if (fromId === toId || !plugins) {
     return cfg;
@@ -360,7 +360,7 @@ export function migratePluginConfigId(
   return nextPlugins === plugins ? cfg : { ...cfg, plugins: nextPlugins };
 }
 
-export function withoutPluginInstallRecord(cfg: OpenClawConfig, pluginId: string): OpenClawConfig {
+export function withoutPluginInstallRecord(cfg: BotConfig, pluginId: string): BotConfig {
   const installs = cfg.plugins?.installs;
   if (!installs || !Object.hasOwn(installs, pluginId)) {
     return cfg;
@@ -376,9 +376,9 @@ export function withoutPluginInstallRecord(cfg: OpenClawConfig, pluginId: string
 }
 
 export function disablePluginAfterUpdateFailure(
-  config: OpenClawConfig,
+  config: BotConfig,
   pluginId: string,
-): OpenClawConfig {
+): BotConfig {
   const disabled = setPluginEnabledInConfig(config, pluginId, false, {
     updateChannelConfig: false,
   });
@@ -393,8 +393,8 @@ export function disablePluginAfterUpdateFailure(
   };
 }
 
-export async function repairOpenClawPeerLinksForNpmInstalls(params: {
-  config: OpenClawConfig;
+export async function repairBotPeerLinksForNpmInstalls(params: {
+  config: BotConfig;
   logger: PluginUpdateLogger;
 }): Promise<boolean> {
   let repaired = false;
@@ -410,23 +410,23 @@ export async function repairOpenClawPeerLinksForNpmInstalls(params: {
       );
     } catch (err) {
       params.logger.warn?.(
-        `Could not repair openclaw peer link for "${pluginId}" due to invalid install path: ${String(err)}`,
+        `Could not repair bot peer link for "${pluginId}" due to invalid install path: ${String(err)}`,
       );
       continue;
     }
 
-    if (!installedPackageNeedsOpenClawPeerLinkRepair(installPath)) {
+    if (!installedPackageNeedsBotPeerLinkRepair(installPath)) {
       continue;
     }
 
     const peerDependencies = readInstalledPackagePeerDependencies(installPath);
-    if (!Object.hasOwn(peerDependencies, "openclaw")) {
+    if (!Object.hasOwn(peerDependencies, "bot")) {
       continue;
     }
 
     try {
       const warnings: string[] = [];
-      const peerLinkRepair = await linkOpenClawPeerDependencies({
+      const peerLinkRepair = await linkBotPeerDependencies({
         installedDir: installPath,
         peerDependencies,
         logger: {
@@ -436,14 +436,14 @@ export async function repairOpenClawPeerLinksForNpmInstalls(params: {
       });
       if (peerLinkRepair.skipped > 0) {
         params.logger.warn?.(
-          `Could not repair openclaw peer link for "${pluginId}" at ${installPath}: ${warnings.join("; ") || "peer link repair was skipped"}`,
+          `Could not repair bot peer link for "${pluginId}" at ${installPath}: ${warnings.join("; ") || "peer link repair was skipped"}`,
         );
         continue;
       }
-      repaired = !installedPackageNeedsOpenClawPeerLinkRepair(installPath) || repaired;
+      repaired = !installedPackageNeedsBotPeerLinkRepair(installPath) || repaired;
     } catch (err) {
       params.logger.warn?.(
-        `Could not repair openclaw peer link for "${pluginId}" at ${installPath}: ${String(err)}`,
+        `Could not repair bot peer link for "${pluginId}" at ${installPath}: ${String(err)}`,
       );
     }
   }

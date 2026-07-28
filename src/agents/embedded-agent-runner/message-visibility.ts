@@ -164,7 +164,7 @@ export function readTerminalSourceReplyDeliveryMirror(
   if (!message || typeof message !== "object") {
     return undefined;
   }
-  const marker = (message as { openclawDeliveryMirror?: unknown }).openclawDeliveryMirror;
+  const marker = (message as { botDeliveryMirror?: unknown }).botDeliveryMirror;
   if (!marker || typeof marker !== "object") {
     return undefined;
   }

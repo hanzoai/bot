@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/retry",
+  "name": "@hanzo/bot-retry",
   "version": "0.0.0-private",
   "private": true,
   "files": [

@@ -1,5 +1,5 @@
 // Imessage plugin module implements approval reactions behavior.
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
+import type { ApprovalResolveResult } from "bot/plugin-sdk/approval-gateway-runtime";
 import {
   addApprovalReactionHintToText,
   buildApprovalReactionHint,
@@ -9,17 +9,17 @@ import {
   resolveTypedApprovalReactionTarget,
   type ApprovalReactionDecisionBinding,
   type ApprovalReactionTargetRecord,
-} from "openclaw/plugin-sdk/approval-reaction-runtime";
-import type { ExecApprovalReplyDecision } from "openclaw/plugin-sdk/approval-reply-runtime";
-import type { OutboundDeliveryResult } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+} from "bot/plugin-sdk/approval-reaction-runtime";
+import type { ExecApprovalReplyDecision } from "bot/plugin-sdk/approval-reply-runtime";
+import type { OutboundDeliveryResult } from "bot/plugin-sdk/channel-send-result";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 import {
   asDateTimestampMs,
   isFutureDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "bot/plugin-sdk/number-runtime";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
 import { getIMessageApprovalApprovers, imessageApprovalAuth } from "./approval-auth.js";
 import { resolveIMessageReactionContext } from "./monitor/reaction-context.js";
 import type { IMessagePayload } from "./monitor/types.js";
@@ -860,7 +860,7 @@ function readApprovalReactionEvent(
 }
 
 export async function handleIMessageApprovalReaction(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   message: IMessagePayload;
   bodyText: string;
@@ -958,7 +958,7 @@ export async function handleIMessageApprovalReaction(params: {
       return { handled: true, stopPolling: true, stopPollingReason: "not-found" };
     }
     // Surface non-NotFound errors at warn level so a gateway 5xx / network
-    // outage / auth failure is visible without OPENCLAW_LOG_LEVEL=debug.
+    // outage / auth failure is visible without BOT_LOG_LEVEL=debug.
     try {
       getOptionalIMessageRuntime()
         ?.logging.getChildLogger({ plugin: "imessage", feature: "approval-reactions" })
@@ -978,7 +978,7 @@ export async function handleIMessageApprovalReaction(params: {
 }
 
 export async function maybeResolveIMessageApprovalReaction(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   message: IMessagePayload;
   bodyText: string;

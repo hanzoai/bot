@@ -2,19 +2,19 @@
 import type {
   ExecApprovalRequest,
   PluginApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/approval-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { whatsappApprovalCapability } from "./approval-native.js";
 
-type WhatsAppConfig = NonNullable<NonNullable<OpenClawConfig["channels"]>["whatsapp"]>;
+type WhatsAppConfig = NonNullable<NonNullable<BotConfig["channels"]>["whatsapp"]>;
 
 function buildConfig(
   params: {
     whatsapp?: Partial<WhatsAppConfig>;
-    approvals?: OpenClawConfig["approvals"];
+    approvals?: BotConfig["approvals"];
   } = {},
-): OpenClawConfig {
+): BotConfig {
   return {
     channels: {
       whatsapp: {
@@ -23,7 +23,7 @@ function buildConfig(
       },
     },
     approvals: params.approvals,
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function buildExecRequest(
@@ -68,7 +68,7 @@ function buildPluginRequest(
 }
 
 function nativeShouldHandle(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   approvalKind: "exec" | "plugin";
   request: ExecApprovalRequest | PluginApprovalRequest;
   accountId?: string | null;

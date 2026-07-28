@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveGatewayStartupSecretProjection } from "./server-startup-secret-surfaces.js";
 
-function channelConfig(): OpenClawConfig {
+function channelConfig(): BotConfig {
   return {
     channels: {
       telegram: {
@@ -67,7 +67,7 @@ describe("gateway startup secret surfaces", () => {
     const projection = resolveGatewayStartupSecretProjection({
       config: channelConfig(),
       reason: "startup",
-      env: { OPENCLAW_SKIP_CHANNELS: "1" },
+      env: { BOT_SKIP_CHANNELS: "1" },
     });
 
     expect(projection.sourceConfig.channels).toBeUndefined();

@@ -1,12 +1,12 @@
 // Legacy web-search migration tests cover doctor repair of old web search config.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../../config/config.js";
+import type { BotConfig } from "../../../config/config.js";
 import {
   listLegacyWebSearchConfigPaths,
   migrateLegacyWebSearchConfig,
 } from "./legacy-web-search-migrate.js";
 
-type LegacyWebSearchConfig = Omit<OpenClawConfig, "tools"> & {
+type LegacyWebSearchConfig = Omit<BotConfig, "tools"> & {
   tools?: {
     web?: {
       search?: Record<string, unknown>;

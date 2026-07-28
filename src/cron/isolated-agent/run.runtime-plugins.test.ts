@@ -1,6 +1,6 @@
 // Runtime plugin tests cover plugin availability during isolated cron runs.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import { makeIsolatedAgentParamsFixture } from "./job-fixtures.js";
 import { setupRunCronIsolatedAgentTurnSuite } from "./run.suite-helpers.js";

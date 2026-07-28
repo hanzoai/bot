@@ -152,8 +152,8 @@ if (transactionRootStats.isSymbolicLink() || !transactionRootStats.isDirectory()
   throw new Error("unsafe accepted workspace transaction directory");
 }
 const workspaceKey = crypto.createHash("sha256").update(root).digest("hex");
-const transactionPrefix = ".openclaw-accepted-" + workspaceKey + "-";
-const cleanupPrefix = ".openclaw-accepted-cleanup-" + workspaceKey + "-";
+const transactionPrefix = ".bot-accepted-" + workspaceKey + "-";
+const cleanupPrefix = ".bot-accepted-cleanup-" + workspaceKey + "-";
 const transaction = path.join(transactionRoot, transactionPrefix + nonce);
 const cleanup = path.join(transactionRoot, cleanupPrefix + nonce);
 const nextRoot = path.join(transaction, "next");

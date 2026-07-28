@@ -5,7 +5,7 @@ import {
   createNodeMeetingRealtimeAudioTransport,
   startMeetingAgentRealtimeEngine,
   startMeetingRealtimeEngine,
-} from "openclaw/plugin-sdk/meeting-runtime";
+} from "bot/plugin-sdk/meeting-runtime";
 import type { TeamsMeetingsConfig, TeamsMeetingsMode } from "../config.js";
 import {
   TEAMS_MEETINGS_SYSTEM_PROFILER_COMMAND,

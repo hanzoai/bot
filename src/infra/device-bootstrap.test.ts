@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resetLogger, setLoggerOverride } from "../logging.js";
 import { flushLogger } from "../logging/logger.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { createTrackedTempDirs } from "../test-utils/tracked-temp-dirs.js";
 import {
   clearDeviceBootstrapTokens,
@@ -23,7 +23,7 @@ import {
 } from "./device-pairing-store.js";
 
 const tempDirs = createTrackedTempDirs();
-const createTempDir = () => tempDirs.make("openclaw-device-bootstrap-test-");
+const createTempDir = () => tempDirs.make("bot-device-bootstrap-test-");
 
 async function verifyBootstrapToken(
   baseDir: string,
@@ -45,7 +45,7 @@ afterEach(async () => {
   vi.useRealTimers();
   resetLogger();
   setLoggerOverride(null);
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   await tempDirs.cleanup();
 });
 

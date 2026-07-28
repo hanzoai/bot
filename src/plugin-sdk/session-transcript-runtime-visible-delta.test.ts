@@ -18,7 +18,7 @@ describe("session transcript visible cursor SDK", () => {
   let storePath: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-visible-transcript-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-sdk-visible-transcript-"));
     storePath = path.join(tempDir, "sessions.json");
   });
 

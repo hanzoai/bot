@@ -1,8 +1,8 @@
 // Gateway log-tail helpers for status diagnostics.
 // Summaries compact repeated auth/runtime failures while preserving enough context for operators.
 
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { classifyOAuthRefreshFailureReason } from "../../agents/auth-profiles/oauth-refresh-failure.js";
 import { readGatewayLogTailLines } from "../../daemon/diagnostics.js";
 import { extractBalancedJsonPrefix } from "../../shared/balanced-json.js";

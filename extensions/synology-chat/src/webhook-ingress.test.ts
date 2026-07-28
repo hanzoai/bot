@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeBotStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createSynologyIngressMonitor,
@@ -57,7 +57,7 @@ function startIngress(queue: SynologyIngressQueue, dispatch: SynologyIngressDisp
 }
 
 async function withQueue<T>(fn: (queue: SynologyIngressQueue) => Promise<T>): Promise<T> {
-  const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-synology-ingress-"));
+  const created = await fs.mkdtemp(path.join(os.tmpdir(), "bot-synology-ingress-"));
   const stateDir = await fs.realpath(created);
   const queue = createChannelIngressQueueForTests<SynologyIngressPayload>({
     channelId: "synology-chat",
@@ -67,13 +67,13 @@ async function withQueue<T>(fn: (queue: SynologyIngressQueue) => Promise<T>): Pr
   try {
     return await fn(queue);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 

@@ -53,7 +53,7 @@ function createPage(params: {
       return () => listeners.delete(notify);
     },
   };
-  const element = document.createElement("openclaw-memory-settings") as MemoryPageElement;
+  const element = document.createElement("bot-memory-settings") as MemoryPageElement;
   element.configObject = params.configObject;
   (element as unknown as { context: ApplicationContext }).context = {
     gateway,
@@ -94,7 +94,7 @@ function visibleTab(element: HTMLElement): "overview" | "search" | "dreaming" | 
   if (!panel) {
     return null;
   }
-  if (panel.querySelector("openclaw-memory-dreaming")) {
+  if (panel.querySelector("bot-memory-dreaming")) {
     return "dreaming";
   }
   return panel.querySelector(".settings-page__intro") ? "search" : "overview";

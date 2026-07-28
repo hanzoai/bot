@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { parseStrictPositiveInteger } from "./parse-finite-number.js";
 import type { PortListener } from "./ports-types.js";
 

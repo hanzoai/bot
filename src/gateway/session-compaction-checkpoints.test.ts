@@ -5,8 +5,8 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { CURRENT_SESSION_VERSION, SessionManager } from "openclaw/plugin-sdk/agent-sessions";
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import { CURRENT_SESSION_VERSION, SessionManager } from "bot/plugin-sdk/agent-sessions";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { afterEach, describe, expect, test } from "vitest";
 import type { SessionCompactionCheckpoint, SessionEntry } from "../config/sessions.js";
 import {
@@ -75,9 +75,9 @@ describe("session-compaction-checkpoints", () => {
   });
 
   test("checkpoint store branches and restores SQLite marker checkpoints from rows", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-checkpoint-sqlite-branch-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-checkpoint-sqlite-branch-"));
     tempDirs.push(dir);
-    const storePath = path.join(dir, "openclaw-agent.sqlite");
+    const storePath = path.join(dir, "bot-agent.sqlite");
     const sessionId = "sqlite-checkpoint-branch-source";
     const sessionKey = MAIN_SESSION_KEY;
     const scope = {
@@ -188,9 +188,9 @@ describe("session-compaction-checkpoints", () => {
   });
 
   test("checkpoint store branches row-backed checkpoints when entry sessionFile is stale", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-checkpoint-sqlite-stale-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-checkpoint-sqlite-stale-"));
     tempDirs.push(dir);
-    const storePath = path.join(dir, "openclaw-agent.sqlite");
+    const storePath = path.join(dir, "bot-agent.sqlite");
     const sessionId = "sqlite-checkpoint-stale-source";
     const sessionKey = MAIN_SESSION_KEY;
     const scope = {
@@ -316,9 +316,9 @@ describe("session-compaction-checkpoints", () => {
   });
 
   test("checkpoint store does not fork retired legacy snapshots for SQLite marker entries", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-checkpoint-sqlite-legacy-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-checkpoint-sqlite-legacy-"));
     tempDirs.push(dir);
-    const storePath = path.join(dir, "openclaw-agent.sqlite");
+    const storePath = path.join(dir, "bot-agent.sqlite");
     const sessionId = "sqlite-checkpoint-legacy-source";
     const sessionKey = MAIN_SESSION_KEY;
     const marker = formatSqliteSessionFileMarker({
@@ -391,7 +391,7 @@ describe("session-compaction-checkpoints", () => {
   });
 
   test("leaf state follows terminal controls while retaining the append cursor", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-checkpoint-leaf-control-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-checkpoint-leaf-control-"));
     tempDirs.push(dir);
     const sessionFile = path.join(dir, "session.jsonl");
     await fs.writeFile(
@@ -442,7 +442,7 @@ describe("session-compaction-checkpoints", () => {
   });
 
   test("async leaf scans ignore controls with dangling references", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-checkpoint-invalid-leaf-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-checkpoint-invalid-leaf-"));
     tempDirs.push(dir);
     const sessionFile = path.join(dir, "session.jsonl");
     await fs.writeFile(
@@ -490,7 +490,7 @@ describe("session-compaction-checkpoints", () => {
   });
 
   test("file-backed checkpoint store branches active state and restores source management state", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-checkpoint-store-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-checkpoint-store-"));
     tempDirs.push(dir);
 
     const session = SessionManager.create(dir, dir);
@@ -582,7 +582,7 @@ describe("session-compaction-checkpoints", () => {
   });
 
   test("file-backed checkpoint store rejects identity changes for model-selection-locked sessions", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-checkpoint-locked-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-checkpoint-locked-"));
     tempDirs.push(dir);
 
     const session = SessionManager.create(dir, dir);

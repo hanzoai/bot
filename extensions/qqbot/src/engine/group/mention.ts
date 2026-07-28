@@ -2,7 +2,7 @@
 import {
   compileSafeRegexDetailed,
   type SafeRegexRejectReason,
-} from "openclaw/plugin-sdk/security-runtime";
+} from "bot/plugin-sdk/security-runtime";
 import { debugWarn } from "../utils/log.js";
 export interface RawMention {
   is_you?: boolean;

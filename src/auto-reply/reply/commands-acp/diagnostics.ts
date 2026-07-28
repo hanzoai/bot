@@ -1,9 +1,9 @@
 // Formats ACP diagnostics and runtime error details for command replies.
-import { formatAcpRuntimeErrorText } from "@openclaw/acp-core/runtime/error-text";
+import { formatAcpRuntimeErrorText } from "@hanzo/bot-acp-core/runtime/error-text";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { getAcpSessionManager } from "../../../acp/control-plane/manager.js";
 import { toAcpRuntimeError } from "../../../acp/runtime/errors.js";
 import { getAcpRuntimeBackend, requireAcpRuntimeBackend } from "../../../acp/runtime/registry.js";
@@ -131,7 +131,7 @@ export async function handleAcpDoctorAction(
       lines.push(`next: add "${backendId}" to plugins.allow or unset plugins.allow.`);
     }
     lines.push(`next: ${installHint}`);
-    lines.push(`next: openclaw config set plugins.entries.${backendId}.enabled true`);
+    lines.push(`next: bot config set plugins.entries.${backendId}.enabled true`);
     if (normalizeLowercaseStringOrEmpty(backendId) === "acpx") {
       lines.push("next: verify acpx is installed (`acpx --help`).");
     }
@@ -153,7 +153,7 @@ export function handleAcpInstallAction(
     "-----",
     `configuredBackend: ${backendId}`,
     `run: ${installHint}`,
-    `then: openclaw config set plugins.entries.${backendId}.enabled true`,
+    `then: bot config set plugins.entries.${backendId}.enabled true`,
     "then: /acp doctor",
   ];
   return stopWithText(lines.join("\n"));

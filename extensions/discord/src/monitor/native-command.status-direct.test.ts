@@ -1,7 +1,7 @@
 // Discord tests cover native command.status direct plugin behavior.
 import { ChannelType } from "discord-api-types/v10";
-import type { dispatchChannelInboundTurn } from "openclaw/plugin-sdk/channel-inbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { dispatchChannelInboundTurn } from "bot/plugin-sdk/channel-inbound";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { nativeCommandRuntime } from "./native-command.runtime.js";
 import { createMockCommandInteraction as createInteraction } from "./native-command.test-helpers.js";
@@ -13,9 +13,9 @@ const runtimeModuleMocks = vi.hoisted(() => ({
   resolveDirectStatusReplyForSession: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/reply-dispatch-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/reply-dispatch-runtime")>(
-    "openclaw/plugin-sdk/reply-dispatch-runtime",
+vi.mock("bot/plugin-sdk/reply-dispatch-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/reply-dispatch-runtime")>(
+    "bot/plugin-sdk/reply-dispatch-runtime",
   );
   return {
     ...actual,
@@ -24,12 +24,12 @@ vi.mock("openclaw/plugin-sdk/reply-dispatch-runtime", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/command-status-runtime", () => ({
+vi.mock("bot/plugin-sdk/command-status-runtime", () => ({
   resolveDirectStatusReplyForSession: (...args: unknown[]) =>
     runtimeModuleMocks.resolveDirectStatusReplyForSession(...args),
 }));
 
-vi.mock("openclaw/plugin-sdk/web-media", () => ({
+vi.mock("bot/plugin-sdk/web-media", () => ({
   loadWebMedia: (...args: unknown[]) => runtimeModuleMocks.loadWebMedia(...args),
 }));
 
@@ -55,7 +55,7 @@ const dispatchChannelInboundTurnForTest: typeof dispatchChannelInboundTurn = asy
 
 let createDiscordNativeCommand: typeof import("./native-command.js").createDiscordNativeCommand;
 
-function createConfig(params?: { requireMention?: boolean }): OpenClawConfig {
+function createConfig(params?: { requireMention?: boolean }): BotConfig {
   return {
     commands: {
       allowFrom: { discord: ["user:owner"] },
@@ -79,10 +79,10 @@ function createConfig(params?: { requireMention?: boolean }): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
-async function createStatusCommand(cfg: OpenClawConfig) {
+async function createStatusCommand(cfg: BotConfig) {
   return createDiscordNativeCommand({
     command: {
       name: "status",
@@ -140,7 +140,7 @@ function firstMockArg(mock: MockWithCalls, label: string) {
 }
 
 function firstStatusCall(): {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   channel: string;
   isGroup: boolean;
@@ -151,7 +151,7 @@ function firstStatusCall(): {
     "resolveDirectStatusReplyForSession",
   );
   return call as {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     sessionKey: string;
     channel: string;
     isGroup: boolean;
@@ -183,7 +183,7 @@ describe("discord native /status", () => {
     });
     nativeCommandRuntime.dispatchChannelInboundTurn = dispatchChannelInboundTurnForTest;
     nativeCommandRuntime.matchPluginCommand = (() =>
-      null) as typeof import("openclaw/plugin-sdk/plugin-runtime").matchPluginCommand;
+      null) as typeof import("bot/plugin-sdk/plugin-runtime").matchPluginCommand;
     setDefaultRouteState();
   });
 
@@ -215,9 +215,9 @@ describe("discord native /status", () => {
         handler: async () => ({ text: "plugin status" }),
       },
       args: undefined,
-    })) as typeof import("openclaw/plugin-sdk/plugin-runtime").matchPluginCommand;
+    })) as typeof import("bot/plugin-sdk/plugin-runtime").matchPluginCommand;
     nativeCommandRuntime.executePluginCommand =
-      executePluginCommand as typeof import("openclaw/plugin-sdk/plugin-runtime").executePluginCommand;
+      executePluginCommand as typeof import("bot/plugin-sdk/plugin-runtime").executePluginCommand;
     const cfg = createConfig();
     const command = await createStatusCommand(cfg);
     const interaction = createInteraction();

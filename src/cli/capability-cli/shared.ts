@@ -8,7 +8,7 @@ import {
   getRuntimeConfigSourceSnapshot,
   setRuntimeConfigSnapshot,
 } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   parseStrictFiniteNumber,
   parseStrictPositiveInteger,
@@ -100,14 +100,14 @@ export function resolveSelectedProviderFromModelRef(
   return resolveModelRefOverride(modelRef).provider;
 }
 
-function getAuthProfileIdsForProvider(cfg: OpenClawConfig, providerId: string): string[] {
+function getAuthProfileIdsForProvider(cfg: BotConfig, providerId: string): string[] {
   const agentDir = resolveAgentDir(cfg, resolveDefaultAgentId(cfg));
   const store = loadAuthProfileStoreForRuntime(agentDir);
   return listProfilesForProvider(store, providerId);
 }
 
 export function providerHasGenericConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   providerId: string;
   envVars?: string[];
 }): boolean {
@@ -198,8 +198,8 @@ export async function resolveLocalCapabilityRuntimeConfig(params: {
   allowedPaths?: Set<string>;
   forcedActivePaths?: Set<string>;
   optionalActivePaths?: Set<string>;
-  config?: OpenClawConfig;
-}): Promise<OpenClawConfig> {
+  config?: BotConfig;
+}): Promise<BotConfig> {
   const cfg = params.config ?? getRuntimeConfig();
   const { effectiveConfig } = await resolveCommandConfigWithSecrets({
     config: cfg,
@@ -215,7 +215,7 @@ export async function resolveLocalCapabilityRuntimeConfig(params: {
   return effectiveConfig;
 }
 
-export function pinRuntimeConfigSnapshot(config: OpenClawConfig): void {
+export function pinRuntimeConfigSnapshot(config: BotConfig): void {
   const sourceConfig = getRuntimeConfigSourceSnapshot();
   if (sourceConfig) {
     setRuntimeConfigSnapshot(config, sourceConfig);

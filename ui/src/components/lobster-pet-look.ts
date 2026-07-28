@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { html, nothing, svg } from "lit";
 import { lobsterHonorific } from "./lobster-dex.ts";
 import type {
@@ -59,7 +59,7 @@ const PALETTES: Array<[LobsterPetPalette, number]> = [
   [{ id: "split", shell: "#ff4f40", claw: "#ff775f" }, 1],
   // Pastel pink/blue iridescence, after the famous Maine catches.
   [{ id: "cottoncandy", shell: "#f6a8c9", claw: "#a5c6f0" }, 0.8],
-  // The grail: homage to the classic OpenClaw logo (big raised claw, smirk,
+  // The grail: homage to the classic Bot logo (big raised claw, smirk,
   // angry brows, white sticker outline). ~0.5% of sessions.
   [{ id: "retro", shell: "#e8262c", claw: "#f04a3e" }, 0.5],
 ];
@@ -98,7 +98,7 @@ const ACCESSORIES: Array<[LobsterPetAccessory, number]> = [
   ["crown", 10],
 ];
 
-// OpenClaw's repository was born 2025-11-24 (GitHub created_at); on the
+// Bot's repository was born 2025-11-24 (GitHub created_at); on the
 // anniversary every visitor dresses as the classic logo and parties.
 const ANNIVERSARY = { month: 10, day: 24 } as const;
 

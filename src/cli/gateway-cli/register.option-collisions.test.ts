@@ -86,7 +86,7 @@ vi.mock("../../../packages/terminal-core/src/health-style.js", () => ({
 }));
 
 vi.mock("../../../packages/terminal-core/src/links.js", () => ({
-  formatDocsLink: () => "docs.openclaw.ai/cli/gateway",
+  formatDocsLink: () => "docs.bot.ai/cli/gateway",
 }));
 
 vi.mock("../../../packages/terminal-core/src/theme.js", () => ({

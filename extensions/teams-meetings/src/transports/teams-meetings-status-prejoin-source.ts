@@ -1,4 +1,4 @@
-import { MeetingPlatformAdapter } from "openclaw/plugin-sdk/meeting-runtime";
+import { MeetingPlatformAdapter } from "bot/plugin-sdk/meeting-runtime";
 
 type MeetingStatusPreludeParams = Parameters<
   typeof MeetingPlatformAdapter.createStatusPreludeSource
@@ -99,7 +99,7 @@ export function teamsMeetingStatusPreludeSource(params: MeetingStatusPreludePara
   }
   if (canMutateSession && !inCall && !identityAwaitingRerender) retireOwnedAudioBridges();
   if (canMutateSession && (identityVerifiedBeforeCall || identityPreservedInCall)) {
-    window.__openclawTeamsMeeting = {
+    window.__botTeamsMeeting = {
       ...(priorMeeting?.identity === expectedIdentity && !meetingOwnerConflict ? priorMeeting : {}),
       identity: expectedIdentity,
       sessionId: sessionId || priorMeeting?.sessionId,
@@ -113,7 +113,7 @@ export function teamsMeetingStatusPreludeSource(params: MeetingStatusPreludePara
     !identityAwaitingRerender &&
     (priorMeeting.inCallControl || markerAgeMs >= identityRetentionMs)
   ) {
-    delete window.__openclawTeamsMeeting;
+    delete window.__botTeamsMeeting;
   }
   const microphone = first(selectors.microphone) || findTextButton(/mute|unmute|microphone/i);
   let microphoneState = identityVerified ? toggleState(microphone, "microphone") : undefined;
@@ -185,7 +185,7 @@ export function teamsMeetingStatusPreludeSource(params: MeetingStatusPreludePara
       // Teams hides the selected-device control after admission. Reopen the in-call audio
       // options and verify the current selection before unmuting; installed devices alone
       // do not prove which microphone Teams is using.
-      const preparedInput = window.__openclawTeamsMeeting;
+      const preparedInput = window.__botTeamsMeeting;
       const preparedSelection = Boolean(
         readOnly &&
         preparedInput?.identity === expectedIdentity &&
@@ -224,8 +224,8 @@ export function teamsMeetingStatusPreludeSource(params: MeetingStatusPreludePara
         }
         selected = Boolean(selectedMicrophoneLabel());
       }
-      if (selected && window.__openclawTeamsMeeting?.identity === expectedIdentity) {
-        window.__openclawTeamsMeeting.audioInputDeviceId = input.deviceId;
+      if (selected && window.__botTeamsMeeting?.identity === expectedIdentity) {
+        window.__botTeamsMeeting.audioInputDeviceId = input.deviceId;
       }
       return selected;
     } catch (error) {
@@ -328,11 +328,11 @@ export function teamsMeetingStatusPreludeSource(params: MeetingStatusPreludePara
   if (committedOwnerConflict && !canMutateSession) {
     manualAction = manualActionFor("teams-session-conflict", "This Teams tab is owned by another active meeting session.");
   } else if (!inCall && loginRequired) {
-    manualAction = manualActionFor("teams-login-required", tenantLoginRequired ? "This Teams tenant requires sign-in or email verification. Complete it in the OpenClaw browser profile, then retry." : "Sign in to Microsoft Teams in the OpenClaw browser profile, then retry the meeting join.");
+    manualAction = manualActionFor("teams-login-required", tenantLoginRequired ? "This Teams tenant requires sign-in or email verification. Complete it in the Bot browser profile, then retry." : "Sign in to Microsoft Teams in the Bot browser profile, then retry the meeting join.");
   } else if (!inCall && lobbyWaiting) {
-    manualAction = manualActionFor("teams-admission-required", "Admit the OpenClaw guest from the Microsoft Teams lobby, then retry speech.");
+    manualAction = manualActionFor("teams-admission-required", "Admit the Bot guest from the Microsoft Teams lobby, then retry speech.");
   } else if (!inCall && permissionRequired) {
-    manualAction = manualActionFor("teams-permission-required", allowMicrophone ? "Allow microphone permission for Teams in the OpenClaw browser profile, then retry." : "Dismiss the Teams device-permission prompt or continue without devices, then retry.");
+    manualAction = manualActionFor("teams-permission-required", allowMicrophone ? "Allow microphone permission for Teams in the Bot browser profile, then retry." : "Dismiss the Teams device-permission prompt or continue without devices, then retry.");
   } else if (!inCall && controlManualAction) {
     manualAction = controlManualAction;
   }
@@ -345,10 +345,10 @@ export function teamsMeetingStatusPreludeSource(params: MeetingStatusPreludePara
     platform: {
       displayName: "Teams",
       globals: {
-        audioOutputs: "__openclawTeamsAudioOutputs",
-        captionArchive: "__openclawTeamsCaptionArchive",
-        captions: "__openclawTeamsCaptions",
-        meeting: "__openclawTeamsMeeting",
+        audioOutputs: "__botTeamsAudioOutputs",
+        captionArchive: "__botTeamsCaptionArchive",
+        captions: "__botTeamsCaptions",
+        meeting: "__botTeamsMeeting",
       },
       manualActionReasonPrefix: "teams",
     },

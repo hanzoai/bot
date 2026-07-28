@@ -5,8 +5,8 @@ import path from "node:path";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { resolveBootstrapWarningSignaturesSeen } from "../../agents/bootstrap-budget.js";
 import { estimateMessagesTokens } from "../../agents/compaction.js";
 import { isBenignCompactionSkipResult } from "../../agents/embedded-agent-runner/compact-reasons.js";
@@ -45,7 +45,7 @@ import {
   formatSqliteSessionFileMarker,
   parseSqliteSessionFileMarker,
 } from "../../config/sessions/sqlite-marker.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { readSessionMessagesAsync } from "../../gateway/session-utils.fs.js";
 import { logVerbose } from "../../globals.js";
 import { isAbortError } from "../../infra/abort-signal.js";
@@ -189,7 +189,7 @@ function setAgentRunnerMemoryTestDeps(overrides?: Partial<typeof memoryDeps>): v
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.agentRunnerMemoryTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.agentRunnerMemoryTestApi")] = {
     setAgentRunnerMemoryTestDeps,
   };
 }
@@ -255,7 +255,7 @@ function resolveMemoryFlushModelFallbackOptions(
 }
 
 function followupUsesCliRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   followupRun: FollowupRun;
   sessionEntry?: Pick<
     SessionEntry,
@@ -274,7 +274,7 @@ function followupUsesCliRuntime(params: {
 }
 
 function resolveFollowupContextConfigProvider(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   followupRun: FollowupRun;
   sessionEntry?: SessionEntry;
   sessionKey?: string;
@@ -289,7 +289,7 @@ function resolveFollowupContextConfigProvider(params: {
 }
 
 function resolveFollowupAgentRuntimeId(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   followupRun: FollowupRun;
   sessionEntry?: SessionEntry;
   sessionKey?: string;
@@ -314,7 +314,7 @@ function resolveFollowupAgentRuntimeId(params: {
 }
 
 function followupUsesCodexRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   followupRun: FollowupRun;
   sessionEntry?: SessionEntry;
   sessionKey?: string;
@@ -478,7 +478,7 @@ type SessionLogSnapshot = {
 };
 
 async function appendPostCompactionRefreshPrompt(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   followupRun: FollowupRun;
 }): Promise<void> {
   const refreshPrompt = await readPostCompactionContext(params.followupRun.run.workspaceDir, {
@@ -733,7 +733,7 @@ async function estimatePromptTokensFromSessionTranscript(params: {
 
 /** Runs preflight compaction when session state exceeds configured thresholds. */
 export async function runPreflightCompactionIfNeeded(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   followupRun: FollowupRun;
   promptForEstimate?: string;
   defaultModel: string;
@@ -781,7 +781,7 @@ export async function runPreflightCompactionIfNeeded(params: {
     })
   ) {
     // Codex runtime sessions should reach Codex with their real thread state.
-    // Its harness owns automatic compaction; OpenClaw preflight compaction is
+    // Its harness owns automatic compaction; Bot preflight compaction is
     // only for non-Codex embedded runtimes.
     logVerbose(
       `preflightCompaction skipped: sessionKey=${params.sessionKey} runtime=codex reason=codex_native_auto_compaction`,
@@ -1075,7 +1075,7 @@ type MemoryFlushResult = {
 
 /** Runs pre-compaction memory flush when transcript state warrants it. */
 export async function runMemoryFlushIfNeeded(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   followupRun: FollowupRun;
   promptForEstimate?: string;
   sessionCtx: TemplateContext;

@@ -1,8 +1,8 @@
 // Kilocode tests cover index plugin behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
-import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { expectPassthroughReplayPolicy } from "openclaw/plugin-sdk/provider-test-contracts";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
+import type { Context, Model } from "bot/plugin-sdk/llm";
+import { registerSingleProviderPlugin } from "bot/plugin-sdk/plugin-test-runtime";
+import { expectPassthroughReplayPolicy } from "bot/plugin-sdk/provider-test-contracts";
 import { describe, expect, it } from "vitest";
 import plugin from "./index.js";
 
@@ -195,7 +195,7 @@ describe("kilocode provider plugin", () => {
       (key) => key.toLowerCase() === "x-kilocode-feature",
     );
     expect(featureHeaderKeys).toEqual(["X-KILOCODE-FEATURE"]);
-    expect(capturedHeaders?.["X-KILOCODE-FEATURE"]).toBe("openclaw");
+    expect(capturedHeaders?.["X-KILOCODE-FEATURE"]).toBe("bot");
     expect(capturedHeaders?.["X-Custom"]).toBe("1");
   });
 

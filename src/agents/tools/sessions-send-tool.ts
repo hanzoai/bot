@@ -4,14 +4,14 @@
  * Sends messages to visible sessions, starts embedded runs, and optionally announces replies.
  */
 import crypto from "node:crypto";
-import { isRequesterParentOfBackgroundAcpSession } from "@openclaw/acp-core/session-interaction-mode";
-import { finiteSecondsToTimerSafeMilliseconds } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRequesterParentOfBackgroundAcpSession } from "@hanzo/bot-acp-core/session-interaction-mode";
+import { finiteSecondsToTimerSafeMilliseconds } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { Type } from "typebox";
 import { readAcpSessionMeta } from "../../acp/runtime/session-meta.js";
 import { parseSessionThreadInfo } from "../../config/sessions/thread-info.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { callGateway } from "../../gateway/call.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import {
@@ -158,7 +158,7 @@ function normalizeSessionsSendArguments(args: unknown): Record<string, unknown> 
 }
 
 function resolveConfiguredAgentMainSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   mainKey: string;
 }): string | undefined {
@@ -174,7 +174,7 @@ function resolveConfiguredAgentMainSessionKey(params: {
 }
 
 function isConfiguredAgentMainSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   mainKey: string;
 }): boolean {
@@ -193,7 +193,7 @@ function isConfiguredAgentMainSessionKey(params: {
 }
 
 async function ensureConfiguredAgentMainSession(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   callGateway: GatewayCaller;
   sessionKey: string;
   mainKey: string;
@@ -427,7 +427,7 @@ export function createSessionsSendTool(opts?: {
   agentSessionKey?: string;
   agentChannel?: GatewayMessageChannel;
   sandboxed?: boolean;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   callGateway?: GatewayCaller;
 }): AnyAgentTool {
   return {

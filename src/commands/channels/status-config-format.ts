@@ -12,7 +12,7 @@ import {
   buildReadOnlySourceChannelAccountSnapshot,
 } from "../../channels/plugins/status.js";
 import type { ChannelAccountSnapshot } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import { listExplicitConfiguredChannelIdsForConfig } from "../../plugins/channel-plugin-ids.js";
 import {
   type OfficialExternalPluginRepairHint,
@@ -34,9 +34,9 @@ type ChannelStatusPluginLabel = {
 
 /** Render channel status lines from config snapshots without calling the gateway. */
 export async function formatConfigChannelsStatusLines(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   meta: { path?: string; mode?: "local" | "remote" },
-  opts?: { sourceConfig?: OpenClawConfig; channel?: string; fallbackReason?: string },
+  opts?: { sourceConfig?: BotConfig; channel?: string; fallbackReason?: string },
 ): Promise<string[]> {
   const lines: string[] = [];
   lines.push(

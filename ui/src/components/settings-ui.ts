@@ -305,7 +305,7 @@ export function renderSettingsSecretInput(props: {
         placeholder=${props.placeholder ?? ""}
         @input=${(e: Event) => props.onInput((e.target as HTMLInputElement).value)}
       />
-      <openclaw-tooltip .content=${props.visible ? props.hideLabel : props.showLabel}>
+      <bot-tooltip .content=${props.visible ? props.hideLabel : props.showLabel}>
         <button
           type="button"
           class="settings-secret__toggle"
@@ -315,7 +315,7 @@ export function renderSettingsSecretInput(props: {
         >
           ${props.visible ? icons.eye : icons.eyeOff}
         </button>
-      </openclaw-tooltip>
+      </bot-tooltip>
     </span>
   `;
 }

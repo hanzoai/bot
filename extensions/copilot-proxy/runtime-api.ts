@@ -1,7 +1,7 @@
 // Copilot Proxy API module exposes the plugin public contract.
-export { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+export { definePluginEntry } from "bot/plugin-sdk/plugin-entry";
 export type {
-  OpenClawPluginApi,
+  BotPluginApi,
   ProviderAuthContext,
   ProviderAuthResult,
-} from "openclaw/plugin-sdk/core";
+} from "bot/plugin-sdk/core";

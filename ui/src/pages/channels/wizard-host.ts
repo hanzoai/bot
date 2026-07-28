@@ -103,7 +103,7 @@ export class ChannelWizardHost {
     if (!context) {
       return;
     }
-    // The wizard rewrote openclaw.json on the gateway; resync the local draft.
+    // The wizard rewrote bot.json on the gateway; resync the local draft.
     await context.runtimeConfig.refresh({ discardPendingChanges: true });
     await context.channels.refresh(true);
     const whatsapp = accounts.find((entry) => entry.channel === "whatsapp");

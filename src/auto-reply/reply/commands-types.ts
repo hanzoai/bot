@@ -1,9 +1,9 @@
-import type { FastMode } from "@openclaw/normalization-core/string-coerce";
+import type { FastMode } from "@hanzo/bot-normalization-core/string-coerce";
 /** Shared command handler context and result contracts. */
 import type { BlockReplyChunking } from "../../agents/embedded-agent-block-chunker.js";
 import type { ChannelId } from "../../channels/plugins/types.public.js";
 import type { SessionEntry, SessionScope } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { SkillCommandSpec } from "../../skills/types.js";
 import type { MsgContext } from "../templating.js";
 import type {
@@ -44,7 +44,7 @@ export type CommandContext = {
 export type HandleCommandsParams = {
   ctx: MsgContext;
   rootCtx?: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   command: CommandContext;
   agentId?: string;
   agentDir?: string;

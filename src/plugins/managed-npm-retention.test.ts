@@ -11,9 +11,9 @@ import {
 
 describe("managed npm retention", () => {
   it("cleans retired generations while preserving the active install root", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-retention-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-retention-"));
     const npmDir = path.join(stateDir, "npm");
-    const packageName = "@openclaw/codex";
+    const packageName = "@hanzo/bot-codex";
     const oldProjectRoot = resolvePluginNpmGenerationProjectDir({
       npmDir,
       packageName,
@@ -24,8 +24,8 @@ describe("managed npm retention", () => {
       packageName,
       generationKey: "codex-v2",
     });
-    const oldPackageDir = path.join(oldProjectRoot, "node_modules", "@openclaw", "codex");
-    const activePackageDir = path.join(activeProjectRoot, "node_modules", "@openclaw", "codex");
+    const oldPackageDir = path.join(oldProjectRoot, "node_modules", "@bot", "codex");
+    const activePackageDir = path.join(activeProjectRoot, "node_modules", "@bot", "codex");
     fs.mkdirSync(oldPackageDir, { recursive: true });
     fs.mkdirSync(activePackageDir, { recursive: true });
     await markRetainedManagedNpmInstall({
@@ -50,9 +50,9 @@ describe("managed npm retention", () => {
   });
 
   it("cleans retained packages from the legacy shared npm root", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-retention-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-retention-"));
     const npmDir = path.join(stateDir, "npm");
-    const packageDir = path.join(npmDir, "node_modules", "@openclaw", "codex");
+    const packageDir = path.join(npmDir, "node_modules", "@bot", "codex");
     fs.mkdirSync(packageDir, { recursive: true });
     await markRetainedManagedNpmInstall({
       packageDir,

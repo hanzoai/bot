@@ -65,7 +65,7 @@ function createTextChatMessage(
   return {
     role,
     content: [{ type: "text" as const, text }],
-    ...(metadata ? { __openclaw: metadata } : {}),
+    ...(metadata ? { __bot: metadata } : {}),
     ...(timestamp === undefined ? {} : { timestamp }),
   };
 }
@@ -609,7 +609,7 @@ describe("handleChatGatewayEvent", () => {
       role: "assistant",
       content: [{ type: "text", text: "Looking into it." }],
       timestamp: 2,
-      openclawStreamFallback: {
+      botStreamFallback: {
         itemId: "preamble-1",
         replacementText: "Looking into it.",
         source: "segment",
@@ -664,7 +664,7 @@ describe("handleChatGatewayEvent", () => {
           role: "assistant",
           content: [{ type: "text", text: "Looking into it." }],
           timestamp: 2,
-          openclawStreamFallback: {
+          botStreamFallback: {
             itemId: "preamble-1",
             replacementText: "Looking into it.",
             source: "segment",
@@ -1244,7 +1244,7 @@ describe("handleChatGatewayEvent", () => {
       role: "assistant",
       content: [
         { type: "text", text: "OK" },
-        { type: "canvas", url: "/__openclaw__/canvas/documents/repeat/index.html" },
+        { type: "canvas", url: "/__bot__/canvas/documents/repeat/index.html" },
       ],
       timestamp: 3,
     };
@@ -1940,7 +1940,7 @@ describe("loadChatHistory filtering", () => {
         content: [
           {
             type: "text",
-            text: "[openclaw] missing tool result in session history; inserted synthetic error result for transcript repair.",
+            text: "[bot] missing tool result in session history; inserted synthetic error result for transcript repair.",
           },
         ],
       },
@@ -1969,13 +1969,13 @@ describe("loadChatHistory filtering", () => {
       {
         role: "user",
         content: "",
-        __openclaw: { media: [{ path: "/tmp/openclaw/user-upload.png" }] },
+        __bot: { media: [{ path: "/tmp/bot/user-upload.png" }] },
       },
       {
         role: "user",
         content: "",
-        __openclaw: {
-          media: [{ path: "/tmp/openclaw/first.png" }, { path: "/tmp/openclaw/second.jpg" }],
+        __bot: {
+          media: [{ path: "/tmp/bot/first.png" }, { path: "/tmp/bot/second.jpg" }],
         },
       },
       { role: "user", content: "" },
@@ -1997,7 +1997,7 @@ describe("loadChatHistory filtering", () => {
     const messages = [
       createTextChatMessage(
         "user",
-        "[openclaw] missing tool result in session history; inserted synthetic error result for transcript repair.",
+        "[bot] missing tool result in session history; inserted synthetic error result for transcript repair.",
       ),
     ];
     const mockClient = {
@@ -2312,9 +2312,9 @@ describe("loadChatHistory retry handling", () => {
         createTextChatMessage(
           "user",
           [
-            "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+            "<<<BEGIN_BOT_INTERNAL_CONTEXT>>>",
             "subagent completion payload",
-            "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+            "<<<END_BOT_INTERNAL_CONTEXT>>>",
           ].join("\n"),
         ),
         { role: "assistant", content: [{ type: "text", text: "visible answer" }] },
@@ -2573,11 +2573,11 @@ describe("loadChatHistory retry handling", () => {
       create(): HistoryReconciliationFixture {
         const first = {
           content: [{ type: "status", value: "first marker" }],
-          __openclaw: { id: "first-marker", seq: 1 },
+          __bot: { id: "first-marker", seq: 1 },
         };
         const later = {
           content: [{ type: "status", value: "different marker" }],
-          __openclaw: { id: "later-marker", seq: 2 },
+          __bot: { id: "later-marker", seq: 2 },
         };
         const pending = createTextChatMessage("user", "unmatched pending turn", {
           idempotencyKey: "pending-run:user",
@@ -2791,7 +2791,7 @@ describe("loadChatHistory retry handling", () => {
     toolName: "shell",
     content: [{ type: "text", text }],
     timestamp,
-    __openclaw: { seq },
+    __bot: { seq },
   });
 
   it.each([
@@ -2961,7 +2961,7 @@ describe("loadChatHistory retry handling", () => {
       toolCallId: "call_old",
       toolName: "shell",
       content: [{ type: "text", text: "old tool output" }],
-      __openclaw: { seq: 2 },
+      __bot: { seq: 2 },
     };
     const latestUser = createTextChatMessage("user", "latest ask", { seq: 3 });
     const liveToolMessage = {
@@ -3019,7 +3019,7 @@ describe("loadChatHistory retry handling", () => {
         },
       ],
       timestamp: 2,
-      __openclaw: { seq: 2 },
+      __bot: { seq: 2 },
     };
     const request = vi.fn().mockResolvedValue({
       messages: [persistedUser, persistedToolCall],
@@ -3076,7 +3076,7 @@ describe("loadChatHistory retry handling", () => {
       toolName: "shell",
       content: [{ type: "text", text: "tool output" }],
       timestamp: 2,
-      __openclaw: { seq: 2 },
+      __bot: { seq: 2 },
     };
     const request = vi.fn().mockResolvedValue({
       messages: [persistedUser, persistedToolResult],
@@ -3182,7 +3182,7 @@ describe("loadChatHistory retry handling", () => {
       toolCallId: "call_1",
       toolName: "shell",
       content: [{ type: "text", text: "tool output" }],
-      __openclaw: { seq: 2 },
+      __bot: { seq: 2 },
     };
     const request = vi.fn().mockResolvedValue({
       messages: [persistedUser, persistedToolResult],

@@ -6,9 +6,9 @@ import type {
   WorkboardClaim,
   WorkboardNotification,
   WorkboardRunAttempt,
-} from "@openclaw/workboard-contract";
-import { isFutureDateTimestampMs } from "openclaw/plugin-sdk/number-runtime";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
+} from "@hanzo/bot-workboard-contract";
+import { isFutureDateTimestampMs } from "bot/plugin-sdk/number-runtime";
+import { safeEqualSecret } from "bot/plugin-sdk/security-runtime";
 import {
   appendEvent,
   assertCanMutateClaimedCard,

@@ -63,7 +63,7 @@ export function registerFleetCli(program: Command): void {
     .command("create")
     .description("Create an isolated tenant cell")
     .argument("<tenant>", "Tenant slug")
-    .option("--image <ref>", "Container image", "ghcr.io/openclaw/openclaw:latest")
+    .option("--image <ref>", "Container image", "ghcr.io/hanzoai/bot:latest")
     .option(
       "--runtime <runtime>",
       "Container runtime (docker or podman)",

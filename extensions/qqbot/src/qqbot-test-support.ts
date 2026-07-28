@@ -1,7 +1,7 @@
 // Qqbot plugin module implements qqbot test support behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 
-export function makeQqbotSecretRefConfig(): OpenClawConfig {
+export function makeQqbotSecretRefConfig(): BotConfig {
   return {
     channels: {
       qqbot: {
@@ -13,10 +13,10 @@ export function makeQqbotSecretRefConfig(): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
-export function makeQqbotDefaultAccountConfig(): OpenClawConfig {
+export function makeQqbotDefaultAccountConfig(): BotConfig {
   return {
     channels: {
       qqbot: {
@@ -26,5 +26,5 @@ export function makeQqbotDefaultAccountConfig(): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }

@@ -3,7 +3,7 @@ import type { Block } from "@slack/web-api";
 import {
   renderMessagePresentationTableFallbackText,
   type MessagePresentationTableBlock,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "bot/plugin-sdk/interactive-runtime";
 import { escapeSlackMrkdwn } from "./monitor/mrkdwn.js";
 import { renderSlackMessagePresentationTableFallbackText } from "./presentation-fallback.js";
 

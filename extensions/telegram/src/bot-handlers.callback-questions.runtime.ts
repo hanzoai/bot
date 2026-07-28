@@ -1,5 +1,5 @@
 // Telegram ask_user callback resolution and toast feedback.
-import { questionGatewayRuntime } from "openclaw/plugin-sdk/question-gateway-runtime";
+import { questionGatewayRuntime } from "bot/plugin-sdk/question-gateway-runtime";
 import type { TelegramQuestionCallback } from "./question-callback-data.js";
 
 type ResolveQuestionParams = Parameters<typeof questionGatewayRuntime.resolveOption>[0];

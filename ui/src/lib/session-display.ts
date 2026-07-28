@@ -1,5 +1,5 @@
 // Control UI module implements session display behavior.
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { normalizeLowercaseStringOrEmpty, normalizeOptionalString } from "./string-coerce.ts";
 
 const CHANNEL_LABELS: Record<string, string> = {
@@ -31,7 +31,7 @@ function shortenOpaqueIdRuns(text: string): string {
   return text.replace(OPAQUE_ID_RUN_RE, (match) => `…${match.slice(-4)}`);
 }
 
-const WORKTREE_BRANCH_PREFIX = "openclaw/";
+const WORKTREE_BRANCH_PREFIX = "bot/";
 
 const CHANNEL_SESSION_KEY_RE = /^agent:[^:]+:([^:]+)(?::[^:]+)?:(?:direct|group|channel|thread):/;
 const PEER_SESSION_KEY_RE = /:(?:direct|group|channel|thread):/;

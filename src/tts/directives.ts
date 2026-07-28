@@ -1,6 +1,6 @@
 // TTS directive helpers parse inline speech directives from text.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.js";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.js";
 import type { SpeechProviderPlugin } from "../plugins/types.js";
 import { listSpeechProviders } from "./provider-registry.js";
 import type {
@@ -12,7 +12,7 @@ import type {
 } from "./provider-types.js";
 
 type ParseTtsDirectiveOptions = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   providers?: readonly SpeechProviderPlugin[];
   providerConfigs?: Record<string, SpeechProviderConfig>;
   preferredProviderId?: string;

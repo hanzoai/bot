@@ -1,11 +1,11 @@
 import { createHmac, randomBytes } from "node:crypto";
-import { resolvePositiveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
-import { normalizeTrimmedStringList } from "openclaw/plugin-sdk/string-coerce-runtime";
-import type { OpenClawExecAsk, OpenClawExecSecurity } from "./config-contracts.js";
+import { resolvePositiveTimerTimeoutMs } from "bot/plugin-sdk/number-runtime";
+import { normalizeResolvedSecretInputString } from "bot/plugin-sdk/secret-input";
+import { normalizeTrimmedStringList } from "bot/plugin-sdk/string-coerce-runtime";
+import type { BotExecAsk, BotExecSecurity } from "./config-contracts.js";
 import type { CodexServiceTier } from "./protocol.js";
 
-const START_OPTIONS_KEY_SECRET_SYMBOL = Symbol.for("openclaw.codexAppServerStartOptionsKeySecret");
+const START_OPTIONS_KEY_SECRET_SYMBOL = Symbol.for("bot.codexAppServerStartOptionsKeySecret");
 const START_OPTIONS_KEY_SECRET = getStartOptionsKeySecret();
 const PLAIN_DECIMAL_NUMBER_RE = /^[+-]?(?:(?:\d+\.?\d*)|(?:\.\d+))$/;
 
@@ -86,11 +86,11 @@ export function readBooleanEnv(value: string | undefined): boolean | undefined {
   return undefined;
 }
 
-export function readExecSecurity(value: unknown): OpenClawExecSecurity | undefined {
+export function readExecSecurity(value: unknown): BotExecSecurity | undefined {
   return value === "deny" || value === "allowlist" || value === "full" ? value : undefined;
 }
 
-export function readExecAsk(value: unknown): OpenClawExecAsk | undefined {
+export function readExecAsk(value: unknown): BotExecAsk | undefined {
   return value === "off" || value === "on-miss" || value === "always" ? value : undefined;
 }
 

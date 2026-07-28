@@ -5,15 +5,15 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { tryReadJsonSync } from "../infra/json-files.js";
-import { resolveOpenClawPackageRootSync } from "../infra/openclaw-root.js";
+import { resolveBotPackageRootSync } from "../infra/bot-root.js";
 import { resolveBundledPluginsDir } from "../plugins/bundled-dir.js";
 import type { PluginPackageChannel } from "../plugins/manifest.js";
 
 type ChannelCatalogEntryLike = {
-  openclaw?: {
+  bot?: {
     channel?: PluginPackageChannel;
   };
 };
@@ -30,12 +30,12 @@ const officialCatalogFileCache = new Map<string, ChannelCatalogEntryLike[] | nul
 const bundledPackageCatalogCache = new Map<string, ChannelCatalogEntryLike[] | null>();
 
 function listPackageRoots(): string[] {
-  // Source checkouts and packaged installs can resolve OpenClaw from different roots; scan both
+  // Source checkouts and packaged installs can resolve Bot from different roots; scan both
   // once so channel metadata works in dev, linked packages, and published CLI layouts.
   return uniqueStrings(
     [
-      resolveOpenClawPackageRootSync({ cwd: process.cwd() }),
-      resolveOpenClawPackageRootSync({ moduleUrl: import.meta.url }),
+      resolveBotPackageRootSync({ cwd: process.cwd() }),
+      resolveBotPackageRootSync({ moduleUrl: import.meta.url }),
     ].filter((entry): entry is string => Boolean(entry)),
   );
 }
@@ -96,14 +96,14 @@ function readOfficialCatalogFileSync(): ChannelCatalogEntryLike[] {
 function isChannelCatalogEntryLike(
   entry: ChannelCatalogEntryLike | PluginPackageChannel,
 ): entry is ChannelCatalogEntryLike {
-  return "openclaw" in entry;
+  return "bot" in entry;
 }
 
 function toBundledChannelEntry(
   entry: ChannelCatalogEntryLike | PluginPackageChannel,
 ): BundledChannelCatalogEntry | null {
   const channel: PluginPackageChannel | undefined = isChannelCatalogEntryLike(entry)
-    ? entry.openclaw?.channel
+    ? entry.bot?.channel
     : entry;
   const id = normalizeOptionalLowercaseString(channel?.id);
   if (!id || !channel) {

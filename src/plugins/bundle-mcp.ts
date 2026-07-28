@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { applyMergePatch } from "../config/merge-patch.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { readRootJsonObjectSync } from "../infra/json-files.js";
 import { isRecord } from "../utils.js";
 import {
@@ -325,7 +325,7 @@ export function inspectNativePluginMcpRuntimeSupport(params: {
 
 export function loadEnabledBundleMcpConfig(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
 }): EnabledBundleMcpConfigResult {
   return loadEnabledBundleConfig({

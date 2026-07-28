@@ -1,6 +1,6 @@
 /**
  * Activates curated Codex marketplace plugins and keeps require-active
- * marketplaces outside OpenClaw's install authority.
+ * marketplaces outside Bot's install authority.
  */
 import type { CodexAppInventoryCache, CodexAppInventoryRequest } from "./app-inventory-cache.js";
 import {
@@ -67,7 +67,7 @@ export async function ensureCodexPluginActivation(
   if (params.identity.marketplaceName === CODEX_PLUGINS_WORKSPACE_MARKETPLACE_NAME) {
     return activationFailure(params.identity, "disabled", {
       message:
-        "workspace-directory plugins must be installed and enabled outside OpenClaw before use.",
+        "workspace-directory plugins must be installed and enabled outside Bot before use.",
     });
   }
 

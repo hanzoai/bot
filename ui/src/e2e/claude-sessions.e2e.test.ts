@@ -12,7 +12,7 @@ import {
 
 const executablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const available = canRunPlaywrightChromium(executablePath);
-const allowMissing = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissing = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const suite = available || !allowMissing ? describe : describe.skip;
 
 let browser: Browser;
@@ -261,7 +261,7 @@ suite("Claude native session catalog", () => {
         expect(await buildHost.locator(".sidebar-recent-session").count()).toBe(1);
       }
 
-      const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDir = process.env.BOT_UI_E2E_ARTIFACT_DIR?.trim();
       if (artifactDir) {
         await fs.mkdir(artifactDir, { recursive: true });
         await page.screenshot({
@@ -312,7 +312,7 @@ suite("Claude native session catalog", () => {
       await connecting.waitFor();
       expect(await page.locator(".tabstrip-tab.is-connecting").count()).toBe(1);
 
-      const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+      const artifactDir = process.env.BOT_UI_E2E_ARTIFACT_DIR?.trim();
       if (artifactDir) {
         await fs.mkdir(artifactDir, { recursive: true });
         await page.screenshot({ path: path.join(artifactDir, "claude-terminal-connecting.png") });
@@ -512,7 +512,7 @@ suite("Claude native session catalog", () => {
     await expect
       .poll(() =>
         page
-          .locator("openclaw-chat-pane")
+          .locator("bot-chat-pane")
           .evaluate(
             (element) =>
               (element as HTMLElement & { catalogMessages: unknown[] }).catalogMessages.length,
@@ -525,7 +525,7 @@ suite("Claude native session catalog", () => {
     await expect
       .poll(() => page.getByText("This thread is on a paired node and is view-only.").count())
       .toBe(1);
-    const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+    const artifactDir = process.env.BOT_UI_E2E_ARTIFACT_DIR?.trim();
     const expectCenteredLayout = async (screenshotName: string) => {
       const [workbenchBox, threadBox, composerBox] = await Promise.all([
         page.locator(".chat-workbench").boundingBox(),
@@ -574,7 +574,7 @@ suite("Claude native session catalog", () => {
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     await page.clock.install();
     const historyMessage = (seq: number, prefix: string) => ({
-      __openclaw: { seq },
+      __bot: { seq },
       content: [
         {
           type: "text",
@@ -642,7 +642,7 @@ suite("Claude native session catalog", () => {
     await expect
       .poll(() =>
         page
-          .locator("openclaw-chat-pane")
+          .locator("bot-chat-pane")
           .evaluate(
             (element) =>
               (element as HTMLElement & { state: { chatMessages: unknown[] } }).state.chatMessages
@@ -672,7 +672,7 @@ suite("Claude native session catalog", () => {
   it("keeps a focused message action mounted while its row scrolls out of view", async () => {
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     const messages = Array.from({ length: 200 }, (_, index) => ({
-      __openclaw: { seq: index + 1 },
+      __bot: { seq: index + 1 },
       content: [
         {
           type: "text",

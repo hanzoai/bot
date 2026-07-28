@@ -1,12 +1,12 @@
-# OpenClaw Exa Plugin
+# Bot Exa Plugin
 
-Official OpenClaw plugin for Exa.
+Official Bot plugin for Exa.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/exa-plugin
-openclaw gateway restart
+bot plugins install @hanzo/bot-exa-plugin
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/tools/exa-search> for setup and configuration.
+See <https://docs.bot.ai/tools/exa-search> for setup and configuration.

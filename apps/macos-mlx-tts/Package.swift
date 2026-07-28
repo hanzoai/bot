@@ -5,41 +5,41 @@
 import PackageDescription
 
 let package = Package(
-    name: "OpenClawMLXTTS",
+    name: "BotMLXTTS",
     platforms: [
         .macOS(.v15),
     ],
     products: [
-        .executable(name: "openclaw-mlx-tts", targets: ["OpenClawMLXTTSHelper"]),
+        .executable(name: "bot-mlx-tts", targets: ["BotMLXTTSHelper"]),
     ],
     dependencies: [
         .package(url: "https://github.com/Blaizzy/mlx-audio-swift", exact: "0.1.3"),
-        .package(path: "../shared/OpenClawMLXTTSProtocol"),
+        .package(path: "../shared/BotMLXTTSProtocol"),
     ],
     targets: [
         .target(
-            name: "OpenClawMLXTTSRuntime",
+            name: "BotMLXTTSRuntime",
             dependencies: [
                 .product(name: "MLXAudioTTS", package: "mlx-audio-swift"),
-                .product(name: "OpenClawMLXTTSProtocol", package: "OpenClawMLXTTSProtocol"),
+                .product(name: "BotMLXTTSProtocol", package: "BotMLXTTSProtocol"),
             ],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .executableTarget(
-            name: "OpenClawMLXTTSHelper",
+            name: "BotMLXTTSHelper",
             dependencies: [
-                "OpenClawMLXTTSRuntime",
-                .product(name: "OpenClawMLXTTSProtocol", package: "OpenClawMLXTTSProtocol"),
+                "BotMLXTTSRuntime",
+                .product(name: "BotMLXTTSProtocol", package: "BotMLXTTSProtocol"),
             ],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]),
         .testTarget(
-            name: "OpenClawMLXTTSRuntimeTests",
+            name: "BotMLXTTSRuntimeTests",
             dependencies: [
-                "OpenClawMLXTTSRuntime",
-                .product(name: "OpenClawMLXTTSProtocol", package: "OpenClawMLXTTSProtocol"),
+                "BotMLXTTSRuntime",
+                .product(name: "BotMLXTTSProtocol", package: "BotMLXTTSProtocol"),
             ],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),

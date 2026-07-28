@@ -1,5 +1,5 @@
 // Tlon monitor tests cover authentication retry scheduling.
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime";
 import { describe, expect, it, vi } from "vitest";
 
 const { authenticateMock, sleepWithAbortMock } = vi.hoisted(() => ({
@@ -7,8 +7,8 @@ const { authenticateMock, sleepWithAbortMock } = vi.hoisted(() => ({
   sleepWithAbortMock: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/runtime-env")>();
+vi.mock("bot/plugin-sdk/runtime-env", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/runtime-env")>();
   return {
     ...actual,
     sleepWithAbort: sleepWithAbortMock,

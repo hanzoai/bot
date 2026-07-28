@@ -1,15 +1,15 @@
-import { parseAllowFromEntries } from "openclaw/plugin-sdk/allow-from";
-import { createChannelDmPolicy } from "openclaw/plugin-sdk/channel-dm-policy";
+import { parseAllowFromEntries } from "bot/plugin-sdk/allow-from";
+import { createChannelDmPolicy } from "bot/plugin-sdk/channel-dm-policy";
 import {
   defineChannelSetupContract,
   type ChannelSetupInput,
-} from "openclaw/plugin-sdk/channel-setup";
+} from "bot/plugin-sdk/channel-setup";
 // Imessage plugin module implements setup core behavior.
 import type {
   ChannelSetupAdapter,
   ChannelSetupWizard,
   ChannelSetupWizardTextInput,
-} from "openclaw/plugin-sdk/setup-runtime";
+} from "bot/plugin-sdk/setup-runtime";
 import {
   createCliPathTextInput,
   createDelegatedSetupWizardProxy,
@@ -19,11 +19,11 @@ import {
   setAccountAllowFromForChannel,
   setSetupChannelEnabled,
   createSetupTranslator,
-  type OpenClawConfig,
+  type BotConfig,
   type WizardPrompter,
-} from "openclaw/plugin-sdk/setup-runtime";
-import { formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/setup-runtime";
+import { formatDocsLink } from "bot/plugin-sdk/setup-tools";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveDefaultIMessageAccountId, resolveIMessageAccount } from "./accounts.js";
 import { normalizeIMessageHandle } from "./targets.js";
 
@@ -111,10 +111,10 @@ function buildIMessageSetupPatch(input: IMessageSetupInput) {
 }
 
 async function promptIMessageAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prompter: WizardPrompter;
   accountId?: string;
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   return promptParsedAllowFromForAccount({
     cfg: params.cfg,
     accountId: params.accountId,
@@ -154,7 +154,7 @@ export const imessageDmPolicy = createChannelDmPolicy({
   promptAllowFrom: promptIMessageAllowFrom,
 });
 
-function resolveIMessageCliPath(params: { cfg: OpenClawConfig; accountId: string }) {
+function resolveIMessageCliPath(params: { cfg: BotConfig; accountId: string }) {
   return resolveIMessageAccount(params).config.cliPath ?? "imsg";
 }
 
@@ -178,13 +178,13 @@ export function createIMessageCliPathTextInput(
 export const imessageCompletionNote = {
   title: "iMessage next steps",
   lines: [
-    "For the usual setup, run OpenClaw on the Mac signed into Messages.",
+    "For the usual setup, run Bot on the Mac signed into Messages.",
     "If the Gateway runs elsewhere, set cliPath to a transparent SSH wrapper that runs imsg on the Messages Mac.",
     `Install imsg on the Messages Mac: ${IMESSAGE_INSTALL_COMMAND}`,
     `Update imsg after imsg fixes or missing-capability errors: ${IMESSAGE_UPDATE_COMMAND}`,
     "Private API mode is strongly encouraged for replies, tapbacks, effects, polls, attachments, and group actions.",
-    "After Private API setup, run `imsg launch`, then `openclaw channels status --probe`.",
-    "Ensure OpenClaw has Full Disk Access to Messages DB.",
+    "After Private API setup, run `imsg launch`, then `bot channels status --probe`.",
+    "Ensure Bot has Full Disk Access to Messages DB.",
     "Grant Automation permission for Messages when prompted.",
     "List chats with: imsg chats --limit 20",
     `Docs: ${formatDocsLink("/imessage", "imessage")}`,
@@ -229,7 +229,7 @@ export const imessageSetupStatusBase = {
   unconfiguredHint: t("wizard.imessage.imsgMissing"),
   configuredScore: 1,
   unconfiguredScore: 0,
-  resolveConfigured: ({ cfg, accountId }: { cfg: OpenClawConfig; accountId?: string }) =>
+  resolveConfigured: ({ cfg, accountId }: { cfg: BotConfig; accountId?: string }) =>
     resolveIMessageAccount({ cfg, accountId }).configured,
 };
 
@@ -257,6 +257,6 @@ export function createIMessageSetupWizardProxy(loadWizard: () => Promise<Channel
     ],
     completionNote: imessageCompletionNote,
     dmPolicy: imessageDmPolicy,
-    disable: (cfg: OpenClawConfig) => setSetupChannelEnabled(cfg, channel, false),
+    disable: (cfg: BotConfig) => setSetupChannelEnabled(cfg, channel, false),
   });
 }

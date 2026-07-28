@@ -1,4 +1,4 @@
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import { createAgentRunRestartAbortError } from "../../run-termination.js";
 import {

@@ -1,7 +1,7 @@
-import { readByteStreamWithLimit } from "@openclaw/media-core/read-byte-stream-with-limit";
-import { isRecord as isPlainRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { readByteStreamWithLimit } from "@hanzo/bot-media-core/read-byte-stream-with-limit";
+import { isRecord as isPlainRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import JSON5 from "json5";
 import {
   coerceSecretRef,
@@ -650,8 +650,8 @@ export function formatPluginInstallConfigSetError(): string {
     "plugins.installs is managed by the plugin index and cannot be edited with config set.",
     "",
     "Use plugin commands instead:",
-    `  ${formatCliCommand("openclaw plugins install <spec>")}`,
-    `  ${formatCliCommand("openclaw plugins update <plugin-id>")}`,
-    `  ${formatCliCommand("openclaw plugins uninstall <plugin-id>")}`,
+    `  ${formatCliCommand("bot plugins install <spec>")}`,
+    `  ${formatCliCommand("bot plugins update <plugin-id>")}`,
+    `  ${formatCliCommand("bot plugins uninstall <plugin-id>")}`,
   ].join("\n");
 }

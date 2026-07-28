@@ -1,5 +1,5 @@
-import OpenClawKit
-import OpenClawProtocol
+import BotKit
+import BotProtocol
 import SwiftUI
 
 extension AgentProTab {
@@ -8,7 +8,7 @@ extension AgentProTab {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("Scheduler")
-                        .font(OpenClawType.headline)
+                        .font(BotType.headline)
                     Spacer()
                     ProValuePill(
                         value: self.overview?.cronStatus?.enabled == true ? "on" : "off",
@@ -23,13 +23,13 @@ extension AgentProTab {
                 }
                 if let cronActionStatusText {
                     Text(cronActionStatusText)
-                        .font(OpenClawType.caption2)
+                        .font(BotType.caption2)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 
     var cronNextRunLabel: String {
@@ -58,7 +58,7 @@ extension AgentProTab {
                     }
                 }
             }
-            .padding(.horizontal, OpenClawProMetric.pagePadding)
+            .padding(.horizontal, BotProMetric.pagePadding)
         }
     }
 
@@ -101,7 +101,7 @@ extension AgentProTab {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
                 TextField("Search automations", text: self.$automationQuery)
-                    .font(OpenClawType.body)
+                    .font(BotType.body)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
             }
@@ -112,16 +112,16 @@ extension AgentProTab {
             Picker(selection: self.$automationListFilter) {
                 ForEach(AutomationListFilter.allCases) { filter in
                     Text(filter.title)
-                        .font(OpenClawType.captionSemiBold)
+                        .font(BotType.captionSemiBold)
                         .tag(filter)
                 }
             } label: {
                 Text("Automation status")
-                    .font(OpenClawType.captionSemiBold)
+                    .font(BotType.captionSemiBold)
             }
             .pickerStyle(.segmented)
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 
     var emptyAutomationFilterRow: some View {
@@ -129,11 +129,11 @@ extension AgentProTab {
             ProIconBadge(systemName: "line.3.horizontal.decrease.circle", color: .secondary)
             VStack(alignment: .leading, spacing: 3) {
                 Text(self.sortedCronJobs.isEmpty ? "No automations yet" : "No matching automations")
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
                 Text(self.sortedCronJobs.isEmpty
                     ? "Scheduled work created on the gateway will appear here."
                     : "Try another search or status filter.")
-                    .font(OpenClawType.caption)
+                    .font(BotType.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
@@ -146,17 +146,17 @@ extension AgentProTab {
         return HStack(alignment: .top, spacing: 12) {
             ProIconBadge(
                 systemName: job.enabled ? "clock.arrow.circlepath" : "pause.circle",
-                color: job.enabled ? OpenClawBrand.accent : .secondary)
+                color: job.enabled ? BotBrand.accent : .secondary)
             VStack(alignment: .leading, spacing: 4) {
                 Text(job.name)
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
                     .lineLimit(1)
                 Text(self.cronJobDetail(job))
-                    .font(OpenClawType.caption)
+                    .font(BotType.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
                 Text(self.cronScheduleSummary(job))
-                    .font(OpenClawType.caption2)
+                    .font(BotType.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
                 HStack(spacing: 8) {
@@ -167,14 +167,14 @@ extension AgentProTab {
                             sourceGatewayID: sourceGatewayID)
                     } label: {
                         Label("Edit", systemImage: "slider.horizontal.3")
-                            .font(OpenClawType.captionSemiBold)
+                            .font(BotType.captionSemiBold)
                     }
 
                     Button {
                         Task { await self.runCronJob(job) }
                     } label: {
                         Label("Run", systemImage: "play.fill")
-                            .font(OpenClawType.captionSemiBold)
+                            .font(BotType.captionSemiBold)
                     }
                     .disabled(busy || !self.liveGatewayConnected || !self.appModel.hasOperatorAdminScope)
 
@@ -182,7 +182,7 @@ extension AgentProTab {
                         Task { await self.setCronJob(job, enabled: !job.enabled) }
                     } label: {
                         Label(job.enabled ? "Pause" : "Enable", systemImage: job.enabled ? "pause.fill" : "checkmark")
-                            .font(OpenClawType.captionSemiBold)
+                            .font(BotType.captionSemiBold)
                     }
                     .disabled(busy || !self.liveGatewayConnected || !self.appModel.hasOperatorAdminScope)
                 }
@@ -196,8 +196,8 @@ extension AgentProTab {
                     .controlSize(.small)
             } else {
                 Text(self.cronJobState(job))
-                    .font(OpenClawType.caption2SemiBold)
-                    .foregroundStyle(job.enabled ? OpenClawBrand.accent : .secondary)
+                    .font(BotType.caption2SemiBold)
+                    .foregroundStyle(job.enabled ? BotBrand.accent : .secondary)
                     .lineLimit(1)
             }
         }

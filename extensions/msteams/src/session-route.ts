@@ -4,8 +4,8 @@ import {
   stripChannelTargetPrefix,
   stripTargetKindPrefix,
   type ChannelOutboundSessionRouteParams,
-} from "openclaw/plugin-sdk/channel-core";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/channel-core";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import { extractMSTeamsConversationMessageId, normalizeMSTeamsConversationId } from "./inbound.js";
 import { resolveMSTeamsRouteSessionKey } from "./monitor-handler/thread-session.js";
 

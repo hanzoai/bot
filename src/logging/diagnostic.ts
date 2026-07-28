@@ -3,7 +3,7 @@ import { monitorEventLoopDelay, performance } from "node:perf_hooks";
 import { resolveCompactionTimeoutMs } from "../agents/embedded-agent-runner/compaction-safety-timeout.js";
 import { getRuntimeConfig } from "../config/config.js";
 import { resolveAllAgentSessionStoreTargetsSync } from "../config/sessions/targets.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   areDiagnosticsEnabledForProcess,
   emitInternalDiagnosticEvent as emitDiagnosticEvent,
@@ -126,7 +126,7 @@ type SampleDiagnosticLiveness = (
 ) => DiagnosticLivenessSample | null;
 
 type StartDiagnosticHeartbeatOptions = {
-  getConfig?: () => OpenClawConfig;
+  getConfig?: () => BotConfig;
   emitMemorySample?: EmitDiagnosticMemorySample;
   sampleLiveness?: SampleDiagnosticLiveness;
   recoverStuckSession?: RecoverStuckSession;
@@ -138,7 +138,7 @@ type StartDiagnosticHeartbeatOptions = {
   };
 };
 
-function resolveDiagnosticSessionStorePaths(config?: OpenClawConfig): string[] | undefined {
+function resolveDiagnosticSessionStorePaths(config?: BotConfig): string[] | undefined {
   if (!config) {
     return undefined;
   }
@@ -184,7 +184,7 @@ async function recoverStuckSession(
  * (#101910); reply admission owns stale-run reclaim now. Kept only because the
  * plugin SDK re-exports this module; scheduled for removal in the next SDK major.
  */
-export function isStuckSessionRecoveryEnabled(config?: OpenClawConfig): boolean {
+export function isStuckSessionRecoveryEnabled(config?: BotConfig): boolean {
   return areDiagnosticsEnabledForProcess() && isDiagnosticsEnabled(config);
 }
 
@@ -1177,7 +1177,7 @@ let heartbeatInterval: NodeJS.Timeout | null = null;
 let lastDiagnosticHeartbeatTickAt: number | undefined;
 
 export function startDiagnosticHeartbeat(
-  config?: OpenClawConfig,
+  config?: BotConfig,
   opts?: StartDiagnosticHeartbeatOptions,
 ) {
   if (!areDiagnosticsEnabledForProcess() || !isDiagnosticsEnabled(config)) {

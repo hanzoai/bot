@@ -1,8 +1,8 @@
 {
-  "name": "@openclaw/oc-path",
+  "name": "@hanzo/bot-oc-path",
   "version": "2026.7.2",
   "private": true,
-  "description": "OpenClaw oc:// workspace path plugin",
+  "description": "Bot oc:// workspace path plugin",
   "type": "module",
   "dependencies": {
     "jsonc-parser": "3.3.1",
@@ -10,18 +10,18 @@
     "yaml": "2.9.0"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*",
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

@@ -1,13 +1,13 @@
 // Configured media size helpers resolve maximum byte limits by media kind.
-import { maxBytesForKind, type MediaKind } from "@openclaw/media-core/constants";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { maxBytesForKind, type MediaKind } from "@hanzo/bot-media-core/constants";
+import type { BotConfig } from "../config/types.bot.js";
 import { MEDIA_MAX_BYTES } from "./store.js";
 
 const MB = 1024 * 1024;
 type GeneratedMediaKind = Extract<MediaKind, "audio" | "image" | "video">;
 
 /** Resolves the global generated-media byte cap from the user-facing MB config value. */
-export function resolveConfiguredMediaMaxBytes(cfg?: OpenClawConfig): number | undefined {
+export function resolveConfiguredMediaMaxBytes(cfg?: BotConfig): number | undefined {
   const configured = cfg?.agents?.defaults?.mediaMaxMb;
   if (typeof configured === "number" && Number.isFinite(configured) && configured > 0) {
     return Math.floor(configured * MB);
@@ -17,7 +17,7 @@ export function resolveConfiguredMediaMaxBytes(cfg?: OpenClawConfig): number | u
 
 /** Returns the configured media cap, falling back to the media-core per-kind default. */
 export function resolveGeneratedMediaMaxBytes(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   kind: GeneratedMediaKind,
 ) {
   return resolveConfiguredMediaMaxBytes(cfg) ?? maxBytesForKind(kind);
@@ -25,7 +25,7 @@ export function resolveGeneratedMediaMaxBytes(
 
 /** Reads channel/account media caps from raw channel config without requiring typed account schemas. */
 export function resolveChannelAccountMediaMaxMb(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel?: string | null;
   accountId?: string | null;
 }): number | undefined {
@@ -52,7 +52,7 @@ export function resolveChannelAccountMediaMaxMb(params: {
 
 /** Resolves the byte cap for staging an outbound reply's media: channel/account, then agent default. */
 export function resolveOutboundMediaMaxBytes(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel?: string | null;
   accountId?: string | null;
 }): number {

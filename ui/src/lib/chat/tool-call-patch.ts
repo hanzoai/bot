@@ -1,4 +1,4 @@
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   MAX_DIFF_RENDER_LINES,
   type DiffLine,

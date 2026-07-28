@@ -44,7 +44,7 @@ export function channelHubMeta(channelId: string): ChannelHubMeta {
 }
 
 export function channelDocsUrl(channelId: string): string {
-  return `https://docs.openclaw.ai/channels/${encodeURIComponent(channelId)}`;
+  return `https://docs.bot.ai/channels/${encodeURIComponent(channelId)}`;
 }
 
 /** Bundled channel art reuses the plugin art set (channel ids match slugs). */

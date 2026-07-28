@@ -2,7 +2,7 @@
 // (prepareGatewayPluginBootstrap) and the /status plugins should-run drift check.
 import { describe, expect, it, vi } from "vitest";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveGatewayStartupPluginActivationConfig } from "./plugin-activation-runtime-config.js";
 import { resolveGatewayReloadPluginActivationCandidate } from "./plugin-activation-runtime-config.js";
 
@@ -16,10 +16,10 @@ describe("resolveGatewayStartupPluginActivationConfig", () => {
   it("auto-enables the source config, then merges activation into the runtime config", () => {
     const runtimeConfig = {
       plugins: { entries: { keep: { enabled: true, runtimeOnly: 1 } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     const sourceConfig = {
       plugins: { entries: { keep: { enabled: true } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     // Auto-enable runs against the source config and yields an activation config that
     // enables an extra plugin; only enable/allow surfaces should carry into runtime config.
     applyPluginAutoEnableMock.mockReturnValue({
@@ -49,8 +49,8 @@ describe("resolveGatewayStartupPluginActivationConfig", () => {
     const discovery = { candidates: [] } as never;
 
     resolveGatewayStartupPluginActivationConfig({
-      runtimeConfig: {} as OpenClawConfig,
-      activationSourceConfig: {} as OpenClawConfig,
+      runtimeConfig: {} as BotConfig,
+      activationSourceConfig: {} as BotConfig,
       env: {} as NodeJS.ProcessEnv,
       manifestRegistry,
       discovery,
@@ -80,7 +80,7 @@ describe("resolveGatewayReloadPluginActivationCandidate", () => {
           telegram: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     applyPluginAutoEnableMock.mockReturnValue({
       config: autoEnabledConfig,
       changes: [],

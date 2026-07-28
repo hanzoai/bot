@@ -1,4 +1,4 @@
-// Slack plugin entrypoint registers its OpenClaw integration.
+// Slack plugin entrypoint registers its Bot integration.
 export {
   listEnabledSlackAccounts,
   listSlackAccountIds,

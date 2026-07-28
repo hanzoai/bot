@@ -106,8 +106,8 @@ describe("server-runtime-services", () => {
     vi.useRealTimers();
     // Gateway test helpers set these at module load. Stub them off so a shared
     // worker's import order cannot silently disable this suite's health monitor.
-    vi.stubEnv("OPENCLAW_SKIP_CHANNELS", "");
-    vi.stubEnv("OPENCLAW_SKIP_PROVIDERS", "");
+    vi.stubEnv("BOT_SKIP_CHANNELS", "");
+    vi.stubEnv("BOT_SKIP_PROVIDERS", "");
     resetGatewayWorkAdmission();
     hoisted.heartbeatRunner.stop.mockClear();
     hoisted.heartbeatRunner.updateConfig.mockClear();
@@ -152,7 +152,7 @@ describe("server-runtime-services", () => {
     expect(hoisted.heartbeatRunner.stop).not.toHaveBeenCalled();
   });
 
-  it.each(["OPENCLAW_SKIP_CHANNELS", "OPENCLAW_SKIP_PROVIDERS"])(
+  it.each(["BOT_SKIP_CHANNELS", "BOT_SKIP_PROVIDERS"])(
     "keeps channel health recovery disabled when %s suppresses startup",
     (envKey) => {
       const monitor = startGatewayChannelHealthMonitor({

@@ -1,8 +1,8 @@
 // Channel plugin blocker tests cover doctor diagnostics for blocked channel plugin setup.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import * as manifestRegistry from "../../../plugins/manifest-registry.js";
 import {
   channelPluginBlockerHitToHealthFinding,
@@ -184,7 +184,7 @@ describe("channel plugin blockers", () => {
           enabled: true,
         },
       },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     expect(hits).toEqual([
       {
@@ -658,7 +658,7 @@ describe("channel plugin blockers", () => {
           id: "twitch",
           origin: "bundled",
           channels: ["twitch"],
-          packageChannel: createPackageChannelEnv("twitch", ["OPENCLAW_TWITCH_ACCESS_TOKEN"]),
+          packageChannel: createPackageChannelEnv("twitch", ["BOT_TWITCH_ACCESS_TOKEN"]),
           enabledByDefault: false,
         },
       ],
@@ -666,7 +666,7 @@ describe("channel plugin blockers", () => {
     } as unknown as ReturnType<typeof manifestRegistry.loadPluginManifestRegistry>);
 
     const hits = scanConfiguredChannelPluginBlockers({}, {
-      OPENCLAW_TWITCH_ACCESS_TOKEN: "configured",
+      BOT_TWITCH_ACCESS_TOKEN: "configured",
     } as NodeJS.ProcessEnv);
 
     expect(hits).toEqual([
@@ -688,7 +688,7 @@ describe("channel plugin blockers", () => {
           id: "twitch",
           origin: "bundled",
           channels: ["twitch"],
-          packageChannel: createPackageChannelEnv("twitch", ["OPENCLAW_TWITCH_ACCESS_TOKEN"]),
+          packageChannel: createPackageChannelEnv("twitch", ["BOT_TWITCH_ACCESS_TOKEN"]),
           enabledByDefault: false,
         },
       ],
@@ -702,7 +702,7 @@ describe("channel plugin blockers", () => {
         },
       },
       {
-        OPENCLAW_TWITCH_ACCESS_TOKEN: "configured",
+        BOT_TWITCH_ACCESS_TOKEN: "configured",
       } as NodeJS.ProcessEnv,
     );
 
@@ -867,7 +867,7 @@ describe("channel plugin blockers", () => {
       diagnostics: [],
     } as unknown as ReturnType<typeof manifestRegistry.loadPluginManifestRegistry>);
 
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: BotConfig = {
       channels: {
         discord: {
           enabled: true,
@@ -908,7 +908,7 @@ describe("channel plugin blockers", () => {
       diagnostics: [],
     } as unknown as ReturnType<typeof manifestRegistry.loadPluginManifestRegistry>);
 
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: BotConfig = {
       channels: {
         "workspace-chat": {
           enabled: true,
@@ -1209,7 +1209,7 @@ describe("channel plugin blockers", () => {
           enabledByDefault: true,
         },
         {
-          id: "openclaw-lark",
+          id: "bot-lark",
           origin: "config",
           channels: ["feishu"],
           enabledByDefault: false,
@@ -1231,7 +1231,7 @@ describe("channel plugin blockers", () => {
           feishu: {
             enabled: false,
           },
-          "openclaw-lark": {
+          "bot-lark": {
             enabled: true,
           },
         },
@@ -1258,7 +1258,7 @@ describe("channel plugin blockers", () => {
           enabledByDefault: true,
         },
         {
-          id: "openclaw-lark",
+          id: "bot-lark",
           origin: "config",
           channels: ["feishu"],
           enabledByDefault: false,
@@ -1299,7 +1299,7 @@ describe("channel plugin blockers", () => {
       },
       {
         channelId: "feishu",
-        pluginId: "openclaw-lark",
+        pluginId: "bot-lark",
         reason: "missing explicit enablement",
       },
     ]);

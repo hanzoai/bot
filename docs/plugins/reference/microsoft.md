@@ -11,8 +11,8 @@ Adds text-to-speech provider support.
 
 ## Distribution
 
-- Package: `@openclaw/microsoft-speech`
-- Install route: included in OpenClaw
+- Package: `@hanzo/bot-microsoft-speech`
+- Install route: included in Bot
 
 ## Surface
 

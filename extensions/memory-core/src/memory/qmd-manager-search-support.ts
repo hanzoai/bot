@@ -1,16 +1,16 @@
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import { truncateUtf16Safe } from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import {
   deriveQmdScopeChannel,
   deriveQmdScopeChatType,
   isQmdScopeAllowed,
   type QmdQueryResult,
-} from "openclaw/plugin-sdk/memory-core-host-engine-qmd";
+} from "bot/plugin-sdk/memory-core-host-engine-qmd";
 import type {
   MemorySearchResult,
   MemorySearchRuntimeDebug,
   MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { uniqueValues } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
+import { uniqueValues } from "bot/plugin-sdk/string-coerce-runtime";
 import { copyQmdSessionArtifactHit } from "../qmd-session-artifacts.js";
 import type { QmdSearchRuntimeDebugContext } from "./qmd-collection-controller.js";
 import type { QmdCommandPhaseReporter } from "./qmd-command-client.js";

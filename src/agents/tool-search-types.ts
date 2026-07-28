@@ -1,6 +1,6 @@
-import type { Result } from "@openclaw/normalization-core/result";
+import type { Result } from "@hanzo/bot-normalization-core/result";
 import type { TSchema } from "typebox";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginToolMcpMeta } from "../plugins/tools.js";
 import type { HookContext } from "./agent-tools.before-tool-call.js";
 import type { AgentToolResult, AgentToolUpdateCallback } from "./runtime/index.js";
@@ -26,7 +26,7 @@ export const TOOL_SCHEMA_DIRECTORY_CONTROL_TOOL_NAMES = new Set([
 ]);
 
 export type ToolSearchMode = "code" | "tools" | "directory";
-export type CatalogSource = "openclaw" | "mcp" | "client";
+export type CatalogSource = "bot" | "mcp" | "client";
 export type CatalogTool = AnyAgentTool | ToolDefinition;
 export type CatalogVisibilityOptions = {
   includeMcp?: boolean;
@@ -80,8 +80,8 @@ export type ToolSearchConfig = {
 
 /** Per-run/session context used by Tool Search control tools. */
 export type ToolSearchToolContext = {
-  config?: OpenClawConfig;
-  runtimeConfig?: OpenClawConfig;
+  config?: BotConfig;
+  runtimeConfig?: BotConfig;
   agentId?: string;
   sessionKey?: string;
   sessionId?: string;

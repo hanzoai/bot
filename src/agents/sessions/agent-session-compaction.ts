@@ -1,4 +1,4 @@
-import { isContextOverflow } from "@openclaw/ai/internal/runtime";
+import { isContextOverflow } from "@hanzo/bot-ai/internal/runtime";
 import type { AssistantMessage, Model } from "../../llm/types.js";
 import {
   calculateContextTokens,

@@ -21,9 +21,9 @@ vi.mock("./media-understanding.runtime.js", () => ({
   transcribeFirstAudio: (...args: unknown[]) => transcribeFirstAudioMock(...args),
 }));
 
-vi.mock("openclaw/plugin-sdk/hook-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/hook-runtime")>(
-    "openclaw/plugin-sdk/hook-runtime",
+vi.mock("bot/plugin-sdk/hook-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/hook-runtime")>(
+    "bot/plugin-sdk/hook-runtime",
   );
   return {
     ...actual,
@@ -202,7 +202,7 @@ describe("resolveTelegramInboundBody", () => {
               type: "photo",
               caption: {
                 text: "Chart",
-                credit: "OpenClaw",
+                credit: "Bot",
               },
             },
           ],
@@ -210,8 +210,8 @@ describe("resolveTelegramInboundBody", () => {
       } as never,
     });
 
-    expect(result?.rawBody).toBe("Run summary\n1.\nCI clean\na^2+b^2=c^2\nChart\nOpenClaw");
-    expect(result?.bodyText).toBe("Run summary\n1.\nCI clean\na^2+b^2=c^2\nChart\nOpenClaw");
+    expect(result?.rawBody).toBe("Run summary\n1.\nCI clean\na^2+b^2=c^2\nChart\nBot");
+    expect(result?.bodyText).toBe("Run summary\n1.\nCI clean\na^2+b^2=c^2\nChart\nBot");
   });
 
   it("keeps rich-message table caption spans inline", async () => {

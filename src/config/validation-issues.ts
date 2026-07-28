@@ -14,7 +14,7 @@ type AllowedValuesCollection = {
 type JsonSchemaLike = Record<string, unknown>;
 
 const CUSTOM_EXPECTED_ONE_OF_RE = /expected one of ((?:"[^"]+"(?:\|"?[^"]+"?)*)+)/i;
-const SECRETREF_POLICY_DOC_URL = "https://docs.openclaw.ai/reference/secretref-credential-surface";
+const SECRETREF_POLICY_DOC_URL = "https://docs.bot.ai/reference/secretref-credential-surface";
 
 function toIssueRecord(value: unknown): UnknownIssueRecord | null {
   if (!value || typeof value !== "object") {

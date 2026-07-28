@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
-import { createOpenAICompletionsTransportStreamFn } from "@openclaw/ai/transports";
-import { expectDefined } from "@openclaw/normalization-core";
+import { createOpenAICompletionsTransportStreamFn } from "@hanzo/bot-ai/transports";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import {
   type OpenAICompletionsOutput,

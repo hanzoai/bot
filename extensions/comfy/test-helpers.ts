@@ -1,6 +1,6 @@
 // Comfy helper module supports test helpers behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import * as providerAuth from "openclaw/plugin-sdk/provider-auth-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import * as providerAuth from "bot/plugin-sdk/provider-auth-runtime";
 import { expect, vi } from "vitest";
 
 type FetchGuardMock = ReturnType<typeof vi.fn>;
@@ -20,24 +20,24 @@ type ComfyCloudJobResponseOptions = {
   redirectLocation?: string;
 };
 
-export function buildComfyConfig(config: Record<string, unknown>): OpenClawConfig {
+export function buildComfyConfig(config: Record<string, unknown>): BotConfig {
   return {
     plugins: {
       entries: {
         comfy: { config },
       },
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as BotConfig;
 }
 
-export function buildLegacyComfyConfig(config: Record<string, unknown>): OpenClawConfig {
+export function buildLegacyComfyConfig(config: Record<string, unknown>): BotConfig {
   return {
     models: {
       providers: {
         comfy: config,
       },
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as BotConfig;
 }
 
 export function parseComfyJsonBody(

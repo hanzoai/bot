@@ -4,8 +4,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { isDirectRunUrl } from "./lib/direct-run.mjs";
 
-const SHARED_LOCATION_PREFIX = "../shared/OpenClawKit/Sources/";
-const SHARED_SOURCE_ROOT = "apps/shared/OpenClawKit/Sources";
+const SHARED_LOCATION_PREFIX = "../shared/BotKit/Sources/";
+const SHARED_SOURCE_ROOT = "apps/shared/BotKit/Sources";
 const BARE_PERIPHERY_IGNORE_COMMENT = /\/\/\/?\s*periphery:ignore(?![:\w])/;
 
 function requireValue(args, index, option) {
@@ -74,7 +74,7 @@ export function validateFindings(value, label) {
       typeof finding.location !== "string" ||
       !finding.location.startsWith(SHARED_LOCATION_PREFIX)
     ) {
-      throw new Error(`${label} finding ${index} is outside shared OpenClawKit sources`);
+      throw new Error(`${label} finding ${index} is outside shared BotKit sources`);
     }
     if (typeof finding.kind !== "string" || typeof finding.name !== "string") {
       throw new Error(`${label} finding ${index} is missing its kind or name`);
@@ -162,13 +162,13 @@ export function formatAnnotation(finding) {
 export function buildSummary(findings) {
   if (findings.length === 0) {
     return [
-      "### Shared OpenClawKit Periphery",
+      "### Shared BotKit Periphery",
       "",
       "No declarations were reported dead by both the iOS and macOS consumer scans.",
     ].join("\n");
   }
   return [
-    "### Shared OpenClawKit Periphery",
+    "### Shared BotKit Periphery",
     "",
     `Found ${findings.length} shared Swift ${findings.length === 1 ? "declaration" : "declarations"} reported dead by both consumer scans.`,
     "",

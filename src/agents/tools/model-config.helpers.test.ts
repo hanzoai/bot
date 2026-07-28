@@ -1,7 +1,7 @@
 // Model config helper tests cover provider auth detection across config and
 // stored agent auth profiles for reusable media tools.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type { AuthProfileCredential, AuthProfileStore } from "../auth-profiles/types.js";
 import {
   hasProviderAuthForTool,
@@ -24,7 +24,7 @@ vi.mock("../model-auth.js", async (importOriginal) => {
   return { ...actual, resolveEnvApiKey: authMocks.resolveEnvApiKey };
 });
 
-const AGENT_DIR = "/tmp/openclaw-model-config-helper";
+const AGENT_DIR = "/tmp/bot-model-config-helper";
 const MODEL = "gpt-5.5";
 
 type Decision = ReturnType<typeof resolveOpenAiImageMediaCandidate>;
@@ -38,7 +38,7 @@ const codexSubstitute = {
 const openAiKeep = { kind: "keep", ref: `openai/${MODEL}` } satisfies Decision;
 const drop = { kind: "drop" } satisfies Decision;
 
-const openAiRefCfg: OpenClawConfig = {
+const openAiRefCfg: BotConfig = {
   models: {
     providers: {
       openai: {
@@ -113,7 +113,7 @@ describe("hasProviderAuthForTool", () => {
     // Regression: hasProviderAuthForTool used to call the env resolver without
     // cfg/workspaceDir, so config-scoped (non-bundled) provider plugins whose
     // env candidates are only visible with config were reported as unauthed.
-    const cfg = { models: { providers: {} } } as OpenClawConfig;
+    const cfg = { models: { providers: {} } } as BotConfig;
     hasProviderAuthForTool({ provider: "acme", cfg, workspaceDir: "/ws" });
     expect(authMocks.resolveEnvApiKey).toHaveBeenCalledWith("acme", undefined, {
       config: cfg,
@@ -124,7 +124,7 @@ describe("hasProviderAuthForTool", () => {
   it("accepts env-key plugin provider auth only when config reaches env resolution", () => {
     // "acme" is not in models.json, so custom-provider auth is false; the only
     // path to true is the config-aware env lookup.
-    const cfg = { models: { providers: {} } } as OpenClawConfig;
+    const cfg = { models: { providers: {} } } as BotConfig;
     expect(hasProviderAuthForTool({ provider: "acme", cfg })).toBe(true);
     expect(hasProviderAuthForTool({ provider: "acme" })).toBe(false);
   });
@@ -140,7 +140,7 @@ describe("hasProviderAuthForTool", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(hasProviderAuthForTool({ provider: "hatchery", cfg })).toBe(true);
   });
@@ -157,7 +157,7 @@ describe("hasProviderAuthForTool", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(hasProviderAuthForTool({ provider: "amazon-bedrock", cfg })).toBe(true);
   });
@@ -228,7 +228,7 @@ describe("resolveOpenAiImageMediaCandidate", () => {
   });
 
   it("honors auth order when choosing between direct OpenAI and Codex media", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       auth: {
         order: {
           openai: ["openai:chatgpt"],
@@ -245,7 +245,7 @@ describe("resolveOpenAiImageMediaCandidate", () => {
   });
 
   it("drops Codex media when auth order excludes subscription-style auth", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       auth: {
         order: {
           openai: ["openai:api-key"],

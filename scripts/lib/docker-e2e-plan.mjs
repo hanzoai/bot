@@ -18,8 +18,8 @@ import {
 export { DEFAULT_LIVE_RETRIES };
 export { normalizeReleaseProfile };
 
-export const DEFAULT_E2E_BARE_IMAGE = "openclaw-docker-e2e-bare:local";
-export const DEFAULT_E2E_FUNCTIONAL_IMAGE = "openclaw-docker-e2e-functional:local";
+export const DEFAULT_E2E_BARE_IMAGE = "bot-docker-e2e-bare:local";
+export const DEFAULT_E2E_FUNCTIONAL_IMAGE = "bot-docker-e2e-functional:local";
 export const DEFAULT_PARALLELISM = 10;
 export const DEFAULT_PROFILE = "all";
 export const DEFAULT_RESOURCE_LIMITS = {
@@ -70,7 +70,7 @@ function shellQuote(value) {
 function sanitizeLaneNameSuffix(value) {
   return (
     String(value)
-      .replace(/^openclaw@/u, "")
+      .replace(/^bot@/u, "")
       .replace(/[^A-Za-z0-9._-]+/g, "-")
       .replace(/^-+|-+$/g, "") || "baseline"
   );
@@ -78,7 +78,7 @@ function sanitizeLaneNameSuffix(value) {
 
 const UPGRADE_SURVIVOR_SCENARIOS = [
   "base",
-  "acpx-openclaw-tools-bridge",
+  "acpx-bot-tools-bridge",
   "feishu-channel",
   "bootstrap-persona",
   "channel-post-core-restore",
@@ -101,15 +101,15 @@ const UPGRADE_SURVIVOR_SCENARIO_ALIASES = new Map([
 const LEGACY_UPGRADE_SURVIVOR_SCENARIO_CATALOGS = new Map([
   [
     "837ab1c89821d52519f385e0f3d2067e0b923f730e3a4791e67f578bf5d29f8e",
-    "base acpx-openclaw-tools-bridge feishu-channel bootstrap-persona channel-post-core-restore codex-allowlist-survival plugin-deps-cleanup configured-plugin-installs stale-source-plugin-shadow tilde-log-path meeting-transcripts-sqlite versioned-runtime-deps cron-scheduled-authority auth-profile-v2026-7-2-beta-5",
+    "base acpx-bot-tools-bridge feishu-channel bootstrap-persona channel-post-core-restore codex-allowlist-survival plugin-deps-cleanup configured-plugin-installs stale-source-plugin-shadow tilde-log-path meeting-transcripts-sqlite versioned-runtime-deps cron-scheduled-authority auth-profile-v2026-7-2-beta-5",
   ],
   [
     "10ea475027d8b320d6a704cd6e4dd0f7e984c57a93b327048db229a7e0132c8a",
-    "base acpx-openclaw-tools-bridge feishu-channel bootstrap-persona channel-post-core-restore codex-allowlist-survival plugin-deps-cleanup configured-plugin-installs stale-source-plugin-shadow tilde-log-path meeting-transcripts-sqlite versioned-runtime-deps cron-scheduled-authority",
+    "base acpx-bot-tools-bridge feishu-channel bootstrap-persona channel-post-core-restore codex-allowlist-survival plugin-deps-cleanup configured-plugin-installs stale-source-plugin-shadow tilde-log-path meeting-transcripts-sqlite versioned-runtime-deps cron-scheduled-authority",
   ],
   [
     "213e004a28814fe0f7bb33018ae59a709c2e6d6e13b273df82a0e7935fbaf5af",
-    "base acpx-openclaw-tools-bridge feishu-channel bootstrap-persona channel-post-core-restore codex-allowlist-survival plugin-deps-cleanup configured-plugin-installs stale-source-plugin-shadow tilde-log-path meeting-transcripts-sqlite versioned-runtime-deps",
+    "base acpx-bot-tools-bridge feishu-channel bootstrap-persona channel-post-core-restore codex-allowlist-survival plugin-deps-cleanup configured-plugin-installs stale-source-plugin-shadow tilde-log-path meeting-transcripts-sqlite versioned-runtime-deps",
   ],
   [
     "755557a6ea609e5b9d9fe9d61beb7e75651641e26a3f0ef2fe1fc3a973b398c8",
@@ -129,11 +129,11 @@ const LEGACY_UPGRADE_SURVIVOR_SCENARIO_CATALOGS = new Map([
   ],
   [
     "f226c05636dfb4e759558b5127d1c684d28a609292f4e110ff656c0e4f95ad06",
-    "base acpx-openclaw-tools-bridge feishu-channel bootstrap-persona channel-post-core-restore plugin-deps-cleanup configured-plugin-installs stale-source-plugin-shadow tilde-log-path versioned-runtime-deps",
+    "base acpx-bot-tools-bridge feishu-channel bootstrap-persona channel-post-core-restore plugin-deps-cleanup configured-plugin-installs stale-source-plugin-shadow tilde-log-path versioned-runtime-deps",
   ],
   [
     "d9c9edcb27aca88a0b11c72e85592001cba732cf0f96bb8a73c1c0243c8f3678",
-    "base acpx-openclaw-tools-bridge feishu-channel bootstrap-persona channel-post-core-restore codex-allowlist-survival plugin-deps-cleanup configured-plugin-installs stale-source-plugin-shadow tilde-log-path versioned-runtime-deps",
+    "base acpx-bot-tools-bridge feishu-channel bootstrap-persona channel-post-core-restore codex-allowlist-survival plugin-deps-cleanup configured-plugin-installs stale-source-plugin-shadow tilde-log-path versioned-runtime-deps",
   ],
   [
     "8ac0113158bfe1ebde77272fb1ffb740c281378a170fbc1e9e281d4e44677f02",
@@ -234,16 +234,16 @@ export function normalizeUpgradeSurvivorBaselineSpec(raw) {
   if (!value) {
     return undefined;
   }
-  const spec = value.startsWith("openclaw@") ? value : `openclaw@${value}`;
+  const spec = value.startsWith("bot@") ? value : `bot@${value}`;
   if (
-    !/^openclaw@(?:alpha|beta|latest|[0-9]{4}\.[0-9]+\.[0-9]+(?:-(?:[0-9]+|alpha\.[0-9]+|beta\.[0-9]+))?)$/u.test(
+    !/^bot@(?:alpha|beta|latest|[0-9]{4}\.[0-9]+\.[0-9]+(?:-(?:[0-9]+|alpha\.[0-9]+|beta\.[0-9]+))?)$/u.test(
       spec,
     )
   ) {
     throw new Error(
       `invalid published upgrade survivor baseline: ${JSON.stringify(
         value,
-      )}. Expected openclaw@latest, openclaw@beta, openclaw@alpha, or openclaw@YYYY.M.PATCH.`,
+      )}. Expected bot@latest, bot@beta, bot@alpha, or bot@YYYY.M.PATCH.`,
     );
   }
   return spec;
@@ -296,7 +296,7 @@ function parseUpgradeSurvivorScenarios(raw) {
 }
 
 function parsePublishedReleaseVersion(spec) {
-  const match = /^openclaw@([0-9]{4})\.([0-9]+)\.([0-9]+)/u.exec(String(spec ?? ""));
+  const match = /^bot@([0-9]{4})\.([0-9]+)\.([0-9]+)/u.exec(String(spec ?? ""));
   if (!match) {
     return null;
   }
@@ -337,7 +337,7 @@ function supportsUpgradeSurvivorScenarioAtBaseline(scenario, baselineSpec) {
   return (
     (scenario !== "plugin-deps-cleanup" ||
       supportsUpgradeSurvivorPluginDependencyCleanup(baselineSpec)) &&
-    (scenario !== "acpx-openclaw-tools-bridge" ||
+    (scenario !== "acpx-bot-tools-bridge" ||
       supportsUpgradeSurvivorAcpToolsBridge(baselineSpec))
   );
 }
@@ -418,11 +418,11 @@ function expandUpgradeSurvivorBaselineLanes(
             const name = expandedUpgradeSurvivorLaneName(poolLane.name, baselineSpec, scenario);
             const suffix = name.slice(poolLane.name.length + 1);
             const commandPrefix = [
-              `OPENCLAW_UPGRADE_SURVIVOR_ARTIFACT_DIR="$PWD/.artifacts/upgrade-survivor/${name}"`,
+              `BOT_UPGRADE_SURVIVOR_ARTIFACT_DIR="$PWD/.artifacts/upgrade-survivor/${name}"`,
               baselineSpec
-                ? `OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC=${shellQuote(baselineSpec)}`
+                ? `BOT_UPGRADE_SURVIVOR_BASELINE_SPEC=${shellQuote(baselineSpec)}`
                 : "",
-              scenario ? `OPENCLAW_UPGRADE_SURVIVOR_SCENARIO=${shellQuote(scenario)}` : "",
+              scenario ? `BOT_UPGRADE_SURVIVOR_SCENARIO=${shellQuote(scenario)}` : "",
             ]
               .filter(Boolean)
               .join(" ");
@@ -471,7 +471,7 @@ export function parseLiveMode(raw) {
     return mode;
   }
   throw new Error(
-    `OPENCLAW_DOCKER_ALL_LIVE_MODE must be one of: all, skip, only. Got: ${JSON.stringify(raw)}`,
+    `BOT_DOCKER_ALL_LIVE_MODE must be one of: all, skip, only. Got: ${JSON.stringify(raw)}`,
   );
 }
 
@@ -481,7 +481,7 @@ export function parseProfile(raw) {
     return profile;
   }
   throw new Error(
-    `OPENCLAW_DOCKER_ALL_PROFILE must be one of: ${DEFAULT_PROFILE}, ${RELEASE_PATH_PROFILE}. Got: ${JSON.stringify(raw)}`,
+    `BOT_DOCKER_ALL_PROFILE must be one of: ${DEFAULT_PROFILE}, ${RELEASE_PATH_PROFILE}. Got: ${JSON.stringify(raw)}`,
   );
 }
 
@@ -521,7 +521,7 @@ export function lanesNeedE2eImageKind(poolLanes, kind) {
   return poolLanes.some((poolLane) => poolLane.e2eImageKind === kind);
 }
 
-export function lanesNeedOpenClawPackage(poolLanes) {
+export function lanesNeedBotPackage(poolLanes) {
   return poolLanes.some((poolLane) => poolLane.e2eImageKind);
 }
 
@@ -529,9 +529,9 @@ export function findLaneByName(name) {
   return dedupeLanes(
     expandUpgradeSurvivorBaselineLanes(
       [...allReleasePathLanes({ includeOpenWebUI: true }), ...mainLanes, ...tailLanes],
-      process.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS,
+      process.env.BOT_UPGRADE_SURVIVOR_BASELINE_SPECS,
       undefined,
-      process.env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS,
+      process.env.BOT_UPGRADE_SURVIVOR_SCENARIOS,
     ).lanes,
   ).find((poolLane) => poolLane.name === name);
 }
@@ -603,7 +603,7 @@ function buildPlanJson(params) {
       e2eImage: imageKinds.length > 0,
       functionalImage: imageKinds.includes("functional"),
       liveImage: scheduledLanes.some((poolLane) => poolLane.needsLiveImage),
-      package: lanesNeedOpenClawPackage(scheduledLanes),
+      package: lanesNeedBotPackage(scheduledLanes),
     },
     profile: params.profile,
     releaseProfile: params.releaseProfile,
@@ -702,7 +702,7 @@ export function resolveDockerE2ePlan(options) {
             omittedUnsupportedLaneNames.add(selectedName);
             return [];
           }
-          selectNamedLanes(unfilteredSelectableLanes, [selectedName], "OPENCLAW_DOCKER_ALL_LANES");
+          selectNamedLanes(unfilteredSelectableLanes, [selectedName], "BOT_DOCKER_ALL_LANES");
           return [];
         })
       : undefined;

@@ -11,7 +11,7 @@ describe("context runtime state", () => {
     const moduleUrl = new URL("./context-runtime-state.ts", import.meta.url).href;
     const output = execNodeEvalSync(
       `
-        const key = Symbol.for("openclaw.contextWindowRuntimeState");
+        const key = Symbol.for("bot.contextWindowRuntimeState");
         const legacyLoadPromise = Promise.resolve();
         globalThis[key] = {
           loadPromise: legacyLoadPromise,

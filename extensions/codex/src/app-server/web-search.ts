@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import type { JsonObject } from "./protocol.js";
 
 export type CodexWebSearchPlan = {
@@ -30,18 +30,18 @@ function normalizeUniqueStrings(value: unknown): string[] | undefined {
   return normalized.length > 0 ? normalized : undefined;
 }
 
-function hasManagedSearchProvider(config: OpenClawConfig | undefined): boolean {
+function hasManagedSearchProvider(config: BotConfig | undefined): boolean {
   return normalizeOptionalString(config?.tools?.web?.search?.provider) !== undefined;
 }
 
-function hasNativeDomainRestrictions(config: OpenClawConfig | undefined): boolean {
+function hasNativeDomainRestrictions(config: BotConfig | undefined): boolean {
   return (
     normalizeUniqueStrings(config?.tools?.web?.search?.openaiCodex?.allowedDomains) !== undefined
   );
 }
 
 export function buildCodexNativeWebSearchThreadConfig(
-  config: OpenClawConfig | undefined,
+  config: BotConfig | undefined,
 ): JsonObject {
   const nativeConfig = config?.tools?.web?.search?.openaiCodex;
   const threadConfig: JsonObject = {
@@ -80,7 +80,7 @@ export function buildCodexNativeWebSearchThreadConfig(
 }
 
 export function resolveCodexWebSearchPlan(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   disableTools?: boolean;
   nativeToolSurfaceEnabled?: boolean;
   nativeProviderWebSearchSupport?: CodexNativeWebSearchSupport;

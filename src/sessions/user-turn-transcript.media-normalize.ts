@@ -1,5 +1,5 @@
 import path from "node:path";
-import { mimeTypeFromFilePath } from "@openclaw/media-core/mime";
+import { mimeTypeFromFilePath } from "@hanzo/bot-media-core/mime";
 import type { MediaFactInput } from "../media/media-facts.js";
 import type { PersistedUserTurnMediaInput } from "./user-turn-transcript.types.js";
 

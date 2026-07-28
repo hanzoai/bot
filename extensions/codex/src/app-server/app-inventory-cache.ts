@@ -2,14 +2,14 @@
  * Process-local cache for Codex app-server app inventories, keyed by runtime
  * identity and safe to refresh in the background.
  */
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { embeddedAgentLog } from "bot/plugin-sdk/agent-harness-runtime";
 import {
   isFutureDateTimestampMs,
   resolveDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/number-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { JsonValue, v2 } from "./protocol.js";
 
 /** Default app inventory cache freshness window. */
@@ -257,11 +257,11 @@ export const defaultCodexAppInventoryCache = new CodexAppInventoryCache();
 /** Builds a stable cache key from build versions and runtime identity fields. */
 export function buildCodexAppInventoryCacheKey(
   input: CodexAppInventoryCacheKeyInput,
-  openClawVersion: string,
+  botVersion: string,
   codexPluginVersion: string,
 ): string {
   return JSON.stringify({
-    openClawVersion,
+    botVersion,
     codexPluginVersion,
     codexHome: input.codexHome ?? null,
     endpoint: input.endpoint ?? null,

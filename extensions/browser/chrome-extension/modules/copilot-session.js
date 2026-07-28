@@ -243,7 +243,7 @@ export function createCopilotSessionController({
       throw new Error("Gateway is still reconciling this tab.");
     }
     if (!(await isTabShared(tabId))) {
-      throw new Error("This tab is not shared with OpenClaw.");
+      throw new Error("This tab is not shared with Bot.");
     }
     const entry = await ensureSession(tabId, { hydrateHistory: false });
     if (!entry) {
@@ -276,7 +276,7 @@ export function createCopilotSessionController({
         }
         throw new Error(
           !stillShared
-            ? "This tab is not shared with OpenClaw."
+            ? "This tab is not shared with Bot."
             : !stillOwnsPanel
               ? "This panel is no longer attached to the tab."
               : "Gateway connection changed while preparing this tab.",

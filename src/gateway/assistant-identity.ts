@@ -1,11 +1,11 @@
 // Gateway assistant identity resolver.
 // Combines UI, agent config, and workspace identity files for Control UI display.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { resolveAgentIdentity } from "../agents/identity.js";
 import { loadAgentIdentity } from "../commands/agents.config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import {
   AVATAR_MAX_DATA_URL_CHARS,
@@ -97,7 +97,7 @@ function normalizeEmojiValue(value: string | undefined): string | undefined {
 
 /** Resolve the display name/avatar/emoji for an agent-facing assistant identity. */
 export function resolveAssistantIdentity(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string | null;
   workspaceDir?: string | null;
 }): ResolvedAssistantIdentity {

@@ -5,7 +5,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import readline from "node:readline";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import {
   isSilentReplyPrefixText,
   isSilentReplyText,
@@ -543,6 +543,6 @@ export function createAcpVisibleTextAccumulator() {
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.attemptExecutionHelpersTestApi")
+    Symbol.for("bot.attemptExecutionHelpersTestApi")
   ] = { claudeCliSessionTranscriptPath, formatClaudeCliFallbackPrelude };
 }

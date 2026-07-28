@@ -1,7 +1,7 @@
 // Persistence helpers for plugin installs plus related config mutation.
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { theme } from "../../packages/terminal-core/src/theme.js";
 import {
   hashConfigIncludeRaw,
@@ -9,7 +9,7 @@ import {
   resolveConfigIncludeWritePath,
 } from "../config/includes.js";
 import type { ConfigWriteOptions } from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { isPathInside } from "../infra/path-guards.js";
 import { defaultRuntime, type RuntimeEnv } from "../runtime.js";
@@ -35,7 +35,7 @@ import {
   type PluginUninstallDirectoryRemoval,
 } from "./uninstall.js";
 
-function addInstalledPluginToAllowlist(cfg: OpenClawConfig, pluginId: string): OpenClawConfig {
+function addInstalledPluginToAllowlist(cfg: BotConfig, pluginId: string): BotConfig {
   const allow = cfg.plugins?.allow;
   if (!Array.isArray(allow) || allow.length === 0 || allow.includes(pluginId)) {
     return cfg;
@@ -51,7 +51,7 @@ function addInstalledPluginToAllowlist(cfg: OpenClawConfig, pluginId: string): O
   };
 }
 
-function removeInstalledPluginFromDenylist(cfg: OpenClawConfig, pluginId: string): OpenClawConfig {
+function removeInstalledPluginFromDenylist(cfg: BotConfig, pluginId: string): BotConfig {
   const deny = cfg.plugins?.deny;
   if (!Array.isArray(deny) || !deny.includes(pluginId)) {
     return cfg;
@@ -71,7 +71,7 @@ function removeInstalledPluginFromDenylist(cfg: OpenClawConfig, pluginId: string
 }
 
 export type ConfigSnapshotForInstallPersist = {
-  config: OpenClawConfig;
+  config: BotConfig;
   baseHash: string | undefined;
   writeOptions: Pick<
     ConfigWriteOptions,
@@ -316,7 +316,7 @@ function sourceMatchesInstalledPath(params: {
 }
 
 function logShadowedNpmInstallWarning(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginId: string;
   install: Omit<PluginInstallUpdate, "pluginId">;
   runtime: RuntimeEnv;
@@ -349,7 +349,7 @@ function logShadowedNpmInstallWarning(params: {
         `Warning: installed plugin "${params.pluginId}" is not the active source because a config-selected plugin with the same id is currently selected:`,
         `  active config source: ${shortenHomePath(active.source)}`,
         `  installed npm source: ${shortenHomePath(installedSource)}`,
-        "Run `openclaw plugins doctor` for repair options.",
+        "Run `bot plugins doctor` for repair options.",
       ].join("\n"),
     ),
   );
@@ -411,7 +411,7 @@ function resolveReplacedManagedInstallRemoval(params: {
           [params.pluginId]: params.previousInstall,
         },
       },
-    } as OpenClawConfig,
+    } as BotConfig,
     pluginId: params.pluginId,
     deleteFiles: true,
   });
@@ -429,7 +429,7 @@ function resolveReplacedManagedInstallRemoval(params: {
   return plan.directoryRemoval;
 }
 
-function prepareConfigForDisabledInstall(config: OpenClawConfig, pluginId: string): OpenClawConfig {
+function prepareConfigForDisabledInstall(config: BotConfig, pluginId: string): BotConfig {
   const entry = config.plugins?.entries?.[pluginId];
   const policy = isRecord(entry) ? { ...entry } : {};
   delete policy.config;
@@ -451,7 +451,7 @@ type PluginConfigEnablement =
   | { mode: "invalid"; error: string };
 
 function resolvePluginConfigEnablement(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginId: string;
   installRecords: Record<string, PluginInstallRecord>;
 }): PluginConfigEnablement {
@@ -488,7 +488,7 @@ export async function persistPluginInstall(params: {
   successMessage?: string;
   warningMessage?: string;
   runtime?: RuntimeEnv;
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   const runtime = params.runtime ?? defaultRuntime;
   const installRecords = await tracePluginLifecyclePhaseAsync(
     "install records load",
@@ -590,7 +590,7 @@ export async function persistPluginInstall(params: {
   logSlotWarnings(slotResult.warnings, runtime);
   const configWarning =
     params.enable !== false && configEnablement.mode === "missing"
-      ? `Installed plugin "${params.pluginId}" without enabling it because it requires configuration first. Configure it, then run \`openclaw plugins enable ${params.pluginId}\`.`
+      ? `Installed plugin "${params.pluginId}" without enabling it because it requires configuration first. Configure it, then run \`bot plugins enable ${params.pluginId}\`.`
       : undefined;
   const warningMessage = [params.warningMessage, configWarning].filter(Boolean).join("\n");
   if (warningMessage) {

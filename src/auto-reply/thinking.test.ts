@@ -123,11 +123,11 @@ describe("listThinkingLevels", () => {
       levels: [
         { id: "off" },
         { id: "max" },
-        ...(context.agentRuntime === "openclaw" ? [{ id: "ultra" as const }] : []),
+        ...(context.agentRuntime === "bot" ? [{ id: "ultra" as const }] : []),
       ],
     }));
 
-    expect(listThinkingLevels("openai", "gpt-5.6-luna", undefined, "openclaw")).toContain("ultra");
+    expect(listThinkingLevels("openai", "gpt-5.6-luna", undefined, "bot")).toContain("ultra");
     expect(listThinkingLevels("openai", "gpt-5.6-luna", undefined, "codex")).not.toContain("ultra");
     expect(providerRuntimeMocks.resolveProviderThinkingProfile).toHaveBeenLastCalledWith({
       provider: "openai",
@@ -343,7 +343,7 @@ describe("listThinkingLevels", () => {
   });
 
   it("exposes Claude Opus xhigh on custom anthropic-messages providers without a plugin profile", () => {
-    // Regression for openclaw#91975: a renamed provider serving Claude Opus over
+    // Regression for bot#91975: a renamed provider serving Claude Opus over
     // anthropic-messages used to fall back to a base profile (no xhigh) and silently
     // clamp `--thinking xhigh` to `off`.
     const catalog = [

@@ -8,7 +8,7 @@ function finishedTask(n: number, now: number) {
     taskId: `task-mock-finished-${n}`,
     status: n === 3 ? "failed" : "completed",
     runtime: "subagent",
-    agentId: "openclaw-mock",
+    agentId: "bot-mock",
     title: `Finished mock task number ${n} with a fairly long title`,
     createdAt: now - n * 600_000,
     startedAt: now - n * 600_000,
@@ -34,14 +34,14 @@ function taskDetailCase(task: { id: string; title: string } & Record<string, unk
 
 export function buildBackgroundTasksMock(baseTime: number) {
   const now = Date.now();
-  const taskSessionKey = "agent:openclaw-mock:subagent:mock-task-1";
+  const taskSessionKey = "agent:bot-mock:subagent:mock-task-1";
   const tasks = [
     {
       id: "task-mock-running",
       taskId: "task-mock-running",
       status: "running",
       runtime: "subagent",
-      agentId: "openclaw-mock",
+      agentId: "bot-mock",
       title: "Map run-status indicator code",
       createdAt: now - 25_000,
       startedAt: now - 25_000,
@@ -56,7 +56,7 @@ export function buildBackgroundTasksMock(baseTime: number) {
       taskId: "task-mock-running-2",
       status: "running",
       runtime: "subagent",
-      agentId: "openclaw-mock",
+      agentId: "bot-mock",
       title: "Audit gateway event scope guards",
       createdAt: now - 95_000,
       startedAt: now - 95_000,

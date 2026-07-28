@@ -10,10 +10,10 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const deadSessionScreenshotPath = process.env.OPENCLAW_TERMINAL_DEAD_SESSION_SCREENSHOT?.trim();
-const deadSessionVideoDir = process.env.OPENCLAW_TERMINAL_DEAD_SESSION_VIDEO_DIR?.trim();
+const deadSessionScreenshotPath = process.env.BOT_TERMINAL_DEAD_SESSION_SCREENSHOT?.trim();
+const deadSessionVideoDir = process.env.BOT_TERMINAL_DEAD_SESSION_VIDEO_DIR?.trim();
 
 let browser: Browser;
 let server: ControlUiE2eServer;
@@ -22,7 +22,7 @@ describeControlUiE2e("embedded terminal document", () => {
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(
-        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set BOT_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
       );
     }
     server = await startControlUiE2eServer();
@@ -40,12 +40,12 @@ describeControlUiE2e("embedded terminal document", () => {
     await page.addInitScript(() => {
       (
         window as Window & {
-          ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: {
+          ["__BOT_NATIVE_CONTROL_AUTH__"]?: {
             gatewayUrl: string;
             token: string;
           };
         }
-      )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+      )["__BOT_NATIVE_CONTROL_AUTH__"] = {
         gatewayUrl: "ws://gateway.example.test",
         token: "native-terminal-token",
       };
@@ -72,8 +72,8 @@ describeControlUiE2e("embedded terminal document", () => {
       const connect = await gateway.waitForRequest("connect");
 
       expect(connect.params).toMatchObject({ auth: { token: "native-terminal-token" } });
-      expect(await page.locator("openclaw-login-gate").count()).toBe(0);
-      expect(await page.locator("openclaw-terminal-panel").count()).toBe(1);
+      expect(await page.locator("bot-login-gate").count()).toBe(0);
+      expect(await page.locator("bot-terminal-panel").count()).toBe(1);
 
       await gateway.resolveDeferred("connect");
       const terminalOpen = await gateway.waitForRequest("terminal.open");
@@ -98,10 +98,10 @@ describeControlUiE2e("embedded terminal document", () => {
           data: "\u001b]11;rgb:f7f7/f8f8/fafa\u001b\\",
         },
       ]);
-      expect(await page.locator("openclaw-login-gate").count()).toBe(0);
-      expect(await page.locator("openclaw-terminal-panel").count()).toBe(1);
+      expect(await page.locator("bot-login-gate").count()).toBe(0);
+      expect(await page.locator("bot-terminal-panel").count()).toBe(1);
       const closeControlMetrics = await page
-        .locator("openclaw-terminal-panel")
+        .locator("bot-terminal-panel")
         .locator(".tabstrip-tab__close")
         .evaluate((close) => {
           const header = close.closest<HTMLElement>(".tp-header");
@@ -123,7 +123,7 @@ describeControlUiE2e("embedded terminal document", () => {
       expect(closeControlMetrics.width).toBe(24);
       expect(closeControlMetrics.height).toBe(36);
       expect(closeControlMetrics.centerOffset).toBeLessThanOrEqual(0.5);
-      const closeControl = page.locator("openclaw-terminal-panel").locator(".tabstrip-tab__close");
+      const closeControl = page.locator("bot-terminal-panel").locator(".tabstrip-tab__close");
       expect(await closeControl.getAttribute("aria-label")).toBe("Close terminal session: bash");
       await closeControl.click();
       const terminalClose = await gateway.waitForRequest("terminal.close");
@@ -145,17 +145,17 @@ describeControlUiE2e("embedded terminal document", () => {
     await page.addInitScript(() => {
       (
         window as Window & {
-          ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: {
+          ["__BOT_NATIVE_CONTROL_AUTH__"]?: {
             gatewayUrl: string;
             token: string;
           };
         }
-      )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+      )["__BOT_NATIVE_CONTROL_AUTH__"] = {
         gatewayUrl: "ws://gateway.example.test",
         token: "test",
       };
       window.sessionStorage.setItem(
-        "openclaw.terminal.sessions.v1",
+        "bot.terminal.sessions.v1",
         JSON.stringify(["terminal-dead-after-restart"]),
       );
     });
@@ -186,12 +186,12 @@ describeControlUiE2e("embedded terminal document", () => {
       if (deadSessionScreenshotPath) {
         await page.screenshot({ path: deadSessionScreenshotPath, fullPage: true });
       }
-      const status = page.locator("openclaw-terminal-panel .tabstrip-tab__status");
+      const status = page.locator("bot-terminal-panel .tabstrip-tab__status");
       await expect.poll(async () => await status.textContent(), { timeout: 5_000 }).toBe("exited");
       expect(await gateway.getRequests("terminal.attach")).toHaveLength(0);
       expect(await gateway.getRequests("terminal.open")).toHaveLength(0);
       expect(
-        await page.evaluate(() => window.sessionStorage.getItem("openclaw.terminal.sessions.v1")),
+        await page.evaluate(() => window.sessionStorage.getItem("bot.terminal.sessions.v1")),
       ).toBe("[]");
     } finally {
       await context.close();

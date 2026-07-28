@@ -14,7 +14,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 const sessionKey = "agent:main:board-mcp-app";
 
@@ -50,7 +50,7 @@ function boardSnapshot(count: number) {
 
 async function openDashboard(page: Page): Promise<void> {
   await page.addInitScript((key) => {
-    const settingsKey = "openclaw.control.settings.v1:ws://127.0.0.1:18789";
+    const settingsKey = "bot.control.settings.v1:ws://127.0.0.1:18789";
     const settings = JSON.parse(localStorage.getItem(settingsKey) ?? "{}") as Record<
       string,
       unknown

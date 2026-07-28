@@ -1,12 +1,12 @@
 // Ollama provider module implements model/runtime integration.
 import { createHash } from "node:crypto";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+import { readProviderJsonResponse } from "bot/plugin-sdk/provider-http";
 import {
   isCloudModelRef,
   type ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-onboard";
-import { fetchWithSsrFGuard, type LookupFn } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/provider-model-shared";
+import type { ModelDefinitionConfig } from "bot/plugin-sdk/provider-onboard";
+import { fetchWithSsrFGuard, type LookupFn } from "bot/plugin-sdk/ssrf-runtime";
 import {
   OLLAMA_CLOUD_DEFAULT_MODELS,
   OLLAMA_DEFAULT_BASE_URL,

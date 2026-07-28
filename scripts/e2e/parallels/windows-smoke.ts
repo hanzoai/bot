@@ -1,5 +1,5 @@
 #!/usr/bin/env -S pnpm tsx
-// Windows Smoke script supports OpenClaw repository automation.
+// Windows Smoke script supports Bot repository automation.
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { windowsAgentWorkspaceScript } from "./agent-workspace.ts";
@@ -41,14 +41,14 @@ import {
 import {
   psSingleQuote,
   windowsAgentTurnConfigPatchScript,
-  windowsOpenClawResolver,
+  windowsBotResolver,
   windowsScopedEnvFunction,
 } from "./powershell.ts";
 import {
   buildCommonSmokeSummary,
   expectedPackageBuildCommit,
   expectedPackageTargetVersion,
-  extractLastOpenClawVersion,
+  extractLastBotVersion,
   packAndServeSmokeArtifact,
   printSmokeTargetSummary,
   SmokeRunController,
@@ -101,7 +101,7 @@ const defaultOptions = (): WindowsOptions => ({
   hostIp: undefined,
   hostPort: 18426,
   hostPortExplicit: false,
-  installUrl: "https://openclaw.ai/install.ps1",
+  installUrl: "https://bot.ai/install.ps1",
   installVersion: "",
   json: false,
   keepServer: false,
@@ -111,13 +111,13 @@ const defaultOptions = (): WindowsOptions => ({
   npmRegistry: undefined,
   provider: "openai",
   skipLatestRefCheck: false,
-  snapshotHint: "pre-openclaw-native-e2e-",
+  snapshotHint: "pre-bot-native-e2e-",
   targetPackageSpec: "",
   upgradeFromPackedMain: false,
   vmName: "Windows 11",
 });
 
-const windowsPortableGitPathScript = `$portableGit = Join-Path (Join-Path (Join-Path $env:LOCALAPPDATA 'OpenClaw\\deps') 'portable-git') ''
+const windowsPortableGitPathScript = `$portableGit = Join-Path (Join-Path (Join-Path $env:LOCALAPPDATA 'Bot\\deps') 'portable-git') ''
 $env:PATH = "$portableGit\\cmd;$portableGit\\mingw64\\bin;$portableGit\\usr\\bin;$env:PATH"
 where.exe git.exe`;
 
@@ -127,20 +127,20 @@ function usage(): string {
 Options:
   --vm <name>                Parallels VM name. Default: "Windows 11"
   --snapshot-hint <name>     Snapshot name substring/fuzzy match.
-                             Default: newest "pre-openclaw-native-e2e-*" snapshot
+                             Default: newest "pre-bot-native-e2e-*" snapshot
   --mode <fresh|upgrade|both>
   --provider <openai|anthropic|minimax>
   --model <provider/model>    Override the model used for the agent-turn smoke.
   --api-key-env <var>        Host env var name for provider API key.
   --openai-api-key-env <var> Alias for --api-key-env (backward compatible)
-  --install-url <url>        Installer URL for latest release. Default: https://openclaw.ai/install.ps1
+  --install-url <url>        Installer URL for latest release. Default: https://bot.ai/install.ps1
   --host-port <port>         Host HTTP port for current-main tgz. Default: 18426
   --host-ip <ip>             Override Parallels host IP.
   --latest-version <ver>     Override npm latest version lookup.
   --install-version <ver>    Pin site-installer version/dist-tag for the baseline lane.
   --upgrade-from-packed-main
                              Upgrade lane: install packed current-main npm tgz as baseline,
-                             then run openclaw update --channel dev.
+                             then run bot update --channel dev.
   --target-package-spec <npm-spec>
                              Install this npm package tarball instead of packing current main.
   --npm-registry <url>       Registry used for target package installs.
@@ -248,15 +248,15 @@ function stripLeadingPackageManagerSeparator(argv: string[]): string[] {
 class WindowsSmoke extends SmokeRunController<WindowsOptions> {
   private auth: ProviderAuth;
   private agentTimeoutSeconds = readPositiveIntEnv(
-    "OPENCLAW_PARALLELS_WINDOWS_AGENT_TIMEOUT_S",
+    "BOT_PARALLELS_WINDOWS_AGENT_TIMEOUT_S",
     2700,
   );
   private updateTimeoutSeconds = readPositiveIntEnv(
-    "OPENCLAW_PARALLELS_WINDOWS_UPDATE_TIMEOUT_S",
+    "BOT_PARALLELS_WINDOWS_UPDATE_TIMEOUT_S",
     1200,
   );
   private gatewayRecoveryAfterMs =
-    readPositiveIntEnv("OPENCLAW_PARALLELS_WINDOWS_GATEWAY_RECOVERY_AFTER_S", 180) * 1000;
+    readPositiveIntEnv("BOT_PARALLELS_WINDOWS_GATEWAY_RECOVERY_AFTER_S", 180) * 1000;
   private artifact: PackageArtifact | null = null;
   private minGitZipPath = "";
   private latestVersion = "";
@@ -288,10 +288,10 @@ class WindowsSmoke extends SmokeRunController<WindowsOptions> {
   }
 
   async run(): Promise<void> {
-    this.runDir = await makeTempDir("openclaw-parallels-windows.");
+    this.runDir = await makeTempDir("bot-parallels-windows.");
     this.phases = new PhaseRunner(this.runDir);
     this.guest = new WindowsGuest(this.options.vmName, this.phases);
-    this.tgzDir = await makeTempDir("openclaw-parallels-windows-tgz.");
+    this.tgzDir = await makeTempDir("bot-parallels-windows-tgz.");
     try {
       validateSnapshotRestoreMode(this.options.mode, "Windows smoke");
       this.snapshot = shouldSkipSnapshotRestore()
@@ -374,7 +374,7 @@ class WindowsSmoke extends SmokeRunController<WindowsOptions> {
     );
     await this.phase("fresh.preflight", 120, () => this.logGuestPreflight(true));
     await this.phase("fresh.install-main", WINDOWS_PACKAGE_INSTALL_TIMEOUT_SECONDS, () =>
-      this.installMain("openclaw-main-fresh.tgz"),
+      this.installMain("bot-main-fresh.tgz"),
     );
     this.status.freshVersion = await this.extractLastVersion("fresh.install-main");
     await this.phase("fresh.verify-main-version", 120, () => this.verifyTargetVersion());
@@ -397,7 +397,7 @@ class WindowsSmoke extends SmokeRunController<WindowsOptions> {
       await this.phase(
         "upgrade.install-baseline-package",
         WINDOWS_PACKAGE_INSTALL_TIMEOUT_SECONDS,
-        () => this.installMain("openclaw-main-upgrade.tgz"),
+        () => this.installMain("bot-main-upgrade.tgz"),
       );
       this.status.latestInstalledVersion = await this.extractLastVersion(
         "upgrade.install-baseline-package",
@@ -460,7 +460,7 @@ class WindowsSmoke extends SmokeRunController<WindowsOptions> {
     script: string,
     options: { check?: boolean; timeoutMs?: number } = {},
   ): string {
-    return this.guest.powershell(`${windowsOpenClawResolver}\n${script}`, options);
+    return this.guest.powershell(`${windowsBotResolver}\n${script}`, options);
   }
 
   private restoreSnapshot(): void {
@@ -540,9 +540,9 @@ class WindowsSmoke extends SmokeRunController<WindowsOptions> {
     throw new Error("Windows guest did not become ready");
   }
 
-  private logGuestPreflight(cleanOpenClaw: boolean): void {
-    const cleanScript = cleanOpenClaw
-      ? "npm.cmd uninstall -g openclaw --no-fund --no-audit --loglevel=error 2>$null; $global:LASTEXITCODE = 0"
+  private logGuestPreflight(cleanBot: boolean): void {
+    const cleanScript = cleanBot
+      ? "npm.cmd uninstall -g bot --no-fund --no-audit --loglevel=error 2>$null; $global:LASTEXITCODE = 0"
       : "";
     this.guestPowerShell(
       `$ErrorActionPreference = 'Continue'
@@ -563,8 +563,8 @@ ${cleanScript}`,
 $script = Invoke-RestMethod -Uri ${psSingleQuote(this.options.installUrl)} -TimeoutSec 120
 & ([scriptblock]::Create($script))${versionArg} -NoOnboard
 if ($LASTEXITCODE -ne 0) { throw "installer failed with exit code $LASTEXITCODE" }
-Invoke-OpenClaw --version
-      if ($LASTEXITCODE -ne 0) { throw "openclaw --version failed with exit code $LASTEXITCODE" }`,
+Invoke-Bot --version
+      if ($LASTEXITCODE -ne 0) { throw "bot --version failed with exit code $LASTEXITCODE" }`,
       this.remainingPhaseTimeoutMs(WINDOWS_PACKAGE_INSTALL_TIMEOUT_MS) ??
         WINDOWS_PACKAGE_INSTALL_TIMEOUT_MS,
     );
@@ -586,8 +586,8 @@ curl.exe -fsSL --connect-timeout 10 --max-time 120 --retry 2 --retry-delay 2 ${p
 ${registryScript}
 npm.cmd install -g $tgz --no-fund --no-audit --loglevel=error
 if ($LASTEXITCODE -ne 0) { throw "npm install failed with exit code $LASTEXITCODE" }
-Invoke-OpenClaw --version
-      if ($LASTEXITCODE -ne 0) { throw "openclaw --version failed with exit code $LASTEXITCODE" }`,
+Invoke-Bot --version
+      if ($LASTEXITCODE -ne 0) { throw "bot --version failed with exit code $LASTEXITCODE" }`,
       this.remainingPhaseTimeoutMs(WINDOWS_PACKAGE_INSTALL_TIMEOUT_MS) ??
         WINDOWS_PACKAGE_INSTALL_TIMEOUT_MS,
     );
@@ -608,7 +608,7 @@ Invoke-OpenClaw --version
   }
 
   private verifyVersionContains(needle: string): void {
-    const version = this.guestPowerShell("Invoke-OpenClaw --version");
+    const version = this.guestPowerShell("Invoke-Bot --version");
     if (!version.includes(needle)) {
       throw new Error(`version mismatch: expected substring ${needle}`);
     }
@@ -625,8 +625,8 @@ Invoke-OpenClaw --version
       `$ErrorActionPreference = 'Continue'
 $PSNativeCommandUseErrorActionPreference = $false
 Set-Item -Path ('Env:' + ${psSingleQuote(this.auth.apiKeyEnv)}) -Value ${psSingleQuote(this.auth.apiKeyValue)}
-Invoke-OpenClaw onboard --non-interactive --mode local --auth-choice ${psSingleQuote(this.auth.authChoice)} --secret-input-mode ref --gateway-port 18789 --gateway-bind loopback --install-daemon --skip-skills --skip-health --accept-risk --json
-if ($LASTEXITCODE -ne 0) { throw "openclaw onboard failed with exit code $LASTEXITCODE" }
+Invoke-Bot onboard --non-interactive --mode local --auth-choice ${psSingleQuote(this.auth.authChoice)} --secret-input-mode ref --gateway-port 18789 --gateway-bind loopback --install-daemon --skip-skills --skip-health --accept-risk --json
+if ($LASTEXITCODE -ne 0) { throw "bot onboard failed with exit code $LASTEXITCODE" }
 ${this.windowsPluginIsolationScript()}`,
       720_000,
     );
@@ -653,7 +653,7 @@ ${this.windowsPluginIsolationScript()}`,
       },
       label,
       onLaunchRetry: warn,
-      script: `${windowsOpenClawResolver}\n${script}`,
+      script: `${windowsBotResolver}\n${script}`,
       timeoutMs: this.remainingPhaseTimeoutMs(timeoutMs) ?? timeoutMs,
       vmName: this.options.vmName,
     });
@@ -663,7 +663,7 @@ ${this.windowsPluginIsolationScript()}`,
     this.guestPowerShell(
       `$ErrorActionPreference = 'Stop'
 ${windowsPortableGitPathScript}
-$configPath = Join-Path $env:USERPROFILE '.openclaw\\openclaw.json'
+$configPath = Join-Path $env:USERPROFILE '.bot\\bot.json'
 $config = Get-Content $configPath -Raw | ConvertFrom-Json
 if ($null -eq $config.update) {
   $config | Add-Member -MemberType NoteProperty -Name update -Value ([pscustomobject]@{})
@@ -671,14 +671,14 @@ if ($null -eq $config.update) {
 $config.update | Add-Member -Force -MemberType NoteProperty -Name channel -Value 'dev'
 $config | ConvertTo-Json -Depth 100 | Set-Content -Path $configPath -Encoding utf8
 ${windowsScopedEnvFunction}
-$script:OpenClawUpdateExit = 0
-Invoke-WithScopedEnv @{ OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS = '1'; OPENCLAW_DISABLE_BUNDLED_PLUGINS = '1' } {
-  Invoke-OpenClaw update --channel dev --yes --json
-  $script:OpenClawUpdateExit = $LASTEXITCODE
+$script:BotUpdateExit = 0
+Invoke-WithScopedEnv @{ BOT_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS = '1'; BOT_DISABLE_BUNDLED_PLUGINS = '1' } {
+  Invoke-Bot update --channel dev --yes --json
+  $script:BotUpdateExit = $LASTEXITCODE
 }
-if ($script:OpenClawUpdateExit -ne 0) { throw "openclaw update failed with exit code $script:OpenClawUpdateExit" }
-Invoke-OpenClaw --version
-Invoke-OpenClaw update status --json`,
+if ($script:BotUpdateExit -ne 0) { throw "bot update failed with exit code $script:BotUpdateExit" }
+Invoke-Bot --version
+Invoke-Bot update status --json`,
       { timeoutMs: this.updateTimeoutSeconds * 1000 },
     );
   }
@@ -686,7 +686,7 @@ Invoke-OpenClaw update status --json`,
   private verifyDevChannelUpdate(): void {
     const status = this.guestPowerShell(
       `${windowsPortableGitPathScript}
-Invoke-OpenClaw update status --json`,
+Invoke-Bot update status --json`,
     );
     for (const needle of ['"installKind": "git"', '"value": "dev"', '"branch": "main"']) {
       if (!status.includes(needle)) {
@@ -700,7 +700,7 @@ Invoke-OpenClaw update status --json`,
       `gateway-${action}`,
       `$ErrorActionPreference = 'Continue'
 $PSNativeCommandUseErrorActionPreference = $false
-Invoke-OpenClaw gateway ${action}
+Invoke-Bot gateway ${action}
 if ($LASTEXITCODE -ne 0) { throw "gateway ${action} failed with exit code $LASTEXITCODE" }`,
       420_000,
     );
@@ -713,7 +713,7 @@ if ($LASTEXITCODE -ne 0) { throw "gateway ${action} failed with exit code $LASTE
     const start = Date.now();
     while (Date.now() < deadline) {
       const probe = this.guestPowerShell(
-        "Invoke-OpenClaw gateway probe --url ws://127.0.0.1:18789 --timeout 30000 --json",
+        "Invoke-Bot gateway probe --url ws://127.0.0.1:18789 --timeout 30000 --json",
         { check: false, timeoutMs: 60_000 },
       );
       if (/"ok"\s*:\s*true/.test(probe)) {
@@ -723,7 +723,7 @@ if ($LASTEXITCODE -ne 0) { throw "gateway ${action} failed with exit code $LASTE
         warn(
           `gateway-reachable recovery: gateway start after ${Math.floor((Date.now() - start) / 1000)}s`,
         );
-        this.guestPowerShell("Invoke-OpenClaw gateway start", {
+        this.guestPowerShell("Invoke-Bot gateway start", {
           check: false,
           timeoutMs: 120_000,
         });
@@ -737,11 +737,11 @@ if ($LASTEXITCODE -ne 0) { throw "gateway ${action} failed with exit code $LASTE
   }
 
   private showGatewayStatusCompat(): void {
-    const help = this.guestPowerShell("Invoke-OpenClaw gateway status --help", {
+    const help = this.guestPowerShell("Invoke-Bot gateway status --help", {
       check: false,
     });
     const suffix = help.includes("--require-rpc") ? "--deep --require-rpc" : "--deep";
-    this.guestPowerShell(`Invoke-OpenClaw gateway status ${suffix}`);
+    this.guestPowerShell(`Invoke-Bot gateway status ${suffix}`);
   }
 
   private verifyTurn(): Promise<void> {
@@ -757,7 +757,7 @@ Set-Item -Path ('Env:' + ${psSingleQuote(this.auth.apiKeyEnv)}) -Value ${psSingl
 $agentOk = $false
 for ($attempt = 1; $attempt -le 2; $attempt++) {
   $sessionId = if ($attempt -eq 1) { 'parallels-windows-smoke' } else { "parallels-windows-smoke-retry-$attempt" }
-  $sessionsDir = Join-Path $env:USERPROFILE '.openclaw\\agents\\main\\sessions'
+  $sessionsDir = Join-Path $env:USERPROFILE '.bot\\agents\\main\\sessions'
   $sessionPath = Join-Path $sessionsDir "$sessionId.jsonl"
   Remove-Item $sessionPath -Force -ErrorAction SilentlyContinue
   $args = @(
@@ -775,7 +775,7 @@ for ($attempt = 1; $attempt -le 2; $attempt++) {
     '${resolveParallelsModelTimeoutSeconds("windows")}',
     '--json'
   )
-  $output = Invoke-OpenClaw @args 2>&1
+  $output = Invoke-Bot @args 2>&1
   $agentExitCode = $LASTEXITCODE
   if ($null -ne $output) { $output | ForEach-Object { $_ } }
   if ($agentExitCode -eq 0 -and ($output | Out-String) -match '"finalAssistant(Raw|Visible)Text":\\s*"OK"') {
@@ -795,13 +795,13 @@ for ($attempt = 1; $attempt -le 2; $attempt++) {
     throw "agent failed with exit code $agentExitCode"
   }
 }
-if (-not $agentOk) { throw 'openclaw agent finished without OK response' }`,
+if (-not $agentOk) { throw 'bot agent finished without OK response' }`,
       this.agentTimeoutSeconds * 1000,
     );
   }
 
   private async extractLastVersion(phaseName: string): Promise<string> {
-    return await extractLastOpenClawVersion(this.runDir, phaseName, /OpenClaw\s+([0-9][^\s]*)/gi);
+    return await extractLastBotVersion(this.runDir, phaseName, /Bot\s+([0-9][^\s]*)/gi);
   }
 
   protected async writeSummary(): Promise<string> {

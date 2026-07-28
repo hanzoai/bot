@@ -31,8 +31,8 @@ vi.mock("./drive.js", () => ({
   deliverCommentThreadText: deliverCommentThreadTextMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/reply-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/reply-runtime")>()),
+vi.mock("bot/plugin-sdk/reply-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("bot/plugin-sdk/reply-runtime")>()),
   dispatchInboundMessage: dispatchInboundMessageMock,
 }));
 
@@ -460,7 +460,7 @@ describe("handleFeishuCommentEvent", () => {
       file_type: "docx",
       comment_id: "comment_1",
       content: [
-        "OpenClaw: access not configured.",
+        "Bot: access not configured.",
         "",
         "Your Feishu user id: ou_sender",
         "Pairing code:",
@@ -470,7 +470,7 @@ describe("handleFeishuCommentEvent", () => {
         "",
         "Ask the bot owner to approve with:",
         "```",
-        "openclaw pairing approve feishu TESTCODE",
+        "bot pairing approve feishu TESTCODE",
         "```",
       ].join("\n"),
       is_whole_comment: false,

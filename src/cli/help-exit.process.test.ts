@@ -34,16 +34,16 @@ async function createHelpProcessFixture(
   loggingViaInclude = false,
   loggingViaRootInclude = false,
 ) {
-  const root = tempDirs.make("openclaw-help-exit-");
+  const root = tempDirs.make("bot-help-exit-");
   const stateDir = path.join(root, "state");
-  const configPath = path.join(stateDir, "openclaw.json");
+  const configPath = path.join(stateDir, "bot.json");
   const tlsImportGuardPath = path.join(root, "forbid-tls-import.mjs");
   const keepAlivePath = path.join(root, "keep-alive.mjs");
   const forceExitPath = path.join(root, "force-exit.mjs");
   const unsupportedRuntimePath = path.join(root, "unsupported-runtime.mjs");
   const failRunMainImportPath = path.join(root, "fail-run-main-import.mjs");
   await fs.mkdir(stateDir, { recursive: true });
-  const profileConfigPath = path.join(root, ".openclaw-work", "openclaw.json");
+  const profileConfigPath = path.join(root, ".bot-work", "bot.json");
   await fs.mkdir(path.dirname(profileConfigPath), { recursive: true });
   const configWithLoggingInclude = config
     ? { ...config, logging: { $include: "./logging.json5" } }
@@ -92,7 +92,7 @@ registerHooks({
   await fs.writeFile(keepAlivePath, "setInterval(() => {}, 60_000);\n");
   await fs.writeFile(
     forceExitPath,
-    "setTimeout(() => process.exit(typeof process.exitCode === 'number' ? process.exitCode : 0), Number(process.env.OPENCLAW_TEST_FORCE_EXIT_MS));\n",
+    "setTimeout(() => process.exit(typeof process.exitCode === 'number' ? process.exitCode : 0), Number(process.env.BOT_TEST_FORCE_EXIT_MS));\n",
   );
   await fs.writeFile(
     unsupportedRuntimePath,
@@ -178,10 +178,10 @@ async function runCliProcess(params: {
         NODE_ENV: undefined,
         NODE_OPTIONS: undefined,
         NODE_USE_SYSTEM_CA: "1",
-        OPENCLAW_CONFIG_PATH: params.useDefaultConfigPaths ? undefined : fixture.configPath,
-        OPENCLAW_NO_RESPAWN: params.allowRespawn ? undefined : "1",
-        OPENCLAW_STATE_DIR: params.useDefaultConfigPaths ? undefined : fixture.stateDir,
-        OPENCLAW_TEST_FORCE_EXIT_MS: params.forceExitMs ? String(params.forceExitMs) : undefined,
+        BOT_CONFIG_PATH: params.useDefaultConfigPaths ? undefined : fixture.configPath,
+        BOT_NO_RESPAWN: params.allowRespawn ? undefined : "1",
+        BOT_STATE_DIR: params.useDefaultConfigPaths ? undefined : fixture.stateDir,
+        BOT_TEST_FORCE_EXIT_MS: params.forceExitMs ? String(params.forceExitMs) : undefined,
         VITEST: undefined,
         ...params.env,
       },
@@ -209,7 +209,7 @@ describe("CLI help process exit", () => {
     const result = await runCliProcess({ args: ["--help"], forbidTlsImport: true });
 
     expect(result.stderr).toBe("");
-    expect(result.stdout).toContain("Usage: openclaw [options] [command]");
+    expect(result.stdout).toContain("Usage: bot [options] [command]");
   });
 
   // One lazy process is representative by design; the matrix below exercises
@@ -218,13 +218,13 @@ describe("CLI help process exit", () => {
     const result = await runCliProcess({ args: ["backup", "--help"], keepAlive: true });
 
     expect(result.stderr).toBe("");
-    expect(result.stdout).toContain("Usage: openclaw backup [options] [command]");
+    expect(result.stdout).toContain("Usage: bot backup [options] [command]");
   });
   it("flushes explicitly requested entry traces on precomputed help", async () => {
     const result = await runCliProcess({
       args: ["gateway", "--help"],
       config: { logging: { consoleStyle: "json", level: "silent" } },
-      env: { OPENCLAW_GATEWAY_STARTUP_TRACE: "1" },
+      env: { BOT_GATEWAY_STARTUP_TRACE: "1" },
     });
 
     expect(parseJsonLines(result.stderr)).toEqual(
@@ -243,7 +243,7 @@ describe("CLI help process exit", () => {
       let stdout = "";
       let stderr = "";
       const program = new Command()
-        .name("openclaw")
+        .name("bot")
         .exitOverride()
         .configureOutput({
           writeOut: (value) => {
@@ -253,7 +253,7 @@ describe("CLI help process exit", () => {
             stderr += value;
           },
         });
-      const argv = ["node", "openclaw", group, "--help"];
+      const argv = ["node", "bot", group, "--help"];
       const registered =
         registry === "core"
           ? await registerCoreCliByName(program, createProgramContext(), group, argv)
@@ -266,7 +266,7 @@ describe("CLI help process exit", () => {
       expect(parseResult).toBeInstanceOf(CommanderError);
       expect(parseResult).toMatchObject({ code: "commander.helpDisplayed", exitCode: 0 });
       expect(stderr).toBe("");
-      expect(stdout).toContain(`Usage: openclaw ${usageCommand} [options] [command]`);
+      expect(stdout).toContain(`Usage: bot ${usageCommand} [options] [command]`);
     },
   );
 
@@ -300,7 +300,7 @@ describe("JSON console style process output", () => {
 
   it.each([
     { name: "routed", env: {} },
-    { name: "Commander", env: { OPENCLAW_DISABLE_ROUTE_FIRST: "1" } },
+    { name: "Commander", env: { BOT_DISABLE_ROUTE_FIRST: "1" } },
   ])("emits JSONL for $name text output", async ({ env }) => {
     const result = await runCliProcess({
       args: ["status", "--timeout", "1000"],
@@ -313,7 +313,7 @@ describe("JSON console style process output", () => {
     expect(stdoutRecords.length).toBeGreaterThan(0);
     expect([...stdoutRecords, ...stderrRecords]).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ level: "info", message: "OpenClaw status" }),
+        expect.objectContaining({ level: "info", message: "Bot status" }),
       ]),
     );
     expect([...stdoutRecords, ...stderrRecords]).not.toEqual(
@@ -350,7 +350,7 @@ describe("JSON console style process output", () => {
     const result = await runCliProcess({
       args: ["status", "--timeout", "1000"],
       config: loggingConfig,
-      env: { OPENCLAW_LOG_LEVEL: "bogus" },
+      env: { BOT_LOG_LEVEL: "bogus" },
     });
 
     const records = [...parseJsonLines(result.stdout), ...parseJsonLines(result.stderr)];
@@ -358,7 +358,7 @@ describe("JSON console style process output", () => {
       expect.arrayContaining([
         expect.objectContaining({
           level: "warn",
-          message: expect.stringContaining('Ignoring invalid OPENCLAW_LOG_LEVEL="bogus"'),
+          message: expect.stringContaining('Ignoring invalid BOT_LOG_LEVEL="bogus"'),
         }),
       ]),
     );
@@ -400,7 +400,7 @@ describe("JSON console style process output", () => {
       let failure: CliProcessFailure | undefined;
       try {
         await runCliProcess({
-          args: ["--container", "openclaw-json-console-missing", "status", ...modifier],
+          args: ["--container", "bot-json-console-missing", "status", ...modifier],
           config: loggingConfig,
         });
       } catch (error) {
@@ -426,9 +426,9 @@ describe("JSON console style process output", () => {
     let failure: CliProcessFailure | undefined;
     try {
       await runCliProcess({
-        args: ["--container", "openclaw-json-console-missing", "gateway", "status"],
+        args: ["--container", "bot-json-console-missing", "gateway", "status"],
         config: loggingConfig,
-        env: { OPENCLAW_GATEWAY_STARTUP_TRACE: "1" },
+        env: { BOT_GATEWAY_STARTUP_TRACE: "1" },
       });
     } catch (error) {
       failure = error as CliProcessFailure;
@@ -454,7 +454,7 @@ describe("JSON console style process output", () => {
       let failure: CliProcessFailure | undefined;
       try {
         await runCliProcess({
-          args: ["openclaw-json-console-missing-command", modifier],
+          args: ["bot-json-console-missing-command", modifier],
           config: loggingConfig,
         });
       } catch (error) {
@@ -479,7 +479,7 @@ describe("JSON console style process output", () => {
     const result = await runCliProcess({ args: ["--help"], config: loggingConfig });
 
     expect(result.stderr).toBe("");
-    expect(result.stdout).toContain("Usage: openclaw [options] [command]");
+    expect(result.stdout).toContain("Usage: bot [options] [command]");
     expect(() => parseJsonLines(result.stdout)).toThrow();
   });
 
@@ -569,12 +569,12 @@ describe("JSON console style process output", () => {
         args: ["--container"],
         config: {
           logging: {
-            consoleStyle: "${OPENCLAW_TEST_CONSOLE_STYLE}",
+            consoleStyle: "${BOT_TEST_CONSOLE_STYLE}",
             level: "silent",
           },
         },
-        env: { OPENCLAW_TEST_CONSOLE_STYLE: undefined },
-        stateEnv: () => ({ OPENCLAW_TEST_CONSOLE_STYLE: "json" }),
+        env: { BOT_TEST_CONSOLE_STYLE: undefined },
+        stateEnv: () => ({ BOT_TEST_CONSOLE_STYLE: "json" }),
       });
     } catch (error) {
       failure = error as CliProcessFailure;
@@ -596,16 +596,16 @@ describe("JSON console style process output", () => {
         args: ["gateway", "status"],
         config: {
           logging: {
-            consoleStyle: "${OPENCLAW_TEST_CONSOLE_STYLE}",
+            consoleStyle: "${BOT_TEST_CONSOLE_STYLE}",
             level: "silent",
           },
         },
         env: {
-          OPENCLAW_GATEWAY_STARTUP_TRACE: "1",
-          OPENCLAW_TEST_CONSOLE_STYLE: undefined,
+          BOT_GATEWAY_STARTUP_TRACE: "1",
+          BOT_TEST_CONSOLE_STYLE: undefined,
         },
         failRunMainImport: true,
-        stateEnv: () => ({ OPENCLAW_TEST_CONSOLE_STYLE: "json" }),
+        stateEnv: () => ({ BOT_TEST_CONSOLE_STYLE: "json" }),
       });
     } catch (error) {
       failure = error as CliProcessFailure;
@@ -630,15 +630,15 @@ describe("JSON console style process output", () => {
     let failure: CliProcessFailure | undefined;
     try {
       await runCliProcess({
-        args: ["--container", "openclaw-json-console-missing", "status"],
+        args: ["--container", "bot-json-console-missing", "status"],
         config: {
           logging: {
-            consoleStyle: "${OPENCLAW_TEST_CONSOLE_STYLE}",
+            consoleStyle: "${BOT_TEST_CONSOLE_STYLE}",
             level: "silent",
           },
         },
-        env: { OPENCLAW_TEST_CONSOLE_STYLE: undefined },
-        stateEnv: () => ({ OPENCLAW_TEST_CONSOLE_STYLE: "json" }),
+        env: { BOT_TEST_CONSOLE_STYLE: undefined },
+        stateEnv: () => ({ BOT_TEST_CONSOLE_STYLE: "json" }),
       });
     } catch (error) {
       failure = error as CliProcessFailure;
@@ -688,7 +688,7 @@ describe("JSON console style process output", () => {
     const result = await runCliProcess({
       args: ["gateway", "status"],
       config: loggingConfig,
-      env: { OPENCLAW_GATEWAY_STARTUP_TRACE: "1" },
+      env: { BOT_GATEWAY_STARTUP_TRACE: "1" },
     });
 
     const records = parseJsonLines(result.stderr);
@@ -707,7 +707,7 @@ describe("JSON console style process output", () => {
       args: ["gateway", "status"],
       allowRespawn: true,
       config: loggingConfig,
-      env: { OPENCLAW_GATEWAY_STARTUP_TRACE: "1" },
+      env: { BOT_GATEWAY_STARTUP_TRACE: "1" },
     });
 
     const bootstrapRecords = parseJsonLines(result.stderr).filter(
@@ -725,19 +725,19 @@ describe("JSON console style process output", () => {
       config: {
         logging: {
           consoleLevel: "info",
-          consoleStyle: "${OPENCLAW_TEST_CONSOLE_STYLE}",
-          file: "${OPENCLAW_TEST_LOG_FILE}",
+          consoleStyle: "${BOT_TEST_CONSOLE_STYLE}",
+          file: "${BOT_TEST_LOG_FILE}",
           level: "info",
         },
       },
       env: {
-        OPENCLAW_GATEWAY_STARTUP_TRACE: "1",
-        OPENCLAW_TEST_CONSOLE_STYLE: undefined,
-        OPENCLAW_TEST_LOG_FILE: undefined,
+        BOT_GATEWAY_STARTUP_TRACE: "1",
+        BOT_TEST_CONSOLE_STYLE: undefined,
+        BOT_TEST_LOG_FILE: undefined,
       },
       stateEnv: (stateDir) => ({
-        OPENCLAW_TEST_CONSOLE_STYLE: "json",
-        OPENCLAW_TEST_LOG_FILE: path.join(stateDir, logFileName),
+        BOT_TEST_CONSOLE_STYLE: "json",
+        BOT_TEST_LOG_FILE: path.join(stateDir, logFileName),
       }),
     });
 
@@ -757,7 +757,7 @@ describe("JSON console style process output", () => {
 
   it.each([
     { name: "routed fallback", env: {} },
-    { name: "Commander", env: { OPENCLAW_DISABLE_ROUTE_FIRST: "1" } },
+    { name: "Commander", env: { BOT_DISABLE_ROUTE_FIRST: "1" } },
   ])("structures $name unknown-option validation", async ({ env }) => {
     let failure: CliProcessFailure | undefined;
     try {
@@ -788,7 +788,7 @@ describe("JSON console style process output", () => {
       await runCliProcess({
         args: ["plugins", "install"],
         config: loggingConfig,
-        env: { OPENCLAW_DISABLE_ROUTE_FIRST: "1" },
+        env: { BOT_DISABLE_ROUTE_FIRST: "1" },
       });
     } catch (error) {
       failure = error as CliProcessFailure;
@@ -813,7 +813,7 @@ describe("JSON console style process output", () => {
         await runCliProcess({
           args: ["config", command, "--definitely-invalid"],
           config: loggingConfig,
-          env: { OPENCLAW_DISABLE_ROUTE_FIRST: "1" },
+          env: { BOT_DISABLE_ROUTE_FIRST: "1" },
         });
       } catch (error) {
         failure = error as CliProcessFailure;
@@ -848,7 +848,7 @@ describe("JSON console style process output", () => {
           },
           env: {
             MISSING_LOG_FILE: undefined,
-            OPENCLAW_DISABLE_ROUTE_FIRST: "1",
+            BOT_DISABLE_ROUTE_FIRST: "1",
           },
           loggingViaInclude: true,
         });
@@ -884,7 +884,7 @@ describe("JSON console style process output", () => {
         },
         env: {
           MISSING_LOG_FILE: undefined,
-          OPENCLAW_DISABLE_ROUTE_FIRST: "1",
+          BOT_DISABLE_ROUTE_FIRST: "1",
         },
       });
     } catch (error) {
@@ -916,7 +916,7 @@ describe("JSON console style process output", () => {
         },
         env: {
           MISSING_LOG_FILE: undefined,
-          OPENCLAW_DISABLE_ROUTE_FIRST: "1",
+          BOT_DISABLE_ROUTE_FIRST: "1",
         },
         loggingViaRootInclude: true,
       });
@@ -941,8 +941,8 @@ describe("JSON console style process output", () => {
       config: loggingConfig,
       forceExitMs: 5_000,
       env: {
-        OPENCLAW_DEBUG_PROXY_ENABLED: "1",
-        OPENCLAW_DEBUG_PROXY_REQUIRE: "1",
+        BOT_DEBUG_PROXY_ENABLED: "1",
+        BOT_DEBUG_PROXY_REQUIRE: "1",
       },
     });
 

@@ -22,7 +22,7 @@ import {
   isSessionTranscriptProjectionUnavailableError,
   resolveTranscriptSessionKeyBySessionId,
 } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { measureDiagnosticsTimelineSpan } from "../../infra/diagnostics-timeline.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { jsonUtf8Bytes } from "../../infra/json-utf8-bytes.js";
@@ -79,7 +79,7 @@ type ChatMetadataResult = {
   swarmEnabled: boolean;
 };
 
-function runtimeConfigsMatch(left: OpenClawConfig, right: OpenClawConfig): boolean {
+function runtimeConfigsMatch(left: BotConfig, right: BotConfig): boolean {
   if (left === right) {
     return true;
   }
@@ -127,7 +127,7 @@ async function handleChatMetadataRequest({
 }
 
 async function buildChatMetadataResult(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   context: GatewayRequestContext;
   agentId: string;
 }): Promise<ChatMetadataResult> {
@@ -158,7 +158,7 @@ async function buildChatMetadataResult(params: {
 }
 
 async function buildChatStartupMetadataResult(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   context: GatewayRequestContext;
   agentId: string;
   modelCatalog: GatewayModelCatalogSnapshot | undefined;
@@ -206,7 +206,7 @@ async function buildChatStartupMetadataResult(params: {
 }
 
 async function buildChatStartupModelCatalogProjection(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   snapshot: ModelCatalogSnapshot;
   sessionAgentId: string;
   sessionEntry: ReturnType<typeof loadSessionEntryReadOnly>["entry"];
@@ -362,7 +362,7 @@ async function handleChatHistoryRequest({
   }
   const agentIdOverride = normalizeOptionalText((params as { agentId?: string }).agentId);
   const requestedAgentId = resolveRequestedChatAgentId({
-    cfg: (context as { getRuntimeConfig?: () => OpenClawConfig }).getRuntimeConfig?.(),
+    cfg: (context as { getRuntimeConfig?: () => BotConfig }).getRuntimeConfig?.(),
     requestedSessionKey: sessionKey,
     agentId: agentIdOverride,
   });

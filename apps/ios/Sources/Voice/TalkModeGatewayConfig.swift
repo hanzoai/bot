@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import BotKit
 
 enum TalkModeExecutionMode: Equatable {
     case native

@@ -5,21 +5,21 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createChannelIngressQueue } from "../../channels/message/ingress-queue.js";
 import type { RuntimeEnv } from "../../runtime.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import {
   channelsDeadLettersListCommand,
   channelsDeadLettersResubmitCommand,
 } from "./dead-letters.js";
 
-const originalStateDir = process.env.OPENCLAW_STATE_DIR;
+const originalStateDir = process.env.BOT_STATE_DIR;
 
 async function withTempState(run: (stateDir: string) => Promise<void>): Promise<void> {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-channel-dead-letters-"));
-  process.env.OPENCLAW_STATE_DIR = stateDir;
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-channel-dead-letters-"));
+  process.env.BOT_STATE_DIR = stateDir;
   try {
     await run(stateDir);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
@@ -34,11 +34,11 @@ function createRuntime() {
 
 describe("channel dead-letter commands", () => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     if (originalStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.BOT_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = originalStateDir;
+      process.env.BOT_STATE_DIR = originalStateDir;
     }
   });
 

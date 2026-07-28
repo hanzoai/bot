@@ -1,6 +1,6 @@
 // Post-install migration helpers guide users through setup after package install.
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import {
   readMigrationConfigPatchDetails,
@@ -12,7 +12,7 @@ import { createLazyRuntimeModule } from "../shared/lazy-runtime.js";
 import type { WizardPrompter } from "./prompts.js";
 
 type PostInstallMigrationOptions = {
-  config: OpenClawConfig;
+  config: BotConfig;
   runtime: RuntimeEnv;
   // Required only on interactive paths; non-interactive callers can omit it
   // since the helper only emits hint lines in that mode.
@@ -27,7 +27,7 @@ type PostInstallMigrationOptions = {
 };
 
 type PostInstallMigrationResult = {
-  config: OpenClawConfig;
+  config: BotConfig;
 };
 
 type ResolvedProviderCandidate = {
@@ -42,7 +42,7 @@ const loadMigrationContextModule = createLazyRuntimeModule(
 const loadConfigPathsModule = createLazyRuntimeModule(() => import("../config/paths.js"));
 
 async function resolveCandidates(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   runtime: RuntimeEnv;
   installedPluginIds: readonly string[];
 }): Promise<ResolvedProviderCandidate[]> {
@@ -111,14 +111,14 @@ function describeCandidate(candidate: ResolvedProviderCandidate): string {
 }
 
 function logMigrationHint(runtime: RuntimeEnv, candidate: ResolvedProviderCandidate): void {
-  const command = formatCliCommand(`openclaw migrate ${candidate.provider.id} --dry-run`);
+  const command = formatCliCommand(`bot migrate ${candidate.provider.id} --dry-run`);
   runtime.log(`Detected ${describeCandidate(candidate)}. Preview migration with ${command}.`);
 }
 
 function applyMigrationConfigPatches(
-  config: OpenClawConfig,
+  config: BotConfig,
   result: { items?: readonly unknown[] } | undefined,
-): OpenClawConfig {
+): BotConfig {
   const items = result?.items ?? [];
   const patches = items
     .filter((item): item is Parameters<typeof readMigrationConfigPatchDetails>[0] =>
@@ -153,7 +153,7 @@ function applyMigrationConfigPatches(
  * that was just installed during onboarding. In non-interactive mode this is
  * a no-op apart from a hint line so scripted setups never mutate state
  * unexpectedly. The actual migration UI (skill/plugin checkboxes, confirm
- * prompt) is owned by `openclaw migrate <provider>`; this helper only owns
+ * prompt) is owned by `bot migrate <provider>`; this helper only owns
  * the gate prompt.
  */
 export async function offerPostInstallMigrations(
@@ -222,7 +222,7 @@ export async function offerPostInstallMigrations(
     } catch (error) {
       params.runtime.log(
         `${candidate.provider.label} migration failed: ${formatErrorMessage(error)}. ` +
-          `Re-run with ${formatCliCommand(`openclaw migrate ${candidate.provider.id} --dry-run`)} to inspect.`,
+          `Re-run with ${formatCliCommand(`bot migrate ${candidate.provider.id} --dry-run`)} to inspect.`,
       );
     } finally {
       await preparation?.dispose?.();

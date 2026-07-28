@@ -1,6 +1,6 @@
 // Configured hook helpers combine config and install records into active hooks.
 import type { HookConfig, HookInstallRecord } from "../config/types.hooks.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { readConfigMachineState } from "../state/config-machine-state.js";
 import { getLegacyInternalHookHandlers } from "./legacy-config.js";
 
@@ -24,7 +24,7 @@ function readConfiguredInstalls(): Record<string, HookInstallRecord> | undefined
 }
 
 /** Return whether config can load any internal hooks, including legacy handlers. */
-export function hasConfiguredInternalHooks(config: OpenClawConfig): boolean {
+export function hasConfiguredInternalHooks(config: BotConfig): boolean {
   const internal = config.hooks?.internal;
   const installs = readConfiguredInstalls();
   if (!internal) {
@@ -49,7 +49,7 @@ export function hasConfiguredInternalHooks(config: OpenClawConfig): boolean {
 }
 
 /** Resolve explicitly configured internal hook names; null means all/discovered hooks may load. */
-export function resolveConfiguredInternalHookNames(config: OpenClawConfig): Set<string> | null {
+export function resolveConfiguredInternalHookNames(config: BotConfig): Set<string> | null {
   const internal = config.hooks?.internal;
   const installs = readConfiguredInstalls();
   if (!internal) {

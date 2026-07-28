@@ -2,7 +2,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveStoredSubagentCapabilities } from "../../../agents/subagent-capabilities.js";
 import type { ResolvedSubagentController } from "../../../agents/subagent-control.js";
 import { subagentRuns } from "../../../agents/subagent-registry-memory.js";

@@ -20,7 +20,7 @@ import {
   MIN_CLIENT_PROTOCOL_VERSION,
 } from "../../../../packages/gateway-protocol/src/version.js";
 import { runGatewaySmoke } from "../../../../scripts/dev/gateway-smoke.js";
-import type { OpenClawConfig } from "../../../../src/config/types.openclaw.js";
+import type { BotConfig } from "../../../../src/config/types.bot.js";
 import { formatErrorMessage } from "../../../../src/infra/errors.js";
 import { createMcpClientTempState } from "./mcp-client-temp-state.fixture.ts";
 import { createQaScriptEvidenceWriter, type QaScriptEvidenceStatus } from "./script-evidence.ts";
@@ -127,13 +127,13 @@ function parseOptions(argv: readonly string[]): ProducerOptions {
 }
 
 async function createFixturePlugin() {
-  // openclaw-temp-dir: allow standalone producer cleans this root in each scenario finally block
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gateway-mcp-fixture-"));
+  // bot-temp-dir: allow standalone producer cleans this root in each scenario finally block
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gateway-mcp-fixture-"));
   const pluginDir = path.join(root, FIXTURE_PLUGIN_ID);
   const startupGatePath = path.join(root, "startup-connect-observed");
   await fs.mkdir(pluginDir, { recursive: true });
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "bot.plugin.json"),
     `${JSON.stringify(
       {
         id: FIXTURE_PLUGIN_ID,
@@ -190,7 +190,7 @@ module.exports = {
   };
 }
 
-function withFixturePlugin(config: OpenClawConfig, pluginDir: string): OpenClawConfig {
+function withFixturePlugin(config: BotConfig, pluginDir: string): BotConfig {
   const existingPaths = config.plugins?.load?.paths ?? [];
   const existingAllow = config.plugins?.allow ?? [];
   return {
@@ -250,9 +250,9 @@ function resolveChannelMcpInvocation(params: {
         "--eval",
         [
           `import(${JSON.stringify(channelServerUrl)})`,
-          `.then((module) => module.serveOpenClawChannelMcp({`,
-          `gatewayUrl: process.env.OPENCLAW_QA_GATEWAY_URL,`,
-          `gatewayToken: process.env.OPENCLAW_QA_GATEWAY_TOKEN,`,
+          `.then((module) => module.serveBotChannelMcp({`,
+          `gatewayUrl: process.env.BOT_QA_GATEWAY_URL,`,
+          `gatewayToken: process.env.BOT_QA_GATEWAY_TOKEN,`,
           `claudeChannelMode: "off",`,
           `verbose: true`,
           `}))`,
@@ -261,14 +261,14 @@ function resolveChannelMcpInvocation(params: {
       command: process.execPath,
       cwd: params.repoRoot,
       envPatch: {
-        OPENCLAW_QA_GATEWAY_TOKEN: params.gatewayToken,
-        OPENCLAW_QA_GATEWAY_URL: params.gatewayUrl,
+        BOT_QA_GATEWAY_TOKEN: params.gatewayToken,
+        BOT_QA_GATEWAY_URL: params.gatewayUrl,
       },
     };
   }
 
   throw new Error(
-    "OpenClaw channel MCP entry not found: expected dist/index.(m)js or src/mcp/channel-server.ts",
+    "Bot channel MCP entry not found: expected dist/index.(m)js or src/mcp/channel-server.ts",
   );
 }
 
@@ -288,10 +288,10 @@ function resolvePluginToolsMcpInvocation(params: {
     cwd: params.repoRoot,
     env: {
       HOME: params.homeDir,
-      OPENCLAW_CONFIG_PATH: params.configPath,
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-      OPENCLAW_HOME: params.homeDir,
-      OPENCLAW_STATE_DIR: params.stateDir,
+      BOT_CONFIG_PATH: params.configPath,
+      BOT_DISABLE_BUNDLED_PLUGINS: "1",
+      BOT_HOME: params.homeDir,
+      BOT_STATE_DIR: params.stateDir,
     },
   };
 }
@@ -488,9 +488,9 @@ async function connectChannelMcpClient(params: {
     env: {
       ...process.env,
       ...mcpInvocation.envPatch,
-      OPENCLAW_ALLOW_INSECURE_PRIVATE_WS: "1",
-      OPENCLAW_LOG_LEVEL: "debug",
-      OPENCLAW_STATE_DIR: tempState.stateDir,
+      BOT_ALLOW_INSECURE_PRIVATE_WS: "1",
+      BOT_LOG_LEVEL: "debug",
+      BOT_STATE_DIR: tempState.stateDir,
     },
     stderr: "pipe",
   });
@@ -559,7 +559,7 @@ async function runGatewaySmokeProof(options: ProducerOptions): Promise<string> {
     controlUiEnabled: false,
   });
   const tempRoot = gateway.tempRoot;
-  const keepTemp = process.env.OPENCLAW_QA_KEEP_TEMP === "1";
+  const keepTemp = process.env.BOT_QA_KEEP_TEMP === "1";
   let details = "";
   try {
     const stdout: string[] = [];
@@ -594,7 +594,7 @@ async function runMcpGatewayStartupRetryProof(options: ProducerOptions): Promise
   let mcp: McpClientHandle | undefined;
   let gateway: Awaited<ReturnType<typeof startQaGatewayChild>> | undefined;
   let beforeSpawnAt = 0;
-  const keepTemp = process.env.OPENCLAW_QA_KEEP_TEMP === "1";
+  const keepTemp = process.env.BOT_QA_KEEP_TEMP === "1";
   let details = "";
   let proofError: Error | undefined;
   try {
@@ -699,16 +699,16 @@ async function runMcpGatewayStartupRetryProof(options: ProducerOptions): Promise
 }
 
 async function writePluginToolsConfig(root: string, pluginDir: string) {
-  const configPath = path.join(root, "openclaw.json");
-  const config = withFixturePlugin({} as OpenClawConfig, pluginDir);
+  const configPath = path.join(root, "bot.json");
+  const config = withFixturePlugin({} as BotConfig, pluginDir);
   await fs.writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, { mode: 0o600 });
   return configPath;
 }
 
 async function runMcpPluginToolsProof(options: ProducerOptions): Promise<string> {
   const fixture = await createFixturePlugin();
-  // openclaw-temp-dir: allow standalone producer cleans and verifies this root in its finally block
-  const runtimeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-tools-mcp-"));
+  // bot-temp-dir: allow standalone producer cleans and verifies this root in its finally block
+  const runtimeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-plugin-tools-mcp-"));
   const stateDir = path.join(runtimeRoot, "state");
   const homeDir = path.join(runtimeRoot, "home");
   await Promise.all([

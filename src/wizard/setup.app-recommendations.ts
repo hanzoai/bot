@@ -5,7 +5,7 @@ import {
   ensureOnboardingPluginInstalled,
   type OnboardingPluginInstallEntry,
 } from "../commands/onboarding-plugin-install.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { fetchClawHubSkillVerification } from "../infra/clawhub.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { scanInstalledApps } from "../infra/installed-apps.js";
@@ -73,11 +73,11 @@ async function isClawHubSkillInstalled(params: {
 }
 
 export type SetupAppRecommendationsOutcome = {
-  config: OpenClawConfig;
+  config: BotConfig;
   commitResult: () => void;
 };
 
-function unchangedOutcome(config: OpenClawConfig): SetupAppRecommendationsOutcome {
+function unchangedOutcome(config: BotConfig): SetupAppRecommendationsOutcome {
   return { config, commitResult: () => undefined };
 }
 
@@ -118,7 +118,7 @@ function uniqueSelectedMatches(
 }
 
 export async function setupAppRecommendations(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   prompter: WizardPrompter;
   runtime: RuntimeEnv;
   workspaceDir: string;

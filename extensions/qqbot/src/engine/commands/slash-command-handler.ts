@@ -5,7 +5,7 @@
  * Handles urgent commands, normal slash commands, and file delivery.
  */
 
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { resolveGroupCommandLevelFromAccountConfig } from "../config/group.js";
 import type { QQBotIngressEffectOnce } from "../gateway/ingress-effects.js";
 import type { QueuedMessage } from "../gateway/message-queue.js";

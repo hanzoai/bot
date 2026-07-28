@@ -1,12 +1,12 @@
-# OpenClaw Perplexity Plugin
+# Bot Perplexity Plugin
 
-Official OpenClaw plugin for Perplexity.
+Official Bot plugin for Perplexity.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/perplexity-plugin
-openclaw gateway restart
+bot plugins install @hanzo/bot-perplexity-plugin
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/tools/perplexity-search> for setup and configuration.
+See <https://docs.bot.ai/tools/perplexity-search> for setup and configuration.

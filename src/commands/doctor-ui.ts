@@ -7,7 +7,7 @@ import {
   resolveControlUiDistIndexHealth,
   resolveControlUiDistIndexPathForRoot,
 } from "../infra/control-ui-assets.js";
-import { resolveOpenClawPackageRoot } from "../infra/openclaw-root.js";
+import { resolveBotPackageRoot } from "../infra/bot-root.js";
 import { runCommandWithTimeout } from "../process/exec.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { DoctorPrompter } from "./doctor-prompter.js";
@@ -41,7 +41,7 @@ export async function detectUiProtocolFreshnessIssues(
 ): Promise<readonly UiProtocolFreshnessIssue[]> {
   const root =
     opts.root ??
-    (await resolveOpenClawPackageRoot({
+    (await resolveBotPackageRoot({
       moduleUrl: import.meta.url,
       argv1: opts.argv1 ?? process.argv[1],
       cwd: opts.cwd ?? process.cwd(),
@@ -130,8 +130,8 @@ export function uiProtocolFreshnessIssueToHealthFinding(
     path: issue.uiIndexPath,
     fixHint: issue.canBuild
       ? issue.kind === "missing-assets"
-        ? "Run `openclaw doctor --fix` to build Control UI assets."
-        : "Run `openclaw doctor --fix --force` to rebuild Control UI assets, or run `pnpm ui:build`."
+        ? "Run `bot doctor --fix` to build Control UI assets."
+        : "Run `bot doctor --fix --force` to rebuild Control UI assets, or run `pnpm ui:build`."
       : "Install from a source checkout with ui/ sources, then run `pnpm ui:build`.",
   };
 }

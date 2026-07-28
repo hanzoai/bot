@@ -1,9 +1,9 @@
 import AVFoundation
 import Foundation
-import OpenClawKit
-import OpenClawProtocol
+import BotKit
+import BotProtocol
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 @MainActor
 private final class RecordingGatewaySpeechSynthesizer: TalkGatewaySpeechSynthesizing {

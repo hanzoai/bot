@@ -1,5 +1,5 @@
 // Memory Core codecs normalize canonical and legacy dreaming ingestion state.
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeStringEntries } from "bot/plugin-sdk/string-coerce-runtime";
 import { asRecord } from "./dreaming-shared.js";
 
 const MEMORY_DAY_RE = /^\d{4}-\d{2}-\d{2}$/;

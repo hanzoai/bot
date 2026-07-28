@@ -14,7 +14,7 @@ import {
   maintainClawPackageLifecycleLease,
   type MaintainedClawPackageLifecycleLease,
 } from "../state/claw-package-lifecycle-lease.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { BotStateDatabaseOptions } from "../state/bot-state-db.js";
 import {
   persistClawPackageRef,
   readClawPackageRefs,
@@ -208,7 +208,7 @@ export async function preflightClawPackage(
   };
 }
 
-type InstallClawPackagesOptions = OpenClawStateDatabaseOptions & {
+type InstallClawPackagesOptions = BotStateDatabaseOptions & {
   deps?: PackageInstallerDeps;
   runtime?: RuntimeEnv;
   nowMs?: number;

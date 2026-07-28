@@ -1,9 +1,9 @@
 import type { Tool as SdkTool } from "@github/copilot-sdk";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentMessage } from "bot/plugin-sdk/agent-harness-runtime";
 import {
   resolveAgentHarnessBeforePromptBuildResult,
   runAgentHarnessLlmInputHook,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   createSessionConfig,
   createSystemMessageContent,

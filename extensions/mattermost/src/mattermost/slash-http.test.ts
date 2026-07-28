@@ -2,7 +2,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { PassThrough } from "node:stream";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, RuntimeEnv } from "../../runtime-api.js";
+import type { BotConfig, RuntimeEnv } from "../../runtime-api.js";
 import type { ResolvedMattermostAccount } from "./accounts.js";
 import type { MattermostClient } from "./client.js";
 const clientMocks = vi.hoisted(() => ({
@@ -149,7 +149,7 @@ async function runSlashRequest(params: {
 }) {
   const handler = createSlashCommandHttpHandler({
     account: accountFixture,
-    cfg: {} as OpenClawConfig,
+    cfg: {} as BotConfig,
     runtime: {} as RuntimeEnv,
     registeredCommands: params.registeredCommands ?? [],
   });
@@ -169,7 +169,7 @@ async function validateMattermostSlashCommandToken(params: {
   clientMocks.createMattermostClient.mockReturnValue(params.client);
   const handler = createSlashCommandHttpHandler({
     account: { ...accountFixture, accountId: `${slashTestAccountId}:${params.accountId}` },
-    cfg: {} as OpenClawConfig,
+    cfg: {} as BotConfig,
     runtime: {} as RuntimeEnv,
     registeredCommands: [params.registeredCommand],
     log: params.log,
@@ -207,7 +207,7 @@ describe("slash-http", () => {
   it("rejects non-POST methods", async () => {
     const handler = createSlashCommandHttpHandler({
       account: accountFixture,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       runtime: {} as RuntimeEnv,
       registeredCommands: [createRegisteredCommand()],
     });
@@ -224,7 +224,7 @@ describe("slash-http", () => {
   it("rejects malformed payloads", async () => {
     const handler = createSlashCommandHttpHandler({
       account: accountFixture,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       runtime: {} as RuntimeEnv,
       registeredCommands: [createRegisteredCommand()],
     });
@@ -283,7 +283,7 @@ describe("slash-http", () => {
   it("returns 408 when the request body stalls", async () => {
     const handler = createSlashCommandHttpHandler({
       account: accountFixture,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       runtime: {} as RuntimeEnv,
       registeredCommands: [createRegisteredCommand()],
       bodyTimeoutMs: 1,

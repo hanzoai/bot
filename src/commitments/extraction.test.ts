@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { BotConfig } from "../config/config.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import {
   buildCommitmentExtractionPrompt,
@@ -37,7 +37,7 @@ describe("commitment extraction", () => {
   const nowMs = Date.parse("2026-04-29T16:00:00.000Z");
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     vi.restoreAllMocks();
     vi.unstubAllEnvs();
     stateDirEnvSnapshot?.restore();
@@ -46,11 +46,11 @@ describe("commitment extraction", () => {
     tmpDirs.length = 0;
   });
 
-  async function createConfig(): Promise<OpenClawConfig> {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-commitments-"));
+  async function createConfig(): Promise<BotConfig> {
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-commitments-"));
     tmpDirs.push(tmpDir);
-    stateDirEnvSnapshot ??= captureEnv(["OPENCLAW_STATE_DIR"]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
+    stateDirEnvSnapshot ??= captureEnv(["BOT_STATE_DIR"]);
+    setTestEnvValue("BOT_STATE_DIR", tmpDir);
     return {};
   }
 
@@ -167,7 +167,7 @@ describe("commitment extraction", () => {
   });
 
   it("rejects disabled, low-confidence, and non-future candidates", () => {
-    const cfg: OpenClawConfig = {};
+    const cfg: BotConfig = {};
     const valid = validateCommitmentCandidates({
       cfg,
       items: [item()],

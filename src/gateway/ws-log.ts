@@ -1,9 +1,9 @@
 // Gateway WebSocket log formatting.
 // Redacts and compacts request/response/event metadata for console diagnostics.
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
-import { sliceUtf16Safe, truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { readStringValue } from "@hanzo/bot-normalization-core/string-coerce";
+import { sliceUtf16Safe, truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import chalk from "chalk";
-import { resolveSendableOutboundReplyParts } from "openclaw/plugin-sdk/reply-payload";
+import { resolveSendableOutboundReplyParts } from "bot/plugin-sdk/reply-payload";
 import { isVerbose } from "../globals.js";
 import { stringifyNonErrorCause } from "../infra/errors.js";
 import { shouldLogSubsystemToConsole } from "../logging/console.js";

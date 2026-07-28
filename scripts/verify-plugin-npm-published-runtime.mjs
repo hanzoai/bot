@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Verifies published plugin npm packages include built runtime entries and
-// metadata expected by OpenClaw.
+// metadata expected by Bot.
 
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -102,23 +102,23 @@ export function collectPluginNpmPublishedRuntimeErrors(params) {
   const errors = [];
   const extensionsResult = readPackageStringList(
     packageLabel,
-    "openclaw.extensions",
-    packageJson.openclaw?.extensions,
+    "bot.extensions",
+    packageJson.bot?.extensions,
   );
   const runtimeExtensionsResult = readPackageStringList(
     packageLabel,
-    "openclaw.runtimeExtensions",
-    packageJson.openclaw?.runtimeExtensions,
+    "bot.runtimeExtensions",
+    packageJson.bot?.runtimeExtensions,
   );
   const setupEntryResult = readOptionalPackageString(
     packageLabel,
-    "openclaw.setupEntry",
-    packageJson.openclaw?.setupEntry,
+    "bot.setupEntry",
+    packageJson.bot?.setupEntry,
   );
   const runtimeSetupEntryResult = readOptionalPackageString(
     packageLabel,
-    "openclaw.runtimeSetupEntry",
-    packageJson.openclaw?.runtimeSetupEntry,
+    "bot.runtimeSetupEntry",
+    packageJson.bot?.runtimeSetupEntry,
   );
   errors.push(
     ...extensionsResult.errors,
@@ -129,8 +129,8 @@ export function collectPluginNpmPublishedRuntimeErrors(params) {
   if (errors.length > 0) {
     return errors;
   }
-  if (!hasPackedFile(packageFiles, "openclaw.plugin.json")) {
-    errors.push(`${packageLabel} plugin npm package must include openclaw.plugin.json`);
+  if (!hasPackedFile(packageFiles, "bot.plugin.json")) {
+    errors.push(`${packageLabel} plugin npm package must include bot.plugin.json`);
     return errors;
   }
   const extensions = extensionsResult.entries;
@@ -140,7 +140,7 @@ export function collectPluginNpmPublishedRuntimeErrors(params) {
 
   if (runtimeExtensions.length > 0 && runtimeExtensions.length !== extensions.length) {
     errors.push(
-      `${packageLabel} package.json openclaw.runtimeExtensions length (${runtimeExtensions.length}) must match openclaw.extensions length (${extensions.length})`,
+      `${packageLabel} package.json bot.runtimeExtensions length (${runtimeExtensions.length}) must match bot.extensions length (${extensions.length})`,
     );
     return errors;
   }
@@ -168,7 +168,7 @@ export function collectPluginNpmPublishedRuntimeErrors(params) {
 
   if (runtimeSetupEntry && !setupEntry) {
     errors.push(
-      `${packageLabel} package.json openclaw.runtimeSetupEntry requires openclaw.setupEntry`,
+      `${packageLabel} package.json bot.runtimeSetupEntry requires bot.setupEntry`,
     );
     return errors;
   }
@@ -232,13 +232,13 @@ export function readPluginNpmCommandOptions(env = process.env) {
     encoding: "utf8",
     killSignal: "SIGKILL",
     maxBuffer: readPositiveIntEnv(
-      "OPENCLAW_PLUGIN_NPM_COMMAND_MAX_BUFFER_BYTES",
+      "BOT_PLUGIN_NPM_COMMAND_MAX_BUFFER_BYTES",
       DEFAULT_NPM_COMMAND_MAX_BUFFER_BYTES,
       env,
     ),
     stdio: ["ignore", "pipe", "pipe"],
     timeout: readPositiveIntEnv(
-      "OPENCLAW_PLUGIN_NPM_COMMAND_TIMEOUT_MS",
+      "BOT_PLUGIN_NPM_COMMAND_TIMEOUT_MS",
       DEFAULT_NPM_COMMAND_TIMEOUT_MS,
       env,
     ),
@@ -277,8 +277,8 @@ function npmViewReadme(spec) {
 }
 
 async function packPublishedPackage(spec, destinationDir) {
-  const attempts = readPositiveIntEnv("OPENCLAW_PLUGIN_NPM_VERIFY_ATTEMPTS", 90);
-  const delayMs = readPositiveIntEnv("OPENCLAW_PLUGIN_NPM_VERIFY_DELAY_MS", 10000);
+  const attempts = readPositiveIntEnv("BOT_PLUGIN_NPM_VERIFY_ATTEMPTS", 90);
+  const delayMs = readPositiveIntEnv("BOT_PLUGIN_NPM_VERIFY_DELAY_MS", 10000);
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
@@ -297,8 +297,8 @@ async function packPublishedPackage(spec, destinationDir) {
 }
 
 async function verifyPublishedPackageReadme(spec) {
-  const attempts = readPositiveIntEnv("OPENCLAW_PLUGIN_NPM_README_VERIFY_ATTEMPTS", 6);
-  const delayMs = readPositiveIntEnv("OPENCLAW_PLUGIN_NPM_README_VERIFY_DELAY_MS", 10000);
+  const attempts = readPositiveIntEnv("BOT_PLUGIN_NPM_README_VERIFY_ATTEMPTS", 6);
+  const delayMs = readPositiveIntEnv("BOT_PLUGIN_NPM_README_VERIFY_DELAY_MS", 10000);
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
@@ -380,7 +380,7 @@ export function parseVerifyPublishedPluginRuntimeArgs(argv) {
 }
 
 async function verifyPublishedPluginRuntime(spec) {
-  const workingDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-npm-runtime."));
+  const workingDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-plugin-npm-runtime."));
   try {
     const tarballPath = await packPublishedPackage(spec, workingDir);
     const extractDir = path.join(workingDir, "extract");

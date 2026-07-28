@@ -4,7 +4,7 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
-import { normalizeStringEntries, uniqueStrings } from "@openclaw/normalization-core";
+import { normalizeStringEntries, uniqueStrings } from "@hanzo/bot-normalization-core";
 import { runWithConcurrency as runWithConcurrencyImpl } from "./concurrency.js";
 import { MEMORY_HOST_ROOT_FILENAME } from "./config-utils.js";
 import { estimateStructuredEmbeddingInputBytes } from "./embedding-input-limits.js";
@@ -27,11 +27,11 @@ import {
   detectMime,
   estimateStringChars,
   truncateUtf16Safe,
-} from "./openclaw-runtime-io.js";
+} from "./bot-runtime-io.js";
 import {
   resolveCanonicalRootMemoryFile,
   shouldSkipRootMemoryAuxiliaryPath,
-} from "./openclaw-runtime-memory.js";
+} from "./bot-runtime-memory.js";
 import { retryTransientMemoryRead } from "./read-retry.js";
 
 export { hashText } from "./hash.js";
@@ -130,7 +130,7 @@ function shouldDescendMemoryEntry(
   if (shouldSkipPath?.(entry.path)) {
     return false;
   }
-  return entry.kind === "directory" && entry.name !== ".openclaw-repair";
+  return entry.kind === "directory" && entry.name !== ".bot-repair";
 }
 
 async function collectMemoryFilesFromDir(

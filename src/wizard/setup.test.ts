@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { ProviderPlugin } from "openclaw/plugin-sdk/provider-model-shared";
+import type { ProviderPlugin } from "bot/plugin-sdk/provider-model-shared";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter as buildWizardPrompter } from "../../test/helpers/wizard-prompter.js";
 import {
@@ -11,7 +11,7 @@ import {
 } from "../agents/auth-profiles/oauth-test-utils.js";
 import { upsertAuthProfileWithLock } from "../agents/auth-profiles/profiles.js";
 import { DEFAULT_BOOTSTRAP_FILENAME } from "../agents/workspace.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginCompatibilityNotice } from "../plugins/status.js";
 import type { ProviderAuthResult } from "../plugins/types.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -165,23 +165,23 @@ function providerPluginStub(
 const healthCommand = vi.hoisted(() => vi.fn(async () => {}));
 const ensureWorkspaceAndSessions = vi.hoisted(() => vi.fn(async () => {}));
 const replaceConfigFile = vi.hoisted(() =>
-  vi.fn(async (params: { nextConfig: OpenClawConfig }) => ({ config: params.nextConfig })),
+  vi.fn(async (params: { nextConfig: BotConfig }) => ({ config: params.nextConfig })),
 );
 const resolveGatewayPort = vi.hoisted(() =>
   vi.fn((_cfg?: unknown, env?: NodeJS.ProcessEnv) => {
-    const raw = env?.OPENCLAW_GATEWAY_PORT ?? process.env.OPENCLAW_GATEWAY_PORT;
+    const raw = env?.BOT_GATEWAY_PORT ?? process.env.BOT_GATEWAY_PORT;
     const port = raw ? Number.parseInt(raw, 10) : Number.NaN;
     return Number.isFinite(port) && port > 0 ? port : 18789;
   }),
 );
 const readConfigFileSnapshot = vi.hoisted(() =>
   vi.fn(async () => ({
-    path: "/tmp/.openclaw/openclaw.json",
+    path: "/tmp/.hanzoai/bot.json",
     exists: false,
     raw: null as string | null,
     parsed: {},
     resolved: {},
-    sourceConfigBeforeMigrations: undefined as OpenClawConfig | undefined,
+    sourceConfigBeforeMigrations: undefined as BotConfig | undefined,
     valid: true,
     config: {},
     issues: [] as Array<{ path: string; message: string }>,
@@ -211,7 +211,7 @@ function getWizardNoteCalls(note: WizardPrompter["note"]) {
   return (note as unknown as { mock: { calls: unknown[][] } }).mock.calls;
 }
 
-function modelConfigWithApiKey(apiKey: string): OpenClawConfig {
+function modelConfigWithApiKey(apiKey: string): BotConfig {
   return {
     agents: {
       defaults: { model: { primary: "openai/gpt-5.5" } },
@@ -272,9 +272,9 @@ function prepareMockAuthProfilesIn(
   return persistCalls;
 }
 
-function persistedWizardConfigs(): OpenClawConfig[] {
+function persistedWizardConfigs(): BotConfig[] {
   return (replaceConfigFile.mock.calls as unknown[][]).map(
-    ([params]) => (params as { nextConfig: OpenClawConfig }).nextConfig,
+    ([params]) => (params as { nextConfig: BotConfig }).nextConfig,
   );
 }
 
@@ -410,7 +410,7 @@ vi.mock("../config/config.js", () => ({
 vi.mock("../commands/onboard-agent.js", async () => {
   const { resolveDefaultAgentId } = await import("../agents/agent-scope-config.js");
   return {
-    ensureOnboardingConfig: async (config: OpenClawConfig) => ({
+    ensureOnboardingConfig: async (config: BotConfig) => ({
       config,
       agentId: resolveDefaultAgentId(config),
       bootstrapPending: true,
@@ -418,7 +418,7 @@ vi.mock("../commands/onboard-agent.js", async () => {
   };
 });
 vi.mock("../commands/onboard-helpers.js", () => ({
-  DEFAULT_WORKSPACE: "/tmp/openclaw-workspace",
+  DEFAULT_WORKSPACE: "/tmp/bot-workspace",
   applyWizardMetadata: (cfg: unknown) => cfg,
   summarizeExistingConfig: () => "summary",
   handleReset: async () => {},
@@ -506,7 +506,7 @@ describe("runSetupWizard", () => {
   let suiteCase = 0;
 
   beforeAll(async () => {
-    suiteRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-onboard-suite-"));
+    suiteRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-onboard-suite-"));
   });
 
   afterAll(async () => {
@@ -522,12 +522,12 @@ describe("runSetupWizard", () => {
   }
 
   function configSnapshot(
-    config: OpenClawConfig,
+    config: BotConfig,
     exists = true,
-    runtimeConfig: OpenClawConfig = config,
+    runtimeConfig: BotConfig = config,
   ) {
     return {
-      path: "/tmp/.openclaw/openclaw.json",
+      path: "/tmp/.hanzoai/bot.json",
       exists,
       raw: exists ? "{}" : null,
       parsed: config,
@@ -649,7 +649,7 @@ describe("runSetupWizard", () => {
   it("skips provider entries without an id during preferred-provider lookup", async () => {
     setupChannels.mockClear();
     readConfigFileSnapshot.mockResolvedValueOnce({
-      path: "/tmp/.openclaw/openclaw.json",
+      path: "/tmp/.hanzoai/bot.json",
       exists: true,
       raw: "{}",
       parsed: {},
@@ -712,7 +712,7 @@ describe("runSetupWizard", () => {
 
   it("exits when config is invalid", async () => {
     readConfigFileSnapshot.mockResolvedValueOnce({
-      path: "/tmp/.openclaw/openclaw.json",
+      path: "/tmp/.hanzoai/bot.json",
       exists: true,
       raw: "{}",
       parsed: {},
@@ -793,7 +793,7 @@ describe("runSetupWizard", () => {
   it("seeds interactive remote setup from command flags", async () => {
     const remoteToken = "REDACTED";
     readConfigFileSnapshot.mockResolvedValueOnce({
-      path: "/tmp/.openclaw/openclaw.json",
+      path: "/tmp/.hanzoai/bot.json",
       exists: true,
       raw: "{}",
       parsed: {},
@@ -850,7 +850,7 @@ describe("runSetupWizard", () => {
 
   it("does not reuse stored remote credentials for an overridden URL", async () => {
     readConfigFileSnapshot.mockResolvedValueOnce({
-      path: "/tmp/.openclaw/openclaw.json",
+      path: "/tmp/.hanzoai/bot.json",
       exists: true,
       raw: "{}",
       parsed: {},
@@ -1036,7 +1036,7 @@ describe("runSetupWizard", () => {
 
   it("skips the security acknowledgement after it was accepted once", async () => {
     readConfigFileSnapshot.mockResolvedValueOnce({
-      path: "/tmp/.openclaw/openclaw.json",
+      path: "/tmp/.hanzoai/bot.json",
       exists: true,
       raw: "{}",
       parsed: {},
@@ -1363,7 +1363,7 @@ describe("runSetupWizard", () => {
   it("preserves imported fleet workspace ownership until the user confirms a move", async () => {
     const currentWorkspace = await makeCaseDir("imported-fleet-current-");
     const requestedWorkspace = await makeCaseDir("imported-fleet-requested-");
-    const importedConfig: OpenClawConfig = {
+    const importedConfig: BotConfig = {
       agents: {
         defaults: { workspace: currentWorkspace },
         entries: { main: { default: true }, ops: {} },
@@ -1437,7 +1437,7 @@ describe("runSetupWizard", () => {
   it("allows size-drop writes for pending plugin install record migration", async () => {
     replaceConfigFile.mockClear();
     readConfigFileSnapshot.mockResolvedValueOnce({
-      path: "/tmp/.openclaw/openclaw.json",
+      path: "/tmp/.hanzoai/bot.json",
       exists: true,
       raw: "{}",
       parsed: {},
@@ -1448,7 +1448,7 @@ describe("runSetupWizard", () => {
         agents: { entries: { main: { default: true } } },
         plugins: {
           installs: {
-            demo: { source: "npm", spec: "@openclaw/demo-plugin" },
+            demo: { source: "npm", spec: "@hanzo/bot-demo-plugin" },
           },
         },
       },
@@ -1549,7 +1549,7 @@ describe("runSetupWizard", () => {
     promptDefaultModel.mockClear();
     replaceConfigFile.mockClear();
     readConfigFileSnapshot.mockResolvedValueOnce({
-      path: "/tmp/.openclaw/openclaw.json",
+      path: "/tmp/.hanzoai/bot.json",
       exists: true,
       raw: "{}",
       parsed: {},
@@ -1619,7 +1619,7 @@ describe("runSetupWizard", () => {
     const currentWorkspace = await makeCaseDir("current-fleet-workspace-");
     const requestedWorkspace = await makeCaseDir("requested-fleet-workspace-");
     readConfigFileSnapshot.mockResolvedValueOnce({
-      path: "/tmp/.openclaw/openclaw.json",
+      path: "/tmp/.hanzoai/bot.json",
       exists: true,
       raw: "{}",
       parsed: {},
@@ -1988,7 +1988,7 @@ describe("runSetupWizard", () => {
     const retryAgents = requireRecord(retryConfig.agents, "retry agents");
     expect(retryAgents.entries).toEqual({ main: { default: true } });
     expect(requireRecord(retryAgents.defaults, "retry defaults").workspace).toBe(
-      "/tmp/openclaw-workspace",
+      "/tmp/bot-workspace",
     );
   });
 
@@ -2092,7 +2092,7 @@ describe("runSetupWizard", () => {
       },
     ]);
     readConfigFileSnapshot.mockResolvedValueOnce({
-      path: "/tmp/.openclaw/openclaw.json",
+      path: "/tmp/.hanzoai/bot.json",
       exists: true,
       raw: "{}",
       parsed: {},
@@ -2144,11 +2144,11 @@ describe("runSetupWizard", () => {
   });
 
   it("resolves gateway.auth.password SecretRef for local setup probe", async () => {
-    const previous = process.env.OPENCLAW_GATEWAY_PASSWORD;
-    process.env.OPENCLAW_GATEWAY_PASSWORD = "gateway-ref-password"; // pragma: allowlist secret
+    const previous = process.env.BOT_GATEWAY_PASSWORD;
+    process.env.BOT_GATEWAY_PASSWORD = "gateway-ref-password"; // pragma: allowlist secret
     probeGatewayReachable.mockClear();
     readConfigFileSnapshot.mockResolvedValueOnce({
-      path: "/tmp/.openclaw/openclaw.json",
+      path: "/tmp/.hanzoai/bot.json",
       exists: true,
       raw: "{}",
       parsed: {},
@@ -2163,7 +2163,7 @@ describe("runSetupWizard", () => {
             password: {
               source: "env",
               provider: "default",
-              id: "OPENCLAW_GATEWAY_PASSWORD",
+              id: "BOT_GATEWAY_PASSWORD",
             },
           },
         },
@@ -2195,9 +2195,9 @@ describe("runSetupWizard", () => {
       );
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+        delete process.env.BOT_GATEWAY_PASSWORD;
       } else {
-        process.env.OPENCLAW_GATEWAY_PASSWORD = previous;
+        process.env.BOT_GATEWAY_PASSWORD = previous;
       }
     }
 
@@ -2338,8 +2338,8 @@ describe("runSetupWizard", () => {
   });
 
   it("shows the resolved gateway port in quickstart for fresh envs", async () => {
-    const previousPort = process.env.OPENCLAW_GATEWAY_PORT;
-    process.env.OPENCLAW_GATEWAY_PORT = "18791";
+    const previousPort = process.env.BOT_GATEWAY_PORT;
+    process.env.BOT_GATEWAY_PORT = "18791";
     const note: WizardPrompter["note"] = vi.fn(async () => {});
     const prompter = buildWizardPrompter({ note });
     const runtime = createRuntime();
@@ -2362,9 +2362,9 @@ describe("runSetupWizard", () => {
       );
     } finally {
       if (previousPort === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_PORT;
+        delete process.env.BOT_GATEWAY_PORT;
       } else {
-        process.env.OPENCLAW_GATEWAY_PORT = previousPort;
+        process.env.BOT_GATEWAY_PORT = previousPort;
       }
     }
 
@@ -2379,10 +2379,10 @@ describe("runSetupWizard", () => {
   });
 
   it("localizes the quickstart summary", async () => {
-    const previousPort = process.env.OPENCLAW_GATEWAY_PORT;
-    const previousLocale = process.env.OPENCLAW_LOCALE;
-    process.env.OPENCLAW_GATEWAY_PORT = "18791";
-    process.env.OPENCLAW_LOCALE = "zh-CN";
+    const previousPort = process.env.BOT_GATEWAY_PORT;
+    const previousLocale = process.env.BOT_LOCALE;
+    process.env.BOT_GATEWAY_PORT = "18791";
+    process.env.BOT_LOCALE = "zh-CN";
     const note: WizardPrompter["note"] = vi.fn(async () => {});
     const prompter = buildWizardPrompter({ note });
     const runtime = createRuntime();
@@ -2405,14 +2405,14 @@ describe("runSetupWizard", () => {
       );
     } finally {
       if (previousPort === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_PORT;
+        delete process.env.BOT_GATEWAY_PORT;
       } else {
-        process.env.OPENCLAW_GATEWAY_PORT = previousPort;
+        process.env.BOT_GATEWAY_PORT = previousPort;
       }
       if (previousLocale === undefined) {
-        delete process.env.OPENCLAW_LOCALE;
+        delete process.env.BOT_LOCALE;
       } else {
-        process.env.OPENCLAW_LOCALE = previousLocale;
+        process.env.BOT_LOCALE = previousLocale;
       }
     }
 

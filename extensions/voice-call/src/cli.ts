@@ -3,19 +3,19 @@ import fs from "node:fs";
 import path from "node:path";
 import { format } from "node:util";
 import type { Command } from "commander";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { callGatewayFromCli } from "openclaw/plugin-sdk/gateway-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { callGatewayFromCli } from "bot/plugin-sdk/gateway-runtime";
 import {
   addTimerTimeoutGraceMs,
   clampTimerTimeoutMs,
   MAX_TIMER_TIMEOUT_MS,
   MAX_TCP_PORT,
   parseStrictNonNegativeInteger,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/number-runtime";
 import {
   isRecord,
   normalizeOptionalLowercaseString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { sleep } from "../api.js";
 import { validateProviderConfig, type VoiceCallConfig } from "./config.js";
 import { getCallHistoryFromStore } from "./manager/store.js";
@@ -425,7 +425,7 @@ export function registerVoiceCallCli(params: {
   const root = program
     .command("voicecall")
     .description("Voice call utilities")
-    .addHelpText("after", () => `\nDocs: https://docs.openclaw.ai/cli/voicecall\n`);
+    .addHelpText("after", () => `\nDocs: https://docs.bot.ai/cli/voicecall\n`);
 
   root
     .command("setup")
@@ -447,7 +447,7 @@ export function registerVoiceCallCli(params: {
     .option(
       "--message <text>",
       "Message to speak during the smoke call",
-      "OpenClaw voice call smoke test.",
+      "Bot voice call smoke test.",
     )
     .option("--mode <mode>", "Call mode: notify or conversation", "notify")
     .option("--yes", "Actually place the live outbound call")

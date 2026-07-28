@@ -2,10 +2,10 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveDefaultAgentId } from "../../agents/agent-scope-config.js";
 import { normalizeChatType } from "../../channels/chat-type.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   buildAgentMainSessionKey,
   buildAgentPeerSessionKey,
@@ -56,7 +56,7 @@ function resolvePolicyDirectPeerId(ctx?: RuntimePolicyContext): string | undefin
 }
 
 function isMainSessionAlias(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentId: string;
   sessionKey: string;
 }): boolean {
@@ -88,7 +88,7 @@ function isMainSessionAlias(params: {
 /** Resolves the session key used for runtime policy checks and direct-message scoping. */
 /** Resolves the session key used for sandbox/tool/runtime policy lookups. */
 export function resolveRuntimePolicySessionKey(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   ctx?: RuntimePolicyContext;
   sessionKey?: string | null;
 }): string | undefined {

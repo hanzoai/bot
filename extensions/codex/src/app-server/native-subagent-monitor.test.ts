@@ -3,7 +3,7 @@ import type {
   AgentHarnessScopedSetDeliveryStatusParams,
   AgentHarnessTaskRecord,
   AgentHarnessTaskRuntimeScope,
-} from "openclaw/plugin-sdk/agent-harness-task-runtime";
+} from "bot/plugin-sdk/agent-harness-task-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { codexNativeSubagentMonitorRuntime } from "./native-subagent-monitor.js";
 import type {

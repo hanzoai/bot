@@ -241,7 +241,7 @@ export function renderChatPaneHeader(props: ChatPaneHeaderProps) {
   return html`
     <div class="chat-pane__header" @mousedown=${beginNativeWindowDrag}>
       ${props.mergedChrome
-        ? html`<openclaw-tooltip .content=${t("nav.expand")}>
+        ? html`<bot-tooltip .content=${t("nav.expand")}>
             <button
               class="btn btn--ghost btn--icon chat-icon-btn chat-pane__nav-toggle"
               type="button"
@@ -256,7 +256,7 @@ export function renderChatPaneHeader(props: ChatPaneHeaderProps) {
             >
               ${icons.menu}
             </button>
-          </openclaw-tooltip>`
+          </bot-tooltip>`
         : nothing}
       ${cloud
         ? html`<span
@@ -370,7 +370,7 @@ export function renderChatPaneHeader(props: ChatPaneHeaderProps) {
                 }
               }}
             >
-              <openclaw-tooltip
+              <bot-tooltip
                 slot="trigger"
                 .content=${props.branchSwitchDisabledReason ?? t("chat.sessionHeader.branches")}
               >
@@ -382,7 +382,7 @@ export function renderChatPaneHeader(props: ChatPaneHeaderProps) {
                 >
                   ${icons.gitBranch}
                 </button>
-              </openclaw-tooltip>
+              </bot-tooltip>
               ${props.branches.map((branch) => {
                 const relativeTime = branchRelativeTime(branch.updatedAt);
                 return html`
@@ -425,7 +425,7 @@ export function renderChatPaneHeader(props: ChatPaneHeaderProps) {
           ? nothing
           : html`${props.diffAction} ${props.backgroundTasksAction} ${props.workspaceAction}`}
         ${props.onOpenSplitView
-          ? html`<openclaw-tooltip .content=${t("chat.splitView.open")}>
+          ? html`<bot-tooltip .content=${t("chat.splitView.open")}>
               <button
                 class="btn btn--ghost btn--icon chat-icon-btn chat-open-split-view"
                 type="button"
@@ -434,10 +434,10 @@ export function renderChatPaneHeader(props: ChatPaneHeaderProps) {
               >
                 ${icons.columns2}
               </button>
-            </openclaw-tooltip>`
+            </bot-tooltip>`
           : nothing}
         ${!props.narrow && props.onSplitDown
-          ? html`<openclaw-tooltip .content=${t("chat.splitView.splitDown")}>
+          ? html`<bot-tooltip .content=${t("chat.splitView.splitDown")}>
               <button
                 class="btn btn--ghost btn--icon chat-icon-btn"
                 type="button"
@@ -446,10 +446,10 @@ export function renderChatPaneHeader(props: ChatPaneHeaderProps) {
               >
                 ${icons.panelBottomOpen}
               </button>
-            </openclaw-tooltip>`
+            </bot-tooltip>`
           : nothing}
         ${!props.narrow && props.onSplitRight
-          ? html`<openclaw-tooltip .content=${t("chat.splitView.splitRight")}>
+          ? html`<bot-tooltip .content=${t("chat.splitView.splitRight")}>
               <button
                 class="btn btn--ghost btn--icon chat-icon-btn"
                 type="button"
@@ -458,10 +458,10 @@ export function renderChatPaneHeader(props: ChatPaneHeaderProps) {
               >
                 ${icons.panelRightOpen}
               </button>
-            </openclaw-tooltip>`
+            </bot-tooltip>`
           : nothing}
         ${props.onClosePane
-          ? html`<openclaw-tooltip .content=${t("chat.splitView.closePane")}>
+          ? html`<bot-tooltip .content=${t("chat.splitView.closePane")}>
               <button
                 class="btn btn--ghost btn--icon chat-icon-btn"
                 type="button"
@@ -470,10 +470,10 @@ export function renderChatPaneHeader(props: ChatPaneHeaderProps) {
               >
                 ${icons.x}
               </button>
-            </openclaw-tooltip>`
+            </bot-tooltip>`
           : nothing}
         ${props.mergedChrome
-          ? html`<openclaw-tooltip .content=${t("chat.openCommandPalette")}>
+          ? html`<bot-tooltip .content=${t("chat.openCommandPalette")}>
               <button
                 class="btn btn--ghost btn--icon chat-icon-btn chat-pane__palette-open"
                 type="button"
@@ -482,7 +482,7 @@ export function renderChatPaneHeader(props: ChatPaneHeaderProps) {
               >
                 ${icons.search}
               </button>
-            </openclaw-tooltip>`
+            </bot-tooltip>`
           : nothing}
       </div>
     </div>

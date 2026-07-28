@@ -3,7 +3,7 @@ import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
 } from "../../infra/kysely-sync.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { BotAgentDatabase } from "../../state/bot-agent-db.js";
 import { publishSqliteSessionEntryCacheInvalidation } from "./session-accessor.sqlite-entry-cache.js";
 import { normalizeSqliteNumber } from "./session-accessor.sqlite-normalize.js";
 import { getSessionKysely, type ResolvedTranscriptScope } from "./session-accessor.sqlite-scope.js";
@@ -15,7 +15,7 @@ function createTranscriptGeneration(): string {
 
 /** Read the current raw transcript generation inside the caller's transaction. */
 export function readTranscriptGenerationInTransaction(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
 ): string | undefined {
   const db = getSessionKysely(database.db);
@@ -30,7 +30,7 @@ export function readTranscriptGenerationInTransaction(
 
 /** Materialize a generation once; pure appends must preserve an existing token. */
 export function ensureTranscriptGenerationInTransaction(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
 ): string {
   const db = getSessionKysely(database.db);
@@ -47,7 +47,7 @@ export function ensureTranscriptGenerationInTransaction(
 
 /** Rotate the watermark in the same transaction as destructive transcript replacement. */
 export function rotateTranscriptGenerationInTransaction(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
 ): string {
   const db = getSessionKysely(database.db);
@@ -65,7 +65,7 @@ export function rotateTranscriptGenerationInTransaction(
 }
 
 export function ensureTranscriptSessionRoot(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   scope: ResolvedTranscriptScope,
   updatedAt: number,
 ): void {
@@ -107,7 +107,7 @@ export function ensureTranscriptSessionRoot(
   );
 }
 
-export function readNextTranscriptSeq(database: OpenClawAgentDatabase, sessionId: string): number {
+export function readNextTranscriptSeq(database: BotAgentDatabase, sessionId: string): number {
   const db = getSessionKysely(database.db);
   const row = executeSqliteQueryTakeFirstSync(
     database.db,
@@ -127,7 +127,7 @@ function normalizeTranscriptMutationAtMs(value: number): number | undefined {
 }
 
 export function readTranscriptMutationStateInTransaction(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
 ): { observedAt: number | null; updatedAt: number | null } {
   const db = getSessionKysely(database.db);
@@ -145,7 +145,7 @@ export function readTranscriptMutationStateInTransaction(
 }
 
 export function advanceTranscriptMutationAtInTransaction(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
   value: number,
   options: { strictly?: boolean } = {},
@@ -172,7 +172,7 @@ export function advanceTranscriptMutationAtInTransaction(
 }
 
 export function touchTranscriptMutationInTransaction(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
 ): void {
   const now = normalizeTranscriptMutationAtMs(Date.now());
@@ -182,7 +182,7 @@ export function touchTranscriptMutationInTransaction(
 }
 
 export function deleteSqliteTranscriptEventsInTransaction(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
 ): boolean {
   const db = getSessionKysely(database.db);

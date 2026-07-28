@@ -175,7 +175,7 @@ describe("matrixMessageActions account propagation", () => {
       createContext({
         action: "send",
         accountId: "ops",
-        mediaLocalRoots: ["/tmp/openclaw-matrix-test"],
+        mediaLocalRoots: ["/tmp/bot-matrix-test"],
         params: {
           to: "room:!room:example",
           message: "hello",
@@ -189,7 +189,7 @@ describe("matrixMessageActions account propagation", () => {
     expect(call.input.accountId).toBe("ops");
     expect(call.input.mediaUrl).toBe("file:///tmp/photo.png");
     expect(call.cfg).toBeTypeOf("object");
-    expect(call.options).toMatchObject({ mediaLocalRoots: ["/tmp/openclaw-matrix-test"] });
+    expect(call.options).toMatchObject({ mediaLocalRoots: ["/tmp/bot-matrix-test"] });
   });
 
   it("allows media-only sends without requiring a message body", async () => {

@@ -5,8 +5,8 @@ import path from "node:path";
 import {
   abortAndDrainAgentHarnessRun,
   type EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness";
-import { AUTH_PROFILE_RUNTIME_CONTRACT } from "openclaw/plugin-sdk/agent-runtime-test-contracts";
+} from "bot/plugin-sdk/agent-harness";
+import { AUTH_PROFILE_RUNTIME_CONTRACT } from "bot/plugin-sdk/agent-runtime-test-contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createCodexRuntimePlanFixture } from "./run-attempt-test-harness.js";
 import { runCodexAppServerAttempt as runCodexAppServerAttemptImpl } from "./run-attempt.js";
@@ -38,7 +38,7 @@ function resetCodexAppServerClientFactoryForTest(): void {
   codexAppServerClientFactoryForTest = undefined;
 }
 
-/** Keeps native Codex bindings reusable while omitting OpenClaw tools and search. */
+/** Keeps native Codex bindings reusable while omitting Bot tools and search. */
 function withPersistentCodexTestToolPolicy(
   params: EmbeddedRunAttemptParams,
 ): EmbeddedRunAttemptParams {
@@ -287,7 +287,7 @@ describe("Auth profile runtime contract - Codex app-server adapter", () => {
   beforeEach(async () => {
     resetCodexTestBindingStore();
     vi.useRealTimers();
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-auth-contract-"));
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-codex-auth-contract-"));
   });
 
   afterEach(async () => {

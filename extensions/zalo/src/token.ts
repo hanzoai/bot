@@ -1,8 +1,8 @@
 // Zalo plugin module implements token behavior.
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import type { BaseTokenResolution } from "openclaw/plugin-sdk/channel-contract";
-import { tryReadSecretFileSync } from "openclaw/plugin-sdk/core";
-import { resolveAccountEntry } from "openclaw/plugin-sdk/routing";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
+import type { BaseTokenResolution } from "bot/plugin-sdk/channel-contract";
+import { tryReadSecretFileSync } from "bot/plugin-sdk/core";
+import { resolveAccountEntry } from "bot/plugin-sdk/routing";
 import { normalizeResolvedSecretInputString, normalizeSecretInputString } from "./secret-input.js";
 import type { ZaloConfig } from "./types.js";
 

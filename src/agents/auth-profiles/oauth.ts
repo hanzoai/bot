@@ -4,9 +4,9 @@
  * credentials, resolves SecretRefs, and maintains runtime store snapshots.
  */
 import { isDeepStrictEqual } from "node:util";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { coerceSecretRef } from "../../config/types.secrets.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import {
@@ -93,7 +93,7 @@ const isCompatibleModeType = (mode: string | undefined, type: string | undefined
 };
 
 function isProfileConfigCompatible(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   profileId: string;
   provider: string;
   mode: "api_key" | "token" | "oauth";
@@ -112,7 +112,7 @@ function isProfileConfigCompatible(params: {
 async function buildOAuthApiKey(
   provider: string,
   credentials: OAuthCredential,
-  context: { cfg?: OpenClawConfig },
+  context: { cfg?: BotConfig },
 ): Promise<string> {
   const formatted = await formatProviderAuthProfileApiKeyWithPlugin({
     provider,
@@ -176,14 +176,14 @@ function isRefreshTokenReusedError(error: unknown): boolean {
 }
 
 type ResolveApiKeyForProfileParams = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   store: AuthProfileStore;
   profileId: string;
   agentDir?: string;
   forceRefresh?: boolean;
 };
 
-type SecretDefaults = NonNullable<OpenClawConfig["secrets"]>["defaults"];
+type SecretDefaults = NonNullable<BotConfig["secrets"]>["defaults"];
 
 async function refreshOAuthCredential(
   credential: OAuthCredential,
@@ -244,7 +244,7 @@ function resetOAuthRefreshQueuesForTest(): void {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.oauthTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.oauthTestApi")] = {
     isRefreshTokenReusedError,
     resetOAuthRefreshQueuesForTest,
   };

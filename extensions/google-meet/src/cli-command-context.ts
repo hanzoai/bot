@@ -1,5 +1,5 @@
 import type { Command } from "commander";
-import type { callGatewayFromCli } from "openclaw/plugin-sdk/gateway-runtime";
+import type { callGatewayFromCli } from "bot/plugin-sdk/gateway-runtime";
 import type { GoogleMeetCalendarLookupResult } from "./calendar.js";
 import type { CreateOptions, MeetArtifactOptions, ResolveSpaceOptions } from "./cli-shared.js";
 import type { GoogleMeetConfig } from "./config.js";

@@ -1,6 +1,6 @@
 import path from "node:path";
-import { isCanonicalDottedDecimalIPv4, isLoopbackIpAddress } from "@openclaw/net-policy/ip";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { isCanonicalDottedDecimalIPv4, isLoopbackIpAddress } from "@hanzo/bot-net-policy/ip";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
 import {
   listAgentEntriesWithSource,
@@ -29,7 +29,7 @@ import {
   isValidExactModelPolicyRef,
   parseModelPolicyWildcardRef,
 } from "./model-policy-ref.js";
-import type { ConfigValidationIssue, OpenClawConfig } from "./types.js";
+import type { ConfigValidationIssue, BotConfig } from "./types.js";
 import { collectRawBundledChannelConfigIssues } from "./validation-channel-rules.js";
 import {
   collectUnsupportedSecretRefPolicyIssues,
@@ -38,9 +38,9 @@ import {
   withConfigIssuePath,
 } from "./validation-issues.js";
 import { isBuiltInModelProviderOverlayId } from "./zod-schema.core.js";
-import { OpenClawSchema } from "./zod-schema.js";
+import { BotSchema } from "./zod-schema.js";
 
-function materializeBundledModelProviderOverlays(config: OpenClawConfig): OpenClawConfig {
+function materializeBundledModelProviderOverlays(config: BotConfig): BotConfig {
   const providers = config.models?.providers;
   if (!providers) {
     return config;
@@ -97,7 +97,7 @@ function createIdentityAvatarIssue(
 }
 
 function validateIdentityAvatar(
-  config: OpenClawConfig,
+  config: BotConfig,
   env?: NodeJS.ProcessEnv,
 ): ConfigValidationIssue[] {
   const agents = listAgentEntriesWithSource(config);
@@ -146,7 +146,7 @@ function validateIdentityAvatar(
   return issues;
 }
 
-function validateGatewayTailscaleBind(config: OpenClawConfig): ConfigValidationIssue[] {
+function validateGatewayTailscaleBind(config: BotConfig): ConfigValidationIssue[] {
   const tailscaleMode = config.gateway?.tailscale?.mode ?? "off";
   if (tailscaleMode !== "serve" && tailscaleMode !== "funnel") {
     return [];
@@ -173,7 +173,7 @@ function validateGatewayTailscaleBind(config: OpenClawConfig): ConfigValidationI
   ];
 }
 
-function validateGatewayTailscaleAuth(config: OpenClawConfig): ConfigValidationIssue[] {
+function validateGatewayTailscaleAuth(config: BotConfig): ConfigValidationIssue[] {
   const tailscaleMode = config.gateway?.tailscale?.mode ?? "off";
   if (!isUnsafeGatewayTailscaleNoAuth({ authMode: config.gateway?.auth?.mode, tailscaleMode })) {
     return [];
@@ -186,7 +186,7 @@ function validateGatewayTailscaleAuth(config: OpenClawConfig): ConfigValidationI
   ];
 }
 
-function collectModelPolicyAllowIssues(config: OpenClawConfig): ConfigValidationIssue[] {
+function collectModelPolicyAllowIssues(config: BotConfig): ConfigValidationIssue[] {
   const issues: ConfigValidationIssue[] = [];
   const defaultModels = config.agents?.defaults?.models;
   const collectAliases = (...modelMaps: Array<typeof defaultModels | undefined>): Set<string> => {
@@ -256,13 +256,13 @@ export function validateConfigObjectRaw(
     preservedLegacyRootKeys?: readonly string[];
     env?: NodeJS.ProcessEnv;
   },
-): { ok: true; config: OpenClawConfig } | { ok: false; issues: ConfigValidationIssue[] } {
+): { ok: true; config: BotConfig } | { ok: false; issues: ConfigValidationIssue[] } {
   const normalizedRaw = stripPreservedLegacyRootKeysForValidation(
     raw,
     opts?.preservedLegacyRootKeys,
   );
   const policyIssues = collectUnsupportedSecretRefPolicyIssues(normalizedRaw);
-  const validated = OpenClawSchema.safeParse(normalizedRaw);
+  const validated = BotSchema.safeParse(normalizedRaw);
   if (!validated.success) {
     const schemaIssues = validated.error.issues.map(mapZodIssueToConfigIssue);
     return {
@@ -271,7 +271,7 @@ export function validateConfigObjectRaw(
     };
   }
   const validatedConfig = attachAgentListProjection(
-    materializeBundledModelProviderOverlays(validated.data as OpenClawConfig),
+    materializeBundledModelProviderOverlays(validated.data as BotConfig),
   );
   const channelIssues =
     policyIssues.length > 0 || opts?.validateBundledChannels
@@ -318,7 +318,7 @@ export function validateConfigObject(
     manifestRegistry?: Pick<PluginMetadataSnapshot, "manifestRegistry">["manifestRegistry"];
     sourceRaw?: unknown;
   },
-): { ok: true; config: OpenClawConfig } | { ok: false; issues: ConfigValidationIssue[] } {
+): { ok: true; config: BotConfig } | { ok: false; issues: ConfigValidationIssue[] } {
   const result = validateConfigObjectRaw(migratePersistedImplicitMainRoster(raw).config, opts);
   if (!result.ok) {
     return result;

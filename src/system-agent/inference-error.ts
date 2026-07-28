@@ -1,6 +1,6 @@
 type SystemAgentInferenceStage = "agent-turn" | "planner" | "conversation";
 
-/** Safe public error for an OpenClaw turn that could not complete with intelligence. */
+/** Safe public error for an Bot turn that could not complete with intelligence. */
 export class SystemAgentInferenceUnavailableError extends Error {
   readonly code = "SYSTEM_AGENT_INFERENCE_UNAVAILABLE";
 
@@ -9,7 +9,7 @@ export class SystemAgentInferenceUnavailableError extends Error {
     readonly failures: readonly unknown[] = [],
   ) {
     super(
-      "OpenClaw could not reach working inference. Run `openclaw onboard` to reconnect and live-test AI, then try again.",
+      "Bot could not reach working inference. Run `bot onboard` to reconnect and live-test AI, then try again.",
     );
     this.name = "SystemAgentInferenceUnavailableError";
   }

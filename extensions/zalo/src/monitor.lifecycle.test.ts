@@ -2,18 +2,18 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
+import { createPluginRuntimeMock } from "bot/plugin-sdk/channel-test-helpers";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeBotStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
 import {
   createEmptyPluginRegistry,
   createRuntimeEnv,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, PluginRuntime } from "../runtime-api.js";
+import type { BotConfig, PluginRuntime } from "../runtime-api.js";
 import type { ResolvedZaloAccount } from "./accounts.js";
 
 const getWebhookInfoMock = vi.fn(async () => ({ ok: true, result: { url: "" } }));
@@ -42,7 +42,7 @@ const TEST_ACCOUNT = {
   config: {},
 } as unknown as ResolvedZaloAccount;
 
-const TEST_CONFIG = {} as OpenClawConfig;
+const TEST_CONFIG = {} as BotConfig;
 let testStateDir: string | undefined;
 let previousStateDir: string | undefined;
 
@@ -78,10 +78,10 @@ async function startLifecycleMonitor(
 
 describe("monitorZaloProvider lifecycle", () => {
   beforeEach(async () => {
-    const createdDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-zalo-monitor-"));
+    const createdDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-zalo-monitor-"));
     testStateDir = await fs.realpath(createdDir);
-    previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = testStateDir;
+    previousStateDir = process.env.BOT_STATE_DIR;
+    process.env.BOT_STATE_DIR = testStateDir;
     const core = createPluginRuntimeMock();
     core.state.openChannelIngressQueue = (<T>(options: { accountId?: string }) =>
       createChannelIngressQueueForTests<T>({
@@ -97,15 +97,15 @@ describe("monitorZaloProvider lifecycle", () => {
     getUpdatesMock.mockReset();
     getUpdatesMock.mockImplementation(() => new Promise(() => {}));
     setActivePluginRegistry(createEmptyPluginRegistry());
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     if (testStateDir) {
       await fs.rm(testStateDir, { recursive: true, force: true });
       testStateDir = undefined;
     }
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.BOT_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.BOT_STATE_DIR = previousStateDir;
       previousStateDir = undefined;
     }
   });

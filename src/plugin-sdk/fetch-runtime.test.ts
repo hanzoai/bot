@@ -28,7 +28,7 @@ describe("plugin SDK fetch runtime", () => {
       "http_proxy",
       "https_proxy",
       "all_proxy",
-      "OPENCLAW_DEBUG_PROXY_ENABLED",
+      "BOT_DEBUG_PROXY_ENABLED",
     ]) {
       delete env[key];
     }

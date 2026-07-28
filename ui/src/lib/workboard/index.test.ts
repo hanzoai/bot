@@ -1,6 +1,6 @@
 // @vitest-environment node
 // Control UI tests cover workboard behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GatewayRequestError } from "../../api/gateway.ts";
 import type { GatewaySessionRow } from "../../api/types.ts";
@@ -3332,7 +3332,7 @@ describe("workboard controller", () => {
       expect.objectContaining({
         sessionKey: sampleTaskSessionKey,
         label: "Build board (card-1)",
-        message: expect.stringContaining("Work on this OpenClaw Workboard card: Build board"),
+        message: expect.stringContaining("Work on this Bot Workboard card: Build board"),
         idempotencyKey: "workboard:default:card-1:1",
       }),
     );
@@ -3865,7 +3865,7 @@ describe("workboard controller", () => {
       expect.objectContaining({
         sessionKey: sampleTaskSessionKey,
         model: "openai/gpt-5.6-sol",
-        message: expect.stringContaining("Work on this OpenClaw Workboard card: Build board"),
+        message: expect.stringContaining("Work on this Bot Workboard card: Build board"),
       }),
     );
     expect(client.request).toHaveBeenNthCalledWith(3, "tasks.list", { limit: 500 });

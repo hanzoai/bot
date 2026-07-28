@@ -38,16 +38,16 @@ const resolveModelAsyncMock = vi.fn(
   async (provider: string, modelId: string): Promise<EmbeddedRunnerModelResolution> =>
     createResolvedEmbeddedRunnerModel(provider, modelId),
 );
-const ensureOpenClawModelsJsonMock = vi.fn(async () => ({ wrote: false }));
+const ensureBotModelsJsonMock = vi.fn(async () => ({ wrote: false }));
 const loggerWarnMock = vi.fn();
 let refreshRuntimeAuthOnFirstPromptError = false;
 let clearRuntimeConfigSnapshot: typeof import("../config/config.js").clearRuntimeConfigSnapshot;
 let setRuntimeConfigSnapshot: typeof import("../config/config.js").setRuntimeConfigSnapshot;
 let getReplyPayloadMetadata: typeof import("../auto-reply/reply-payload.js").getReplyPayloadMetadata;
 
-vi.mock("openclaw/plugin-sdk/llm", async () => {
+vi.mock("bot/plugin-sdk/llm", async () => {
   const actual =
-    await vi.importActual<typeof import("openclaw/plugin-sdk/llm")>("openclaw/plugin-sdk/llm");
+    await vi.importActual<typeof import("bot/plugin-sdk/llm")>("bot/plugin-sdk/llm");
 
   const buildAssistantMessage = (model: { api: string; provider: string; id: string }) => ({
     role: "assistant" as const,
@@ -163,14 +163,14 @@ const installRunEmbeddedMocks = () => {
     const mod = await vi.importActual<typeof import("./models-config.js")>("./models-config.js");
     return {
       ...mod,
-      ensureOpenClawModelsJson: (...args: Parameters<typeof ensureOpenClawModelsJsonMock>) =>
-        ensureOpenClawModelsJsonMock(...args),
+      ensureBotModelsJson: (...args: Parameters<typeof ensureBotModelsJsonMock>) =>
+        ensureBotModelsJsonMock(...args),
     };
   });
 };
 
 let runEmbeddedAgent: typeof import("./embedded-agent-runner/run.js").runEmbeddedAgent;
-let SessionManager: typeof import("openclaw/plugin-sdk/agent-sessions").SessionManager;
+let SessionManager: typeof import("bot/plugin-sdk/agent-sessions").SessionManager;
 let e2eWorkspace: EmbeddedAgentRunnerTestWorkspace | undefined;
 let agentDir: string;
 let workspaceDir: string;
@@ -185,9 +185,9 @@ beforeAll(async () => {
   ({ clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } = await import("../config/config.js"));
   ({ runEmbeddedAgent } = await import("./embedded-agent-runner/run.js"));
   const { SessionManager: LoadedSessionManager } =
-    await import("openclaw/plugin-sdk/agent-sessions");
+    await import("bot/plugin-sdk/agent-sessions");
   SessionManager = LoadedSessionManager;
-  e2eWorkspace = await createEmbeddedAgentRunnerTestWorkspace("openclaw-embedded-agent-");
+  e2eWorkspace = await createEmbeddedAgentRunnerTestWorkspace("bot-embedded-agent-");
   ({ agentDir, workspaceDir } = e2eWorkspace);
 }, 180_000);
 
@@ -207,8 +207,8 @@ beforeEach(() => {
   resolveModelAsyncMock.mockImplementation(async (provider: string, modelId: string) =>
     createResolvedEmbeddedRunnerModel(provider, modelId),
   );
-  ensureOpenClawModelsJsonMock.mockReset();
-  ensureOpenClawModelsJsonMock.mockResolvedValue({ wrote: false });
+  ensureBotModelsJsonMock.mockReset();
+  ensureBotModelsJsonMock.mockResolvedValue({ wrote: false });
   loggerWarnMock.mockReset();
   refreshRuntimeAuthOnFirstPromptError = false;
   runEmbeddedAttemptMock.mockImplementation(async () => {
@@ -385,7 +385,7 @@ describe("runEmbeddedAgent", () => {
       });
     }
 
-    expect(ensureOpenClawModelsJsonMock).toHaveBeenCalledTimes(1);
+    expect(ensureBotModelsJsonMock).toHaveBeenCalledTimes(1);
   });
 
   it("uses the configured default model when the caller omits provider and model", async () => {
@@ -577,10 +577,10 @@ describe("runEmbeddedAgent", () => {
     expect(
       (resolveModelCall?.[4] as { skipAgentDiscovery?: boolean } | undefined)?.skipAgentDiscovery,
     ).toBe(true);
-    expect(ensureOpenClawModelsJsonMock).toHaveBeenCalledTimes(1);
+    expect(ensureBotModelsJsonMock).toHaveBeenCalledTimes(1);
   });
 
-  it("resolves explicit OpenAI OpenClaw runs through Codex when auth order starts with Codex OAuth", async () => {
+  it("resolves explicit OpenAI Bot runs through Codex when auth order starts with Codex OAuth", async () => {
     const sessionFile = nextSessionFile();
     const baseConfig = createEmbeddedAgentRunnerOpenAiConfig(["mock-1"]);
     const openAIProvider = baseConfig.models?.providers?.openai;
@@ -601,7 +601,7 @@ describe("runEmbeddedAgent", () => {
         defaults: {
           models: {
             "openai/mock-1": {
-              agentRuntime: { id: "openclaw" },
+              agentRuntime: { id: "bot" },
             },
           },
         },
@@ -622,7 +622,7 @@ describe("runEmbeddedAgent", () => {
     );
 
     await runEmbeddedAgent({
-      sessionId: "codex-first-openclaw",
+      sessionId: "codex-first-bot",
       sessionFile,
       workspaceDir,
       config: cfg,
@@ -631,7 +631,7 @@ describe("runEmbeddedAgent", () => {
       model: "mock-1",
       timeoutMs: 5_000,
       agentDir,
-      runId: nextRunId("codex-first-openclaw"),
+      runId: nextRunId("codex-first-bot"),
       enqueue: immediateEnqueue,
     });
 
@@ -722,7 +722,7 @@ describe("runEmbeddedAgent", () => {
       expect.objectContaining({ skipAgentDiscovery: true }),
     );
     expect(resolveModelAsyncMock).toHaveBeenCalledTimes(1);
-    expect(ensureOpenClawModelsJsonMock).toHaveBeenCalledTimes(1);
+    expect(ensureBotModelsJsonMock).toHaveBeenCalledTimes(1);
     expect(
       (firstRunEmbeddedAttemptParams() as { model?: { provider?: string } }).model?.provider,
     ).toBe("openai");
@@ -796,7 +796,7 @@ describe("runEmbeddedAgent", () => {
         preferBundledStaticCatalogTransport: true,
       }),
     );
-    expect(ensureOpenClawModelsJsonMock).toHaveBeenCalledTimes(1);
+    expect(ensureBotModelsJsonMock).toHaveBeenCalledTimes(1);
     expect(
       (firstRunEmbeddedAttemptParams() as { model?: { provider?: string } }).model?.provider,
     ).toBe("openai");
@@ -826,7 +826,7 @@ describe("runEmbeddedAgent", () => {
     });
 
     expect(resolveModelAsyncMock).not.toHaveBeenCalled();
-    expect(ensureOpenClawModelsJsonMock).toHaveBeenCalledTimes(1);
+    expect(ensureBotModelsJsonMock).toHaveBeenCalledTimes(1);
     const attempt = firstRunEmbeddedAttemptParams() as Record<string, unknown>;
     expect(attempt).toMatchObject({
       agentHarnessId: "codex",

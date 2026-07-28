@@ -3,12 +3,12 @@
  *
  * Implements only the Gateway calls needed by session tools and rejects unsupported methods.
  */
-import { normalizeFastMode, type FastMode } from "@openclaw/normalization-core/string-coerce";
+import { normalizeFastMode, type FastMode } from "@hanzo/bot-normalization-core/string-coerce";
 import type {
   SessionsListParams,
   SessionsResolveParams,
 } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { CallGatewayOptions } from "../../gateway/call.js";
 import type {
   ReadSessionMessagesAsyncOptions,
@@ -26,14 +26,14 @@ const SESSIONS_SEARCH_MAX_QUERY_CHARS = 4096;
 interface EmbeddedGatewayRuntime {
   resolveSessionAgentId: (opts: {
     sessionKey: string;
-    config: OpenClawConfig;
+    config: BotConfig;
     agentId?: string;
   }) => string;
-  getRuntimeConfig: () => OpenClawConfig;
-  resolveDefaultAgentId: (config: OpenClawConfig) => string;
-  resolveSessionStoreKey: (params: { cfg: OpenClawConfig; sessionKey: string }) => string;
+  getRuntimeConfig: () => BotConfig;
+  resolveDefaultAgentId: (config: BotConfig) => string;
+  resolveSessionStoreKey: (params: { cfg: BotConfig; sessionKey: string }) => string;
   resolveStoredSessionKeyForAgentStore: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     agentId: string;
     sessionKey: string;
   }) => string;
@@ -62,7 +62,7 @@ interface EmbeddedGatewayRuntime {
     messages: unknown[];
     maxSingleMessageBytes: number;
   }) => { messages: unknown[] };
-  resolveEffectiveChatHistoryMaxChars: (cfg: OpenClawConfig) => number;
+  resolveEffectiveChatHistoryMaxChars: (cfg: BotConfig) => number;
   dropPreSessionStartAnnouncePairs: (
     messages: unknown[],
     sessionStartedAt: number | undefined,
@@ -74,27 +74,27 @@ interface EmbeddedGatewayRuntime {
   ) => unknown[];
   capArrayByJsonBytes: (items: unknown[], maxBytes: number) => { items: unknown[] };
   listSessionsFromStoreAsync: (opts: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     storePath: string;
     store: unknown;
     opts: SessionsListParams;
   }) => Promise<SessionsListResult>;
   loadCombinedSessionStoreForGateway: (
-    cfg: OpenClawConfig,
+    cfg: BotConfig,
     opts?: { agentId?: string; projection?: "full" | "list" },
   ) => {
     storePath: string;
     store: unknown;
   };
   resolveSessionKeyFromResolveParams: (opts: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     p: SessionsResolveParams;
   }) => Promise<SessionsResolveResult>;
   loadSessionEntry: (
     sessionKey: string,
     opts?: { agentId?: string },
   ) => {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     storePath: string | undefined;
     entry: Record<string, unknown> | undefined;
   };
@@ -111,7 +111,7 @@ interface EmbeddedGatewayRuntime {
     opts: { offset: number; maxMessages: number; allowResetArchiveFallback?: boolean },
   ) => Promise<{ messages: unknown[]; totalMessages: number }>;
   resolveSessionModelRef: (
-    cfg: OpenClawConfig,
+    cfg: BotConfig,
     entry: unknown,
     sessionAgentId: string,
   ) => { provider: string | undefined };
@@ -139,7 +139,7 @@ function readChatHistoryMessageSeq(message: unknown): number | undefined {
   if (!message || typeof message !== "object" || Array.isArray(message)) {
     return undefined;
   }
-  const metadata = (message as Record<string, unknown>)["__openclaw"];
+  const metadata = (message as Record<string, unknown>)["__bot"];
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
     return undefined;
   }

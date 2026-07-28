@@ -42,8 +42,8 @@ import type { PluginRuntime } from "./runtime/types.js";
 import type { SessionCatalogProvider } from "./session-catalog.js";
 import type { PluginDependencyStatus } from "./status-dependencies-core.js";
 import type {
-  OpenClawPluginHttpRouteAuth,
-  OpenClawPluginHttpRouteUpgradeHandler,
+  BotPluginHttpRouteAuth,
+  BotPluginHttpRouteUpgradeHandler,
 } from "./types.js";
 import type { PluginMcpServerConnectionResolverRegistration } from "./types.mcp-connection.js";
 type ChannelPlugin = import("../channels/plugins/types.plugin.js").ChannelPlugin;
@@ -52,23 +52,23 @@ type ImageGenerationProviderPlugin = import("./types.js").ImageGenerationProvide
 type MediaUnderstandingProviderPlugin = import("./types.js").MediaUnderstandingProviderPlugin;
 type TranscriptSourceProvider = import("./types.js").TranscriptSourceProvider;
 type MusicGenerationProviderPlugin = import("./types.js").MusicGenerationProviderPlugin;
-type OpenClawPluginCliRootCommandDescriptor =
-  import("./types.js").OpenClawPluginCliRootCommandDescriptor;
-type OpenClawPluginCliRegistrar = import("./types.js").OpenClawPluginCliRegistrar;
-type OpenClawPluginCommandDefinition = import("./types.js").OpenClawPluginCommandDefinition;
+type BotPluginCliRootCommandDescriptor =
+  import("./types.js").BotPluginCliRootCommandDescriptor;
+type BotPluginCliRegistrar = import("./types.js").BotPluginCliRegistrar;
+type BotPluginCommandDefinition = import("./types.js").BotPluginCommandDefinition;
 type PluginInteractiveHandlerRegistration =
   import("./types.js").PluginInteractiveHandlerRegistration;
-type OpenClawPluginGatewayRuntimeScopeSurface =
-  import("./types.js").OpenClawPluginGatewayRuntimeScopeSurface;
-type OpenClawGatewayDiscoveryService = import("./types.js").OpenClawGatewayDiscoveryService;
-type OpenClawPluginHttpRouteHandler = import("./types.js").OpenClawPluginHttpRouteHandler;
-type OpenClawPluginHttpRouteMatch = import("./types.js").OpenClawPluginHttpRouteMatch;
-type OpenClawPluginHostedMediaResolver = import("./types.js").OpenClawPluginHostedMediaResolver;
-type OpenClawPluginReloadRegistration = import("./types.js").OpenClawPluginReloadRegistration;
-type OpenClawPluginSecurityAuditCollector =
-  import("./types.js").OpenClawPluginSecurityAuditCollector;
-type OpenClawPluginService = import("./types.js").OpenClawPluginService;
-type OpenClawPluginToolFactory = import("./types.js").OpenClawPluginToolFactory;
+type BotPluginGatewayRuntimeScopeSurface =
+  import("./types.js").BotPluginGatewayRuntimeScopeSurface;
+type BotGatewayDiscoveryService = import("./types.js").BotGatewayDiscoveryService;
+type BotPluginHttpRouteHandler = import("./types.js").BotPluginHttpRouteHandler;
+type BotPluginHttpRouteMatch = import("./types.js").BotPluginHttpRouteMatch;
+type BotPluginHostedMediaResolver = import("./types.js").BotPluginHostedMediaResolver;
+type BotPluginReloadRegistration = import("./types.js").BotPluginReloadRegistration;
+type BotPluginSecurityAuditCollector =
+  import("./types.js").BotPluginSecurityAuditCollector;
+type BotPluginService = import("./types.js").BotPluginService;
+type BotPluginToolFactory = import("./types.js").BotPluginToolFactory;
 type PluginConversationBindingResolvedEvent =
   import("./types.js").PluginConversationBindingResolvedEvent;
 type TypedPluginHookRegistration = import("./types.js").PluginHookRegistration;
@@ -90,7 +90,7 @@ type UnifiedModelCatalogProviderPlugin = import("./types.js").UnifiedModelCatalo
 export type PluginToolRegistration = {
   pluginId: string;
   pluginName?: string;
-  factory: OpenClawPluginToolFactory;
+  factory: BotPluginToolFactory;
   names: string[];
   declaredNames?: string[];
   optional: boolean;
@@ -102,10 +102,10 @@ export type PluginToolRegistration = {
 type PluginCliRegistration = {
   pluginId: string;
   pluginName?: string;
-  register: OpenClawPluginCliRegistrar;
+  register: BotPluginCliRegistrar;
   parentPath: string[];
   commands: string[];
-  descriptors: OpenClawPluginCliRootCommandDescriptor[];
+  descriptors: BotPluginCliRootCommandDescriptor[];
   source: string;
   rootDir?: string;
 };
@@ -114,11 +114,11 @@ type PluginCliRegistration = {
 export type PluginHttpRouteRegistration = {
   pluginId?: string;
   path: string;
-  handler: OpenClawPluginHttpRouteHandler;
-  handleUpgrade?: OpenClawPluginHttpRouteUpgradeHandler;
-  auth: OpenClawPluginHttpRouteAuth;
-  match: OpenClawPluginHttpRouteMatch;
-  gatewayRuntimeScopeSurface?: OpenClawPluginGatewayRuntimeScopeSurface;
+  handler: BotPluginHttpRouteHandler;
+  handleUpgrade?: BotPluginHttpRouteUpgradeHandler;
+  auth: BotPluginHttpRouteAuth;
+  match: BotPluginHttpRouteMatch;
+  gatewayRuntimeScopeSurface?: BotPluginGatewayRuntimeScopeSurface;
   gatewayMethodDispatchAllowed?: boolean;
   nodeCapability?: {
     surface: string;
@@ -130,7 +130,7 @@ export type PluginHttpRouteRegistration = {
 type PluginHostedMediaResolverRegistration = {
   pluginId: string;
   pluginName?: string;
-  resolver: OpenClawPluginHostedMediaResolver;
+  resolver: BotPluginHostedMediaResolver;
   source: string;
   rootDir?: string;
 };
@@ -195,7 +195,7 @@ export type PluginDashboardActionVerbRegistration = PluginManifestDashboardActio
 type PluginCliBackendRegistration = {
   pluginId: string;
   pluginName?: string;
-  builtWithOpenClawVersion?: string;
+  builtWithBotVersion?: string;
   backend: CliBackendPlugin;
   source: string;
   rootDir?: string;
@@ -281,7 +281,7 @@ type PluginHookRegistration = {
 export type PluginServiceRegistration = {
   pluginId: string;
   pluginName?: string;
-  service: OpenClawPluginService;
+  service: BotPluginService;
   source: string;
   origin: PluginOrigin;
   trustedOfficialInstall?: boolean;
@@ -291,7 +291,7 @@ export type PluginServiceRegistration = {
 export type PluginGatewayDiscoveryServiceRegistration = {
   pluginId: string;
   pluginName?: string;
-  service: OpenClawGatewayDiscoveryService;
+  service: BotGatewayDiscoveryService;
   source: string;
   rootDir?: string;
 };
@@ -299,7 +299,7 @@ export type PluginGatewayDiscoveryServiceRegistration = {
 type PluginReloadRegistration = {
   pluginId: string;
   pluginName?: string;
-  registration: OpenClawPluginReloadRegistration;
+  registration: BotPluginReloadRegistration;
   source: string;
   rootDir?: string;
 };
@@ -307,7 +307,7 @@ type PluginReloadRegistration = {
 export type PluginNodeHostCommandRegistration = {
   pluginId: string;
   pluginName?: string;
-  command: import("./types.js").OpenClawPluginNodeHostCommand;
+  command: import("./types.js").BotPluginNodeHostCommand;
   source: string;
   rootDir?: string;
 };
@@ -315,7 +315,7 @@ export type PluginNodeHostCommandRegistration = {
 type PluginNodeInvokePolicyRegistration = {
   pluginId: string;
   pluginName?: string;
-  policy: import("./types.js").OpenClawPluginNodeInvokePolicy;
+  policy: import("./types.js").BotPluginNodeInvokePolicy;
   pluginConfig?: Record<string, unknown>;
   source: string;
   rootDir?: string;
@@ -324,7 +324,7 @@ type PluginNodeInvokePolicyRegistration = {
 type PluginSecurityAuditCollectorRegistration = {
   pluginId: string;
   pluginName?: string;
-  collector: OpenClawPluginSecurityAuditCollector;
+  collector: BotPluginSecurityAuditCollector;
   source: string;
   rootDir?: string;
 };
@@ -332,7 +332,7 @@ type PluginSecurityAuditCollectorRegistration = {
 export type PluginCommandRegistration = {
   pluginId: string;
   pluginName?: string;
-  command: OpenClawPluginCommandDefinition;
+  command: BotPluginCommandDefinition;
   source: string;
   rootDir?: string;
 };
@@ -422,7 +422,7 @@ export type PluginRecord = {
   id: string;
   name: string;
   version?: string;
-  builtWithOpenClawVersion?: string;
+  builtWithBotVersion?: string;
   packageName?: string;
   description?: string;
   format?: PluginFormat;

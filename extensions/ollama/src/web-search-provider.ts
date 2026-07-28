@@ -1,11 +1,11 @@
 // Ollama provider module implements model/runtime integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   isNonSecretApiKeyMarker,
   normalizeOptionalSecretInput,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveEnvApiKey } from "openclaw/plugin-sdk/provider-auth-runtime";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+} from "bot/plugin-sdk/provider-auth";
+import { resolveEnvApiKey } from "bot/plugin-sdk/provider-auth-runtime";
+import { readProviderJsonResponse } from "bot/plugin-sdk/provider-http";
 import {
   enablePluginInConfig,
   readPositiveIntegerParam,
@@ -17,9 +17,9 @@ import {
   truncateText,
   wrapWebContent,
   type WebSearchProviderPlugin,
-} from "openclaw/plugin-sdk/provider-web-search";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/provider-web-search";
+import { fetchWithSsrFGuard } from "bot/plugin-sdk/ssrf-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { Type } from "typebox";
 import { OLLAMA_DEFAULT_BASE_URL } from "./defaults.js";
 import { readProviderBaseUrl } from "./provider-base-url.js";
@@ -80,7 +80,7 @@ function isOllamaCloudBaseUrl(baseUrl: string): boolean {
   }
 }
 
-function resolveConfiguredOllamaWebSearchApiKey(config?: OpenClawConfig): string | undefined {
+function resolveConfiguredOllamaWebSearchApiKey(config?: BotConfig): string | undefined {
   const providerApiKey = normalizeOptionalSecretInput(config?.models?.providers?.ollama?.apiKey);
   if (providerApiKey && !isNonSecretApiKeyMarker(providerApiKey)) {
     return providerApiKey;
@@ -92,7 +92,7 @@ function resolveEnvOllamaWebSearchApiKey(): string | undefined {
   return resolveEnvApiKey("ollama")?.apiKey;
 }
 
-function resolveOllamaWebSearchBaseUrl(config?: OpenClawConfig): string {
+function resolveOllamaWebSearchBaseUrl(config?: BotConfig): string {
   const pluginBaseUrl = normalizeOptionalString(
     resolveProviderWebSearchPluginConfig(config, "ollama")?.baseUrl,
   );
@@ -158,7 +158,7 @@ function buildOllamaWebSearchAttempts(params: {
 }
 
 async function runOllamaWebSearch(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   query: string;
   count?: number;
 }): Promise<Record<string, unknown>> {
@@ -263,11 +263,11 @@ async function runOllamaWebSearch(params: {
 }
 
 async function warnOllamaWebSearchPrereqs(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   prompter: {
     note: (message: string, title?: string) => Promise<void>;
   };
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   const baseUrl = resolveOllamaWebSearchBaseUrl(params.config);
   const { reachable } = await fetchOllamaModels(baseUrl);
   if (!reachable) {
@@ -306,7 +306,7 @@ export function createOllamaWebSearchProvider(): WebSearchProviderPlugin {
     envVars: [],
     placeholder: "(run ollama signin)",
     signupUrl: "https://ollama.com/",
-    docsUrl: "https://docs.openclaw.ai/tools/web",
+    docsUrl: "https://docs.bot.ai/tools/web",
     autoDetectOrder: 110,
     credentialPath: "",
     getCredentialValue: () => undefined,

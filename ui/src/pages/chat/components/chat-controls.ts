@@ -61,7 +61,7 @@ export function renderChatControls(props: ChatControlsProps) {
   const rows = chatViewMenuRows(props);
   return html`
     <div class="chat-view-menu-wrapper">
-      <openclaw-tooltip .content=${menuTitle}>
+      <bot-tooltip .content=${menuTitle}>
         <wa-dropdown
           id=${menuId}
           class="chat-view-menu"
@@ -109,7 +109,7 @@ export function renderChatControls(props: ChatControlsProps) {
             `,
           )}
         </wa-dropdown>
-      </openclaw-tooltip>
+      </bot-tooltip>
     </div>
     <div
       class="chat-composer-model-control"

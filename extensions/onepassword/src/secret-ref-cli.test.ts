@@ -3,7 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { inspectPathPermissions } from "@openclaw/fs-safe/permissions";
 import { Command } from "commander";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/plugin-entry";
+import type { BotConfig } from "bot/plugin-sdk/plugin-entry";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { encodeOnePasswordSecretId } from "../onepassword-secret-id.js";
 import { registerOnePasswordSecretRefCommands, testing } from "./secret-ref-cli.js";
@@ -17,20 +17,20 @@ function captureStdout() {
   return () => output;
 }
 
-function createProgram(config: OpenClawConfig): Command {
+function createProgram(config: BotConfig): Command {
   const program = new Command().exitOverride();
   const onepassword = program.command("onepassword");
   registerOnePasswordSecretRefCommands({
     command: onepassword,
     config,
-    tokenFile: path.join(os.tmpdir(), "openclaw-onepassword-missing-token"),
+    tokenFile: path.join(os.tmpdir(), "bot-onepassword-missing-token"),
     env: { PATH: "" },
   });
   return program;
 }
 
 async function runStatus(
-  config: OpenClawConfig,
+  config: BotConfig,
   args: string[] = [],
 ): Promise<Record<string, unknown>> {
   const output = captureStdout();
@@ -47,7 +47,7 @@ function createOpenAiPlan() {
   return testing.buildPlan({
     providerAlias: "onepassword",
     providerConfig: testing.buildProviderConfig(),
-    providerSecrets: [{ providerId: "openai", secretId: "op://openclaw/OpenAI/credential" }],
+    providerSecrets: [{ providerId: "openai", secretId: "op://bot/OpenAI/credential" }],
   });
 }
 
@@ -64,11 +64,11 @@ describe("1Password CLI helpers", () => {
       providerSecrets: [
         {
           providerId: "anthropic",
-          secretId: "op://openclaw/Anthropic/credential",
+          secretId: "op://bot/Anthropic/credential",
         },
         {
           providerId: "openrouter",
-          secretId: "openclaw/OpenRouter/credential",
+          secretId: "bot/OpenRouter/credential",
         },
       ],
     });
@@ -89,7 +89,7 @@ describe("1Password CLI helpers", () => {
         ref: {
           source: "exec",
           provider: "onepassword",
-          id: "op://openclaw/Anthropic/credential",
+          id: "op://bot/Anthropic/credential",
         },
       },
       {
@@ -100,21 +100,21 @@ describe("1Password CLI helpers", () => {
         ref: {
           source: "exec",
           provider: "onepassword",
-          id: "openclaw/OpenRouter/credential",
+          id: "bot/OpenRouter/credential",
         },
       },
     ]);
   });
 
-  it("builds a secrets apply plan for arbitrary known openclaw secret targets", () => {
+  it("builds a secrets apply plan for arbitrary known bot secret targets", () => {
     const plan = testing.buildPlan({
       providerAlias: "onepassword",
       providerConfig: testing.buildProviderConfig(),
       providerSecrets: [],
       configTargetSecrets: testing.parseConfigTargetMappings([
-        "channels.telegram.botToken=op://openclaw/Telegram/botToken",
-        "models.providers.openai.headers.x-api-key=op://openclaw/OpenAI/proxyKey",
-        "auth-profiles:main:profiles.openai.key=op://openclaw/OpenAI/credential",
+        "channels.telegram.botToken=op://bot/Telegram/botToken",
+        "models.providers.openai.headers.x-api-key=op://bot/OpenAI/proxyKey",
+        "auth-profiles:main:profiles.openai.key=op://bot/OpenAI/credential",
       ]),
     });
 
@@ -126,7 +126,7 @@ describe("1Password CLI helpers", () => {
         ref: {
           source: "exec",
           provider: "onepassword",
-          id: "op://openclaw/Telegram/botToken",
+          id: "op://bot/Telegram/botToken",
         },
       },
       {
@@ -137,7 +137,7 @@ describe("1Password CLI helpers", () => {
         ref: {
           source: "exec",
           provider: "onepassword",
-          id: "op://openclaw/OpenAI/proxyKey",
+          id: "op://bot/OpenAI/proxyKey",
         },
       },
       {
@@ -148,23 +148,23 @@ describe("1Password CLI helpers", () => {
         ref: {
           source: "exec",
           provider: "onepassword",
-          id: "op://openclaw/OpenAI/credential",
+          id: "op://bot/OpenAI/credential",
         },
       },
     ]);
   });
 
   it("parses custom provider mappings", () => {
-    expect(testing.parseProviderKeyMappings(["xai=op://openclaw/xAI/credential"])).toEqual([
+    expect(testing.parseProviderKeyMappings(["xai=op://bot/xAI/credential"])).toEqual([
       {
         providerId: "xai",
-        secretId: "op://openclaw/xAI/credential",
+        secretId: "op://bot/xAI/credential",
       },
     ]);
   });
 
   it("accepts native 1Password refs with spaces and encoded selectors", () => {
-    const nativeRef = "op://Personal/OpenClaw QA API Key/password?attribute=value%20one";
+    const nativeRef = "op://Personal/Bot QA API Key/password?attribute=value%20one";
     expect(testing.parseProviderKeyMappings([`openai=${nativeRef}`])).toEqual([
       {
         providerId: "openai",
@@ -187,7 +187,7 @@ describe("1Password CLI helpers", () => {
   );
 
   it("rejects line breaks in generated command arguments", () => {
-    expect(() => testing.quoteCliArg("plan.json\nopenclaw secrets reload", "posix")).toThrow(
+    expect(() => testing.quoteCliArg("plan.json\nbot secrets reload", "posix")).toThrow(
       /cannot contain CR or LF/,
     );
     expect(() => testing.quoteCliArg("plan.json\r& whoami", "cmd")).toThrow(
@@ -198,11 +198,11 @@ describe("1Password CLI helpers", () => {
   it("renders native follow-up commands for both Windows shells", () => {
     expect(testing.renderApplyCommands(String.raw`C:\Users\Jane Doe\plan;.json`, "win32")).toEqual([
       "PowerShell:",
-      String.raw`  openclaw secrets apply --from 'C:\Users\Jane Doe\plan;.json' --dry-run --allow-exec`,
-      String.raw`  openclaw secrets apply --from 'C:\Users\Jane Doe\plan;.json' --allow-exec`,
+      String.raw`  bot secrets apply --from 'C:\Users\Jane Doe\plan;.json' --dry-run --allow-exec`,
+      String.raw`  bot secrets apply --from 'C:\Users\Jane Doe\plan;.json' --allow-exec`,
       "Command Prompt:",
-      String.raw`  openclaw secrets apply --from "C:\Users\Jane Doe\plan;.json" --dry-run --allow-exec`,
-      String.raw`  openclaw secrets apply --from "C:\Users\Jane Doe\plan;.json" --allow-exec`,
+      String.raw`  bot secrets apply --from "C:\Users\Jane Doe\plan;.json" --dry-run --allow-exec`,
+      String.raw`  bot secrets apply --from "C:\Users\Jane Doe\plan;.json" --allow-exec`,
     ]);
   });
 
@@ -211,7 +211,7 @@ describe("1Password CLI helpers", () => {
     expect(commands).toContain(
       "Command Prompt: unavailable for paths containing % or !; use PowerShell.",
     );
-    expect(commands.filter((command) => command.includes("openclaw secrets apply"))).toHaveLength(
+    expect(commands.filter((command) => command.includes("bot secrets apply"))).toHaveLength(
       2,
     );
     expect(() => testing.quoteCliArg(String.raw`C:\%TEMP%\plan!.json`, "cmd")).toThrow(
@@ -222,18 +222,18 @@ describe("1Password CLI helpers", () => {
   it("parses config target mappings", () => {
     expect(
       testing.parseConfigTargetMappings([
-        "channels.telegram.botToken=op://openclaw/Telegram/botToken",
-        "auth-profiles:main:profiles.openai.key=op://openclaw/OpenAI/credential",
+        "channels.telegram.botToken=op://bot/Telegram/botToken",
+        "auth-profiles:main:profiles.openai.key=op://bot/OpenAI/credential",
       ]),
     ).toEqual([
       {
         path: "channels.telegram.botToken",
-        secretId: "op://openclaw/Telegram/botToken",
+        secretId: "op://bot/Telegram/botToken",
       },
       {
         path: "profiles.openai.key",
         agentId: "main",
-        secretId: "op://openclaw/OpenAI/credential",
+        secretId: "op://bot/OpenAI/credential",
       },
     ]);
   });
@@ -241,7 +241,7 @@ describe("1Password CLI helpers", () => {
   it("rejects non-canonical auth-profile agent ids", () => {
     expect(() =>
       testing.parseConfigTargetMappings([
-        "auth-profiles:../main:profiles.openai.key=op://openclaw/OpenAI/credential",
+        "auth-profiles:../main:profiles.openai.key=op://bot/OpenAI/credential",
       ]),
     ).toThrow("Invalid --target auth-profiles target for 1Password");
   });
@@ -249,8 +249,8 @@ describe("1Password CLI helpers", () => {
   it("rejects duplicate model providers", () => {
     expect(() =>
       testing.collectProviderSecrets({
-        openaiId: "op://openclaw/OpenAI/credential",
-        providerKey: ["openai=op://openclaw/OpenAI/other"],
+        openaiId: "op://bot/OpenAI/credential",
+        providerKey: ["openai=op://bot/OpenAI/other"],
       }),
     ).toThrow("Duplicate model provider id in 1Password setup: openai");
   });
@@ -320,13 +320,13 @@ describe("1Password CLI helpers", () => {
   });
 
   it("rejects traversal segments in SecretRef ids", () => {
-    expect(() => testing.parseProviderKeyMappings(["openai=op://openclaw/../credential"])).toThrow(
+    expect(() => testing.parseProviderKeyMappings(["openai=op://bot/../credential"])).toThrow(
       "Invalid --provider-key openai 1Password SecretRef id",
     );
   });
 
   it("rejects invalid 1Password references before encoding", () => {
-    for (const id of ["/absolute/path", "op://openclaw\\OpenAI\\credential", "op://vault/clé"]) {
+    for (const id of ["/absolute/path", "op://bot\\OpenAI\\credential", "op://vault/clé"]) {
       expect(() => testing.parseProviderKeyMappings([`openai=${id}`])).toThrow(
         "Invalid --provider-key openai 1Password SecretRef id",
       );
@@ -342,7 +342,7 @@ describe("1Password CLI helpers", () => {
         configTargetSecrets: [
           {
             path: "secrets.github_pat",
-            secretId: "op://openclaw/GitHub/pat",
+            secretId: "op://bot/GitHub/pat",
           },
         ],
       }),
@@ -357,13 +357,13 @@ describe("1Password CLI helpers", () => {
         providerSecrets: [
           {
             providerId: "openai",
-            secretId: "op://openclaw/OpenAI/credential",
+            secretId: "op://bot/OpenAI/credential",
           },
         ],
         configTargetSecrets: [
           {
             path: "models.providers.openai.apiKey",
-            secretId: "op://openclaw/OpenAI/other",
+            secretId: "op://bot/OpenAI/other",
           },
         ],
       }),
@@ -371,7 +371,7 @@ describe("1Password CLI helpers", () => {
   });
 
   it("creates plan files exclusively with owner-only permissions", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-1password-plan-test-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-1password-plan-test-"));
     const planPath = path.join(tempDir, "plan.json");
     const plan = createOpenAiPlan();
     try {
@@ -407,7 +407,7 @@ describe("1Password CLI helpers", () => {
   it.skipIf(process.platform === "win32")(
     "rejects plan output in a directory writable by another account",
     async () => {
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-1password-plan-test-"));
+      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-1password-plan-test-"));
       const planPath = path.join(tempDir, "plan.json");
       const plan = createOpenAiPlan();
       try {
@@ -427,10 +427,10 @@ describe("1Password CLI helpers", () => {
     "writes through the canonical directory instead of a replaceable alias",
     async () => {
       const trustedDir = await fs.mkdtemp(
-        path.join(os.tmpdir(), "openclaw-1password-plan-trusted-"),
+        path.join(os.tmpdir(), "bot-1password-plan-trusted-"),
       );
       const aliasParent = await fs.mkdtemp(
-        path.join(os.tmpdir(), "openclaw-1password-plan-alias-"),
+        path.join(os.tmpdir(), "bot-1password-plan-alias-"),
       );
       const aliasDir = path.join(aliasParent, "output");
       const canonicalPlanPath = path.join(await fs.realpath(trustedDir), "plan.json");
@@ -455,7 +455,7 @@ describe("1Password CLI helpers", () => {
   it.skipIf(process.platform === "win32")(
     "rejects unrenderable plan paths before creating a file",
     async () => {
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-1password-plan-test-"));
+      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-1password-plan-test-"));
       const planPath = path.join(tempDir, "plan\n.json");
       const plan = createOpenAiPlan();
       try {
@@ -470,7 +470,7 @@ describe("1Password CLI helpers", () => {
   );
 
   it("writes a Windows plan through the atomic private-file primitive", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-1password-plan-test-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-1password-plan-test-"));
     const planPath = path.join(tempDir, "plan.json");
     const plan = createOpenAiPlan();
     const createPrivateWindowsFile = vi.fn(async (filePath: string, content: string) => {
@@ -492,7 +492,7 @@ describe("1Password CLI helpers", () => {
   });
 
   it("prints the readiness check before plan application", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-1password-setup-test-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-1password-setup-test-"));
     const planPath = path.join(tempDir, "plan with spaces.json");
     const canonicalPlanPath = path.join(await fs.realpath(tempDir), "plan with spaces.json");
     const output = captureStdout();
@@ -503,18 +503,18 @@ describe("1Password CLI helpers", () => {
           "secretref",
           "setup",
           "--openai-id",
-          "op://openclaw/OpenAI/credential",
+          "op://bot/OpenAI/credential",
           "--plan-out",
           planPath,
         ],
         { from: "user" },
       );
-      expect(output()).toContain("openclaw onepassword secretref status");
+      expect(output()).toContain("bot onepassword secretref status");
       expect(output()).toContain(
-        `openclaw secrets apply --from '${canonicalPlanPath}' --dry-run --allow-exec`,
+        `bot secrets apply --from '${canonicalPlanPath}' --dry-run --allow-exec`,
       );
       expect(output()).toContain(
-        `openclaw secrets apply --from '${canonicalPlanPath}' --allow-exec`,
+        `bot secrets apply --from '${canonicalPlanPath}' --allow-exec`,
       );
     } finally {
       await fs.rm(tempDir, { recursive: true, force: true });
@@ -562,7 +562,7 @@ describe("1Password CLI status", () => {
   });
 
   it("requires an explicit alias when multiple providers are configured", async () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       secrets: {
         providers: Object.fromEntries(
           ["corp-onepassword", "prod-onepassword"].map((alias) => [

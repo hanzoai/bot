@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { reviewExecRequestWithConfiguredModel } from "openclaw/plugin-sdk/agent-harness-exec-review-runtime";
+import { reviewExecRequestWithConfiguredModel } from "bot/plugin-sdk/agent-harness-exec-review-runtime";
 import {
   callGatewayTool,
   hasNativeHookRelayInvocation,
@@ -10,7 +10,7 @@ import {
   resolveNativeHookRelayDeferredToolApproval,
   runBeforeToolCallHook,
   type EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handleCodexAppServerApprovalRequest } from "./approval-bridge.js";
 import {
@@ -18,8 +18,8 @@ import {
   waitForPluginApprovalDecision,
 } from "./plugin-approval-roundtrip.js";
 
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-runtime")>()),
+vi.mock("bot/plugin-sdk/agent-harness-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("bot/plugin-sdk/agent-harness-runtime")>()),
   callGatewayTool: vi.fn(),
   hasNativeHookRelayInvocation: vi.fn(() => false),
   invokeNativeHookRelay: vi.fn(),
@@ -30,9 +30,9 @@ vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => (
   })),
 }));
 
-vi.mock("openclaw/plugin-sdk/agent-harness-exec-review-runtime", async (importOriginal) => ({
+vi.mock("bot/plugin-sdk/agent-harness-exec-review-runtime", async (importOriginal) => ({
   ...(await importOriginal<
-    typeof import("openclaw/plugin-sdk/agent-harness-exec-review-runtime")
+    typeof import("bot/plugin-sdk/agent-harness-exec-review-runtime")
   >()),
   reviewExecRequestWithConfiguredModel: vi.fn(),
 }));
@@ -224,7 +224,7 @@ describe("Codex app-server approval bridge", () => {
     expect(gatewayCallMethod()).toBe("plugin.approval.request");
     expect(typeof gatewayCallAt(0)[1]).toBe("object");
     const requestPayload = gatewayRequestPayload();
-    expect(requestPayload.pluginId).toBe("openclaw-codex-app-server");
+    expect(requestPayload.pluginId).toBe("bot-codex-app-server");
     expect(requestPayload.title).toBe("Codex app-server command approval");
     expect(requestPayload.twoPhase).toBe(true);
     expect(requestPayload.turnSourceChannel).toBe("telegram");
@@ -680,7 +680,7 @@ describe("Codex app-server approval bridge", () => {
   });
 
   it("falls back to plugin approval when Codex native OpenAI config uses a local base URL", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-approval-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-codex-approval-"));
     try {
       await fs.mkdir(path.join(tempDir, "codex-home"), { recursive: true });
       await fs.writeFile(
@@ -870,8 +870,8 @@ describe("Codex app-server approval bridge", () => {
   it.each([
     "/approve abc123 allow-once",
     "bash -lc '/approve abc123 allow-once'",
-    "openclaw channels login --channel whatsapp",
-    "sudo -EH bash -lc 'openclaw channels login --channel whatsapp'",
+    "bot channels login --channel whatsapp",
+    "sudo -EH bash -lc 'bot channels login --channel whatsapp'",
   ])("keeps unsafe control command approvals on the plugin approval route: %s", async (command) => {
     const params = createParams();
     params.config = {
@@ -944,7 +944,7 @@ describe("Codex app-server approval bridge", () => {
         threadId: "thread-1",
         turnId: "turn-1",
         itemId: "cmd-auto-review-security-suppression",
-        command: "openclaw config set security.audit.suppressions '[]'",
+        command: "bot config set security.audit.suppressions '[]'",
       },
       paramsForRun: params,
       threadId: "thread-1",
@@ -1056,7 +1056,7 @@ describe("Codex app-server approval bridge", () => {
     ]);
   });
 
-  it("normalizes prefixed channel targets for OpenClaw tool policy context", async () => {
+  it("normalizes prefixed channel targets for Bot tool policy context", async () => {
     const params = createParams();
     params.messageChannel = "telegram";
     params.messageProvider = "telegram";
@@ -1088,7 +1088,7 @@ describe("Codex app-server approval bridge", () => {
     expect(gatewayRequestPayload().turnSourceTo).toBe("telegram:-100123");
   });
 
-  it("denies command approvals before prompting when OpenClaw tool policy blocks", async () => {
+  it("denies command approvals before prompting when Bot tool policy blocks", async () => {
     const params = createParams();
     mockRunBeforeToolCallHook.mockResolvedValueOnce({
       blocked: true,
@@ -1159,7 +1159,7 @@ describe("Codex app-server approval bridge", () => {
       event: "pre_tool_use",
       rawPayload: {
         hook_event_name: "PreToolUse",
-        openclaw_approval_mode: "report",
+        bot_approval_mode: "report",
         tool_name: "exec_command",
         tool_use_id: "cmd-native-relay",
         cwd: "/workspace",
@@ -1452,7 +1452,7 @@ describe("Codex app-server approval bridge", () => {
     findApprovalEvent(params, {
       status: "denied",
       message:
-        "OpenClaw native hook relay returned an unreadable Codex app-server approval result.",
+        "Bot native hook relay returned an unreadable Codex app-server approval result.",
     });
   });
 
@@ -1495,7 +1495,7 @@ describe("Codex app-server approval bridge", () => {
     expect(mockCallGatewayTool).not.toHaveBeenCalled();
     findApprovalEvent(params, {
       status: "denied",
-      message: "OpenClaw native hook relay returned a non-deny Codex app-server approval decision.",
+      message: "Bot native hook relay returned a non-deny Codex app-server approval decision.",
     });
   });
 
@@ -1565,7 +1565,7 @@ describe("Codex app-server approval bridge", () => {
     findApprovalEvent(params, {
       status: "denied",
       message:
-        "OpenClaw native hook relay unavailable for Codex app-server approval: native hook relay not found",
+        "Bot native hook relay unavailable for Codex app-server approval: native hook relay not found",
     });
   });
 
@@ -1632,7 +1632,7 @@ describe("Codex app-server approval bridge", () => {
     findApprovalEvent(params, {
       status: "denied",
       message:
-        "OpenClaw native hook relay unavailable for Codex app-server approval: native hook relay handler failed",
+        "Bot native hook relay unavailable for Codex app-server approval: native hook relay handler failed",
     });
   });
 
@@ -1686,7 +1686,7 @@ describe("Codex app-server approval bridge", () => {
     ]);
   });
 
-  it("denies command approvals when OpenClaw tool policy rewrites params", async () => {
+  it("denies command approvals when Bot tool policy rewrites params", async () => {
     const params = createParams();
     mockRunBeforeToolCallHook.mockResolvedValueOnce({
       blocked: false,
@@ -1719,11 +1719,11 @@ describe("Codex app-server approval bridge", () => {
     findApprovalEvent(params, {
       status: "denied",
       message:
-        "OpenClaw tool policy rewrote Codex app-server approval params; refusing original request.",
+        "Bot tool policy rewrote Codex app-server approval params; refusing original request.",
     });
   });
 
-  it("keeps OpenClaw plugin allow-always approvals scoped to one Codex request", async () => {
+  it("keeps Bot plugin allow-always approvals scoped to one Codex request", async () => {
     const params = createParams();
     mockRunBeforeToolCallHook.mockResolvedValueOnce({
       blocked: false,
@@ -1760,7 +1760,7 @@ describe("Codex app-server approval bridge", () => {
     });
   });
 
-  it("denies command approvals when OpenClaw tool policy requires approval", async () => {
+  it("denies command approvals when Bot tool policy requires approval", async () => {
     const params = createParams();
     mockRunBeforeToolCallHook.mockResolvedValueOnce({
       blocked: true,
@@ -2442,7 +2442,7 @@ describe("Codex app-server approval bridge", () => {
 
     expect(result).toEqual({
       decision: "decline",
-      reason: "OpenClaw codex app-server bridge does not grant native approvals yet.",
+      reason: "Bot codex app-server bridge does not grant native approvals yet.",
     });
     expect(mockCallGatewayTool).not.toHaveBeenCalled();
     expect(params.onAgentEvent).not.toHaveBeenCalled();

@@ -1,4 +1,4 @@
-// Generates setup codes used to pair external channels with OpenClaw.
+// Generates setup codes used to pair external channels with Bot.
 import os from "node:os";
 import {
   isCarrierGradeNatIpv4Address,
@@ -7,13 +7,13 @@ import {
   isLoopbackIpAddress,
   isRfc1918Ipv4Address,
   parseCanonicalIpAddress,
-} from "@openclaw/net-policy/ip";
+} from "@hanzo/bot-net-policy/ip";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveGatewayPort } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import { normalizeSecretInputString, resolveSecretInputRef } from "../config/types.secrets.js";
 import { materializeGatewayAuthSecretRefs } from "../gateway/auth-config-utils.js";
 import { assertExplicitGatewayAuthModeWhenBothConfigured } from "../gateway/auth-mode-policy.js";
@@ -246,7 +246,7 @@ function parseNormalizedGatewayUrl(raw: string): string | null {
 }
 
 function resolveScheme(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   opts?: {
     forceSecure?: boolean;
   },
@@ -280,7 +280,7 @@ function pickTailnetIPv4(
 }
 
 function resolvePairingSetupAuthLabel(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv,
 ): ResolveAuthLabelResult {
   const mode = cfg.gateway?.auth?.mode;
@@ -293,8 +293,8 @@ function resolvePairingSetupAuthLabel(
     value: cfg.gateway?.auth?.password,
     defaults,
   }).ref;
-  const envToken = normalizeOptionalString(env.OPENCLAW_GATEWAY_TOKEN);
-  const envPassword = normalizeOptionalString(env.OPENCLAW_GATEWAY_PASSWORD);
+  const envToken = normalizeOptionalString(env.BOT_GATEWAY_TOKEN);
+  const envPassword = normalizeOptionalString(env.BOT_GATEWAY_PASSWORD);
   const token =
     envToken || (tokenRef ? undefined : normalizeSecretInputString(cfg.gateway?.auth?.token));
   const password =
@@ -323,7 +323,7 @@ function resolvePairingSetupAuthLabel(
 }
 
 async function resolveGatewayUrl(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   opts: {
     env: NodeJS.ProcessEnv;
     publicUrl?: string;
@@ -410,7 +410,7 @@ export function encodePairingSetupCode(payload: PairingSetupPayload): string {
 }
 
 export async function resolvePairingSetupFromConfig(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   options: ResolvePairingSetupOptions = {},
 ): Promise<PairingSetupResolution> {
   assertExplicitGatewayAuthModeWhenBothConfigured(cfg);
@@ -421,8 +421,8 @@ export async function resolvePairingSetupFromConfig(
     mode: cfg.gateway?.auth?.mode,
     hasTokenOverride: false,
     hasPasswordOverride: false,
-    hasTokenFallback: Boolean(normalizeOptionalString(env.OPENCLAW_GATEWAY_TOKEN)),
-    hasPasswordFallback: Boolean(normalizeOptionalString(env.OPENCLAW_GATEWAY_PASSWORD)),
+    hasTokenFallback: Boolean(normalizeOptionalString(env.BOT_GATEWAY_TOKEN)),
+    hasPasswordFallback: Boolean(normalizeOptionalString(env.BOT_GATEWAY_PASSWORD)),
   });
   const authLabel = resolvePairingSetupAuthLabel(cfgForAuth, env);
   if (authLabel.error) {

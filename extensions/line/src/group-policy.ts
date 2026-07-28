@@ -2,10 +2,10 @@
 import {
   buildChannelGroupsScopeTree,
   resolveScopeRequireMention,
-} from "openclaw/plugin-sdk/channel-policy";
-import { resolveExactLineGroupConfigKey, type OpenClawConfig } from "./channel-api.js";
+} from "bot/plugin-sdk/channel-policy";
+import { resolveExactLineGroupConfigKey, type BotConfig } from "./channel-api.js";
 
-type LineGroupContext = { cfg: OpenClawConfig; accountId?: string | null; groupId?: string | null };
+type LineGroupContext = { cfg: BotConfig; accountId?: string | null; groupId?: string | null };
 
 export function resolveLineGroupRequireMention(params: LineGroupContext): boolean {
   const tree = buildChannelGroupsScopeTree(params.cfg, "line", params.accountId);

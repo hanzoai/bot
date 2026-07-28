@@ -6,7 +6,7 @@
 // events are the raw REST calls (POST/PUT/DELETE /posts). The monitor's
 // per-activity glue (partial dedupe, boundary rotation) is replicated inline in
 // block-preview mode; the scripted steps stand in for the dispatcher callbacks.
-// Refresh goldens with OPENCLAW_TRACE_UPDATE=1 (see delivery-trace harness docs).
+// Refresh goldens with BOT_TRACE_UPDATE=1 (see delivery-trace harness docs).
 import {
   deliveryTraceScenarios,
   expectDeliveryTraceMatchesGolden,
@@ -14,16 +14,16 @@ import {
   type DeliveryTraceInStep,
   type DeliveryTraceScenarioName,
   type WireRecorder,
-} from "openclaw/plugin-sdk/channel-contract-testing";
-import type { OpenClawConfig, PluginRuntime } from "openclaw/plugin-sdk/core";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
+} from "bot/plugin-sdk/channel-contract-testing";
+import type { BotConfig, PluginRuntime } from "bot/plugin-sdk/core";
+import { resolveMarkdownTableMode } from "bot/plugin-sdk/markdown-table-runtime";
 import {
   chunkMarkdownTextWithMode,
   resolveChunkMode,
   resolveTextChunkLimit,
-} from "openclaw/plugin-sdk/reply-chunking";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { convertMarkdownTables } from "openclaw/plugin-sdk/text-chunking";
+} from "bot/plugin-sdk/reply-chunking";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
+import { convertMarkdownTables } from "bot/plugin-sdk/text-chunking";
 import { describe, it, vi } from "vitest";
 import { createMattermostPost, type MattermostClient } from "./mattermost/client.js";
 import {
@@ -40,7 +40,7 @@ const ACCOUNT_ID = "main";
 // Matches the monitor's draft stream wiring (throttleMs: 1200).
 const DRAFT_THROTTLE_MS = 1200;
 
-const cfg = {} as OpenClawConfig;
+const cfg = {} as BotConfig;
 const tableMode = resolveMarkdownTableMode({ cfg, channel: "mattermost" });
 const chunkMode = resolveChunkMode(cfg, "mattermost", ACCOUNT_ID);
 const textLimit = resolveTextChunkLimit(cfg, "mattermost", ACCOUNT_ID, { fallbackLimit: 4000 });

@@ -118,7 +118,7 @@ function createHarness(initialScopeId: string) {
 
 function appendPage(context: ApplicationContext) {
   const page = document.createElement(
-    "openclaw-model-providers-page",
+    "bot-model-providers-page",
   ) as ModelProvidersPageTestElement;
   page.context = context;
   document.body.append(page);
@@ -178,7 +178,7 @@ describe("ModelProvidersPage agent scope", () => {
     const { context, request, snapshot } = createHarness("writer");
     const staleData = { ...EMPTY_MODEL_PROVIDERS_DATA, updatedAt: 1 };
     const page = document.createElement(
-      "openclaw-model-providers-page",
+      "bot-model-providers-page",
     ) as ModelProvidersPageTestElement;
     page.context = context;
     page.routeData = { data: staleData, client: snapshot.client, agentId: "main" };

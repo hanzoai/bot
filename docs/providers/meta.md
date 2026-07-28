@@ -2,12 +2,12 @@
 summary: "Meta setup (auth + muse-spark-1.1 model selection)"
 title: "Meta"
 read_when:
-  - You want to use Meta with OpenClaw
+  - You want to use Meta with Bot
   - You need the MODEL_API_KEY env var or CLI auth choice
 ---
 
 The **Meta API** uses the OpenAI-compatible **Responses API** (`POST /v1/responses`)
-for the `muse-spark-1.1` reasoning model. The provider ships as a bundled OpenClaw
+for the `muse-spark-1.1` reasoning model. The provider ships as a bundled Bot
 plugin.
 
 | Property          | Value                              |
@@ -29,11 +29,11 @@ plugin.
     <CodeGroup>
 
 ```bash Onboarding
-openclaw onboard --auth-choice meta-api-key
+bot onboard --auth-choice meta-api-key
 ```
 
 ```bash Direct flag
-openclaw onboard --non-interactive --accept-risk \
+bot onboard --non-interactive --accept-risk \
   --auth-choice meta-api-key \
   --meta-api-key "$MODEL_API_KEY"
 ```
@@ -47,11 +47,11 @@ export MODEL_API_KEY=<key>
   </Step>
   <Step title="Verify models are available">
     ```bash
-    openclaw models list --provider meta
+    bot models list --provider meta
     ```
 
     Lists the static `muse-spark-1.1` catalog entry. If `MODEL_API_KEY` is unresolved,
-    `openclaw models status --json` reports the missing credential under
+    `bot models status --json` reports the missing credential under
     `auth.unusableProfiles`.
 
   </Step>
@@ -60,7 +60,7 @@ export MODEL_API_KEY=<key>
 ## Non-interactive setup
 
 ```bash
-openclaw onboard --non-interactive --accept-risk \
+bot onboard --non-interactive --accept-risk \
   --mode local \
   --auth-choice meta-api-key \
   --meta-api-key "$MODEL_API_KEY"
@@ -80,7 +80,7 @@ Capabilities:
 - Stateless encrypted reasoning replay (`store: false`, `include: ["reasoning.encrypted_content"]`)
 
 <Warning>
-`muse-spark-1.1` does not accept `reasoning.effort: "none"`. OpenClaw maps
+`muse-spark-1.1` does not accept `reasoning.effort: "none"`. Bot maps
 `--thinking off` to `minimal` for this provider.
 </Warning>
 
@@ -103,7 +103,7 @@ Capabilities:
 <Note>
 If the Gateway runs as a daemon (launchd, systemd, Docker), make sure
 `MODEL_API_KEY` is available to that process — for example in
-`~/.openclaw/.env` or through `env.shellEnv`. A key exported only in an
+`~/.bot/.env` or through `env.shellEnv`. A key exported only in an
 interactive shell will not help a managed service unless the env is imported
 separately.
 </Note>

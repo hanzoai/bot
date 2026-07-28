@@ -102,7 +102,7 @@ function findQueuedSendMessageIndex(
     if (userRoleOnly && record.role !== "user") {
       return false;
     }
-    const marker = record["__openclaw"];
+    const marker = record["__bot"];
     const markerIdempotencyKey =
       marker && typeof marker === "object" && !Array.isArray(marker)
         ? (marker as { idempotencyKey?: unknown }).idempotencyKey
@@ -146,7 +146,7 @@ export function preserveQueuedUserTurn(state: SteerLifecycleHost, item: ChatQueu
     role: "user",
     content,
     timestamp: item.createdAt,
-    __openclaw: { idempotencyKey: `${runId}:user` },
+    __bot: { idempotencyKey: `${runId}:user` },
   };
   if (visibleSessionMatches(state, sessionKey, item.agentId)) {
     if (!chatMessagesContainQueuedSend(state.chatMessages, item, true)) {

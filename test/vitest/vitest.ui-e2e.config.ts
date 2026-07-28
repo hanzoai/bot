@@ -12,7 +12,7 @@ function createUiE2eVitestConfig(
   const base = sharedVitestConfig as Record<string, unknown>;
   const baseTest = sharedVitestConfig.test ?? {};
   const exclude = (baseTest.exclude ?? []).filter((pattern) => pattern !== "**/*.e2e.test.ts");
-  const includeFromEnv = loadPatternListFromEnv("OPENCLAW_VITEST_INCLUDE_FILE", env);
+  const includeFromEnv = loadPatternListFromEnv("BOT_VITEST_INCLUDE_FILE", env);
   const include =
     includeFromEnv ??
     narrowIncludePatternsForCli(uiE2eIncludePatterns, argv) ??

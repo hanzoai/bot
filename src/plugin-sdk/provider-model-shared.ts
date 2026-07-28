@@ -1,9 +1,9 @@
 // Provider model helpers normalize model catalog entries shared by provider plugins.
-import { normalizeProviderId as normalizeProviderIdCore } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId as normalizeProviderIdCore } from "@hanzo/bot-model-catalog-core/provider-id";
 import {
   normalizeAntigravityPreviewModelId as normalizeAntigravityPreviewModelIdCore,
   normalizeGooglePreviewModelId as normalizeGooglePreviewModelIdCore,
-} from "@openclaw/model-catalog-core/provider-model-id-normalize";
+} from "@hanzo/bot-model-catalog-core/provider-model-id-normalize";
 import {
   buildAnthropicReplayPolicyForModel,
   buildGoogleGeminiReplayPolicy,
@@ -41,13 +41,13 @@ export {
   supportsClaudeFastMode,
   supportsClaudeNativeMaxEffort,
   supportsClaudeNativeXhighEffort,
-} from "@openclaw/llm-core";
+} from "@hanzo/bot-llm-core";
 export type {
   UnifiedModelCatalogEntry,
   UnifiedModelCatalogKind,
   UnifiedModelCatalogSource,
-} from "@openclaw/model-catalog-core/model-catalog-types";
-export { isCloudModelRef } from "@openclaw/model-catalog-core/model-catalog-refs";
+} from "@hanzo/bot-model-catalog-core/model-catalog-types";
+export { isCloudModelRef } from "@hanzo/bot-model-catalog-core/model-catalog-refs";
 export type {
   BedrockDiscoveryConfig,
   ModelCompatConfig,
@@ -120,7 +120,7 @@ export function modelCostsEqual(
 
 const LOCAL_MODEL_FAMILY_PREFERENCES = [
   // Gemma 4 leads: live bench of the system-agent contract (planner JSON +
-  // openclaw tool calls) scored gemma4:e4b well above qwen3.5:4b on approval
+  // bot tool calls) scored gemma4:e4b well above qwen3.5:4b on approval
   // follow-through and structured-command accuracy at ~2.5x lower latency.
   /gemma[-_.]?4(?!\d)/,
   /qwen[-_.]?3[._]5(?!\d)/,

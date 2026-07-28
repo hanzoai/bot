@@ -66,12 +66,12 @@ describe("board session shell", () => {
     );
     render(renderBoardSessionSurface(props), unlinked);
 
-    const chip = linked.querySelector<HTMLElementTagNameMap["openclaw-workboard-card-chip"]>(
-      "openclaw-workboard-card-chip",
+    const chip = linked.querySelector<HTMLElementTagNameMap["bot-workboard-card-chip"]>(
+      "bot-workboard-card-chip",
     );
     expect(chip?.sessionKey).toBe("agent:main:workboard-link");
     expect(chip?.client).toBe(client);
-    expect(unlinked.querySelector("openclaw-workboard-card-chip")).toBeNull();
+    expect(unlinked.querySelector("bot-workboard-card-chip")).toBeNull();
   });
 
   it("shows the face toggle only when a board exists", () => {
@@ -133,7 +133,7 @@ describe("board session shell", () => {
     expect(container.querySelector(`.board-session-surface--dock-${dock}`)).not.toBeNull();
     expect(container.querySelector("[data-test-divider]") !== null).toBe(dock === "bottom");
     expect(container.querySelector("[data-test-chat]") !== null).toBe(dock === "bottom");
-    expect(container.querySelector("openclaw-board-view")).not.toBeNull();
+    expect(container.querySelector("bot-board-view")).not.toBeNull();
   });
 
   it("collapses hidden chat to a reopen affordance", () => {
@@ -191,19 +191,19 @@ describe("board session shell", () => {
     };
 
     render(renderBoardSessionSurface({ ...props, dock: "right" }), container);
-    const board = container.querySelector("openclaw-board-view");
+    const board = container.querySelector("bot-board-view");
     expect(container.querySelector("[data-test-chat]")).toBeNull();
 
     render(renderBoardSessionSurface({ ...props, dock: "left" }), container);
-    expect(container.querySelector("openclaw-board-view")).toBe(board);
+    expect(container.querySelector("bot-board-view")).toBe(board);
     expect(container.querySelector("[data-test-chat]")).toBeNull();
 
     render(renderBoardSessionSurface({ ...props, dock: "bottom" }), container);
-    expect(container.querySelector("openclaw-board-view")).toBe(board);
+    expect(container.querySelector("bot-board-view")).toBe(board);
     expect(container.querySelector("[data-test-chat]")).not.toBeNull();
 
     render(renderBoardSessionSurface({ ...props, dock: "hidden" }), container);
-    expect(container.querySelector("openclaw-board-view")).toBe(board);
+    expect(container.querySelector("bot-board-view")).toBe(board);
     expect(container.querySelector("[data-test-chat]")).toBeNull();
   });
 });

@@ -1,8 +1,8 @@
 // Zalo plugin module implements accounts behavior.
-import { createAccountListHelpers } from "openclaw/plugin-sdk/account-helpers";
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { createAccountListHelpers } from "bot/plugin-sdk/account-helpers";
+import { normalizeAccountId } from "bot/plugin-sdk/account-id";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveZaloToken } from "./token.js";
 import type { ResolvedZaloAccount, ZaloAccountConfig, ZaloConfig } from "./types.js";
 
@@ -22,7 +22,7 @@ const {
 export { listZaloAccountIds, resolveDefaultZaloAccountId };
 
 export function resolveZaloAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   allowUnresolvedSecretRef?: boolean;
 }): ResolvedZaloAccount {
@@ -49,7 +49,7 @@ export function resolveZaloAccount(params: {
   };
 }
 
-export function listEnabledZaloAccounts(cfg: OpenClawConfig): ResolvedZaloAccount[] {
+export function listEnabledZaloAccounts(cfg: BotConfig): ResolvedZaloAccount[] {
   return listZaloAccountIds(cfg)
     .map((accountId) => resolveZaloAccount({ cfg, accountId }))
     .filter((account) => account.enabled);

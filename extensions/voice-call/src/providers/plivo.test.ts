@@ -73,7 +73,7 @@ describe("PlivoProvider", () => {
         authToken: "test-token",
       },
       {
-        publicUrl: "https://voice.openclaw.ai/voice/webhook?provider=plivo",
+        publicUrl: "https://voice.bot.ai/voice/webhook?provider=plivo",
       },
     );
 
@@ -89,7 +89,7 @@ describe("PlivoProvider", () => {
     const callbackMap = (provider as unknown as { callUuidToWebhookUrl: Map<string, string> })
       .callUuidToWebhookUrl;
 
-    expect(callbackMap.get("call-uuid")).toBe("https://voice.openclaw.ai/voice/webhook");
+    expect(callbackMap.get("call-uuid")).toBe("https://voice.bot.ai/voice/webhook");
   });
 
   it("pins call-control transfer URLs to the configured publicUrl path", async () => {
@@ -99,7 +99,7 @@ describe("PlivoProvider", () => {
         authToken: "test-token",
       },
       {
-        publicUrl: "https://voice.openclaw.ai/voice/webhook?provider=plivo",
+        publicUrl: "https://voice.bot.ai/voice/webhook?provider=plivo",
       },
     );
     const apiRequest = vi.fn(async (_params: unknown) => ({}));
@@ -130,7 +130,7 @@ describe("PlivoProvider", () => {
         endpoint: "/Call/call-uuid/",
         body: expect.objectContaining({
           aleg_url:
-            "https://voice.openclaw.ai/voice/webhook?provider=plivo&flow=xml-speak&callId=internal-call-id",
+            "https://voice.bot.ai/voice/webhook?provider=plivo&flow=xml-speak&callId=internal-call-id",
         }),
       }),
     );

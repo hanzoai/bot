@@ -10,7 +10,7 @@ import {
   resolveSessionTranscriptPathInDir,
 } from "../config/sessions.js";
 import { applySessionEntryReplacements } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveGatewaySessionStoreTarget } from "../gateway/session-utils.js";
 import {
   getAgentEventLifecycleGeneration,
@@ -67,8 +67,8 @@ function resolveEntryTranscriptLockPaths(params: {
 }
 
 export async function markRestartAbortedMainSessions(params: {
-  cfg?: OpenClawConfig;
-  additionalCfgs?: Iterable<OpenClawConfig | undefined>;
+  cfg?: BotConfig;
+  additionalCfgs?: Iterable<BotConfig | undefined>;
   stateDir?: string;
   sessionKeys?: Iterable<string>;
   sessionIds?: Iterable<string>;
@@ -110,10 +110,10 @@ export async function markRestartAbortedMainSessions(params: {
   const env =
     params.stateDir === undefined
       ? process.env
-      : { ...process.env, OPENCLAW_STATE_DIR: params.stateDir };
+      : { ...process.env, BOT_STATE_DIR: params.stateDir };
   const stateDir = resolveStateDir(env);
   const configs = [params.cfg, ...(params.additionalCfgs ?? [])].filter(
-    (cfg): cfg is OpenClawConfig => Boolean(cfg),
+    (cfg): cfg is BotConfig => Boolean(cfg),
   );
   for (const cfg of configs) {
     try {
@@ -245,7 +245,7 @@ export async function markRestartAbortedMainSessions(params: {
 }
 
 export async function markStartupOrphanedMainSessionsForRecovery(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   stateDir?: string;
   activeSessionIds?: Iterable<string>;
   activeSessionKeys?: Iterable<string>;

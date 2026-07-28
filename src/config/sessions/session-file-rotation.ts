@@ -1,7 +1,7 @@
 // Session file rotation rewrites transcript paths when session ids reset or fork.
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 
 /** Rewrites transcript file paths when a session id changes during reset or fork. */
 export function rewriteSessionFileForNewSessionId(params: {

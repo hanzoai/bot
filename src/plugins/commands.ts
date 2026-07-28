@@ -5,11 +5,11 @@
  * These commands are processed before built-in commands and before agent invocation.
  */
 
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { resolveBoundAgentIdForSession } from "../agents/session-agent-binding.js";
 import { resolveConversationBindingContext } from "../channels/conversation-binding-context.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { ADMIN_SCOPE, isOperatorScope } from "../gateway/operator-scopes.js";
 import { logVerbose } from "../globals.js";
 import {
@@ -34,7 +34,7 @@ import {
 } from "./conversation-binding.js";
 import { getActivePluginChannelRegistry } from "./runtime.js";
 import type {
-  OpenClawPluginCommandDefinition,
+  BotPluginCommandDefinition,
   PluginCommandContext,
   PluginCommandResult,
 } from "./types.js";
@@ -123,7 +123,7 @@ function sanitizeArgs(args: string | undefined): string | undefined {
 }
 
 function resolveBindingConversationFromCommand(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   channel: string;
   senderId?: string;
   from?: string;
@@ -146,7 +146,7 @@ function resolveBindingConversationFromCommand(params: {
     return null;
   }
   return resolveConversationBindingContext({
-    cfg: params.config ?? ({} as OpenClawConfig),
+    cfg: params.config ?? ({} as BotConfig),
     channel: params.channel,
     accountId: params.accountId,
     threadId: params.messageThreadId,
@@ -165,7 +165,7 @@ type PluginCommandLlmCompleteParams = Parameters<
 
 function buildPluginCommandRuntimeContext(params: {
   command: RegisteredPluginCommand;
-  config: OpenClawConfig;
+  config: BotConfig;
   agentId?: string;
   sessionKey?: string;
   authProfileId?: string;
@@ -228,7 +228,7 @@ export async function executePluginCommand(params: {
   sessionFile?: PluginCommandContext["sessionFile"];
   authProfileId?: string;
   commandBody: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   from?: PluginCommandContext["from"];
   to?: PluginCommandContext["to"];
   originatingTo?: string;
@@ -438,6 +438,6 @@ export function listPluginCommands(): Array<{
   }));
 }
 
-function listPluginInvocationNames(command: OpenClawPluginCommandDefinition): string[] {
+function listPluginInvocationNames(command: BotPluginCommandDefinition): string[] {
   return listPluginInvocationKeys(command);
 }

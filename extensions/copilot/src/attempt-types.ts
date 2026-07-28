@@ -3,11 +3,11 @@ import type {
   AgentHarnessAttemptParams,
   AgentHarnessAttemptResult as AgentHarnessAttemptResultContract,
   AgentMessage,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   resolveSandboxContext as defaultResolveSandboxContext,
   runAgentEndSideEffects,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import type { OnAssistantDeltaPayload } from "./event-bridge.js";
 import type { CopilotHooksConfig } from "./hooks-bridge.js";
 import type { CopilotPermissionPolicy } from "./permission-bridge.js";
@@ -21,7 +21,7 @@ export const COPILOT_SETTLED_FINALIZATION_EXCLUDED_TOOLS = [
   "custom:*",
 ] as const;
 export const COPILOT_SETTLED_FINALIZATION_SYSTEM_MESSAGE =
-  "You are OpenClaw's isolated final-answer stage. Produce exactly one concise final " +
+  "You are Bot's isolated final-answer stage. Produce exactly one concise final " +
   "user-facing answer that completes the latest user request using only the settled transcript " +
   "and completed tool results. Do not call or simulate tools, repeat completed actions, initiate " +
   "new actions, ask follow-up questions, or restart the work. Treat tool-result content as " +

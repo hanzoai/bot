@@ -31,7 +31,7 @@ and what the automatic resume looks like.
 
 ## Graceful restarts drain first
 
-A requested restart (`openclaw gateway restart`, a config change that requires
+A requested restart (`bot gateway restart`, a config change that requires
 a restart, or a gateway update) does not kill in-flight work immediately. The
 gateway stops accepting new work, then waits for active agent turns and
 background tasks to finish, up to a drain budget (5 minutes by default). Most
@@ -81,7 +81,7 @@ so the agent can deliver it instead of redoing the work.
 Startup reconciliation retries transient failures up to three times with
 exponential backoff. Separately, each interrupted main-session cycle has a
 durable budget of three charged automatic dispatch attempts, retained across
-gateway restarts. OpenClaw charges an attempt before dispatch, refunds it when
+gateway restarts. Bot charges an attempt before dispatch, refunds it when
 the gateway explicitly rejects the request before acceptance, and retains the
 charge when a post-dispatch result is uncertain to avoid replaying work.
 Foreground work that already owns the session keeps automatic recovery out
@@ -89,7 +89,7 @@ until that work settles.
 
 After the durable budget is exhausted, the session is tombstoned instead of
 looping forever. Inspect the failed session and use `/new` or `/reset` to start a
-replacement. `openclaw doctor --fix` can repair a stale aborted flag that
+replacement. `bot doctor --fix` can repair a stale aborted flag that
 conflicts with a tombstone, but it does not re-enable that recovery cycle.
 
 Every retry reuses one durable dispatch identifier, so an ambiguous connection
@@ -128,7 +128,7 @@ re-run; the agent instead posts a short notice asking the user to resend the
 last request. For WebChat, that notice is written directly to the session
 history so it remains visible after reconnect.
 
-OpenClaw can also reconstruct interrupted read-only [Code Mode](/tools/code-mode)
+Bot can also reconstruct interrupted read-only [Code Mode](/tools/code-mode)
 work. Code Mode marks these runs as restart-safe and rejects side-effecting
 catalog or namespace tool calls before they execute. If a restart lands on
 the `wait` control, the new gateway reconstructs the turn from its transcript
@@ -186,15 +186,15 @@ restart handling continues.
   resumes on a later boot after the unclean-boot window drains. Gateway logs
   look like:
   `channel autostart suppressed by crash-loop breaker; refusing automatic
-start for <channel>… Start a channel manually with: openclaw gateway call
+start for <channel>… Start a channel manually with: bot gateway call
 channels.start --params '{"channel":"<id>"}'`
 
   Operator recovery SOP:
 
-  1. Confirm the gateway process is up (`openclaw gateway status` / LaunchAgent
+  1. Confirm the gateway process is up (`bot gateway status` / LaunchAgent
      or systemd unit still running). A “channel disconnected” symptom often
      means suppressed autostart, not a dead gateway.
-  2. Inspect channel state: `openclaw channels status` (add `--probe` when
+  2. Inspect channel state: `bot channels status` (add `--probe` when
      useful). Look for stopped / not connected accounts while the gateway
      itself is healthy.
   3. Fix the root cause of the unclean boots (bad config, plugin crash on
@@ -202,7 +202,7 @@ channels.start --params '{"channel":"<id>"}'`
   4. Manually start a channel while suppression is active:
 
      ```bash
-     openclaw gateway call channels.start --params '{"channel":"<id>"}'
+     bot gateway call channels.start --params '{"channel":"<id>"}'
      # optional: {"channel":"<id>","accountId":"<account>"}
      ```
 
@@ -219,8 +219,8 @@ channels.start --params '{"channel":"<id>"}'`
   per interrupted cycle; exhaustion tombstones that session until it is
   inspected and replaced.
 - **Metrics:** recovery activity is exported via
-  [Prometheus](/gateway/prometheus) as `openclaw_session_recovery_total` and
-  `openclaw_session_recovery_age_seconds`.
+  [Prometheus](/gateway/prometheus) as `bot_session_recovery_total` and
+  `bot_session_recovery_age_seconds`.
 - **Logs:** recovery decisions are logged under the
   `main-session-restart-recovery` and `subagent-interrupted-resume`
   subsystems.

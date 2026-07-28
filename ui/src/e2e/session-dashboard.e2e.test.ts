@@ -17,7 +17,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 const cardboardProofDir = path.resolve(
   process.cwd(),
@@ -140,7 +140,7 @@ const pluginWidgetBoardSnapshot = {
 
 async function showDashboard(page: Page): Promise<void> {
   await page.addInitScript((key) => {
-    const settingsKey = "openclaw.control.settings.v1:ws://127.0.0.1:18789";
+    const settingsKey = "bot.control.settings.v1:ws://127.0.0.1:18789";
     const settings = JSON.parse(localStorage.getItem(settingsKey) ?? "{}") as Record<
       string,
       unknown
@@ -166,7 +166,7 @@ function workboardConfigSnapshot(enabled = true) {
   return {
     config,
     hash: "workboard-cardboard-e2e",
-    path: "/tmp/openclaw-e2e/openclaw.json",
+    path: "/tmp/bot-e2e/bot.json",
     raw: JSON.stringify(config),
     resolved: config,
     sourceConfig: config,
@@ -307,7 +307,7 @@ describeControlUiE2e("Control UI session dashboard stitch", () => {
                 render: "url",
                 title: "Release status",
                 viewId: "cv_release",
-                url: "/__openclaw__/canvas/documents/cv_release/index.html",
+                url: "/__bot__/canvas/documents/cv_release/index.html",
                 preferredHeight: 240,
                 sandbox: "scripts",
               },
@@ -449,7 +449,7 @@ describeControlUiE2e("Control UI session dashboard stitch", () => {
   });
 
   it("renders and updates active Workboard plugin widgets", async () => {
-    const recordProof = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+    const recordProof = process.env.BOT_UI_E2E_RECORD === "1";
     if (recordProof) {
       await mkdir(pluginWidgetsProofDir, { recursive: true });
     }
@@ -646,7 +646,7 @@ describeControlUiE2e("Control UI session dashboard stitch", () => {
   });
 
   it("links a dispatched Workboard card and its live session dashboard in both directions", async () => {
-    const recordProof = process.env.OPENCLAW_UI_E2E_RECORD === "1";
+    const recordProof = process.env.BOT_UI_E2E_RECORD === "1";
     if (recordProof) {
       await mkdir(cardboardProofDir, { recursive: true });
     }
@@ -739,14 +739,14 @@ describeControlUiE2e("Control UI session dashboard stitch", () => {
       });
       await workboardCard.waitFor();
       await workboardCard.click();
-      const cardDashboard = page.locator("openclaw-workboard-card-dashboard");
+      const cardDashboard = page.locator("bot-workboard-card-dashboard");
       await cardDashboard.waitFor();
       await expect
         .poll(() =>
           cardDashboard.locator(".workboard-card-dashboard__toggle").getAttribute("aria-expanded"),
         )
         .toBe("true");
-      await cardDashboard.locator("openclaw-board-view").waitFor();
+      await cardDashboard.locator("bot-board-view").waitFor();
       if (recordProof) {
         await page.screenshot({
           path: path.join(cardboardProofDir, "02-workboard-card-dashboard.png"),

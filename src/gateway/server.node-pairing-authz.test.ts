@@ -36,7 +36,7 @@ const {
   makeStateDir: makeNodePairingStateDir,
   seedNodeDevice,
   setup: setupNodePairingTestState,
-} = createNodePairingTestState("openclaw-node-pair-authz-");
+} = createNodePairingTestState("bot-node-pair-authz-");
 
 async function findPairedNode(nodeId: string, baseDir?: string) {
   const pairing = await listNodePairing(baseDir);

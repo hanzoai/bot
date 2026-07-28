@@ -58,7 +58,7 @@ type SkillsHandlerName = keyof typeof skillsHandlers;
 function emptySkillStatusReport() {
   return {
     workspaceDir: "/tmp/workspace",
-    managedSkillsDir: "/tmp/openclaw/skills",
+    managedSkillsDir: "/tmp/bot/skills",
     skills: [],
   };
 }
@@ -69,7 +69,7 @@ async function callSkillsHandler(method: SkillsHandlerName, params: Record<strin
 
 function expectEmptySecurityVerdicts(response: unknown): void {
   expect(response).toEqual({
-    schema: "openclaw.skills.security-verdicts.v1",
+    schema: "bot.skills.security-verdicts.v1",
     items: [],
   });
 }
@@ -132,7 +132,7 @@ describe("skills gateway handlers (clawhub)", () => {
   it("fetches one bulk ClawHub verdict batch for linked installed skills", async () => {
     buildWorkspaceSkillStatusMock.mockReturnValue({
       workspaceDir: "/tmp/workspace",
-      managedSkillsDir: "/tmp/openclaw/skills",
+      managedSkillsDir: "/tmp/bot/skills",
       skills: [
         {
           name: "agentreceipt",
@@ -164,7 +164,7 @@ describe("skills gateway handlers (clawhub)", () => {
           requestedVersion: "1.2.3",
           version: "1.2.3",
           securityAuditUrl:
-            "https://clawhub.ai/openclaw/skills/agentreceipt/security-audit?version=1.2.3",
+            "https://clawhub.ai/bot/skills/agentreceipt/security-audit?version=1.2.3",
           security: { status: "clean", passed: true },
           scannerPayload: { ignored: true },
         },
@@ -183,7 +183,7 @@ describe("skills gateway handlers (clawhub)", () => {
     expect(ok).toBe(true);
     expect(error).toBeUndefined();
     expect(response).toEqual({
-      schema: "openclaw.skills.security-verdicts.v1",
+      schema: "bot.skills.security-verdicts.v1",
       items: [
         expect.objectContaining({
           registry: "https://clawhub.ai",
@@ -202,7 +202,7 @@ describe("skills gateway handlers (clawhub)", () => {
   it("does not passively fetch verdicts from a non-default registry", async () => {
     buildWorkspaceSkillStatusMock.mockReturnValue({
       workspaceDir: "/tmp/workspace",
-      managedSkillsDir: "/tmp/openclaw/skills",
+      managedSkillsDir: "/tmp/bot/skills",
       skills: [
         {
           name: "agentreceipt",
@@ -225,7 +225,7 @@ describe("skills gateway handlers (clawhub)", () => {
   it("loads local Skill Card content for a known installed skill", async () => {
     buildWorkspaceSkillStatusMock.mockReturnValue({
       workspaceDir: "/tmp/workspace",
-      managedSkillsDir: "/tmp/openclaw/skills",
+      managedSkillsDir: "/tmp/bot/skills",
       skills: [
         {
           name: "AgentReceipt",
@@ -251,7 +251,7 @@ describe("skills gateway handlers (clawhub)", () => {
       "/tmp/workspace/skills/agentreceipt",
     );
     expect(response).toEqual({
-      schema: "openclaw.skills.skill-card.v1",
+      schema: "bot.skills.skill-card.v1",
       skillKey: "agentreceipt",
       path: "/tmp/workspace/skills/agentreceipt/skill-card.md",
       sizeBytes: 34,
@@ -529,7 +529,7 @@ describe("skills gateway handlers (clawhub)", () => {
         ok: false,
         error: "ClawHub blocked this release; update was not started.",
         code: "clawhub_download_blocked",
-        warning: "Latest skill version is marked malicious; OpenClaw will not download it.",
+        warning: "Latest skill version is marked malicious; Bot will not download it.",
       },
     ]);
 
@@ -549,7 +549,7 @@ describe("skills gateway handlers (clawhub)", () => {
             ok: false,
             error: "ClawHub blocked this release; update was not started.",
             code: "clawhub_download_blocked",
-            warning: "Latest skill version is marked malicious; OpenClaw will not download it.",
+            warning: "Latest skill version is marked malicious; Bot will not download it.",
           },
         ],
       },
@@ -563,10 +563,10 @@ describe("skills gateway handlers (clawhub)", () => {
             ok: false,
             error: "ClawHub blocked this release; update was not started.",
             code: "clawhub_download_blocked",
-            warning: "Latest skill version is marked malicious; OpenClaw will not download it.",
+            warning: "Latest skill version is marked malicious; Bot will not download it.",
           },
         ],
-        warnings: ["Latest skill version is marked malicious; OpenClaw will not download it."],
+        warnings: ["Latest skill version is marked malicious; Bot will not download it."],
       },
     });
   });

@@ -1,11 +1,11 @@
 // Receipt lookup and source-removal bookkeeping for legacy workspace migration.
 import { createHash } from "node:crypto";
 import path from "node:path";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -13,7 +13,7 @@ import {
 } from "./kysely-sync.js";
 import type { LegacyWorkspaceStateSource } from "./state-migrations.workspace-setup.types.js";
 
-type WorkspaceReceiptDatabase = Pick<OpenClawStateKyselyDatabase, "migration_sources">;
+type WorkspaceReceiptDatabase = Pick<BotStateKyselyDatabase, "migration_sources">;
 
 export type MigrationReceipt = {
   sourceKey: string;
@@ -34,7 +34,7 @@ export function readReceipt(
   env: NodeJS.ProcessEnv,
 ): MigrationReceipt | null {
   const key = resolveWorkspaceMigrationSourceKey(source);
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openBotStateDatabase({ env });
   const row = executeSqliteQueryTakeFirstSync(
     db,
     getNodeSqliteKysely<WorkspaceReceiptDatabase>(db)
@@ -48,7 +48,7 @@ export function readReceipt(
 }
 
 export function markSourceRemoved(sourceKey: string, env: NodeJS.ProcessEnv): void {
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       executeSqliteQuerySync(
         db,

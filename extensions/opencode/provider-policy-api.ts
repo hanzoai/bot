@@ -2,8 +2,8 @@
 import type {
   ProviderDefaultThinkingPolicyContext,
   ProviderThinkingProfile,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { resolveClaudeThinkingProfile } from "openclaw/plugin-sdk/provider-model-shared";
+} from "bot/plugin-sdk/plugin-entry";
+import { resolveClaudeThinkingProfile } from "bot/plugin-sdk/provider-model-shared";
 
 const GPT_56_THINKING_PROFILE = {
   levels: [

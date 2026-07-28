@@ -1,7 +1,7 @@
 import {
   resolveApprovalOverGateway,
   type ApprovalResolveResult,
-} from "openclaw/plugin-sdk/approval-gateway-runtime";
+} from "bot/plugin-sdk/approval-gateway-runtime";
 import { updateGoogleChatMessage } from "./api.js";
 import { googleChatApprovalAuth } from "./approval-auth.js";
 import {

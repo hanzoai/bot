@@ -31,7 +31,7 @@ import { attachWorkerWsMessageHandler, type WorkerConnectionService } from "./wo
 const CREDENTIAL = ["worker", "credential", "fixture"].join("-");
 const HANDSHAKE = {
   bundleHash: "a".repeat(64),
-  openclawVersion: "2026.7.11",
+  botVersion: "2026.7.11",
   protocolFeatures: [
     "worker-heartbeat-v1",
     WORKER_TRANSCRIPT_COMMIT_PROTOCOL_FEATURE,

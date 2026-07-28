@@ -34,7 +34,7 @@ export const runNodeConfigFiles = ["tsconfig.json", "package.json", "tsdown.conf
 /** Combined watch list used by the run-node wrapper. */
 export const runNodeWatchedPaths = [...runNodeSourceRoots, ...runNodeConfigFiles];
 /** Plugin metadata files that require a runtime restart even without source edits. */
-export const extensionRestartMetadataFiles = new Set(["openclaw.plugin.json", "package.json"]);
+export const extensionRestartMetadataFiles = new Set(["bot.plugin.json", "package.json"]);
 
 const ignoredRunNodeRepoPathPatterns = [
   /^extensions\/[^/]+\/src\/host\/.+\/\.bundle\.hash$/u,

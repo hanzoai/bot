@@ -5,7 +5,7 @@ import {
   loadCodexBundleMcpThreadConfig,
   supportsModelTools,
   type EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import { prepareCodexAppServerAuthBinding } from "./auth-binding.js";
 import {
   resolveCodexAppServerAuthAccountCacheKey,

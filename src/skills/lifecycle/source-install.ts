@@ -1,10 +1,10 @@
 // Source install helpers install skills from source directories and repositories.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { redactSensitiveUrlLikeString } from "@hanzo/bot-net-policy/redact-sensitive-url";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { sanitizeForLog } from "../../../packages/terminal-core/src/ansi.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { sanitizeHostExecEnv } from "../../infra/host-env-security.js";
 import { withTempDir } from "../../infra/install-source-utils.js";
 import { writeJson } from "../../infra/json-files.js";
@@ -44,7 +44,7 @@ type SkillSourceInstallResult =
     }
   | { ok: false; error: string };
 
-const SKILL_SOURCE_ORIGIN_RELATIVE_PATH = path.join(".openclaw", "source-origin.json");
+const SKILL_SOURCE_ORIGIN_RELATIVE_PATH = path.join(".bot", "source-origin.json");
 const DEFAULT_GIT_TIMEOUT_MS = 120_000;
 
 function createGitCommandEnv(): NodeJS.ProcessEnv {
@@ -202,7 +202,7 @@ async function installLocalSkillDir(params: {
   force?: boolean;
   timeoutMs?: number;
   logger?: Logger;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   git?: SkillSourceOrigin["git"];
 }): Promise<SkillSourceInstallResult> {
   const slug = await resolveSkillInstallSlug({
@@ -269,14 +269,14 @@ async function installGitSkill(params: {
   force?: boolean;
   timeoutMs?: number;
   logger?: Logger;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): Promise<SkillSourceInstallResult> {
   const parsed = parseGitPluginSpec(params.spec);
   if (!parsed) {
     return { ok: false, error: `Unsupported git skill spec: ${params.spec}` };
   }
 
-  return await withTempDir("openclaw-git-skill-", async (tmpDir) => {
+  return await withTempDir("bot-git-skill-", async (tmpDir) => {
     const repoDir = path.join(tmpDir, "repo");
     const exportDir = path.join(tmpDir, "export");
     params.logger?.info?.(
@@ -362,7 +362,7 @@ async function installPathSkill(params: {
   force?: boolean;
   timeoutMs?: number;
   logger?: Logger;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): Promise<SkillSourceInstallResult> {
   const sourceDir = resolveUserPath(params.spec);
   let stat;
@@ -406,7 +406,7 @@ export async function installSkillFromSource(params: {
   force?: boolean;
   timeoutMs?: number;
   logger?: Logger;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): Promise<SkillSourceInstallResult> {
   const spec = params.spec.trim();
   if (spec.toLowerCase().startsWith("git:")) {

@@ -2,7 +2,7 @@
 // history limits, model overrides, inbound dispatch, and streaming event fanout.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import type { GetReplyOptions } from "../auto-reply/get-reply-options.types.js";
@@ -22,14 +22,14 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { waitForSessionTranscriptIndexReconcile } from "../config/sessions/session-transcript-reconcile.js";
 import type { AgentModelConfig } from "../config/types.agents-shared.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { rotateAgentEventLifecycleGeneration } from "../infra/agent-events.js";
 import { onDiagnosticEvent, type DiagnosticPayloadLargeEvent } from "../infra/diagnostic-events.js";
 import { runExclusiveSessionLifecycleMutation } from "../sessions/session-lifecycle-admission.js";
-import { openOpenClawAgentDatabase } from "../state/openclaw-agent-db.js";
+import { openBotAgentDatabase } from "../state/bot-agent-db.js";
 import { createDeferred } from "../test-utils/deferred.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withBotTestState } from "../test-utils/bot-test-state.js";
 import { GATEWAY_CLIENT_MODES, GATEWAY_CLIENT_NAMES } from "../utils/message-channel.js";
 import {
   createDirectChatContext,
@@ -114,7 +114,7 @@ async function withGatewayChatHarness(
 ) {
   const ws = await harness.openWs(options?.headers);
   const createSessionDir = async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     testState.sessionStorePath = path.join(sessionDir, "sessions.json");
     return sessionDir;
   };
@@ -122,8 +122,8 @@ async function withGatewayChatHarness(
   try {
     await run({ ws, createSessionDir });
   } finally {
-    if (process.env.OPENCLAW_CONFIG_PATH) {
-      await fs.rm(process.env.OPENCLAW_CONFIG_PATH, { force: true });
+    if (process.env.BOT_CONFIG_PATH) {
+      await fs.rm(process.env.BOT_CONFIG_PATH, { force: true });
     }
     clearConfigCache();
     testState.sessionStorePath = undefined;
@@ -150,11 +150,11 @@ function futureFixtureUpdatedAt(): number {
   return Date.now() + 60_000;
 }
 
-function readOpenClawSeq(message: unknown): number | undefined {
+function readBotSeq(message: unknown): number | undefined {
   if (!message || typeof message !== "object" || Array.isArray(message)) {
     return undefined;
   }
-  const metadata = (message as Record<string, unknown>)["__openclaw"];
+  const metadata = (message as Record<string, unknown>)["__bot"];
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
     return undefined;
   }
@@ -163,9 +163,9 @@ function readOpenClawSeq(message: unknown): number | undefined {
 }
 
 async function writeGatewayConfig(config: Record<string, unknown>) {
-  const configPath = process.env.OPENCLAW_CONFIG_PATH;
+  const configPath = process.env.BOT_CONFIG_PATH;
   if (!configPath) {
-    throw new Error("OPENCLAW_CONFIG_PATH missing in gateway test environment");
+    throw new Error("BOT_CONFIG_PATH missing in gateway test environment");
   }
   await fs.mkdir(path.dirname(configPath), { recursive: true });
   await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf-8");
@@ -202,7 +202,7 @@ async function writeMainSessionTranscript(
 }
 
 async function withDirectChatSession(run: (sessionDir: string) => Promise<void>) {
-  const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+  const sessionDir = autoCleanupTempDirs.make("bot-gw-");
   testState.sessionStorePath = path.join(sessionDir, "sessions.json");
   try {
     await run(sessionDir);
@@ -266,7 +266,7 @@ async function sendControlUiChat(params: {
 }
 
 test("chat.send replays a cached result after the session is archived", async () => {
-  const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+  const sessionDir = autoCleanupTempDirs.make("bot-gw-");
   try {
     dispatchInboundMessageMock.mockClear();
     testState.sessionStorePath = path.join(sessionDir, "sessions.json");
@@ -410,7 +410,7 @@ describe("gateway server chat", () => {
   test.each(["chat.history", "chat.startup"] as const)(
     "%s replays the active plan snapshot in inFlightRun",
     async (method) => {
-      const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+      const sessionDir = autoCleanupTempDirs.make("bot-gw-");
       try {
         testState.sessionStorePath = path.join(sessionDir, "sessions.json");
         await writeMainSessionStore(sessionDir);
@@ -465,7 +465,7 @@ describe("gateway server chat", () => {
   );
 
   test("chat.history returns catalog-backed session metadata with history", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     try {
       testState.sessionStorePath = path.join(sessionDir, "sessions.json");
       testState.agentConfig = {
@@ -724,7 +724,7 @@ describe("gateway server chat", () => {
         defaults: {},
         list: [{ id: "main", default: true }, { id: "work" }],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const context = createDirectChatContext({
       getRuntimeConfig: () => config,
       loadGatewayModelCatalogSnapshot: vi.fn(async () => ({
@@ -736,7 +736,7 @@ describe("gateway server chat", () => {
         routeVariants: [],
       })),
     });
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     try {
       testState.sessionStorePath = path.join(sessionDir, "sessions.json");
       await writeSessionStore({
@@ -775,13 +775,13 @@ describe("gateway server chat", () => {
   test("chat.startup omits model metadata when config advances after catalog load", async () => {
     const initialConfig = {
       agents: { defaults: {}, list: [{ id: "main", default: true }] },
-    } as OpenClawConfig;
+    } as BotConfig;
     const replacementConfig = {
       agents: {
         defaults: { models: { "test/*": {} } },
         list: [{ id: "main", default: true }],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     let currentConfig = initialConfig;
     const context = createDirectChatContext({
       getRuntimeConfig: () => currentConfig,
@@ -797,7 +797,7 @@ describe("gateway server chat", () => {
         };
       }),
     });
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     try {
       testState.sessionStorePath = path.join(sessionDir, "sessions.json");
       await writeSessionStore({
@@ -839,7 +839,7 @@ describe("gateway server chat", () => {
         defaults: { models: { "test/initial": {} } },
         list: [{ id: "main", default: true }],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const equivalentConfig = structuredClone(initialConfig);
     let currentConfig = initialConfig;
     const context = createDirectChatContext({
@@ -863,7 +863,7 @@ describe("gateway server chat", () => {
         };
       }),
     });
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     try {
       testState.sessionStorePath = path.join(sessionDir, "sessions.json");
       await writeSessionStore({
@@ -909,7 +909,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.startup does not wait for slow optional model catalog metadata", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     try {
       testState.sessionStorePath = path.join(sessionDir, "sessions.json");
       await writeSessionStore({
@@ -973,24 +973,24 @@ describe("gateway server chat", () => {
   });
 
   test("chat.startup projects route thinking metadata per agent and session auth", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-gw-startup-routes-",
+        prefix: "bot-gw-startup-routes-",
         agentEnv: "main",
         env: {
           CHATGPT_OAUTH_TOKEN: undefined,
           CODEX_API_KEY: undefined,
-          CODEX_HOME: "/__openclaw_gateway_startup_routes__/codex",
-          OPENCLAW_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+          CODEX_HOME: "/__bot_gateway_startup_routes__/codex",
+          BOT_BUNDLED_PLUGINS_DIR: path.resolve("extensions"),
+          BOT_DISABLE_BUNDLED_PLUGINS: undefined,
           OPENAI_API_KEY: undefined,
           OPENAI_BASE_URL: undefined,
           OPENAI_OAUTH_TOKEN: undefined,
         },
       },
       async (state) => {
-        const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+        const sessionDir = autoCleanupTempDirs.make("bot-gw-");
         try {
           testState.sessionStorePath = path.join(sessionDir, "sessions.json");
           const config = {
@@ -1282,7 +1282,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.startup scopes metadata to agent session keys without explicit agentId", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     try {
       testState.sessionStorePath = path.join(sessionDir, "sessions.json");
       await writeSessionStore({
@@ -1327,7 +1327,7 @@ describe("gateway server chat", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as BotConfig;
       await writeGatewayConfig(config);
       const responses: Array<{ ok: boolean; payload?: unknown; error?: unknown }> = [];
       const context = createDirectChatContext({
@@ -1477,7 +1477,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send returns in_flight when duplicate attachment send wins parsing race", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const dispatchRelease = createDeferred();
     try {
       testState.sessionStorePath = path.join(sessionDir, "sessions.json");
@@ -1596,7 +1596,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.abort cancels chat.send during attachment preparation before ACK", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const firstCatalog =
       createDeferred<Awaited<ReturnType<GatewayRequestContext["loadGatewayModelCatalog"]>>>();
     try {
@@ -1772,7 +1772,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.abort cancels chat.send while lifecycle admission waits", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const releaseMutation = createDeferred();
     try {
       testState.sessionStorePath = path.join(sessionDir, "sessions.json");
@@ -1918,7 +1918,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send rejects stale lifecycle work after admission waits", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const releaseMutation = createDeferred();
     try {
       testState.sessionStorePath = path.join(sessionDir, "sessions.json");
@@ -1999,7 +1999,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send does not recreate a session deleted while admission waits", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const performDeletion = createDeferred();
     let mutation: Promise<void> | undefined;
     try {
@@ -2112,7 +2112,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send does not enter a replacement session after reset while admission waits", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const releaseMutation = createDeferred();
     try {
       testState.sessionStorePath = path.join(sessionDir, "sessions.json");
@@ -2191,7 +2191,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send does not consume a replacement pending reservation", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const releaseMutation = createDeferred();
     const releaseTerminalMutation = createDeferred();
     try {
@@ -2336,7 +2336,7 @@ describe("gateway server chat", () => {
   test.each(configuredImageModelCases)(
     "chat.send preserves text-only image uploads as MediaPaths even with configured imageModel: $id",
     async ({ id, imageModel }) => {
-      const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+      const sessionDir = autoCleanupTempDirs.make("bot-gw-");
       try {
         testState.sessionStorePath = path.join(sessionDir, "sessions.json");
         testState.agentConfig = {
@@ -2473,7 +2473,7 @@ describe("gateway server chat", () => {
   );
 
   test("chat.send durably admits a restart-safe Control UI turn before ACK", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     const dispatchRelease = createDeferred();
     try {
@@ -2555,7 +2555,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send persists optional connection identity per turn", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     try {
       testState.sessionStorePath = path.join(sessionDir, "sessions.json");
       await writeSessionStore({
@@ -2628,7 +2628,7 @@ describe("gateway server chat", () => {
             message: expect.objectContaining({
               role: "user",
               content: "prompt from alice",
-              __openclaw: expect.objectContaining({
+              __bot: expect.objectContaining({
                 senderId: "0d9f4c35-d221-49da-9a3f-b8c73921066b",
                 senderName: "Alice",
               }),
@@ -2639,7 +2639,7 @@ describe("gateway server chat", () => {
             message: expect.objectContaining({
               role: "user",
               content: "prompt from bob",
-              __openclaw: expect.objectContaining({
+              __bot: expect.objectContaining({
                 senderId: "77ad3957-b2c8-428a-83d3-fc09e696492e",
                 senderName: "Bob",
               }),
@@ -2650,7 +2650,7 @@ describe("gateway server chat", () => {
             message: expect.objectContaining({
               role: "user",
               content: "prompt without identity",
-              __openclaw: expect.not.objectContaining({ senderId: expect.anything() }),
+              __bot: expect.not.objectContaining({ senderId: expect.anything() }),
             }),
           }),
         ]),
@@ -2663,7 +2663,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send preserves a terminal source claim before admitting the next turn", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     const dispatchRelease = createDeferred();
     const priorRunId = "idem-prior-terminal-claim";
@@ -2742,7 +2742,7 @@ describe("gateway server chat", () => {
     { caseName: "tombstones an explicit abort", retryable: false, stopReason: "rpc" },
     { caseName: "retains a restart interruption", retryable: true, stopReason: "restart" },
   ])("chat.send $caseName during SQLite admission", async ({ retryable, stopReason }) => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     const runId = `idem-restart-safe-abort-${stopReason}`;
     const lockEntered = createDeferred();
@@ -2904,7 +2904,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send keeps a durable Control UI retry pending when recovery remains abandoned", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     const idempotencyKey = "idem-restart-safe-duplicate";
     try {
@@ -2980,7 +2980,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send retires a durable retry after recovery re-dispatch succeeds", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     const idempotencyKey = "idem-restart-safe-recovered-retry";
     try {
@@ -3038,7 +3038,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send suppresses a durable retry settled while lifecycle admission waits", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     const idempotencyKey = "idem-recovery-settled-during-admission";
     const releaseMutation = createDeferred();
@@ -3104,7 +3104,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send does not re-dispatch an archived durable recovery claim", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     const idempotencyKey = "idem-restart-safe-archived-retry";
     try {
@@ -3150,7 +3150,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send stops automatic retry when durable recovery ownership changes", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     const idempotencyKey = "idem-restart-safe-replaced-retry";
     try {
@@ -3208,7 +3208,7 @@ describe("gateway server chat", () => {
     { caseName: "settled recovery", status: "done" as const, abortedLastRun: false },
     { caseName: "unresumable recovery", status: "failed" as const, abortedLastRun: true },
   ])("chat.send suppresses a Control UI retry after $caseName", async (terminal) => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     const idempotencyKey = `idem-${terminal.status}-recovery`;
     try {
@@ -3249,7 +3249,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send releases an unadopted durable claim after dispatch rejection", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     const runId = "idem-restart-safe-dispatch-error";
     try {
@@ -3346,7 +3346,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send releases a durable claim after synchronous post-admission failure", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     const runId = "idem-restart-safe-setup-error";
     try {
@@ -3394,7 +3394,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send leaves a post-admission routing rejection retryable", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     const runId = "idem-restart-safe-routing-change";
     try {
@@ -3494,7 +3494,7 @@ describe("gateway server chat", () => {
       entry: { abortedLastRun: true },
     },
   ])("chat.send leaves $caseName outside restart-safe admission", async ({ entry, runId }) => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const storePath = path.join(sessionDir, "sessions.json");
     try {
       testState.sessionStorePath = storePath;
@@ -3540,7 +3540,7 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send keeps matching WebChat text sends distinct by idempotency key", async () => {
-    const sessionDir = autoCleanupTempDirs.make("openclaw-gw-");
+    const sessionDir = autoCleanupTempDirs.make("bot-gw-");
     const dispatchRelease = createDeferred();
     try {
       testState.sessionStorePath = path.join(sessionDir, "sessions.json");
@@ -3943,7 +3943,7 @@ describe("gateway server chat", () => {
       expect(dispatchOptions[0]?.runId).toBe("idem-sequential-a");
       expect(dispatchOptions[1]?.runId).toBe("idem-sequential-b");
       expect(dispatchOptions[0]?.promptCacheKey).toEqual(
-        expect.stringMatching(/^openclaw-webchat-[a-f0-9]{32}$/u),
+        expect.stringMatching(/^bot-webchat-[a-f0-9]{32}$/u),
       );
       expect(dispatchOptions[1]?.promptCacheKey).toBe(dispatchOptions[0]?.promptCacheKey);
       expect(dispatchOptions[0]?.promptCacheKey).not.toContain("main");
@@ -4444,7 +4444,7 @@ describe("gateway server chat", () => {
             message: {
               role: "user",
               content:
-                'Sender: ⟦openclaw:ctx⟧\n```json\n{"label":"openclaw-control-ui"}\n```\n\n[Thu 2026-03-26 16:29 GMT] hi',
+                'Sender: ⟦bot:ctx⟧\n```json\n{"label":"bot-control-ui"}\n```\n\n[Thu 2026-03-26 16:29 GMT] hi',
             },
           }),
           JSON.stringify({
@@ -4490,7 +4490,7 @@ describe("gateway server chat", () => {
           },
         });
         const history = await rpcReq<{
-          messages?: Array<{ __openclaw?: { id?: string } }>;
+          messages?: Array<{ __bot?: { id?: string } }>;
           hasMore?: boolean;
           nextOffset?: number;
           totalMessages?: number;
@@ -4516,7 +4516,7 @@ describe("gateway server chat", () => {
         expect(history.payload?.nextOffset).toBeUndefined();
         expect(history.payload?.totalMessages).toBe(107);
         expect(history.payload?.completeSnapshot).toBe(true);
-        expect(new Set(messages.map((message) => message["__openclaw"]?.id)).size).toBe(107);
+        expect(new Set(messages.map((message) => message["__bot"]?.id)).size).toBe(107);
       } finally {
         homeEnvSnapshot.restore();
       }
@@ -4580,7 +4580,7 @@ describe("gateway server chat", () => {
         );
 
         const history = await rpcReq<{
-          messages?: Array<{ __openclaw?: { id?: string; seq?: number } }>;
+          messages?: Array<{ __bot?: { id?: string; seq?: number } }>;
           hasMore?: boolean;
           nextOffset?: number;
           totalMessages?: number;
@@ -4593,7 +4593,7 @@ describe("gateway server chat", () => {
         expect(history.payload?.completeSnapshot).toBe(true);
         const deliveredIdentities = new Set(
           (history.payload?.messages ?? []).map((message) => {
-            const metadata = expectDefined(message["__openclaw"], "history metadata");
+            const metadata = expectDefined(message["__bot"], "history metadata");
             return metadata.seq !== undefined
               ? `seq:${metadata.seq}`
               : `id:${expectDefined(metadata.id, "history id")}`;
@@ -4648,19 +4648,19 @@ describe("gateway server chat", () => {
         );
 
         const firstPage = await rpcReq<{
-          messages?: Array<{ __openclaw?: { seq?: number } }>;
+          messages?: Array<{ __bot?: { seq?: number } }>;
           hasMore?: boolean;
           nextOffset?: number;
           totalMessages?: number;
         }>(ws, "chat.history", { sessionKey: "main", limit: 2 });
         expect(firstPage.ok).toBe(true);
-        expect(firstPage.payload?.messages?.map(readOpenClawSeq)).toEqual([4, 5]);
+        expect(firstPage.payload?.messages?.map(readBotSeq)).toEqual([4, 5]);
         expect(firstPage.payload?.hasMore).toBe(true);
         expect(firstPage.payload?.nextOffset).toBe(2);
         expect(firstPage.payload?.totalMessages).toBe(5);
 
         const secondPage = await rpcReq<{
-          messages?: Array<{ __openclaw?: { seq?: number } }>;
+          messages?: Array<{ __bot?: { seq?: number } }>;
           hasMore?: boolean;
           nextOffset?: number;
         }>(ws, "chat.history", {
@@ -4669,7 +4669,7 @@ describe("gateway server chat", () => {
           offset: firstPage.payload?.nextOffset,
         });
         expect(secondPage.ok).toBe(true);
-        expect(secondPage.payload?.messages?.map(readOpenClawSeq)).toEqual([2, 3]);
+        expect(secondPage.payload?.messages?.map(readBotSeq)).toEqual([2, 3]);
         expect(secondPage.payload?.hasMore).toBe(true);
         expect(secondPage.payload?.nextOffset).toBe(4);
       } finally {
@@ -4947,7 +4947,7 @@ describe("gateway server chat", () => {
       ]);
 
       const page = await rpcReq<{
-        messages?: Array<{ __openclaw?: { seq?: number } }>;
+        messages?: Array<{ __bot?: { seq?: number } }>;
         nextOffset?: number;
         hasMore?: boolean;
       }>(ws, "chat.history", {
@@ -5000,7 +5000,7 @@ describe("gateway server chat", () => {
       const page = await rpcReq<{
         messages?: Array<{
           content?: Array<{ text?: string }>;
-          __openclaw?: { turnBoundary?: boolean };
+          __bot?: { turnBoundary?: boolean };
         }>;
       }>(ws, "chat.history", {
         sessionKey: "main",
@@ -5011,7 +5011,7 @@ describe("gateway server chat", () => {
       expect(page.ok).toBe(true);
       expect(page.payload?.messages).toHaveLength(1);
       expect(page.payload?.messages?.[0]?.content?.[0]?.text).toBe("heartbeat run output");
-      expect(page.payload?.messages?.[0]?.["__openclaw"]?.turnBoundary).toBe(true);
+      expect(page.payload?.messages?.[0]?.["__bot"]?.turnBoundary).toBe(true);
     });
   });
 
@@ -5049,12 +5049,12 @@ describe("gateway server chat", () => {
   });
 
   test("chat.send diagnostics timeline carries run correlation attributes", async () => {
-    const timelineDir = autoCleanupTempDirs.make("openclaw-chat-timeline-");
+    const timelineDir = autoCleanupTempDirs.make("bot-chat-timeline-");
     const timelinePath = path.join(timelineDir, "timeline.jsonl");
-    const previousDiagnostics = process.env.OPENCLAW_DIAGNOSTICS;
-    const previousTimelinePath = process.env.OPENCLAW_DIAGNOSTICS_TIMELINE_PATH;
-    process.env.OPENCLAW_DIAGNOSTICS = "timeline";
-    process.env.OPENCLAW_DIAGNOSTICS_TIMELINE_PATH = timelinePath;
+    const previousDiagnostics = process.env.BOT_DIAGNOSTICS;
+    const previousTimelinePath = process.env.BOT_DIAGNOSTICS_TIMELINE_PATH;
+    process.env.BOT_DIAGNOSTICS = "timeline";
+    process.env.BOT_DIAGNOSTICS_TIMELINE_PATH = timelinePath;
     try {
       await withGatewayChatHarness(
         async ({ ws, createSessionDir }) => {
@@ -5122,14 +5122,14 @@ describe("gateway server chat", () => {
       );
     } finally {
       if (previousDiagnostics === undefined) {
-        delete process.env.OPENCLAW_DIAGNOSTICS;
+        delete process.env.BOT_DIAGNOSTICS;
       } else {
-        process.env.OPENCLAW_DIAGNOSTICS = previousDiagnostics;
+        process.env.BOT_DIAGNOSTICS = previousDiagnostics;
       }
       if (previousTimelinePath === undefined) {
-        delete process.env.OPENCLAW_DIAGNOSTICS_TIMELINE_PATH;
+        delete process.env.BOT_DIAGNOSTICS_TIMELINE_PATH;
       } else {
-        process.env.OPENCLAW_DIAGNOSTICS_TIMELINE_PATH = previousTimelinePath;
+        process.env.BOT_DIAGNOSTICS_TIMELINE_PATH = previousTimelinePath;
       }
     }
   });
@@ -5309,7 +5309,7 @@ describe("gateway server chat", () => {
       expect(Buffer.byteLength(serialized, "utf8")).toBeLessThanOrEqual(historyMaxBytes);
       expect(serialized).toContain("[chat.history omitted: message too large]");
       expect(messages[0]).toMatchObject({
-        __openclaw: { id: "msg-huge", truncated: true, reason: "oversized" },
+        __bot: { id: "msg-huge", truncated: true, reason: "oversized" },
       });
       expect(serialized.includes(hugeNestedText.slice(0, 256))).toBe(false);
     });
@@ -5828,7 +5828,7 @@ describe("gateway server chat", () => {
       ]);
       await waitForSessionTranscriptIndexReconcile({
         agentId: "main",
-        path: path.join(sessionDir, "openclaw-agent.sqlite"),
+        path: path.join(sessionDir, "bot-agent.sqlite"),
       });
 
       const stale = await fetchChatMessage(ws, {
@@ -5940,9 +5940,9 @@ describe("gateway server chat", () => {
       ]);
       const databaseOptions = {
         agentId: "main",
-        path: path.join(sessionDir, "openclaw-agent.sqlite"),
+        path: path.join(sessionDir, "bot-agent.sqlite"),
       };
-      const database = openOpenClawAgentDatabase(databaseOptions);
+      const database = openBotAgentDatabase(databaseOptions);
       database.db
         .prepare("UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?")
         .run("sess-main");
@@ -5973,7 +5973,7 @@ describe("gateway server chat", () => {
       ]);
 
       const firstPage = await rpcReq<{
-        messages?: Array<{ __openclaw?: { seq?: number } }>;
+        messages?: Array<{ __bot?: { seq?: number } }>;
         nextOffset?: number;
         hasMore?: boolean;
         totalMessages?: number;
@@ -5984,13 +5984,13 @@ describe("gateway server chat", () => {
         maxChars: 100,
       });
       expect(firstPage.ok).toBe(true);
-      expect(firstPage.payload?.messages?.map(readOpenClawSeq)).toEqual([3, 5]);
+      expect(firstPage.payload?.messages?.map(readBotSeq)).toEqual([3, 5]);
       expect(firstPage.payload?.nextOffset).toBe(3);
       expect(firstPage.payload?.hasMore).toBe(true);
       expect(firstPage.payload?.totalMessages).toBe(5);
 
       const secondPage = await rpcReq<{
-        messages?: Array<{ __openclaw?: { seq?: number } }>;
+        messages?: Array<{ __bot?: { seq?: number } }>;
         hasMore?: boolean;
         nextOffset?: number;
       }>(ws, "chat.history", {
@@ -6000,7 +6000,7 @@ describe("gateway server chat", () => {
         maxChars: 100,
       });
       expect(secondPage.ok).toBe(true);
-      expect(secondPage.payload?.messages?.map(readOpenClawSeq)).toEqual([1, 2]);
+      expect(secondPage.payload?.messages?.map(readBotSeq)).toEqual([1, 2]);
       expect(JSON.stringify(secondPage.payload?.messages)).not.toContain("visible boundary");
       expect(secondPage.payload?.hasMore).toBe(false);
       expect(secondPage.payload?.nextOffset).toBeUndefined();
@@ -6024,7 +6024,7 @@ describe("gateway server chat", () => {
       );
 
       type HistoryPage = {
-        messages?: Array<{ __openclaw?: { seq?: number } }>;
+        messages?: Array<{ __bot?: { seq?: number } }>;
         nextOffset?: number;
         hasMore?: boolean;
         totalMessages?: number;
@@ -6042,7 +6042,7 @@ describe("gateway server chat", () => {
         offset = page.payload?.nextOffset;
       } while (pages.at(-1)?.hasMore);
 
-      expect(pages.map((page) => page.messages?.map(readOpenClawSeq))).toEqual([
+      expect(pages.map((page) => page.messages?.map(readBotSeq))).toEqual([
         [6, 7],
         [4, 5],
         [2, 3],
@@ -6054,7 +6054,7 @@ describe("gateway server chat", () => {
       expect(
         pages
           .flatMap((page) => page.messages ?? [])
-          .map(readOpenClawSeq)
+          .map(readBotSeq)
           .toSorted((a, b) => (a ?? 0) - (b ?? 0)),
       ).toEqual([1, 2, 3, 4, 5, 6, 7]);
     });
@@ -6094,7 +6094,7 @@ describe("gateway server chat", () => {
       }
 
       type HistoryPage = {
-        messages?: Array<{ __openclaw?: { seq?: number } }>;
+        messages?: Array<{ __bot?: { seq?: number } }>;
         nextOffset?: number;
         hasMore?: boolean;
         totalMessages?: number;
@@ -6112,7 +6112,7 @@ describe("gateway server chat", () => {
         offset = page.payload?.nextOffset;
       } while (pages.at(-1)?.hasMore);
 
-      expect(pages.map((page) => page.messages?.map(readOpenClawSeq))).toEqual([
+      expect(pages.map((page) => page.messages?.map(readBotSeq))).toEqual([
         [4, 5],
         [2, 3],
         [1],
@@ -6154,11 +6154,11 @@ describe("gateway server chat", () => {
       }
       await waitForSessionTranscriptIndexReconcile({
         agentId: "main",
-        path: path.join(sessionDir, "openclaw-agent.sqlite"),
+        path: path.join(sessionDir, "bot-agent.sqlite"),
       });
 
       const history = await rpcReq<{
-        messages?: Array<{ __openclaw?: { seq?: number } }>;
+        messages?: Array<{ __bot?: { seq?: number } }>;
         hasMore?: boolean;
         nextOffset?: number;
         offset?: number;
@@ -6172,7 +6172,7 @@ describe("gateway server chat", () => {
       });
 
       expect(history.ok).toBe(true);
-      expect(history.payload?.messages?.map(readOpenClawSeq)).toEqual([2, 3, 4]);
+      expect(history.payload?.messages?.map(readBotSeq)).toEqual([2, 3, 4]);
       expect(history.payload?.offset).toBeUndefined();
       expect(history.payload?.nextOffset).toBeUndefined();
       expect(history.payload?.hasMore).toBeUndefined();
@@ -6297,7 +6297,7 @@ describe("gateway server chat", () => {
       );
 
       const firstPage = await rpcReq<{
-        messages?: Array<{ __openclaw?: { seq?: number } }>;
+        messages?: Array<{ __bot?: { seq?: number } }>;
         nextOffset?: number;
         hasMore?: boolean;
         totalMessages?: number;
@@ -6308,7 +6308,7 @@ describe("gateway server chat", () => {
         maxChars: 100_000,
       });
       expect(firstPage.ok).toBe(true);
-      const sequences = firstPage.payload?.messages?.map(readOpenClawSeq) ?? [];
+      const sequences = firstPage.payload?.messages?.map(readBotSeq) ?? [];
       expect(sequences.length).toBeGreaterThan(0);
       expect(sequences.length).toBeLessThan(messageCount);
       const oldestSeq = expectDefined(sequences[0], "oldest returned sequence");
@@ -6357,7 +6357,7 @@ describe("gateway server chat", () => {
         ]);
 
         type HistoryPage = {
-          messages?: Array<{ __openclaw?: { seq?: number } }>;
+          messages?: Array<{ __bot?: { seq?: number } }>;
           nextOffset?: number;
           hasMore?: boolean;
         };
@@ -6368,7 +6368,7 @@ describe("gateway server chat", () => {
           maxChars: 100_000,
         });
         expect(firstPage.ok).toBe(true);
-        const firstPageSequences = firstPage.payload?.messages?.map(readOpenClawSeq) ?? [];
+        const firstPageSequences = firstPage.payload?.messages?.map(readBotSeq) ?? [];
         expect(firstPageSequences.length).toBeGreaterThan(0);
         expect(firstPageSequences.every((seq) => seq === 3)).toBe(true);
         expect(firstPage.payload?.hasMore).toBe(true);

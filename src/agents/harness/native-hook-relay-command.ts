@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { resolveOpenClawPackageRootSync } from "../../infra/openclaw-root.js";
+import { resolveBotPackageRootSync } from "../../infra/bot-root.js";
 import type { NativeHookRelayEvent, NativeHookRelayProvider } from "./native-hook-relay-types.js";
 import {
   normalizeOptionalPositiveInteger,
@@ -63,10 +63,10 @@ export function buildNativeHookRelayCommandWithStateDatabase(params: {
   nodeExecutable?: string;
 }): string {
   const timeoutMs = normalizePositiveInteger(params.timeoutMs, DEFAULT_RELAY_TIMEOUT_MS);
-  const executable = params.executable ?? resolveOpenClawCliExecutable();
+  const executable = params.executable ?? resolveBotCliExecutable();
   const argv =
-    executable === "openclaw"
-      ? ["openclaw"]
+    executable === "bot"
+      ? ["bot"]
       : [params.nodeExecutable ?? process.execPath, executable];
   const nicePrefix = resolveNativeHookRelayNicePrefix(params.nice);
   const command = shellQuoteArgs([
@@ -93,19 +93,19 @@ export function buildNativeHookRelayCommandWithStateDatabase(params: {
   return process.platform === "win32" ? command : `exec ${command}`;
 }
 
-function resolveOpenClawCliExecutable(): string {
-  const envPath = process.env.OPENCLAW_CLI_PATH?.trim();
+function resolveBotCliExecutable(): string {
+  const envPath = process.env.BOT_CLI_PATH?.trim();
   if (envPath && existsSync(envPath)) {
     return envPath;
   }
-  const packageRoot = resolveOpenClawPackageRootSync({
+  const packageRoot = resolveBotPackageRootSync({
     moduleUrl: import.meta.url,
     argv1: process.argv[1],
     cwd: process.cwd(),
   });
   if (packageRoot) {
     for (const candidate of [
-      path.join(packageRoot, "openclaw.mjs"),
+      path.join(packageRoot, "bot.mjs"),
       path.join(packageRoot, "dist", "entry.js"),
       path.join(packageRoot, "scripts", "run-node.mjs"),
     ]) {
@@ -121,5 +121,5 @@ function resolveOpenClawCliExecutable(): string {
       return resolved;
     }
   }
-  throw new Error("Cannot resolve OpenClaw CLI executable path for native hook relay");
+  throw new Error("Cannot resolve Bot CLI executable path for native hook relay");
 }

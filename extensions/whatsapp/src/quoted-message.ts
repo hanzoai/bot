@@ -3,7 +3,7 @@ import type { MiscMessageGenerationOptions } from "baileys";
 import {
   formatMediaPlaceholderText,
   type MediaPlaceholderTextFact,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "bot/plugin-sdk/channel-inbound";
 import { jidToE164 } from "./text-runtime.js";
 
 // ── Inbound message metadata cache ──────────────────────────────────────

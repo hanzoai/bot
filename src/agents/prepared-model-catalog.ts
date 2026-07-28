@@ -1,6 +1,6 @@
 /** Lifecycle-owned model catalog access. */
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   listAgentIds,
   resolveAgentDir,
@@ -27,7 +27,7 @@ import {
 export type LoadPreparedModelCatalogParams = {
   agentId?: string;
   agentDir?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   readOnly?: boolean;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;

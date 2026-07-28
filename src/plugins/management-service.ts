@@ -1,7 +1,7 @@
 // Structured plugin catalog and lifecycle operations shared by Gateway-facing surfaces.
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { MANIFEST_KEY } from "../compat/legacy-names.js";
 import { collectChangedPaths } from "../config/config-change-paths.js";
 import {
@@ -11,7 +11,7 @@ import {
 } from "../config/config.js";
 import { resolveIsNixMode } from "../config/paths.js";
 import { ensurePluginAllowlisted } from "../config/plugins-allowlist.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { parseClawHubPluginSpec } from "../infra/clawhub-spec.js";
 import { formatErrorMessage } from "../infra/errors.js";
@@ -172,7 +172,7 @@ type ManagedPluginSourceInstallResult =
   | {
       ok: true;
       pluginId: string;
-      config: OpenClawConfig;
+      config: BotConfig;
       warnings?: string[];
       targetDir?: string;
       version?: string;
@@ -637,7 +637,7 @@ function resolvePluginIconUrlFromCatalogFacts(params: {
 
 /** Resolve the current manifest/catalog icon URL without accepting a caller-provided URL. */
 export async function resolveManagedPluginIconUrl(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginId: string;
   env?: NodeJS.ProcessEnv;
   officialCatalog?: OfficialCatalogResult;
@@ -670,7 +670,7 @@ function normalizeManagedCatalogIconUrl(value: unknown): string | undefined {
 
 /** Resolve only URLs currently owned by a manifest or bundled presentation catalog. */
 export function resolveManagedSetupCatalogIconUrl(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   iconUrl: string;
   env?: NodeJS.ProcessEnv;
 }): string | undefined {
@@ -695,7 +695,7 @@ export function resolveManagedSetupCatalogIconUrl(params: {
 
 /** Build cold installed state merged with the hosted official catalog and bundled curation. */
 export async function listManagedPlugins(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env?: NodeJS.ProcessEnv;
   officialCatalog?: OfficialCatalogResult;
 }): Promise<ManagedPluginCatalog> {
@@ -854,7 +854,7 @@ function assertValidConfigSnapshot(
   const { snapshot, writeOptions } = prepared;
   if (!snapshot.valid) {
     throw new ManagedPluginLifecycleError(
-      "Config invalid; run `openclaw doctor --fix` before managing plugins.",
+      "Config invalid; run `bot doctor --fix` before managing plugins.",
     );
   }
   const mutationWriteOptions = selectInstallMutationWriteOptions(writeOptions);
@@ -1061,7 +1061,7 @@ async function persistManagedSourceInstall(params: {
   runtime?: RuntimeEnv;
   successMessage?: string;
   cleanupOnPersistenceFailure?: boolean;
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   const persist = () =>
     persistPluginInstall({
       snapshot: params.snapshot,

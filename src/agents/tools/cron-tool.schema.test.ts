@@ -1,4 +1,4 @@
-import { normalizeToolParameterSchema } from "@openclaw/ai/internal/openai";
+import { normalizeToolParameterSchema } from "@hanzo/bot-ai/internal/openai";
 // Cron tool schema tests cover the provider-facing parameter shape and runtime
 // validation compatibility for cron jobs.
 import { Value } from "typebox/value";

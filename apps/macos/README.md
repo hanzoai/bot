@@ -1,4 +1,4 @@
-# OpenClaw macOS app (dev + signing)
+# Bot macOS app (dev + signing)
 
 ## Quick dev run
 
@@ -26,7 +26,7 @@ process owns the local Gateway.
 scripts/package-mac-app.sh
 ```
 
-Creates `dist/OpenClaw.app` and signs it via `scripts/codesign-mac-app.sh`.
+Creates `dist/Bot.app` and signs it via `scripts/codesign-mac-app.sh`.
 
 ## Signing behavior
 

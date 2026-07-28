@@ -41,8 +41,8 @@ describe("SessionPullRequestIndicatorsController", () => {
           : [
               {
                 number: 1,
-                owner: "openclaw",
-                repo: "openclaw",
+                owner: "bot",
+                repo: "bot",
                 branch: "feature/demo",
                 title: "Demo",
                 url: "https://example.test/pr/1",

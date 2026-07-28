@@ -16,7 +16,7 @@ setupCliBundleMcpTestHarness();
 describe("prepareCliBundleMcpConfig", () => {
   it("injects a strict empty --mcp-config overlay for bundle-MCP-enabled backends without servers", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-empty-",
+      "bot-cli-bundle-mcp-empty-",
     );
 
     const prepared = await prepareCliBundleMcpConfig({
@@ -43,7 +43,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("serves only the exclusive config, ignoring user and plugin servers", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-exclusive-",
+      "bot-cli-bundle-mcp-exclusive-",
     );
     const userConfig = path.join(workspaceDir, "user-mcp.json");
     await fs.writeFile(
@@ -62,7 +62,7 @@ describe("prepareCliBundleMcpConfig", () => {
       workspaceDir,
       config: { plugins: { enabled: false } },
       exclusiveConfig: {
-        mcpServers: { openclaw: { command: "node", args: ["openclaw.mjs"] } },
+        mcpServers: { bot: { command: "node", args: ["bot.mjs"] } },
       },
     });
 
@@ -71,8 +71,8 @@ describe("prepareCliBundleMcpConfig", () => {
     const raw = JSON.parse(await fs.readFile(generatedConfigPath, "utf-8")) as {
       mcpServers?: Record<string, { args?: string[] }>;
     };
-    expect(Object.keys(raw.mcpServers ?? {})).toEqual(["openclaw"]);
-    expect(raw.mcpServers?.openclaw?.args).toEqual(["openclaw.mjs"]);
+    expect(Object.keys(raw.mcpServers ?? {})).toEqual(["bot"]);
+    expect(raw.mcpServers?.bot?.args).toEqual(["bot.mjs"]);
     expect(prepared.mcpConfigHash).toMatch(/^[0-9a-f]{64}$/);
 
     await prepared.cleanup?.();
@@ -97,7 +97,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("strips variadic Claude --mcp-config values and merges every listed config", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-variadic-",
+      "bot-cli-bundle-mcp-variadic-",
     );
     const firstConfig = path.join(workspaceDir, "first-mcp.json");
     const secondConfig = path.join(workspaceDir, "second-mcp.json");
@@ -155,7 +155,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("merges and strips Claude --mcp-config equals form", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-equals-",
+      "bot-cli-bundle-mcp-equals-",
     );
     const configPath = path.join(workspaceDir, "equals-mcp.json");
     await fs.writeFile(
@@ -191,7 +191,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("keeps dash-prefixed args after Claude --mcp-config because they terminate variadic values", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-dash-",
+      "bot-cli-bundle-mcp-dash-",
     );
 
     const prepared = await prepareCliBundleMcpConfig({
@@ -218,9 +218,9 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("loads workspace bundle MCP plugins from the configured workspace root", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-workspace-root-",
+      "bot-cli-bundle-mcp-workspace-root-",
     );
-    const pluginRoot = path.join(workspaceDir, ".openclaw", "extensions", "workspace-probe");
+    const pluginRoot = path.join(workspaceDir, ".bot", "extensions", "workspace-probe");
     // Workspace-local plugins should be resolved relative to workspaceDir, not HOME.
     const serverPath = path.join(pluginRoot, "servers", "probe.mjs");
     await fs.mkdir(path.dirname(serverPath), { recursive: true });
@@ -276,12 +276,12 @@ describe("prepareCliBundleMcpConfig", () => {
   it("merges loopback overlay config with bundle MCP servers", async () => {
     const additionalConfig = {
       mcpServers: {
-        openclaw: {
+        bot: {
           type: "http",
           url: "http://127.0.0.1:23119/mcp",
           headers: {
-            Authorization: "Bearer ${OPENCLAW_MCP_TOKEN}",
-            "x-openclaw-cli-capture-key": "${OPENCLAW_MCP_CLI_CAPTURE_KEY}",
+            Authorization: "Bearer ${BOT_MCP_TOKEN}",
+            "x-bot-cli-capture-key": "${BOT_MCP_CLI_CAPTURE_KEY}",
           },
         },
       },
@@ -289,15 +289,15 @@ describe("prepareCliBundleMcpConfig", () => {
     const prepared = await prepareBundleProbeCliConfig({
       additionalConfig,
       env: {
-        OPENCLAW_MCP_TOKEN: "lb-tk-123",
-        OPENCLAW_MCP_CLI_CAPTURE_KEY: "",
+        BOT_MCP_TOKEN: "lb-tk-123",
+        BOT_MCP_CLI_CAPTURE_KEY: "",
       },
     });
     const otherEnvPrepared = await prepareBundleProbeCliConfig({
       additionalConfig,
       env: {
-        OPENCLAW_MCP_TOKEN: "other-loopback-token",
-        OPENCLAW_MCP_CLI_CAPTURE_KEY: "",
+        BOT_MCP_TOKEN: "other-loopback-token",
+        BOT_MCP_CLI_CAPTURE_KEY: "",
       },
     });
 
@@ -305,10 +305,10 @@ describe("prepareCliBundleMcpConfig", () => {
     const raw = JSON.parse(await fs.readFile(generatedConfigPath, "utf-8")) as {
       mcpServers?: Record<string, { url?: string; headers?: Record<string, string> }>;
     };
-    expect(Object.keys(raw.mcpServers ?? {}).toSorted()).toEqual(["bundleProbe", "openclaw"]);
-    expect(raw.mcpServers?.openclaw?.url).toBe("http://127.0.0.1:23119/mcp");
-    expect(raw.mcpServers?.openclaw?.headers?.Authorization).toBe("Bearer lb-tk-123");
-    expect(raw.mcpServers?.openclaw?.headers?.["x-openclaw-cli-capture-key"]).toBe("");
+    expect(Object.keys(raw.mcpServers ?? {}).toSorted()).toEqual(["bundleProbe", "bot"]);
+    expect(raw.mcpServers?.bot?.url).toBe("http://127.0.0.1:23119/mcp");
+    expect(raw.mcpServers?.bot?.headers?.Authorization).toBe("Bearer lb-tk-123");
+    expect(raw.mcpServers?.bot?.headers?.["x-bot-cli-capture-key"]).toBe("");
     await prepareCliBundleMcpCaptureAttempt({
       mode: "claude-config-file",
       backend: prepared.backend,
@@ -318,8 +318,8 @@ describe("prepareCliBundleMcpConfig", () => {
     const attemptRaw = JSON.parse(await fs.readFile(generatedConfigPath, "utf-8")) as {
       mcpServers?: Record<string, { url?: string; headers?: Record<string, string> }>;
     };
-    expect(attemptRaw.mcpServers?.openclaw?.headers?.Authorization).toBe("Bearer lb-tk-123");
-    expect(attemptRaw.mcpServers?.openclaw?.headers?.["x-openclaw-cli-capture-key"]).toBe(
+    expect(attemptRaw.mcpServers?.bot?.headers?.Authorization).toBe("Bearer lb-tk-123");
+    expect(attemptRaw.mcpServers?.bot?.headers?.["x-bot-cli-capture-key"]).toBe(
       "attempt-123",
     );
     expect(prepared.mcpConfigHash).toBe(otherEnvPrepared.mcpConfigHash);
@@ -331,7 +331,7 @@ describe("prepareCliBundleMcpConfig", () => {
 
   it("preserves extra env values alongside generated MCP config", async () => {
     const workspaceDir = await cliBundleMcpHarness.tempHarness.createTempDir(
-      "openclaw-cli-bundle-mcp-env-",
+      "bot-cli-bundle-mcp-env-",
     );
 
     const prepared = await prepareCliBundleMcpConfig({
@@ -344,14 +344,14 @@ describe("prepareCliBundleMcpConfig", () => {
       workspaceDir,
       config: { plugins: { enabled: false } },
       env: {
-        OPENCLAW_MCP_TOKEN: "lb-tk-123",
-        OPENCLAW_MCP_SESSION_KEY: "agent:main:telegram:group:chat123",
+        BOT_MCP_TOKEN: "lb-tk-123",
+        BOT_MCP_SESSION_KEY: "agent:main:telegram:group:chat123",
       },
     });
 
     expect(prepared.env).toEqual({
-      OPENCLAW_MCP_TOKEN: "lb-tk-123",
-      OPENCLAW_MCP_SESSION_KEY: "agent:main:telegram:group:chat123",
+      BOT_MCP_TOKEN: "lb-tk-123",
+      BOT_MCP_SESSION_KEY: "agent:main:telegram:group:chat123",
     });
 
     await prepared.cleanup?.();
@@ -364,7 +364,7 @@ describe("prepareCliBundleMcpConfig", () => {
         command: "node",
         args: ["./fake-cli.mjs"],
       },
-      workspaceDir: "/tmp/openclaw-bundle-mcp-disabled",
+      workspaceDir: "/tmp/bot-bundle-mcp-disabled",
     });
 
     expect(prepared.backend.args).toEqual(["./fake-cli.mjs"]);

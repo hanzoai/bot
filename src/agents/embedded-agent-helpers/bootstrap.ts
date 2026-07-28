@@ -3,8 +3,8 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../../config/types.bot.js";
 import { sanitizeGoogleAssistantFirstOrdering } from "../../shared/google-turn-ordering.js";
 import { sliceUtf16Safe, truncateUtf16Safe } from "../../utils.js";
 import { resolveAgentConfig } from "../agent-scope.js";
@@ -117,7 +117,7 @@ type PolicyDigest = {
   omittedLines: number;
 };
 
-export function resolveBootstrapMaxChars(cfg?: OpenClawConfig, agentId?: string | null): number {
+export function resolveBootstrapMaxChars(cfg?: BotConfig, agentId?: string | null): number {
   const raw =
     cfg && agentId
       ? (resolveAgentConfig(cfg, agentId)?.bootstrapMaxChars ??
@@ -130,7 +130,7 @@ export function resolveBootstrapMaxChars(cfg?: OpenClawConfig, agentId?: string 
 }
 
 export function resolveBootstrapTotalMaxChars(
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
   agentId?: string | null,
 ): number {
   const raw =
@@ -145,7 +145,7 @@ export function resolveBootstrapTotalMaxChars(
 }
 
 export function resolveBootstrapPromptTruncationWarningMode(
-  _cfg?: OpenClawConfig,
+  _cfg?: BotConfig,
 ): "off" | "once" | "always" {
   return DEFAULT_BOOTSTRAP_PROMPT_TRUNCATION_WARNING_MODE;
 }

@@ -1,0 +1,44 @@
+bot
+Copyright (c) 2026 Hanzo AI Inc.
+
+This product includes software from Bot, formerly Warelay / Clawdbot / Moltbot (https://github.com/hanzoai/bot), licensed under MIT:
+
+    Copyright (c) 2026 Bot Foundation
+
+--- Fork provenance ---
+
+Forked from https://github.com/hanzoai/bot — Bot, the personal AI
+assistant published by the Bot Foundation (upstream sites bot.ai and
+docs.bot.ai). Hanzo Bot tracks the TypeScript reference implementation of
+that project. This repository's root commit is the Bot initial import
+(matching the upstream repository's own initial commit), and earlier upstream
+names — Moltbot, Clawdbot, Warelay — are recorded in CHANGELOG.md.
+
+--- DEVIATIONS ---
+
+Changes made by Hanzo AI, Inc. on top of the Bot MIT baseline:
+
+- Rebranded product-facing surfaces to "Hanzo Bot": CLI binaries `hanzo-bot` and
+  `bot`, npm package `@hanzo/bot`, README, and documentation pointing to hanzo.ai
+  and docs.hanzo.ai. Legacy `CLAWDBOT_*` and `BOT_*` environment variables are
+  retained for compatibility.
+- Added Hanzo IAM (OIDC) authentication for the Gateway (src/gateway/auth-iam.ts,
+  src/commands/auth-choice.apply.hanzo-iam.ts), driven by the canonical
+  IAM_CLIENT_ID, IAM_CLIENT_SECRET, IAM_TOKEN_ENDPOINT and IAM_AUTHORIZE_ENDPOINT
+  environment variables.
+- Added an org-scoped bot-management API on the Gateway, authenticated at the
+  pod boundary: GET /v1/bots (list the caller org's runs) and
+  POST /v1/bots/:runId/stop (src/gateway/bots-http.ts).
+- Added per-tenant LLM billing through IAM (src/gateway/billing/, including
+  iam-billing-client.ts and the billing gate).
+- Added Playground control-plane registration (src/gateway/playground-registration.ts):
+  the gateway and cloud-provisioned node hosts register, heartbeat and deregister
+  against /v1/nodes. Cloud provisioning is signalled by HANZO_PLAYGROUND_CLOUD_NODE
+  (src/infra/cloud-node.ts).
+- Added a cloud image, Dockerfile.cloud, layering the bot Gateway on
+  ghcr.io/hanzoai/operative for cloud agents, plus render.yaml, hanzo.toml and
+  bot.podman.env deployment configuration.
+- Routed CI to Hanzo self-hosted ARC runners (hanzo-build-linux-amd64,
+  hanzo-deploy-linux-amd64) instead of GitHub-hosted runners.
+- Added a social CLI surface (src/cli/social-cli.ts) and a cloud connect flow
+  (src/commands/cloud-connect.ts).

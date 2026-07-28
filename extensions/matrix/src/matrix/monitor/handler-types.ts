@@ -1,6 +1,6 @@
-import type { resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
-import type { createChannelInboundEnvelopeBuilder } from "openclaw/plugin-sdk/channel-inbound";
-import type { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+import type { resolveHumanDelayConfig } from "bot/plugin-sdk/agent-runtime";
+import type { createChannelInboundEnvelopeBuilder } from "bot/plugin-sdk/channel-inbound";
+import type { resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
 import type {
   CoreConfig,
   MatrixConfig,

@@ -1,7 +1,7 @@
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import {
   loadExactSessionEntry,
   loadSessionEntry,
@@ -70,9 +70,9 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
       ctx,
       cfg: markCompleteReplyConfig({
         session: {
-          store: path.join(tempDirs.make("openclaw-native-slash-"), "sessions.json"),
+          store: path.join(tempDirs.make("bot-native-slash-"), "sessions.json"),
         },
-      } as OpenClawConfig),
+      } as BotConfig),
       agentId: "main",
       agentDir: "/tmp/agent",
       agentCfg: undefined,
@@ -134,9 +134,9 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
       ctx,
       cfg: markCompleteReplyConfig({
         session: {
-          store: path.join(tempDirs.make("openclaw-text-slash-"), "sessions.json"),
+          store: path.join(tempDirs.make("bot-text-slash-"), "sessions.json"),
         },
-      } as OpenClawConfig),
+      } as BotConfig),
       agentId: "dev",
       agentDir: "/tmp/agent",
       agentCfg: undefined,
@@ -189,9 +189,9 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
       ctx,
       cfg: markCompleteReplyConfig({
         session: {
-          store: path.join(tempDirs.make("openclaw-external-text-slash-"), "sessions.json"),
+          store: path.join(tempDirs.make("bot-external-text-slash-"), "sessions.json"),
         },
-      } as OpenClawConfig),
+      } as BotConfig),
       agentId: "dev",
       agentDir: "/tmp/agent",
       agentCfg: undefined,
@@ -212,7 +212,7 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
 
   it("does not create a session for an unauthorized native command", async () => {
     const storePath = path.join(
-      tempDirs.make("openclaw-native-slash-unauthorized-"),
+      tempDirs.make("bot-native-slash-unauthorized-"),
       "sessions.json",
     );
     const sessionKey = "agent:main:telegram:slash:unauthorized";
@@ -237,7 +237,7 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
           body: "/config show",
         },
       }),
-      cfg: markCompleteReplyConfig({ session: { store: storePath } } as OpenClawConfig),
+      cfg: markCompleteReplyConfig({ session: { store: storePath } } as BotConfig),
       agentId: "main",
       agentDir: "/tmp/agent",
       agentCfg: undefined,
@@ -281,9 +281,9 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
       }),
       cfg: markCompleteReplyConfig({
         session: {
-          store: path.join(tempDirs.make("openclaw-native-slash-conflict-"), "sessions.json"),
+          store: path.join(tempDirs.make("bot-native-slash-conflict-"), "sessions.json"),
         },
-      } as OpenClawConfig),
+      } as BotConfig),
       agentId: "main",
       agentDir: "/tmp/agent",
       agentCfg: undefined,
@@ -328,9 +328,9 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
       }),
       cfg: markCompleteReplyConfig({
         session: {
-          store: path.join(tempDirs.make("openclaw-native-slash-rotation-"), "sessions.json"),
+          store: path.join(tempDirs.make("bot-native-slash-rotation-"), "sessions.json"),
         },
-      } as OpenClawConfig),
+      } as BotConfig),
       agentId: "main",
       agentDir: "/tmp/agent",
       agentCfg: undefined,
@@ -352,7 +352,7 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
   });
 
   it("adopts a supported legacy alias before native command initialization", async () => {
-    const storePath = path.join(tempDirs.make("openclaw-native-slash-alias-"), "sessions.json");
+    const storePath = path.join(tempDirs.make("bot-native-slash-alias-"), "sessions.json");
     const sessionKey = "agent:main:main";
     await replaceSessionEntry({ sessionKey: "Agent:main:main", storePath }, {
       sessionId: "legacy-session",
@@ -378,7 +378,7 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
           body: "/compact",
         },
       }),
-      cfg: markCompleteReplyConfig({ session: { store: storePath } } as OpenClawConfig),
+      cfg: markCompleteReplyConfig({ session: { store: storePath } } as BotConfig),
       agentId: "main",
       agentDir: "/tmp/agent",
       agentCfg: undefined,
@@ -400,7 +400,7 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
   });
 
   it("does not mutate an archived session during native command initialization", async () => {
-    const storePath = path.join(tempDirs.make("openclaw-native-slash-archived-"), "sessions.json");
+    const storePath = path.join(tempDirs.make("bot-native-slash-archived-"), "sessions.json");
     const sessionKey = "agent:main:main";
     const archivedEntry = {
       sessionId: "archived-session",
@@ -428,7 +428,7 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
           body: "/compact",
         },
       }),
-      cfg: markCompleteReplyConfig({ session: { store: storePath } } as OpenClawConfig),
+      cfg: markCompleteReplyConfig({ session: { store: storePath } } as BotConfig),
       agentId: "main",
       agentDir: "/tmp/agent",
       agentCfg: undefined,
@@ -451,7 +451,7 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
   });
 
   it("persists fast-path session initialization before command mutation", async () => {
-    const storePath = path.join(tempDirs.make("openclaw-native-slash-init-"), "sessions.json");
+    const storePath = path.join(tempDirs.make("bot-native-slash-init-"), "sessions.json");
     const sessionKey = "agent:main:main";
     await replaceSessionEntry({ sessionKey, storePath }, {
       sessionId: "session-1",
@@ -489,7 +489,7 @@ describe("maybeResolveNativeSlashCommandFastReply", () => {
             body: "/compact",
           },
         }),
-        cfg: markCompleteReplyConfig({ session: { store: storePath } } as OpenClawConfig),
+        cfg: markCompleteReplyConfig({ session: { store: storePath } } as BotConfig),
         agentId: "main",
         agentDir: "/tmp/agent",
         agentCfg: undefined,

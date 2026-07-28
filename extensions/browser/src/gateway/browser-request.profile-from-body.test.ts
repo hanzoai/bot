@@ -1,5 +1,5 @@
 // Browser tests cover browser request.profile from body plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -22,10 +22,10 @@ vi.mock("../core-api.js", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/runtime-config-snapshot", async () => {
+vi.mock("bot/plugin-sdk/runtime-config-snapshot", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/runtime-config-snapshot")
-  >("openclaw/plugin-sdk/runtime-config-snapshot");
+    typeof import("bot/plugin-sdk/runtime-config-snapshot")
+  >("bot/plugin-sdk/runtime-config-snapshot");
   return {
     ...actual,
     getRuntimeConfig: loadConfigMock,
@@ -338,7 +338,7 @@ describe("browser.request profile selection", () => {
       error: "headed mode needs a display",
       reason: "no_display_for_headed_profile",
       details: {
-        profile: "openclaw",
+        profile: "bot",
         requestedHeadless: false,
         headlessSource: "config",
         displayPresent: false,

@@ -10,13 +10,13 @@
  * QQBot falls back to "always handle, anyone can approve".
  */
 
-import { createChannelApprovalCapability } from "openclaw/plugin-sdk/approval-delivery-runtime";
-import { createLazyChannelApprovalNativeRuntimeAdapter } from "openclaw/plugin-sdk/approval-handler-adapter-runtime";
-import type { ChannelApprovalNativeRuntimeAdapter } from "openclaw/plugin-sdk/approval-handler-runtime";
-import { resolveApprovalRequestSessionConversation } from "openclaw/plugin-sdk/approval-native-runtime";
-import type { ChannelApprovalCapability } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { createChannelApprovalCapability } from "bot/plugin-sdk/approval-delivery-runtime";
+import { createLazyChannelApprovalNativeRuntimeAdapter } from "bot/plugin-sdk/approval-handler-adapter-runtime";
+import type { ChannelApprovalNativeRuntimeAdapter } from "bot/plugin-sdk/approval-handler-runtime";
+import { resolveApprovalRequestSessionConversation } from "bot/plugin-sdk/approval-native-runtime";
+import type { ChannelApprovalCapability } from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveApprovalTarget } from "../../engine/approval/index.js";
 import {
   isQQBotExecApprovalClientEnabled,
@@ -38,7 +38,7 @@ import { getBridgeLogger } from "../logger.js";
  * delivery fails with 500 on the QQ Bot API).
  */
 function shouldHandleRequest(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   request: {
     request: {
@@ -63,14 +63,14 @@ function shouldHandleRequest(params: {
 }
 
 function hasExecApprovalConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
 }): boolean {
   return resolveQQBotExecApprovalConfig(params) !== undefined;
 }
 
 function isNativeDeliveryEnabled(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
 }): boolean {
   if (hasExecApprovalConfig(params)) {
@@ -100,7 +100,7 @@ function canResolveTarget(request: {
 }
 
 function resolveNativeDeliveryState(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
 }): { kind: "enabled" } | { kind: "disabled" } {
   const enabled = isNativeDeliveryEnabled(params);

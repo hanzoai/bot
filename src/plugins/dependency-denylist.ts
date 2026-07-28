@@ -1,5 +1,5 @@
 /** Denylist checks for unsafe packages in plugin manifests and installed dependency trees. */
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import { BLOCKED_INSTALL_DEPENDENCY_PACKAGE_NAMES } from "./dependency-denylist-packages.js";
 
 /** Finding for blocked dependencies declared in a plugin package manifest. */

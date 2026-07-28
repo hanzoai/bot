@@ -190,7 +190,7 @@ export async function createBlockModeContext(
   return await createAutomaticSourceDeliveryContext({
     cfg: {
       messages: { ackReaction: "👀" },
-      session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+      session: { store: "/tmp/bot-discord-process-test-sessions.json" },
       channels: {
         discord: {
           streaming: {

@@ -1,5 +1,5 @@
 // Slack plugin module implements setup surface behavior.
-import { resolveBasicAllowFromEntries } from "openclaw/plugin-sdk/allow-from";
+import { resolveBasicAllowFromEntries } from "bot/plugin-sdk/allow-from";
 import {
   noteChannelLookupFailure,
   noteChannelLookupSummary,
@@ -7,18 +7,18 @@ import {
   resolveEntriesWithOptionalToken,
   resolveSetupAccountId,
   createSetupTranslator,
-  type OpenClawConfig,
+  type BotConfig,
   parseMentionOrPrefixedId,
   promptResolvedAllowFrom,
   splitSetupEntries,
   type WizardPrompter,
-} from "openclaw/plugin-sdk/setup-runtime";
+} from "bot/plugin-sdk/setup-runtime";
 import type {
   ChannelSetupWizard,
   ChannelSetupWizardAllowFromEntry,
-} from "openclaw/plugin-sdk/setup-runtime";
-import { formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/setup-runtime";
+import { formatDocsLink } from "bot/plugin-sdk/setup-tools";
+import { normalizeStringEntries } from "bot/plugin-sdk/string-coerce-runtime";
 import { inspectSlackAccount, type InspectedSlackAccount } from "./account-inspect.js";
 import { resolveDefaultSlackAccountId, resolveSlackAccountAllowFrom } from "./accounts.js";
 import { resolveSlackChannelAllowlist } from "./resolve-channels.js";
@@ -53,10 +53,10 @@ async function resolveSlackAllowFromEntries(params: {
 }
 
 async function promptSlackAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prompter: WizardPrompter;
   accountId?: string;
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   const parseId = (value: string) =>
     parseMentionOrPrefixedId({
       value,
@@ -120,7 +120,7 @@ async function promptSlackAllowFrom(params: {
 }
 
 async function resolveSlackGroupAllowlist(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   credentialValues: SlackSetupCredentialValues;
   entries: string[];

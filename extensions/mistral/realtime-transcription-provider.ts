@@ -6,16 +6,16 @@ import {
   type RealtimeTranscriptionSession,
   type RealtimeTranscriptionSessionCreateRequest,
   type RealtimeTranscriptionWebSocketTransport,
-} from "openclaw/plugin-sdk/realtime-transcription";
+} from "bot/plugin-sdk/realtime-transcription";
 import {
   normalizeResolvedSecretInputString,
   normalizeSecretInput,
-} from "openclaw/plugin-sdk/secret-input";
+} from "bot/plugin-sdk/secret-input";
 import {
   asOptionalRecord as readRecord,
   normalizeOptionalString,
   parseFiniteNumber as readFiniteNumber,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 
 type MistralRealtimeTranscriptionEncoding =
   | "pcm_s16le"

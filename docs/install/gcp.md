@@ -1,13 +1,13 @@
 ---
-summary: "Run OpenClaw Gateway 24/7 on a GCP Compute Engine VM (Docker) with durable state"
+summary: "Run Bot Gateway 24/7 on a GCP Compute Engine VM (Docker) with durable state"
 read_when:
-  - You want OpenClaw running 24/7 on GCP
+  - You want Bot running 24/7 on GCP
   - You want a production-grade, always-on Gateway on your own VM
   - You want full control over persistence, binaries, and restart behavior
 title: "GCP"
 ---
 
-Run a persistent OpenClaw Gateway on a GCP Compute Engine VM using Docker, with durable state, baked-in binaries, and safe restart behavior.
+Run a persistent Bot Gateway on a GCP Compute Engine VM using Docker, with durable state, baked-in binaries, and safe restart behavior.
 
 Pricing varies by machine type and region; pick the smallest VM that fits your workload and scale up if you hit OOMs.
 
@@ -30,7 +30,7 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
 1. Create a GCP project, enable billing and the Compute Engine API
 2. Create a Compute Engine VM (`e2-small`, Debian 12, 20GB)
 3. SSH into the VM, install Docker
-4. Clone the OpenClaw repository
+4. Clone the Bot repository
 5. Create persistent host directories
 6. Configure `.env` and `docker-compose.yml`
 7. Bake required binaries, build, and launch
@@ -50,8 +50,8 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
 
   <Step title="Create a GCP project">
     ```bash
-    gcloud projects create my-openclaw-project --name="OpenClaw Gateway"
-    gcloud config set project my-openclaw-project
+    gcloud projects create my-bot-project --name="Bot Gateway"
+    gcloud config set project my-bot-project
     gcloud services enable compute.googleapis.com
     ```
 
@@ -69,7 +69,7 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
     | e2-micro  | 2 vCPU (shared), 1GB RAM | Free tier eligible | Often fails with Docker build OOM (exit 137)  |
 
     ```bash
-    gcloud compute instances create openclaw-gateway \
+    gcloud compute instances create bot-gateway \
       --zone=us-central1-a \
       --machine-type=e2-small \
       --boot-disk-size=20GB \
@@ -81,7 +81,7 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
 
   <Step title="SSH into the VM">
     ```bash
-    gcloud compute ssh openclaw-gateway --zone=us-central1-a
+    gcloud compute ssh bot-gateway --zone=us-central1-a
     ```
 
     Console: click "SSH" next to the VM in the Compute Engine dashboard.
@@ -105,7 +105,7 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
     ```
 
     ```bash
-    gcloud compute ssh openclaw-gateway --zone=us-central1-a
+    gcloud compute ssh bot-gateway --zone=us-central1-a
     ```
 
     Verify:
@@ -117,10 +117,10 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
 
   </Step>
 
-  <Step title="Clone the OpenClaw repository">
+  <Step title="Clone the Bot repository">
     ```bash
-    git clone https://github.com/openclaw/openclaw.git
-    cd openclaw
+    git clone https://github.com/hanzoai/bot.git
+    cd bot
     ```
 
     This guide builds a custom image so any binaries you bake in survive restarts.
@@ -131,8 +131,8 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
     Docker containers are ephemeral; all long-lived state must live on the host.
 
     ```bash
-    mkdir -p ~/.openclaw
-    mkdir -p ~/.openclaw/workspace
+    mkdir -p ~/.bot
+    mkdir -p ~/.bot/workspace
     ```
 
   </Step>
@@ -141,21 +141,21 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
     Create `.env` in the repository root:
 
     ```bash
-    OPENCLAW_IMAGE=openclaw:latest
-    OPENCLAW_GATEWAY_TOKEN=
-    OPENCLAW_GATEWAY_BIND=lan
-    OPENCLAW_GATEWAY_PORT=18789
+    BOT_IMAGE=bot:latest
+    BOT_GATEWAY_TOKEN=
+    BOT_GATEWAY_BIND=lan
+    BOT_GATEWAY_PORT=18789
 
-    OPENCLAW_CONFIG_DIR=/home/$USER/.openclaw
-    OPENCLAW_WORKSPACE_DIR=/home/$USER/.openclaw/workspace
+    BOT_CONFIG_DIR=/home/$USER/.bot
+    BOT_WORKSPACE_DIR=/home/$USER/.bot/workspace
 
     GOG_KEYRING_PASSWORD=
-    XDG_CONFIG_HOME=/home/node/.openclaw
+    XDG_CONFIG_HOME=/home/node/.bot
     ```
 
-    Set `OPENCLAW_GATEWAY_TOKEN` to manage the stable gateway token through
+    Set `BOT_GATEWAY_TOKEN` to manage the stable gateway token through
     `.env`; otherwise configure `gateway.auth.token` before relying on clients
-    across restarts. If neither is set, OpenClaw uses a runtime-only token for
+    across restarts. If neither is set, Bot uses a runtime-only token for
     that startup. Generate a keyring password for `GOG_KEYRING_PASSWORD`:
 
     ```bash
@@ -163,8 +163,8 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
     ```
 
     **Do not commit this file.** It holds container/runtime env such as
-    `OPENCLAW_GATEWAY_TOKEN`. Stored provider OAuth/API-key auth lives in the
-    mounted `~/.openclaw/agents/<agentId>/agent/auth-profiles.json`.
+    `BOT_GATEWAY_TOKEN`. Stored provider OAuth/API-key auth lives in the
+    mounted `~/.bot/agents/<agentId>/agent/auth-profiles.json`.
 
   </Step>
 
@@ -173,8 +173,8 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
 
     ```yaml
     services:
-      openclaw-gateway:
-        image: ${OPENCLAW_IMAGE}
+      bot-gateway:
+        image: ${BOT_IMAGE}
         build: .
         restart: unless-stopped
         env_file:
@@ -183,28 +183,28 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
           - HOME=/home/node
           - NODE_ENV=production
           - TERM=xterm-256color
-          - OPENCLAW_GATEWAY_BIND=${OPENCLAW_GATEWAY_BIND}
-          - OPENCLAW_GATEWAY_PORT=${OPENCLAW_GATEWAY_PORT}
-          - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+          - BOT_GATEWAY_BIND=${BOT_GATEWAY_BIND}
+          - BOT_GATEWAY_PORT=${BOT_GATEWAY_PORT}
+          - BOT_GATEWAY_TOKEN=${BOT_GATEWAY_TOKEN}
           - GOG_KEYRING_PASSWORD=${GOG_KEYRING_PASSWORD}
           - XDG_CONFIG_HOME=${XDG_CONFIG_HOME}
           - PATH=/home/linuxbrew/.linuxbrew/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
         volumes:
-          - ${OPENCLAW_CONFIG_DIR}:/home/node/.openclaw
-          - ${OPENCLAW_WORKSPACE_DIR}:/home/node/.openclaw/workspace
+          - ${BOT_CONFIG_DIR}:/home/node/.bot
+          - ${BOT_WORKSPACE_DIR}:/home/node/.bot/workspace
         ports:
           # Recommended: keep the Gateway loopback-only on the VM; access via SSH tunnel.
           # To expose it publicly, remove the `127.0.0.1:` prefix and firewall accordingly.
-          - "127.0.0.1:${OPENCLAW_GATEWAY_PORT}:18789"
+          - "127.0.0.1:${BOT_GATEWAY_PORT}:18789"
         command:
           [
             "node",
             "dist/index.js",
             "gateway",
             "--bind",
-            "${OPENCLAW_GATEWAY_BIND}",
+            "${BOT_GATEWAY_BIND}",
             "--port",
-            "${OPENCLAW_GATEWAY_PORT}",
+            "${BOT_GATEWAY_PORT}",
             "--allow-unconfigured",
           ]
     ```
@@ -226,10 +226,10 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
   <Step title="GCP-specific launch notes">
     If the build fails with `Killed` or `exit code 137` during `pnpm install --frozen-lockfile`, the VM is out of memory. Use `e2-small` at minimum, or `e2-medium` for more reliable first builds.
 
-    When binding to LAN (`OPENCLAW_GATEWAY_BIND=lan`), configure a trusted browser origin before continuing:
+    When binding to LAN (`BOT_GATEWAY_BIND=lan`), configure a trusted browser origin before continuing:
 
     ```bash
-    docker compose run --rm openclaw-cli config set gateway.controlUi.allowedOrigins '["http://127.0.0.1:18789"]' --strict-json
+    docker compose run --rm bot-cli config set gateway.controlUi.allowedOrigins '["http://127.0.0.1:18789"]' --strict-json
     ```
 
     Replace `18789` with your configured port if you changed it.
@@ -240,7 +240,7 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
     Create an SSH tunnel to forward the Gateway port:
 
     ```bash
-    gcloud compute ssh openclaw-gateway --zone=us-central1-a -- -L 18789:127.0.0.1:18789
+    gcloud compute ssh bot-gateway --zone=us-central1-a -- -L 18789:127.0.0.1:18789
     ```
 
     Open `http://127.0.0.1:18789/` in your browser.
@@ -248,7 +248,7 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
     Reprint a clean dashboard link:
 
     ```bash
-    docker compose run --rm openclaw-cli dashboard --no-open
+    docker compose run --rm bot-cli dashboard --no-open
     ```
 
     If the UI prompts for shared-secret auth, paste the configured token or
@@ -259,8 +259,8 @@ This guide uses Debian on GCP Compute Engine. Ubuntu also works; map packages ac
     If Control UI shows `unauthorized` or `disconnected (1008): pairing required`, approve the browser device:
 
     ```bash
-    docker compose run --rm openclaw-cli devices list
-    docker compose run --rm openclaw-cli devices approve <requestId>
+    docker compose run --rm bot-cli devices list
+    docker compose run --rm bot-cli devices approve <requestId>
     ```
 
     See [Docker VM Runtime](/install/docker-vm-runtime#what-persists-where) for the shared persistence map and [update flow](/install/docker-vm-runtime#updates).
@@ -290,15 +290,15 @@ If the Docker build fails with `Killed` and `exit code 137`, the VM was OOM-kill
 
 ```bash
 # Stop the VM first
-gcloud compute instances stop openclaw-gateway --zone=us-central1-a
+gcloud compute instances stop bot-gateway --zone=us-central1-a
 
 # Change machine type
-gcloud compute instances set-machine-type openclaw-gateway \
+gcloud compute instances set-machine-type bot-gateway \
   --zone=us-central1-a \
   --machine-type=e2-small
 
 # Start the VM
-gcloud compute instances start openclaw-gateway --zone=us-central1-a
+gcloud compute instances start bot-gateway --zone=us-central1-a
 ```
 
 ## Service accounts (security best practice)
@@ -306,11 +306,11 @@ gcloud compute instances start openclaw-gateway --zone=us-central1-a
 For personal use, your default user account works fine. For automation or CI/CD, create a dedicated service account with minimal permissions:
 
 ```bash
-gcloud iam service-accounts create openclaw-deploy \
-  --display-name="OpenClaw Deployment"
+gcloud iam service-accounts create bot-deploy \
+  --display-name="Bot Deployment"
 
-gcloud projects add-iam-policy-binding my-openclaw-project \
-  --member="serviceAccount:openclaw-deploy@my-openclaw-project.iam.gserviceaccount.com" \
+gcloud projects add-iam-policy-binding my-bot-project \
+  --member="serviceAccount:bot-deploy@my-bot-project.iam.gserviceaccount.com" \
   --role="roles/compute.instanceAdmin.v1"
 ```
 

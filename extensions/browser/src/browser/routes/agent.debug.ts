@@ -6,7 +6,7 @@
  */
 import crypto from "node:crypto";
 import path from "node:path";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import type { PwAiModule } from "../pw-ai-module.js";
 import type { BrowserRouteContext } from "../server-context.js";
 import {

@@ -293,7 +293,7 @@ describe("WebRtcSdpRealtimeTalkTransport", () => {
         clientSecret: "client-secret-123",
         offerUrl: "https://api.openai.com/v1/realtime/calls",
         offerHeaders: {
-          originator: "openclaw",
+          originator: "bot",
           version: "2026.3.22",
         },
       },
@@ -310,7 +310,7 @@ describe("WebRtcSdpRealtimeTalkTransport", () => {
       method: "POST",
       body: "offer-sdp",
       headers: {
-        originator: "openclaw",
+        originator: "bot",
         version: "2026.3.22",
         Authorization: "Bearer client-secret-123",
         "Content-Type": "application/sdp",
@@ -754,7 +754,7 @@ describe("WebRtcSdpRealtimeTalkTransport", () => {
           mode: "status",
           sessionKey: "main",
           active: true,
-          message: "OpenClaw is working in read (running).",
+          message: "Bot is working in read (running).",
           speak: true,
           show: true,
           suppress: false,
@@ -770,7 +770,7 @@ describe("WebRtcSdpRealtimeTalkTransport", () => {
       expect(request).toHaveBeenCalledWith("talk.client.steer", expect.any(Object)),
     );
     const sent = sentRealtimeEvents(peer);
-    expectSpokenStatusMessage(sent, "OpenClaw is working in read (running).");
+    expectSpokenStatusMessage(sent, "Bot is working in read (running).");
     expect(sent).toContainEqual({ type: "response.create" });
     transport.stop();
   });
@@ -787,7 +787,7 @@ describe("WebRtcSdpRealtimeTalkTransport", () => {
           mode: "status",
           sessionKey: "main",
           active: true,
-          message: "OpenClaw is working in read (running).",
+          message: "Bot is working in read (running).",
           speak: true,
           show: true,
           suppress: false,
@@ -806,7 +806,7 @@ describe("WebRtcSdpRealtimeTalkTransport", () => {
     );
     let sent = sentRealtimeEvents(peer);
     expect(sent).toContainEqual({ type: "response.cancel" });
-    expectSpokenStatusMessage(sent, "OpenClaw is working in read (running).");
+    expectSpokenStatusMessage(sent, "Bot is working in read (running).");
     expect(sent.filter((event) => event.type === "response.create")).toHaveLength(0);
 
     dispatchRealtimeEvent(peer, { type: "response.done", response: { status: "completed" } });
@@ -866,7 +866,7 @@ describe("WebRtcSdpRealtimeTalkTransport", () => {
           sessionKey: "main",
           active: true,
           aborted: true,
-          message: "Cancelled the active OpenClaw run.",
+          message: "Cancelled the active Bot run.",
           speak: true,
           show: true,
           suppress: false,

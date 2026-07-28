@@ -1,6 +1,6 @@
 // Normalizes env flag values and logs env warnings lazily.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import type { SubsystemLogger } from "../logging/subsystem.js";
 import { createLazyPromise } from "../shared/lazy-runtime.js";
 export { isFastTestRuntimeEnv, isVitestRuntimeEnv } from "./test-runtime-env.js";

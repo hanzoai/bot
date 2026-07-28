@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
-import { asOptionalRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { asOptionalRecord as asRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { executeSqliteQueryTakeFirstSync } from "../../infra/kysely-sync.js";
 import { extractAssistantVisibleText } from "../../shared/chat-message-content.js";
 import {
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  openBotAgentDatabase,
+  runBotAgentWriteTransaction,
+  type BotAgentDatabase,
+} from "../../state/bot-agent-db.js";
 import type { TranscriptEvent } from "./session-accessor.sqlite-contract.js";
 import {
   collectSessionEntryLookupKeys,
@@ -85,7 +85,7 @@ function cloneSessionBranchSummaries(branches: readonly SessionBranchSummary[]) 
 }
 
 function readSessionBranchWatermark(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
 ): Pick<SessionBranchCacheEntry, "generation" | "maxSeq"> {
   const db = getSessionKysely(database.db);
@@ -107,7 +107,7 @@ function readSessionBranchWatermark(
 }
 
 function loadSessionBranchSummaries(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
 ): SessionBranchSummary[] {
   const cacheKey = sessionBranchCacheKey(database.path, sessionId);
@@ -150,7 +150,7 @@ export async function listSqliteSessionBranches(
     ...(params.storePath ? { storePath: params.storePath } : {}),
   });
   try {
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openBotAgentDatabase(toDatabaseOptions(resolved));
     const currentEntry = readSessionEntryRow(database, sourceKey)?.entry;
     if (!currentEntry?.sessionId) {
       return { status: "missing-session" };
@@ -222,7 +222,7 @@ async function mutateSqliteSessionAtMessage(
     let previousIdentity = new Map<string, SessionEntry>();
     let currentIdentity = new Map<string, SessionEntry>();
     let databasePath: string | undefined;
-    const result = runOpenClawAgentWriteTransaction((database) => {
+    const result = runBotAgentWriteTransaction((database) => {
       databasePath = database.path;
       const identityKeys = uniqueStrings([
         ...collectSessionEntryLookupKeys(database, sourceKey),
@@ -254,7 +254,7 @@ async function mutateSqliteSessionAtMessage(
 }
 
 function mutateSqliteSessionAtMessageInTransaction(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   resolved: ResolvedSqliteScope,
   params: {
     canonicalSourceKey: string;
@@ -581,7 +581,7 @@ function extractEditorAttachments(
 function extractEditorMediaRefs(
   message: Record<string, unknown>,
 ): Array<{ path: string; contentType: string }> | undefined {
-  const media = asRecord(message["__openclaw"])?.media;
+  const media = asRecord(message["__bot"])?.media;
   if (!Array.isArray(media)) {
     return undefined;
   }

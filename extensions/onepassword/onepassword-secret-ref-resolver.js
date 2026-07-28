@@ -86,8 +86,8 @@ function resolveOsHome() {
   return path.resolve(home);
 }
 
-function resolveOpenClawHome() {
-  const explicit = process.env.OPENCLAW_HOME?.trim();
+function resolveBotHome() {
+  const explicit = process.env.BOT_HOME?.trim();
   if (!explicit) {
     return resolveOsHome();
   }
@@ -98,23 +98,23 @@ function resolveOpenClawHome() {
 }
 
 function resolveStateDir() {
-  const override = process.env.OPENCLAW_STATE_DIR?.trim();
+  const override = process.env.BOT_STATE_DIR?.trim();
   if (override) {
     if (override === "~" || override.startsWith("~/") || override.startsWith("~\\")) {
-      return path.resolve(override.replace(/^~(?=$|[\\/])/u, resolveOpenClawHome()));
+      return path.resolve(override.replace(/^~(?=$|[\\/])/u, resolveBotHome()));
     }
     return path.resolve(override);
   }
-  const home = resolveOpenClawHome();
-  const profile = process.env.OPENCLAW_PROFILE?.trim();
+  const home = resolveBotHome();
+  const profile = process.env.BOT_PROFILE?.trim();
   if (profile && profile.toLowerCase() !== "default") {
     // Keep the static resolver aligned with the root CLI profile contract without importing core.
     if (!/^[A-Za-z0-9_-]+$/u.test(profile)) {
-      throw new Error("invalid OpenClaw profile name");
+      throw new Error("invalid Bot profile name");
     }
-    return path.join(home, `.openclaw-${profile}`);
+    return path.join(home, `.bot-${profile}`);
   }
-  const current = path.join(home, ".openclaw");
+  const current = path.join(home, ".bot");
   const legacy = path.join(home, ".clawdbot");
   return fsSync.existsSync(current) || !fsSync.existsSync(legacy) ? current : legacy;
 }

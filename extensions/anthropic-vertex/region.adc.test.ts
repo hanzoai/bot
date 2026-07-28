@@ -28,7 +28,7 @@ vi.mock("node:fs", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/secret-file-runtime", () => ({
+vi.mock("bot/plugin-sdk/secret-file-runtime", () => ({
   tryReadSecretFileSync: (pathname: string) => readFileSyncMock(pathname, "utf8"),
 }));
 

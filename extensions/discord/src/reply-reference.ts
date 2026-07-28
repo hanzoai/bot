@@ -1,6 +1,6 @@
-import type { ReplyToResolution } from "openclaw/plugin-sdk/channel-outbound";
-import type { ReplyToMode } from "openclaw/plugin-sdk/config-contracts";
-import { isSingleUseReplyToMode } from "openclaw/plugin-sdk/reply-reference";
+import type { ReplyToResolution } from "bot/plugin-sdk/channel-outbound";
+import type { ReplyToMode } from "bot/plugin-sdk/config-contracts";
+import { isSingleUseReplyToMode } from "bot/plugin-sdk/reply-reference";
 
 // Keep the native reference and its physical-send scope together so text, media,
 // component, and voice paths cannot desynchronize parallel reply options.

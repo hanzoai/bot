@@ -19,7 +19,7 @@ type SessionManagerCacheTestApi = {
 
 function getTestApi(): SessionManagerCacheTestApi {
   const api = (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.sessionManagerCacheTestApi")
+    Symbol.for("bot.sessionManagerCacheTestApi")
   ];
   if (!api) {
     throw new Error("session manager cache test API is unavailable");

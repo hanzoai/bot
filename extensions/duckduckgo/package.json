@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/duckduckgo-plugin",
+  "name": "@hanzo/bot-duckduckgo-plugin",
   "version": "2026.7.2",
   "private": true,
-  "description": "OpenClaw DuckDuckGo plugin",
+  "description": "Bot DuckDuckGo plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

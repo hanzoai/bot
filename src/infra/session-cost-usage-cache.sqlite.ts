@@ -1,8 +1,8 @@
 import type { DatabaseSync } from "node:sqlite";
 import { normalizeAgentId } from "../routing/session-key.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
-import { runOpenClawAgentWriteTransaction } from "../state/openclaw-agent-db.js";
+import { withBotAgentDatabaseReadOnly } from "../state/bot-agent-db-readonly.js";
+import type { DB as BotAgentKyselyDatabase } from "../state/bot-agent-db.generated.js";
+import { runBotAgentWriteTransaction } from "../state/bot-agent-db.js";
 // Per-agent SQLite storage for rebuildable per-session usage rollups.
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "./kysely-sync.js";
 import { isTransientSqliteError } from "./unhandled-rejections.js";
@@ -12,7 +12,7 @@ const LEGACY_CACHE_KEY = "cache";
 const REFRESH_LOCK_KEY = "refresh-lock";
 const ROLLUP_SCOPE = "session-cost-usage-rollup-v1";
 
-type AgentCacheDatabase = Pick<OpenClawAgentKyselyDatabase, "cache_entries">;
+type AgentCacheDatabase = Pick<BotAgentKyselyDatabase, "cache_entries">;
 
 type SessionCostUsageRefreshLock = {
   pid: number;
@@ -32,7 +32,7 @@ function readCacheDatabase<T>(
   operation: (database: { db: DatabaseSync }) => T,
 ): T | undefined {
   try {
-    const result = withOpenClawAgentDatabaseReadOnly(operation, {
+    const result = withBotAgentDatabaseReadOnly(operation, {
       agentId: normalizeAgentId(agentId),
       ...(databasePath ? { path: databasePath } : {}),
     });
@@ -76,7 +76,7 @@ function deleteCacheValueIfUnchanged(params: {
   key: string;
   valueJson: string;
 }): void {
-  runOpenClawAgentWriteTransaction(
+  runBotAgentWriteTransaction(
     (database) => {
       const kysely = getNodeSqliteKysely<AgentCacheDatabase>(database.db);
       executeSqliteQuerySync(
@@ -126,7 +126,7 @@ export function writeSessionCostUsageRollup(params: {
   valueJson: string;
   updatedAt: number;
 }): boolean {
-  return runOpenClawAgentWriteTransaction(
+  return runBotAgentWriteTransaction(
     (database) => {
       const kysely = getNodeSqliteKysely<AgentCacheDatabase>(database.db);
       const currentValueJson =
@@ -181,7 +181,7 @@ export function deleteSessionCostUsageRollupsExcept(params: {
   const existing = readSessionCostUsageRollupRows(params.agentId, params.databasePath).filter(
     (row) => !params.liveKeys.has(row.key),
   );
-  runOpenClawAgentWriteTransaction(
+  runBotAgentWriteTransaction(
     (database) => {
       const kysely = getNodeSqliteKysely<AgentCacheDatabase>(database.db);
       for (const row of existing) {
@@ -277,7 +277,7 @@ export function acquireSessionCostUsageRefreshLock(
     ownerNonce: `${process.pid}:${Date.now()}:${process.hrtime.bigint()}`,
   };
   const lockJson = JSON.stringify(lock);
-  const acquired = runOpenClawAgentWriteTransaction(
+  const acquired = runBotAgentWriteTransaction(
     (database) => {
       const kysely = getNodeSqliteKysely<AgentCacheDatabase>(database.db);
       const currentRaw =

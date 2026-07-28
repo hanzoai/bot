@@ -32,7 +32,7 @@ import {
   isMissingOperatorReadScopeError,
 } from "../../lib/gateway-errors.ts";
 import { buildSessionUsageDateParams, requestSessionsUsage } from "../../lib/sessions/index.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { PROFILE_SETTINGS_TARGET_IDS } from "../config/settings-targets.ts";
 import {
   decideUsageRefresh,
@@ -76,7 +76,7 @@ function toIdentityErrorMessage(error: unknown): string {
     : t("profilePage.identity.profileUnavailable");
 }
 
-export class ProfilePage extends OpenClawLightDomElement {
+export class ProfilePage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: false })
   private context!: ApplicationContext;
 
@@ -523,7 +523,7 @@ export class ProfilePage extends OpenClawLightDomElement {
         <div class="profile-hero__name">${name}</div>
         <div class="profile-hero__handle">
           <span>@${agentId}</span>
-          <span class="profile-hero__badge">OpenClaw</span>
+          <span class="profile-hero__badge">Bot</span>
         </div>
         <div class="profile-hero__chips">
           ${since
@@ -600,6 +600,6 @@ export class ProfilePage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-profile-page")) {
-  customElements.define("openclaw-profile-page", ProfilePage);
+if (!customElements.get("bot-profile-page")) {
+  customElements.define("bot-profile-page", ProfilePage);
 }

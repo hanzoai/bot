@@ -1,4 +1,4 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 
 export const loadPluralKitRuntime = createLazyRuntimeModule(() => import("../pluralkit.js"));
 

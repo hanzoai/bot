@@ -1,20 +1,20 @@
 // Slack plugin module implements setup shared behavior.
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
-import { hasConfiguredSecretInput } from "openclaw/plugin-sdk/secret-input";
-import { patchChannelConfigForAccount } from "openclaw/plugin-sdk/setup-runtime";
-import { formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
+import { describeAccountSnapshot } from "bot/plugin-sdk/account-helpers";
+import { hasConfiguredSecretInput } from "bot/plugin-sdk/secret-input";
+import { patchChannelConfigForAccount } from "bot/plugin-sdk/setup-runtime";
+import { formatDocsLink } from "bot/plugin-sdk/setup-tools";
 import { isSlackPluginAccountConfigured } from "./account-configured.js";
 import type { ResolvedSlackAccount } from "./accounts.js";
-import type { OpenClawConfig } from "./channel-api.js";
+import type { BotConfig } from "./channel-api.js";
 
 export const SLACK_CHANNEL = "slack" as const;
 
-export function buildSlackManifest(botName = "OpenClaw") {
-  const safeName = botName.trim() || "OpenClaw";
+export function buildSlackManifest(botName = "Bot") {
+  const safeName = botName.trim() || "Bot";
   const manifest = {
     display_information: {
       name: safeName,
-      description: `${safeName} connector for OpenClaw`,
+      description: `${safeName} connector for Bot`,
     },
     features: {
       bot_user: {
@@ -27,7 +27,7 @@ export function buildSlackManifest(botName = "OpenClaw") {
         messages_tab_read_only_enabled: false,
       },
       agent_view: {
-        agent_description: `${safeName} connects Slack Agent View conversations to OpenClaw agents.`,
+        agent_description: `${safeName} connects Slack Agent View conversations to Bot agents.`,
         suggested_prompts: [
           {
             title: "What can you do?",
@@ -45,8 +45,8 @@ export function buildSlackManifest(botName = "OpenClaw") {
       },
       slash_commands: [
         {
-          command: "/openclaw",
-          description: "Send a message to OpenClaw",
+          command: "/bot",
+          description: "Send a message to Bot",
           should_escape: false,
         },
       ],
@@ -119,10 +119,10 @@ export function buildSlackSetupLines(): string[] {
 }
 
 export function setSlackChannelAllowlist(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   accountId: string,
   channelKeys: string[],
-): OpenClawConfig {
+): BotConfig {
   const channels = Object.fromEntries(channelKeys.map((key) => [key, { enabled: true }]));
   return patchChannelConfigForAccount({
     cfg,

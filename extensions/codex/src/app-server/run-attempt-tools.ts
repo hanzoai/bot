@@ -1,8 +1,8 @@
 import type {
   EmbeddedRunAttemptParams,
   NativeHookRelayRegistrationHandle,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { handleCodexAppServerApprovalRequest } from "./approval-bridge.js";
 import { isSystemAgentOnlyCodexDynamicToolAllowlist } from "./dynamic-tool-profile.js";
 import type {
@@ -113,10 +113,10 @@ export function resolveCodexDynamicToolDirectNames(
   // Tools with catalogMode=direct-only use the model-only namespace. This list
   // remains for control tools that intentionally live at the dynamic-tool root.
   const names: string[] = [];
-  // OpenClaw is the run's only tool and must stay callable when Codex tool
+  // Bot is the run's only tool and must stay callable when Codex tool
   // search is unavailable. Exact toolsAllow is the public harness contract.
   if (hostSystemAgentActive && isSystemAgentOnlyCodexDynamicToolAllowlist(params.toolsAllow)) {
-    names.push("openclaw");
+    names.push("bot");
   }
   if (params.sourceReplyDeliveryMode === "message_tool_only") {
     names.push("message");

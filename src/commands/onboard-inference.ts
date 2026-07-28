@@ -1,8 +1,8 @@
 import { randomInt } from "node:crypto";
-// Inference backend detection shared by onboarding bootstrap and OpenClaw setup.
+// Inference backend detection shared by onboarding bootstrap and Bot setup.
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { resolveAgentConfig, resolveDefaultAgentId } from "../agents/agent-scope-config.js";
 import {
   readClaudeCliCredentialsCached,
@@ -11,7 +11,7 @@ import {
 } from "../agents/cli-credentials.js";
 import { resolveDefaultModelForAgent } from "../agents/model-selection.js";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { probeLocalCommand, type LocalCommandProbe } from "../system-agent/probes.js";
 import {
   CLAUDE_CLI_DEFAULT_MODEL_REF,
@@ -48,7 +48,7 @@ type DetectInferenceBackendsDeps = {
 };
 
 type DetectInferenceBackendsOptions = {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   env?: NodeJS.ProcessEnv;
   platform?: NodeJS.Platform;
   deps?: DetectInferenceBackendsDeps;
@@ -158,7 +158,7 @@ async function detectNativeCodexAppServer(
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.onboardInferenceTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.onboardInferenceTestApi")] = {
     detectNativeCodexAppServer,
   };
 }

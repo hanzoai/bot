@@ -22,8 +22,8 @@ describe("ingestMemoryWikiSource human notes", () => {
     const pagePath = path.join(config.vault.path, "sources", "roadmap.md");
     const userNote = "KEY INSIGHT: covers $1 of the Q2 roadmap";
     const edited = (await fs.readFile(pagePath, "utf8")).replace(
-      "<!-- openclaw:human:start -->\n<!-- openclaw:human:end -->",
-      `<!-- openclaw:human:start -->\n${userNote}\n<!-- openclaw:human:end -->`,
+      "<!-- bot:human:start -->\n<!-- bot:human:end -->",
+      `<!-- bot:human:start -->\n${userNote}\n<!-- bot:human:end -->`,
     );
     await fs.writeFile(pagePath, edited, "utf8");
 
@@ -54,16 +54,16 @@ describe("ingestMemoryWikiSource human notes", () => {
     const pagePath = path.join(config.vault.path, "sources", "notes.md");
     const userNote = "MY PRIVATE NOTE";
     const edited = (await fs.readFile(pagePath, "utf8")).replace(
-      "<!-- openclaw:human:start -->\n<!-- openclaw:human:end -->",
-      `<!-- openclaw:human:start -->\n${userNote}\n<!-- openclaw:human:end -->`,
+      "<!-- bot:human:start -->\n<!-- bot:human:end -->",
+      `<!-- bot:human:start -->\n${userNote}\n<!-- bot:human:end -->`,
     );
     await fs.writeFile(pagePath, edited, "utf8");
 
     const sourceWithMarkers = [
       "second body",
-      "<!-- openclaw:human:start -->",
+      "<!-- bot:human:start -->",
       "INJECTED FROM SOURCE",
-      "<!-- openclaw:human:end -->",
+      "<!-- bot:human:end -->",
       "",
     ].join("\n");
     await fs.writeFile(inputPath, sourceWithMarkers, "utf8");
@@ -87,9 +87,9 @@ describe("ingestMemoryWikiSource human notes", () => {
 
     const sourceWithMarkers = [
       "first body",
-      "<!-- openclaw:human:start -->",
+      "<!-- bot:human:start -->",
       "OLD SOURCE MARKER PAYLOAD",
-      "<!-- openclaw:human:end -->",
+      "<!-- bot:human:end -->",
       "",
     ].join("\n");
     await fs.writeFile(inputPath, sourceWithMarkers, "utf8");
@@ -102,8 +102,8 @@ describe("ingestMemoryWikiSource human notes", () => {
     const pagePath = path.join(config.vault.path, "sources", "windows-notes.md");
     const userNote = "CRLF USER NOTE";
     const edited = (await fs.readFile(pagePath, "utf8")).replace(
-      "<!-- openclaw:human:start -->\n<!-- openclaw:human:end -->",
-      `<!-- openclaw:human:start -->\n${userNote}\n<!-- openclaw:human:end -->`,
+      "<!-- bot:human:start -->\n<!-- bot:human:end -->",
+      `<!-- bot:human:start -->\n${userNote}\n<!-- bot:human:end -->`,
     );
     await fs.writeFile(pagePath, edited.replace(/\n/g, "\r\n"), "utf8");
 
@@ -136,12 +136,12 @@ describe("ingestMemoryWikiSource human notes", () => {
     const pagePath = path.join(config.vault.path, "sources", "diary.md");
     const noteWithMarker = [
       "EARLY NOTE before any quoted marker",
-      "<!-- openclaw:human:start -->",
+      "<!-- bot:human:start -->",
       "LATE NOTE after a pasted marker",
     ].join("\n");
     const edited = (await fs.readFile(pagePath, "utf8")).replace(
-      "<!-- openclaw:human:start -->\n<!-- openclaw:human:end -->",
-      `<!-- openclaw:human:start -->\n${noteWithMarker}\n<!-- openclaw:human:end -->`,
+      "<!-- bot:human:start -->\n<!-- bot:human:end -->",
+      `<!-- bot:human:start -->\n${noteWithMarker}\n<!-- bot:human:end -->`,
     );
     await fs.writeFile(pagePath, edited, "utf8");
 
@@ -175,8 +175,8 @@ describe("ingestMemoryWikiSource human notes", () => {
       "\n",
     );
     const edited = (await fs.readFile(pagePath, "utf8")).replace(
-      "<!-- openclaw:human:start -->\n<!-- openclaw:human:end -->",
-      `<!-- openclaw:human:start -->\n${noteWithHeading}\n<!-- openclaw:human:end -->`,
+      "<!-- bot:human:start -->\n<!-- bot:human:end -->",
+      `<!-- bot:human:start -->\n${noteWithHeading}\n<!-- bot:human:end -->`,
     );
     await fs.writeFile(pagePath, edited, "utf8");
 

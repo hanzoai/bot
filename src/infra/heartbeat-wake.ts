@@ -1,5 +1,5 @@
 // Tracks heartbeat wake requests, busy skips, and retry timing.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { runWithGatewayIndependentRootWorkAdmission } from "../process/gateway-work-admission.js";
 import { resolveTimerTimeoutMs } from "../shared/number-coercion.js";
 import { normalizeHeartbeatWakeReason } from "./heartbeat-reason.js";

@@ -2,15 +2,15 @@
 import {
   buildDmGroupAccountAllowlistAdapter,
   createFlatAllowlistOverrideResolver,
-} from "openclaw/plugin-sdk/allowlist-config-edit";
+} from "bot/plugin-sdk/allowlist-config-edit";
 import {
   buildChannelOutboundSessionRoute,
   createChatChannelPlugin,
-} from "openclaw/plugin-sdk/channel-core";
-import { createPairingPrefixStripper } from "openclaw/plugin-sdk/channel-pairing";
-import { createRestrictSendersChannelSecurity } from "openclaw/plugin-sdk/channel-policy";
-import { createEmptyChannelDirectoryAdapter } from "openclaw/plugin-sdk/directory-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+} from "bot/plugin-sdk/channel-core";
+import { createPairingPrefixStripper } from "bot/plugin-sdk/channel-pairing";
+import { createRestrictSendersChannelSecurity } from "bot/plugin-sdk/channel-policy";
+import { createEmptyChannelDirectoryAdapter } from "bot/plugin-sdk/directory-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 import { resolveLineAccount } from "./accounts.js";
 import { lineBindingsAdapter } from "./bindings.js";
 import type { ChannelPlugin, ResolvedLineAccount } from "./channel-api.js";
@@ -39,7 +39,7 @@ const lineSecurityAdapter = createRestrictSendersChannelSecurity<ResolvedLineAcc
   groupAllowFromPath: "channels.line.groupAllowFrom",
   mentionGated: false,
   policyPathSuffix: "dmPolicy",
-  approveHint: "openclaw pairing approve line <code>",
+  approveHint: "bot pairing approve line <code>",
   normalizeDmEntry: (raw) => raw.replace(/^line:(?:user:)?/i, ""),
 });
 
@@ -176,7 +176,7 @@ export const linePlugin: ChannelPlugin<ResolvedLineAccount> = createChatChannelP
   pairing: {
     text: {
       idLabel: "lineUserId",
-      message: "OpenClaw: your access has been approved.",
+      message: "Bot: your access has been approved.",
       normalizeAllowEntry: createPairingPrefixStripper(/^line:(?:user:)?/i),
       notify: async ({ cfg, id, message }) => {
         const account = (getLineRuntime().channel.line?.resolveLineAccount ?? resolveLineAccount)({

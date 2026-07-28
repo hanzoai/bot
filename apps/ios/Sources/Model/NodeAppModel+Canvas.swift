@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import BotKit
 
 enum A2UIReadyState {
     case ready

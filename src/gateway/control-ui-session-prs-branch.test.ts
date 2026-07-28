@@ -18,12 +18,12 @@ describe("session branch diff stats", () => {
   let root: string;
 
   const git = (...args: string[]) =>
-    execFileAsync("git", ["-c", "user.email=test@openclaw.ai", "-c", "user.name=Test", ...args], {
+    execFileAsync("git", ["-c", "user.email=test@bot.ai", "-c", "user.name=Test", ...args], {
       cwd: root,
     });
 
   beforeEach(async () => {
-    root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-prs-")));
+    root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "bot-session-prs-")));
   });
 
   afterEach(async () => {
@@ -51,7 +51,7 @@ describe("session branch diff stats", () => {
 
     const fetchImpl = routedFetch([
       { match: "/pulls?head=", response: () => githubJson([]) },
-      { match: "/repos/openclaw/openclaw", response: () => githubJson({ fork: false }) },
+      { match: "/repos/hanzoai/bot", response: () => githubJson({ fork: false }) },
     ]);
     const result = await loadControlUiSessionPullRequests(
       { sessionKey: "agent:main:main" },
@@ -67,12 +67,12 @@ describe("session branch diff stats", () => {
     );
 
     expect(result.branch).toEqual({
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "bot",
+      repo: "bot",
       branch: "feature",
       additions: 4,
       deletions: 1,
-      createUrl: "https://github.com/openclaw/openclaw/pull/new/feature",
+      createUrl: "https://github.com/hanzoai/bot/pull/new/feature",
     });
   });
 
@@ -96,7 +96,7 @@ describe("session branch diff stats", () => {
 
     const fetchImpl = routedFetch([
       { match: "/pulls?head=", response: () => githubJson([]) },
-      { match: "/repos/openclaw/openclaw", response: () => githubJson({ fork: false }) },
+      { match: "/repos/hanzoai/bot", response: () => githubJson({ fork: false }) },
     ]);
     const result = await loadControlUiSessionPullRequests(
       { sessionKey: "agent:main:main" },
@@ -126,7 +126,7 @@ describe("session branch diff stats", () => {
 
     const fetchImpl = routedFetch([
       { match: "/pulls?head=", response: () => githubJson([]) },
-      { match: "/repos/openclaw/openclaw", response: () => githubJson({ fork: false }) },
+      { match: "/repos/hanzoai/bot", response: () => githubJson({ fork: false }) },
     ]);
     const result = await loadControlUiSessionPullRequests(
       { sessionKey: "agent:main:main" },
@@ -158,7 +158,7 @@ describe("session branch diff stats", () => {
 
     const fetchImpl = routedFetch([
       { match: "/pulls?head=", response: () => githubJson([]) },
-      { match: "/repos/openclaw/openclaw", response: () => githubJson({ fork: false }) },
+      { match: "/repos/hanzoai/bot", response: () => githubJson({ fork: false }) },
     ]);
     const result = await loadControlUiSessionPullRequests(
       { sessionKey: "agent:main:main" },
@@ -176,8 +176,8 @@ describe("session branch diff stats", () => {
     // GitHub's pull/new page 404s for unpushed branches, so no Create PR
     // link — but the session's changed files still get a row.
     expect(result.branch).toEqual({
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "bot",
+      repo: "bot",
       branch: "feature",
       additions: 1,
       deletions: 0,
@@ -196,7 +196,7 @@ describe("session branch diff stats", () => {
 
     const fetchImpl = routedFetch([
       { match: "/pulls?head=", response: () => githubJson([]) },
-      { match: "/repos/openclaw/openclaw", response: () => githubJson({ fork: false }) },
+      { match: "/repos/hanzoai/bot", response: () => githubJson({ fork: false }) },
     ]);
     const result = await loadControlUiSessionPullRequests(
       { sessionKey: "agent:main:main" },
@@ -214,8 +214,8 @@ describe("session branch diff stats", () => {
     // origin/feature == origin/main, so no Create PR link yet, but the dirty
     // working tree is visible work the row must surface.
     expect(result.branch).toEqual({
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "bot",
+      repo: "bot",
       branch: "feature",
       additions: 1,
       deletions: 0,
@@ -310,8 +310,8 @@ describe("session branch diff stats", () => {
     // The stale merge base would replay the merged +1 as pending; only the
     // uncommitted follow-up line counts, and no Create PR link is offered.
     expect(result.branch).toEqual({
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "bot",
+      repo: "bot",
       branch: "feature",
       additions: 1,
       deletions: 0,
@@ -340,7 +340,7 @@ describe("session branch diff stats", () => {
               state: "closed",
               merged_at: "2026-07-01T00:00:00Z",
               head: { sha: mergedHead },
-              base: { ref: "release", repo: { name: "openclaw", owner: { login: "openclaw" } } },
+              base: { ref: "release", repo: { name: "bot", owner: { login: "bot" } } },
             }),
           ]),
       },
@@ -360,7 +360,7 @@ describe("session branch diff stats", () => {
 
     // Merging into release does not land the work on main; the affordance to
     // open a PR against the default branch must survive.
-    expect(result.branch?.createUrl).toBe("https://github.com/openclaw/openclaw/pull/new/feature");
+    expect(result.branch?.createUrl).toBe("https://github.com/hanzoai/bot/pull/new/feature");
   });
 
   it("suppresses the row via local HEAD when the merged remote ref was pruned", async () => {
@@ -513,12 +513,12 @@ describe("session branch diff stats", () => {
     // The merge base contains the PR's merge commit, proving the rebase went
     // past the landing: the new commit is a genuine second PR.
     expect(result.branch).toEqual({
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "bot",
+      repo: "bot",
       branch: "feature",
       additions: 1,
       deletions: 0,
-      createUrl: "https://github.com/openclaw/openclaw/pull/new/feature",
+      createUrl: "https://github.com/hanzoai/bot/pull/new/feature",
     });
   });
 
@@ -552,7 +552,7 @@ describe("session branch diff stats", () => {
               merged_at: "2026-07-01T00:00:00Z",
               head: { sha: mergedHead },
               merge_commit_sha: mergeCommit,
-              base: { ref: "release", repo: { name: "openclaw", owner: { login: "openclaw" } } },
+              base: { ref: "release", repo: { name: "bot", owner: { login: "bot" } } },
             }),
           ]),
       },
@@ -626,12 +626,12 @@ describe("session branch diff stats", () => {
     // The merged head is contained in the merge base, so a new PR's compare
     // holds only the follow-up commit; no rebase is required here.
     expect(result.branch).toEqual({
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "bot",
+      repo: "bot",
       branch: "feature",
       additions: 1,
       deletions: 0,
-      createUrl: "https://github.com/openclaw/openclaw/pull/new/feature",
+      createUrl: "https://github.com/hanzoai/bot/pull/new/feature",
     });
   });
 
@@ -709,8 +709,8 @@ describe("session branch diff stats", () => {
     // PR1's landing is in the merge base but PR2's is not: a new PR would
     // replay PR2's diff, so only the follow-up shows and the link stays off.
     expect(result.branch).toEqual({
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "bot",
+      repo: "bot",
       branch: "feature",
       additions: 1,
       deletions: 0,
@@ -926,8 +926,8 @@ describe("session branch diff stats", () => {
     // compare for this un-rebased tip would replay the landed changes, so the
     // Create PR link stays off until the branch incorporates the landing.
     expect(result.branch).toEqual({
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "bot",
+      repo: "bot",
       branch: "feature",
       additions: 1,
       deletions: 0,
@@ -944,7 +944,7 @@ describe("session branch diff stats", () => {
 
     const fetchImpl = routedFetch([
       { match: "/pulls?head=", response: () => githubJson([]) },
-      { match: "/repos/openclaw/openclaw", response: () => githubJson({ fork: false }) },
+      { match: "/repos/hanzoai/bot", response: () => githubJson({ fork: false }) },
     ]);
     const result = await loadControlUiSessionPullRequests(
       { sessionKey: "agent:main:main" },

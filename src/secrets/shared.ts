@@ -69,7 +69,7 @@ export function writeTextFileAtomic(pathname: string, value: string, mode = 0o60
       filePath: pathname,
       content: value,
       mode,
-      tempPrefix: ".openclaw-secrets",
+      tempPrefix: ".bot-secrets",
     });
     return;
   }

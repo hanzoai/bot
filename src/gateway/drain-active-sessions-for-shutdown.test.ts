@@ -1,7 +1,7 @@
 // Shutdown drain tests protect bounded session_end hook emission for tracked
 // active sessions during gateway shutdown and restart.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 // Regression coverage for #57790: the bounded shutdown drain must fire a
 // typed `session_end` for every session the tracker has noted, must skip
@@ -55,7 +55,7 @@ const {
 const { forgetActiveSessionForShutdown, listActiveSessionsForShutdown } =
   await import("./active-sessions-shutdown-tracker.js");
 
-const cfg: OpenClawConfig = {};
+const cfg: BotConfig = {};
 
 const requireSessionEndHookEvent = (index: number): SessionEndHookEvent => {
   const call = runSessionEndMock.mock.calls[index];

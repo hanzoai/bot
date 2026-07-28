@@ -1,5 +1,5 @@
 // Qqbot tests cover response timeout plugin behavior.
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "bot/plugin-sdk/number-runtime";
 import { describe, expect, it } from "vitest";
 import { resolveResponseTimeoutMs } from "./response-timeout.js";
 

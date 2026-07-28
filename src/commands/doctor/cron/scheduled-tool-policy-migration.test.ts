@@ -122,6 +122,6 @@ describe("migrateScheduledToolPolicy", () => {
         legacyJobs: result.legacyScheduledToolPolicyJobs,
         invalidJobs: result.invalidScheduledToolPolicyJobs,
       }),
-    ).toContain("openclaw cron edit <id> --tools");
+    ).toContain("bot cron edit <id> --tools");
   });
 });

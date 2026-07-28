@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { DEFAULT_SECRET_FILE_MAX_BYTES } from "openclaw/plugin-sdk/secret-file-runtime";
+import { DEFAULT_SECRET_FILE_MAX_BYTES } from "bot/plugin-sdk/secret-file-runtime";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { encodeOnePasswordSecretId } from "../onepassword-secret-id.js";
 import { createTrustedNodeFixture } from "./trusted-node.test-support.js";
@@ -16,7 +16,7 @@ const sourceStaticAssetPaths = [
   fileURLToPath(new URL("../onepassword-op-path.js", import.meta.url)),
   fileURLToPath(new URL("../onepassword-secret-id.js", import.meta.url)),
 ];
-const manifestPath = fileURLToPath(new URL("../openclaw.plugin.json", import.meta.url));
+const manifestPath = fileURLToPath(new URL("../bot.plugin.json", import.meta.url));
 const packagePath = fileURLToPath(new URL("../package.json", import.meta.url));
 const tsxCliPath = fileURLToPath(import.meta.resolve("tsx/cli"));
 const rootTsconfigPath = path.resolve("tsconfig.json");
@@ -39,7 +39,7 @@ beforeAll(() => {
         fs
           .readFileSync(sourcePath, "utf8")
           .replace(
-            '"openclaw/plugin-sdk/secret-ref-runtime"',
+            '"bot/plugin-sdk/secret-ref-runtime"',
             JSON.stringify(secretRefRuntimeSourceUrl),
           ),
       );
@@ -59,7 +59,7 @@ afterAll(() => {
 });
 
 function makeTempDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-1password-test-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-1password-test-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -82,7 +82,7 @@ function runResolver(params: {
   env?: Record<string, string>;
   token?: string | null;
 }): Promise<{ stdout: string; stderr: string; code: number | null }> {
-  const stateDir = params.env?.OPENCLAW_STATE_DIR ?? makeTempDir();
+  const stateDir = params.env?.BOT_STATE_DIR ?? makeTempDir();
   if (params.token !== null) {
     const tokenDir = path.join(stateDir, "credentials", "onepassword");
     fs.mkdirSync(tokenDir, { recursive: true });
@@ -103,7 +103,7 @@ function runResolver(params: {
           ...process.env,
           OP_SERVICE_ACCOUNT_TOKEN: "",
           CLAW_1PASSWORD_OP: "",
-          OPENCLAW_STATE_DIR: stateDir,
+          BOT_STATE_DIR: stateDir,
           ...params.env,
         },
       },
@@ -153,7 +153,7 @@ describe("plugin manifest", () => {
       secretProviderIntegrations?: Record<string, Record<string, unknown>>;
     };
     const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf8")) as {
-      openclaw?: {
+      bot?: {
         build?: {
           staticAssets?: Array<{ source?: string; output?: string }>;
         };
@@ -182,8 +182,8 @@ describe("plugin manifest", () => {
         "LOCALAPPDATA",
         "TEMP",
         "TMP",
-        "OPENCLAW_STATE_DIR",
-        "OPENCLAW_PROFILE",
+        "BOT_STATE_DIR",
+        "BOT_PROFILE",
         "PATH",
         "SYSTEMROOT",
         "WINDIR",
@@ -202,15 +202,15 @@ describe("plugin manifest", () => {
     );
     expect(resolverSource).toContain("#!/usr/bin/env node");
     expect(resolverSource).toContain('from "execa"');
-    expect(packageJson.openclaw?.build?.staticAssets).toContainEqual({
+    expect(packageJson.bot?.build?.staticAssets).toContainEqual({
       source: "./onepassword-op-path.js",
       output: "onepassword-op-path.js",
     });
-    expect(packageJson.openclaw?.build?.staticAssets).toContainEqual({
+    expect(packageJson.bot?.build?.staticAssets).toContainEqual({
       source: "./onepassword-secret-ref-resolver.js",
       output: "onepassword-secret-ref-resolver.js",
     });
-    expect(packageJson.openclaw?.build?.staticAssets).toContainEqual({
+    expect(packageJson.bot?.build?.staticAssets).toContainEqual({
       source: "./onepassword-secret-id.js",
       output: "onepassword-secret-id.js",
     });
@@ -325,7 +325,7 @@ process.stdout.write("not-a-real-value \\t");
       const tempDir = makeTempDir();
       const opPath = path.join(tempDir, "op");
       const logPath = path.join(tempDir, "op-args.json");
-      const nativeRef = "op://Personal/OpenClaw QA API Key/password?attribute=value%20one";
+      const nativeRef = "op://Personal/Bot QA API Key/password?attribute=value%20one";
       fs.writeFileSync(
         opPath,
         `#!${createTrustedNodeFixture(tempDir)}
@@ -528,7 +528,7 @@ process.stdout.write("not-a-real-value");
         provider: "onepassword",
         ids: ["op://Engineering/OpenRouter/apiKey"],
       },
-      env: { CLAW_1PASSWORD_OP: process.execPath, OPENCLAW_STATE_DIR: stateDir },
+      env: { CLAW_1PASSWORD_OP: process.execPath, BOT_STATE_DIR: stateDir },
       token: null,
     });
 
@@ -562,7 +562,7 @@ process.stdout.write("not-a-real-value");
           provider: "onepassword",
           ids: ["op://Engineering/OpenRouter/apiKey"],
         },
-        env: { CLAW_1PASSWORD_OP: opPath, OPENCLAW_STATE_DIR: stateDir },
+        env: { CLAW_1PASSWORD_OP: opPath, BOT_STATE_DIR: stateDir },
         token: null,
       });
 
@@ -577,8 +577,8 @@ process.stdout.write("not-a-real-value");
     "reads the service token from the selected profile state directory",
     async () => {
       const home = makeTempDir();
-      const profileTokenDir = path.join(home, ".openclaw-work", "credentials", "onepassword");
-      const defaultTokenDir = path.join(home, ".openclaw", "credentials", "onepassword");
+      const profileTokenDir = path.join(home, ".bot-work", "credentials", "onepassword");
+      const defaultTokenDir = path.join(home, ".bot", "credentials", "onepassword");
       const opPath = path.join(home, "op");
       fs.mkdirSync(profileTokenDir, { recursive: true });
       fs.mkdirSync(defaultTokenDir, { recursive: true });
@@ -603,9 +603,9 @@ process.stdout.write("not-a-real-value");
         env: {
           CLAW_1PASSWORD_OP: opPath,
           HOME: home,
-          OPENCLAW_HOME: "",
-          OPENCLAW_PROFILE: "work",
-          OPENCLAW_STATE_DIR: "",
+          BOT_HOME: "",
+          BOT_PROFILE: "work",
+          BOT_STATE_DIR: "",
         },
         token: null,
       });

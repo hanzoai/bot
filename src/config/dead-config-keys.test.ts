@@ -222,7 +222,7 @@ describe("dead config keys", () => {
           providers: {
             legacy: {
               source: "file",
-              path: "/tmp/openclaw-secret",
+              path: "/tmp/bot-secret",
               allowInsecurePath: true,
             },
           },

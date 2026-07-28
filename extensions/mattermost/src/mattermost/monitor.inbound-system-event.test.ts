@@ -1,10 +1,10 @@
 // Mattermost tests cover monitor.inbound system event plugin behavior.
-import { createInboundDebouncer } from "openclaw/plugin-sdk/channel-inbound-debounce";
+import { createInboundDebouncer } from "bot/plugin-sdk/channel-inbound-debounce";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MattermostPost } from "./client.js";
 import type { MattermostEventPayload } from "./monitor-websocket.js";
 import { monitorMattermostProvider } from "./monitor.js";
-import type { OpenClawConfig, ReplyPayload, RuntimeEnv } from "./runtime-api.js";
+import type { BotConfig, ReplyPayload, RuntimeEnv } from "./runtime-api.js";
 
 class FakeWebSocket {
   public readonly sent: string[] = [];
@@ -99,8 +99,8 @@ const mockState = vi.hoisted(() => ({
   updateMattermostPost: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/reply-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/reply-runtime")>();
+vi.mock("bot/plugin-sdk/reply-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/reply-runtime")>();
   return {
     ...actual,
     createReplyDispatcherWithTyping: (...args: unknown[]) =>
@@ -194,7 +194,7 @@ vi.mock("./runtime-api.js", async () => {
       readStoreForDmPolicy: vi.fn(async () => []),
       upsertPairingRequest: vi.fn(async () => ({ code: "123456", created: true })),
     })),
-    createChannelMessageReplyPipeline: vi.fn((params: { cfg: OpenClawConfig }) => ({
+    createChannelMessageReplyPipeline: vi.fn((params: { cfg: BotConfig }) => ({
       onModelSelected: vi.fn(),
       typingCallbacks: {},
       resolveResponsePrefix: () => params.cfg.channels?.mattermost?.responsePrefix,
@@ -214,7 +214,7 @@ vi.mock("./send.js", async () => {
 });
 
 function createRuntimeCore(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   routeOverride?: {
     accountId?: string;
     agentId?: string;
@@ -273,7 +273,7 @@ function createRuntimeCore(
   const recordInboundSession = vi.fn(async (_params: RecordInboundSessionInput) => {});
   const dispatchPlanForTest = vi.fn(
     async (turn: {
-      cfg: OpenClawConfig;
+      cfg: BotConfig;
       channel: string;
       route: { agentId: string; sessionKey: string };
       ctxPayload: { SessionKey?: string };
@@ -294,7 +294,7 @@ function createRuntimeCore(
       };
     }) => {
       await recordInboundSession({
-        storePath: "/tmp/openclaw-test-sessions.json",
+        storePath: "/tmp/bot-test-sessions.json",
         sessionKey: turn.ctxPayload.SessionKey ?? turn.route.sessionKey,
         ctx: turn.ctxPayload,
         groupResolution: turn.record?.groupResolution,
@@ -410,7 +410,7 @@ function createRuntimeCore(
         }),
       },
       session: {
-        resolveStorePath: () => "/tmp/openclaw-test-sessions.json",
+        resolveStorePath: () => "/tmp/bot-test-sessions.json",
         recordInboundSession,
         updateLastRoute: vi.fn(async () => {}),
       },
@@ -430,7 +430,7 @@ function createRuntimeCore(
   };
 }
 
-const testConfig: OpenClawConfig = {
+const testConfig: BotConfig = {
   channels: {
     mattermost: {
       enabled: true,
@@ -499,7 +499,7 @@ describe("mattermost inbound user posts", () => {
     });
     mockState.fetchMattermostMe.mockResolvedValue({
       id: "bot-user",
-      username: "openclaw",
+      username: "bot",
       update_at: 1,
     });
     mockState.registerMattermostMonitorSlashCommands.mockResolvedValue(undefined);
@@ -644,7 +644,7 @@ describe("mattermost inbound user posts", () => {
           id: "post-bare-mention",
           channel_id: "chan-1",
           user_id: "user-1",
-          message: "@openclaw",
+          message: "@bot",
           create_at: 1_714_000_000_001,
         }),
       },
@@ -658,7 +658,7 @@ describe("mattermost inbound user posts", () => {
 
     expect(mockState.dispatchInboundMessage).toHaveBeenCalledTimes(1);
     const ctx = mockState.dispatchInboundMessage.mock.calls.at(0)?.[0].ctx;
-    expect(ctx?.BodyForAgent).toBe("@openclaw");
+    expect(ctx?.BodyForAgent).toBe("@bot");
     expect(ctx?.MessageSid).toBe("post-bare-mention");
     expect(ctx?.OriginatingChannel).toBe("mattermost");
     expect(ctx?.Provider).toBe("mattermost");
@@ -675,7 +675,7 @@ describe("mattermost inbound user posts", () => {
       stop: vi.fn(async () => {}),
     };
     mockState.createMattermostDraftStream.mockReturnValue(draftStream);
-    const progressConfig: OpenClawConfig = {
+    const progressConfig: BotConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -779,7 +779,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const inlineCommandConfig: OpenClawConfig = {
+    const inlineCommandConfig: BotConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -854,7 +854,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const directConfig: OpenClawConfig = {
+    const directConfig: BotConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -981,7 +981,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const channelTypeConfig: OpenClawConfig = {
+    const channelTypeConfig: BotConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -1040,7 +1040,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const mentionConfig: OpenClawConfig = {
+    const mentionConfig: BotConfig = {
       messages: { inbound: { debounceMs: 60_000 } },
       channels: {
         mattermost: {
@@ -1132,7 +1132,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const directConfig: OpenClawConfig = {
+    const directConfig: BotConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -1189,7 +1189,7 @@ describe("mattermost inbound user posts", () => {
 
     expect(runtimeCore.channel.session.recordInboundSession).toHaveBeenCalledTimes(1);
     const [recordCall] = runtimeCore.channel.session.recordInboundSession.mock.calls.at(0) ?? [];
-    expect(recordCall?.storePath).toBe("/tmp/openclaw-test-sessions.json");
+    expect(recordCall?.storePath).toBe("/tmp/bot-test-sessions.json");
     expect(recordCall?.sessionKey).toBe("mattermost:default:channel:chan-1");
     const updateLastRoute = recordCall?.updateLastRoute;
     expect(updateLastRoute?.sessionKey).toBe("mattermost:default:channel:chan-1");
@@ -1208,7 +1208,7 @@ describe("mattermost inbound user posts", () => {
     const socket = new FakeWebSocket();
     const abortController = new AbortController();
     mockState.abortController = abortController;
-    const directConfig: OpenClawConfig = {
+    const directConfig: BotConfig = {
       session: { dmScope: "per-channel-peer" },
       channels: {
         mattermost: {
@@ -1284,7 +1284,7 @@ describe("mattermost inbound user posts", () => {
   });
 
   it("keeps core block streaming enabled when preview streaming is off", async () => {
-    const offConfig: OpenClawConfig = {
+    const offConfig: BotConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -1329,7 +1329,7 @@ describe("mattermost inbound user posts", () => {
   });
 
   it("preserves text-tool-text boundaries while grouping interleaved tool updates", async () => {
-    const blockConfig: OpenClawConfig = {
+    const blockConfig: BotConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -1553,7 +1553,7 @@ describe("mattermost inbound user posts", () => {
   });
 
   it("finalizes only the current block when the terminal reply is cumulative", async () => {
-    const blockConfig: OpenClawConfig = {
+    const blockConfig: BotConfig = {
       channels: {
         mattermost: {
           enabled: true,
@@ -1642,7 +1642,7 @@ describe("mattermost inbound user posts", () => {
   });
 
   it("records participation when the confirmed preview already contains the final", async () => {
-    const blockConfig: OpenClawConfig = {
+    const blockConfig: BotConfig = {
       channels: {
         mattermost: {
           enabled: true,

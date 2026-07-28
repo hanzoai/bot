@@ -1,13 +1,13 @@
 // Xai plugin module implements stream behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { streamSimple } from "openclaw/plugin-sdk/llm";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
+import { streamSimple } from "bot/plugin-sdk/llm";
+import type { ProviderWrapStreamFnContext } from "bot/plugin-sdk/plugin-entry";
 import {
   composeProviderStreamWrappers,
   createPayloadPatchStreamWrapper,
   createPlainTextToolCallCompatWrapper,
   createToolStreamWrapper,
-} from "openclaw/plugin-sdk/provider-stream-shared";
+} from "bot/plugin-sdk/provider-stream-shared";
 import { isXaiProviderId } from "./provider-id.js";
 
 const XAI_FAST_MODEL_IDS = new Map<string, string>([

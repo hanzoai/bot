@@ -1,6 +1,6 @@
-# @openclaw/memory-wiki
+# @hanzo/bot-memory-wiki
 
-Persistent wiki compiler and Obsidian-friendly knowledge vault for **OpenClaw**.
+Persistent wiki compiler and Obsidian-friendly knowledge vault for **Bot**.
 
 This plugin is separate from the active memory plugin. The active memory plugin still handles recall, promotion, and dreaming. `memory-wiki` compiles durable knowledge into a navigable markdown vault with deterministic indexes, provenance, structured claim/evidence metadata, and optional Obsidian CLI workflows.
 
@@ -28,14 +28,14 @@ Put config under `plugins.entries.memory-wiki.config`:
 
   vault: {
     scope: "global", // or "agent"
-    path: "~/.openclaw/wiki/main",
+    path: "~/.bot/wiki/main",
     renderMode: "obsidian", // or "native"
   },
 
   obsidian: {
     enabled: true,
     useOfficialCli: true,
-    vaultName: "OpenClaw Wiki",
+    vaultName: "Bot Wiki",
     openAfterWrites: false,
   },
 
@@ -78,7 +78,7 @@ Put config under `plugins.entries.memory-wiki.config`:
 
 ### Per-agent vaults
 
-In agent scope, `vault.path` is a parent directory. OpenClaw appends the
+In agent scope, `vault.path` is a parent directory. Bot appends the
 normalized agent id:
 
 ```json5
@@ -86,7 +86,7 @@ normalized agent id:
   vaultMode: "bridge",
   vault: {
     scope: "agent",
-    path: "~/.openclaw/wiki",
+    path: "~/.bot/wiki",
   },
   bridge: {
     enabled: true,
@@ -99,16 +99,16 @@ normalized agent id:
 ```
 
 This resolves agents such as `support` and `marketing` to
-`~/.openclaw/wiki/support` and `~/.openclaw/wiki/marketing`. With no explicit
-path, the parent defaults to `~/.openclaw/wiki`; the default `main` agent
-therefore keeps the existing `~/.openclaw/wiki/main` path. In global scope,
+`~/.bot/wiki/support` and `~/.bot/wiki/marketing`. With no explicit
+path, the parent defaults to `~/.bot/wiki`; the default `main` agent
+therefore keeps the existing `~/.bot/wiki/main` path. In global scope,
 `vault.path` remains the exact shared vault path.
 
 Wiki tools and compiled prompt/corpus supplements resolve the active runtime
 agent on each call. In bridge mode, an agent vault imports only public memory
 artifacts whose `agentIds` includes that agent; unowned and other-agent
 artifacts are skipped. CLI and Gateway operations require an explicit agent in
-multi-agent setups; use `openclaw wiki --agent <agentId> ...` or pass `agentId`
+multi-agent setups; use `bot wiki --agent <agentId> ...` or pass `agentId`
 to the `wiki.*` RPC request. A single configured agent may remain implicit.
 
 Configuration validation rejects agent scope with either
@@ -138,52 +138,52 @@ The plugin initializes a vault like this:
   reports/
   _attachments/
   _views/
-  .openclaw-wiki/
+  .bot-wiki/
 ```
 
 Generated content stays inside managed blocks. Human note blocks are preserved.
 
-Key beliefs can live in structured `claims` frontmatter with per-claim evidence, confidence, and status. Compile also persists a machine-readable snapshot in OpenClaw plugin state so agent/runtime consumers do not have to scrape markdown pages.
+Key beliefs can live in structured `claims` frontmatter with per-claim evidence, confidence, and status. Compile also persists a machine-readable snapshot in Bot plugin state so agent/runtime consumers do not have to scrape markdown pages.
 
 When `render.createBacklinks` is enabled, compile adds deterministic `## Related` blocks to pages. Those blocks list source pages, pages that reference the current page, and nearby pages that share the same source ids.
 
 When `render.createDashboards` is enabled, compile also maintains report dashboards under `reports/` for open questions, contradictions, low-confidence pages, and stale pages.
 
-Unmanaged raw Markdown can live under `sources/` without OpenClaw page frontmatter. Add `<!-- openclaw:wiki:raw-source -->` near the top of the page body to opt it out of wiki page metadata and freshness lint; generated or source-sync tracked imports still require their structured metadata.
+Unmanaged raw Markdown can live under `sources/` without Bot page frontmatter. Add `<!-- bot:wiki:raw-source -->` near the top of the page body to opt it out of wiki page metadata and freshness lint; generated or source-sync tracked imports still require their structured metadata.
 
 ## CLI
 
 ```bash
-openclaw wiki status
-openclaw wiki doctor
-openclaw wiki init
-openclaw wiki ingest ./notes/alpha.md
-openclaw wiki compile
-openclaw wiki lint
-openclaw wiki search "alpha"
-openclaw wiki get entity.alpha --from 1 --lines 80
+bot wiki status
+bot wiki doctor
+bot wiki init
+bot wiki ingest ./notes/alpha.md
+bot wiki compile
+bot wiki lint
+bot wiki search "alpha"
+bot wiki get entity.alpha --from 1 --lines 80
 
-openclaw wiki apply synthesis "Alpha Summary" \
+bot wiki apply synthesis "Alpha Summary" \
   --body "Short synthesis body" \
   --source-id source.alpha
 
-openclaw wiki apply metadata entity.alpha \
+bot wiki apply metadata entity.alpha \
   --source-id source.alpha \
   --status review \
   --question "Still active?"
 
-openclaw wiki bridge import
-openclaw wiki unsafe-local import
+bot wiki bridge import
+bot wiki unsafe-local import
 
-openclaw wiki obsidian status
-openclaw wiki obsidian search "alpha"
-openclaw wiki obsidian open syntheses/alpha-summary.md
-openclaw wiki obsidian command workspace:quick-switcher
-openclaw wiki obsidian daily
+bot wiki obsidian status
+bot wiki obsidian search "alpha"
+bot wiki obsidian open syntheses/alpha-summary.md
+bot wiki obsidian command workspace:quick-switcher
+bot wiki obsidian daily
 
 # Agent-scoped vault
-openclaw wiki --agent support status
-openclaw wiki --agent support search "refund policy"
+bot wiki --agent support status
+bot wiki --agent support search "refund policy"
 ```
 
 ## Agent tools

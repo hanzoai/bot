@@ -4,7 +4,7 @@ import {
   type ListedAgentEntry,
   listAgentEntriesWithSource,
 } from "../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { LEGACY_IMPLICIT_AGENT_ID, normalizeAgentId } from "../routing/session-key.js";
 import { runtimeMemorySecretOwnerId } from "./runtime-memory-secret-owner.js";
 import {
@@ -17,7 +17,7 @@ import { isRecord } from "./shared.js";
 
 /** Collects memory-search SecretRefs once for every agent that can inherit them. */
 export function collectAgentMemorySearchAssignments(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   defaults: SecretDefaults | undefined;
   context: ResolverContext;
 }): void {

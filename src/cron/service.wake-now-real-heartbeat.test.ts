@@ -3,7 +3,7 @@
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { runHeartbeatOnce } from "../infra/heartbeat-runner.js";
 import {
   seedMainSessionStore,
@@ -32,7 +32,7 @@ afterEach(() => {
 const noopLogger = { debug() {}, info() {}, warn() {}, error() {} };
 
 function makeSandbox() {
-  const dir = tempDirs.make("openclaw-cron-real-heartbeat-");
+  const dir = tempDirs.make("bot-cron-real-heartbeat-");
   return {
     dir,
     cronStorePath: path.join(dir, "cron", "jobs.json"),
@@ -52,7 +52,7 @@ async function runWakeNowCase(mode: WakeNowRunMode) {
     resolveFinished = resolve;
   });
 
-  const cfg: OpenClawConfig = {
+  const cfg: BotConfig = {
     agents: {
       defaults: {
         workspace: sandbox.dir,

@@ -2,16 +2,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { expandHomePrefix } from "../infra/home-dir.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
 import { replaceFileAtomic } from "../infra/replace-file.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 import { resolveConfigDir } from "../utils.js";
 import { parseJsonWithJson5Fallback } from "../utils/parse-json-compat.js";
 import { readCronStoreStatePath } from "./store/config-state.js";
@@ -77,7 +77,7 @@ export function resolveCronJobsStorePathFromConfig(
 export async function loadCronJobsStoreWithConfigJobs(storePath: string): Promise<LoadedCronStore> {
   const resolvedStorePath = path.resolve(storePath);
   const storeKey = cronStoreKey(resolvedStorePath);
-  const database = openOpenClawStateDatabase().db;
+  const database = openBotStateDatabase().db;
   const rows = loadCronRows(database, storeKey);
   if (rows.length > 0) {
     return loadedCronStoreFromRows(rows);
@@ -114,7 +114,7 @@ export async function loadCronJobsStoreWithConfigJobsReadOnly(
   storePath: string,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<LoadedCronStore> {
-  const statePath = resolveOpenClawStateSqlitePath(env);
+  const statePath = resolveBotStateSqlitePath(env);
   if (!fs.existsSync(statePath)) {
     return emptyLoadedCronStore();
   }
@@ -144,7 +144,7 @@ export async function loadCronJobsStore(storePath: string): Promise<CronStoreFil
 export function loadCronJobsStoreSync(storePath: string): CronStoreFile {
   const resolvedStorePath = path.resolve(storePath);
   const storeKey = cronStoreKey(resolvedStorePath);
-  const database = openOpenClawStateDatabase().db;
+  const database = openBotStateDatabase().db;
   const rows = loadCronRows(database, storeKey);
   if (rows.length > 0) {
     return loadedCronStoreFromRows(rows).store;
@@ -162,7 +162,7 @@ async function atomicWrite(filePath: string, content: string, dirMode = 0o700): 
     content,
     dirMode,
     mode: 0o600,
-    tempPrefix: ".openclaw-cron",
+    tempPrefix: ".bot-cron",
     renameMaxRetries: 3,
     copyFallbackOnPermissionError: true,
   });
@@ -179,13 +179,13 @@ export async function saveCronJobsStore(
   if (opts?.stateOnly) {
     // Hot-path timer updates only mutate runtime columns; full config JSON stays
     // untouched so user-authored cron definitions do not churn.
-    runOpenClawStateWriteTransaction(({ db }) => {
+    runBotStateWriteTransaction(({ db }) => {
       updateCronRuntimeRows(db, storeKey, store);
     });
     return;
   }
   assertCronStoreCanPersist(store);
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runBotStateWriteTransaction(({ db }) => {
     replaceCronRows(db, storeKey, store);
   });
 }
@@ -199,7 +199,7 @@ export async function saveCronJobsStoreWithMetadata(
   const resolvedStorePath = path.resolve(storePath);
   const storeKey = cronStoreKey(resolvedStorePath);
   assertCronStoreCanPersist(store);
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runBotStateWriteTransaction(({ db }) => {
     if (!acquireMetadata(db)) {
       return false;
     }

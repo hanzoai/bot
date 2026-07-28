@@ -2,7 +2,7 @@
 import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "bot/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 
 function runSourceCli(tempHome: string, args: string[], envOverrides: NodeJS.ProcessEnv = {}) {
@@ -10,11 +10,11 @@ function runSourceCli(tempHome: string, args: string[], envOverrides: NodeJS.Pro
     ...process.env,
     HOME: tempHome,
     USERPROFILE: tempHome,
-    OPENCLAW_TEST_FAST: "1",
+    BOT_TEST_FAST: "1",
   };
-  delete env.OPENCLAW_HOME;
-  delete env.OPENCLAW_STATE_DIR;
-  delete env.OPENCLAW_CONFIG_PATH;
+  delete env.BOT_HOME;
+  delete env.BOT_STATE_DIR;
+  delete env.BOT_CONFIG_PATH;
   delete env.VITEST;
   Object.assign(env, envOverrides);
 
@@ -30,32 +30,32 @@ function runSourceCli(tempHome: string, args: string[], envOverrides: NodeJS.Pro
 
 describe("cli json stdout contract", () => {
   it.each([
-    { name: "default service", inheritedProfile: undefined, inheritedStateName: ".openclaw" },
-    { name: "named service", inheritedProfile: "main", inheritedStateName: ".openclaw-main" },
+    { name: "default service", inheritedProfile: undefined, inheritedStateName: ".bot" },
+    { name: "named service", inheritedProfile: "main", inheritedStateName: ".bot-main" },
   ])("resolves the requested profile from inherited $name state", async (inherited) => {
     await withTempHome(
       async (tempHome) => {
         const inheritedStateDir = path.join(tempHome, inherited.inheritedStateName);
         const result = runSourceCli(tempHome, ["--profile", "work", "config", "file"], {
-          OPENCLAW_PROFILE: inherited.inheritedProfile,
-          OPENCLAW_STATE_DIR: inheritedStateDir,
-          OPENCLAW_CONFIG_PATH: path.join(inheritedStateDir, "openclaw.json"),
+          BOT_PROFILE: inherited.inheritedProfile,
+          BOT_STATE_DIR: inheritedStateDir,
+          BOT_CONFIG_PATH: path.join(inheritedStateDir, "bot.json"),
         });
 
         expect(result.status, result.stderr).toBe(0);
-        expect(result.stdout.trim()).toBe(path.join(tempHome, ".openclaw-work", "openclaw.json"));
-        await expect(fs.access(path.join(tempHome, ".openclaw-work"))).rejects.toMatchObject({
+        expect(result.stdout.trim()).toBe(path.join(tempHome, ".bot-work", "bot.json"));
+        await expect(fs.access(path.join(tempHome, ".bot-work"))).rejects.toMatchObject({
           code: "ENOENT",
         });
       },
-      { prefix: "openclaw-profile-isolation-e2e-" },
+      { prefix: "bot-profile-isolation-e2e-" },
     );
   });
 
   it("keeps default-profile exec approvals untouched for a scratch-state config query", async () => {
     await withTempHome(
       async (tempHome) => {
-        const defaultStateDir = path.join(tempHome, ".openclaw");
+        const defaultStateDir = path.join(tempHome, ".bot");
         const scratchStateDir = path.join(tempHome, "scratch-state");
         const approvalsPath = path.join(defaultStateDir, "exec-approvals.json");
         const approvals = '{"version":1,"approvals":{"demo":true}}\n';
@@ -64,11 +64,11 @@ describe("cli json stdout contract", () => {
         await fs.writeFile(approvalsPath, approvals, "utf8");
 
         const result = runSourceCli(tempHome, ["config", "file"], {
-          OPENCLAW_STATE_DIR: scratchStateDir,
+          BOT_STATE_DIR: scratchStateDir,
         });
 
         expect(result.status, result.stderr).toBe(0);
-        expect(result.stdout.trim()).toBe(path.join(scratchStateDir, "openclaw.json"));
+        expect(result.stdout.trim()).toBe(path.join(scratchStateDir, "bot.json"));
         await expect(fs.readFile(approvalsPath, "utf8")).resolves.toBe(approvals);
         await expect(fs.access(`${approvalsPath}.migrated`)).rejects.toMatchObject({
           code: "ENOENT",
@@ -77,10 +77,10 @@ describe("cli json stdout contract", () => {
           fs.access(path.join(scratchStateDir, "exec-approvals.json")),
         ).rejects.toMatchObject({ code: "ENOENT" });
         await expect(
-          fs.access(path.join(scratchStateDir, "state", "openclaw.sqlite")),
+          fs.access(path.join(scratchStateDir, "state", "bot.sqlite")),
         ).rejects.toMatchObject({ code: "ENOENT" });
       },
-      { prefix: "openclaw-read-only-state-e2e-" },
+      { prefix: "bot-read-only-state-e2e-" },
     );
   });
 
@@ -109,7 +109,7 @@ describe("cli json stdout contract", () => {
         expect(stdout).not.toContain("Doctor changes");
         expect(stdout).not.toContain("Config invalid");
       },
-      { prefix: "openclaw-json-e2e-" },
+      { prefix: "bot-json-e2e-" },
     );
   });
 
@@ -122,7 +122,7 @@ describe("cli json stdout contract", () => {
         expect(result.stdout).toBe("");
         expect(result.stderr).toContain("--timeout must be a positive integer (seconds)");
       },
-      { prefix: "openclaw-update-empty-timeout-e2e-" },
+      { prefix: "bot-update-empty-timeout-e2e-" },
     );
   });
 
@@ -130,7 +130,7 @@ describe("cli json stdout contract", () => {
     await withTempHome(
       async (tempHome) => {
         const result = runSourceCli(tempHome, ["config", "schema"], {
-          OPENCLAW_LOG_LEVEL: "debug",
+          BOT_LOG_LEVEL: "debug",
         });
 
         expect(result.status).toBe(0);
@@ -141,18 +141,18 @@ describe("cli json stdout contract", () => {
         expect(result.stdout).not.toContain("possibly sensitive key found");
         expect(result.stderr).not.toContain("possibly sensitive key found");
       },
-      { prefix: "openclaw-config-schema-json-e2e-" },
+      { prefix: "bot-config-schema-json-e2e-" },
     );
   });
 
   it("keeps `config validate --json` stdout parseable at debug log level", async () => {
     await withTempHome(
       async (tempHome) => {
-        const configPath = path.join(tempHome, "openclaw.json");
+        const configPath = path.join(tempHome, "bot.json");
         await fs.writeFile(configPath, "{}", "utf8");
         const result = runSourceCli(tempHome, ["config", "validate", "--json"], {
-          OPENCLAW_CONFIG_PATH: configPath,
-          OPENCLAW_LOG_LEVEL: "debug",
+          BOT_CONFIG_PATH: configPath,
+          BOT_LOG_LEVEL: "debug",
         });
 
         expect(result.status).toBe(0);
@@ -162,7 +162,7 @@ describe("cli json stdout contract", () => {
         });
         expect(result.stdout).not.toContain("possibly sensitive key found");
       },
-      { prefix: "openclaw-config-validate-json-e2e-" },
+      { prefix: "bot-config-validate-json-e2e-" },
     );
   });
 });

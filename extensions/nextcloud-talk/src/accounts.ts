@@ -4,13 +4,13 @@ import {
   hasConfiguredAccountValue,
   normalizeAccountId,
   resolveAccountWithDefaultFallback,
-} from "openclaw/plugin-sdk/account-core";
-import { createAccountListHelpers } from "openclaw/plugin-sdk/account-helpers";
-import { tryReadSecretFileSync } from "openclaw/plugin-sdk/secret-file-runtime";
+} from "bot/plugin-sdk/account-core";
+import { createAccountListHelpers } from "bot/plugin-sdk/account-helpers";
+import { tryReadSecretFileSync } from "bot/plugin-sdk/secret-file-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import {
   resolveNextcloudTalkApiCredentialsResult,
   type NextcloudTalkCredentialUnavailableDiagnostic,
@@ -24,7 +24,7 @@ function isTruthyEnvValue(value?: string): boolean {
 }
 
 const debugAccounts = (...args: unknown[]) => {
-  if (isTruthyEnvValue(process.env.OPENCLAW_DEBUG_NEXTCLOUD_TALK_ACCOUNTS)) {
+  if (isTruthyEnvValue(process.env.BOT_DEBUG_NEXTCLOUD_TALK_ACCOUNTS)) {
     console.warn("[nextcloud-talk:accounts]", ...args);
   }
 };

@@ -2,8 +2,8 @@
 import {
   ChannelImplicitMentionsSchema,
   buildChannelConfigSchema,
-} from "openclaw/plugin-sdk/channel-config-schema";
-import { createChannelConfigUiHints } from "openclaw/plugin-sdk/channel-core";
+} from "bot/plugin-sdk/channel-config-schema";
+import { createChannelConfigUiHints } from "bot/plugin-sdk/channel-core";
 import { z } from "zod";
 
 const ShipSchema = z.string().min(1);

@@ -2,9 +2,9 @@
 import type {
   ExecApprovalRequest,
   PluginApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { MessagePresentationAction } from "openclaw/plugin-sdk/interactive-runtime";
+} from "bot/plugin-sdk/approval-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { MessagePresentationAction } from "bot/plugin-sdk/interactive-runtime";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { whatsappApprovalCapability } from "./approval-native.js";
 import { cacheInboundMessageMeta } from "./quoted-message.js";
@@ -92,7 +92,7 @@ describe("whatsappChannelOutbound", () => {
             targets: [{ channel: "whatsapp", to: "configured-target" }],
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
       const target = {
         channel: "whatsapp",
         to: "configured-target",
@@ -203,7 +203,7 @@ describe("whatsappChannelOutbound", () => {
           targets: [{ channel: "whatsapp", to: "configured-target" }],
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const payload = whatsappApprovalCapability.render?.exec?.buildPendingPayload?.({
       cfg,
       request: {
@@ -303,7 +303,7 @@ describe("whatsappChannelOutbound", () => {
           targets: [{ channel: "whatsapp", to: "configured-target" }],
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const payload = whatsappApprovalCapability.render?.exec?.buildPendingPayload?.({
       cfg,
       request: {

@@ -5,11 +5,11 @@
  * CDP connections to localhost/127.0.0.1 can be incorrectly routed through
  * the proxy, causing browser control to fail.
  *
- * @see https://github.com/nicepkg/openclaw/issues/31219
+ * @see https://github.com/nicepkg/bot/issues/31219
  */
 import http from "node:http";
 import https from "node:https";
-import { registerManagedProxyBrowserCdpBypass } from "openclaw/plugin-sdk/ssrf-runtime-internal";
+import { registerManagedProxyBrowserCdpBypass } from "bot/plugin-sdk/ssrf-runtime-internal";
 import { isLoopbackHost } from "../gateway/net.js";
 import { hasProxyEnvConfigured } from "../infra/net/proxy-env.js";
 

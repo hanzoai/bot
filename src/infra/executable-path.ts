@@ -1,7 +1,7 @@
 // Resolves executable paths from PATH and platform-specific install locations.
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { expandHomePrefix } from "./home-dir.js";
 
 function isDriveLessWindowsRootedPath(value: string): boolean {

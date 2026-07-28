@@ -999,8 +999,8 @@ export async function createQaLabApp(root: HTMLDivElement) {
     });
     root.querySelector<HTMLSelectElement>("#runtime-pair")?.addEventListener("change", (e) => {
       const runtimePair: RunnerSelection["runtimePair"] =
-        (e.currentTarget as HTMLSelectElement).value === "openclaw,codex"
-          ? ["openclaw", "codex"]
+        (e.currentTarget as HTMLSelectElement).value === "bot,codex"
+          ? ["bot", "codex"]
           : null;
       updateRunnerDraft((draft) => ({ ...draft, runtimePair }));
     });

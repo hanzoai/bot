@@ -1,12 +1,12 @@
 import { writeFile } from "node:fs/promises";
 import { createInterface } from "node:readline/promises";
 import { format } from "node:util";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { callGatewayFromCli } from "openclaw/plugin-sdk/gateway-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { callGatewayFromCli } from "bot/plugin-sdk/gateway-runtime";
 import {
   clampTimerTimeoutMs,
   parseStrictPositiveInteger,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/number-runtime";
 import prettyMilliseconds from "pretty-ms";
 import type { GoogleMeetCalendarLookupResult } from "./calendar.js";
 import {

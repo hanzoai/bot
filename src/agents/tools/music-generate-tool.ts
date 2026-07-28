@@ -1,8 +1,8 @@
 /** Runs music generation, persistence, and detached completion. */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import { Type } from "typebox";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { SsrFPolicy } from "../../infra/net/ssrf.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { resolveGeneratedMediaMaxBytes } from "../../media/configured-max-bytes.js";
@@ -146,7 +146,7 @@ const MusicGenerateToolSchema = Type.Object({
 });
 
 function resolveMusicGenerationModelConfigForTool(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   agentDir?: string;
   authStore?: AuthProfileStore;
@@ -161,12 +161,12 @@ function resolveMusicGenerationModelConfigForTool(params: {
   });
 }
 
-function hasExplicitMusicGenerationModelConfig(cfg?: OpenClawConfig): boolean {
+function hasExplicitMusicGenerationModelConfig(cfg?: BotConfig): boolean {
   return hasToolModelConfig(coerceToolModelConfig(cfg?.agents?.defaults?.mediaModels?.music));
 }
 
 function resolveSelectedMusicGenerationProvider(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   providers?: MusicGenerationProvider[];
   musicGenerationModelConfig: ToolModelConfig;
   modelOverride?: string;
@@ -398,7 +398,7 @@ type ExecutedMusicGeneration = {
 };
 
 async function executeMusicGenerationJob(params: {
-  effectiveCfg: OpenClawConfig;
+  effectiveCfg: BotConfig;
   prompt: string;
   agentDir?: string;
   model?: string;
@@ -559,7 +559,7 @@ async function executeMusicGenerationJob(params: {
 }
 
 export function createMusicGenerateTool(options?: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   agentDir?: string;
   authProfileStore?: AuthProfileStore;
   agentSessionKey?: string;
@@ -571,7 +571,7 @@ export function createMusicGenerateTool(options?: {
   scheduleBackgroundWork?: MediaGenerateBackgroundScheduler;
   onAsyncTaskStarted?: MediaGenerateAsyncStartCallback;
 }): AnyAgentTool | null {
-  const cfg: OpenClawConfig = options?.config ?? getRuntimeConfig();
+  const cfg: BotConfig = options?.config ?? getRuntimeConfig();
   const preparedProviders = options?.preparedModelRuntime?.mediaCapabilityProviders
     ?.musicGenerationProviders
     ? [...options.preparedModelRuntime.mediaCapabilityProviders.musicGenerationProviders]

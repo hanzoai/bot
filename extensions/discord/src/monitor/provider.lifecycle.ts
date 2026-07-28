@@ -2,11 +2,11 @@
 import {
   createConnectedChannelStatusPatch,
   createTransportActivityStatusPatch,
-} from "openclaw/plugin-sdk/gateway-runtime";
-import { asDateTimestampMs, parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { danger, sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/gateway-runtime";
+import { asDateTimestampMs, parseStrictPositiveInteger } from "bot/plugin-sdk/number-runtime";
+import { danger, sleepWithAbort } from "bot/plugin-sdk/runtime-env";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "bot/plugin-sdk/ssrf-runtime";
 import { attachDiscordGatewayLogging } from "../gateway-logging.js";
 import { getDiscordGatewayEmitter, waitForDiscordGatewayStop } from "../monitor.gateway.js";
 import type { DiscordVoiceManager } from "../voice/manager.js";
@@ -25,8 +25,8 @@ import type { DiscordMonitorStatusSink } from "./status.js";
 const DEFAULT_DISCORD_GATEWAY_READY_TIMEOUT_MS = 15_000;
 const DEFAULT_DISCORD_GATEWAY_RUNTIME_READY_TIMEOUT_MS = 30_000;
 const MAX_DISCORD_GATEWAY_READY_TIMEOUT_MS = 120_000;
-const DISCORD_GATEWAY_READY_TIMEOUT_ENV = "OPENCLAW_DISCORD_READY_TIMEOUT_MS";
-const DISCORD_GATEWAY_RUNTIME_READY_TIMEOUT_ENV = "OPENCLAW_DISCORD_RUNTIME_READY_TIMEOUT_MS";
+const DISCORD_GATEWAY_READY_TIMEOUT_ENV = "BOT_DISCORD_READY_TIMEOUT_MS";
+const DISCORD_GATEWAY_RUNTIME_READY_TIMEOUT_ENV = "BOT_DISCORD_RUNTIME_READY_TIMEOUT_MS";
 const DISCORD_GATEWAY_READY_POLL_MS = 250;
 const DISCORD_GATEWAY_READY_RETRY_BACKOFF_MS = 2_000;
 const DISCORD_GATEWAY_STARTUP_DISCONNECT_DRAIN_TIMEOUT_MS = 5_000;

@@ -1,16 +1,16 @@
 import { createHash } from "node:crypto";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { resolveConfiguredSecretInputString } from "openclaw/plugin-sdk/secret-input-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
+import { resolveConfiguredSecretInputString } from "bot/plugin-sdk/secret-input-runtime";
 import type {
   SessionCatalogHost,
   SessionCatalogTranscriptItem,
-} from "openclaw/plugin-sdk/session-catalog";
+} from "bot/plugin-sdk/session-catalog";
 import {
   listActiveSessionCatalogs,
   type ActiveSessionCatalog,
-} from "openclaw/plugin-sdk/session-catalog-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/session-catalog-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import { BEAM_MAX_BODY_BYTES, BEAM_MAX_ITEM_CHARS, BEAM_MAX_ITEMS } from "./types.js";
 
 const MIRROR_CONFIG_PATH = "plugins.entries.beam.config.mirror";
@@ -355,7 +355,7 @@ export function createBeamMirrorRunner(params: {
       if (mirror.token !== undefined) {
         const resolved = await resolveConfiguredSecretInputString({
           // The resolver only reads; the plugin runtime exposes a DeepReadonly view.
-          config: config as OpenClawConfig,
+          config: config as BotConfig,
           env,
           value: mirror.token,
           path: MIRROR_TOKEN_PATH,

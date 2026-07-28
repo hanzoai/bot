@@ -1,5 +1,5 @@
 ---
-summary: "Imports Hermes configuration, memories, skills, and supported credentials into OpenClaw."
+summary: "Imports Hermes configuration, memories, skills, and supported credentials into Bot."
 read_when:
   - You are installing, configuring, or auditing the migrate-hermes plugin
 title: "Migrate Hermes plugin"
@@ -7,12 +7,12 @@ title: "Migrate Hermes plugin"
 
 # Migrate Hermes plugin
 
-Imports Hermes configuration, memories, skills, and supported credentials into OpenClaw.
+Imports Hermes configuration, memories, skills, and supported credentials into Bot.
 
 ## Distribution
 
-- Package: `@openclaw/migrate-hermes`
-- Install route: included in OpenClaw
+- Package: `@hanzo/bot-migrate-hermes`
+- Install route: included in Bot
 
 ## Surface
 

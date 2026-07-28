@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { resolveWorkspaceStateIdentity } from "../agents/workspace-state-store.js";
 import {
   pluginStateEntriesInKeyRange,

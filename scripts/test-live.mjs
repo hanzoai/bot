@@ -15,7 +15,7 @@ function testLiveUsage() {
   return [
     "Usage: node scripts/test-live.mjs [options] [--] [vitest targets/args...]",
     "",
-    "Runs live Vitest suites with OPENCLAW_LIVE_TEST=1.",
+    "Runs live Vitest suites with BOT_LIVE_TEST=1.",
     "",
     "Options:",
     "  --codex-harness        Enable the live Codex harness.",
@@ -80,9 +80,9 @@ export function buildTestLiveEnv(args, baseEnv = process.env) {
     CI: baseEnv.CI || "1",
     PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: baseEnv.PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN || "false",
     pnpm_config_verify_deps_before_run: baseEnv.pnpm_config_verify_deps_before_run || "false",
-    OPENCLAW_LIVE_TEST: baseEnv.OPENCLAW_LIVE_TEST || "1",
-    OPENCLAW_LIVE_TEST_QUIET: args.quietOverride ?? baseEnv.OPENCLAW_LIVE_TEST_QUIET ?? "1",
-    ...(args.forceCodexHarness ? { OPENCLAW_LIVE_CODEX_HARNESS: "1" } : {}),
+    BOT_LIVE_TEST: baseEnv.BOT_LIVE_TEST || "1",
+    BOT_LIVE_TEST_QUIET: args.quietOverride ?? baseEnv.BOT_LIVE_TEST_QUIET ?? "1",
+    ...(args.forceCodexHarness ? { BOT_LIVE_CODEX_HARNESS: "1" } : {}),
   };
 }
 
@@ -90,17 +90,17 @@ export function buildTestLiveEnv(args, baseEnv = process.env) {
  * Reads the live-test heartbeat interval.
  */
 export function resolveTestLiveHeartbeatMs(baseEnv = process.env) {
-  const value = baseEnv.OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS;
+  const value = baseEnv.BOT_LIVE_WRAPPER_HEARTBEAT_MS;
   if (value === undefined || value === "") {
     return 20_000;
   }
   const text = value.trim();
   if (!/^\d+$/u.test(text)) {
-    throw new Error(`invalid OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS: ${text}`);
+    throw new Error(`invalid BOT_LIVE_WRAPPER_HEARTBEAT_MS: ${text}`);
   }
   const parsed = Number(text);
   if (!Number.isSafeInteger(parsed) || parsed <= 0) {
-    throw new Error(`invalid OPENCLAW_LIVE_WRAPPER_HEARTBEAT_MS: ${text}`);
+    throw new Error(`invalid BOT_LIVE_WRAPPER_HEARTBEAT_MS: ${text}`);
   }
   return parsed;
 }

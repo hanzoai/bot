@@ -8,14 +8,14 @@
  * validation, fetch, and structured response formatting.
  */
 
-import { resolveChannelGroupPolicy } from "openclaw/plugin-sdk/channel-policy";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { resolveChannelGroupPolicy } from "bot/plugin-sdk/channel-policy";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   readProviderTextResponse,
   readResponseTextLimited,
-} from "openclaw/plugin-sdk/provider-http";
-import { fetchWithSsrFGuard, type SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
-import { jsonResult as json } from "openclaw/plugin-sdk/tool-results";
+} from "bot/plugin-sdk/provider-http";
+import { fetchWithSsrFGuard, type SsrFPolicy } from "bot/plugin-sdk/ssrf-runtime";
+import { jsonResult as json } from "bot/plugin-sdk/tool-results";
 import { formatErrorMessage } from "../utils/format.js";
 import { debugLog, debugError } from "../utils/log.js";
 
@@ -248,7 +248,7 @@ function validateDeleteConfirmation(params: ChannelApiParams): string | null {
  */
 interface ChannelApiExecuteOptions {
   accessToken: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   accountId?: string | null;
 }
 

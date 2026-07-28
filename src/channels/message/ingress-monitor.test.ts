@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import {
   createChannelIngressMonitor,
   type ChannelIngressMonitorDeliveryResult,
@@ -16,13 +16,13 @@ class PermanentIngressError extends Error {}
 async function withQueue<T>(
   run: (queue: ChannelIngressQueue<StoredEvent>) => Promise<T>,
 ): Promise<T> {
-  const stateDir = tempDirs.make("openclaw-ingress-monitor-");
+  const stateDir = tempDirs.make("bot-ingress-monitor-");
   try {
     return await run(
       createChannelIngressQueue<StoredEvent>({ channelId: "test", accountId: "a", stateDir }),
     );
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
   }
 }
 
@@ -80,7 +80,7 @@ function createMonitor(
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 

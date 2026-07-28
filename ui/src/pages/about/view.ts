@@ -1,5 +1,5 @@
 import "../../styles/lobster-pet.css";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { html, nothing, type TemplateResult } from "lit";
 import type { ControlUiBuildInfo } from "../../build-info.ts";
 import { icons } from "../../components/icons.ts";
@@ -37,10 +37,10 @@ const SHORT_COMMIT_LENGTH = 12;
 // Docs-first where a docs page exists; GitHub/Discord match the native
 // macOS/iOS About screens (AboutSettings.swift, SettingsProTabSections.swift).
 const ABOUT_LINKS: ReadonlyArray<{ href: string; icon: TemplateResult; label: () => string }> = [
-  { href: "https://openclaw.ai", icon: icons.globe, label: () => t("aboutPage.linkWebsite") },
-  { href: "https://docs.openclaw.ai", icon: icons.book, label: () => t("aboutPage.linkDocs") },
+  { href: "https://bot.ai", icon: icons.globe, label: () => t("aboutPage.linkWebsite") },
+  { href: "https://docs.bot.ai", icon: icons.book, label: () => t("aboutPage.linkDocs") },
   {
-    href: "https://github.com/openclaw/openclaw",
+    href: "https://github.com/hanzoai/bot",
     icon: brandIcons.github,
     label: () => t("aboutPage.linkGitHub"),
   },
@@ -50,12 +50,12 @@ const ABOUT_LINKS: ReadonlyArray<{ href: string; icon: TemplateResult; label: ()
     label: () => t("aboutPage.linkDiscord"),
   },
   {
-    href: "https://x.com/openclaw",
+    href: "https://x.com/bot",
     icon: brandIcons.x,
     label: () => t("aboutPage.linkX"),
   },
   {
-    href: "https://docs.openclaw.ai/releases",
+    href: "https://docs.bot.ai/releases",
     icon: icons.scrollText,
     label: () => t("aboutPage.linkChangelog"),
   },
@@ -134,7 +134,7 @@ function renderCommit(props: AboutProps) {
     <span class="about-commit">
       <code dir="ltr" title=${commit}>${commit.slice(0, SHORT_COMMIT_LENGTH)}</code>
       ${renderCommitAge(props.buildInfo.commitAt)}
-      <openclaw-tooltip .content=${label}>
+      <bot-tooltip .content=${label}>
         <button
           type="button"
           class="about-commit__copy"
@@ -145,7 +145,7 @@ function renderCommit(props: AboutProps) {
         >
           <span aria-hidden="true">${props.copyState === "copied" ? icons.check : icons.copy}</span>
         </button>
-      </openclaw-tooltip>
+      </bot-tooltip>
       <span class="about-sr-only" role="status" aria-live="polite"
         >${copyStatus(props.copyState)}</span
       >

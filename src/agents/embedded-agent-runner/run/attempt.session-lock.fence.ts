@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { type BigIntStats, statSync } from "node:fs";
 import fs from "node:fs/promises";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import { parseSqliteSessionFileMarker } from "../../../config/sessions/sqlite-marker.js";
 import type { OwnedSessionTranscriptPublishedEntry } from "../../../config/sessions/transcript-write-context.js";
 import {

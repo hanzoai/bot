@@ -1,5 +1,5 @@
 // Agent cron-tool write safety and optimistic update orchestration.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { isRecord } from "../../utils.js";
 import { planCronJobUpdatePatch } from "./cron-tool-creator-cap.js";
 import type { CronCreatorToolAllowlistEntry, GatewayToolCaller } from "./cron-tool.types.js";

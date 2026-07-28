@@ -1,4 +1,4 @@
-/** Tests merging bundled MCP defaults with OpenClaw user MCP configuration. */
+/** Tests merging bundled MCP defaults with Bot user MCP configuration. */
 import { describe, expect, it, vi } from "vitest";
 import { loadMergedBundleMcpConfig, toCliBundleMcpServerConfig } from "./bundle-mcp-config.js";
 
@@ -21,7 +21,7 @@ vi.mock("../plugins/bundle-mcp.js", () => ({
 }));
 
 describe("loadMergedBundleMcpConfig", () => {
-  it("lets OpenClaw mcp.servers override bundle defaults while preserving raw transport shape", () => {
+  it("lets Bot mcp.servers override bundle defaults while preserving raw transport shape", () => {
     const merged = loadMergedBundleMcpConfig({
       workspaceDir: "/workspace",
       cfg: {
@@ -47,7 +47,7 @@ describe("loadMergedBundleMcpConfig", () => {
     });
   });
 
-  it("maps OpenClaw transports to downstream CLI types when requested", () => {
+  it("maps Bot transports to downstream CLI types when requested", () => {
     expect(
       toCliBundleMcpServerConfig({
         transport: "streamable-http",
@@ -62,7 +62,7 @@ describe("loadMergedBundleMcpConfig", () => {
     });
   });
 
-  it("keeps disabled OpenClaw MCP servers out of embedded runtimes", () => {
+  it("keeps disabled Bot MCP servers out of embedded runtimes", () => {
     const merged = loadMergedBundleMcpConfig({
       workspaceDir: "/workspace",
       cfg: {
@@ -81,7 +81,7 @@ describe("loadMergedBundleMcpConfig", () => {
     expect(merged.config.mcpServers).not.toHaveProperty("disabledDocs");
   });
 
-  it("lets disabled OpenClaw MCP servers tombstone bundle defaults with the same name", () => {
+  it("lets disabled Bot MCP servers tombstone bundle defaults with the same name", () => {
     const merged = loadMergedBundleMcpConfig({
       workspaceDir: "/workspace",
       cfg: {

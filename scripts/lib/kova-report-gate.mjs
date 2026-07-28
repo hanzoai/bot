@@ -487,7 +487,7 @@ function validateProfiledFailure(record, card, group) {
   }
   const messages = violations.map((violation) => violation.message);
   check(
-    card.kind === "openclaw-failure" &&
+    card.kind === "bot-failure" &&
       card.status === "FAIL" &&
       card.failedCommand === null &&
       card.scenario === record.scenario &&

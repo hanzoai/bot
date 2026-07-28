@@ -1,7 +1,7 @@
 // Normalized status overview surface shared by text and JSON status outputs.
 // It collects gateway/update/service fields into one shape before row or payload builders run.
 
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import type { UpdateCheckResult } from "../infra/update-check.js";
 import {
   buildGatewayStatusJsonPayload,
@@ -41,7 +41,7 @@ type StatusGatewaySelf =
 type StatusServiceSummary = {
   label: string;
   installed: boolean | null;
-  managedByOpenClaw?: boolean;
+  managedByBot?: boolean;
   loadedText: string;
   runtimeShort?: string | null;
   runtime?: {
@@ -51,7 +51,7 @@ type StatusServiceSummary = {
 };
 
 export type StatusOverviewSurface = {
-  cfg: Pick<OpenClawConfig, "update" | "gateway">;
+  cfg: Pick<BotConfig, "update" | "gateway">;
   update: UpdateCheckResult;
   tailscaleMode: string;
   tailscaleDns?: string | null;

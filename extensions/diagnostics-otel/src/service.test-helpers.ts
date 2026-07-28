@@ -1,13 +1,13 @@
 import {
   emitTrustedDiagnosticEventWithPrivateData,
   type DiagnosticTraceContext,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
-import { onTrustedInternalDiagnosticEvent } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/diagnostic-runtime";
+import { onTrustedInternalDiagnosticEvent } from "bot/plugin-sdk/plugin-test-runtime";
 import { vi } from "vitest";
-import type { OpenClawPluginServiceContext } from "../api.js";
+import type { BotPluginServiceContext } from "../api.js";
 import { createDiagnosticsOtelService } from "./service.js";
 
-const OTEL_TEST_STATE_DIR = "/tmp/openclaw-diagnostics-otel-test";
+const OTEL_TEST_STATE_DIR = "/tmp/bot-diagnostics-otel-test";
 export const OTEL_TEST_ENDPOINT = "http://otel-collector:4318";
 const OTEL_TEST_PROTOCOL = "http/protobuf";
 export const TRACE_ID = "4bf92f3577b34da6a3ce929d0e0e4736";
@@ -24,7 +24,7 @@ export const MODEL_FIXTURE = {
 export const RUN_FIXTURE = { runId: "run-1", ...MODEL_FIXTURE } as const;
 export const MODEL_CALL_FIXTURE = { ...RUN_FIXTURE, callId: "call-1" } as const;
 type OtelConfig = NonNullable<
-  NonNullable<OpenClawPluginServiceContext["config"]["diagnostics"]>["otel"]
+  NonNullable<BotPluginServiceContext["config"]["diagnostics"]>["otel"]
 >;
 export type OtelContextFlags = Pick<
   OtelConfig,
@@ -33,12 +33,12 @@ export type OtelContextFlags = Pick<
 
 type StartOtelServiceOptions = OtelContextFlags & {
   endpoint?: string;
-  configure?: (ctx: OpenClawPluginServiceContext) => void;
+  configure?: (ctx: BotPluginServiceContext) => void;
 };
 
 type StartedService = {
   service: ReturnType<typeof createDiagnosticsOtelService>;
-  ctx: OpenClawPluginServiceContext;
+  ctx: BotPluginServiceContext;
 };
 
 const startedServices = new Set<StartedService>();
@@ -53,7 +53,7 @@ export function createOtelContext(
     logsExporter,
     captureContent,
   }: OtelContextFlags = {},
-): OpenClawPluginServiceContext {
+): BotPluginServiceContext {
   return {
     config: {
       diagnostics: {

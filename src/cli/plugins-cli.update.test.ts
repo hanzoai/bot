@@ -2,7 +2,7 @@
 import path from "node:path";
 import { Command } from "commander";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { CLAWHUB_INSTALL_ERROR_CODE } from "../plugins/clawhub-error-codes.js";
 import {
   loadConfig,
@@ -23,7 +23,7 @@ import {
   writePersistedInstalledPluginIndexInstallRecords,
 } from "./plugins-cli-test-helpers.js";
 
-const ORIGINAL_OPENCLAW_NIX_MODE = process.env.OPENCLAW_NIX_MODE;
+const ORIGINAL_BOT_NIX_MODE = process.env.BOT_NIX_MODE;
 const ORIGINAL_STDIN_TTY = Object.getOwnPropertyDescriptor(process.stdin, "isTTY");
 const ORIGINAL_STDOUT_TTY = Object.getOwnPropertyDescriptor(process.stdout, "isTTY");
 
@@ -55,7 +55,7 @@ function createTrackedPluginConfig(params: {
   pluginId: string;
   spec: string;
   resolvedName?: string;
-}): OpenClawConfig {
+}): BotConfig {
   return {
     plugins: {
       installs: {
@@ -67,7 +67,7 @@ function createTrackedPluginConfig(params: {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function expectRestartNoticeLogged() {
@@ -88,18 +88,18 @@ function expectSingleCallParams(mockFn: ReturnType<typeof vi.fn>) {
 }
 
 function primeUpdateConfigSnapshot(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   configPath?: string;
   hash?: string;
-  loadedConfig?: OpenClawConfig;
+  loadedConfig?: BotConfig;
   parsed?: Record<string, unknown>;
-  runtimeConfig?: OpenClawConfig;
-  sourceConfig?: OpenClawConfig;
+  runtimeConfig?: BotConfig;
+  sourceConfig?: BotConfig;
   valid?: boolean;
   includeFileHashesForWrite?: Record<string, string>;
   includeFileTargetsForWrite?: Record<string, string>;
 }) {
-  const configPath = params.configPath ?? path.join(process.cwd(), "openclaw.json5");
+  const configPath = params.configPath ?? path.join(process.cwd(), "bot.json5");
   const parsed = params.parsed ?? (params.config as Record<string, unknown>);
   const sourceConfig = params.sourceConfig ?? params.config;
   const runtimeConfig = params.runtimeConfig ?? params.config;
@@ -132,10 +132,10 @@ function primeUpdateConfigSnapshot(params: {
   return prepared;
 }
 
-function primeBlockedUpdateConfig(section: "hooks" | "plugins", config: OpenClawConfig): void {
+function primeBlockedUpdateConfig(section: "hooks" | "plugins", config: BotConfig): void {
   const externalPath = path.join(
     path.parse(process.cwd()).root,
-    "external-openclaw",
+    "external-bot",
     `${section}.json5`,
   );
   primeUpdateConfigSnapshot({
@@ -154,10 +154,10 @@ describe("plugins cli update", () => {
 
   afterEach(() => {
     restoreTty();
-    if (ORIGINAL_OPENCLAW_NIX_MODE === undefined) {
-      delete process.env.OPENCLAW_NIX_MODE;
+    if (ORIGINAL_BOT_NIX_MODE === undefined) {
+      delete process.env.BOT_NIX_MODE;
     } else {
-      process.env.OPENCLAW_NIX_MODE = ORIGINAL_OPENCLAW_NIX_MODE;
+      process.env.BOT_NIX_MODE = ORIGINAL_BOT_NIX_MODE;
     }
   });
 
@@ -176,17 +176,17 @@ describe("plugins cli update", () => {
   });
 
   it("refuses plugin updates in Nix mode before package-manager work", async () => {
-    const previous = process.env.OPENCLAW_NIX_MODE;
-    process.env.OPENCLAW_NIX_MODE = "1";
+    const previous = process.env.BOT_NIX_MODE;
+    process.env.BOT_NIX_MODE = "1";
     try {
       await expect(runPluginsCommand(["plugins", "update", "--all"])).rejects.toThrow(
-        "OPENCLAW_NIX_MODE=1",
+        "BOT_NIX_MODE=1",
       );
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_NIX_MODE;
+        delete process.env.BOT_NIX_MODE;
       } else {
-        process.env.OPENCLAW_NIX_MODE = previous;
+        process.env.BOT_NIX_MODE = previous;
       }
     }
 
@@ -196,7 +196,7 @@ describe("plugins cli update", () => {
   });
 
   it("updates tracked hook packs through plugins update", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
     const nextConfig = cfg;
 
     primeUpdateConfigSnapshot({ config: cfg });
@@ -245,18 +245,18 @@ describe("plugins cli update", () => {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const snapshotConfig = {
       plugins: {
         entries: {
           alpha: { enabled: false },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const installRecords = {
       alpha: {
         source: "npm",
-        spec: "@openclaw/alpha@1.0.0",
+        spec: "@hanzo/bot-alpha@1.0.0",
         installPath: "/tmp/alpha",
       },
     } as const;
@@ -275,15 +275,15 @@ describe("plugins cli update", () => {
       "new-hooks": {
         source: "npm",
         spec: "@acme/new-hooks@1.0.0",
-        installPath: "/home/test/.openclaw/hooks/new-hooks",
+        installPath: "/home/test/.bot/hooks/new-hooks",
       },
     });
-    updateNpmInstalledPlugins.mockImplementation(async (params: { config: OpenClawConfig }) => ({
+    updateNpmInstalledPlugins.mockImplementation(async (params: { config: BotConfig }) => ({
       config: params.config,
       changed: false,
       outcomes: [],
     }));
-    updateNpmInstalledHookPacks.mockImplementation(async (params: { config: OpenClawConfig }) => ({
+    updateNpmInstalledHookPacks.mockImplementation(async (params: { config: BotConfig }) => ({
       config: params.config,
       changed: false,
       outcomes: [],
@@ -313,11 +313,11 @@ describe("plugins cli update", () => {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const persistedRecords = {
       alpha: {
         source: "npm",
-        spec: "@openclaw/alpha@1.0.0",
+        spec: "@hanzo/bot-alpha@1.0.0",
         installPath: "/tmp/alpha",
       },
     } as const;
@@ -343,7 +343,7 @@ describe("plugins cli update", () => {
           ...cfg.plugins,
           installs: persistedRecords,
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       changed: false,
       outcomes: [],
     });
@@ -363,7 +363,7 @@ describe("plugins cli update", () => {
   it("rejects invalid config snapshots before updater side effects", async () => {
     const cfg = createTrackedPluginConfig({
       pluginId: "alpha",
-      spec: "@openclaw/alpha@1.0.0",
+      spec: "@hanzo/bot-alpha@1.0.0",
     });
     primeUpdateConfigSnapshot({
       config: cfg,
@@ -382,23 +382,23 @@ describe("plugins cli update", () => {
   });
 
   it("allows index-only legacy id migration when an included plugins section has no references", async () => {
-    const cfg = { plugins: {} } as OpenClawConfig;
+    const cfg = { plugins: {} } as BotConfig;
     const pluginRecords = createTrackedPluginConfig({
       pluginId: "voice-call",
-      spec: "@openclaw/voice-call@1.0.0",
+      spec: "@hanzo/bot-voice-call@1.0.0",
     }).plugins?.installs;
     const nextConfig = {
       ...cfg,
       plugins: {
         ...cfg.plugins,
         installs: {
-          "@openclaw/voice-call": {
+          "@hanzo/bot-voice-call": {
             source: "npm",
-            spec: "@openclaw/voice-call@1.1.0",
+            spec: "@hanzo/bot-voice-call@1.1.0",
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords(pluginRecords ?? {});
     updateNpmInstalledPlugins.mockResolvedValue({
@@ -406,9 +406,9 @@ describe("plugins cli update", () => {
       changed: true,
       outcomes: [
         {
-          pluginId: "@openclaw/voice-call",
+          pluginId: "@hanzo/bot-voice-call",
           status: "updated",
-          message: "Updated @openclaw/voice-call.",
+          message: "Updated @hanzo/bot-voice-call.",
         },
       ],
     });
@@ -432,7 +432,7 @@ describe("plugins cli update", () => {
           [pluginId]: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const pluginRecords = {
       [pluginId]: {
         source: "git",
@@ -446,7 +446,7 @@ describe("plugins cli update", () => {
         ...cfg.plugins,
         installs: pluginRecords,
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords(pluginRecords);
     updateNpmInstalledPlugins.mockResolvedValue({
@@ -484,22 +484,22 @@ describe("plugins cli update", () => {
           brave: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const sourceCfg = structuredClone(cfg);
     delete sourceCfg.gateway;
     const previousRecords = {
       brave: {
         source: "npm",
-        spec: "@openclaw/brave-plugin@2026.6.11-beta.2",
+        spec: "@hanzo/bot-brave-plugin@2026.6.11-beta.2",
         installPath: "/tmp/brave-beta",
-        resolvedName: "@openclaw/brave-plugin",
+        resolvedName: "@hanzo/bot-brave-plugin",
         resolvedVersion: "2026.6.11-beta.2",
       },
     } as const;
     const nextRecords = {
       brave: {
         ...previousRecords.brave,
-        spec: "@openclaw/brave-plugin@2026.6.11",
+        spec: "@hanzo/bot-brave-plugin@2026.6.11",
         installPath: "/tmp/brave-stable",
         resolvedVersion: "2026.6.11",
       },
@@ -518,7 +518,7 @@ describe("plugins cli update", () => {
           ...cfg.plugins,
           installs: nextRecords,
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       changed: true,
       outcomes: [{ pluginId: "brave", status: "updated", message: "Updated brave." }],
     });
@@ -539,25 +539,25 @@ describe("plugins cli update", () => {
   });
 
   it("commits a moved managed npm load path with its replacement record", async () => {
-    const previousInstallPath = "/tmp/openclaw/npm/projects/brave-v1/node_modules/brave";
-    const nextInstallPath = "/tmp/openclaw/npm/projects/brave-v2/node_modules/brave";
+    const previousInstallPath = "/tmp/bot/npm/projects/brave-v1/node_modules/brave";
+    const nextInstallPath = "/tmp/bot/npm/projects/brave-v2/node_modules/brave";
     const customPath = "/tmp/custom-plugin";
     const cfg = {
       plugins: {
         load: { paths: [previousInstallPath, customPath] },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const previousRecords = {
       brave: {
         source: "npm" as const,
-        spec: "@openclaw/brave-plugin@1.0.0",
+        spec: "@hanzo/bot-brave-plugin@1.0.0",
         installPath: previousInstallPath,
       },
     };
     const nextRecords = {
       brave: {
         ...previousRecords.brave,
-        spec: "@openclaw/brave-plugin@2.0.0",
+        spec: "@hanzo/bot-brave-plugin@2.0.0",
         installPath: nextInstallPath,
       },
     };
@@ -566,7 +566,7 @@ describe("plugins cli update", () => {
         load: { paths: [nextInstallPath, customPath] },
         installs: nextRecords,
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     primeUpdateConfigSnapshot({ config: cfg });
     setInstalledPluginIndexInstallRecords(previousRecords);
     updateNpmInstalledPlugins.mockResolvedValue({
@@ -612,27 +612,27 @@ describe("plugins cli update", () => {
           brave: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const changedCfg = {
       ...cfg,
       gateway: {
         ...cfg.gateway,
         port: 18890,
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const previousRecords = {
       brave: {
         source: "npm",
-        spec: "@openclaw/brave-plugin@2026.6.11-beta.2",
+        spec: "@hanzo/bot-brave-plugin@2026.6.11-beta.2",
         installPath: "/tmp/brave-beta",
-        resolvedName: "@openclaw/brave-plugin",
+        resolvedName: "@hanzo/bot-brave-plugin",
         resolvedVersion: "2026.6.11-beta.2",
       },
     } as const;
     const nextRecords = {
       brave: {
         ...previousRecords.brave,
-        spec: "@openclaw/brave-plugin@2026.6.11",
+        spec: "@hanzo/bot-brave-plugin@2026.6.11",
         installPath: "/tmp/brave-stable",
         resolvedVersion: "2026.6.11",
       },
@@ -662,7 +662,7 @@ describe("plugins cli update", () => {
           ...cfg.plugins,
           installs: nextRecords,
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       changed: true,
       outcomes: [{ pluginId: "brave", status: "updated", message: "Updated brave." }],
     });
@@ -694,20 +694,20 @@ describe("plugins cli update", () => {
           brave: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const previousRecords = {
       brave: {
         source: "npm",
-        spec: "@openclaw/brave-plugin@2026.6.11-beta.2",
+        spec: "@hanzo/bot-brave-plugin@2026.6.11-beta.2",
         installPath: "/tmp/brave-beta",
-        resolvedName: "@openclaw/brave-plugin",
+        resolvedName: "@hanzo/bot-brave-plugin",
         resolvedVersion: "2026.6.11-beta.2",
       },
     } as const;
     const nextRecords = {
       brave: {
         ...previousRecords.brave,
-        spec: "@openclaw/brave-plugin@2026.6.11",
+        spec: "@hanzo/bot-brave-plugin@2026.6.11",
         installPath: "/tmp/brave-stable",
         resolvedVersion: "2026.6.11",
       },
@@ -746,7 +746,7 @@ describe("plugins cli update", () => {
           ...cfg.plugins,
           installs: nextRecords,
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       changed: true,
       outcomes: [{ pluginId: "brave", status: "updated", message: "Updated brave." }],
     });
@@ -780,20 +780,20 @@ describe("plugins cli update", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const previousRecords = {
       brave: {
         source: "npm",
-        spec: "@openclaw/brave-plugin@2026.6.11-beta.2",
+        spec: "@hanzo/bot-brave-plugin@2026.6.11-beta.2",
         installPath: "/tmp/brave-beta",
-        resolvedName: "@openclaw/brave-plugin",
+        resolvedName: "@hanzo/bot-brave-plugin",
         resolvedVersion: "2026.6.11-beta.2",
       },
     } as const;
     const nextRecords = {
       brave: {
         ...previousRecords.brave,
-        spec: "@openclaw/brave-plugin@2026.6.11",
+        spec: "@hanzo/bot-brave-plugin@2026.6.11",
         installPath: "/tmp/brave-stable",
         resolvedVersion: "2026.6.11",
       },
@@ -823,7 +823,7 @@ describe("plugins cli update", () => {
           ...cfg.plugins,
           installs: nextRecords,
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       changed: true,
       outcomes: [{ pluginId: "brave", status: "updated", message: "Updated brave." }],
     });
@@ -852,12 +852,12 @@ describe("plugins cli update", () => {
           "voice-call": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords({
       "voice-call": {
         source: "npm",
-        spec: "@openclaw/voice-call",
+        spec: "@hanzo/bot-voice-call",
         installPath: "/tmp/voice-call",
       },
     });
@@ -875,12 +875,12 @@ describe("plugins cli update", () => {
   });
 
   it("blocks managed npm load-path reconciliation before updater side effects", async () => {
-    const installPath = "/tmp/openclaw/npm/projects/demo-v1/node_modules/demo";
+    const installPath = "/tmp/bot/npm/projects/demo-v1/node_modules/demo";
     const cfg = {
       plugins: {
         load: { paths: [installPath] },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords({
       demo: {
@@ -903,8 +903,8 @@ describe("plugins cli update", () => {
       label: "ClawHub",
       record: {
         source: "clawhub",
-        spec: "clawhub:@openclaw/voice-call",
-        clawhubPackage: "@openclaw/voice-call",
+        spec: "clawhub:@hanzo/bot-voice-call",
+        clawhubPackage: "@hanzo/bot-voice-call",
         installPath: "/tmp/voice-call",
       },
     },
@@ -912,7 +912,7 @@ describe("plugins cli update", () => {
       label: "git",
       record: {
         source: "git",
-        spec: "https://github.com/openclaw/voice-call.git",
+        spec: "https://github.com/bot/voice-call.git",
         installPath: "/tmp/voice-call",
       },
     },
@@ -934,7 +934,7 @@ describe("plugins cli update", () => {
             "voice-call": { enabled: true },
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
       primeBlockedUpdateConfig("plugins", cfg);
       setInstalledPluginIndexInstallRecords({
         "voice-call": record,
@@ -955,14 +955,14 @@ describe("plugins cli update", () => {
   it("blocks possible legacy id migration when an included plugins section is unresolved", async () => {
     const externalPath = path.join(
       path.parse(process.cwd()).root,
-      "external-openclaw",
+      "external-bot",
       "plugins.json5",
     );
-    const cfg = { plugins: {} } as OpenClawConfig;
+    const cfg = { plugins: {} } as BotConfig;
     primeUpdateConfigSnapshot({
       config: cfg,
       parsed: { plugins: { $include: externalPath } },
-      sourceConfig: { plugins: { $include: externalPath } } as unknown as OpenClawConfig,
+      sourceConfig: { plugins: { $include: externalPath } } as unknown as BotConfig,
       includeFileTargetsForWrite: {
         [externalPath]: externalPath,
       },
@@ -970,7 +970,7 @@ describe("plugins cli update", () => {
     setInstalledPluginIndexInstallRecords({
       "voice-call": {
         source: "npm",
-        spec: "@openclaw/voice-call",
+        spec: "@hanzo/bot-voice-call",
         installPath: "/tmp/voice-call",
       },
     });
@@ -992,12 +992,12 @@ describe("plugins cli update", () => {
         installs: {
           legacy: {
             source: "npm",
-            spec: "@openclaw/legacy@1.0.0",
+            spec: "@hanzo/bot-legacy@1.0.0",
             installPath: "/tmp/legacy",
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setHookInstallRecords({
       "demo-hooks": {
@@ -1030,7 +1030,7 @@ describe("plugins cli update", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords(cfg.plugins?.installs ?? {});
     updateNpmInstalledPlugins.mockResolvedValue({
@@ -1053,7 +1053,7 @@ describe("plugins cli update", () => {
           demo: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     primeBlockedUpdateConfig("plugins", cfg);
     setInstalledPluginIndexInstallRecords({
       demo: {
@@ -1087,7 +1087,7 @@ describe("plugins cli update", () => {
       plugins: {
         installs: {},
       },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     await expect(runPluginsCommand(["plugins", "update"])).rejects.toThrow("__exit__:1");
 
@@ -1100,7 +1100,7 @@ describe("plugins cli update", () => {
       plugins: {
         installs: {},
       },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     await runPluginsCommand(["plugins", "update", "--all"]);
 
@@ -1111,8 +1111,8 @@ describe("plugins cli update", () => {
 
   it("passes dangerous force unsafe install to plugin updates", async () => {
     const config = createTrackedPluginConfig({
-      pluginId: "openclaw-codex-app-server",
-      spec: "openclaw-codex-app-server@beta",
+      pluginId: "bot-codex-app-server",
+      spec: "bot-codex-app-server@beta",
     });
     loadConfig.mockReturnValue(config);
     setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
@@ -1125,13 +1125,13 @@ describe("plugins cli update", () => {
     await runPluginsCommand([
       "plugins",
       "update",
-      "openclaw-codex-app-server",
+      "bot-codex-app-server",
       "--dangerously-force-unsafe-install",
     ]);
 
     const updateParams = expectSingleCallParams(updateNpmInstalledPlugins);
     expect(updateParams.config).toEqual(config);
-    expect(updateParams.pluginIds).toEqual(["openclaw-codex-app-server"]);
+    expect(updateParams.pluginIds).toEqual(["bot-codex-app-server"]);
     expect(updateParams.dangerouslyForceUnsafeInstall).toBe(true);
     expect(
       runtimeLogs.some((message) =>
@@ -1145,8 +1145,8 @@ describe("plugins cli update", () => {
   it("does not sync official catalog specs for manual plugin updates", async () => {
     const config = createTrackedPluginConfig({
       pluginId: "codex",
-      spec: "@openclaw/codex@2026.5.28",
-      resolvedName: "@openclaw/codex",
+      spec: "@hanzo/bot-codex@2026.5.28",
+      resolvedName: "@hanzo/bot-codex",
     });
     loadConfig.mockReturnValue(config);
     setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
@@ -1168,8 +1168,8 @@ describe("plugins cli update", () => {
   it("syncs official catalog specs with beta channel context for update --all", async () => {
     const config = createTrackedPluginConfig({
       pluginId: "codex",
-      spec: "@openclaw/codex@2026.6.8-beta.1",
-      resolvedName: "@openclaw/codex",
+      spec: "@hanzo/bot-codex@2026.6.8-beta.1",
+      resolvedName: "@hanzo/bot-codex",
     });
     config.update = { channel: "beta" };
     loadConfig.mockReturnValue(config);
@@ -1192,8 +1192,8 @@ describe("plugins cli update", () => {
   it("passes extended-stable channel and installed core version to update --all", async () => {
     const config = createTrackedPluginConfig({
       pluginId: "codex",
-      spec: "@openclaw/codex",
-      resolvedName: "@openclaw/codex",
+      spec: "@hanzo/bot-codex",
+      resolvedName: "@hanzo/bot-codex",
     });
     config.update = { channel: "extended-stable" };
     loadConfig.mockReturnValue(config);
@@ -1217,8 +1217,8 @@ describe("plugins cli update", () => {
 
   it("passes ClawHub risk acknowledgement to plugin updates", async () => {
     const config = createTrackedPluginConfig({
-      pluginId: "openclaw-codex-app-server",
-      spec: "openclaw-codex-app-server@beta",
+      pluginId: "bot-codex-app-server",
+      spec: "bot-codex-app-server@beta",
     });
     loadConfig.mockReturnValue(config);
     setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
@@ -1231,14 +1231,14 @@ describe("plugins cli update", () => {
     await runPluginsCommand([
       "plugins",
       "update",
-      "openclaw-codex-app-server",
+      "bot-codex-app-server",
       "--acknowledge-clawhub-risk",
     ]);
 
     expect(updateNpmInstalledPlugins).toHaveBeenCalledWith(
       expect.objectContaining({
         config,
-        pluginIds: ["openclaw-codex-app-server"],
+        pluginIds: ["bot-codex-app-server"],
         acknowledgeClawHubRisk: true,
       }),
     );
@@ -1247,8 +1247,8 @@ describe("plugins cli update", () => {
   it("does not pass an interactive ClawHub risk prompt to dry-run plugin updates", async () => {
     setTty(true);
     const config = createTrackedPluginConfig({
-      pluginId: "openclaw-codex-app-server",
-      spec: "clawhub:openclaw-codex-app-server",
+      pluginId: "bot-codex-app-server",
+      spec: "clawhub:bot-codex-app-server",
     });
     loadConfig.mockReturnValue(config);
     setInstalledPluginIndexInstallRecords(config.plugins?.installs ?? {});
@@ -1258,7 +1258,7 @@ describe("plugins cli update", () => {
       outcomes: [],
     });
 
-    await runPluginsCommand(["plugins", "update", "openclaw-codex-app-server", "--dry-run"]);
+    await runPluginsCommand(["plugins", "update", "bot-codex-app-server", "--dry-run"]);
 
     const updateParams = expectSingleCallParams(updateNpmInstalledPlugins);
     expect(updateParams.dryRun).toBe(true);
@@ -1272,31 +1272,31 @@ describe("plugins cli update", () => {
         installs: {
           alpha: {
             source: "npm",
-            spec: "@openclaw/alpha@1.0.0",
+            spec: "@hanzo/bot-alpha@1.0.0",
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const nextConfig = {
       plugins: {
         installs: {
           alpha: {
             source: "npm",
-            spec: "@openclaw/alpha@1.1.0",
+            spec: "@hanzo/bot-alpha@1.1.0",
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const runtimeConfig = {
       ...cfg,
       messages: {
         ackReactionScope: "group-mentions",
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const nextRuntimeConfig = {
       ...nextConfig,
       messages: runtimeConfig.messages,
-    } as OpenClawConfig;
+    } as BotConfig;
     primeUpdateConfigSnapshot({
       config: cfg,
       runtimeConfig,
@@ -1350,29 +1350,29 @@ describe("plugins cli update", () => {
         installs: {
           alpha: {
             source: "npm",
-            spec: "@openclaw/alpha@1.0.0",
+            spec: "@hanzo/bot-alpha@1.0.0",
           },
           beta: {
             source: "npm",
-            spec: "@openclaw/beta@1.0.0",
+            spec: "@hanzo/bot-beta@1.0.0",
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const nextConfig = {
       plugins: {
         installs: {
           alpha: {
             source: "npm",
-            spec: "@openclaw/alpha@1.1.0",
+            spec: "@hanzo/bot-alpha@1.1.0",
           },
           beta: {
             source: "npm",
-            spec: "@openclaw/beta@1.0.0",
+            spec: "@hanzo/bot-beta@1.0.0",
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     loadConfig.mockReturnValue(cfg);
     setInstalledPluginIndexInstallRecords(cfg.plugins?.installs ?? {});
     updateNpmInstalledPlugins.mockResolvedValue({
@@ -1408,12 +1408,12 @@ describe("plugins cli update", () => {
         installs: {
           demo: {
             source: "clawhub",
-            spec: "clawhub:@openclaw/plugin-demo@1.0.0",
-            clawhubPackage: "@openclaw/plugin-demo",
+            spec: "clawhub:@hanzo/bot-plugin-demo@1.0.0",
+            clawhubPackage: "@hanzo/bot-plugin-demo",
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     loadConfig.mockReturnValue(cfg);
     setInstalledPluginIndexInstallRecords(cfg.plugins?.installs ?? {});
     updateNpmInstalledPlugins.mockResolvedValue({
@@ -1447,12 +1447,12 @@ describe("plugins cli update", () => {
         installs: {
           demo: {
             source: "clawhub",
-            spec: "clawhub:@openclaw/plugin-demo",
-            clawhubPackage: "@openclaw/plugin-demo",
+            spec: "clawhub:@hanzo/bot-plugin-demo",
+            clawhubPackage: "@hanzo/bot-plugin-demo",
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     loadConfig.mockReturnValue(cfg);
     setInstalledPluginIndexInstallRecords(cfg.plugins?.installs ?? {});
     updateNpmInstalledPlugins.mockResolvedValue({
@@ -1486,12 +1486,12 @@ describe("plugins cli update", () => {
         installs: {
           demo: {
             source: "clawhub",
-            spec: "clawhub:@openclaw/plugin-demo",
-            clawhubPackage: "@openclaw/plugin-demo",
+            spec: "clawhub:@hanzo/bot-plugin-demo",
+            clawhubPackage: "@hanzo/bot-plugin-demo",
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     loadConfig.mockReturnValue(cfg);
     setInstalledPluginIndexInstallRecords(cfg.plugins?.installs ?? {});
     updateNpmInstalledPlugins.mockResolvedValue({
@@ -1501,7 +1501,7 @@ describe("plugins cli update", () => {
           status: "skipped",
           code: "clawhub_security_unavailable",
           message:
-            'Skipped demo ClawHub update: ClawHub security data for "@openclaw/plugin-demo@1.1.0" is unavailable, so OpenClaw left the existing installed plugin unchanged. Try again later or choose a different version.',
+            'Skipped demo ClawHub update: ClawHub security data for "@hanzo/bot-plugin-demo@1.1.0" is unavailable, so Bot left the existing installed plugin unchanged. Try again later or choose a different version.',
         },
       ],
       changed: false,
@@ -1520,7 +1520,7 @@ describe("plugins cli update", () => {
   });
 
   it("exits non-zero when a hook pack update reports an error", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
     loadConfig.mockReturnValue(cfg);
     setHookInstallRecords({
       "demo-hooks": {

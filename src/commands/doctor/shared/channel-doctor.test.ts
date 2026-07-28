@@ -223,7 +223,7 @@ describe("channel doctor compatibility mutations", () => {
 
     const result = await collectChannelDoctorPreviewWarnings({
       cfg: cfg as never,
-      doctorFixCommand: "openclaw doctor --fix",
+      doctorFixCommand: "bot doctor --fix",
     });
 
     expect(result).toEqual([
@@ -294,7 +294,7 @@ describe("channel doctor compatibility mutations", () => {
 
   it("passes explicit env into read-only channel plugin discovery", () => {
     const cfg = createMatrixEnabledConfig();
-    const env = { OPENCLAW_HOME: "/tmp/openclaw-test-home" };
+    const env = { BOT_HOME: "/tmp/bot-test-home" };
 
     collectChannelDoctorCompatibilityMutations(cfg as never, { env });
 
@@ -384,7 +384,7 @@ describe("channel doctor compatibility mutations", () => {
         },
       },
     };
-    const env = { OPENCLAW_HOME: "/tmp/openclaw-test-home" };
+    const env = { BOT_HOME: "/tmp/bot-test-home" };
     mocks.resolveReadOnlyChannelPluginsForConfig.mockReturnValue({
       plugins: [
         {

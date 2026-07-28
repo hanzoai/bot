@@ -42,7 +42,7 @@ export function parseArgs(argv) {
       args: argv,
       allowPositionals: true,
       options: {
-        repo: { type: "string", default: "openclaw/openclaw" },
+        repo: { type: "string", default: "hanzoai/bot" },
         after: { type: "string" },
         "attach-timeout": { type: "string", default: "900" },
         timeout: { type: "string", default: "3600" },

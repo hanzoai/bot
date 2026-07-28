@@ -233,7 +233,7 @@ export async function migrateLegacySubagentRegistry(params: {
   if (!params.detected.hasLegacy) {
     return { changes: [], warnings: [] };
   }
-  const env = { ...(params.env ?? process.env), OPENCLAW_STATE_DIR: params.stateDir };
+  const env = { ...(params.env ?? process.env), BOT_STATE_DIR: params.stateDir };
   let lock: Awaited<ReturnType<typeof acquireGatewayLock>>;
   try {
     lock = await acquireGatewayLock({
@@ -251,7 +251,7 @@ export async function migrateLegacySubagentRegistry(params: {
     return {
       changes: [],
       warnings: [
-        `Failed migrating legacy subagent registry: ${detail}. Stop the Gateway, then run \`openclaw doctor --fix\` again.`,
+        `Failed migrating legacy subagent registry: ${detail}. Stop the Gateway, then run \`bot doctor --fix\` again.`,
       ],
     };
   }

@@ -1,5 +1,5 @@
 // QA Lab mock provider assistant text fixtures.
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import {
   type ResponsesInputItem,
   QA_STRANDED_FINAL_RECOVERY_PROMPT_RE,
@@ -203,7 +203,7 @@ export function buildAssistantText(
       : buildStrandedFinalRecoveryText();
   }
   if (/tool continuity check/i.test(prompt) && toolOutput) {
-    return `Protocol note: model switch handoff confirmed on ${model || "the requested model"}. QA mission from QA_KICKOFF_TASK.md still applies: understand this OpenClaw repo from source + docs before acting.`;
+    return `Protocol note: model switch handoff confirmed on ${model || "the requested model"}. QA mission from QA_KICKOFF_TASK.md still applies: understand this Bot repo from source + docs before acting.`;
   }
   if (toolOutput && promptExactReplyDirective) {
     return promptExactReplyDirective;

@@ -6,20 +6,20 @@ import path from "node:path";
 import {
   asDateTimestampMs,
   timestampMsToIsoString,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   refreshRemoteModelCatalog,
   REMOTE_MODEL_CATALOG_TTL_MS,
 } from "../model-catalog/remote-refresh.js";
 import { runCommandWithTimeout } from "../process/exec.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
 import { VERSION } from "../version.js";
 import { isTruthyEnvValue } from "./env.js";
 import {
@@ -31,7 +31,7 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "./kysely-sync.js";
-import { resolveOpenClawPackageRoot } from "./openclaw-root.js";
+import { resolveBotPackageRoot } from "./bot-root.js";
 import {
   resolveGatewayRestartDeferralTimeoutMs,
   scheduleGatewaySigusr1Restart,
@@ -105,7 +105,7 @@ const AUTO_STABLE_JITTER_HOURS_DEFAULT = 12;
 const AUTO_BETA_CHECK_INTERVAL_HOURS_DEFAULT = 1;
 const MANAGED_AUTO_UPDATE_SYSTEMD_RESTART_GRACE_MS = 2000;
 
-type UpdateCheckStateDatabase = Pick<OpenClawStateKyselyDatabase, "update_check_state">;
+type UpdateCheckStateDatabase = Pick<BotStateKyselyDatabase, "update_check_state">;
 
 function shouldSkipCheck(allowInTests: boolean): boolean {
   if (allowInTests) {
@@ -117,7 +117,7 @@ function shouldSkipCheck(allowInTests: boolean): boolean {
   return false;
 }
 
-function resolveAutoUpdatePolicy(cfg: OpenClawConfig): AutoUpdatePolicy {
+function resolveAutoUpdatePolicy(cfg: BotConfig): AutoUpdatePolicy {
   const auto = cfg.update?.auto;
   return {
     enabled: Boolean(auto?.enabled),
@@ -127,7 +127,7 @@ function resolveAutoUpdatePolicy(cfg: OpenClawConfig): AutoUpdatePolicy {
   };
 }
 
-function resolveCheckIntervalMs(cfg: OpenClawConfig): number {
+function resolveCheckIntervalMs(cfg: BotConfig): number {
   const channel = normalizeUpdateChannel(cfg.update?.channel) ?? DEFAULT_PACKAGE_CHANNEL;
   const auto = resolveAutoUpdatePolicy(cfg);
   if (!auto.enabled) {
@@ -147,7 +147,7 @@ function presentString(value: string | null): string | undefined {
 }
 
 async function readState(): Promise<UpdateCheckState> {
-  const database = openOpenClawStateDatabase();
+  const database = openBotStateDatabase();
   const stateDb = getNodeSqliteKysely<UpdateCheckStateDatabase>(database.db);
   const row = executeSqliteQueryTakeFirstSync(
     database.db,
@@ -178,7 +178,7 @@ async function readState(): Promise<UpdateCheckState> {
 
 async function writeState(state: UpdateCheckState): Promise<void> {
   const updatedAtMs = Date.now();
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runBotStateWriteTransaction(({ db }) => {
     const stateDb = getNodeSqliteKysely<UpdateCheckStateDatabase>(db);
     executeSqliteQuerySync(
       db,
@@ -426,7 +426,7 @@ async function runAutoUpdateCommand(params: {
     };
   }
   const supervisor = detectRespawnSupervisor(process.env, process.platform, {
-    includeLinuxOpenClawGatewayServiceMarker: true,
+    includeLinuxBotGatewayServiceMarker: true,
   });
   if (supervisor) {
     return await startManagedServiceAutoUpdateHandoff({
@@ -470,7 +470,7 @@ async function runAutoUpdateCommand(params: {
     }
   }
   if (argv.length === 0) {
-    argv.push("openclaw", ...baseArgs);
+    argv.push("bot", ...baseArgs);
   }
 
   try {
@@ -500,7 +500,7 @@ function clearAutoState(nextState: UpdateCheckState): void {
 }
 
 async function resolveStartupInstallStatus() {
-  const root = await resolveOpenClawPackageRoot({
+  const root = await resolveBotPackageRoot({
     moduleUrl: import.meta.url,
     argv1: process.argv[1],
     cwd: process.cwd(),
@@ -515,7 +515,7 @@ async function resolveStartupInstallStatus() {
 }
 
 export async function runGatewayUpdateCheck(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   log: { info: (msg: string, meta?: Record<string, unknown>) => void };
   isNixMode: boolean;
   allowInTests?: boolean;
@@ -536,7 +536,7 @@ export async function runGatewayUpdateCheck(params: {
   const configuredChannel =
     normalizeUpdateChannel(params.cfg.update?.channel) ?? DEFAULT_PACKAGE_CHANNEL;
   const auto = resolveAutoUpdatePolicy(params.cfg);
-  const autoDisabledByEnv = isTruthyEnvValue(process.env.OPENCLAW_NO_AUTO_UPDATE);
+  const autoDisabledByEnv = isTruthyEnvValue(process.env.BOT_NO_AUTO_UPDATE);
   const autoDisabledByExternalSupervisor = isGatewayExternallySupervised();
   const isAutoUpdateChannel = configuredChannel === "stable" || configuredChannel === "beta";
   const shouldRunAutoUpdate =
@@ -656,14 +656,14 @@ export async function runGatewayUpdateCheck(params: {
       state.lastNotifiedVersion !== resolved.version || state.lastNotifiedTag !== tag;
     if (shouldRunUpdateHints && shouldNotify) {
       params.log.info(
-        `update available (${tag}): v${resolved.version} (current v${VERSION}). Run: ${formatCliCommand("openclaw update")}`,
+        `update available (${tag}): v${resolved.version} (current v${VERSION}). Run: ${formatCliCommand("bot update")}`,
       );
       nextState.lastNotifiedVersion = resolved.version;
       nextState.lastNotifiedTag = tag;
     }
 
     if (channel !== "extended-stable" && auto.enabled && autoDisabledByEnv) {
-      params.log.info("auto-update disabled by OPENCLAW_NO_AUTO_UPDATE", {
+      params.log.info("auto-update disabled by BOT_NO_AUTO_UPDATE", {
         version: resolved.version,
         tag,
       });
@@ -771,7 +771,7 @@ export async function runGatewayUpdateCheck(params: {
 }
 
 export function scheduleGatewayUpdateCheck(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   log: { info: (msg: string, meta?: Record<string, unknown>) => void };
   isNixMode: boolean;
   onUpdateAvailableChange?: (updateAvailable: UpdateAvailable | null) => void;
@@ -818,7 +818,7 @@ export function scheduleGatewayUpdateCheck(params: {
 }
 
 function scheduleRemoteModelCatalogRefresh(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   log: { info: (msg: string, meta?: Record<string, unknown>) => void };
 }): () => void {
   let stopped = false;

@@ -67,7 +67,7 @@ describe("chat thinking helpers", () => {
           modelProvider: "openai",
           model: "gpt-5.6-luna",
           contextTokens: null,
-          agentRuntime: { id: "openclaw", source: "model" },
+          agentRuntime: { id: "bot", source: "model" },
           thinkingLevels: [
             { id: "max", label: "max" },
             { id: "ultra", label: "ultra" },

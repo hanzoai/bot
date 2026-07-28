@@ -335,7 +335,7 @@ export const id: TranslationMap = {
     genericSubtitle: "Terjadi kesalahan saat memuat panel ini.",
     staleTitle: "Versi baru tersedia",
     staleSubtitle:
-      "OpenClaw telah diperbarui di latar belakang. Muat ulang untuk mendapatkan panel terbaru.",
+      "Bot telah diperbarui di latar belakang. Muat ulang untuk mendapatkan panel terbaru.",
     reloading: "Memuat ulang…",
     retry: "Coba lagi",
   },
@@ -343,7 +343,7 @@ export const id: TranslationMap = {
     pairing: {
       button: "Pasangkan perangkat seluler",
       adminRequired: "Akses administrator diperlukan untuk membuat kode penyiapan.",
-      title: "OpenClaw seluler",
+      title: "Bot seluler",
       subtitle: "Pindai kode QR ini di aplikasi seluler untuk menghubungkan ponsel baru.",
       noApp: "Belum punya aplikasinya?",
       getApps: "Dapatkan aplikasinya",
@@ -358,14 +358,14 @@ export const id: TranslationMap = {
       transportLimitedHint:
         "URL Gateway ini menggunakan ws:// tanpa enkripsi. Gunakan wss:// atau Tailscale Serve, lalu buat kode baru untuk akses penuh.",
       failed: "Tidak dapat membuat kode penyiapan.",
-      qrAlt: "Kode QR pemasangan OpenClaw seluler",
+      qrAlt: "Kode QR pemasangan Bot seluler",
       qrUnavailable: "QR tidak tersedia. Salin kode penyiapan sebagai gantinya.",
       copySetupCode: "Salin kode penyiapan",
       newCode: "Kode baru",
       showSetupCode: "Tampilkan kode penyiapan",
       pending: "Permintaan perangkat yang menunggu peninjauan: {count}",
       review: "Tinjau",
-      waiting: "Aplikasi seluler resmi OpenClaw terhubung otomatis setelah dipindai.",
+      waiting: "Aplikasi seluler resmi Bot terhubung otomatis setelah dipindai.",
       help: "Bantuan pemasangan",
       manageDevices: "Kelola perangkat",
     },
@@ -510,11 +510,11 @@ export const id: TranslationMap = {
     ownerSession: "Sesi",
     ownerWorkboard: "Workboard",
     title: "Worktree Terkelola",
-    subtitle: "Checkout repositori terisolasi yang dimiliki oleh OpenClaw.",
+    subtitle: "Checkout repositori terisolasi yang dimiliki oleh Bot.",
     cleanNow: "Bersihkan sekarang",
     cleanupTitle: "Pembersihan",
     cleanupSubtitle:
-      "OpenClaw secara berkala menghapus worktree lama untuk mengosongkan ruang disk. Atur seberapa agresif pembersihan dijalankan.",
+      "Bot secara berkala menghapus worktree lama untuk mengosongkan ruang disk. Atur seberapa agresif pembersihan dijalankan.",
     cleanupMaxCount: "Worktree maksimum",
     cleanupMaxCountHelp:
       "Jumlah maksimum worktree terkelola yang dipertahankan di seluruh repositori. Worktree yang lebih lama dibuatkan snapshot dan dihapus terlebih dahulu. Atur ke 0 untuk menonaktifkan batas jumlah.",
@@ -565,7 +565,7 @@ export const id: TranslationMap = {
     cloudWorker: "Cloud · {profile}",
     cloudWorkerProvider: "Penyedia worker cloud: {provider}",
     cloudRequiresWorktree: "Worker cloud memerlukan worktree terkelola",
-    cloudRequiresOpenClawRuntime: "Worker cloud memerlukan runtime OpenClaw; {runtime} dipilih.",
+    cloudRequiresBotRuntime: "Worker cloud memerlukan runtime Bot; {runtime} dipilih.",
     cloudSecureContextRequired:
       "Worker cloud memerlukan konteks browser yang aman agar pemulihan dapat melindungi tugas Anda.",
     cloudStartFailed: "Sesi dibuat secara lokal, tetapi proses memulai cloud gagal: {error}",
@@ -1354,7 +1354,7 @@ export const id: TranslationMap = {
       title: "Notifikasi push",
       nativeTitle: "Notifications",
       hint: "Terima notifikasi push browser dari gateway Anda.",
-      nativeHint: "Notifikasi ditampilkan secara native oleh aplikasi OpenClaw di Mac ini.",
+      nativeHint: "Notifikasi ditampilkan secara native oleh aplikasi Bot di Mac ini.",
       unavailableHint: "Tidak tersedia di browser ini.",
       unavailable: "Tidak tersedia",
       checking: "Memeriksa...",
@@ -1379,7 +1379,7 @@ export const id: TranslationMap = {
       blockedHint:
         "Notifikasi diblokir. Perbarui izin situs browser Anda untuk mengizinkan notifikasi.",
       nativeBlockedHint:
-        "Notifikasi dinonaktifkan untuk OpenClaw di macOS. Izinkan di System Settings > Notifications.",
+        "Notifikasi dinonaktifkan untuk Bot di macOS. Izinkan di System Settings > Notifications.",
     },
     appearance: {
       theme: "Tema",
@@ -1457,7 +1457,7 @@ export const id: TranslationMap = {
     autoSaveFailed: "Gagal menyimpan",
     autoSaveConflict: "Pengaturan diubah di tempat lain",
     retry: "Coba lagi",
-    applyBannerText: "Tersimpan ke openclaw.json — mulai ulang gateway untuk menerapkan.",
+    applyBannerText: "Tersimpan ke bot.json — mulai ulang gateway untuk menerapkan.",
     applyBannerAction: "Mulai ulang & terapkan",
     rawDiscard: "Buang",
     rawDraftBlocksApply:
@@ -1520,7 +1520,7 @@ export const id: TranslationMap = {
     },
   },
   approvalPage: {
-    brandName: "OpenClaw",
+    brandName: "Bot",
     eyebrow: "Operator approval",
     loadingTitle: "Loading approval",
     loadingDescription: "Checking the current approval state with the Gateway.",
@@ -1529,7 +1529,7 @@ export const id: TranslationMap = {
       "This approval could not be found or this device is not authorized to review it.",
     connectionErrorTitle: "Connection interrupted",
     connectionErrorDescription:
-      "OpenClaw cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
+      "Bot cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
     retry: "Retry",
     execTitle: "Command approval",
     pending: "Waiting for your decision",
@@ -1707,7 +1707,7 @@ export const id: TranslationMap = {
     chat: "Chat",
     settings: "Pengaturan",
     settingsGeneral: "Umum",
-    askOpenClaw: "Tanya OpenClaw",
+    askBot: "Tanya Bot",
     settingsGroupConnections: "Koneksi",
     settingsGroupAgents: "Agen & Alat",
     settingsGroupSecurity: "Privasi & Keamanan",
@@ -1835,7 +1835,7 @@ export const id: TranslationMap = {
     skillWorkshop: "Skill Workshop",
     nodes: "Node",
     chat: "Chat",
-    custodian: "OpenClaw",
+    custodian: "Bot",
     config: "Konfigurasi",
     profile: "Profil",
     communications: "Komunikasi",
@@ -1872,7 +1872,7 @@ export const id: TranslationMap = {
     nodes: "Perangkat yang dipasangkan dan perintah.",
     chat: "Chat Gateway untuk intervensi cepat.",
     custodian: "Penyiapan dan perawatan sistem.",
-    config: "Edit openclaw.json.",
+    config: "Edit bot.json.",
     profile: "Statistik, rentetan, dan kehidupan agen Anda di reef.",
     communications: "Saluran, pesan, dan pengaturan audio.",
     appearance: "Tema, UI, dan pengaturan wizard penyiapan.",
@@ -1895,7 +1895,7 @@ export const id: TranslationMap = {
   modelSetup: {
     heading: "Hubungkan AI Anda",
     intro:
-      "OpenClaw menggunakan kembali akses AI yang sudah Anda miliki — login CLI, kunci API, atau login penyedia.",
+      "Bot menggunakan kembali akses AI yang sudah Anda miliki — login CLI, kunci API, atau login penyedia.",
     loading: "Memeriksa akses AI yang tersedia di Gateway ini…",
     retry: "Coba lagi",
     checkAgain: "Periksa lagi",
@@ -1908,7 +1908,7 @@ export const id: TranslationMap = {
     },
     access: {
       adminRequired: "Penyiapan model memerlukan akses operator.admin.",
-      gatewayTooOld: "Gateway menjalankan OpenClaw versi lama",
+      gatewayTooOld: "Gateway menjalankan Bot versi lama",
     },
     candidates: {
       title: "Ditemukan di Gateway ini",
@@ -2022,12 +2022,12 @@ export const id: TranslationMap = {
     confirmDescription: "Salin {count} file memori yang dipilih ke ruang kerja agen ini.",
     confirmReplace: "File tujuan yang ada akan dicadangkan dalam laporan migrasi sebelum diganti.",
     confirmBackup:
-      "OpenClaw membuat cadangan pra-impor yang terverifikasi sebelum menyalin memori.",
+      "Bot membuat cadangan pra-impor yang terverifikasi sebelum menyalin memori.",
     confirmImport: "Impor memori",
     disconnected: "Hubungkan ke Gateway untuk mengimpor memori.",
     title: "Impor memori asisten",
     subtitle:
-      "Tinjau memori gabungan Codex dan memori otomatis Claude Code sebelum menyalinnya ke OpenClaw.",
+      "Tinjau memori gabungan Codex dan memori otomatis Claude Code sebelum menyalinnya ke Bot.",
     agent: "Agen tujuan",
     replaceExisting: "Ganti hasil impor yang ada",
     replaceHint: "Pratinjau kembali konflik dan simpan cadangan item sebelum penggantian.",
@@ -2035,7 +2035,7 @@ export const id: TranslationMap = {
   onboarding: {
     memoryImport: {
       title: "Bawa memori asisten Anda",
-      body: "OpenClaw menemukan memori dari asisten coding lain. Impor memori tersebut ke ruang kerja agen Anda?",
+      body: "Bot menemukan memori dari asisten coding lain. Impor memori tersebut ke ruang kerja agen Anda?",
       plannedCount: "{count} siap diimpor",
       alreadyImported: "Sudah diimpor: {count}",
       sourceUnavailable: "Jalur sumber tidak tersedia",
@@ -2051,34 +2051,34 @@ export const id: TranslationMap = {
       unknownError: "Permintaan gagal",
       doneTitle: "Impor memori selesai",
       doneBody:
-        "Berhasil memigrasikan {migrated}, melewati {skipped}. Anda dapat melanjutkan penyiapan OpenClaw.",
+        "Berhasil memigrasikan {migrated}, melewati {skipped}. Anda dapat melanjutkan penyiapan Bot.",
     },
   },
   custodian: {
-    title: "OpenClaw",
+    title: "Bot",
     subtitle: "Panduan penyiapan sistem Anda",
     subtitleCaretaker: "Pengaturan dan perawatan sistem.",
     exitSetup: "Keluar dari pengaturan",
     newAgent: "Agen baru",
     hatchDraft: "Bangun, teman!",
-    placeholder: "Kirim pesan ke OpenClaw…",
+    placeholder: "Kirim pesan ke Bot…",
     sensitivePlaceholder: "Masukkan nilai sensitif…",
     sensitiveReply: "Balasan sensitif terkirim",
     send: "Kirim",
-    thinking: "OpenClaw sedang berpikir",
+    thinking: "Bot sedang berpikir",
     earlier: "Sebelumnya",
-    requestFailed: "OpenClaw tidak dapat membalas. Coba lagi.",
+    requestFailed: "Bot tidak dapat membalas. Coba lagi.",
     connectionChanged: "Koneksi Gateway berubah. Coba lagi untuk melanjutkan pengaturan ini.",
     sessionRestarted:
-      "{error} OpenClaw memulai sesi baru; pesan sebelumnya tetap ada sebagai konteks.",
-    unsupportedGateway: "Perbarui Gateway untuk melanjutkan pengaturan dengan OpenClaw.",
+      "{error} Bot memulai sesi baru; pesan sebelumnya tetap ada sebagai konteks.",
+    unsupportedGateway: "Perbarui Gateway untuk melanjutkan pengaturan dengan Bot.",
     history: {
       button: "Riwayat",
       title: "Perubahan terbaru",
       description: "Apa yang berubah pada sistem ini, terbaru dahulu.",
       loading: "Memuat perubahan terbaru…",
       empty: "Belum ada perubahan yang tercatat.",
-      requestFailed: "OpenClaw tidak dapat memuat riwayat perubahan.",
+      requestFailed: "Bot tidak dapat memuat riwayat perubahan.",
       loadMore: "Muat lebih banyak",
       loadingMore: "Memuat lebih banyak…",
       changedPaths: "Path yang berubah ({count})",
@@ -2216,7 +2216,7 @@ export const id: TranslationMap = {
       notes: "Simpan catatan ke Markdown, Obsidian, Notion, atau Bear.",
     },
     noInstalledTitle: "Tidak ada plugin opsional yang terinstal",
-    noInstalledBody: "Temukan plugin unggulan atau cari ClawHub untuk memperluas OpenClaw.",
+    noInstalledBody: "Temukan plugin unggulan atau cari ClawHub untuk memperluas Bot.",
     noInstalledMatchTitle: "Tidak ada plugin terinstal yang cocok",
     noMatchBody: "Coba pencarian lain.",
     filterAll: "Semua",
@@ -2251,7 +2251,7 @@ export const id: TranslationMap = {
     detailPluginId: "ID Plugin",
     offlineTitle: "Gateway offline",
     offlineBody: "Hubungkan untuk menelusuri plugin yang terinstal dan direkomendasikan.",
-    optionalCapability: "Kapabilitas OpenClaw opsional.",
+    optionalCapability: "Kapabilitas Bot opsional.",
     enabled: "Diaktifkan",
     disabled: "Dinonaktifkan",
     available: "Tersedia",
@@ -2308,7 +2308,7 @@ export const id: TranslationMap = {
     },
   },
   aboutPage: {
-    productName: "OpenClaw",
+    productName: "Bot",
     tagline: "Asisten AI pribadi Anda, berjalan di perangkat Anda sendiri.",
     waveHello: "Lambaikan tangan untuk menyapa Clawd",
     linksLabel: "Komunitas dan sumber daya",
@@ -2318,7 +2318,7 @@ export const id: TranslationMap = {
     linkDiscord: "Discord",
     linkX: "X (Twitter)",
     linkChangelog: "Catatan perubahan",
-    license: "© 2026 OpenClaw Foundation — Lisensi MIT.",
+    license: "© 2026 Bot Foundation — Lisensi MIT.",
     artifactTitle: "Control UI",
     artifactSubtitle: "Identitas yang disematkan saat artefak browser ini dibuat.",
     artifactDetails: "Detail build Control UI",
@@ -2336,7 +2336,7 @@ export const id: TranslationMap = {
       "Dilaporkan oleh koneksi Gateway aktif; terpisah dari build Control UI ini.",
   },
   appsPage: {
-    heroTitle: "Bawa OpenClaw ke mana saja",
+    heroTitle: "Bawa Bot ke mana saja",
     heroTagline:
       "Aplikasi pendamping untuk ponsel, jam tangan, desktop, dan browser Anda — ditambah plugin untuk memperluas kemampuan agen Anda.",
     sectionMobile: "Di ponsel Anda",
@@ -2360,11 +2360,11 @@ export const id: TranslationMap = {
     cards: {
       ios: {
         title: "iPhone",
-        desc: "Mengobrol, berbicara, menyetujui tindakan, dan berbagi ke OpenClaw dari iOS.",
+        desc: "Mengobrol, berbicara, menyetujui tindakan, dan berbagi ke Bot dari iOS.",
       },
       android: {
         title: "Android",
-        desc: "Ponsel Android Anda sebagai node OpenClaw penuh — chat, kamera, dan Canvas.",
+        desc: "Ponsel Android Anda sebagai node Bot penuh — chat, kamera, dan Canvas.",
       },
       appleWatch: {
         title: "Apple Watch",
@@ -2372,7 +2372,7 @@ export const id: TranslationMap = {
       },
       wearOs: {
         title: "Wear OS",
-        desc: "Pendamping Android memperluas OpenClaw ke jam tangan Anda.",
+        desc: "Pendamping Android memperluas Bot ke jam tangan Anda.",
       },
       macos: {
         title: "macOS",
@@ -2380,7 +2380,7 @@ export const id: TranslationMap = {
       },
       windows: {
         title: "Windows",
-        desc: "Companion Windows menghubungkan PC Anda sebagai node OpenClaw.",
+        desc: "Companion Windows menghubungkan PC Anda sebagai node Bot.",
       },
       linux: {
         title: "Linux",
@@ -2388,11 +2388,11 @@ export const id: TranslationMap = {
       },
       chrome: {
         title: "Ekstensi Chrome",
-        desc: "Biarkan OpenClaw mengendalikan Chrome Anda yang sudah ada — tab, halaman, dan formulir.",
+        desc: "Biarkan Bot mengendalikan Chrome Anda yang sudah ada — tab, halaman, dan formulir.",
       },
       plugins: {
         title: "Plugin & ClawHub",
-        desc: "Perluas OpenClaw dengan channel, alat, dan Skills dari komunitas.",
+        desc: "Perluas Bot dengan channel, alat, dan Skills dari komunitas.",
       },
     },
   },
@@ -2590,7 +2590,7 @@ export const id: TranslationMap = {
     selfLearning: {
       pitchTitle: "Aktifkan pembelajaran mandiri",
       pitchBody:
-        "OpenClaw meninjau koreksi dan proses penting yang telah diselesaikan, lalu menyusun draf proposal skill untuk papan ini. Fitur ini menggunakan token latar belakang tambahan dan draf akan muncul sebagai proposal tertunda.",
+        "Bot meninjau koreksi dan proses penting yang telah diselesaikan, lalu menyusun draf proposal skill untuk papan ini. Fitur ini menggunakan token latar belakang tambahan dan draf akan muncul sebagai proposal tertunda.",
       enable: "Aktifkan pembelajaran mandiri",
       enabling: "Mengaktifkan…",
       updateError: "Tidak dapat memperbarui pengaturan pembelajaran mandiri.",
@@ -3757,9 +3757,9 @@ export const id: TranslationMap = {
         summary:
           "Gateway dapat dijangkau, tetapi memerlukan token atau kata sandi yang cocok sebelum browser ini dapat terhubung.",
         stepPaste:
-          "Tempel token dari openclaw dashboard --no-open atau masukkan kata sandi yang dikonfigurasi.",
+          "Tempel token dari bot dashboard --no-open atau masukkan kata sandi yang dikonfigurasi.",
         stepGenerate:
-          "Jika belum ada token yang dikonfigurasi, jalankan openclaw doctor --generate-gateway-token di host Gateway.",
+          "Jika belum ada token yang dikonfigurasi, jalankan bot doctor --generate-gateway-token di host Gateway.",
         stepConnect: "Klik Connect lagi setelah memperbarui kredensial.",
       },
       authFailed: {
@@ -3767,7 +3767,7 @@ export const id: TranslationMap = {
         summary:
           "Kredensial yang diberikan ditolak. Penyebab paling umum adalah token kedaluwarsa atau token yang disalin dari URL Gateway lain.",
         stepDashboard:
-          "Jalankan openclaw dashboard --no-open lalu buka URL baru atau tempel tokennya.",
+          "Jalankan bot dashboard --no-open lalu buka URL baru atau tempel tokennya.",
         stepReplace:
           "Ganti nilai token/kata sandi yang lama; jangan gunakan ulang token dari URL Gateway lain.",
         stepMode:
@@ -3791,8 +3791,8 @@ export const id: TranslationMap = {
           "Browser ini memerlukan persetujuan satu kali dari host Gateway sebelum dapat menggunakan Control UI.",
         upgradeSummary:
           "Browser ini sudah dikenal, tetapi akses yang diminta berubah dan memerlukan persetujuan baru.",
-        stepList: "Jalankan openclaw devices list di host Gateway.",
-        stepApproveId: "Setujui permintaan ini: openclaw devices approve {requestId}.",
+        stepList: "Jalankan bot devices list di host Gateway.",
+        stepApproveId: "Setujui permintaan ini: bot devices approve {requestId}.",
         stepApprove: "Setujui permintaan browser/perangkat yang tertunda dari daftar tersebut.",
         stepReconnect: "Hubungkan ulang setelah persetujuan selesai.",
       },
@@ -3820,21 +3820,21 @@ export const id: TranslationMap = {
           "Control UI yang disajikan dan Gateway yang berjalan tidak sepakat tentang protokol koneksi yang didukung.",
         refresh: "Muat ulang halaman",
         stepDashboard:
-          "Buka kembali dashboard yang disajikan dengan openclaw dashboard agar UI dan Gateway berasal dari instalasi yang sama.",
+          "Buka kembali dashboard yang disajikan dengan bot dashboard agar UI dan Gateway berasal dari instalasi yang sama.",
         stepDevUi:
           "Jika menggunakan pnpm ui:dev, bangun ulang atau mulai ulang UI dev terhadap checkout saat ini.",
         stepRestart:
-          "Mulai ulang Gateway setelah memperbarui OpenClaw agar menyajikan protokol saat ini.",
+          "Mulai ulang Gateway setelah memperbarui Bot agar menyajikan protokol saat ini.",
       },
       network: {
         title: "Tidak dapat terhubung",
         summary:
           "Browser tidak dapat menyelesaikan koneksi Gateway. Periksa target dan transport sebelum mencoba ulang kredensial.",
-        stepGateway: "Pastikan Gateway berjalan dengan openclaw status atau openclaw gateway run.",
+        stepGateway: "Pastikan Gateway berjalan dengan bot status atau bot gateway run.",
         stepUrl:
           "Periksa URL WebSocket dan gunakan wss:// saat Gateway berada di belakang HTTPS/Tailscale Serve.",
         stepDashboard:
-          "Buka kembali dashboard dengan openclaw dashboard --no-open untuk menyalin ulang URL dan detail auth saat ini.",
+          "Buka kembali dashboard dengan bot dashboard --no-open untuk menyalin ulang URL dan detail auth saat ini.",
       },
     },
   },
@@ -3930,7 +3930,7 @@ export const id: TranslationMap = {
       remoteViewOnly: "Sesi ini berada di node yang dipasangkan dan hanya dapat dilihat.",
       unsupportedViewOnly: "Sumber sesi eksternal ini hanya dapat dilihat.",
       sessionMenu: "External session actions",
-      openInOpenClaw: "Open in OpenClaw",
+      openInBot: "Open in Bot",
       openInTerminal: "Open in terminal",
       terminalUnavailable: "Terminal opening is unavailable for this session.",
     },
@@ -3985,7 +3985,7 @@ export const id: TranslationMap = {
     followUpModeOverriding: "Menimpa default server ({mode})",
     followUpModeReset: "Setel ulang ke default server",
     catalogOpenTarget: "Buka sesi eksternal di",
-    catalogOpenTargetViewer: "OpenClaw viewer",
+    catalogOpenTargetViewer: "Bot viewer",
     catalogOpenTargetTerminal: "Terminal",
     onboardingDisabled: "Dinonaktifkan selama penyiapan",
     commandPaletteTitle: "Cari atau lompat ke… (⌘K)",
@@ -4003,7 +4003,7 @@ export const id: TranslationMap = {
       titleOne: "1 konflik cloud workspace",
       titleMany: "{count} konflik cloud workspace",
       description:
-        "OpenClaw menyimpan versi lokal Anda dan menerapkan perubahan cloud lainnya. Periksa hasil yang di-stage atau ambil versinya untuk jalur yang bermasalah.",
+        "Bot menyimpan versi lokal Anda dan menerapkan perubahan cloud lainnya. Periksa hasil yang di-stage atau ambil versinya untuk jalur yang bermasalah.",
       morePaths: "+{count} jalur lagi",
       stagedResult: "Hasil cloud yang di-stage",
       copyStagedResult: "Salin ref hasil yang di-stage",
@@ -4014,7 +4014,7 @@ export const id: TranslationMap = {
       commandHelp:
         "Jalankan ini di Bash atau zsh (Git Bash di Windows). Jika inspect mengatakan jalur tidak ada, cloud menghapusnya; verifikasi dan hapus jalur lokal secara manual. Jika checkout melaporkan konflik file/direktori, pindahkan atau hapus jalur lokal yang menghalangi, lalu coba lagi. Jika ref yang di-stage hilang, pemberitahuan sudah usang; jangan ubah jalur lokal.",
       commandsUnavailable:
-        "Nama file ini mengandung karakter kontrol terminal, sehingga OpenClaw tidak akan membuat perintah shell yang dapat disalin untuknya. Periksa ref yang di-stage secara langsung dan masukkan jalur secara manual dengan hati-hati.",
+        "Nama file ini mengandung karakter kontrol terminal, sehingga Bot tidak akan membuat perintah shell yang dapat disalin untuknya. Periksa ref yang di-stage secara langsung dan masukkan jalur secara manual dengan hati-hati.",
       dismiss: "Tutup pemberitahuan konflik workspace",
       eventSender: "Cloud workspace",
       eventTitleOne: "Hasil cloud diterapkan dengan 1 konflik",
@@ -4592,7 +4592,7 @@ export const id: TranslationMap = {
       shownOf: "{shown} dari {total}",
       emptyTitle: "Belum ada tugas terjadwal",
       emptyHint:
-        "Jelaskan apa yang harus dilakukan OpenClaw dan kapan — ia berjalan sesuai jadwal.",
+        "Jelaskan apa yang harus dilakukan Bot dan kapan — ia berjalan sesuai jadwal.",
       noMatching: "Tidak ada tugas yang cocok dengan filter saat ini.",
       loadMore: "Muat lebih banyak",
       loading: "Memuat...",
@@ -4659,7 +4659,7 @@ export const id: TranslationMap = {
     detail: {
       tabsLabel: "Detail otomatisasi",
       newTitle: "Tugas terjadwal baru",
-      newSubtitle: "Jelaskan apa yang harus dilakukan OpenClaw, lalu pilih kapan ia berjalan.",
+      newSubtitle: "Jelaskan apa yang harus dilakukan Bot, lalu pilih kapan ia berjalan.",
       back: "Semua otomatisasi",
       settingsTab: "Pengaturan",
       historyTitle: "Riwayat proses",
@@ -4732,7 +4732,7 @@ export const id: TranslationMap = {
       descriptionPlaceholder: "Konteks opsional untuk tugas ini",
       agentPlaceholder: "main atau ops",
       agentHelp: "Mulai mengetik untuk memilih agen yang dikenal, atau masukkan agen kustom.",
-      promptPlaceholder: "Jelaskan apa yang harus dilakukan OpenClaw...",
+      promptPlaceholder: "Jelaskan apa yang harus dilakukan Bot...",
       repeat: "Ulangi",
       repeatInterval: "Interval",
       repeatOnce: "Sekali",

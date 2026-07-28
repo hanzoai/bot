@@ -1,4 +1,4 @@
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
+import { recordChannelActivity } from "bot/plugin-sdk/channel-activity-runtime";
 import { recordOutboundMessageForPromptContext } from "./outbound-message-context.js";
 import {
   buildTelegramThreadReplyParams,

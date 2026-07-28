@@ -61,7 +61,7 @@ describe("runEmbeddedAttempt tool-search catalog cleanup", () => {
       });
       throw params.signal?.reason;
     });
-    hoisted.createOpenClawCodingToolsMock.mockImplementation(() => catalogProbeTools());
+    hoisted.createBotCodingToolsMock.mockImplementation(() => catalogProbeTools());
 
     const runId = "run-catalog-abort";
     const attempt = createContextEngineAttemptRunner({

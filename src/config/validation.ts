@@ -1,6 +1,6 @@
-// Validates normalized OpenClaw config and reports user-facing errors.
-import { collectConfiguredModelRefs } from "@openclaw/model-catalog-core/configured-model-refs";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+// Validates normalized Bot config and reports user-facing errors.
+import { collectConfiguredModelRefs } from "@hanzo/bot-model-catalog-core/configured-model-refs";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
 import {
   listAgentEntriesWithSource,
@@ -26,7 +26,7 @@ import {
 } from "./channel-config-metadata.js";
 import { migratePersistedImplicitMainRoster } from "./legacy.roster.js";
 import { materializeRuntimeConfig } from "./materialize.js";
-import type { ConfigValidationIssue, OpenClawConfig } from "./types.js";
+import type { ConfigValidationIssue, BotConfig } from "./types.js";
 import {
   bundledChannelIds,
   collectChannelDmPolicyDependencyWarnings,
@@ -45,7 +45,7 @@ export { validateConfigObject, validateConfigObjectRaw } from "./validation-core
 export { collectUnsupportedSecretRefPolicyIssues } from "./validation-issues.js";
 
 type ValidateConfigWithPluginsResult =
-  | { ok: true; config: OpenClawConfig; warnings: ConfigValidationIssue[] }
+  | { ok: true; config: BotConfig; warnings: ConfigValidationIssue[] }
   | { ok: false; issues: ConfigValidationIssue[]; warnings: ConfigValidationIssue[] };
 
 type ValidateConfigWithPluginsParams = {
@@ -53,7 +53,7 @@ type ValidateConfigWithPluginsParams = {
   pluginValidation?: "full" | "skip";
   pluginMetadataSnapshot?: Pick<PluginMetadataSnapshot, "manifestRegistry">;
   loadPluginMetadataSnapshot?: (
-    config: OpenClawConfig,
+    config: BotConfig,
   ) => Pick<PluginMetadataSnapshot, "manifestRegistry">;
   sourceRaw?: unknown;
   preservedLegacyRootKeys?: readonly string[];
@@ -143,7 +143,7 @@ function validateConfigObjectWithPluginsBase(
       : formatRawChannelConfigIssueMessage(message);
   };
 
-  let compatConfig: OpenClawConfig | null | undefined;
+  let compatConfig: BotConfig | null | undefined;
   let compatPluginIds: ReadonlySet<string> | null = null;
   let compatPluginIdsResolved = false;
   let registryDiagnosticsPushed = false;
@@ -220,7 +220,7 @@ function validateConfigObjectWithPluginsBase(
     return compatPluginIds;
   };
 
-  const ensureCompatConfig = (): OpenClawConfig => {
+  const ensureCompatConfig = (): BotConfig => {
     if (compatConfig !== undefined) {
       return compatConfig ?? config;
     }
@@ -406,13 +406,13 @@ function validateConfigObjectWithPluginsBase(
     if (installCatalogEntry) {
       const issue = {
         path: issuePath,
-        message: `web_search provider is not available: ${trimmed} (install or enable plugin "${installCatalogEntry.pluginId}", then run openclaw doctor --fix)`,
+        message: `web_search provider is not available: ${trimmed} (install or enable plugin "${installCatalogEntry.pluginId}", then run bot doctor --fix)`,
         allowedValues: collectKnownWebSearchProviderIds(),
       };
       if (hasPluginEvidenceForWebSearchProvider(trimmed, installCatalogEntry.pluginId)) {
         warnings.push({
           ...issue,
-          message: `web_search provider is not available: ${trimmed} (configured plugin "${installCatalogEntry.pluginId}" is unavailable; Gateway will ignore this optional provider until the plugin is installed/enabled or openclaw doctor --fix repairs the config)`,
+          message: `web_search provider is not available: ${trimmed} (configured plugin "${installCatalogEntry.pluginId}" is unavailable; Gateway will ignore this optional provider until the plugin is installed/enabled or bot doctor --fix repairs the config)`,
         });
       } else {
         issues.push(issue);
@@ -437,7 +437,7 @@ function validateConfigObjectWithPluginsBase(
     if (hasStaleEvidence) {
       warnings.push({
         ...issue,
-        message: `${issue.message} (stale web search plugin config ignored; run openclaw doctor --fix to remove stale config, or install the plugin)`,
+        message: `${issue.message} (stale web search plugin config ignored; run bot doctor --fix to remove stale config, or install the plugin)`,
       });
     } else {
       issues.push(issue);
@@ -534,7 +534,7 @@ function validateConfigObjectWithPluginsBase(
         if (hasStalePluginEvidenceForUnknownChannel(trimmed)) {
           warnings.push({
             ...issue,
-            message: `${issue.message} (stale channel plugin config ignored; run openclaw doctor --fix to remove stale config, or install the plugin)`,
+            message: `${issue.message} (stale channel plugin config ignored; run bot doctor --fix to remove stale config, or install the plugin)`,
           });
         } else {
           issues.push(issue);

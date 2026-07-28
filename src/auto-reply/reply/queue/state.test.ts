@@ -165,7 +165,7 @@ describe("refreshQueuedFollowupSession", () => {
       nextProvider: "custom",
       nextModel: "reasoner",
       nextRouteResolution: "resolved",
-      nextThinking: { level: "ultra", agentRuntime: "openclaw" },
+      nextThinking: { level: "ultra", agentRuntime: "bot" },
     });
 
     expect(queue.items[0]?.run.thinkLevel).toBe("high");

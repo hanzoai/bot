@@ -41,7 +41,7 @@ const tempRoots = new Set<string>();
 let previousStateDir: string | undefined;
 
 async function makeTempRoot(): Promise<string> {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-migration-transaction-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-migration-transaction-"));
   tempRoots.add(root);
   return root;
 }
@@ -193,7 +193,7 @@ async function runImport(params: {
 }) {
   const workspace = path.join(params.root, "workspace");
   mocks.currentConfig = params.currentConfig;
-  process.env.OPENCLAW_STATE_DIR = path.join(params.root, "openclaw-state");
+  process.env.BOT_STATE_DIR = path.join(params.root, "bot-state");
   return await runSetupMigrationImport({
     opts: {
       importFrom: "claude",
@@ -221,7 +221,7 @@ async function runImport(params: {
 }
 
 beforeEach(() => {
-  previousStateDir = process.env.OPENCLAW_STATE_DIR;
+  previousStateDir = process.env.BOT_STATE_DIR;
   mocks.currentConfig = undefined;
   mocks.canonicalMutateConfigFile.mockReset();
   mocks.canonicalMutateConfigFile.mockImplementation(
@@ -256,18 +256,18 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
-  const [{ closeOpenClawAgentDatabasesForTest }, { closeOpenClawStateDatabaseForTest }] =
+  const [{ closeBotAgentDatabasesForTest }, { closeBotStateDatabaseForTest }] =
     await Promise.all([
-      import("../state/openclaw-agent-db.js"),
-      import("../state/openclaw-state-db.js"),
+      import("../state/bot-agent-db.js"),
+      import("../state/bot-state-db.js"),
     ]);
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeBotAgentDatabasesForTest();
+  closeBotStateDatabaseForTest();
   mocks.provider = undefined;
   if (previousStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.BOT_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = previousStateDir;
+    process.env.BOT_STATE_DIR = previousStateDir;
   }
   for (const root of tempRoots) {
     await fs.rm(root, { recursive: true, force: true });
@@ -289,7 +289,7 @@ describe("transactional setup migration import", () => {
     expect(await fs.readFile(path.join(root, "workspace", "MEMORY.md"), "utf8")).toBe(
       "remember this\n",
     );
-    expect(JSON.stringify(currentConfig.value)).not.toContain(".openclaw-migration-");
+    expect(JSON.stringify(currentConfig.value)).not.toContain(".bot-migration-");
     expect(mocks.verify).not.toHaveBeenCalled();
   });
 
@@ -322,7 +322,7 @@ describe("transactional setup migration import", () => {
       kind: "no-imported-inference",
     });
 
-    const reportRoot = path.join(root, "openclaw-state", "migration", "claude");
+    const reportRoot = path.join(root, "bot-state", "migration", "claude");
     const [reportDir] = await fs.readdir(reportRoot);
     const report = JSON.parse(
       await fs.readFile(path.join(reportRoot, reportDir!, "report.json"), "utf8"),
@@ -425,7 +425,7 @@ describe("transactional setup migration import", () => {
     });
 
     expect(deferredCalls).toBe(1);
-    const reportRoot = path.join(root, "openclaw-state", "migration", "claude");
+    const reportRoot = path.join(root, "bot-state", "migration", "claude");
     const [reportDir] = await fs.readdir(reportRoot);
     const report = JSON.parse(
       await fs.readFile(path.join(reportRoot, reportDir!, "report.json"), "utf8"),
@@ -433,9 +433,9 @@ describe("transactional setup migration import", () => {
     expect(report.items.filter((item) => item.id === "plugin:calendar")).toHaveLength(1);
     expect(report.items.find((item) => item.id === "plugin:calendar")?.status).toBe("warning");
     expect(report.warnings?.join("\n")).toContain(
-      "Retry only those steps with openclaw onboard --flow import --import-from claude",
+      "Retry only those steps with bot onboard --flow import --import-from claude",
     );
-    expect(JSON.stringify(report)).not.toContain(".openclaw-migration-");
+    expect(JSON.stringify(report)).not.toContain(".bot-migration-");
   });
 
   it("routes deferred config writes through the canonical runtime", async () => {
@@ -498,7 +498,7 @@ describe("transactional setup migration import", () => {
     expect(await fs.readFile(path.join(root, "workspace", "MEMORY.md"), "utf8")).toBe(
       "remember this\n",
     );
-    const reportRoot = path.join(root, "openclaw-state", "migration", "claude");
+    const reportRoot = path.join(root, "bot-state", "migration", "claude");
     const [reportDir] = await fs.readdir(reportRoot);
     const report = JSON.parse(
       await fs.readFile(path.join(reportRoot, reportDir!, "report.json"), "utf8"),
@@ -539,7 +539,7 @@ describe("transactional setup migration import", () => {
     await runImport({ root, source, currentConfig });
 
     expect(activationCalls).toEqual(["plugin:calendar", "plugin:drive", "plugin:drive"]);
-    const reportRoot = path.join(root, "openclaw-state", "migration", "claude");
+    const reportRoot = path.join(root, "bot-state", "migration", "claude");
     const [reportDir] = await fs.readdir(reportRoot);
     const report = JSON.parse(
       await fs.readFile(path.join(reportRoot, reportDir!, "report.json"), "utf8"),

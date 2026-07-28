@@ -9,10 +9,10 @@ import type {
 } from "../../../packages/gateway-protocol/src/schema/worker-inference.js";
 import { stableStringify } from "../../agents/stable-stringify.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+  type BotStateDatabase,
+} from "../../state/bot-state-db.js";
 import type { WorkerConnectionIdentity } from "./connection-identity.js";
 import {
   createWorkerInferenceStore,
@@ -77,14 +77,14 @@ function createSink() {
 
 describe("worker inference SQLite store", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: BotStateDatabase;
   let nowMs: number;
   let store: WorkerInferenceStore;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-inference-store-"));
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "bot-inference-store-"));
     nowMs = 1_000;
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
     createWorkerEnvironmentStore({ database, now: () => nowMs }).createIntent({
       environmentId: ENVIRONMENT_ID,
       providerId: "fixture-provider",
@@ -96,13 +96,13 @@ describe("worker inference SQLite store", () => {
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
   function reopenStore(): WorkerInferenceStore {
-    closeOpenClawStateDatabaseForTest();
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    closeBotStateDatabaseForTest();
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
     return createWorkerInferenceStore({ database, now: () => nowMs });
   }
 

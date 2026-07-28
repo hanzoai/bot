@@ -1,5 +1,5 @@
-import type { RetryConfig } from "openclaw/plugin-sdk/retry-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import type { RetryConfig } from "bot/plugin-sdk/retry-runtime";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
 import type { TelegramInlineButtons } from "./button-types.js";
 import { renderTelegramHtmlText, telegramHtmlToPlainTextFallback } from "./format.js";
 import { buildInlineKeyboard } from "./inline-keyboard.js";
@@ -24,7 +24,7 @@ import {
   type TelegramApiOverride,
 } from "./send-context.js";
 import { prepareTelegramOutbound } from "./send-outbound.js";
-import type { OpenClawConfig } from "./send.runtime.js";
+import type { BotConfig } from "./send.runtime.js";
 import { resolveMarkdownTableMode } from "./send.runtime.js";
 
 type TelegramEditMessageTextParams = Parameters<TelegramApiContext["api"]["editMessageText"]>[3];
@@ -47,7 +47,7 @@ type TelegramEditOpts = {
   /** Use Telegram's media-caption edit endpoint, or fall back to it when text edits target media. */
   editMode?: "text" | "caption" | "auto";
   /** Resolved runtime config from the command or gateway boundary. */
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 };
 
 type TelegramEditReplyMarkupOpts = {
@@ -60,7 +60,7 @@ type TelegramEditReplyMarkupOpts = {
   /** Inline keyboard buttons (reply markup). Pass empty array to remove buttons. */
   buttons?: TelegramInlineButtons;
   /** Resolved runtime config from the command or gateway boundary. */
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 };
 
 export async function editMessageReplyMarkupTelegram(

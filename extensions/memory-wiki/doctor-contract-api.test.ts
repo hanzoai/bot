@@ -2,12 +2,12 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import type { OpenKeyedStoreOptions } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { stateMigrations } from "./doctor-contract-api.js";
 import {
@@ -36,11 +36,11 @@ async function makeTempDir(): Promise<string> {
 }
 
 function resolveLegacyImportRunRecordPath(vaultRoot: string, runId: string): string {
-  return path.join(vaultRoot, ".openclaw-wiki", "import-runs", `${runId}.json`);
+  return path.join(vaultRoot, ".bot-wiki", "import-runs", `${runId}.json`);
 }
 
 function migrationParams(params: { stateDir: string; vaultRoot: string; agentIds?: string[] }) {
-  const env = { ...process.env, HOME: params.stateDir, OPENCLAW_STATE_DIR: params.stateDir };
+  const env = { ...process.env, HOME: params.stateDir, BOT_STATE_DIR: params.stateDir };
   return {
     config: {
       ...(params.agentIds ? { agents: { list: params.agentIds.map((id) => ({ id })) } } : {}),
@@ -82,7 +82,7 @@ describe("memory-wiki doctor source sync migration", () => {
   it("deletes rebuildable compiled cache files without importing them", async () => {
     const stateDir = await makeTempDir();
     const vaultRoot = path.join(stateDir, "vault");
-    const cacheDir = path.join(vaultRoot, ".openclaw-wiki", "cache");
+    const cacheDir = path.join(vaultRoot, ".bot-wiki", "cache");
     const legacyPaths = [
       path.join(cacheDir, "agent-digest.json"),
       path.join(cacheDir, "claims.jsonl"),
@@ -128,10 +128,10 @@ describe("memory-wiki doctor source sync migration", () => {
     const vaultRoot = path.join(stateDir, "vault");
     const externalCacheDir = path.join(stateDir, "external-cache");
     const externalCachePath = path.join(externalCacheDir, "agent-digest.json");
-    await fs.mkdir(path.join(vaultRoot, ".openclaw-wiki"), { recursive: true });
+    await fs.mkdir(path.join(vaultRoot, ".bot-wiki"), { recursive: true });
     await fs.mkdir(externalCacheDir, { recursive: true });
     await fs.writeFile(externalCachePath, "private\n", "utf8");
-    await fs.symlink(externalCacheDir, path.join(vaultRoot, ".openclaw-wiki", "cache"));
+    await fs.symlink(externalCacheDir, path.join(vaultRoot, ".bot-wiki", "cache"));
     const params = migrationParams({ stateDir, vaultRoot });
     const migration = requireStateMigration("memory-wiki-compiled-cache-file-cleanup");
 
@@ -202,7 +202,7 @@ describe("memory-wiki doctor source sync migration", () => {
     const legacyPath = resolveLegacyImportRunRecordPath(vaultRoot, "chatgpt-alpha");
     const snapshotPath = path.join(
       vaultRoot,
-      ".openclaw-wiki",
+      ".bot-wiki",
       "import-runs",
       "chatgpt-alpha",
       "snapshots",

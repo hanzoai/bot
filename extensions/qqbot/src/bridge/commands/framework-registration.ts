@@ -11,7 +11,7 @@
  * single-responsibility helpers in this directory.
  */
 
-import type { OpenClawPluginApi, PluginCommandContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { BotPluginApi, PluginCommandContext } from "bot/plugin-sdk/plugin-entry";
 import { PRIVATE_CHAT_ONLY_TEXT } from "../../engine/commands/command-visibility.js";
 import { getFrameworkCommands } from "../../engine/commands/slash-commands-impl.js";
 import { resolveGroupCommandLevelFromAccountConfig } from "../../engine/config/group.js";
@@ -32,7 +32,7 @@ function isExplicitQQBotC2cFrom(from: string | undefined | null): boolean {
   return /^qqbot:/iu.test(raw) && kind === "c2c" && targetId.length > 0;
 }
 
-export function registerQQBotFrameworkCommands(api: OpenClawPluginApi): void {
+export function registerQQBotFrameworkCommands(api: BotPluginApi): void {
   for (const cmd of getFrameworkCommands()) {
     api.registerCommand({
       name: cmd.name,

@@ -1,11 +1,11 @@
-import { installedPluginRoot } from "openclaw/plugin-sdk/test-fixtures";
+import { installedPluginRoot } from "bot/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 // Plugins CLI uninstall tests cover plugin removal selection and uninstall output.
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { persistClawPackageRef } from "../claws/provenance.js";
 import type { ClawAddPlan } from "../claws/types.js";
-import type { OpenClawConfig } from "../config/config.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { BotConfig } from "../config/config.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import {
   applyPluginUninstallDirectoryRemoval,
   buildPluginDiagnosticsReport,
@@ -25,9 +25,9 @@ import {
   writePersistedInstalledPluginIndexInstallRecords,
 } from "./plugins-cli-test-helpers.js";
 
-const CLI_STATE_ROOT = "/tmp/openclaw-state";
+const CLI_STATE_ROOT = "/tmp/bot-state";
 const ALPHA_INSTALL_PATH = installedPluginRoot(CLI_STATE_ROOT, "alpha");
-const ORIGINAL_OPENCLAW_NIX_MODE = process.env.OPENCLAW_NIX_MODE;
+const ORIGINAL_BOT_NIX_MODE = process.env.BOT_NIX_MODE;
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function expectRuntimeLogIncludes(fragment: string) {
@@ -58,26 +58,26 @@ describe("plugins cli uninstall", () => {
   });
 
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
-    if (ORIGINAL_OPENCLAW_NIX_MODE === undefined) {
-      delete process.env.OPENCLAW_NIX_MODE;
+    closeBotStateDatabaseForTest();
+    if (ORIGINAL_BOT_NIX_MODE === undefined) {
+      delete process.env.BOT_NIX_MODE;
     } else {
-      process.env.OPENCLAW_NIX_MODE = ORIGINAL_OPENCLAW_NIX_MODE;
+      process.env.BOT_NIX_MODE = ORIGINAL_BOT_NIX_MODE;
     }
   });
 
   it("refuses plugin uninstalls in Nix mode before planning file removal", async () => {
-    const previous = process.env.OPENCLAW_NIX_MODE;
-    process.env.OPENCLAW_NIX_MODE = "1";
+    const previous = process.env.BOT_NIX_MODE;
+    process.env.BOT_NIX_MODE = "1";
     try {
       await expect(runPluginsCommand(["plugins", "uninstall", "alpha", "--force"])).rejects.toThrow(
-        "OPENCLAW_NIX_MODE=1",
+        "BOT_NIX_MODE=1",
       );
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_NIX_MODE;
+        delete process.env.BOT_NIX_MODE;
       } else {
-        process.env.OPENCLAW_NIX_MODE = previous;
+        process.env.BOT_NIX_MODE = previous;
       }
     }
 
@@ -87,7 +87,7 @@ describe("plugins cli uninstall", () => {
   });
 
   it("shows uninstall dry-run preview without mutating config or acquiring write mode", async () => {
-    process.env.OPENCLAW_NIX_MODE = "1";
+    process.env.BOT_NIX_MODE = "1";
     loadConfig.mockReturnValue({
       plugins: {
         entries: {
@@ -106,14 +106,14 @@ describe("plugins cli uninstall", () => {
           contextEngine: "alpha",
         },
       },
-    } as OpenClawConfig);
+    } as BotConfig);
     buildPluginSnapshotReport.mockReturnValue({
       plugins: [{ id: "alpha", name: "alpha" }],
       diagnostics: [],
     });
     planPluginUninstall.mockReturnValue({
       ok: true,
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       actions: {
         entry: true,
         install: true,
@@ -152,13 +152,13 @@ describe("plugins cli uninstall", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const nextConfig = {
       plugins: {
         entries: {},
         installs: {},
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     loadConfig.mockReturnValue(baseConfig);
     setInstalledPluginIndexInstallRecords(baseConfig.plugins?.installs ?? {});
@@ -218,9 +218,9 @@ describe("plugins cli uninstall", () => {
   });
 
   it("warns but proceeds when a shared plugin has an uncertain Claw reference", async () => {
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = tempDirs.make("openclaw-claw-plugin-ref-");
-    closeOpenClawStateDatabaseForTest();
+    const previousStateDir = process.env.BOT_STATE_DIR;
+    process.env.BOT_STATE_DIR = tempDirs.make("bot-claw-plugin-ref-");
+    closeBotStateDatabaseForTest();
     try {
       const installRecord = {
         source: "clawhub" as const,
@@ -234,7 +234,7 @@ describe("plugins cli uninstall", () => {
           entries: { alpha: { enabled: true } },
           installs: { alpha: installRecord },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
       loadConfig.mockReturnValue(baseConfig);
       setInstalledPluginIndexInstallRecords({ alpha: installRecord });
       buildPluginSnapshotReport.mockReturnValue({
@@ -243,7 +243,7 @@ describe("plugins cli uninstall", () => {
       });
       planPluginUninstall.mockReturnValue({
         ok: true,
-        config: { plugins: { entries: {}, installs: {} } } as OpenClawConfig,
+        config: { plugins: { entries: {}, installs: {} } } as BotConfig,
         actions: {
           entry: true,
           install: true,
@@ -279,11 +279,11 @@ describe("plugins cli uninstall", () => {
       expect(writePersistedInstalledPluginIndexInstallRecords).toHaveBeenCalledWith({});
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.BOT_STATE_DIR = previousStateDir;
       }
-      closeOpenClawStateDatabaseForTest();
+      closeBotStateDatabaseForTest();
     }
   });
 
@@ -301,7 +301,7 @@ describe("plugins cli uninstall", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     loadConfig.mockReturnValue(baseConfig);
     setInstalledPluginIndexInstallRecords(baseConfig.plugins?.installs ?? {});
     buildPluginSnapshotReport.mockReturnValue({
@@ -310,7 +310,7 @@ describe("plugins cli uninstall", () => {
     });
     planPluginUninstall.mockReturnValue({
       ok: true,
-      config: { plugins: { entries: {}, installs: {} } } as OpenClawConfig,
+      config: { plugins: { entries: {}, installs: {} } } as BotConfig,
       actions: {
         entry: true,
         install: true,
@@ -353,13 +353,13 @@ describe("plugins cli uninstall", () => {
         },
         installs: installRecords,
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const nextConfig = {
       plugins: {
         entries: {},
         installs: {},
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     loadConfig.mockReturnValue(baseConfig);
     setInstalledPluginIndexInstallRecords(installRecords);
@@ -412,13 +412,13 @@ describe("plugins cli uninstall", () => {
         },
         installs: installRecords,
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const nextConfig = {
       plugins: {
         entries: {},
         installs: {},
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     loadConfig.mockReturnValue(baseConfig);
     setInstalledPluginIndexInstallRecords(installRecords);
@@ -467,7 +467,7 @@ describe("plugins cli uninstall", () => {
   });
 
   it("keeps the install tracked and disabled when directory removal fails", async () => {
-    const installPath = tempDirs.make("openclaw-plugin-uninstall-failure-");
+    const installPath = tempDirs.make("bot-plugin-uninstall-failure-");
     const installRecords = {
       alpha: {
         source: "npm",
@@ -482,7 +482,7 @@ describe("plugins cli uninstall", () => {
         },
         installs: installRecords,
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     loadConfig.mockReturnValue(baseConfig);
     setInstalledPluginIndexInstallRecords(installRecords);
     buildPluginSnapshotReport.mockReturnValue({
@@ -491,7 +491,7 @@ describe("plugins cli uninstall", () => {
     });
     planPluginUninstall.mockReturnValue({
       ok: true,
-      config: { plugins: { entries: {}, installs: {} } } as OpenClawConfig,
+      config: { plugins: { entries: {}, installs: {} } } as BotConfig,
       actions: {
         entry: true,
         install: true,
@@ -531,12 +531,12 @@ describe("plugins cli uninstall", () => {
         allow: ["alpha", "beta"],
         deny: ["alpha"],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const nextConfig = {
       plugins: {
         allow: ["beta"],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     loadConfig.mockReturnValue(baseConfig);
     buildPluginSnapshotReport.mockReturnValue({
@@ -574,8 +574,8 @@ describe("plugins cli uninstall", () => {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
-    const nextConfig = {} as OpenClawConfig;
+    } as BotConfig;
+    const nextConfig = {} as BotConfig;
 
     loadConfig.mockReturnValue(baseConfig);
     buildPluginSnapshotReport.mockReturnValue({
@@ -635,14 +635,14 @@ describe("plugins cli uninstall", () => {
           enabled: true,
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const nextConfig = {
       channels: {
         discord: {
           enabled: true,
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     loadConfig.mockReturnValue(baseConfig);
     setInstalledPluginIndexInstallRecords(installRecords);
@@ -686,7 +686,7 @@ describe("plugins cli uninstall", () => {
         entries: {},
         installs: {},
       },
-    } as OpenClawConfig);
+    } as BotConfig);
     buildPluginSnapshotReport.mockReturnValue({
       plugins: [{ id: "alpha", name: "alpha" }],
       diagnostics: [],

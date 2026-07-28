@@ -2,8 +2,8 @@
 import {
   createMessageReceiptFromOutboundResults,
   type MessageReceiptPartKind,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import { requireRuntimeConfig } from "bot/plugin-sdk/plugin-config-runtime";
 import type { PollInput } from "../runtime-api.js";
 import type { CoreConfig } from "../types.js";
 import { loadOutboundMediaFromUrl } from "./outbound-media-runtime.js";

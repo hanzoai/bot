@@ -3,7 +3,7 @@
 // global and belong on a global page; only the diary/short-term reads below are
 // agent-scoped, which is what the agent picker drives.
 import { consume } from "@lit/context";
-import { asNullableRecord as asConfigRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asConfigRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { html, nothing, type TemplateResult } from "lit";
 import { state } from "lit/decorators.js";
 import { applicationContext, type ApplicationContext } from "../../app/context.ts";
@@ -13,7 +13,7 @@ import { renderSettingsRow, renderSettingsSection } from "../../components/setti
 import { t } from "../../i18n/index.ts";
 import { listSelectableAgents, normalizeAgentLabel } from "../../lib/agents/display.ts";
 import { currentConfigObject } from "../../lib/config/index.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import {
   resolveConfiguredDreaming,
@@ -24,7 +24,7 @@ import "../agents/memory/memory-panel.ts";
 import { renderDreamingSettings, renderDreamingUnsupported } from "./memory-dreaming.ts";
 import { renderConfigApplyBanner, renderConfigAutoSaveStatus } from "./view.ts";
 
-class MemoryDreamingSettings extends OpenClawLightDomElement {
+class MemoryDreamingSettings extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -189,14 +189,14 @@ class MemoryDreamingSettings extends OpenClawLightDomElement {
       renderSettingsRow({
         title: t("memoryPage.dreaming.agentScope.rowTitle"),
         control: html`
-          <openclaw-agent-select
+          <bot-agent-select
             .options=${options}
             .value=${agentId ?? ""}
             .accessibleLabel=${t("memoryPage.dreaming.agentScope.rowTitle")}
             .onSelect=${(value: string) => {
               this.selectedAgentId = value || null;
             }}
-          ></openclaw-agent-select>
+          ></bot-agent-select>
         `,
       }),
     );
@@ -218,12 +218,12 @@ class MemoryDreamingSettings extends OpenClawLightDomElement {
         ${this.renderAgentPicker(agentId)}
       </div>
       ${agentId
-        ? html`<openclaw-agent-memory-panel .agentId=${agentId}></openclaw-agent-memory-panel>`
+        ? html`<bot-agent-memory-panel .agentId=${agentId}></bot-agent-memory-panel>`
         : nothing}
     `;
   }
 }
 
-if (!customElements.get("openclaw-memory-dreaming")) {
-  customElements.define("openclaw-memory-dreaming", MemoryDreamingSettings);
+if (!customElements.get("bot-memory-dreaming")) {
+  customElements.define("bot-memory-dreaming", MemoryDreamingSettings);
 }

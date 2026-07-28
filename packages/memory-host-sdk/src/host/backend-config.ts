@@ -1,11 +1,11 @@
 // Memory Host SDK module implements backend config behavior.
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   normalizeStringEntries,
   uniqueStrings,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@hanzo/bot-normalization-core/string-normalization";
 import {
   MEMORY_HOST_ROOT_FILENAME,
   type MemoryBackend,
@@ -14,7 +14,7 @@ import {
   type MemoryQmdIndexPath,
   type MemoryQmdSearchMode,
   type MemoryQmdStartupMode,
-  type OpenClawConfig,
+  type BotConfig,
   resolveMemoryHostAgentWorkspaceDir,
   resolveMemoryHostSearchPathConfig,
   normalizeAgentId,
@@ -23,7 +23,7 @@ import {
   splitShellArgs,
 } from "./config-utils.js";
 import { isPathInside } from "./fs-utils.js";
-import { parseDurationMs } from "./openclaw-runtime-config.js";
+import { parseDurationMs } from "./bot-runtime-config.js";
 
 function escapeQmdExactFilePattern(fileName: string): string {
   return fileName.replace(/[\\*?[\]{}()!+@]/g, "\\$&");
@@ -400,7 +400,7 @@ function resolveDefaultCollections(
 }
 
 export function resolveMemoryBackendConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
 }): ResolvedMemoryBackendConfig {
   const normalizedAgentId = normalizeAgentId(params.agentId);

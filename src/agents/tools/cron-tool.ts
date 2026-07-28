@@ -3,9 +3,9 @@
  *
  * Manages scheduled jobs, wake/run actions, delivery context, and reminder-style payload normalization.
  */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { parseDurationMs } from "../../cli/parse-duration.js";
-import { getRuntimeConfig, type OpenClawConfig } from "../../config/config.js";
+import { getRuntimeConfig, type BotConfig } from "../../config/config.js";
 import { resolveCronCreationDelivery } from "../../cron/delivery-context.js";
 import { assertCronDeliveryInputNonBlankFields } from "../../cron/delivery-target-validation.js";
 import { normalizeCronJobCreate, normalizeCronJobPatch } from "../../cron/normalize.js";
@@ -87,7 +87,7 @@ function readCronJobIdParam(params: Record<string, unknown>) {
 
 function resolveCronToolCallerScope(
   opts: CronToolOptions | undefined,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): CronToolCallerScope | undefined {
   const sessionKey = opts?.agentSessionKey?.trim();
   if (!sessionKey) {
@@ -301,7 +301,7 @@ SCHEDULE:
 
 TARGET+PAYLOAD:
 - "current" (agentTurn default) = this conversation: run carries this chat's context, result lands here. Self-wakeup/"continue later"/loop = at|every + agentTurn + current.
-- "isolated" = fresh detached session (shows in \`openclaw tasks\`); standalone background work.
+- "isolated" = fresh detached session (shows in \`bot tasks\`); standalone background work.
 - "main" = heartbeat lane; payload {kind:"systemEvent",text} (systemEvent default target).
 - "session:<key>" = named session.
 - agentTurn {kind:"agentTurn",message,model?,thinking?,timeoutSeconds?}; timeoutSeconds 0=none.
@@ -424,7 +424,7 @@ Job wakeMode (main jobs): "now"(default)|"next-heartbeat". Restricted cron-run s
             // job properties to the top level alongside `action` instead of nesting
             // them inside `job`. When `params.job` is missing or empty, reconstruct
             // a synthetic job object from any recognised top-level job fields.
-            // See: https://github.com/openclaw/openclaw/issues/11310
+            // See: https://github.com/hanzoai/bot/issues/11310
             if (isMissingOrEmptyObject(params.job)) {
               const synthetic = recoverCronObjectFromFlatParams(params);
               // Only use the synthetic job if at least one meaningful field is present
@@ -679,7 +679,7 @@ Job wakeMode (main jobs): "now"(default)|"next-heartbeat". Restricted cron-run s
             // Without this, the wake gateway call goes through with no session
             // key and the system event lands on the heartbeat / main default
             // rather than the originating conversation lane. Closes the
-            // upstream half of openclaw/openclaw#46886 (#64556 — agentId/
+            // upstream half of hanzoai/bot#46886 (#64556 — agentId/
             // sessionKey silently ignored for `action: "wake"`). Explicit
             // params on the tool call still take precedence over the inferred
             // value, so call sites can wake a different session owned by the

@@ -1,4 +1,4 @@
-import { MeetingPlatformAdapter } from "openclaw/plugin-sdk/meeting-runtime";
+import { MeetingPlatformAdapter } from "bot/plugin-sdk/meeting-runtime";
 import type { TeamsMeetingsConfig, TeamsMeetingsMode, TeamsMeetingsTransport } from "./config.js";
 import type {
   TeamsMeetingsChromeHealth,

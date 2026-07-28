@@ -41,7 +41,7 @@ function createPage(request: GatewayBrowserClient["request"]): TestApprovalsPage
     basePath: "",
     gateway,
   } as unknown as ApplicationContext);
-  const page = document.createElement("openclaw-approvals-page") as TestApprovalsPage;
+  const page = document.createElement("bot-approvals-page") as TestApprovalsPage;
   provider.append(page);
   document.body.append(provider);
   return page;

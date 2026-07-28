@@ -2,8 +2,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import * as sessionTranscriptHit from "openclaw/plugin-sdk/session-transcript-hit";
+import type { MemorySearchResult } from "bot/plugin-sdk/memory-core-host-runtime-files";
+import * as sessionTranscriptHit from "bot/plugin-sdk/session-transcript-hit";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   attachQmdSessionArtifactHit,
@@ -12,7 +12,7 @@ import {
   resolveQmdSessionArtifactIdentity,
 } from "./qmd-session-artifacts.js";
 import { filterMemorySearchHitsBySessionVisibility } from "./session-search-visibility.js";
-import { asOpenClawConfig } from "./tools.test-helpers.js";
+import { asBotConfig } from "./tools.test-helpers.js";
 
 type TestSessionEntry = {
   sessionId: string;
@@ -32,9 +32,9 @@ const crossAgentStore: Record<string, TestSessionEntry> = {
 let combinedSessionStore: Record<string, TestSessionEntry> = crossAgentStore;
 const tempRoots: string[] = [];
 
-vi.mock("openclaw/plugin-sdk/session-transcript-hit", async (importOriginal) => {
+vi.mock("bot/plugin-sdk/session-transcript-hit", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/session-transcript-hit")>();
+    await importOriginal<typeof import("bot/plugin-sdk/session-transcript-hit")>();
   return {
     ...actual,
     loadCombinedSessionStoreForGateway: vi.fn(() => ({
@@ -64,7 +64,7 @@ describe("filterMemorySearchHitsBySessionVisibility for QMD", () => {
     searchPath: string;
     sessionId: string;
   }): Promise<string> {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-qmd-session-artifact-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-qmd-session-artifact-"));
     tempRoots.push(root);
     const indexPath = path.join(root, "index.sqlite");
     replaceQmdSessionArtifactMappings({
@@ -115,7 +115,7 @@ describe("filterMemorySearchHitsBySessionVisibility for QMD", () => {
       startLine: 1,
       endLine: 2,
     };
-    const cfg = asOpenClawConfig({
+    const cfg = asBotConfig({
       tools: {
         sessions: { visibility: "agent" },
       },
@@ -148,7 +148,7 @@ describe("filterMemorySearchHitsBySessionVisibility for QMD", () => {
       startLine: 1,
       endLine: 2,
     };
-    const cfg = asOpenClawConfig({
+    const cfg = asBotConfig({
       tools: {
         sessions: { visibility: "self" },
       },
@@ -180,7 +180,7 @@ describe("filterMemorySearchHitsBySessionVisibility for QMD", () => {
       startLine: 1,
       endLine: 2,
     };
-    const cfg = asOpenClawConfig({
+    const cfg = asBotConfig({
       tools: {
         sessions: { visibility: "self" },
       },
@@ -229,7 +229,7 @@ describe("filterMemorySearchHitsBySessionVisibility for QMD", () => {
       },
     );
     const copiedHit = copyQmdSessionArtifactHit(hit, { ...hit, snippet: "trimmed" });
-    const cfg = asOpenClawConfig({
+    const cfg = asBotConfig({
       tools: {
         sessions: { visibility: "self" },
       },
@@ -292,7 +292,7 @@ describe("filterMemorySearchHitsBySessionVisibility for QMD", () => {
         searchPath,
       },
     );
-    const cfg = asOpenClawConfig({ tools: { sessions: { visibility: "self" } } });
+    const cfg = asBotConfig({ tools: { sessions: { visibility: "self" } } });
 
     const filtered = await filterMemorySearchHitsBySessionVisibility({
       cfg,
@@ -348,7 +348,7 @@ describe("filterMemorySearchHitsBySessionVisibility for QMD", () => {
         searchPath,
       },
     );
-    const cfg = asOpenClawConfig({ tools: { sessions: { visibility: "self" } } });
+    const cfg = asBotConfig({ tools: { sessions: { visibility: "self" } } });
 
     const filtered = await filterMemorySearchHitsBySessionVisibility({
       cfg,
@@ -391,7 +391,7 @@ describe("filterMemorySearchHitsBySessionVisibility for QMD", () => {
         searchPath,
       },
     );
-    const cfg = asOpenClawConfig({
+    const cfg = asBotConfig({
       tools: {
         sessions: { visibility: "agent" },
       },
@@ -419,7 +419,7 @@ describe("filterMemorySearchHitsBySessionVisibility for QMD", () => {
     };
 
     const filtered = await filterMemorySearchHitsBySessionVisibility({
-      cfg: asOpenClawConfig({ tools: { sessions: { visibility: "agent" } } }),
+      cfg: asBotConfig({ tools: { sessions: { visibility: "agent" } } }),
       requesterSessionKey: "agent:main:main",
       sandboxed: false,
       hits: [hit],
@@ -455,7 +455,7 @@ describe("filterMemorySearchHitsBySessionVisibility for QMD", () => {
         searchPath,
       },
     );
-    const cfg = asOpenClawConfig({
+    const cfg = asBotConfig({
       tools: {
         sessions: { visibility: "all" },
       },
@@ -503,7 +503,7 @@ describe("filterMemorySearchHitsBySessionVisibility for QMD", () => {
         searchPath,
       },
     );
-    const cfg = asOpenClawConfig({
+    const cfg = asBotConfig({
       tools: {
         sessions: { visibility: "all" },
         agentToAgent: { enabled: true, allow: ["*"] },
@@ -530,7 +530,7 @@ describe("filterMemorySearchHitsBySessionVisibility for QMD", () => {
       startLine: 1,
       endLine: 2,
     };
-    const cfg = asOpenClawConfig({
+    const cfg = asBotConfig({
       tools: {
         sessions: { visibility: "all" },
       },

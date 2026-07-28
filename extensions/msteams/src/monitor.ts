@@ -7,7 +7,7 @@ import {
   keepHttpServerTaskAlive,
   mergeAllowlist,
   summarizeMapping,
-  type OpenClawConfig,
+  type BotConfig,
   type RuntimeEnv,
 } from "../runtime-api.js";
 import { resolveMSTeamsSdkCloudOptions } from "./cloud.js";
@@ -55,7 +55,7 @@ import { resolveMSTeamsCredentials } from "./token.js";
 import { applyMSTeamsWebhookTimeouts } from "./webhook-timeouts.js";
 
 type MonitorMSTeamsOpts = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runtime?: RuntimeEnv;
   abortSignal?: AbortSignal;
   conversationStore?: MSTeamsConversationStore;
@@ -465,7 +465,7 @@ export async function monitorMSTeamsProvider(
   app.on("signin.verify-state", (ctx) => handleSdkSigninInvoke(ctx, "onVerifyState"));
 
   // The delegated SDK sign-in handlers emit `signin` only after a successful
-  // token exchange/lookup. Persist that token for later OpenClaw use.
+  // token exchange/lookup. Persist that token for later Bot use.
   if (ssoDeps) {
     app.event("signin", (ctx) => {
       void (async () => {

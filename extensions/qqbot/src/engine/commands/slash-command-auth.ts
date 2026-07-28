@@ -27,7 +27,7 @@ function readSlashCommandAuthList(value: unknown): SlashCommandAuthEntry[] | und
 }
 
 /**
- * Resolve the command-specific QQBot allowlist from the root OpenClaw config.
+ * Resolve the command-specific QQBot allowlist from the root Bot config.
  *
  * `commands.allowFrom.qqbot` takes precedence over the global
  * `commands.allowFrom["*"]`, matching the framework command authorization

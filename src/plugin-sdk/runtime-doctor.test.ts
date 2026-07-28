@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "./config-contracts.js";
+import type { BotConfig } from "./config-contracts.js";
 import {
   defineKeyMoveMigration,
   normalizeChannelConfigEntries,
   stripRetiredChannelKeys,
 } from "./runtime-doctor.js";
 
-function cfgWith(entry: Record<string, unknown>): OpenClawConfig {
+function cfgWith(entry: Record<string, unknown>): BotConfig {
   return { channels: { sample: entry } } as never;
 }
 

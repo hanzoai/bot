@@ -1,7 +1,7 @@
 // Research autocapture tests cover capture policy, persistence, and config gating.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { loadSessionEntry, upsertSessionEntry } from "../../config/sessions/session-accessor.js";
 import {
@@ -9,9 +9,9 @@ import {
   recordSessionSkillCaptureSignals,
 } from "../../config/sessions/skill-suggestions.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createBotTestState,
+  type BotTestState,
+} from "../../test-utils/bot-test-state.js";
 import { createTrackedTempDirs } from "../../test-utils/tracked-temp-dirs.js";
 import {
   applySkillProposal,
@@ -24,7 +24,7 @@ import * as workshopService from "../workshop/service.js";
 import { runSkillResearchAutoCapture } from "./autocapture.js";
 
 const tempDirs = createTrackedTempDirs();
-let testState: OpenClawTestState;
+let testState: BotTestState;
 const SESSION_KEY = "agent:main:main";
 
 async function seedSession(sessionKey = SESSION_KEY): Promise<void> {
@@ -39,9 +39,9 @@ function readSession(sessionKey = SESSION_KEY) {
 }
 
 beforeEach(async () => {
-  testState = await createOpenClawTestState({
+  testState = await createBotTestState({
     layout: "state-only",
-    prefix: "openclaw-skill-workshop-state-",
+    prefix: "bot-skill-workshop-state-",
   });
   await seedSession();
 });
@@ -52,7 +52,7 @@ afterEach(async () => {
 });
 
 async function makeWorkspace(): Promise<string> {
-  return await tempDirs.make("openclaw-skill-workshop-");
+  return await tempDirs.make("bot-skill-workshop-");
 }
 
 describe("skill research auto-capture", () => {

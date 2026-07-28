@@ -112,7 +112,7 @@ function request(pathname: string, options?: { token?: string; method?: string }
   });
 }
 
-describe("GET /__openclaw__/plugin-icon/:pluginId", () => {
+describe("GET /__bot__/plugin-icon/:pluginId", () => {
   it("requires gateway authentication before resolving plugin metadata", async () => {
     mocks.authorize.mockImplementationOnce(async ({ res }) => {
       res.statusCode = 401;
@@ -120,7 +120,7 @@ describe("GET /__openclaw__/plugin-icon/:pluginId", () => {
       return null;
     });
 
-    const response = await request("/__openclaw__/plugin-icon/firecrawl", { token: "" });
+    const response = await request("/__bot__/plugin-icon/firecrawl", { token: "" });
 
     expect(response.status).toBe(401);
     expect(mocks.resolveIconUrl).not.toHaveBeenCalled();
@@ -129,7 +129,7 @@ describe("GET /__openclaw__/plugin-icon/:pluginId", () => {
 
   it("resolves by plugin identity and ignores arbitrary remote URL parameters", async () => {
     const response = await request(
-      "/__openclaw__/plugin-icon/firecrawl?url=http%3A%2F%2F127.0.0.1%2Fsecret",
+      "/__bot__/plugin-icon/firecrawl?url=http%3A%2F%2F127.0.0.1%2Fsecret",
     );
 
     expect(response.status).toBe(200);
@@ -168,7 +168,7 @@ describe("GET /__openclaw__/plugin-icon/:pluginId", () => {
 
   it("resolves encoded catalog URLs through the server-owned allowlist", async () => {
     const iconUrl = "https://cdn.example.test/setup-tool.svg";
-    const response = await request(`/__openclaw__/catalog-icon/${encodeURIComponent(iconUrl)}`);
+    const response = await request(`/__bot__/catalog-icon/${encodeURIComponent(iconUrl)}`);
 
     expect(response.status).toBe(200);
     expect(mocks.resolveCatalogIconUrl).toHaveBeenCalledWith({
@@ -183,7 +183,7 @@ describe("GET /__openclaw__/plugin-icon/:pluginId", () => {
   it("does not fetch catalog URLs rejected by the server-owned allowlist", async () => {
     mocks.resolveCatalogIconUrl.mockReturnValueOnce(undefined);
     const response = await request(
-      `/__openclaw__/catalog-icon/${encodeURIComponent("https://untrusted.example/icon.png")}`,
+      `/__bot__/catalog-icon/${encodeURIComponent("https://untrusted.example/icon.png")}`,
     );
 
     expect(response.status).toBe(404);
@@ -197,7 +197,7 @@ describe("GET /__openclaw__/plugin-icon/:pluginId", () => {
       contentType: "image/svg+xml",
     });
 
-    const response = await request("/__openclaw__/plugin-icon/simple-icons");
+    const response = await request("/__bot__/plugin-icon/simple-icons");
 
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("image/svg+xml");
@@ -209,8 +209,8 @@ describe("GET /__openclaw__/plugin-icon/:pluginId", () => {
 
   it("reuses successful icon bytes from the bounded process cache", async () => {
     configForRequest = () => ({});
-    const first = await request("/__openclaw__/plugin-icon/firecrawl");
-    const second = await request("/__openclaw__/plugin-icon/firecrawl");
+    const first = await request("/__bot__/plugin-icon/firecrawl");
+    const second = await request("/__bot__/plugin-icon/firecrawl");
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);
@@ -220,23 +220,23 @@ describe("GET /__openclaw__/plugin-icon/:pluginId", () => {
 
   it("accepts one canonical scoped plugin id encoded as a single path segment", async () => {
     const response = await request(
-      `/__openclaw__/plugin-icon/${encodeURIComponent("@expediagroup/expedia-openclaw")}`,
+      `/__bot__/plugin-icon/${encodeURIComponent("@expediagroup/expedia-bot")}`,
     );
 
     expect(response.status).toBe(200);
     expect(mocks.resolveIconUrl).toHaveBeenCalledWith({
       config: testConfig,
-      pluginId: "@expediagroup/expedia-openclaw",
+      pluginId: "@expediagroup/expedia-bot",
     });
   });
 
   it("refreshes cached icon bytes after the cache lifetime", async () => {
     const now = vi.spyOn(Date, "now").mockReturnValue(1_000);
     try {
-      const first = await request("/__openclaw__/plugin-icon/firecrawl");
-      const cached = await request("/__openclaw__/plugin-icon/firecrawl");
+      const first = await request("/__bot__/plugin-icon/firecrawl");
+      const cached = await request("/__bot__/plugin-icon/firecrawl");
       now.mockReturnValue(1_000 + PLUGIN_ICON_CACHE_TTL_MS + 1);
-      const refreshed = await request("/__openclaw__/plugin-icon/firecrawl");
+      const refreshed = await request("/__bot__/plugin-icon/firecrawl");
 
       expect(first.status).toBe(200);
       expect(cached.status).toBe(200);
@@ -249,21 +249,21 @@ describe("GET /__openclaw__/plugin-icon/:pluginId", () => {
 
   it("returns not found when metadata is absent or remote image validation fails", async () => {
     mocks.resolveIconUrl.mockResolvedValueOnce(undefined);
-    const missing = await request("/__openclaw__/plugin-icon/missing");
+    const missing = await request("/__bot__/plugin-icon/missing");
     expect(missing.status).toBe(404);
 
     mocks.readRemoteMediaBuffer.mockResolvedValueOnce({
       buffer: Buffer.from("<html>nope</html>"),
       contentType: "text/html",
     });
-    const invalid = await request("/__openclaw__/plugin-icon/not-an-image");
+    const invalid = await request("/__bot__/plugin-icon/not-an-image");
     expect(invalid.status).toBe(404);
 
     mocks.readRemoteMediaBuffer.mockResolvedValueOnce({
       buffer: Buffer.from("<html>still nope</html>"),
       contentType: "image/png",
     });
-    const mislabeled = await request("/__openclaw__/plugin-icon/mislabeled");
+    const mislabeled = await request("/__bot__/plugin-icon/mislabeled");
     expect(mislabeled.status).toBe(404);
 
     mocks.readImageMetadata.mockReturnValueOnce({ width: 10_000, height: 10_000 });
@@ -271,16 +271,16 @@ describe("GET /__openclaw__/plugin-icon/:pluginId", () => {
       buffer: PNG_BYTES,
       contentType: "image/png",
     });
-    const oversized = await request("/__openclaw__/plugin-icon/oversized");
+    const oversized = await request("/__bot__/plugin-icon/oversized");
     expect(oversized.status).toBe(404);
 
     mocks.readRemoteMediaBuffer.mockRejectedValueOnce(new Error("upstream failed"));
-    const failed = await request("/__openclaw__/plugin-icon/broken");
+    const failed = await request("/__bot__/plugin-icon/broken");
     expect(failed.status).toBe(404);
   });
 
   it("rejects non-GET methods without loading metadata", async () => {
-    const response = await request("/__openclaw__/plugin-icon/firecrawl", { method: "POST" });
+    const response = await request("/__bot__/plugin-icon/firecrawl", { method: "POST" });
 
     expect(response.status).toBe(405);
     expect(response.headers.get("allow")).toBe("GET");
@@ -292,7 +292,7 @@ describe("GET /__openclaw__/plugin-icon/:pluginId", () => {
       void handlePluginIconHttpRequest(req, res, {
         auth: { mode: "token", token: "test-token", allowTailscale: false },
         config: {},
-        basePath: "/openclaw",
+        basePath: "/bot",
       }).then((handled) => {
         if (!handled) {
           res.statusCode = 404;
@@ -307,7 +307,7 @@ describe("GET /__openclaw__/plugin-icon/:pluginId", () => {
     try {
       const handledPort = (handledServer.address() as AddressInfo).port;
       const response = await fetch(
-        `http://127.0.0.1:${handledPort}/openclaw/__openclaw__/plugin-icon/firecrawl`,
+        `http://127.0.0.1:${handledPort}/bot/__bot__/plugin-icon/firecrawl`,
         { headers: { Authorization: "Bearer test-token" } },
       );
       expect(response.status).toBe(200);

@@ -1,15 +1,15 @@
-import type { WorkboardCard } from "@openclaw/workboard-contract";
+import type { WorkboardCard } from "@hanzo/bot-workboard-contract";
 // Workboard plugin module implements tools behavior.
-import { jsonResult, readStringParam } from "openclaw/plugin-sdk/core";
-import type { AnyAgentTool, OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
+import { jsonResult, readStringParam } from "bot/plugin-sdk/core";
+import type { AnyAgentTool, BotPluginApi } from "bot/plugin-sdk/plugin-entry";
+import type { BotPluginToolContext } from "bot/plugin-sdk/plugin-entry";
+import { safeEqualSecret } from "bot/plugin-sdk/security-runtime";
 import { Type } from "typebox";
 import { redactClaimToken } from "./card-redaction.js";
 import { WorkboardStore } from "./store.js";
 import { cardIdField, claimTokenField, createWorkboardMoveTool } from "./tools-card-mutations.js";
 
-function contextOwner(ctx: OpenClawPluginToolContext | undefined): string {
+function contextOwner(ctx: BotPluginToolContext | undefined): string {
   const record = (ctx ?? {}) as Record<string, unknown>;
   return (
     (typeof record.agentId === "string" && record.agentId) ||
@@ -172,8 +172,8 @@ const CardIdSchema = Type.Object(
 );
 
 export function createWorkboardTools(params: {
-  api: OpenClawPluginApi;
-  context?: OpenClawPluginToolContext;
+  api: BotPluginApi;
+  context?: BotPluginToolContext;
   store?: WorkboardStore;
 }): AnyAgentTool[] {
   const store = params.store ?? WorkboardStore.openSqlite();

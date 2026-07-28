@@ -1,8 +1,8 @@
 // Compact format tests cover compact skill prompt serialization.
 import os from "node:os";
-import { formatSkillsForPrompt as upstreamFormatSkillsForPrompt } from "openclaw/plugin-sdk/agent-sessions";
+import { formatSkillsForPrompt as upstreamFormatSkillsForPrompt } from "bot/plugin-sdk/agent-sessions";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import {
   restoreMockSkillsHomeEnv,
   setMockSkillsHomeEnv,
@@ -52,7 +52,7 @@ function buildPrompt(
           ...(limits.maxCount !== undefined && { maxSkillsInPrompt: limits.maxCount }),
         },
       },
-    } satisfies OpenClawConfig,
+    } satisfies BotConfig,
   });
 }
 
@@ -65,9 +65,9 @@ function requireIncludedCounts(prompt: string): [included: number, total: number
 }
 
 const COMPACT_OMITTED_NOTICE =
-  "⚠️ Skills catalog using compact format (descriptions omitted). Run `openclaw skills check` to audit.";
+  "⚠️ Skills catalog using compact format (descriptions omitted). Run `bot skills check` to audit.";
 const COMPACT_SHORTENED_NOTICE =
-  "⚠️ Skills catalog using compact format (descriptions shortened). Run `openclaw skills check` to audit.";
+  "⚠️ Skills catalog using compact format (descriptions shortened). Run `bot skills check` to audit.";
 
 describe("formatSkillsCompact", () => {
   it("keeps the full-format XML output aligned with the upstream formatter for visible skills", () => {
@@ -153,7 +153,7 @@ describe("applySkillsPromptLimits (via buildWorkspaceSkillsPrompt)", () => {
   let envSnapshot: SkillsHomeEnvSnapshot;
 
   beforeEach(() => {
-    envSnapshot = setMockSkillsHomeEnv("/Users/openclaw-test-user");
+    envSnapshot = setMockSkillsHomeEnv("/Users/bot-test-user");
   });
 
   afterEach(() => restoreMockSkillsHomeEnv(envSnapshot));
@@ -174,7 +174,7 @@ describe("applySkillsPromptLimits (via buildWorkspaceSkillsPrompt)", () => {
             maxSkillsPromptChars: 4_000,
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
     });
 
     expect(prompt).toContain("visible");
@@ -251,7 +251,7 @@ describe("applySkillsPromptLimits (via buildWorkspaceSkillsPrompt)", () => {
     const tenSkills = skills.slice(0, 10);
     const fullLen = formatSkillsForPrompt(tenSkills).length;
     const truncatedNotice =
-      "⚠️ Skills truncated: included 10 of 30 (compact format, descriptions shortened). Run `openclaw skills check` to audit.";
+      "⚠️ Skills truncated: included 10 of 30 (compact format, descriptions shortened). Run `bot skills check` to audit.";
     const budget = `${truncatedNotice}\n${formatSkillsCompact(tenSkills)}`.length;
     // Verify precondition: full format of 10 skills exceeds budget
     expect(fullLen).toBeGreaterThan(budget);
@@ -311,7 +311,7 @@ describe("applySkillsPromptLimits (via buildWorkspaceSkillsPrompt)", () => {
       makeSkill(
         `skill-${i}`,
         "A".repeat(800),
-        `${home}/.openclaw/workspace/skills/skill-${i}/SKILL.md`,
+        `${home}/.bot/workspace/skills/skill-${i}/SKILL.md`,
       ),
     );
     // Compute compacted lengths (what the prompt will actually contain)
@@ -350,7 +350,7 @@ describe("applySkillsPromptLimits (via buildWorkspaceSkillsPrompt)", () => {
     );
     const prompt = buildWorkspaceSkillsPrompt("/fake", {
       entries,
-      config: { skills: { limits: { maxSkillsPromptChars: 50_000 } } } satisfies OpenClawConfig,
+      config: { skills: { limits: { maxSkillsPromptChars: 50_000 } } } satisfies BotConfig,
     });
     const nameMatches = [...prompt.matchAll(/<name>(\w+)<\/name>/g)].map((m) => m[1]);
     expect(nameMatches).toEqual(["apple", "banana", "mango", "zoo"]);
@@ -359,7 +359,7 @@ describe("applySkillsPromptLimits (via buildWorkspaceSkillsPrompt)", () => {
   it("resolvedSkills in snapshot keeps canonical paths, not compacted", () => {
     const home = os.homedir();
     const skills = Array.from({ length: 5 }, (_, i) =>
-      makeSkill(`skill-${i}`, "A skill", `${home}/.openclaw/workspace/skills/skill-${i}/SKILL.md`),
+      makeSkill(`skill-${i}`, "A skill", `${home}/.bot/workspace/skills/skill-${i}/SKILL.md`),
     );
     const snapshot = buildWorkspaceSkillSnapshot("/fake", {
       entries: skills.map(makeEntry),

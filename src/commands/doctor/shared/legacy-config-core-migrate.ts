@@ -1,5 +1,5 @@
 // Core doctor compatibility migration pipeline for current config objects.
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { runPluginSetupConfigMigrations } from "../../../plugins/setup-registry.js";
 import { migrateLegacySecretRefEnvMarkers } from "../../../secrets/legacy-secretref-env-marker.js";
 import { applyChannelDoctorCompatibilityMigrations } from "./channel-legacy-config-migrate.js";
@@ -9,7 +9,7 @@ import { normalizeBaseCompatibilityConfigValues } from "./legacy-config-compatib
 import { normalizeLegacyOpenAICodexModelsAddMetadata } from "./legacy-config-core-normalizers.js";
 import { stripRetiredTuningKnobs } from "./legacy-config-migrations.runtime.retired-media.js";
 
-function repairNullAgentWorkspaces(cfg: OpenClawConfig, changes: string[]): OpenClawConfig {
+function repairNullAgentWorkspaces(cfg: BotConfig, changes: string[]): BotConfig {
   const agents = cfg.agents?.list;
   if (!Array.isArray(agents)) {
     return cfg;
@@ -49,12 +49,12 @@ function repairNullAgentWorkspaces(cfg: OpenClawConfig, changes: string[]): Open
 
 /** Normalize current config through core, plugin setup, channel, and secret-ref migrations. */
 export function normalizeCompatibilityConfigValues(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   options: {
     blockedModelIdentities?: ReadonlySet<LegacyCodexModelIdentity>;
   } = {},
 ): {
-  config: OpenClawConfig;
+  config: BotConfig;
   changes: string[];
 } {
   const changes: string[] = [];

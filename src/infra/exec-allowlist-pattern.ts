@@ -1,7 +1,7 @@
 // Parses execution allowlist patterns for approval policy checks.
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { escapeRegExp as escapeRegExpLiteral } from "../shared/regexp.js";
 import { expandHomePrefix } from "./home-dir.js";
 

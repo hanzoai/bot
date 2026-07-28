@@ -187,7 +187,7 @@
   flex-direction: row;
 }
 
-.chat-main--rail-docked > openclaw-chat-session-rail {
+.chat-main--rail-docked > bot-chat-session-rail {
   display: block;
   width: 400px;
   min-width: 400px;
@@ -195,7 +195,7 @@
   flex: 0 0 400px;
 }
 
-openclaw-chat-sidebar-region,
+bot-chat-sidebar-region,
 .sidebar-region__right-runtime,
 .sidebar-region__panels-runtime {
   display: contents;
@@ -306,7 +306,7 @@ openclaw-chat-sidebar-region,
 
 .sidebar-column__body,
 .sidebar-column__panel,
-.sidebar-column__panel > :is(.chat, openclaw-chat-detail-panel, openclaw-session-discussion) {
+.sidebar-column__panel > :is(.chat, bot-chat-detail-panel, bot-session-discussion) {
   display: flex;
   flex: 1 1 0;
   min-width: 0;
@@ -325,7 +325,7 @@ openclaw-chat-sidebar-region,
   bottom: 0;
 }
 
-.sidebar-column__panel > openclaw-chat-detail-panel {
+.sidebar-column__panel > bot-chat-detail-panel {
   flex-direction: column;
 }
 
@@ -1029,7 +1029,7 @@ openclaw-chat-sidebar-region,
   stroke-width: 1.8px;
 }
 
-/* openclaw-tooltip is display:contents, so the title span itself is the flex
+/* bot-tooltip is display:contents, so the title span itself is the flex
    item; growing it pins the stop button to the card's right edge even for
    short titles. */
 .chat-tasks-rail__task-title {
@@ -1361,7 +1361,7 @@ openclaw-chat-sidebar-region,
   min-height: 0;
 }
 
-openclaw-session-discussion {
+bot-session-discussion {
   display: flex;
   flex: 1 1 0;
   height: 100%;

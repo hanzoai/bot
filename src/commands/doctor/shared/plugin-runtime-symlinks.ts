@@ -1,10 +1,10 @@
 // Doctor detection and cleanup for stale global plugin-runtime symlinks.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { sortUniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { note } from "../../../../packages/terminal-core/src/note.js";
 import type { HealthFinding } from "../../../flows/health-checks.js";
-import { resolveOpenClawPackageRootSync } from "../../../infra/openclaw-root.js";
+import { resolveBotPackageRootSync } from "../../../infra/bot-root.js";
 import { shortenHomePath } from "../../../utils.js";
 
 const PLUGIN_RUNTIME_DEPS_MARKER = "plugin-runtime-deps";
@@ -109,7 +109,7 @@ function stalePluginRuntimeSymlinkToHealthFinding(item: StalePluginRuntimeSymlin
     path: item.path,
     target: item.path,
     requirement: "stale-plugin-runtime-symlink-removed",
-    fixHint: "Run `openclaw doctor --fix` to remove stale plugin-runtime symlinks.",
+    fixHint: "Run `bot doctor --fix` to remove stale plugin-runtime symlinks.",
   };
 }
 
@@ -118,7 +118,7 @@ export async function collectStalePluginRuntimeSymlinkHealthFindings(
 ): Promise<HealthFinding[]> {
   const packageRoot =
     params.packageRoot ??
-    resolveOpenClawPackageRootSync({
+    resolveBotPackageRootSync({
       argv1: process.argv[1],
       moduleUrl: import.meta.url,
       cwd: process.cwd(),
@@ -144,7 +144,7 @@ export async function noteStalePluginRuntimeSymlinks(
   const shortenPath = options.shortenPath ?? shortenHomePath;
   const lines = [
     "- Plugin-runtime symlinks under the global Node prefix point at pruned",
-    `  ${PLUGIN_RUNTIME_DEPS_MARKER} directories from a previous OpenClaw install.`,
+    `  ${PLUGIN_RUNTIME_DEPS_MARKER} directories from a previous Bot install.`,
     "- Bundled plugin ESM imports can fail with ERR_MODULE_NOT_FOUND until repaired.",
   ];
   for (const item of stale.slice(0, MAX_REPORTED)) {
@@ -153,7 +153,7 @@ export async function noteStalePluginRuntimeSymlinks(
   if (stale.length > MAX_REPORTED) {
     lines.push(`  - ...and ${stale.length - MAX_REPORTED} more`);
   }
-  lines.push("- Repair: run `openclaw doctor --fix` to remove the dangling symlinks.");
+  lines.push("- Repair: run `bot doctor --fix` to remove the dangling symlinks.");
   (options.noteFn ?? note)(lines.join("\n"), "Plugin-runtime symlinks");
 }
 

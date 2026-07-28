@@ -11,7 +11,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 const COMMIT = "0123456789abcdef0123456789abcdef01234567";
 const BUILT_AT = "2026-07-10T12:34:56.000Z";
@@ -44,8 +44,8 @@ describeControlUiE2e("Control UI About mocked Gateway E2E", () => {
         configurable: true,
         value: {
           writeText: async (text: string) => {
-            (globalThis as typeof globalThis & { __openclawCopiedCommit?: string })[
-              "__openclawCopiedCommit"
+            (globalThis as typeof globalThis & { __botCopiedCommit?: string })[
+              "__botCopiedCommit"
             ] = text;
           },
         },
@@ -96,7 +96,7 @@ describeControlUiE2e("Control UI About mocked Gateway E2E", () => {
         .toContain("separate from this Control UI build");
 
       const hero = page.locator(".about-hero");
-      await expect.poll(() => hero.locator(".about-hero__name").textContent()).toBe("OpenClaw");
+      await expect.poll(() => hero.locator(".about-hero__name").textContent()).toBe("Bot");
       await expect
         .poll(() => hero.locator(".about-hero__version").textContent())
         .toBe("v2026.7.10");
@@ -104,19 +104,19 @@ describeControlUiE2e("Control UI About mocked Gateway E2E", () => {
       const githubLink = hero.getByRole("link", { name: "GitHub", exact: true });
       await expect
         .poll(() => githubLink.getAttribute("href"))
-        .toBe("https://github.com/openclaw/openclaw");
+        .toBe("https://github.com/hanzoai/bot");
       await expect.poll(() => githubLink.getAttribute("target")).toBe("_blank");
       await expect.poll(() => githubLink.getAttribute("rel")).toContain("noopener");
       const discordLink = hero.getByRole("link", { name: "Discord", exact: true });
       await expect.poll(() => discordLink.getAttribute("href")).toBe("https://discord.gg/clawd");
       const xLink = hero.getByRole("link", { name: "X (Twitter)", exact: true });
-      await expect.poll(() => xLink.getAttribute("href")).toBe("https://x.com/openclaw");
+      await expect.poll(() => xLink.getAttribute("href")).toBe("https://x.com/bot");
 
       const clawd = page.getByRole("button", { name: "Wave hello to Clawd" });
       // CLAWD_WAVE_MS clears the class after 1400ms, so click and read it in one browser step.
       const clawdWaving = await clawd.evaluate(async (element) => {
         const button = element as HTMLButtonElement;
-        const owner = element.closest("openclaw-about-page") as
+        const owner = element.closest("bot-about-page") as
           | (HTMLElement & {
               updateComplete: Promise<unknown>;
             })
@@ -138,7 +138,7 @@ describeControlUiE2e("Control UI About mocked Gateway E2E", () => {
       // initial copying render and the async clipboard continuation before reading it.
       const copiedLabel = await copyButton.evaluate(async (element) => {
         const button = element as HTMLButtonElement;
-        const owner = element.closest("openclaw-about-page") as
+        const owner = element.closest("bot-about-page") as
           | (HTMLElement & {
               updateComplete: Promise<unknown>;
             })
@@ -173,8 +173,8 @@ describeControlUiE2e("Control UI About mocked Gateway E2E", () => {
         .poll(() =>
           page.evaluate(
             () =>
-              (globalThis as typeof globalThis & { __openclawCopiedCommit?: string })[
-                "__openclawCopiedCommit"
+              (globalThis as typeof globalThis & { __botCopiedCommit?: string })[
+                "__botCopiedCommit"
               ],
           ),
         )

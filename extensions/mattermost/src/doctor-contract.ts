@@ -1,8 +1,8 @@
 // Mattermost plugin module implements doctor contract behavior.
-import type { ChannelDoctorConfigMutation } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { defineChannelAliasMigration } from "openclaw/plugin-sdk/runtime-doctor";
-import { createLegacyPrivateNetworkDoctorContract } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { ChannelDoctorConfigMutation } from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { defineChannelAliasMigration } from "bot/plugin-sdk/runtime-doctor";
+import { createLegacyPrivateNetworkDoctorContract } from "bot/plugin-sdk/ssrf-runtime";
 
 const networkContract = createLegacyPrivateNetworkDoctorContract({
   channelKey: "mattermost",
@@ -28,7 +28,7 @@ export const legacyConfigRules = [
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): ChannelDoctorConfigMutation {
   const network = networkContract.normalizeCompatibilityConfig({ cfg });
   return streamingAliasMigration.normalizeChannelConfig({

@@ -13,18 +13,18 @@ let fetchImage: ReturnType<typeof vi.fn>;
 
 async function renderLightbox() {
   render(
-    html`<openclaw-image-lightbox
+    html`<bot-image-lightbox
       src="data:image/png;base64,cG5n"
       title="Generated lobster"
-    ></openclaw-image-lightbox>`,
+    ></bot-image-lightbox>`,
     container,
   );
-  const modal = container.querySelector("openclaw-image-lightbox");
+  const modal = container.querySelector("bot-image-lightbox");
   if (!modal) {
     throw new Error("missing image lightbox");
   }
   await modal.updateComplete;
-  const dialogAdapter = modal.shadowRoot?.querySelector("openclaw-modal-dialog");
+  const dialogAdapter = modal.shadowRoot?.querySelector("bot-modal-dialog");
   if (!dialogAdapter) {
     throw new Error("missing modal dialog adapter");
   }
@@ -32,7 +32,7 @@ async function renderLightbox() {
   return { modal, dialogAdapter };
 }
 
-describe("openclaw-image-lightbox", () => {
+describe("bot-image-lightbox", () => {
   beforeEach(() => {
     restoreDialogPolyfill = installDialogPolyfill();
     createObjectUrl = vi.fn(() => "blob:lightbox-original");
@@ -83,13 +83,13 @@ describe("openclaw-image-lightbox", () => {
       blob: async () => new Blob(["png"], { type: "image/png;charset=utf-8" }),
     });
     render(
-      html`<openclaw-image-lightbox
+      html`<bot-image-lightbox
         src="data:image/png;charset=utf-8;base64,cG5n"
         title="Generated lobster"
-      ></openclaw-image-lightbox>`,
+      ></bot-image-lightbox>`,
       container,
     );
-    const modal = container.querySelector("openclaw-image-lightbox");
+    const modal = container.querySelector("bot-image-lightbox");
     if (!modal) {
       throw new Error("missing image lightbox");
     }
@@ -116,13 +116,13 @@ describe("openclaw-image-lightbox", () => {
 
   it("omits the original action for active data image formats", async () => {
     render(
-      html`<openclaw-image-lightbox
+      html`<bot-image-lightbox
         src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'></svg>"
         title="Untrusted SVG"
-      ></openclaw-image-lightbox>`,
+      ></bot-image-lightbox>`,
       container,
     );
-    const modal = container.querySelector("openclaw-image-lightbox");
+    const modal = container.querySelector("bot-image-lightbox");
     if (!modal) {
       throw new Error("missing image lightbox");
     }

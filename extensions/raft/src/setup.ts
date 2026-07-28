@@ -1,17 +1,17 @@
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/core";
+import { defineChannelSetupContract } from "bot/plugin-sdk/channel-setup";
+import type { ChannelPlugin } from "bot/plugin-sdk/core";
 // Raft plugin setup owns only the Raft CLI profile, never Raft credentials.
 import {
   createPatchedAccountSetupAdapter,
   type ChannelSetupInput,
-} from "openclaw/plugin-sdk/setup";
+} from "bot/plugin-sdk/setup";
 import {
   createDetectedBinaryStatus,
   formatDocsLink,
   setSetupChannelEnabled,
-} from "openclaw/plugin-sdk/setup";
-import { detectBinary } from "openclaw/plugin-sdk/setup-tools";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/setup";
+import { detectBinary } from "bot/plugin-sdk/setup-tools";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   listRaftAccountIds,
   RAFT_CHANNEL_ID,

@@ -7,7 +7,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { StringDecoder } from "node:string_decoder";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { readAcpSessionMeta } from "../acp/runtime/session-meta.js";
 import { getRuntimeConfig } from "../config/config.js";
 import { resolveSessionFilePath } from "../config/sessions/paths.js";
@@ -112,7 +112,7 @@ function setSessionsTailFollowIntervalMsForTests(intervalMs?: number): void {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.sessionsTailTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.sessionsTailTestApi")] = {
     setSessionsTailFollowIntervalMsForTests,
   };
 }
@@ -135,7 +135,7 @@ function toOptionalString(value: unknown): string | undefined {
 function isTrajectoryEvent(value: unknown): value is TrajectoryEvent {
   return (
     isRecord(value) &&
-    value.traceSchema === "openclaw-trajectory" &&
+    value.traceSchema === "bot-trajectory" &&
     value.schemaVersion === 1 &&
     typeof value.type === "string" &&
     typeof value.ts === "string" &&

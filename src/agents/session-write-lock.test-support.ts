@@ -33,7 +33,7 @@ type SessionWriteLockTestApi = {
 
 function getTestApi(): SessionWriteLockTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.sessionWriteLockTestApi")
+    Symbol.for("bot.sessionWriteLockTestApi")
   ] as SessionWriteLockTestApi;
 }
 

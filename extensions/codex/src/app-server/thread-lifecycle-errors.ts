@@ -1,4 +1,4 @@
-import { formatErrorMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/agent-harness-runtime";
 
 export class CodexThreadStartRequestError extends Error {
   constructor(cause: unknown) {

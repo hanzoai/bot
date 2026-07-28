@@ -10,5 +10,5 @@ export {
   GatewayProtocolRequestError,
   MIN_CLIENT_PROTOCOL_VERSION,
   PROTOCOL_VERSION,
-} from "@openclaw/gateway-client/browser";
+} from "@hanzo/bot-gateway-client/browser";
 export { getPublicKeyAsync, signAsync, utils as ed25519Utils } from "@noble/ed25519";

@@ -1,4 +1,4 @@
-// Covers OpenClaw's default fs-safe Python helper configuration.
+// Covers Bot's default fs-safe Python helper configuration.
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { configureFsSafePython } = vi.hoisted(() => ({
@@ -18,10 +18,10 @@ describe("fs-safe defaults", () => {
   afterEach(() => {
     configureFsSafePython.mockReset();
     delete process.env.FS_SAFE_PYTHON_MODE;
-    delete process.env.OPENCLAW_FS_SAFE_PYTHON_MODE;
+    delete process.env.BOT_FS_SAFE_PYTHON_MODE;
   });
 
-  it("disables the Python helper by default in OpenClaw", async () => {
+  it("disables the Python helper by default in Bot", async () => {
     await importDefaults();
 
     expect(configureFsSafePython).toHaveBeenCalledWith({ mode: "off" });
@@ -35,8 +35,8 @@ describe("fs-safe defaults", () => {
     expect(configureFsSafePython).not.toHaveBeenCalled();
   });
 
-  it("honors the OpenClaw-specific env mode override", async () => {
-    process.env.OPENCLAW_FS_SAFE_PYTHON_MODE = "auto";
+  it("honors the Bot-specific env mode override", async () => {
+    process.env.BOT_FS_SAFE_PYTHON_MODE = "auto";
 
     await importDefaults();
 

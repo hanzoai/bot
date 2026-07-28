@@ -1,6 +1,6 @@
 // Approval shared helpers normalize pending exec/plugin approval lookups,
 // decision payloads, turn-source routing, and gateway error responses.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import type { ValidationError } from "../../../packages/gateway-protocol/src/index.js";
 import { hasApprovalTurnSourceRoute } from "../../infra/approval-turn-source.js";

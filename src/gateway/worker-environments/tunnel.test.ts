@@ -285,8 +285,8 @@ describe("worker tunnel manager", () => {
 
   it("syncs a dirty workspace over pinned rsync and records an immutable manifest", async () => {
     const manifestRef = `sha256:${"b".repeat(64)}`;
-    const remoteWorkspaceDir = "/home/worker/.openclaw-worker/workspaces/env/session/7";
-    const localPath = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-worker-sync-test-"));
+    const remoteWorkspaceDir = "/home/worker/.bot-worker/workspaces/env/session/7";
+    const localPath = await fs.mkdtemp(path.join(os.tmpdir(), "bot-worker-sync-test-"));
     await fs.writeFile(path.join(localPath, ".worktreeinclude"), "cache/*.bin\n");
     await git(localPath, "init");
     await git(localPath, "config", "user.name", "Worker Sync Test");
@@ -356,7 +356,7 @@ describe("worker tunnel manager", () => {
   });
 
   it("fails workspace sync before manifest creation when rsync fails", async () => {
-    const remoteWorkspaceDir = "/home/worker/.openclaw-worker/workspaces/env/session/2";
+    const remoteWorkspaceDir = "/home/worker/.bot-worker/workspaces/env/session/2";
     const fake = fakeRunner((argv, options) => {
       if (argv[0] === "git") {
         return { ...success(), code: 128 };
@@ -399,8 +399,8 @@ describe("worker tunnel manager", () => {
   });
 
   it("does not downgrade an operational HEAD probe failure to plain sync", async () => {
-    const remoteWorkspaceDir = "/home/worker/.openclaw-worker/workspaces/env/session/3";
-    const localPath = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-worker-head-probe-"));
+    const remoteWorkspaceDir = "/home/worker/.bot-worker/workspaces/env/session/3";
+    const localPath = await fs.mkdtemp(path.join(os.tmpdir(), "bot-worker-head-probe-"));
     await fs.mkdir(path.join(localPath, ".git"));
     const fake = fakeRunner((argv, options) => {
       if (argv.includes("--show-toplevel")) {
@@ -446,8 +446,8 @@ describe("worker tunnel manager", () => {
   });
 
   it("does not downgrade an operational repository-root probe failure to plain sync", async () => {
-    const remoteWorkspaceDir = "/home/worker/.openclaw-worker/workspaces/env/session/4";
-    const localPath = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-worker-root-probe-"));
+    const remoteWorkspaceDir = "/home/worker/.bot-worker/workspaces/env/session/4";
+    const localPath = await fs.mkdtemp(path.join(os.tmpdir(), "bot-worker-root-probe-"));
     await fs.mkdir(path.join(localPath, ".git"));
     const fake = fakeRunner((argv, options) => {
       if (argv.includes("--show-toplevel")) {
@@ -493,7 +493,7 @@ describe("worker tunnel manager", () => {
   });
 
   it("materializes a large dirty git workspace as a credential-free commit-capable clone", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-worker-git-sync-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-worker-git-sync-"));
     const localPath = path.join(root, "local");
     const remoteHome = path.join(root, "remote-home");
     await Promise.all([
@@ -675,7 +675,7 @@ describe("worker tunnel manager", () => {
 
       const manifestPath = path.join(
         remoteHome,
-        ".openclaw-worker/manifests",
+        ".bot-worker/manifests",
         `${result.manifestRef.slice("sha256:".length)}.json`,
       );
       const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8")) as {
@@ -706,7 +706,7 @@ describe("worker tunnel manager", () => {
   }, 60_000);
 
   it("mirrors plain workspaces and rejects escaping symlinks in a git overlay", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-worker-sync-modes-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-worker-sync-modes-"));
     const plainPath = path.join(root, "plain");
     const gitPath = path.join(root, "git");
     const remoteHome = path.join(root, "remote-home");

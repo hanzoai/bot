@@ -1,5 +1,5 @@
 import { Relay, finalizeEvent, type Event } from "nostr-tools";
-import { createChannelReplayGuard } from "openclaw/plugin-sdk/persistent-dedupe";
+import { createChannelReplayGuard } from "bot/plugin-sdk/persistent-dedupe";
 import {
   buildBuzzMessageTags,
   parseBuzzMessageEvent,

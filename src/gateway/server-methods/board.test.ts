@@ -6,10 +6,10 @@ import { SqliteBoardStore } from "../../boards/sqlite-board-store.js";
 import { replaceSessionEntrySync } from "../../config/sessions/session-accessor.entry.js";
 import { peekSystemEvents, resetSystemEventsForTest } from "../../infra/system-events.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+} from "../../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import { resolveCoreOperatorGatewayMethodScope } from "../methods/core-descriptors.js";
 import {
   createBoardHarness as createHarness,
@@ -52,8 +52,8 @@ describe("board gateway methods", () => {
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotAgentDatabasesForTest();
+    closeBotStateDatabaseForTest();
   });
 
   it("registers every contract method with its required scope", () => {
@@ -155,10 +155,10 @@ describe("board gateway methods", () => {
     const plainFrameUrl = first.widgets.find((widget) => widget.name === "plain")?.frameUrl;
     const statusFrameUrl = first.widgets.find((widget) => widget.name === "status")?.frameUrl;
     expect(plainFrameUrl).toMatch(
-      /^\/__openclaw__\/board\/agent%3Amain%3Amain\/plain\/index\.html\?bt=v1\./u,
+      /^\/__bot__\/board\/agent%3Amain%3Amain\/plain\/index\.html\?bt=v1\./u,
     );
     expect(statusFrameUrl).toMatch(
-      /^\/__openclaw__\/board\/agent%3Amain%3Amain\/status\/index\.html\?bt=v1\./u,
+      /^\/__bot__\/board\/agent%3Amain%3Amain\/status\/index\.html\?bt=v1\./u,
     );
     expect(first.widgets.find((widget) => widget.name === "plain")).toMatchObject({
       viewTicket: expect.stringMatching(/^v1\./u),
@@ -217,9 +217,9 @@ describe("board gateway methods", () => {
 
   it("returns the same board.get wire structure from memory and SQLite stores", async () => {
     const sessionKey = "agent:main:board-get-parity";
-    const stateDir = tempDirs.make("openclaw-board-get-parity-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const stateDir = tempDirs.make("bot-board-get-parity-");
+    const env = { BOT_STATE_DIR: stateDir };
+    const database = openBotAgentDatabase({ agentId: "main", env });
     replaceSessionEntrySync(
       { agentId: "main", sessionKey, storePath: database.path },
       { sessionId: "board-get-parity", updatedAt: Date.now() },
@@ -639,7 +639,7 @@ describe("board gateway methods", () => {
       "<!doctype html><p>same wrapped bytes</p>",
     );
     expect(stored && "html" in stored ? stored.html : "").toContain(
-      "openclaw:widget-bridge-port-offer",
+      "bot:widget-bridge-port-offer",
     );
     expect(response).toHaveBeenCalledWith(
       true,
@@ -654,7 +654,7 @@ describe("board gateway methods", () => {
 
   it("installs the trusted bridge before arbitrary complete HTML", async () => {
     const { invoke, store } = createHarness();
-    const untrusted = '<!doctype html><script>void window.openclaw?.prompt.send("forged")</script>';
+    const untrusted = '<!doctype html><script>void window.bot?.prompt.send("forged")</script>';
 
     const response = await invoke("board.widget.put", {
       sessionKey: "session",
@@ -670,8 +670,8 @@ describe("board gateway methods", () => {
     expect(response.mock.calls[0]?.[0]).toBe(true);
     const stored = store.readWidgetHtml("session", "complete-document");
     const html = stored && "html" in stored ? stored.html : "";
-    expect(html).toContain("openclaw:widget-host-init-ack");
-    expect(html.indexOf("openclaw:widget-bridge-port-offer")).toBeLessThan(html.indexOf(untrusted));
+    expect(html).toContain("bot:widget-host-init-ack");
+    expect(html.indexOf("bot:widget-bridge-port-offer")).toBeLessThan(html.indexOf(untrusted));
     expect(html).toContain("connect-src https://api.open-meteo.com");
   });
 
@@ -1031,9 +1031,9 @@ describe("board gateway methods", () => {
 
   it("keeps board state across the real sessions.reset handler", async () => {
     const sessionKey = "agent:main:board-reset-proof";
-    const stateDir = tempDirs.make("openclaw-board-reset-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const stateDir = tempDirs.make("bot-board-reset-");
+    const env = { BOT_STATE_DIR: stateDir };
+    const database = openBotAgentDatabase({ agentId: "main", env });
     replaceSessionEntrySync(
       { agentId: "main", sessionKey, storePath: database.path },
       { sessionId: "board-reset-proof", updatedAt: Date.now() },

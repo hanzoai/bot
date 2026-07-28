@@ -89,7 +89,7 @@ async function callPluginToolsMcp(params: {
       appendQaChildOutputTail(stderrTail, chunk);
     });
   }
-  const client = new Client({ name: "openclaw-qa-suite", version: "0.0.0" }, {});
+  const client = new Client({ name: "bot-qa-suite", version: "0.0.0" }, {});
   try {
     await client.connect(transport, { timeout: MCP_REQUEST_TIMEOUT_MS });
     const listed = await client.listTools({}, { timeout: MCP_REQUEST_TIMEOUT_MS });

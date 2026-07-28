@@ -1,7 +1,7 @@
 // Provider-index normalization validates generated discovery metadata and rejects unsafe provider entries.
-import { normalizeModelCatalog } from "@openclaw/model-catalog-core/model-catalog-normalize";
-import { normalizeModelCatalogProviderId } from "@openclaw/model-catalog-core/model-catalog-refs";
-import type { ModelCatalogProvider } from "@openclaw/model-catalog-core/model-catalog-types";
+import { normalizeModelCatalog } from "@hanzo/bot-model-catalog-core/model-catalog-normalize";
+import { normalizeModelCatalogProviderId } from "@hanzo/bot-model-catalog-core/model-catalog-refs";
+import type { ModelCatalogProvider } from "@hanzo/bot-model-catalog-core/model-catalog-types";
 import { asFiniteNumber } from "../../../packages/normalization-core/src/number-coercion.js";
 import { normalizeOptionalString } from "../../../packages/normalization-core/src/string-coerce.js";
 import { normalizeUniqueTrimmedStringList } from "../../../packages/normalization-core/src/string-normalization.js";
@@ -10,23 +10,23 @@ import { parseRegistryNpmSpec } from "../../infra/npm-registry-spec.js";
 import { isBlockedObjectKey } from "../../infra/prototype-keys.js";
 import { isRecord } from "../../utils.js";
 import type {
-  OpenClawProviderIndex,
-  OpenClawProviderIndexPluginInstall,
-  OpenClawProviderIndexPlugin,
-  OpenClawProviderIndexProviderAuthChoice,
-  OpenClawProviderIndexProvider,
+  BotProviderIndex,
+  BotProviderIndexPluginInstall,
+  BotProviderIndexPlugin,
+  BotProviderIndexProviderAuthChoice,
+  BotProviderIndexProvider,
 } from "./types.js";
 
 // Provider-index normalization accepts generated discovery metadata from the
 // bundled index and rejects malformed or prototype-polluting entries.
-const OPENCLAW_PROVIDER_INDEX_VERSION = 1;
+const BOT_PROVIDER_INDEX_VERSION = 1;
 
 function normalizeSafeKey(value: unknown): string {
   const key = normalizeOptionalString(value) ?? "";
   return key && !isBlockedObjectKey(key) ? key : "";
 }
 
-function normalizeInstall(value: unknown): OpenClawProviderIndexPluginInstall | undefined {
+function normalizeInstall(value: unknown): BotProviderIndexPluginInstall | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
@@ -55,7 +55,7 @@ function normalizeInstall(value: unknown): OpenClawProviderIndexPluginInstall | 
   };
 }
 
-function normalizePlugin(value: unknown): OpenClawProviderIndexPlugin | undefined {
+function normalizePlugin(value: unknown): BotProviderIndexPlugin | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
@@ -100,7 +100,7 @@ function normalizePreviewCatalog(params: {
 
 function normalizeOnboardingScopes(
   value: unknown,
-): OpenClawProviderIndexProviderAuthChoice["onboardingScopes"] | undefined {
+): BotProviderIndexProviderAuthChoice["onboardingScopes"] | undefined {
   const scopes = normalizeUniqueTrimmedStringList(value).filter(
     (scope): scope is "text-inference" | "image-generation" | "music-generation" =>
       scope === "text-inference" || scope === "image-generation" || scope === "music-generation",
@@ -110,7 +110,7 @@ function normalizeOnboardingScopes(
 
 function normalizeAssistantVisibility(
   value: unknown,
-): OpenClawProviderIndexProviderAuthChoice["assistantVisibility"] | undefined {
+): BotProviderIndexProviderAuthChoice["assistantVisibility"] | undefined {
   return value === "visible" || value === "manual-only" ? value : undefined;
 }
 
@@ -118,7 +118,7 @@ function normalizeAuthChoice(params: {
   providerId: string;
   providerName: string;
   value: unknown;
-}): OpenClawProviderIndexProviderAuthChoice | undefined {
+}): BotProviderIndexProviderAuthChoice | undefined {
   if (!isRecord(params.value)) {
     return undefined;
   }
@@ -161,20 +161,20 @@ function normalizeAuthChoices(params: {
   providerId: string;
   providerName: string;
   value: unknown;
-}): readonly OpenClawProviderIndexProviderAuthChoice[] | undefined {
+}): readonly BotProviderIndexProviderAuthChoice[] | undefined {
   if (!Array.isArray(params.value)) {
     return undefined;
   }
   const choices = params.value
     .map((value) => normalizeAuthChoice({ ...params, value }))
-    .filter((choice): choice is OpenClawProviderIndexProviderAuthChoice => Boolean(choice));
+    .filter((choice): choice is BotProviderIndexProviderAuthChoice => Boolean(choice));
   return choices.length > 0 ? choices : undefined;
 }
 
 function normalizeProvider(
   rawProviderId: string,
   value: unknown,
-): OpenClawProviderIndexProvider | undefined {
+): BotProviderIndexProvider | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
@@ -213,14 +213,14 @@ function normalizeProvider(
   };
 }
 
-export function normalizeOpenClawProviderIndex(value: unknown): OpenClawProviderIndex | undefined {
-  if (!isRecord(value) || value.version !== OPENCLAW_PROVIDER_INDEX_VERSION) {
+export function normalizeBotProviderIndex(value: unknown): BotProviderIndex | undefined {
+  if (!isRecord(value) || value.version !== BOT_PROVIDER_INDEX_VERSION) {
     return undefined;
   }
   if (!isRecord(value.providers)) {
     return undefined;
   }
-  const providers: Record<string, OpenClawProviderIndexProvider> = {};
+  const providers: Record<string, BotProviderIndexProvider> = {};
   for (const [rawProviderId, rawProvider] of Object.entries(value.providers)) {
     const providerId = normalizeModelCatalogProviderId(rawProviderId);
     // Provider ids become object keys, so blocked keys are dropped before
@@ -234,7 +234,7 @@ export function normalizeOpenClawProviderIndex(value: unknown): OpenClawProvider
     }
   }
   return {
-    version: OPENCLAW_PROVIDER_INDEX_VERSION,
+    version: BOT_PROVIDER_INDEX_VERSION,
     providers: Object.fromEntries(
       Object.entries(providers).toSorted(([left], [right]) => left.localeCompare(right)),
     ),

@@ -1,6 +1,6 @@
 /** Built-in blocking user-question tool and its active-session answer bridge. */
 import { createHash } from "node:crypto";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { Type } from "typebox";
 import type {
   QuestionAnswers,
@@ -89,7 +89,7 @@ type AskUserQuestionState = {
   waiters: Set<() => void>;
 };
 
-const ASK_USER_QUESTIONS_KEY = Symbol.for("openclaw.askUserQuestions");
+const ASK_USER_QUESTIONS_KEY = Symbol.for("bot.askUserQuestions");
 const askUserGlobal = globalThis as Record<PropertyKey, unknown>;
 // Tool execution and subscriber delivery can live in separate production bundles.
 // Keep one process registry or prompt readiness never reaches the delivery waiter.
@@ -533,7 +533,7 @@ function resetPendingAskUserQuestionsForTest(): void {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.askUserToolTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.askUserToolTestApi")] = {
     resetPendingAskUserQuestionsForTest,
   };
 }

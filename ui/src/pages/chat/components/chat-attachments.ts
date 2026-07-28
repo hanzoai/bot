@@ -1,5 +1,5 @@
 // Shared attachment controls for chat and new-session composers.
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { html, nothing } from "lit";
 import { icons } from "../../../components/icons.ts";
 import "../../../components/tooltip.ts";
@@ -575,16 +575,16 @@ export function renderAttachmentPreview(props: ChatAttachmentControlsProps) {
                     </div>
                   `
                 : html`
-                    <openclaw-tooltip .content=${att.fileName ?? "Attached file"}>
+                    <bot-tooltip .content=${att.fileName ?? "Attached file"}>
                       <div class="chat-attachment-file">
                         <span class="chat-attachment-file__icon">${icons.paperclip}</span>
                         <span class="chat-attachment-file__name"
                           >${att.fileName ?? "Attached file"}</span
                         >
                       </div>
-                    </openclaw-tooltip>
+                    </bot-tooltip>
                   `}
-            <openclaw-tooltip .content=${t("chat.composer.removeAttachment")}>
+            <bot-tooltip .content=${t("chat.composer.removeAttachment")}>
               <button
                 class="chat-attachment-remove"
                 type="button"
@@ -598,7 +598,7 @@ export function renderAttachmentPreview(props: ChatAttachmentControlsProps) {
               >
                 ${icons.x}
               </button>
-            </openclaw-tooltip>
+            </bot-tooltip>
           </div>
         `,
       )}

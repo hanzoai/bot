@@ -75,10 +75,10 @@ export async function detectStaleSessionLocks(params?: {
 
 export function sessionLockToHealthFinding(lock: SessionLockInspection): HealthFinding {
   const fixHint = lock.removable
-    ? 'Run "openclaw doctor --fix" to remove this stale lock file automatically.'
+    ? 'Run "bot doctor --fix" to remove this stale lock file automatically.'
     : isReportOnlyStaleLock(lock)
-      ? "OpenClaw is preserving this live owned lock; inspect the owning process if it appears stuck."
-      : 'Run "openclaw doctor --fix" after the cleanup grace period if this stale lock remains.';
+      ? "Bot is preserving this live owned lock; inspect the owning process if it appears stuck."
+      : 'Run "bot doctor --fix" after the cleanup grace period if this stale lock remains.';
   return {
     checkId: SESSION_LOCKS_CHECK_ID,
     severity: "warning",
@@ -148,7 +148,7 @@ export async function noteSessionLockHealth(params?: {
 
   if (staleCount > 0 && !shouldRepair) {
     lines.push(`- ${staleCount} lock file${staleCount === 1 ? " is" : "s are"} stale.`);
-    lines.push('- Run "openclaw doctor --fix" to remove stale lock files automatically.');
+    lines.push('- Run "bot doctor --fix" to remove stale lock files automatically.');
   }
   if (shouldRepair && removedCount > 0) {
     lines.push(

@@ -7,7 +7,7 @@ import fs from "node:fs/promises";
 import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
-import { readJsonFileWithFallback } from "openclaw/plugin-sdk/json-store";
+import { readJsonFileWithFallback } from "bot/plugin-sdk/json-store";
 import {
   parse as parseToml,
   stringify as stringifyToml,
@@ -17,7 +17,7 @@ import {
   CODEX_ACP_BIN,
   CODEX_ACP_PACKAGE,
   LEGACY_CODEX_ACP_PACKAGE,
-  OPENCLAW_CODEX_CONFIG_ARG,
+  BOT_CODEX_CONFIG_ARG,
 } from "./codex-adapter.js";
 import {
   extractTrustedCodexProjectPaths,
@@ -26,11 +26,11 @@ import {
 import { quoteCommandPart, splitCommandParts } from "./command-line.js";
 import { resolveAcpxPluginRoot } from "./config.js";
 import type { ResolvedAcpxPluginConfig } from "./config.js";
-import { OPENCLAW_ACPX_LEASE_ID_ARG, OPENCLAW_GATEWAY_INSTANCE_ID_ARG } from "./process-lease.js";
+import { BOT_ACPX_LEASE_ID_ARG, BOT_GATEWAY_INSTANCE_ID_ARG } from "./process-lease.js";
 
 const CLAUDE_ACP_PACKAGE = "@agentclientprotocol/claude-agent-acp";
 const CLAUDE_ACP_BIN = "claude-agent-acp";
-const RUN_CONFIGURED_COMMAND_SENTINEL = "--openclaw-run-configured";
+const RUN_CONFIGURED_COMMAND_SENTINEL = "--bot-run-configured";
 const requireFromHere = createRequire(import.meta.url);
 
 type PackageManifest = {
@@ -47,7 +47,7 @@ function readSelfManifest(): PackageManifest {
 function readManifestDependencyVersion(packageName: string): string {
   const version = readSelfManifest().dependencies?.[packageName];
   if (typeof version !== "string" || version.trim() === "") {
-    throw new Error(`Missing ${packageName} dependency version in @openclaw/acpx manifest`);
+    throw new Error(`Missing ${packageName} dependency version in @hanzo/bot-acpx manifest`);
   }
   return version;
 }
@@ -102,7 +102,7 @@ async function resolveInstalledAcpPackageBinPath(
 }
 
 async function resolveInstalledCodexAcpBinPath(): Promise<string | undefined> {
-  // Keep OpenClaw's isolated CODEX_HOME wrapper, but launch the plugin-local
+  // Keep Bot's isolated CODEX_HOME wrapper, but launch the plugin-local
   // Codex ACP adapter when the package dependency is available.
   return await resolveInstalledAcpPackageBinPath(CODEX_ACP_PACKAGE, CODEX_ACP_BIN);
 }
@@ -235,7 +235,7 @@ function buildAdapterWrapperScript(params: {
   installedBinPath?: string;
   envSetup: string;
   envConfigSetup?: string;
-  openClawWrapperArgs?: string[];
+  botWrapperArgs?: string[];
   stderrLogFileNamePrefix?: string;
 }): string {
   return `#!/usr/bin/env node
@@ -249,13 +249,13 @@ ${params.envSetup}
 const stderrLogFileNamePrefix = ${params.stderrLogFileNamePrefix ? JSON.stringify(params.stderrLogFileNamePrefix) : "undefined"};
 const stderrLogMaxChars = 256 * 1024;
 
-const openClawWrapperArgs = new Set([
-  ${quoteCommandPart(OPENCLAW_ACPX_LEASE_ID_ARG)},
-  ${quoteCommandPart(OPENCLAW_GATEWAY_INSTANCE_ID_ARG)},
-  ${(params.openClawWrapperArgs ?? []).map(quoteCommandPart).join(",\n  ")}
+const botWrapperArgs = new Set([
+  ${quoteCommandPart(BOT_ACPX_LEASE_ID_ARG)},
+  ${quoteCommandPart(BOT_GATEWAY_INSTANCE_ID_ARG)},
+  ${(params.botWrapperArgs ?? []).map(quoteCommandPart).join(",\n  ")}
 ]);
 
-function readOpenClawWrapperArg(args, name) {
+function readBotWrapperArg(args, name) {
   const index = args.indexOf(name);
   if (index < 0) {
     return undefined;
@@ -264,7 +264,7 @@ function readOpenClawWrapperArg(args, name) {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
-function readOpenClawWrapperArgs(args, name) {
+function readBotWrapperArgs(args, name) {
   const values = [];
   for (let index = 0; index < args.length; index += 1) {
     if (args[index] !== name) {
@@ -289,7 +289,7 @@ function resolveStderrLogPath(args) {
     return undefined;
   }
   const leaseId =
-    readOpenClawWrapperArg(args, ${quoteCommandPart(OPENCLAW_ACPX_LEASE_ID_ARG)}) ||
+    readBotWrapperArg(args, ${quoteCommandPart(BOT_ACPX_LEASE_ID_ARG)}) ||
     "pid-" + process.pid;
   const fileName = stderrLogFileNamePrefix + "." + safeDiagnosticFilePart(leaseId) + ".log";
   return fileURLToPath(new URL("./" + fileName, import.meta.url));
@@ -408,11 +408,11 @@ function finishStderrLog() {
   writeRedactedStderrLog(text);
 }
 
-function stripOpenClawWrapperArgs(args) {
+function stripBotWrapperArgs(args) {
   const stripped = [];
   for (let index = 0; index < args.length; index += 1) {
     const value = args[index];
-    if (openClawWrapperArgs.has(value)) {
+    if (botWrapperArgs.has(value)) {
       index += 1;
       continue;
     }
@@ -432,7 +432,7 @@ if (stderrLogPath) {
   }
 }
 
-const configuredArgs = stripOpenClawWrapperArgs(rawConfiguredArgs);
+const configuredArgs = stripBotWrapperArgs(rawConfiguredArgs);
 
 function resolveNpmCliPath() {
   const candidate = path.resolve(
@@ -469,7 +469,7 @@ const args =
     : [...defaultArgs, ...configuredArgs];
 
 if (!command) {
-  console.error("[openclaw] missing configured ${params.displayName} ACP command");
+  console.error("[bot] missing configured ${params.displayName} ACP command");
   process.exit(1);
 }
 
@@ -544,7 +544,7 @@ const parentWatcher =
 parentWatcher?.unref?.();
 
 child.on("error", (error) => {
-  console.error(\`[openclaw] failed to launch ${params.displayName} ACP wrapper: \${error.message}\`);
+  console.error(\`[bot] failed to launch ${params.displayName} ACP wrapper: \${error.message}\`);
   process.exit(1);
 });
 
@@ -579,7 +579,7 @@ function buildCodexAcpWrapperScript(installedBinPath?: string): string {
     binName: CODEX_ACP_BIN,
     installedBinPath,
     stderrLogFileNamePrefix: "codex-acp-wrapper.stderr",
-    openClawWrapperArgs: [OPENCLAW_CODEX_CONFIG_ARG],
+    botWrapperArgs: [BOT_CODEX_CONFIG_ARG],
     envSetup: `const codexHome = fileURLToPath(new URL("./codex-home/", import.meta.url));
 const codexAuthPath = fileURLToPath(new URL("./codex-home/auth.json", import.meta.url));
 const codexApiKey = (process.env.CODEX_API_KEY || process.env.OPENAI_API_KEY || "").trim();
@@ -630,11 +630,11 @@ function mergeCodexConfig(base, override) {
   return merged;
 }
 
-const openClawCodexConfigs = readOpenClawWrapperArgs(
+const botCodexConfigs = readBotWrapperArgs(
   rawConfiguredArgs,
-  ${quoteCommandPart(OPENCLAW_CODEX_CONFIG_ARG)},
+  ${quoteCommandPart(BOT_CODEX_CONFIG_ARG)},
 );
-if (openClawCodexConfigs.length > 0) {
+if (botCodexConfigs.length > 0) {
   let existingCodexConfig = {};
   if (typeof env.CODEX_CONFIG === "string" && env.CODEX_CONFIG.trim()) {
     try {
@@ -644,23 +644,23 @@ if (openClawCodexConfigs.length > 0) {
       }
       existingCodexConfig = parsedCodexConfig;
     } catch {
-      console.error("[openclaw] CODEX_CONFIG must be a valid JSON object");
+      console.error("[bot] CODEX_CONFIG must be a valid JSON object");
       process.exit(1);
     }
   }
-  for (const openClawCodexConfig of openClawCodexConfigs) {
+  for (const botCodexConfig of botCodexConfigs) {
     try {
-      const parsedOpenClawCodexConfig = JSON.parse(openClawCodexConfig);
+      const parsedBotCodexConfig = JSON.parse(botCodexConfig);
       if (
-        !parsedOpenClawCodexConfig ||
-        typeof parsedOpenClawCodexConfig !== "object" ||
-        Array.isArray(parsedOpenClawCodexConfig)
+        !parsedBotCodexConfig ||
+        typeof parsedBotCodexConfig !== "object" ||
+        Array.isArray(parsedBotCodexConfig)
       ) {
-        throw new Error("invalid OpenClaw Codex config");
+        throw new Error("invalid Bot Codex config");
       }
-      existingCodexConfig = mergeCodexConfig(existingCodexConfig, parsedOpenClawCodexConfig);
+      existingCodexConfig = mergeCodexConfig(existingCodexConfig, parsedBotCodexConfig);
     } catch {
-      console.error("[openclaw] invalid generated Codex ACP startup config");
+      console.error("[bot] invalid generated Codex ACP startup config");
       process.exit(1);
     }
   }
@@ -672,7 +672,7 @@ if (openClawCodexConfigs.length > 0) {
 function buildClaudeAcpWrapperScript(installedBinPath?: string): string {
   return buildAdapterWrapperScript({
     displayName: "Claude",
-    // This package is patched in OpenClaw; fallback must not float to an unpatched newer release.
+    // This package is patched in Bot; fallback must not float to an unpatched newer release.
     packageSpec: `${CLAUDE_ACP_PACKAGE}@${CLAUDE_ACP_PACKAGE_VERSION}`,
     binName: CLAUDE_ACP_BIN,
     installedBinPath,
@@ -893,7 +893,7 @@ function resolveCodexAdapterLaunch(configuredCommand?: string): CodexAdapterLaun
     return {
       args: [
         ...(migration.hadOverrides
-          ? [OPENCLAW_CODEX_CONFIG_ARG, JSON.stringify(migration.config)]
+          ? [BOT_CODEX_CONFIG_ARG, JSON.stringify(migration.config)]
           : []),
         ...migration.forwardedArgs,
       ],

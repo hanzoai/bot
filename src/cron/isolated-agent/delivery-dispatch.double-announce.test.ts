@@ -822,11 +822,11 @@ describe("dispatchCronDelivery — double-announce guard", () => {
         to: "123456",
       })
       .mockResolvedValueOnce({
-        sessionKey: "agent:main:openclaw-weixin:direct:123456",
-        baseSessionKey: "agent:main:openclaw-weixin:direct:123456",
+        sessionKey: "agent:main:bot-weixin:direct:123456",
+        baseSessionKey: "agent:main:bot-weixin:direct:123456",
         peer: { kind: "direct", id: "123456" },
         chatType: "direct",
-        from: "openclaw-weixin:123456",
+        from: "bot-weixin:123456",
         to: "123456",
       });
 
@@ -859,7 +859,7 @@ describe("dispatchCronDelivery — double-announce guard", () => {
             via: "message_tool",
             target: {
               tool: "message",
-              provider: "openclaw-weixin",
+              provider: "bot-weixin",
               to: "123456",
               text: "Shared cron update.",
             },
@@ -883,8 +883,8 @@ describe("dispatchCronDelivery — double-announce guard", () => {
     expect(enqueueSystemEvent).toHaveBeenCalledWith(
       "A scheduled cron job delivered this message to this channel:\nShared cron update.",
       {
-        sessionKey: "agent:main:openclaw-weixin:direct:123456",
-        contextKey: "cron-direct-delivery:v1:cron:test-job:1000:openclaw-weixin::123456:",
+        sessionKey: "agent:main:bot-weixin:direct:123456",
+        contextKey: "cron-direct-delivery:v1:cron:test-job:1000:bot-weixin::123456:",
       },
     );
   });
@@ -990,8 +990,8 @@ describe("dispatchCronDelivery — double-announce guard", () => {
 
   it("queues message-tool awareness for explicit off-plan message-tool deliveries", async () => {
     mockResolvedOutboundRoute({
-      sessionKey: "agent:main:openclaw-weixin:direct:user-123",
-      baseSessionKey: "agent:main:openclaw-weixin:direct:user-123",
+      sessionKey: "agent:main:bot-weixin:direct:user-123",
+      baseSessionKey: "agent:main:bot-weixin:direct:user-123",
       to: "user-123",
     });
 
@@ -1019,7 +1019,7 @@ describe("dispatchCronDelivery — double-announce guard", () => {
             via: "message_tool",
             target: {
               tool: "message",
-              provider: "openclaw-weixin",
+              provider: "bot-weixin",
               to: "user-123",
               text: "386502",
             },
@@ -1034,7 +1034,7 @@ describe("dispatchCronDelivery — double-announce guard", () => {
 
     expect(resolveOutboundSessionRoute).toHaveBeenCalledWith(
       expect.objectContaining({
-        channel: "openclaw-weixin",
+        channel: "bot-weixin",
         target: "user-123",
         accountId: undefined,
         threadId: undefined,
@@ -1043,8 +1043,8 @@ describe("dispatchCronDelivery — double-announce guard", () => {
     expect(enqueueSystemEvent).toHaveBeenCalledExactlyOnceWith(
       "A scheduled cron job delivered this message to this channel:\n386502",
       {
-        sessionKey: "agent:main:openclaw-weixin:direct:user-123",
-        contextKey: "cron-direct-delivery:v1:cron:test-job:1000:openclaw-weixin::user-123:",
+        sessionKey: "agent:main:bot-weixin:direct:user-123",
+        contextKey: "cron-direct-delivery:v1:cron:test-job:1000:bot-weixin::user-123:",
       },
     );
   });
@@ -2070,7 +2070,7 @@ describe("dispatchCronDelivery — double-announce guard", () => {
   });
 
   it("retries proven-not-sent direct announce failures before succeeding", async () => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("BOT_TEST_FAST", "1");
     vi.mocked(deliverOutboundPayloads)
       .mockRejectedValueOnce(
         new PlatformMessageNotDispatchedError("upload stopped before final dispatch", {
@@ -2091,7 +2091,7 @@ describe("dispatchCronDelivery — double-announce guard", () => {
   it.each(["structured", "threaded"] as const)(
     "retries proven-not-sent %s cron delivery without duplicating a message",
     async (deliveryKind) => {
-      vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+      vi.stubEnv("BOT_TEST_FAST", "1");
       vi.mocked(deliverOutboundPayloads)
         .mockRejectedValueOnce(
           new PlatformMessageNotDispatchedError("upload stopped before final dispatch", {
@@ -2117,7 +2117,7 @@ describe("dispatchCronDelivery — double-announce guard", () => {
   );
 
   it("does not retry ambiguous direct announce send errors", async () => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("BOT_TEST_FAST", "1");
     vi.mocked(deliverOutboundPayloads).mockRejectedValueOnce(
       Object.assign(new Error("read ECONNRESET after send"), {
         code: "ECONNRESET",
@@ -2150,7 +2150,7 @@ describe("dispatchCronDelivery — double-announce guard", () => {
         }),
       },
     );
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("BOT_TEST_FAST", "1");
     vi.mocked(deliverOutboundPayloads).mockImplementationOnce(async (deliveryParams) => {
       deliveryParams.onPayloadDeliveryOutcome?.({
         index: 0,
@@ -2212,7 +2212,7 @@ describe("dispatchCronDelivery — double-announce guard", () => {
         }),
       },
     );
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("BOT_TEST_FAST", "1");
     vi.mocked(deliverOutboundPayloads).mockImplementationOnce(async (deliveryParams) => {
       deliveryParams.onPayloadDeliveryOutcome?.({
         index: 0,
@@ -2581,7 +2581,7 @@ describe("dispatchCronDelivery — double-announce guard", () => {
   });
 
   it("does not retry permanent direct announce failures", async () => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("BOT_TEST_FAST", "1");
     vi.mocked(deliverOutboundPayloads).mockRejectedValue(new Error("chat not found"));
 
     const params = makeBaseParams({ synthesizedText: "This should fail once." });
@@ -2771,7 +2771,7 @@ describe("dispatchCronDelivery — double-announce guard", () => {
       )
       .mockResolvedValueOnce([{ ok: true } as never]);
 
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("BOT_TEST_FAST", "1");
     try {
       const params = makeBaseParams({ synthesizedText: "Retry test." });
       const state = await dispatchCronDelivery(params);
@@ -2893,7 +2893,7 @@ describe("dispatchCronDelivery — double-announce guard", () => {
       "sessionKey is required to resolve delivery.channel=last",
     );
     expect(state.result?.error).toContain(
-      "the agent used the message tool, but OpenClaw could not verify",
+      "the agent used the message tool, but Bot could not verify",
     );
   });
 
@@ -2985,7 +2985,7 @@ describe("dispatchCronDelivery — double-announce guard", () => {
       archivedAt: Date.now(),
     });
 
-    const params = makeBaseParams({ synthesizedText: "Delivered outside OpenClaw" });
+    const params = makeBaseParams({ synthesizedText: "Delivered outside Bot" });
     params.resolvedDelivery = makeResolvedDelivery({
       channel: "whatsapp",
       to: "+15551234567",

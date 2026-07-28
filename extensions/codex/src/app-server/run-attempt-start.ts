@@ -1,4 +1,4 @@
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { embeddedAgentLog } from "bot/plugin-sdk/agent-harness-runtime";
 import { resolveCodexAppServerForModelProvider } from "./app-server-policy.js";
 import { startCodexAttemptThread } from "./attempt-startup.js";
 import { flattenCodexDynamicToolFunctions } from "./protocol.js";

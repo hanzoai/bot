@@ -7,9 +7,9 @@ import type {
   ResumeSessionRequest,
 } from "@agentclientprotocol/sdk";
 import { PROTOCOL_VERSION } from "@agentclientprotocol/sdk";
-import { createInMemorySessionStore } from "@openclaw/acp-core/session";
+import { createInMemorySessionStore } from "@hanzo/bot-acp-core/session";
 /** Tests ACP translator initialize/session lifecycle and prompt bridge behavior. */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import type { GatewayClient } from "../gateway/client.js";
 import type { GatewaySessionRow } from "../gateway/session-utils.js";
@@ -52,7 +52,7 @@ function createListSessionsRequest(params: {
 
 function createResumeSessionRequest(
   sessionId: string,
-  cwd = "/tmp/openclaw",
+  cwd = "/tmp/bot",
 ): ResumeSessionRequest {
   return {
     sessionId,
@@ -254,7 +254,7 @@ describe("acp translator stable lifecycle handlers", () => {
         return createGatewaySessions([
           createSessionRow({
             key: "agent:main:work",
-            cwd: "/tmp/openclaw",
+            cwd: "/tmp/bot",
             title: "Work session",
             updatedAt: Number.POSITIVE_INFINITY,
           }),
@@ -267,7 +267,7 @@ describe("acp translator stable lifecycle handlers", () => {
       sessionStore,
     });
 
-    const result = await agent.listSessions(createListSessionsRequest({ cwd: "/tmp/openclaw" }));
+    const result = await agent.listSessions(createListSessionsRequest({ cwd: "/tmp/bot" }));
 
     expect(result.sessions).toHaveLength(1);
     expect(result.sessions[0]?.updatedAt).toBeUndefined();
@@ -339,7 +339,7 @@ describe("acp translator stable lifecycle handlers", () => {
         return createGatewaySessions([
           createSessionRow({
             key: "agent:main:work",
-            cwd: "/tmp/openclaw",
+            cwd: "/tmp/bot",
             title: "Work session",
           }),
         ]);
@@ -374,7 +374,7 @@ describe("acp translator stable lifecycle handlers", () => {
         _meta: {
           sessionKey: "agent:main:work",
           kind: "direct",
-          spawnedWorkspaceDir: "/tmp/openclaw",
+          spawnedWorkspaceDir: "/tmp/bot",
         },
       },
     });
@@ -416,7 +416,7 @@ describe("acp translator stable lifecycle handlers", () => {
     sessionStore.createSession({
       sessionId: "session-1",
       sessionKey: "agent:main:work",
-      cwd: "/tmp/openclaw",
+      cwd: "/tmp/bot",
     });
     const agent = new AcpGatewayAgent(createAcpConnection(), createAcpGateway(request), {
       sessionStore,
@@ -440,7 +440,7 @@ describe("acp translator stable lifecycle handlers", () => {
     sessionStore.createSession({
       sessionId: "session-1",
       sessionKey: "agent:main:work",
-      cwd: "/tmp/openclaw",
+      cwd: "/tmp/bot",
     });
     const agent = new AcpGatewayAgent(createAcpConnection(), createAcpGateway(request), {
       sessionStore,
@@ -463,7 +463,7 @@ describe("acp translator stable lifecycle handlers", () => {
     sessionStore.createSession({
       sessionId: "session-1",
       sessionKey: "agent:main:work",
-      cwd: "/tmp/openclaw",
+      cwd: "/tmp/bot",
     });
     const agent = new AcpGatewayAgent(createAcpConnection(), createAcpGateway(request), {
       sessionStore,
@@ -493,7 +493,7 @@ describe("acp translator stable lifecycle handlers", () => {
     sessionStore.createSession({
       sessionId: "session-1",
       sessionKey: "agent:main:work",
-      cwd: "/tmp/openclaw",
+      cwd: "/tmp/bot",
     });
     const agent = new AcpGatewayAgent(createAcpConnection(), createAcpGateway(request), {
       sessionStore,

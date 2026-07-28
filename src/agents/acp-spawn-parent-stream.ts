@@ -1,7 +1,7 @@
 /** Relays child ACP session stream updates back into the requester parent session. */
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { sliceUtf16Safe, truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asFiniteNumber } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { sliceUtf16Safe, truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import {
   isAcpTagVisible,
   resolveAcpProjectionSettings,
@@ -11,7 +11,7 @@ import {
   resolveChannelStreamingProgressCommentary,
   type StreamingCompatEntry,
 } from "../channels/streaming.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { onAgentEvent } from "../infra/agent-events.js";
 import {
   type EventSessionRoutingPolicy,
@@ -146,7 +146,7 @@ function applyParentPreviewStreamModeDefault(
 }
 
 function resolveParentProgressStreamingEntry(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   deliveryContext: DeliveryContext | undefined;
 }): StreamingCompatEntry | undefined {
   const channelId = normalizeOptionalString(params.deliveryContext?.channel);
@@ -172,7 +172,7 @@ function resolveParentProgressStreamingEntry(params: {
 }
 
 function resolveParentProgressCommentary(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   deliveryContext: DeliveryContext | undefined;
 }): boolean {
   return resolveChannelStreamingProgressCommentary(
@@ -224,7 +224,7 @@ export function startAcpSpawnParentStreamRelay(params: {
   noOutputPollMs?: number;
   maxRelayLifetimeMs?: number;
   emitStartNotice?: boolean;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }): AcpSpawnParentRelayHandle {
   const runId = normalizeOptionalString(params.runId) ?? "";
   const parentSessionKey = normalizeOptionalString(params.parentSessionKey) ?? "";

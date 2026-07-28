@@ -2,7 +2,7 @@
 import {
   normalizeOptionalLowercaseString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveProviderRequestPolicy } from "../../../agents/provider-attribution.js";
 import { resolveProviderRequestPolicyConfig } from "../../../agents/provider-request-config.js";
 import type { StreamFn } from "../../../agents/runtime/index.js";
@@ -17,7 +17,7 @@ import {
 import { isAnthropicModelRef } from "./anthropic-family-cache-semantics.js";
 import { streamWithPayloadPatch } from "./stream-payload-utils.js";
 const KILOCODE_FEATURE_HEADER = "X-KILOCODE-FEATURE";
-const KILOCODE_FEATURE_DEFAULT = "openclaw";
+const KILOCODE_FEATURE_DEFAULT = "bot";
 const KILOCODE_FEATURE_ENV_VAR = "KILOCODE_FEATURE";
 
 function resolveKilocodeAppHeaders(): Record<string, string> {

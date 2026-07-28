@@ -22,9 +22,9 @@ const defaults = getDefaultRedactPatterns();
 let tempDirs: string[] = [];
 
 function writeConfig(source: string): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-redact-config-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-redact-config-"));
   tempDirs.push(dir);
-  const configPath = path.join(dir, "openclaw.json");
+  const configPath = path.join(dir, "bot.json");
   fs.writeFileSync(configPath, source);
   return configPath;
 }
@@ -769,20 +769,20 @@ describe("redactSensitiveText", () => {
   });
 
   it("masks named Gateway security headers", () => {
-    const openClawToken = "supersecretgatewaytoken1234567890";
+    const botToken = "supersecretgatewaytoken1234567890";
     const pomeriumJwt = "eyJheaderabcd.eyJpayloadabcd.signatureabcd123456";
     const apiKey = "shortsecret";
     const input = [
-      `X-OpenClaw-Token: ${openClawToken}`,
+      `X-Bot-Token: ${botToken}`,
       `x-pomerium-jwt-assertion: ${pomeriumJwt}`,
       `X-Api-Key=${apiKey}`,
     ].join("\n");
     const output = redactSensitiveText(input, { mode: "tools" });
 
-    expect(output).toContain("X-OpenClaw-Token: supers…7890");
+    expect(output).toContain("X-Bot-Token: supers…7890");
     expect(output).toContain("x-pomerium-jwt-assertion: eyJhea…3456");
     expect(output).toContain("X-Api-Key=***");
-    expect(output).not.toContain(openClawToken);
+    expect(output).not.toContain(botToken);
     expect(output).not.toContain(pomeriumJwt);
     expect(output).not.toContain(apiKey);
   });
@@ -972,8 +972,8 @@ describe("redactSensitiveText", () => {
       "https://browser-user:browser-password-1234567890@api.example.test/v1",
       "https://:empty-username-password-1234567890@api.example.test/v1",
       "https://same:same@example.test/v1",
-      "postgres://dbuser:database-password-1234567890@db.example.test/openclaw",
-      "postgres://secret:secret@db.example.test/openclaw",
+      "postgres://dbuser:database-password-1234567890@db.example.test/bot",
+      "postgres://secret:secret@db.example.test/bot",
       "mongodb+srv://mongo:mongodb-password-1234567890@cluster.example.test/app",
       "redis://:redis-password-1234567890@cache.example.test/0",
       "rediss://cache:redis-tls-password-1234567890@cache.example.test/0",
@@ -988,8 +988,8 @@ describe("redactSensitiveText", () => {
     expect(output).toContain("https://browser-user:browse…7890@api.example.test/v1");
     expect(output).toContain("https://:empty-…7890@api.example.test/v1");
     expect(output).toContain("https://same:***@example.test/v1");
-    expect(output).toContain("postgres://dbuser:databa…7890@db.example.test/openclaw");
-    expect(output).toContain("postgres://secret:***@db.example.test/openclaw");
+    expect(output).toContain("postgres://dbuser:databa…7890@db.example.test/bot");
+    expect(output).toContain("postgres://secret:***@db.example.test/bot");
     expect(output).toContain("mongodb+srv://mongo:mongod…7890@cluster.example.test/app");
     expect(output).toContain("redis://:redis-…7890@cache.example.test/0");
     expect(output).toContain("rediss://cache:redis-…7890@cache.example.test/0");
@@ -1483,7 +1483,7 @@ describe("redactSensitiveText", () => {
 
   it("does not redact ordinary identifiers containing short token-prefix substrings", () => {
     const input = [
-      "npm_telegram_package_spec ask_openclaw_query_patterns team_management risk_assessment glpat-docs gloas-docs gldt-docs glcbt-docs glptt-docs glft-docs glimt-docs glagent-docs glwt-docs glsoat-docs glffct-docs glrt-docs glrtr-docs GR1348941-docs _gitlab_session=short dapi-example sbp_short nfp_site CCIPAT_docs ATATT-example fw-tooshort fw_tooshort fpk_tooshort",
+      "npm_telegram_package_spec ask_bot_query_patterns team_management risk_assessment glpat-docs gloas-docs gldt-docs glcbt-docs glptt-docs glft-docs glimt-docs glagent-docs glwt-docs glsoat-docs glffct-docs glrt-docs glrtr-docs GR1348941-docs _gitlab_session=short dapi-example sbp_short nfp_site CCIPAT_docs ATATT-example fw-tooshort fw_tooshort fpk_tooshort",
       `fixturefw-${"C".repeat(40)}`,
       `fixture_fw_${"A".repeat(40)}`,
       `fixture_fpk_${"B".repeat(40)}`,
@@ -1602,10 +1602,10 @@ describe("redactSensitiveText", () => {
 
   it("masks connection-string passwords through the default options path", () => {
     expect(
-      redactSensitiveText("postgres://dbuser:opaquepw12345@db.example.test/openclaw", {
+      redactSensitiveText("postgres://dbuser:opaquepw12345@db.example.test/bot", {
         mode: "tools",
       }),
-    ).toBe("postgres://dbuser:***@db.example.test/openclaw");
+    ).toBe("postgres://dbuser:***@db.example.test/bot");
   });
 
   it("masks quoted standalone values containing the other quote character", () => {
@@ -1676,7 +1676,7 @@ describe("redactSensitiveText", () => {
       },
     }`);
 
-    withEnv({ OPENCLAW_CONFIG_PATH: configPath }, () =>
+    withEnv({ BOT_CONFIG_PATH: configPath }, () =>
       expect(redactSensitiveText("OPENAI_API_KEY=sk-1234567890abcdef")).toBe(
         "OPENAI_API_KEY=sk-123…cdef",
       ),
@@ -1740,7 +1740,7 @@ describe("redactSensitiveText", () => {
       },
     }`);
 
-    withEnv({ OPENCLAW_CONFIG_PATH: configPath }, () =>
+    withEnv({ BOT_CONFIG_PATH: configPath }, () =>
       expect(redactSensitiveText("ticket internal-12345 should hide")).toBe(
         "ticket *** should hide",
       ),

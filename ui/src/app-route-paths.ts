@@ -1,8 +1,8 @@
 import { normalizeRouteBasePath, normalizeRoutePath } from "@openclaw/uirouter";
 import type { RouteLocation } from "@openclaw/uirouter";
-import { isValidWorkboardBoardId } from "@openclaw/workboard-contract";
+import { isValidWorkboardBoardId } from "@hanzo/bot-workboard-contract";
 import type { BoardFace } from "./lib/board/settings.ts";
-export const INTERNAL_SESSION_PATH_PARAM = "__openclawSessionPath";
+export const INTERNAL_SESSION_PATH_PARAM = "__botSessionPath";
 
 const APP_ROUTE_DEFINITIONS = {
   chat: { path: "/chat" },

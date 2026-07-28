@@ -1,8 +1,8 @@
 /**
  * Assembles hook, orphan-repair, steering, and cache inputs for one prompt.
  */
-import { ensureSystemPromptCacheBoundary } from "@openclaw/ai/internal/shared";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { ensureSystemPromptCacheBoundary } from "@hanzo/bot-ai/internal/shared";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { getRuntimeConfig } from "../../../config/config.js";
 import type { DiagnosticTraceContext } from "../../../infra/diagnostic-trace-context.js";
 import { freezeDiagnosticTraceContext } from "../../../infra/diagnostic-trace-context.js";

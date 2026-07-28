@@ -1,7 +1,7 @@
 // Model auth status tests cover profile health summaries, provider usage,
 // credential cleanup, secret refresh, and provider run abort side effects.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthHealthSummary } from "../../agents/auth-health.js";
 import type { AuthProfileStore } from "../../agents/auth-profiles.js";

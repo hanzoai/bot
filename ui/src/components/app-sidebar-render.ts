@@ -59,8 +59,8 @@ function readSidebarNativeGateway(): SidebarNativeGateway | null {
     return null;
   }
   const snapshot = (
-    window as Window & { __OPENCLAW_NATIVE_GATEWAYS__?: SidebarNativeGatewaysSnapshot }
-  )["__OPENCLAW_NATIVE_GATEWAYS__"];
+    window as Window & { __BOT_NATIVE_GATEWAYS__?: SidebarNativeGatewaysSnapshot }
+  )["__BOT_NATIVE_GATEWAYS__"];
   if (!snapshot || !Array.isArray(snapshot.gateways) || snapshot.gateways.length < 2) {
     return null;
   }
@@ -88,7 +88,7 @@ export function renderAppSidebarBrand(host: AppSidebarRenderHost) {
   // keeps its separate offline-tolerant ⌘N mirror.
   return html`
     <div class="sidebar-brand">
-      <openclaw-sidebar-agent-card
+      <bot-sidebar-agent-card
         .agentName=${cardName}
         .avatarUrl=${cardAgent
           ? resolveAgentAvatarUrl(cardAgent, cardIdentity)
@@ -100,9 +100,9 @@ export function renderAppSidebarBrand(host: AppSidebarRenderHost) {
         .approvalCount=${approvalCount}
         .switcherAvailable=${cardAgents.length > 1}
         .onToggleMenu=${(trigger: HTMLElement) => host.sidebarMenus.toggleAgentMenu(trigger)}
-      ></openclaw-sidebar-agent-card>
+      ></bot-sidebar-agent-card>
       <div class="sidebar-brand__actions">
-        <openclaw-tooltip
+        <bot-tooltip
           .content=${host.connected
             ? t("chat.runControls.newSession")
             : t("chat.runControls.newSessionDisconnected")}
@@ -116,7 +116,7 @@ export function renderAppSidebarBrand(host: AppSidebarRenderHost) {
           >
             ${icons.plus}
           </button>
-        </openclaw-tooltip>
+        </bot-tooltip>
       </div>
     </div>
   `;
@@ -166,32 +166,32 @@ export function renderAppSidebarHomeRow(host: AppSidebarRenderHost) {
       }}
     >
       ${running
-        ? html`<openclaw-tooltip .content=${t("sessionsView.activeRun")}
-            >${homeGlyph}</openclaw-tooltip
+        ? html`<bot-tooltip .content=${t("sessionsView.activeRun")}
+            >${homeGlyph}</bot-tooltip
           >`
         : homeGlyph}
       <span class="nav-item__text">${t("nav.home")}</span>
       ${sessionHasBoard(mainKey)
-        ? html`<openclaw-tooltip .content=${t("sessionsView.dashboardAvailable")}>
+        ? html`<bot-tooltip .content=${t("sessionsView.dashboardAvailable")}>
             <span
               class="sidebar-board-glyph"
               role="img"
               aria-label=${t("sessionsView.dashboardAvailable")}
               >${icons.layoutDashboard}</span
             >
-          </openclaw-tooltip>`
+          </bot-tooltip>`
         : nothing}
       ${approvalNeeded || outboxCount > 0
         ? html`<span class="nav-item__state sidebar-home-session-states">
             ${approvalNeeded
-              ? html`<openclaw-tooltip .content=${t("sessionsView.approvalNeeded")}>
+              ? html`<bot-tooltip .content=${t("sessionsView.approvalNeeded")}>
                   <span
                     class="session-approval-badge"
                     role="img"
                     aria-label=${t("sessionsView.approvalNeeded")}
                     >${icons.alertTriangle}</span
                   >
-                </openclaw-tooltip>`
+                </bot-tooltip>`
               : nothing}
             ${renderSessionRowBadges({ hasAutomation: false, outboxCount })}
           </span>`
@@ -239,7 +239,7 @@ export function renderAppSidebarFooterBar(host: AppSidebarRenderHost) {
   const identityMenuLabel = t("profilePage.identity.menuButtonLabel", { name: selfLabel });
   return html`
     <div class="sidebar-footer-bar">
-      <openclaw-tooltip .content=${selfLabel}>
+      <bot-tooltip .content=${selfLabel}>
         <button
           type="button"
           class="sidebar-identity-card"
@@ -251,7 +251,7 @@ export function renderAppSidebarFooterBar(host: AppSidebarRenderHost) {
           @click=${(event: MouseEvent) =>
             host.sidebarMenus.toggleIdentityMenu(event.currentTarget as HTMLElement)}
         >
-          <openclaw-viewer-avatar .user=${avatarUser} variant="footer"></openclaw-viewer-avatar>
+          <bot-viewer-avatar .user=${avatarUser} variant="footer"></bot-viewer-avatar>
           <span class="sidebar-identity-card__text">
             <span class="sidebar-identity-card__name">${selfLabel}</span>
             ${host.offline
@@ -280,7 +280,7 @@ export function renderAppSidebarFooterBar(host: AppSidebarRenderHost) {
             >${icons.chevronDown}</span
           >
         </button>
-      </openclaw-tooltip>
+      </bot-tooltip>
       <span class="sidebar-identity-card__status" role="status" aria-live="polite"
         >${host.offline ? t("connection.reconnecting") : ""}</span
       >
@@ -376,8 +376,8 @@ function renderWorkboardBoard(
 }
 
 export function renderAppSidebarAttention(host: AppSidebarRenderHost) {
-  return html`<openclaw-sidebar-attention
+  return html`<bot-sidebar-attention
     .onNavigate=${(routeId: NavigationRouteId) => host.onNavigate?.(routeId)}
     .onOpenApprovals=${() => host.onOpenApprovals?.()}
-  ></openclaw-sidebar-attention>`;
+  ></bot-sidebar-attention>`;
 }

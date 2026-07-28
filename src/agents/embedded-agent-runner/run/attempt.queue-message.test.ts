@@ -19,7 +19,7 @@ function steerWithDeliveryWait(
   });
 }
 
-describe("embedded OpenClaw queued steering cancellation", () => {
+describe("embedded Bot queued steering cancellation", () => {
   it("forwards prepared transcript context with a queued steering message", async () => {
     const steer = vi.fn(async () => undefined);
     const recorder = createUserTurnTranscriptRecorder({

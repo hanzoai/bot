@@ -11,7 +11,7 @@ type SessionWithAgentPrompt = {
 };
 
 type PromptReleaseStreamFn = ((...args: unknown[]) => unknown) & {
-  __openclawSessionLockPromptReleaseInstalled?: boolean;
+  __botSessionLockPromptReleaseInstalled?: boolean;
 };
 
 export function installPromptSubmissionLockRelease(params: {
@@ -33,7 +33,7 @@ export function installPromptSubmissionLockRelease(params: {
     return;
   }
   const currentStreamFn = agent.streamFn;
-  if (currentStreamFn["__openclawSessionLockPromptReleaseInstalled"] === true) {
+  if (currentStreamFn["__botSessionLockPromptReleaseInstalled"] === true) {
     return;
   }
   const originalStreamFn = currentStreamFn.bind(agent);
@@ -59,6 +59,6 @@ export function installPromptSubmissionLockRelease(params: {
       await params.reacquireAfterPrompt();
     }
   };
-  wrappedStreamFn["__openclawSessionLockPromptReleaseInstalled"] = true;
+  wrappedStreamFn["__botSessionLockPromptReleaseInstalled"] = true;
   agent.streamFn = wrappedStreamFn;
 }

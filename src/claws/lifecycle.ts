@@ -21,7 +21,7 @@ import {
   type ClawDiagnostic,
   type ClawManifest,
   type ClawLocalPrerequisite,
-  type ClawOpenClawProfile,
+  type ClawBotProfile,
   type ClawPackage,
   type ClawSourceIdentity,
 } from "./types.js";
@@ -193,7 +193,7 @@ async function inspectWorkspaceFileAction(params: {
 export async function buildClawAddPlan(params: {
   manifest: ClawManifest;
   clawMarkdownBody?: Buffer;
-  openClawProfile?: ClawOpenClawProfile;
+  botProfile?: ClawBotProfile;
   source: ClawSourceIdentity;
   diagnostics?: ClawDiagnostic[];
   context?: ClawAddPlanContext;
@@ -201,7 +201,7 @@ export async function buildClawAddPlan(params: {
   const context = params.context ?? {};
   const finalId = context.agentId ?? params.manifest.agent.id;
   const workspace = canonicalWorkspacePath(
-    context.workspace ?? resolve(homedir(), ".openclaw", `workspace-${finalId}`),
+    context.workspace ?? resolve(homedir(), ".bot", `workspace-${finalId}`),
   );
   const packageRoot = await realpath(params.source.packageRoot).catch(
     () => params.source.packageRoot,
@@ -224,10 +224,10 @@ export async function buildClawAddPlan(params: {
   }
   const existingAgentIds = new Set(context.existingAgentIds ?? []);
   const agentBlocked = existingAgentIds.has(finalId);
-  const openClawAgentSettings = params.openClawProfile?.agent ?? {};
+  const botAgentSettings = params.botProfile?.agent ?? {};
   const agentConfig: ClawAddPlan["agent"]["config"] = {
     ...params.manifest.agent,
-    ...openClawAgentSettings,
+    ...botAgentSettings,
     id: finalId,
     workspace,
   };
@@ -249,10 +249,10 @@ export async function buildClawAddPlan(params: {
     blocked: agentBlocked || !AGENT_ID_PATTERN.test(finalId),
   });
   const agentCapabilityEffect = {
-    ...(openClawAgentSettings.sandbox ? { sandbox: openClawAgentSettings.sandbox } : {}),
-    ...(openClawAgentSettings.tools ? { tools: openClawAgentSettings.tools } : {}),
-    ...(openClawAgentSettings.memory ? { memory: openClawAgentSettings.memory } : {}),
-    ...(openClawAgentSettings.heartbeat ? { heartbeat: openClawAgentSettings.heartbeat } : {}),
+    ...(botAgentSettings.sandbox ? { sandbox: botAgentSettings.sandbox } : {}),
+    ...(botAgentSettings.tools ? { tools: botAgentSettings.tools } : {}),
+    ...(botAgentSettings.memory ? { memory: botAgentSettings.memory } : {}),
+    ...(botAgentSettings.heartbeat ? { heartbeat: botAgentSettings.heartbeat } : {}),
   };
   if (Object.keys(agentCapabilityEffect).length > 0) {
     capabilityChanges.push(

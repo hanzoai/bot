@@ -2,8 +2,8 @@
 name: notcrawl
 description: "Notion archive: search, sync freshness, pages/databases, Markdown exports, SQL counts, and Notcrawl repo work."
 metadata:
-  openclaw:
-    homepage: https://github.com/openclaw/notcrawl
+  bot:
+    homepage: https://github.com/bot/notcrawl
     requires:
       bins:
         - notcrawl

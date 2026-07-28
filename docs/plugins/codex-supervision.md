@@ -1,9 +1,9 @@
 ---
-summary: "Browse non-archived native Codex sessions and paginated transcripts across OpenClaw nodes"
+summary: "Browse non-archived native Codex sessions and paginated transcripts across Bot nodes"
 title: "Supervise Codex sessions"
 sidebarTitle: "Codex supervision"
 read_when:
-  - You want Codex Desktop or CLI sessions to appear in OpenClaw
+  - You want Codex Desktop or CLI sessions to appear in Bot
   - You need to branch from or archive a stored or idle local Codex session
   - You are exposing Codex sessions and transcript history from paired nodes
 ---
@@ -15,12 +15,12 @@ sidebar and Chat pane.
 
 The initial release deliberately keeps ownership narrow:
 
-- A stored or idle local session can create a model-locked OpenClaw Chat from
+- A stored or idle local session can create a model-locked Bot Chat from
   its bounded persisted user and assistant history. The first message starts a
   native snapshot fork, then starts the full Codex harness thread with exactly
   the model and provider that Codex App Server selected for that fork. Later
   turns restore the canonical native thread's persisted pair while the
-  supervised binding prevents OpenClaw from substituting another runtime,
+  supervised binding prevents Bot from substituting another runtime,
   model, or fallback. A separate native Codex control can still change that
   persisted pair. An already-created branch opens its existing Chat.
 - A stored session discovered from another Codex process has unknown live
@@ -39,19 +39,19 @@ The initial release deliberately keeps ownership narrow:
 
 ## Before you begin
 
-- Install the official `@openclaw/codex` plugin on the Gateway. The OpenClaw
+- Install the official `@hanzo/bot-codex` plugin on the Gateway. The Bot
   macOS app can install it when you enable Codex features; CLI installations can
-  run `openclaw plugins install @openclaw/codex`.
+  run `bot plugins install @hanzo/bot-codex`.
 - Install and sign in to Codex Desktop or the Codex CLI on each computer whose
   sessions you want to list.
-- Pair remote computers as OpenClaw nodes. Each computer must opt in locally;
+- Pair remote computers as Bot nodes. Each computer must opt in locally;
   enabling supervision only on the Gateway does not authorize another node.
 - Use an owner-controlled Gateway. Session titles, working directories, and Git
   branches can reveal sensitive project information.
 
 ## Enable supervision
 
-Guided `openclaw onboard` and macOS first-run setup attempt to install and
+Guided `bot onboard` and macOS first-run setup attempt to install and
 enable Codex supervision after detecting a native Codex installation and
 successfully activating the selected inference backend. Codex does not need to
 be the primary backend. Supervision becomes available when that opportunistic
@@ -65,7 +65,7 @@ Codex provider, harness, and agent-facing supervision policy unchanged while
 also removing the paired-node catalog list/read commands from this host.
 Existing installations can enable the same capability manually:
 
-Enable the `codex` plugin and its supervision capability in `openclaw.json`:
+Enable the `codex` plugin and its supervision capability in `bot.json`:
 
 ```json5
 {
@@ -90,7 +90,7 @@ changing plugin activation.
 With no explicit `appServer` connection settings, supervision uses a separate
 managed stdio supervision connection against the native user Codex home. The
 ordinary Codex harness remains agent-scoped by default. This makes native
-sessions visible in both apps without making ordinary OpenClaw turns share
+sessions visible in both apps without making ordinary Bot turns share
 native Codex state. Set `appServer.homeScope: "user"` explicitly if the harness
 should share that state too. Supervision honors explicit `appServer` connection
 settings instead of replacing them with its local user-home default.
@@ -103,13 +103,13 @@ and provider configuration without changing the default for other sessions.
 Watched adopted Chats also participate in [session state awareness](/concepts/session-state).
 
 For the default local supervision connection, the store is shared with native
-Codex clients. OpenClaw does not assume that another client shares the same live
+Codex clients. Bot does not assume that another client shares the same live
 App Server process, and native status ownership is process-local. It therefore
 treats a thread that its supervision App Server reports as `notLoaded` as
 **Stored / activity unknown**, not as idle.
 
 Apply the same opt-in on every headless node host whose sessions should appear.
-The native OpenClaw macOS app reads the same local setting when it advertises
+The native Bot macOS app reads the same local setting when it advertises
 its Codex catalog to the paired Gateway. That paired native Mac catalog supports
 only the default or explicit `appServer.transport: "stdio"` with an unset or
 explicit `appServer.homeScope: "user"`. `command`, `args`, and `clearEnv` are
@@ -122,8 +122,8 @@ A newly advertised node command changes the node's approved command surface.
 Approve the update from the Gateway host:
 
 ```bash
-openclaw nodes pending
-openclaw nodes approve <requestId>
+bot nodes pending
+bot nodes approve <requestId>
 ```
 
 Non-archived Codex sessions also appear in the main Control UI sidebar, grouped
@@ -156,7 +156,7 @@ hide results from healthy hosts.
 The sidebar warning includes the catalog error code and the safe underlying
 Gateway error. Open **Settings > Automation > Plugins > Codex > Native Session
 Discovery** to disable discovery without disabling Codex. For
-`NODE_LIST_FAILED`, compare `openclaw nodes list` and **Settings > Devices**;
+`NODE_LIST_FAILED`, compare `bot nodes list` and **Settings > Devices**;
 the detailed cause identifies the pairing-store, node-registry, permission, or
 Gateway lifecycle failure that needs repair.
 
@@ -166,12 +166,12 @@ The terminal CLI exposes the same non-archived catalog and Gateway-local branch
 and archive actions:
 
 ```bash
-openclaw codex sessions [--search <text>] [--host <id>] [--limit <count>] [--cursor <cursor>] [--json] [--url <url>] [--token <token>] [--timeout <ms>] [--expect-final]
-openclaw codex continue <thread-id> [--json] [--url <url>] [--token <token>] [--timeout <ms>] [--expect-final]
-openclaw codex archive <thread-id> --confirm-no-other-runner [--json] [--url <url>] [--token <token>] [--timeout <ms>] [--expect-final]
+bot codex sessions [--search <text>] [--host <id>] [--limit <count>] [--cursor <cursor>] [--json] [--url <url>] [--token <token>] [--timeout <ms>] [--expect-final]
+bot codex continue <thread-id> [--json] [--url <url>] [--token <token>] [--timeout <ms>] [--expect-final]
+bot codex archive <thread-id> --confirm-no-other-runner [--json] [--url <url>] [--token <token>] [--timeout <ms>] [--expect-final]
 ```
 
-`openclaw codex sessions` options:
+`bot codex sessions` options:
 
 - `--search <text>` searches session titles case-insensitively.
 - `--host <id>` limits the response to one stable catalog host, such as
@@ -202,7 +202,7 @@ command.
 ## Branch from a local session
 
 Choose **Continue as branch** on a stored or idle row from the Gateway computer.
-OpenClaw creates a normal Chat entry, mirrors bounded user and assistant history
+Bot creates a normal Chat entry, mirrors bounded user and assistant history
 through the source's last terminal persisted turn (completed, interrupted, or
 failed), records a pending harness branch, and opens the Chat. The generic model
 picker is locked, but no concrete model or provider has been selected yet. The
@@ -221,22 +221,22 @@ real approval, elicitation, event, and delivery handlers. It uses a temporary
 native fork on the supervision connection to pin the source snapshot without
 supplying a model or provider override. Codex App Server selects both from its
 current native configuration and returns the actual selection. On that same
-connection, OpenClaw starts the canonical `appServer`-source full harness thread
+connection, Bot starts the canonical `appServer`-source full harness thread
 under its cwd and runtime policy with exactly that returned pair, injects the
 bounded visible history, and archives the temporary fork. The canonical thread
-has the full OpenClaw harness tool surface. This is a visible-history branch, not
+has the full Bot harness tool surface. This is a visible-history branch, not
 a full native rollout clone: source reasoning, tool calls, and tool results are
 omitted. This and every later turn stays on the supervised Codex connection
-rather than another OpenClaw model runtime or the ordinary agent-home harness.
+rather than another Bot model runtime or the ordinary agent-home harness.
 
 The returned selection is not proof of the source's historical model. If the
 current native configuration differs from the model recorded for the source's
-last turn, Codex emits its normal model-difference warning. OpenClaw uses the
+last turn, Codex emits its normal model-difference warning. Bot uses the
 returned pair for the canonical thread start. Codex persists that canonical
 thread's native model and provider, and later resumes preserve them because
-OpenClaw omits model and provider overrides. If the canonical thread is changed
-through a separate native Codex control, OpenClaw accepts Codex's persisted
-selection. OpenClaw never substitutes its outer model or fallback chain.
+Bot omits model and provider overrides. If the canonical thread is changed
+through a separate native Codex control, Bot accepts Codex's persisted
+selection. Bot never substitutes its outer model or fallback chain.
 
 The supervised model-locked Chat cannot be deleted, switch models, use `/new`
 or `/reset`, invoke the Gateway session-reset action, or use the generic
@@ -266,18 +266,18 @@ still provide bounded title-only search. Rename, unarchive, detached fork, and
 archive of an unrelated unowned thread require
 `allowWriteControls`. Neither option bypasses the locked binding.
 
-OpenClaw does not subscribe to or answer approval requests while merely listing
+Bot does not subscribe to or answer approval requests while merely listing
 the source thread or displaying the pending Chat. Starting a distinct canonical
 harness thread on the first turn lets another Codex process keep owning the
 source without creating competing rollout writers.
 
 The original CLI, VS Code, Atlas, or ChatGPT source remains visible to native
-clients and the OpenClaw catalog. The canonical branch is stored as a native
+clients and the Bot catalog. The canonical branch is stored as a native
 Codex thread, but its source kind is `appServer`; Codex Desktop or another
 native client may filter that source kind, so the branch itself is not guaranteed
 to appear in every native history view.
 
-An active row reported by OpenClaw's App Server cannot start a new branch. Wait
+An active row reported by Bot's App Server cannot start a new branch. Wait
 for the current turn to finish and refresh the catalog. Codex App Server
 serializes mutations within one process, but it does not provide an exclusive
 cross-process runner or approval-owner lease.
@@ -290,8 +290,8 @@ in-progress turn, its latest in-flight work might not be present in the branch.
 ## Archive a local session
 
 Choose **Archive** on a stored or idle Gateway-local row, then confirm that no
-other Codex client or OpenClaw runner is using that thread or its spawned
-descendants. OpenClaw freshly reads the process-local status, proceeds only for
+other Codex client or Bot runner is using that thread or its spawned
+descendants. Bot freshly reads the process-local status, proceeds only for
 `idle` or `notLoaded`, calls the native Codex archive operation, and removes the
 session from the non-archived list. Native Codex also attempts to archive the
 thread's spawned descendants.
@@ -300,8 +300,8 @@ Archive is unavailable when the fresh read reports the session active or in an
 error state, when it belongs to a paired node, or while a newly created
 supervised Chat still has a pending branch from that source. Send the Chat's
 first message to materialize its canonical branch before archiving the source.
-Archive is also blocked when OpenClaw knows that an active binding owns the
-exact target thread or any non-archived spawned descendant. OpenClaw follows the
+Archive is also blocked when Bot knows that an active binding owns the
+exact target thread or any non-archived spawned descendant. Bot follows the
 experimental Codex descendant query through every page; an invalid response,
 request failure, repeated cursor or thread, or safety-limit exhaustion rejects
 archive.
@@ -388,7 +388,7 @@ Sessions**, where the full harness installs approval and tool handlers before
 continuation. Interrupt likewise requires an active readable turn. These tools
 do not resume or start an idle source thread.
 
-`openclaw doctor --fix` moves a retired `codex-supervisor` entry, its endpoint
+`bot doctor --fix` moves a retired `codex-supervisor` entry, its endpoint
 and permission fields, and plugin allow/deny policy references into the official
 `codex` plugin without overwriting explicit canonical settings. The standalone
 compatibility MCP adapter continues to load the same five tools from that
@@ -400,7 +400,7 @@ For every supervision config field, see
 
 ## Troubleshooting
 
-**No sessions appear:** verify that `@openclaw/codex` is installed, both the
+**No sessions appear:** verify that `@hanzo/bot-codex` is installed, both the
 plugin and `supervision.enabled` are true, the current plugin allowlist permits
 `codex`, and the sessions are not archived. Restart the Gateway or node after
 changing activation.
@@ -419,7 +419,7 @@ read-only for archive.
 no archived view. Run `codex unarchive <thread-id>` or use Codex Desktop to show
 it again.
 
-**Old `codex-supervisor` config remains:** run `openclaw doctor --fix`. Doctor
+**Old `codex-supervisor` config remains:** run `bot doctor --fix`. Doctor
 moves the retired plugin entry and related plugin-policy references into
 `plugins.entries.codex.config.supervision` without overwriting explicit Codex
 settings.

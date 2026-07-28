@@ -121,7 +121,7 @@ describe("shared/tailscale-status", () => {
             Handlers: { "/": { Proxy: "http://127.0.0.1:18789" } },
           },
           "mac.tail.ts.net:443": {
-            Handlers: { "/openclaw": { Proxy: "http://127.0.0.1:18789" } },
+            Handlers: { "/bot": { Proxy: "http://127.0.0.1:18789" } },
           },
           "other.tail.ts.net:443": {
             Handlers: { "/": { Proxy: "http://192.168.1.20:18789" } },
@@ -145,10 +145,10 @@ describe("shared/tailscale-status", () => {
         },
         AllowFunnel: { "mac.tail.ts.net:443": true },
         Services: {
-          "svc:openclaw": {
+          "svc:bot": {
             TCP: { "443": { HTTPS: true } },
             Web: {
-              "openclaw.tail.ts.net:443": {
+              "bot.tail.ts.net:443": {
                 Handlers: { "/": { Proxy: "127.0.0.1:18789" } },
               },
             },

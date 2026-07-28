@@ -1,18 +1,18 @@
 /**
- * Persistent lease store for ACPX wrapper processes. Leases let OpenClaw attach
+ * Persistent lease store for ACPX wrapper processes. Leases let Bot attach
  * gateway/session identity to spawned ACP processes and clean them up later.
  */
 import { randomUUID, createHash } from "node:crypto";
 import type {
   OpenKeyedStoreOptions,
   PluginStateKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/plugin-state-runtime";
 import { ACPX_PROCESS_LEASE_MAX_ENTRIES, ACPX_PROCESS_LEASE_NAMESPACE } from "./state.js";
 
 /** CLI argument carrying the ACPX process lease id. */
-export const OPENCLAW_ACPX_LEASE_ID_ARG = "--openclaw-acpx-lease-id";
+export const BOT_ACPX_LEASE_ID_ARG = "--bot-acpx-lease-id";
 /** CLI argument carrying the owning gateway instance id. */
-export const OPENCLAW_GATEWAY_INSTANCE_ID_ARG = "--openclaw-gateway-instance-id";
+export const BOT_GATEWAY_INSTANCE_ID_ARG = "--bot-gateway-instance-id";
 
 /** Lifecycle state for a tracked ACPX wrapper process. */
 type AcpxProcessLeaseState = "open" | "closing" | "closed" | "lost";
@@ -172,9 +172,9 @@ function appendAcpxLeaseArgs(params: {
 }): string {
   return [
     params.command,
-    OPENCLAW_ACPX_LEASE_ID_ARG,
+    BOT_ACPX_LEASE_ID_ARG,
     quoteEnvValue(params.leaseId),
-    OPENCLAW_GATEWAY_INSTANCE_ID_ARG,
+    BOT_GATEWAY_INSTANCE_ID_ARG,
     quoteEnvValue(params.gatewayInstanceId),
   ].join(" ");
 }

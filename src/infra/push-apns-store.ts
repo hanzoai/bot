@@ -1,15 +1,15 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 // Canonical shared-SQLite store for APNs device and relay registrations.
 import type { Insertable, Selectable } from "kysely";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+  type BotStateDatabaseOptions,
+} from "../state/bot-state-db.js";
 import { loadPairedDevicePairingStoreRecordFromDatabase } from "./device-pairing-store.js";
 import { resolveNodePairingGeneration } from "./device-pairing.js";
 import {
@@ -86,7 +86,7 @@ type RegisterRelayApnsParams = {
 type RegisterApnsParams = RegisterDirectApnsParams | RegisterRelayApnsParams;
 
 type ApnsRegistrationDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  BotStateKyselyDatabase,
   "apns_registrations" | "apns_registration_tombstones"
 >;
 type ApnsRegistrationRow = Selectable<ApnsRegistrationDatabase["apns_registrations"]>;
@@ -99,9 +99,9 @@ const MAX_RELAY_IDENTIFIER_LENGTH = 256;
 const MAX_SEND_GRANT_LENGTH = 1024;
 const APNS_REGISTRATION_LOOKUP_CHUNK_SIZE = 500;
 
-function apnsStateDatabaseOptions(stateDir?: string): OpenClawStateDatabaseOptions {
+function apnsStateDatabaseOptions(stateDir?: string): BotStateDatabaseOptions {
   return stateDir
-    ? { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } }
+    ? { env: { ...process.env, BOT_STATE_DIR: stateDir } }
     : { env: process.env };
 }
 
@@ -504,7 +504,7 @@ export async function registerApnsRegistration(
     };
   }
 
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runBotStateWriteTransaction(({ db }) => {
     if (params.expectedPairingGeneration) {
       // The Gateway admission check happens before this transaction. Reread the
       // pairing here so removal and APNs ownership cannot commit out of order.
@@ -587,7 +587,7 @@ export async function loadApnsRegistration(
   if (!normalizedNodeId) {
     return null;
   }
-  const database = openOpenClawStateDatabase(apnsStateDatabaseOptions(baseDir));
+  const database = openBotStateDatabase(apnsStateDatabaseOptions(baseDir));
   const row = executeSqliteQueryTakeFirstSync(
     database.db,
     getNodeSqliteKysely<ApnsRegistrationDatabase>(database.db)
@@ -617,7 +617,7 @@ export async function loadApnsRegistrations(
   if (uniqueNodeIds.length === 0) {
     return [];
   }
-  const database = openOpenClawStateDatabase(apnsStateDatabaseOptions(baseDir));
+  const database = openBotStateDatabase(apnsStateDatabaseOptions(baseDir));
   const registrations = new Map<string, ApnsRegistration>();
   const stateDb = getNodeSqliteKysely<ApnsRegistrationDatabase>(database.db);
   for (
@@ -656,7 +656,7 @@ export async function clearApnsRegistrationIfCurrent(params: {
   if (!normalizedNodeId) {
     return false;
   }
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runBotStateWriteTransaction(({ db }) => {
     const stateDb = getNodeSqliteKysely<ApnsRegistrationDatabase>(db);
     const currentRow = executeSqliteQueryTakeFirstSync(
       db,

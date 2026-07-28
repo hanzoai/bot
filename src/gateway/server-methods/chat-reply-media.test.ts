@@ -4,12 +4,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { getAgentScopedMediaLocalRoots } from "../../media/local-roots.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createBotTestState,
+  type BotTestState,
+} from "../../test-utils/bot-test-state.js";
 import { createManagedOutgoingImageBlocks } from "../managed-image-attachments.js";
 import { normalizeWebchatReplyMediaPathsForDisplay } from "./chat-reply-media.js";
 
@@ -28,16 +28,16 @@ type MediaTestContext = {
   stateDir: string;
   agentDir: string;
   workspaceDir: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 };
 
 describe("normalizeWebchatReplyMediaPathsForDisplay", () => {
-  let testState: OpenClawTestState;
+  let testState: BotTestState;
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
+    testState = await createBotTestState({
       layout: "state-only",
-      prefix: "openclaw-webchat-reply-media-",
+      prefix: "bot-webchat-reply-media-",
     });
   });
 
@@ -49,7 +49,7 @@ describe("normalizeWebchatReplyMediaPathsForDisplay", () => {
     agentDir: string;
     workspaceDir: string;
     allowRead: boolean;
-  }): OpenClawConfig {
+  }): BotConfig {
     return {
       tools: params.allowRead ? { allow: ["read"] } : { fs: { workspaceOnly: true } },
       agents: {
@@ -100,7 +100,7 @@ describe("normalizeWebchatReplyMediaPathsForDisplay", () => {
   }
 
   async function normalizeReplyMedia(params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     payloads: ReplyMediaPayloads;
   }) {
     const [payload] = await normalizeWebchatReplyMediaPathsForDisplay({
@@ -126,7 +126,7 @@ describe("normalizeWebchatReplyMediaPathsForDisplay", () => {
   }
 
   async function createManagedImageBlocks(params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     mediaUrls: string[] | undefined;
   }) {
     return createManagedOutgoingImageBlocks({

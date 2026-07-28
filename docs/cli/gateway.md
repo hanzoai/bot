@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Gateway CLI (`openclaw gateway`) — run, query, and discover gateways"
+summary: "Bot Gateway CLI (`bot gateway`) — run, query, and discover gateways"
 read_when:
   - Running the Gateway from the CLI (dev or servers)
   - Debugging Gateway auth, bind modes, and connectivity
@@ -9,14 +9,14 @@ title: "Gateway"
 sidebarTitle: "Gateway"
 ---
 
-The Gateway is OpenClaw's WebSocket server (channels, nodes, sessions, hooks). All subcommands below live under `openclaw gateway ...`.
+The Gateway is Bot's WebSocket server (channels, nodes, sessions, hooks). All subcommands below live under `bot gateway ...`.
 
 <CardGroup cols={3}>
   <Card title="Bonjour discovery" href="/gateway/bonjour">
     Local mDNS + wide-area DNS-SD setup.
   </Card>
   <Card title="Discovery overview" href="/gateway/discovery">
-    How OpenClaw advertises and finds gateways.
+    How Bot advertises and finds gateways.
   </Card>
   <Card title="Configuration" href="/gateway/configuration">
     Top-level gateway config keys.
@@ -26,18 +26,18 @@ The Gateway is OpenClaw's WebSocket server (channels, nodes, sessions, hooks). A
 ## Run the Gateway
 
 ```bash
-openclaw gateway
-openclaw gateway run   # equivalent, explicit form
+bot gateway
+bot gateway run   # equivalent, explicit form
 ```
 
 <AccordionGroup>
   <Accordion title="Startup behavior">
-    - Refuses to start unless `gateway.mode=local` is set in `~/.openclaw/openclaw.json`. Use `--allow-unconfigured` for ad-hoc/dev runs; it bypasses the guard without writing or repairing config.
-    - When startup finds a repairable invalid config, an interactive terminal offers to run `openclaw doctor --fix` and retries startup once after consent. Non-interactive runs never repair automatically; they print the command instead. If the repaired config is still invalid, startup remains stopped.
-    - `openclaw onboard --mode local` and `openclaw setup` write `gateway.mode=local`. If the config file exists but `gateway.mode` is missing, that is treated as damaged/clobbered config and the Gateway refuses to guess `local` for you — re-run onboarding, set the key manually, or pass `--allow-unconfigured`.
+    - Refuses to start unless `gateway.mode=local` is set in `~/.hanzoai/bot.json`. Use `--allow-unconfigured` for ad-hoc/dev runs; it bypasses the guard without writing or repairing config.
+    - When startup finds a repairable invalid config, an interactive terminal offers to run `bot doctor --fix` and retries startup once after consent. Non-interactive runs never repair automatically; they print the command instead. If the repaired config is still invalid, startup remains stopped.
+    - `bot onboard --mode local` and `bot setup` write `gateway.mode=local`. If the config file exists but `gateway.mode` is missing, that is treated as damaged/clobbered config and the Gateway refuses to guess `local` for you — re-run onboarding, set the key manually, or pass `--allow-unconfigured`.
     - Binding beyond loopback without auth is blocked.
     - `--bind` values `lan`, `tailnet`, and `custom` resolve over IPv4-only paths today; IPv6-only bring-your-own-host setups need an IPv4 sidecar or proxy in front of the Gateway.
-    - `SIGUSR1` triggers an in-process restart when authorized. `commands.restart` (default: enabled) gates externally-sent `SIGUSR1`; set it to `false` to block manual OS-signal restarts. The agent-facing `gateway` tool is read-only; agents request restart through the human-approved `openclaw` delegation tool.
+    - `SIGUSR1` triggers an in-process restart when authorized. `commands.restart` (default: enabled) gates externally-sent `SIGUSR1`; set it to `false` to block manual OS-signal restarts. The agent-facing `gateway` tool is read-only; agents request restart through the human-approved `bot` delegation tool.
     - `SIGINT`/`SIGTERM` stop the process but do not restore custom terminal state — if you wrap the CLI in a TUI or raw-mode input, restore the terminal yourself before exit.
 
   </Accordion>
@@ -52,7 +52,7 @@ openclaw gateway run   # equivalent, explicit form
   Bind mode: `loopback` (default), `lan`, `tailnet`, `auto`, `custom`.
 </ParamField>
 <ParamField path="--token <token>" type="string">
-  Shared token for `connect.params.auth.token`. Defaults to `OPENCLAW_GATEWAY_TOKEN` when set.
+  Shared token for `connect.params.auth.token`. Defaults to `BOT_GATEWAY_TOKEN` when set.
 </ParamField>
 <ParamField path="--auth <mode>" type="string">
   Auth mode: `none`, `token`, `password`, `trusted-proxy`.
@@ -110,11 +110,11 @@ For `--bind custom`, set `gateway.customBindHost` to an IPv4 address. Any addres
 ## Restart the Gateway
 
 ```bash
-openclaw gateway restart
-openclaw gateway restart --safe
-openclaw gateway restart --safe --skip-deferral
-openclaw gateway restart --force
-openclaw gateway restart --wait 30s
+bot gateway restart
+bot gateway restart --safe
+bot gateway restart --safe --skip-deferral
+bot gateway restart --force
+bot gateway restart --wait 30s
 ```
 
 `--safe` asks the running Gateway to preflight active work and schedule one coalesced restart after that work drains. The wait is bounded to 5 minutes; when the budget expires the restart is forced. `--safe` cannot combine with `--force` or `--wait`.
@@ -131,31 +131,31 @@ Inline `--password` can be exposed in local process listings. Prefer `--password
 
 ### External supervisors
 
-Set `OPENCLAW_SUPERVISOR_MODE=external` only when another process manager owns the Gateway lifecycle. In this mode:
+Set `BOT_SUPERVISOR_MODE=external` only when another process manager owns the Gateway lifecycle. In this mode:
 
-- `openclaw gateway restart` preserves the existing safe, forced, and bounded-wait behavior while targeting the verified running Gateway instead of launchd, systemd, or Task Scheduler.
+- `bot gateway restart` preserves the existing safe, forced, and bounded-wait behavior while targeting the verified running Gateway instead of launchd, systemd, or Task Scheduler.
 - Native service install, start, stop, and uninstall operations are refused with guidance to use the external supervisor.
-- OpenClaw self-update is refused so the supervisor can stop the Gateway, replace and finalize the runtime, and restart it safely.
+- Bot self-update is refused so the supervisor can stop the Gateway, replace and finalize the runtime, and restart it safely.
 - A fresh-process restart writes a bounded SQLite handoff before clean exit. If persistence fails, the Gateway falls back to an in-process restart instead of exiting without a consumable handoff.
 
-`OPENCLAW_SERVICE_REPAIR_POLICY=external` remains a separate Doctor repair policy. It does not declare runtime ownership; supervisors that need both behaviors should set both variables.
+`BOT_SERVICE_REPAIR_POLICY=external` remains a separate Doctor repair policy. It does not declare runtime ownership; supervisors that need both behaviors should set both variables.
 
 External supervisors can negotiate and consume restart handoffs through the hidden machine contract:
 
 ```bash
-openclaw gateway restart-handoff capabilities --json
-openclaw gateway restart-handoff consume --expected-pid <pid> --json
+bot gateway restart-handoff capabilities --json
+bot gateway restart-handoff consume --expected-pid <pid> --json
 ```
 
 Protocol version `1` supports the `consume` operation. Consumption validates the expected PID and bounded handoff fields inside one immediate SQLite transaction. An accepted handoff is deleted before success is returned, so concurrent or replayed consumers cannot both accept it. A PID mismatch is retained for the matching owner; missing, expired, and invalid rows do not authorize a restart.
 
-Valid machine requests return JSON with exit code `0`, including non-restart results. Invalid arguments return `reason: "invalid-expected-pid"` with exit code `2`; state-store failures return `reason: "store-unavailable"` with exit code `1`. Supervisors should probe `capabilities` on the exact runtime or launcher they will use rather than infer support from an OpenClaw version string or read the private SQLite schema directly.
+Valid machine requests return JSON with exit code `0`, including non-restart results. Invalid arguments return `reason: "invalid-expected-pid"` with exit code `2`; state-store failures return `reason: "store-unavailable"` with exit code `1`. Supervisors should probe `capabilities` on the exact runtime or launcher they will use rather than infer support from an Bot version string or read the private SQLite schema directly.
 
 ### Gateway profiling
 
-- `OPENCLAW_GATEWAY_STARTUP_TRACE=1` logs phase timings during startup, including per-phase `eventLoopMax` delay and plugin lookup-table timings (installed-index, manifest registry, startup planning, owner-map work).
-- `OPENCLAW_GATEWAY_RESTART_TRACE=1` logs restart-scoped `restart trace:` lines: signal handling, active-work drain, shutdown phases, next start, ready timing, and memory metrics.
-- `OPENCLAW_DIAGNOSTICS=timeline` with `OPENCLAW_DIAGNOSTICS_TIMELINE_PATH=<path>` writes a best-effort JSONL startup diagnostics timeline for external QA harnesses (equivalent to config `diagnostics.flags: ["timeline"]`; the path is still env-only). Add `OPENCLAW_DIAGNOSTICS_EVENT_LOOP=1` to include event-loop samples.
+- `BOT_GATEWAY_STARTUP_TRACE=1` logs phase timings during startup, including per-phase `eventLoopMax` delay and plugin lookup-table timings (installed-index, manifest registry, startup planning, owner-map work).
+- `BOT_GATEWAY_RESTART_TRACE=1` logs restart-scoped `restart trace:` lines: signal handling, active-work drain, shutdown phases, next start, ready timing, and memory metrics.
+- `BOT_DIAGNOSTICS=timeline` with `BOT_DIAGNOSTICS_TIMELINE_PATH=<path>` writes a best-effort JSONL startup diagnostics timeline for external QA harnesses (equivalent to config `diagnostics.flags: ["timeline"]`; the path is still env-only). Add `BOT_DIAGNOSTICS_EVENT_LOOP=1` to include event-loop samples.
 - `pnpm build` then `pnpm test:startup:gateway -- --runs 5 --warmup 1` benchmarks Gateway startup against the built CLI entry: first process output, `/healthz`, `/readyz`, startup trace timings, event-loop delay, and plugin lookup-table timing.
 - `pnpm build` then `pnpm test:restart:gateway -- --case skipChannels --runs 1 --restarts 5` benchmarks in-process restart on macOS or Linux (not supported on Windows; restart requires `SIGUSR1`). Uses `SIGUSR1`, enables both traces in the child process, and records next `/healthz`, next `/readyz`, downtime, ready timing, CPU, RSS, and restart trace metrics.
 - `/healthz` is liveness; `/readyz` is usable readiness. Treat trace lines and benchmark output as owner-attribution signal, not a complete performance conclusion from one span or sample.
@@ -188,14 +188,14 @@ When you set `--url`, the CLI does not fall back to config or environment creden
 ### `gateway health`
 
 ```bash
-openclaw gateway health --url ws://127.0.0.1:18789
-openclaw gateway health --port 18789
+bot gateway health --url ws://127.0.0.1:18789
+bot gateway health --port 18789
 ```
 
 `/healthz` is a liveness probe: it returns as soon as the server can answer HTTP. `/readyz` is stricter and stays red while startup plugin sidecars, channels, or configured hooks are still settling. Local or authenticated detailed `/readyz` responses include an `eventLoop` diagnostic block (delay, utilization, CPU-core ratio, `degraded` flag).
 
 <ParamField path="--port <port>" type="number">
-  Target a local loopback Gateway on this port. Overrides `OPENCLAW_GATEWAY_URL` and `OPENCLAW_GATEWAY_PORT` for this call.
+  Target a local loopback Gateway on this port. Overrides `BOT_GATEWAY_URL` and `BOT_GATEWAY_PORT` for this call.
 </ParamField>
 
 ### `gateway usage-cost`
@@ -203,11 +203,11 @@ openclaw gateway health --port 18789
 Fetch usage-cost summaries from session logs.
 
 ```bash
-openclaw gateway usage-cost
-openclaw gateway usage-cost --days 7
-openclaw gateway usage-cost --agent work --json
-openclaw gateway usage-cost --all-agents
-openclaw gateway usage-cost --json
+bot gateway usage-cost
+bot gateway usage-cost --days 7
+bot gateway usage-cost --agent work --json
+bot gateway usage-cost --all-agents
+bot gateway usage-cost --json
 ```
 
 <ParamField path="--days <days>" type="number" default="30">
@@ -225,11 +225,11 @@ openclaw gateway usage-cost --json
 Fetch the recent diagnostic stability recorder from a running Gateway.
 
 ```bash
-openclaw gateway stability
-openclaw gateway stability --type payload.large
-openclaw gateway stability --bundle latest
-openclaw gateway stability --bundle latest --export
-openclaw gateway stability --json
+bot gateway stability
+bot gateway stability --type payload.large
+bot gateway stability --bundle latest
+bot gateway stability --bundle latest --export
+bot gateway stability --json
 ```
 
 <ParamField path="--limit <limit>" type="number" default="25">
@@ -254,7 +254,7 @@ openclaw gateway stability --json
 <AccordionGroup>
   <Accordion title="Privacy and bundle behavior">
     - Records keep operational metadata: event names, counts, byte sizes, memory readings, queue/session state, approval ids, channel/plugin names, and redacted session summaries. They exclude chat text, webhook bodies, tool outputs, raw request/response bodies, tokens, cookies, secret values, hostnames, and raw session ids. Set `diagnostics.enabled: false` to disable the recorder entirely.
-    - Fatal Gateway exits, shutdown timeouts, and restart startup failures write the same diagnostic snapshot to `~/.openclaw/logs/stability/openclaw-stability-*.json` when the recorder has events. Inspect the newest bundle with `openclaw gateway stability --bundle latest`; `--limit`, `--type`, and `--since-seq` apply to bundle output too.
+    - Fatal Gateway exits, shutdown timeouts, and restart startup failures write the same diagnostic snapshot to `~/.bot/logs/stability/bot-stability-*.json` when the recorder has events. Inspect the newest bundle with `bot gateway stability --bundle latest`; `--limit`, `--type`, and `--since-seq` apply to bundle output too.
 
   </Accordion>
 </AccordionGroup>
@@ -264,9 +264,9 @@ openclaw gateway stability --json
 Write a local diagnostics zip designed for bug reports. For the privacy model and bundle contents, see [Diagnostics Export](/gateway/diagnostics).
 
 ```bash
-openclaw gateway diagnostics export
-openclaw gateway diagnostics export --output openclaw-diagnostics.zip
-openclaw gateway diagnostics export --json
+bot gateway diagnostics export
+bot gateway diagnostics export --output bot-diagnostics.zip
+bot gateway diagnostics export --json
 ```
 
 <ParamField path="--output <path>" type="string">
@@ -297,7 +297,7 @@ openclaw gateway diagnostics export --json
   Print the written path, size, and manifest as JSON.
 </ParamField>
 
-The export bundles: `manifest.json` (file inventory), `summary.md` (Markdown summary), `diagnostics.json` (top-level config/logs/discovery/stability/status/health summary), `config/sanitized.json`, `status/gateway-status.json`, `health/gateway-health.json`, `logs/openclaw-sanitized.jsonl`, and `stability/latest.json` when a bundle exists.
+The export bundles: `manifest.json` (file inventory), `summary.md` (Markdown summary), `diagnostics.json` (top-level config/logs/discovery/stability/status/health summary), `config/sanitized.json`, `status/gateway-status.json`, `health/gateway-health.json`, `logs/bot-sanitized.jsonl`, and `stability/latest.json` when a bundle exists.
 
 It is designed to be shared. It keeps operational details useful for debugging — safe log fields, subsystem names, status codes, durations, configured modes, ports, plugin/provider ids, non-secret feature settings, and redacted operational log messages — and omits or redacts chat text, webhook bodies, tool outputs, credentials, cookies, account/message identifiers, prompt/instruction text, hostnames, and secret values. When a log message looks like user/chat/tool payload text (e.g. "user said", "chat text", "tool output", "webhook body"), the export keeps only the fact that a message was omitted plus its byte count.
 
@@ -306,9 +306,9 @@ It is designed to be shared. It keeps operational details useful for debugging �
 Shows the Gateway service (launchd/systemd/schtasks) plus an optional connectivity/auth probe.
 
 ```bash
-openclaw gateway status
-openclaw gateway status --json
-openclaw gateway status --require-rpc
+bot gateway status
+bot gateway status --json
+bot gateway status --require-rpc
 ```
 
 <ParamField path="--url <url>" type="string">
@@ -369,9 +369,9 @@ If multiple probe targets are reachable, all are printed. An SSH tunnel, TLS/pro
 </Note>
 
 ```bash
-openclaw gateway probe
-openclaw gateway probe --json
-openclaw gateway probe --port 18789
+bot gateway probe
+bot gateway probe --json
+bot gateway probe --port 18789
 ```
 
 <ParamField path="--port <port>" type="number">
@@ -407,10 +407,10 @@ openclaw gateway probe --port 18789
   </Accordion>
   <Accordion title="Common warning codes">
     - `ssh_tunnel_failed`: SSH tunnel setup failed; the command fell back to direct probes.
-    - `multiple_gateways`: distinct gateway identities were reachable, or OpenClaw could not prove reachable targets are the same gateway. An SSH tunnel, proxy URL, or configured remote URL to the same gateway does not trigger this.
+    - `multiple_gateways`: distinct gateway identities were reachable, or Bot could not prove reachable targets are the same gateway. An SSH tunnel, proxy URL, or configured remote URL to the same gateway does not trigger this.
     - `auth_secretref_unresolved`: a configured auth SecretRef could not be resolved for a failed target.
     - `probe_scope_limited`: WebSocket connect succeeded, but the read probe was limited by missing `operator.read`.
-    - `local_tls_runtime_unavailable`: local Gateway TLS is enabled but OpenClaw could not load the local certificate fingerprint.
+    - `local_tls_runtime_unavailable`: local Gateway TLS is enabled but Bot could not load the local certificate fingerprint.
 
   </Accordion>
 </AccordionGroup>
@@ -422,7 +422,7 @@ The macOS app "Remote over SSH" mode uses a local port-forward so a loopback-onl
 CLI equivalent:
 
 ```bash
-openclaw gateway probe --ssh user@gateway-host
+bot gateway probe --ssh user@gateway-host
 ```
 
 <ParamField path="--ssh <target>" type="string">
@@ -442,8 +442,8 @@ Config defaults (optional): `gateway.remote.sshTarget`, `gateway.remote.sshIdent
 Low-level RPC helper.
 
 ```bash
-openclaw gateway call status
-openclaw gateway call logs.tail --params '{"limit": 200}'
+bot gateway call status
+bot gateway call logs.tail --params '{"limit": 200}'
 ```
 
 <ParamField path="--params <json>" type="string" default="{}">
@@ -475,41 +475,41 @@ openclaw gateway call logs.tail --params '{"limit": 200}'
 ## Manage the Gateway service
 
 ```bash
-openclaw gateway install
-openclaw gateway start
-openclaw gateway stop
-openclaw gateway restart
-openclaw gateway uninstall
+bot gateway install
+bot gateway start
+bot gateway stop
+bot gateway restart
+bot gateway uninstall
 ```
 
 ### Install with a wrapper
 
-Use `--wrapper` when the managed service must start through another executable, for example a secrets manager shim or a run-as helper. The wrapper receives the normal Gateway args and is responsible for eventually exec'ing `openclaw` or Node with those args.
+Use `--wrapper` when the managed service must start through another executable, for example a secrets manager shim or a run-as helper. The wrapper receives the normal Gateway args and is responsible for eventually exec'ing `bot` or Node with those args.
 
 ```bash
-cat > ~/.local/bin/openclaw-doppler <<'EOF'
+cat > ~/.local/bin/bot-doppler <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-exec doppler run --project my-project --config production -- openclaw "$@"
+exec doppler run --project my-project --config production -- bot "$@"
 EOF
-chmod +x ~/.local/bin/openclaw-doppler
+chmod +x ~/.local/bin/bot-doppler
 
-openclaw gateway install --wrapper ~/.local/bin/openclaw-doppler --force
-openclaw gateway restart
+bot gateway install --wrapper ~/.local/bin/bot-doppler --force
+bot gateway restart
 ```
 
-You can also set the wrapper through the environment. `gateway install` validates that the path is an executable file, writes the wrapper into the service `ProgramArguments`, and persists `OPENCLAW_WRAPPER` in the service environment for later forced reinstalls, updates, and doctor repairs.
+You can also set the wrapper through the environment. `gateway install` validates that the path is an executable file, writes the wrapper into the service `ProgramArguments`, and persists `BOT_WRAPPER` in the service environment for later forced reinstalls, updates, and doctor repairs.
 
 ```bash
-OPENCLAW_WRAPPER="$HOME/.local/bin/openclaw-doppler" openclaw gateway install --force
-openclaw doctor
+BOT_WRAPPER="$HOME/.local/bin/bot-doppler" bot gateway install --force
+bot doctor
 ```
 
-To remove a persisted wrapper, clear `OPENCLAW_WRAPPER` while reinstalling:
+To remove a persisted wrapper, clear `BOT_WRAPPER` while reinstalling:
 
 ```bash
-OPENCLAW_WRAPPER= openclaw gateway install --force
-openclaw gateway restart
+BOT_WRAPPER= bot gateway install --force
+bot gateway restart
 ```
 
 <AccordionGroup>
@@ -534,15 +534,15 @@ openclaw gateway restart
     - `gateway install` writes a heap-only `NODE_OPTIONS` value for the managed Gateway service. It targets 50% of constrained memory when Node reports a container or service limit, otherwise 50% of physical memory.
     - The nominal target range is 2048–8192 MiB, with an additional 75% native-headroom cap. On small hosts, that headroom cap can put the applied limit below the nominal 2048 MiB floor.
     - A valid explicit `--max-old-space-size` already stored in the installed service is preserved across forced reinstalls and doctor repairs. Other `NODE_OPTIONS` flags are not carried into the managed service.
-    - Ambient shell `NODE_OPTIONS` does not override this policy. Use `gateway status` or `doctor` to inspect the installed value; run `openclaw gateway install --force` to regenerate older service metadata that has no managed heap setting.
+    - Ambient shell `NODE_OPTIONS` does not override this policy. Use `gateway status` or `doctor` to inspect the installed value; run `bot gateway install --force` to regenerate older service metadata that has no managed heap setting.
     - The policy applies only to the managed Gateway service. Foreground `gateway run`, node services, and hand-written supervisor units retain their own runtime configuration.
 
   </Accordion>
   <Accordion title="Auth and SecretRefs at install time">
     - When token auth requires a token and `gateway.auth.token` is SecretRef-managed, `gateway install` validates that the SecretRef is resolvable but does not persist the resolved token into service environment metadata.
     - If token auth requires a token and the configured token SecretRef is unresolved, install fails closed instead of persisting fallback plaintext.
-    - For password auth on `gateway run`, prefer `OPENCLAW_GATEWAY_PASSWORD`, `--password-file`, or a SecretRef-backed `gateway.auth.password` over inline `--password`.
-    - In inferred auth mode, shell-only `OPENCLAW_GATEWAY_PASSWORD` does not relax install token requirements; use durable config (`gateway.auth.password` or config `env`) when installing a managed service.
+    - For password auth on `gateway run`, prefer `BOT_GATEWAY_PASSWORD`, `--password-file`, or a SecretRef-backed `gateway.auth.password` over inline `--password`.
+    - In inferred auth mode, shell-only `BOT_GATEWAY_PASSWORD` does not relax install token requirements; use durable config (`gateway.auth.password` or config `env`) when installing a managed service.
     - If both `gateway.auth.token` and `gateway.auth.password` are configured and `gateway.auth.mode` is unset, install is blocked until mode is set explicitly.
 
   </Accordion>
@@ -550,10 +550,10 @@ openclaw gateway restart
 
 ## Discover gateways (Bonjour)
 
-`gateway discover` scans for Gateway beacons (`_openclaw-gw._tcp`).
+`gateway discover` scans for Gateway beacons (`_bot-gw._tcp`).
 
 - Multicast DNS-SD: `local.`
-- Unicast DNS-SD (wide-area Bonjour): choose a domain (example: `openclaw.internal.`) and set up split DNS + a DNS server; see [Bonjour](/gateway/bonjour).
+- Unicast DNS-SD (wide-area Bonjour): choose a domain (example: `bot.internal.`) and set up split DNS + a DNS server; see [Bonjour](/gateway/bonjour).
 
 Only gateways with Bonjour discovery enabled (default) advertise the beacon.
 
@@ -562,7 +562,7 @@ TXT hints on every beacon: `role` (gateway role hint), `transport` (transport hi
 ### `gateway discover`
 
 ```bash
-openclaw gateway discover
+bot gateway discover
 ```
 
 <ParamField path="--timeout <ms>" type="number" default="2000">
@@ -575,8 +575,8 @@ openclaw gateway discover
 Examples:
 
 ```bash
-openclaw gateway discover --timeout 4000
-openclaw gateway discover --json | jq '.beacons[].wsUrl'
+bot gateway discover --timeout 4000
+bot gateway discover --json | jq '.beacons[].wsUrl'
 ```
 
 <Note>

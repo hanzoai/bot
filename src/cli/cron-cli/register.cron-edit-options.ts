@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { CronJob } from "../../cron/types.js";
 import { parseStrictPositiveInteger } from "../../infra/parse-finite-number.js";
 import {

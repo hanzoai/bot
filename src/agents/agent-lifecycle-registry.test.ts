@@ -6,7 +6,7 @@ import {
   claimCompletedAgentDeletionJournal,
   readAgentDeletionJournal,
 } from "../state/agent-deletion-journal.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import {
   beginAgentDeletion,
   claimCompletedAgentDeletion,
@@ -17,10 +17,10 @@ const tempDirs: string[] = [];
 
 function createOptions() {
   const stateDir = fs.realpathSync(
-    fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-agent-delete-")),
+    fs.mkdtempSync(path.join(os.tmpdir(), "bot-agent-delete-")),
   );
   tempDirs.push(stateDir);
-  return { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+  return { env: { ...process.env, BOT_STATE_DIR: stateDir } };
 }
 
 function createEntry(agentId: string) {
@@ -33,7 +33,7 @@ function createEntry(agentId: string) {
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   for (const dir of tempDirs.splice(0)) {
     fs.rmSync(dir, { recursive: true, force: true });
   }

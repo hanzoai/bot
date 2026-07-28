@@ -4,9 +4,9 @@ import { listDevicePairing } from "../infra/device-pairing.js";
 import { requestNodePairing } from "../infra/node-pairing.js";
 import { configureSqliteConnectionPragmas } from "../infra/sqlite-wal.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
 import { openTrackedWs } from "./device-authz.test-helpers.js";
 import {
   createNodePairingTestState,
@@ -21,7 +21,7 @@ const {
   makeStateDir: makeNodePairingStateDir,
   seedNodeDevice,
   setup: setupNodePairingTestState,
-} = createNodePairingTestState("openclaw-node-pair-memo-");
+} = createNodePairingTestState("bot-node-pair-memo-");
 
 describe("gateway node pairing memoization", () => {
   beforeAll(async () => {
@@ -29,7 +29,7 @@ describe("gateway node pairing memoization", () => {
   });
 
   afterAll(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await cleanupNodePairingTestState();
   });
 
@@ -43,7 +43,7 @@ describe("gateway node pairing memoization", () => {
           deviceIdentityPath: `${await makeNodePairingStateDir()}/memo-scan-count.sqlite`,
         });
         await seedNodeDevice("node-list-memo-scan-count");
-        const database = openOpenClawStateDatabase();
+        const database = openBotStateDatabase();
         const originalPrepare = database.db.prepare.bind(database.db);
         const tableSelects = { paired: 0, pending: 0 };
         const prepareSpy = vi.spyOn(database.db, "prepare").mockImplementation((sql) => {
@@ -113,8 +113,8 @@ describe("gateway node pairing memoization", () => {
         ?.displayName,
     ).toBeUndefined();
 
-    const database = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: baseDir },
+    const database = openBotStateDatabase({
+      env: { ...process.env, BOT_STATE_DIR: baseDir },
     });
     const external = new DatabaseSync(database.path);
     const maintenance = configureSqliteConnectionPragmas(external, {

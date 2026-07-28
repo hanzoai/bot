@@ -33,7 +33,7 @@ describe("force-clear terminal state persistence", () => {
   let storePath: string;
 
   beforeEach(() => {
-    const tempDir = tempDirs.make("openclaw-forceclear-");
+    const tempDir = tempDirs.make("bot-forceclear-");
     storePath = path.join(tempDir, "sessions.json");
     setRuntimeConfigSnapshot({ session: { store: storePath } });
   });

@@ -5,7 +5,7 @@ import { appendRegularFile } from "../infra/regular-file.js";
 import { createSuiteLogPathTracker } from "./log-test-helpers.js";
 import { getLogger, resetLogger, setLoggerOverride, testApi } from "./logger.js";
 
-const logPathTracker = createSuiteLogPathTracker("openclaw-file-transport-");
+const logPathTracker = createSuiteLogPathTracker("bot-file-transport-");
 
 function writeStableRecords(): void {
   const logger = getLogger();
@@ -77,11 +77,11 @@ describe("async logger file transport", () => {
     expect(markers).toEqual([
       expect.objectContaining({
         dropped: 2,
-        message: "[openclaw] file log queue overflow; dropped 2 oldest records",
+        message: "[bot] file log queue overflow; dropped 2 oldest records",
       }),
     ]);
     expect(records.map((record) => record.message)).toEqual([
-      "[openclaw] file log queue overflow; dropped 2 oldest records",
+      "[bot] file log queue overflow; dropped 2 oldest records",
       "queued-record-3",
       "queued-record-4",
       "queued-record-5",

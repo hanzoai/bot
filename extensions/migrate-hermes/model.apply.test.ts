@@ -1,6 +1,6 @@
 // Migrate Hermes tests cover model.apply plugin behavior.
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-auth";
+import type { BotConfig } from "bot/plugin-sdk/provider-auth";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   HERMES_REASON_DEFAULT_MODEL_CONFIGURED,
@@ -53,8 +53,8 @@ describe("Hermes migration model apply", () => {
           },
         },
       },
-    } as OpenClawConfig;
-    let writtenConfig: OpenClawConfig | undefined;
+    } as BotConfig;
+    let writtenConfig: BotConfig | undefined;
     const provider = buildHermesMigrationProvider({
       runtime: makeConfigRuntime(existingConfig, (next) => {
         writtenConfig = next;
@@ -110,8 +110,8 @@ describe("Hermes migration model apply", () => {
           },
         ],
       },
-    } as OpenClawConfig;
-    let writtenConfig: OpenClawConfig | undefined;
+    } as BotConfig;
+    let writtenConfig: BotConfig | undefined;
     const provider = buildHermesMigrationProvider({
       runtime: makeConfigRuntime(existingConfig, (next) => {
         writtenConfig = next;
@@ -154,7 +154,7 @@ describe("Hermes migration model apply", () => {
           model: "anthropic/claude-sonnet-4.6",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const provider = buildHermesMigrationProvider({
       runtime: makeConfigRuntime(lateConfig),
     });
@@ -198,7 +198,7 @@ describe("Hermes migration model apply", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const provider = buildHermesMigrationProvider({ runtime: makeConfigRuntime(lateConfig) });
     const ctx = makeContext({ source, stateDir, workspaceDir, reportDir });
     const plan = await provider.plan(ctx);

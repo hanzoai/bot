@@ -3,7 +3,7 @@ import { generateSecureToken } from "../../infra/secure-random.js";
 import { registerSecretValueForRedaction } from "../../logging/secret-redaction-registry.js";
 
 export const WORKER_CREDENTIAL_TTL_MS = 10 * 60_000;
-const WORKER_CREDENTIAL_HASH_DOMAIN = "openclaw-worker-credential-v1\0";
+const WORKER_CREDENTIAL_HASH_DOMAIN = "bot-worker-credential-v1\0";
 const WORKER_CREDENTIAL_BYTES = 32;
 
 export type WorkerCredentialRecord = {

@@ -1,18 +1,18 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   markReplyPayloadAsTtsSupplement,
   resolveSendableOutboundReplyParts,
   type ReplyPayload,
-} from "openclaw/plugin-sdk/reply-payload";
-import { isVerbose, logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/reply-payload";
+import { isVerbose, logVerbose } from "bot/plugin-sdk/runtime-env";
 import {
   canonicalizeSpeechProviderId,
   getSpeechProvider,
   parseTtsDirectives,
   summarizeText,
   type SpeechVoiceOption,
-} from "openclaw/plugin-sdk/speech-core";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/speech-core";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { assertSpeechRuntimeAvailable, isSpeechRuntimeAvailable } from "./runtime-availability.js";
 import { isCodeHeavySpeechText, normalizeSpeechText } from "./speech-text.js";
 import {
@@ -43,7 +43,7 @@ export function setLastTtsAttempt(entry: TtsStatusEntry | undefined): void {
 
 export async function listSpeechVoices(params: {
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   config?: ResolvedTtsConfig;
   apiKey?: string;
   baseUrl?: string;
@@ -84,7 +84,7 @@ function hasLegacyFinalMediaDirective(text: string): boolean {
 
 export async function maybeApplyTtsToPayload(params: {
   payload: ReplyPayload;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel?: string;
   kind?: "tool" | "block" | "final";
   inboundAudio?: boolean;

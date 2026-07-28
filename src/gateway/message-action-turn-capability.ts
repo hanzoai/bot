@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { InternalChannelThreadingToolContext } from "../channels/threading-tool-context-internal.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import {

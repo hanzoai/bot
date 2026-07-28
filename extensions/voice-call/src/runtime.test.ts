@@ -1,5 +1,5 @@
 // Voice Call tests cover runtime plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
+import type { BotConfig } from "bot/plugin-sdk/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { VoiceCallConfig } from "./config.js";
 import type { CoreConfig } from "./core-bridge.js";
@@ -219,7 +219,7 @@ function requireRealtimeConsultToolHandler(): RealtimeConsultToolHandler {
     mocks.realtimeHandlerRegisterToolHandler.mock.calls,
     "realtime tool handler registration",
   );
-  expect(registeredToolHandler[0]).toBe("openclaw_agent_consult");
+  expect(registeredToolHandler[0]).toBe("bot_agent_consult");
   if (typeof registeredToolHandler[1] !== "function") {
     throw new Error("expected realtime tool handler callback");
   }
@@ -310,7 +310,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
           openai: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await createVoiceCallRuntime({
       config: createBaseConfig(),
@@ -335,8 +335,8 @@ describe("createVoiceCallRuntime lifecycle", () => {
     };
     const fullConfig = {
       agents: { list: [{ id: "operator", default: true }, { id: "support" }] },
-    } as OpenClawConfig;
-    const resolveAgentIdentity = vi.fn((_cfg: OpenClawConfig, agentId: string) => ({
+    } as BotConfig;
+    const resolveAgentIdentity = vi.fn((_cfg: BotConfig, agentId: string) => ({
       name: agentId === "support" ? "Support Voice" : "Main Voice",
     }));
 
@@ -381,7 +381,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
       from: "+15550001111",
       to: "+15550002222",
     });
-    expect(unknownInstructions).not.toContain("OpenClaw agent voice context:");
+    expect(unknownInstructions).not.toContain("Bot agent voice context:");
   });
 
   it.each(["twilio", "telnyx", "plivo"] as const)(
@@ -516,7 +516,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
       throw new Error("expected realtime handler tools to be an array");
     }
     expect(tools.map((tool) => requireRecord(tool, "realtime tool").name)).toEqual([
-      "openclaw_agent_consult",
+      "bot_agent_consult",
       "custom_tool",
     ]);
     const handler = requireRealtimeConsultToolHandler();
@@ -529,8 +529,8 @@ describe("createVoiceCallRuntime lifecycle", () => {
     });
     expect(runEmbeddedAgent).toHaveBeenCalledOnce();
     const consultParams = requireRecord(
-      firstCallParam(runEmbeddedAgent.mock.calls as unknown[][], "embedded OpenClaw consult"),
-      "embedded OpenClaw consult params",
+      firstCallParam(runEmbeddedAgent.mock.calls as unknown[][], "embedded Bot consult"),
+      "embedded Bot consult params",
     );
     expect(consultParams.agentId).toBe("support");
     expect(consultParams.sessionKey).toBe("agent:support:voice:15550009999");
@@ -596,9 +596,9 @@ describe("createVoiceCallRuntime lifecycle", () => {
     const consultParams = requireRecord(
       firstCallParam(
         runEmbeddedAgent.mock.calls as unknown[][],
-        "per-call embedded OpenClaw consult",
+        "per-call embedded Bot consult",
       ),
-      "per-call embedded OpenClaw consult params",
+      "per-call embedded Bot consult params",
     );
     expect(consultParams.sessionKey).toBe("agent:main:voice:call:call-1");
   });
@@ -682,7 +682,7 @@ describe("createVoiceCallRuntime lifecycle", () => {
     mocks.resolveRealtimeFastContextConsult.mockResolvedValue({
       handled: true,
       result: {
-        text: "Fast OpenClaw memory or session context found.\nThe caller's basement lights are on.",
+        text: "Fast Bot memory or session context found.\nThe caller's basement lights are on.",
       },
     });
 
@@ -764,9 +764,9 @@ describe("createVoiceCallRuntime lifecycle", () => {
     const consultParams = requireRecord(
       firstCallParam(
         runEmbeddedAgent.mock.calls as unknown[][],
-        "configured embedded OpenClaw consult",
+        "configured embedded Bot consult",
       ),
-      "configured embedded OpenClaw consult params",
+      "configured embedded Bot consult params",
     );
     expect(consultParams.thinkLevel).toBe("ultra");
     expect(consultParams.fastMode).toBe(true);

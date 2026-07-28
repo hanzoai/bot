@@ -1,4 +1,4 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { resolveTeamsMeetingsConfig } from "./config.js";
 import { getTeamsMeetingsSetupStatus } from "./runtime-setup.js";

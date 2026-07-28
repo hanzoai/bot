@@ -3,19 +3,19 @@ import { createHash } from "node:crypto";
 import type { Dirent } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createAsyncLock } from "openclaw/plugin-sdk/async-lock-runtime";
+import { createAsyncLock } from "bot/plugin-sdk/async-lock-runtime";
 import {
   extractErrorCode,
   formatErrorMessage,
   RequestScopedSubagentRuntimeError,
   readErrorName,
   SUBAGENT_RUNTIME_REQUEST_SCOPE_ERROR_CODE,
-} from "openclaw/plugin-sdk/error-runtime";
-import { resolveGlobalMap } from "openclaw/plugin-sdk/global-singleton";
-import { resolveStateDir } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import { getRuntimeConfig } from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { cleanupSessionLifecycleArtifacts } from "openclaw/plugin-sdk/session-store-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/error-runtime";
+import { resolveGlobalMap } from "bot/plugin-sdk/global-singleton";
+import { resolveStateDir } from "bot/plugin-sdk/memory-core-host-runtime-core";
+import { getRuntimeConfig } from "bot/plugin-sdk/runtime-config-snapshot";
+import { cleanupSessionLifecycleArtifacts } from "bot/plugin-sdk/session-store-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import pLimit from "p-limit";
 import { readDreamsFile, resolveDreamsPath, updateDreamsFile } from "./dreaming-dreams-file.js";
 
@@ -105,13 +105,13 @@ const NARRATIVE_MESSAGE_SETTLE_DELAYS_MS = [50, 150, 300, 750] as const;
 const DREAMING_SESSION_KEY_PREFIX = "dreaming-narrative-";
 const DREAMING_TRANSCRIPT_RUN_MARKER = '"runId":"dreaming-narrative-';
 const DREAMING_ORPHAN_MIN_AGE_MS = 300_000;
-const DIARY_START_MARKER = "<!-- openclaw:dreaming:diary:start -->";
-const DIARY_END_MARKER = "<!-- openclaw:dreaming:diary:end -->";
-const BACKFILL_ENTRY_MARKER = "openclaw:dreaming:backfill-entry";
+const DIARY_START_MARKER = "<!-- bot:dreaming:diary:start -->";
+const DIARY_END_MARKER = "<!-- bot:dreaming:diary:end -->";
+const BACKFILL_ENTRY_MARKER = "bot:dreaming:backfill-entry";
 const RECENT_DIARY_CONTEXT_LIMIT = 3;
 const RECENT_DIARY_CONTEXT_MAX_CHARS = 360;
 const NARRATIVE_SESSION_LOCKS_KEY = Symbol.for(
-  "openclaw.memoryCore.dreamingNarrative.sessionLocks",
+  "bot.memoryCore.dreamingNarrative.sessionLocks",
 );
 
 type NarrativeSessionLockEntry = {

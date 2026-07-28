@@ -5,7 +5,7 @@
  * across `outbound.ts`. Centralizing them here keeps detection consistent.
  */
 
-import { getFileExtension } from "openclaw/plugin-sdk/media-mime";
+import { getFileExtension } from "bot/plugin-sdk/media-mime";
 
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"]);
 const VIDEO_EXTENSIONS = new Set([".mp4", ".mov", ".avi", ".mkv", ".webm", ".flv", ".wmv"]);

@@ -1,10 +1,10 @@
 import path from "node:path";
-import { collectConfiguredModelRefs } from "@openclaw/model-catalog-core/configured-model-refs";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { collectConfiguredModelRefs } from "@hanzo/bot-model-catalog-core/configured-model-refs";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import type { PreparedMessageToolCatalog } from "../channels/plugins/message-action-discovery.js";
 import { hashRuntimeConfigValue } from "../config/runtime-snapshot.js";
 import { MODEL_APIS } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { withTimeout } from "../node-host/with-timeout.js";
 import { prepareMediaCapabilityProviders } from "../plugins/capability-provider-runtime.js";
 import { resolvePluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.js";
@@ -26,7 +26,7 @@ import {
 import { loadBundledProviderStaticCatalogContextModels } from "./embedded-agent-runner/model.static-catalog.js";
 import { buildPreparedModelCatalogSnapshot, type ModelCatalogEntry } from "./model-catalog.js";
 import type { ModelCatalogSnapshot } from "./model-catalog.types.js";
-import { ensureOpenClawModelsJson } from "./models-config.js";
+import { ensureBotModelsJson } from "./models-config.js";
 import { ensureRuntimePluginsLoaded } from "./runtime-plugins.js";
 import { AuthStorage, type AuthStorageData } from "./sessions/auth-storage.js";
 import type { ModelRegistry } from "./sessions/model-registry.js";
@@ -42,7 +42,7 @@ export type PreparedModelRuntimeSnapshot = Readonly<{
   workspaceDir?: string;
   /** Run-prepared repository root; null means discovery completed without a match. */
   repoRoot?: string | null;
-  config: OpenClawConfig;
+  config: BotConfig;
   metadataSnapshot: PluginMetadataSnapshot;
   messageToolCatalog?: PreparedMessageToolCatalog;
   mediaCapabilityProviders?: ReturnType<typeof prepareMediaCapabilityProviders>;
@@ -64,7 +64,7 @@ export type PreparedModelRuntimeInput = {
   readOnly?: boolean;
   skipCredentials?: boolean;
   env?: NodeJS.ProcessEnv;
-  config: OpenClawConfig;
+  config: BotConfig;
 };
 
 export type PreparedModelRuntimeLease = Readonly<{
@@ -173,7 +173,7 @@ export function rebindInputToCommittedConfiguredOwner(
   const owner = candidates[0]!;
   const preserveWorkspaceDir =
     input.preserveWorkspaceDirOnRefresh === true && input.workspaceDir !== undefined;
-  // Reserved execution identities (for example setup's `openclaw` agent) intentionally borrow a
+  // Reserved execution identities (for example setup's `bot` agent) intentionally borrow a
   // configured agent directory. Rebase their lifecycle inputs without erasing that run identity.
   const agentId = input.agentId ?? owner.input.agentId;
   return normalizePreparedModelRuntimeInput({
@@ -190,8 +190,8 @@ export function rebindInputToCommittedConfiguredOwner(
 
 /** Accepts canonical config clones without weakening projected-config isolation. */
 export function preparedModelRuntimeConfigsMatch(
-  left: OpenClawConfig,
-  right: OpenClawConfig,
+  left: BotConfig,
+  right: BotConfig,
 ): boolean {
   if (left === right) {
     return true;
@@ -267,7 +267,7 @@ function toStaticCatalogEntry(
 }
 
 function collectPreparedModelRuntimeProviderIds(
-  config: OpenClawConfig,
+  config: BotConfig,
   credentials: Readonly<AuthStorageData>,
 ): string[] {
   const providerIds = new Set<string>();
@@ -368,7 +368,7 @@ export function createPreparedModelRuntimeReplacement(): PreparedModelRuntimeRep
 }
 
 export function listConfiguredOwnerInputs(
-  config: OpenClawConfig,
+  config: BotConfig,
   defaultWorkspaceDir?: string,
 ): PreparedModelRuntimeInput[] {
   const inheritedAuthDir = resolveDefaultAgentDir(config);
@@ -431,7 +431,7 @@ async function buildSnapshot(
   const credentials = templateAuthStorage.getAll();
   const providerIds = collectPreparedModelRuntimeProviderIds(input.config, credentials);
   if (!input.readOnly) {
-    await ensureOpenClawModelsJson(input.config, input.agentDir, {
+    await ensureBotModelsJson(input.config, input.agentDir, {
       pluginMetadataSnapshot,
       ...(input.workspaceDir ? { workspaceDir: input.workspaceDir } : {}),
       ...(input.env ? { env } : {}),

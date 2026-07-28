@@ -1,10 +1,10 @@
-import { parseStrictPositiveInteger } from "@openclaw/normalization-core/number-coercion";
+import { parseStrictPositiveInteger } from "@hanzo/bot-normalization-core/number-coercion";
 /**
  * OpenAI Responses payload policy.
  * Classifies endpoint capabilities and applies store, prompt-cache,
  * server-compaction, service-tier, and reasoning payload rules.
  */
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
+import { readStringValue } from "@hanzo/bot-normalization-core/string-coerce";
 import { supportsOpenAIReasoningEffort } from "../internal/openai.js";
 
 type OpenAIResponsesPayloadModel = {
@@ -70,8 +70,8 @@ const OPENAI_RESPONSES_APIS = new Set([
   "openai-responses",
   "azure-openai-responses",
   "openai-chatgpt-responses",
-  "openclaw-openai-responses-transport",
-  "openclaw-openai-chatgpt-responses-transport",
+  "bot-openai-responses-transport",
+  "bot-openai-chatgpt-responses-transport",
 ]);
 const OPENAI_RESPONSES_PROVIDERS = new Set(["openai", "azure-openai", "azure-openai-responses"]);
 const LOCAL_ENDPOINT_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
@@ -254,18 +254,18 @@ function resolveOpenAIResponsesPayloadCapabilities(
   return {
     allowsOpenAIServiceTier:
       (provider === "openai" &&
-        (api === "openai-responses" || api === "openclaw-openai-responses-transport") &&
+        (api === "openai-responses" || api === "bot-openai-responses-transport") &&
         endpointClass === "openai-public") ||
       (isOpenAIProvider &&
         (api === "openai-chatgpt-responses" ||
-          api === "openclaw-openai-chatgpt-responses-transport" ||
+          api === "bot-openai-chatgpt-responses-transport" ||
           api === "openai-responses" ||
-          api === "openclaw-openai-responses-transport") &&
+          api === "bot-openai-responses-transport") &&
         endpointClass === "openai"),
     allowsResponsesStore:
       supportsResponsesStoreField &&
       api !== "openai-chatgpt-responses" &&
-      api !== "openclaw-openai-chatgpt-responses-transport" &&
+      api !== "bot-openai-chatgpt-responses-transport" &&
       provider !== undefined &&
       OPENAI_RESPONSES_PROVIDERS.has(provider) &&
       usesKnownNativeOpenAIEndpoint,

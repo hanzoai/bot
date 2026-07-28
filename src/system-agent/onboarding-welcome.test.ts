@@ -20,7 +20,7 @@ vi.mock("../config/config.js", async (importOriginal) => ({
   readConfigFileSnapshot: vi.fn(async () => ({
     exists: true,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/bot.json",
     hash: "hash",
     config: {},
     sourceConfig: mocks.sourceConfig,
@@ -43,7 +43,7 @@ describe("buildOnboardingWelcome", () => {
     const engine = {
       loadOverview: vi.fn(async () => ({
         config: {
-          path: "/tmp/openclaw.json",
+          path: "/tmp/bot.json",
           exists: true,
           valid: true,
           issues: [],
@@ -76,7 +76,7 @@ describe("buildOnboardingWelcome", () => {
       engine: {
         loadOverview: vi.fn(async () => ({
           config: {
-            path: "/tmp/openclaw.json",
+            path: "/tmp/bot.json",
             exists: false,
             valid: false,
             issues: [],
@@ -100,7 +100,7 @@ describe("buildOnboardingWelcome", () => {
     const engine = {
       loadOverview: vi.fn(async () => ({
         config: {
-          path: "/tmp/openclaw.json",
+          path: "/tmp/bot.json",
           exists: true,
           valid: true,
           issues: [],
@@ -128,7 +128,7 @@ describe("buildOnboardingWelcome", () => {
       engine: {
         loadOverview: vi.fn(async () => ({
           config: {
-            path: "/tmp/openclaw.json",
+            path: "/tmp/bot.json",
             exists: true,
             valid: true,
             issues: [],
@@ -157,7 +157,7 @@ describe("buildOnboardingWelcome", () => {
         engine: {
           loadOverview: vi.fn(async () => ({
             config: {
-              path: "/tmp/openclaw.json",
+              path: "/tmp/bot.json",
               exists: true,
               valid: true,
               issues: [],
@@ -189,7 +189,7 @@ describe("buildOnboardingWelcome", () => {
       engine: {
         loadOverview: vi.fn(async () => ({
           config: {
-            path: "/tmp/openclaw.json",
+            path: "/tmp/bot.json",
             exists: true,
             valid: true,
             issues: [],

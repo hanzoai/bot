@@ -1,6 +1,6 @@
 // Qqbot tests cover gateway connection close/disconnect status behavior.
 import { EventEmitter } from "node:events";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { EngineAdapters } from "../adapter/index.js";
 import { stopBackgroundTokenRefresh } from "../messaging/sender.js";

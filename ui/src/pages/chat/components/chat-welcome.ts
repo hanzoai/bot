@@ -1,7 +1,7 @@
 // Control UI chat module implements chat welcome behavior.
 import { html, nothing } from "lit";
 import type { GatewaySessionRow, SessionsListResult } from "../../../api/types.ts";
-import "../../../components/openclaw-mascot.ts";
+import "../../../components/bot-mascot.ts";
 import { t } from "../../../i18n/index.ts";
 import { resolveAssistantTextAvatar, resolveChatAvatarRenderUrl } from "../../../lib/avatar.ts";
 import { formatRelativeTimestamp } from "../../../lib/format.ts";
@@ -96,7 +96,7 @@ function selectWelcomeRecentSessions(
 function renderWelcomeClawd() {
   return html`
     <div class="agent-chat__welcome-clawd" aria-hidden="true">
-      <openclaw-mascot mood="idle" .size=${112}></openclaw-mascot>
+      <bot-mascot mood="idle" .size=${112}></bot-mascot>
     </div>
   `;
 }
@@ -174,7 +174,7 @@ export function renderWelcomeState(props: ChatWelcomeProps) {
   const mascotFor = (event: DragEvent): WelcomeMascot | null => {
     const target = event.currentTarget;
     return target instanceof HTMLElement
-      ? target.querySelector<WelcomeMascot>(".agent-chat__welcome-clawd openclaw-mascot")
+      ? target.querySelector<WelcomeMascot>(".agent-chat__welcome-clawd bot-mascot")
       : null;
   };
 

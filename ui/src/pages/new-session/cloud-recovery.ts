@@ -22,7 +22,7 @@ export type CloudSessionRecovery = {
 
 // Keep the create -> dispatch -> first-send handoff recoverable across reloads,
 // while scoping it to this tab, Gateway, and authenticated credential.
-const STORAGE_PREFIX = "openclaw.new-session.cloud-recovery.v1:";
+const STORAGE_PREFIX = "bot.new-session.cloud-recovery.v1:";
 
 function storageKey(gatewayUrl: string, recoveryScope: string): string {
   return `${STORAGE_PREFIX}${gatewayUrl}:${recoveryScope}`;

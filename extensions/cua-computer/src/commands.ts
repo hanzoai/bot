@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { canonicalizeBase64 } from "openclaw/plugin-sdk/media-runtime";
-import type { OpenClawPluginNodeHostCommand } from "openclaw/plugin-sdk/plugin-entry";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import { canonicalizeBase64 } from "bot/plugin-sdk/media-runtime";
+import type { BotPluginNodeHostCommand } from "bot/plugin-sdk/plugin-entry";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
 import { createRastermill } from "rastermill";
 import { z } from "zod";
 import {
@@ -188,7 +188,7 @@ function createImageProcessor(env: NodeJS.ProcessEnv): ImageProcessor {
   return createRastermill({
     execution: "auto",
     limits: { inputPixels: MAX_IMAGE_PIXELS, outputPixels: MAX_IMAGE_PIXELS },
-    temp: { rootDir: resolvePreferredOpenClawTmpDir(), prefix: "openclaw-cua-computer-" },
+    temp: { rootDir: resolvePreferredBotTmpDir(), prefix: "bot-cua-computer-" },
     commandResolver: (command) => resolveImageCommand(command, env),
   });
 }
@@ -358,7 +358,7 @@ async function handleAct(
 
 export function createCuaComputerCommands(
   options: CuaComputerCommandsOptions = {},
-): OpenClawPluginNodeHostCommand[] {
+): BotPluginNodeHostCommand[] {
   const platform = options.platform ?? process.platform;
   const env = options.env ?? process.env;
   const driver =
@@ -371,7 +371,7 @@ export function createCuaComputerCommands(
   const isSupportedPlatform = platform === "linux" || platform === "win32";
   const isAvailable = () => isSupportedPlatform && driver.isAvailable();
 
-  const snapshot: OpenClawPluginNodeHostCommand = {
+  const snapshot: BotPluginNodeHostCommand = {
     command: "screen.snapshot",
     cap: "screen",
     dangerous: false,
@@ -444,7 +444,7 @@ export function createCuaComputerCommands(
       }),
   };
 
-  const act: OpenClawPluginNodeHostCommand = {
+  const act: BotPluginNodeHostCommand = {
     command: "computer.act",
     cap: "computer",
     dangerous: true,

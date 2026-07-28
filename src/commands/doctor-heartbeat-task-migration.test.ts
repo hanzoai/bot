@@ -5,15 +5,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import * as sessionAccessor from "../config/sessions/session-accessor.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveHeartbeatMonitorSpecs } from "../cron/heartbeat-monitor.js";
 import { heartbeatTaskDeclarationKey, isHeartbeatTaskCronJob } from "../cron/heartbeat-task.js";
 import { readCronJobScratchState, writeCronJobScratch } from "../cron/scratch-store.js";
 import { CronService } from "../cron/service.js";
 import { loadCronJobsStore, resolveCronJobsStorePathFromConfig } from "../cron/store.js";
 import { resolveHeartbeatSession } from "../infra/heartbeat-runner.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import {
   collectHeartbeatTaskMigrationFindings,
   maybeMigrateHeartbeatTasksToCron,
@@ -23,7 +23,7 @@ const tempDirs: string[] = [];
 let originalHome: string | undefined;
 let originalStateDir: string | undefined;
 
-function createTestCronService(storePath: string, cfg: OpenClawConfig, nowMs: number): CronService {
+function createTestCronService(storePath: string, cfg: BotConfig, nowMs: number): CronService {
   const noop = () => {};
   const log = { debug: noop, info: noop, warn: noop, error: noop };
   return new CronService({
@@ -44,22 +44,22 @@ function createTestCronService(storePath: string, cfg: OpenClawConfig, nowMs: nu
 
 beforeEach(() => {
   originalHome = process.env.HOME;
-  originalStateDir = process.env.OPENCLAW_STATE_DIR;
+  originalStateDir = process.env.BOT_STATE_DIR;
 });
 
 afterEach(async () => {
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeBotAgentDatabasesForTest();
+  closeBotStateDatabaseForTest();
   if (originalHome === undefined) {
     delete process.env.HOME;
   } else {
     process.env.HOME = originalHome;
   }
   if (originalStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.BOT_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = originalStateDir;
+    process.env.BOT_STATE_DIR = originalStateDir;
   }
   await Promise.all(tempDirs.splice(0).map((dir) => fs.rm(dir, { recursive: true, force: true })));
 });
@@ -79,14 +79,14 @@ tasks:
 # Keep alerts concise
 `,
 ) {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-heartbeat-task-migration-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-heartbeat-task-migration-"));
   tempDirs.push(root);
-  const env = { ...process.env, HOME: path.join(root, "home"), OPENCLAW_STATE_DIR: root };
+  const env = { ...process.env, HOME: path.join(root, "home"), BOT_STATE_DIR: root };
   process.env.HOME = env.HOME;
-  process.env.OPENCLAW_STATE_DIR = env.OPENCLAW_STATE_DIR;
+  process.env.BOT_STATE_DIR = env.BOT_STATE_DIR;
   const cfg = {
     agents: { defaults: { heartbeat: { every: "30m" } }, list: [{ id: "main" }] },
-  } as OpenClawConfig;
+  } as BotConfig;
   const storePath = resolveCronJobsStorePathFromConfig(cfg, env);
   const cron = createTestCronService(storePath, cfg, nowMs);
   const spec = resolveHeartbeatMonitorSpecs(cfg, [])[0];
@@ -603,11 +603,11 @@ tasks:
   it("uses the supplied environment for legacy session timing and cleanup", async () => {
     const fixture = await createFixture(2_000_000_000_000);
     const suppliedHome = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-heartbeat-task-migration-supplied-home-"),
+      path.join(os.tmpdir(), "bot-heartbeat-task-migration-supplied-home-"),
     );
     tempDirs.push(suppliedHome);
     fixture.cfg.session = {
-      store: "~/.openclaw/agents/{agentId}/sessions/sessions.json",
+      store: "~/.bot/agents/{agentId}/sessions/sessions.json",
     };
     const suppliedEnv = { ...fixture.env, HOME: suppliedHome };
     const suppliedSession = resolveHeartbeatSession(

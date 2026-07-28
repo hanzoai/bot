@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { BotConfig } from "../types.bot.js";
 import { purgeAgentSessionStoreEntries } from "./cleanup-service.js";
 
 const sessionAccessorMocks = vi.hoisted(() => ({
@@ -30,14 +30,14 @@ describe("purgeAgentSessionStoreEntries", () => {
 
   it("purges deleted-agent entries through the storage boundary", async () => {
     const cfg = {
-      session: { store: "/tmp/openclaw-agent-purge-sessions.json" },
+      session: { store: "/tmp/bot-agent-purge-sessions.json" },
       agents: {
         list: [
           { id: "main", workspace: "/workspace/main" },
           { id: "ops", workspace: "/workspace/ops" },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     await purgeAgentSessionStoreEntries(cfg, "ops");
 
@@ -45,7 +45,7 @@ describe("purgeAgentSessionStoreEntries", () => {
       cfg,
       agentId: "ops",
       storeAgentId: "main",
-      storePath: "/tmp/openclaw-agent-purge-sessions.json",
+      storePath: "/tmp/bot-agent-purge-sessions.json",
     });
     expect(sessionAccessorMocks.applySessionEntryLifecycleMutation).not.toHaveBeenCalled();
   });

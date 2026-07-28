@@ -7,13 +7,13 @@ read_when:
 title: "Discovery and transports"
 ---
 
-OpenClaw has two related but distinct discovery problems:
+Bot has two related but distinct discovery problems:
 
 1. **Operator remote control**: the macOS menu bar app controlling a gateway running elsewhere.
 2. **Node pairing**: iOS/Android (and future nodes) finding a gateway and pairing securely.
 
 All network discovery/advertising lives in the **Node Gateway**
-(`openclaw gateway`); clients (mac app, iOS) are consumers only.
+(`bot gateway`); clients (mac app, iOS) are consumers only.
 
 ## Terms
 
@@ -45,7 +45,7 @@ Protocol details: [Gateway protocol](/gateway/protocol),
 
 ### 1) Bonjour / DNS-SD
 
-Multicast Bonjour is best-effort and does not cross networks. OpenClaw also
+Multicast Bonjour is best-effort and does not cross networks. Bot also
 supports browsing the same gateway beacon via a configured wide-area DNS-SD
 domain, so discovery can cover both `local.` on the same LAN and a configured
 unicast DNS-SD domain for cross-network discovery.
@@ -58,7 +58,7 @@ Troubleshooting and beacon details: [Bonjour](/gateway/bonjour).
 
 #### Service beacon details
 
-- Service type: `_openclaw-gw._tcp` (gateway transport beacon).
+- Service type: `_bot-gw._tcp` (gateway transport beacon).
 - TXT keys (non-secret):
 
   | Key                         | Notes                                                                                                                                                            |
@@ -92,23 +92,23 @@ Security notes:
 
 Enable, disable, and override:
 
-- `openclaw plugins enable bonjour` enables LAN multicast advertising.
-- `discovery.mdns.mode` in `openclaw.json` controls mDNS broadcast:
+- `bot plugins enable bonjour` enables LAN multicast advertising.
+- `discovery.mdns.mode` in `bot.json` controls mDNS broadcast:
   `"minimal"` (default), `"full"` (adds `cliPath`/`sshPort` to both the LAN
   beacon and any wide-area DNS-SD zone), or `"off"` (disables mDNS).
-- `OPENCLAW_DISABLE_BONJOUR=1` force-disables advertising; `discovery.mdns.mode="off"`
-  disables it independently. `OPENCLAW_DISABLE_BONJOUR=0` is an explicit
+- `BOT_DISABLE_BONJOUR=1` force-disables advertising; `discovery.mdns.mode="off"`
+  disables it independently. `BOT_DISABLE_BONJOUR=0` is an explicit
   opt-in that overrides the plugin's auto-disable inside a detected container
   (Docker, containerd, Kubernetes, LXC); it does not override
   `discovery.mdns.mode="off"`. The bundled `bonjour` plugin auto-starts on
   macOS hosts (`enabledByDefaultOnPlatforms: ["darwin"]`) and auto-disables
   inside detected containers; Linux, Windows, and other containerized
   deployments need explicit `plugins enable bonjour`.
-- `gateway.bind` in `~/.openclaw/openclaw.json` controls the Gateway bind mode.
-- `OPENCLAW_SSH_PORT` overrides the advertised SSH port (only takes effect
+- `gateway.bind` in `~/.hanzoai/bot.json` controls the Gateway bind mode.
+- `BOT_SSH_PORT` overrides the advertised SSH port (only takes effect
   when `discovery.mdns.mode="full"`).
-- `OPENCLAW_TAILNET_DNS` publishes a `tailnetDns` hint (MagicDNS).
-- `OPENCLAW_CLI_PATH` overrides the advertised CLI path.
+- `BOT_TAILNET_DNS` publishes a `tailnetDns` hint (MagicDNS).
+- `BOT_CLI_PATH` overrides the advertised CLI path.
 
 ### 2) Tailnet (cross-network)
 

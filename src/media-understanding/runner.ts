@@ -4,17 +4,17 @@ import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { mergeInboundPathRoots } from "@openclaw/media-core/inbound-path-policy";
-import { findNormalizedProviderValue } from "@openclaw/model-catalog-core/provider-id";
+import { mergeInboundPathRoots } from "@hanzo/bot-media-core/inbound-path-policy";
+import { findNormalizedProviderValue } from "@hanzo/bot-model-catalog-core/provider-id";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeNullableString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import {
   normalizeStringEntries,
   uniqueStrings,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@hanzo/bot-normalization-core/string-normalization";
 import type { ActiveMediaModel } from "../../packages/media-understanding-common/src/active-model.js";
 import { isMediaUnderstandingSkipError } from "../../packages/media-understanding-common/src/errors.js";
 import { providerSupportsCapability } from "../../packages/media-understanding-common/src/provider-supports.js";
@@ -30,13 +30,13 @@ import {
   resolveAgentModelFallbackValues,
   resolveAgentModelPrimaryValue,
 } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import type {
   MediaUnderstandingConfig,
   MediaUnderstandingModelConfig,
 } from "../config/types.tools.js";
 import { logVerbose, shouldLogVerbose } from "../globals.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 import { logWarn } from "../logger.js";
 import { resolveChannelInboundAttachmentRoots } from "../media/channel-inbound-roots.js";
 import { getDefaultMediaLocalRoots } from "../media/local-roots.js";
@@ -99,7 +99,7 @@ const loadPreparedModelCatalogApi = createLazyRuntimeModule(async () => ({
 }));
 
 function resolveLiteralProviderApiKey(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   providerId: string,
 ): string | null {
   return normalizeNullableString(
@@ -110,7 +110,7 @@ function resolveLiteralProviderApiKey(
 async function hasProviderAuthAvailable(params: {
   capability: MediaUnderstandingCapability;
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
   workspaceDir?: string;
 }): Promise<boolean> {
@@ -130,7 +130,7 @@ async function hasProviderAuthAvailable(params: {
 }
 
 function resolveConfiguredKeyProviderOrder(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   providerRegistry: ProviderRegistry;
   capability: MediaUnderstandingCapability;
   fallbackProviders: readonly string[];
@@ -148,7 +148,7 @@ function resolveConfiguredKeyProviderOrder(params: {
 }
 
 function resolveConfiguredImageModelId(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   providerId: string;
 }): string | undefined {
   if (isMinimaxVlmProvider(params.providerId)) {
@@ -160,7 +160,7 @@ function resolveConfiguredImageModelId(params: {
 }
 
 function resolveConfiguredImageModel(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   providerId: string;
 }): { id?: string; input?: string[] } | undefined {
   const providerCfg = findNormalizedProviderValue(
@@ -238,7 +238,7 @@ function resolveAutoMediaKeyProvidersFromRegistry(params: {
 }
 
 async function explicitImageModelVisionStatus(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   providerId: string;
   model: string;
@@ -273,7 +273,7 @@ async function explicitImageModelVisionStatus(params: {
 }
 
 async function resolveAutoImageModelId(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   providerId: string;
   providerRegistry: ProviderRegistry;
@@ -336,13 +336,13 @@ async function resolveAutoImageModelId(params: {
 
 export function buildProviderRegistry(
   overrides?: Record<string, MediaUnderstandingProvider>,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): ProviderRegistry {
   return buildMediaUnderstandingRegistry(overrides, cfg);
 }
 
 export function resolveMediaAttachmentLocalRoots(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   ctx: MsgContext;
   workspaceDir?: string;
 }): readonly string[] {
@@ -368,7 +368,7 @@ function clearMediaUnderstandingBinaryCacheForTests(): void {
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.mediaUnderstandingRunnerTestApi")
+    Symbol.for("bot.mediaUnderstandingRunnerTestApi")
   ] = { clearMediaUnderstandingBinaryCacheForTests };
 }
 
@@ -460,7 +460,7 @@ async function probeAntigravityCliCandidate(command: string): Promise<string | n
     return null;
   }
   const probeDir = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-antigravity-probe-"),
+    path.join(resolvePreferredBotTmpDir(), "bot-antigravity-probe-"),
   );
   try {
     const { stdout } = await runExec(resolved, ["--help"], {
@@ -481,7 +481,7 @@ async function probeAntigravityCliCandidate(command: string): Promise<string | n
 
 async function resolveAntigravityCliBinary(): Promise<string | null> {
   return await getOrCreatePromise(antigravityCliCache, "agy", async () => {
-    const configured = process.env.OPENCLAW_ANTIGRAVITY_CLI?.trim();
+    const configured = process.env.BOT_ANTIGRAVITY_CLI?.trim();
     const candidates = [configured, "agy", "antigravity"].filter((value): value is string =>
       Boolean(value),
     );
@@ -519,7 +519,7 @@ async function resolveAntigravityCliEntry(
 }
 
 async function resolveKeyEntry(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -612,7 +612,7 @@ async function resolveKeyEntry(params: {
 }
 
 function resolveImageModelFromAgentDefaults(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
 }): MediaUnderstandingModelConfig[] {
   const refs: string[] = [];
@@ -663,7 +663,7 @@ function resolveImageModelFromAgentDefaults(params: {
 }
 
 function hasExplicitImageUnderstandingConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   providerRegistry: ProviderRegistry;
 }): boolean {
   return (params.cfg.tools?.media?.models ?? []).some((entry) =>
@@ -686,7 +686,7 @@ function isMinimaxNativeVisionModel(params: { provider: string; model?: string }
 }
 
 async function activeModelSupportsNativeVision(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   activeModel?: ActiveMediaModel;
   agentDir?: string;
@@ -718,7 +718,7 @@ async function activeModelSupportsNativeVision(params: {
 }
 
 async function resolveAutoEntries(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -770,7 +770,7 @@ async function resolveAutoEntries(params: {
 }
 
 export async function resolveAutoImageModel(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -823,7 +823,7 @@ export async function resolveAutoImageModel(params: {
 }
 
 async function resolveActiveModelEntry(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -900,7 +900,7 @@ async function resolveActiveModelEntry(params: {
 
 async function runAttachmentEntries(params: {
   capability: MediaUnderstandingCapability;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   ctx: MsgContext;
   attachment: MediaAttachment;
   agentId?: string;
@@ -1006,7 +1006,7 @@ function hasFailedMediaAttempt(attachments: MediaUnderstandingDecision["attachme
 
 export async function runCapability(params: {
   capability: MediaUnderstandingCapability;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   ctx: MsgContext;
   attachments: MediaAttachmentCache;
   media: MediaAttachment[];

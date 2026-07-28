@@ -1,6 +1,6 @@
 import path from "node:path";
-import { disposeRegisteredAgentHarnesses } from "openclaw/plugin-sdk/agent-harness";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { disposeRegisteredAgentHarnesses } from "bot/plugin-sdk/agent-harness";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { startQaGatewayChild } from "./gateway-child.js";
 import type { QaLabLatestReport, QaLabScenarioOutcome } from "./lab-server.types.js";
 import { sanitizeQaProgressValue as sanitizeQaSuiteProgressValue } from "./progress-format.js";
@@ -115,7 +115,7 @@ export async function runQaFlowSuiteStandard(
     writeQaSuiteProgress(progressEnabled, "gateway start");
     const activeGateway = await startQaGatewayChild({
       repoRoot,
-      command: params?.sutOpenClawCommand,
+      command: params?.sutBotCommand,
       providerBaseUrl: activeMock ? `${activeMock.baseUrl}/v1` : undefined,
       transport,
       transportBaseUrl: lab.listenUrl,
@@ -131,14 +131,14 @@ export async function runQaFlowSuiteStandard(
       enabledPluginIds,
       forwardHostHome: gatewayRuntimeOptions?.forwardHostHome,
       mutateConfig: gatewayConfigPatch
-        ? (cfg) => applyQaMergePatch(cfg, gatewayConfigPatch) as OpenClawConfig
+        ? (cfg) => applyQaMergePatch(cfg, gatewayConfigPatch) as BotConfig
         : undefined,
       runtimeEnvPatch: mergeQaRuntimeEnvPatches(
         buildQaRuntimeEnvPatch({
           providerMode,
           forcedRuntime: params?.forcedRuntime,
           mockBaseUrl: activeMock?.baseUrl,
-          nativeAppServerArgs: process.env.OPENCLAW_CODEX_APP_SERVER_ARGS,
+          nativeAppServerArgs: process.env.BOT_CODEX_APP_SERVER_ARGS,
         }),
         transport.createRuntimeEnvPatch?.(),
         buildQaGatewayHeapCheckpointRuntimeEnvPatch(),
@@ -422,7 +422,7 @@ export async function runQaFlowSuiteStandard(
     throw error;
   } finally {
     const activeEnv = env;
-    const keepTemp = process.env.OPENCLAW_QA_KEEP_TEMP === "1" || false;
+    const keepTemp = process.env.BOT_QA_KEEP_TEMP === "1" || false;
     const activeGateway = gateway;
     const activeMock = mock;
     const cleanupErrors = await runQaFlowSuiteCleanupPlan({

@@ -4,7 +4,7 @@ import {
   ensureControlUiAllowedOriginsForNonLoopbackBind,
   type GatewayNonLoopbackBindMode,
 } from "../config/gateway-control-ui-origins.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isContainerEnvironment } from "./net.js";
 
 /**
@@ -12,11 +12,11 @@ import { isContainerEnvironment } from "./net.js";
  * otherwise reject the browser that just opened the local UI.
  */
 export async function maybeSeedControlUiAllowedOriginsAtStartup(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   log: { info: (msg: string) => void; warn: (msg: string) => void };
   runtimeBind?: unknown;
   runtimePort?: unknown;
-}): Promise<{ config: OpenClawConfig; seededAllowedOrigins: boolean }> {
+}): Promise<{ config: BotConfig; seededAllowedOrigins: boolean }> {
   const seeded = ensureControlUiAllowedOriginsForNonLoopbackBind(params.config, {
     isContainerEnvironment,
     runtimeBind: params.runtimeBind,

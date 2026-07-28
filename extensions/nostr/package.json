@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/nostr",
+  "name": "@hanzo/bot-nostr",
   "version": "2026.7.2",
-  "description": "OpenClaw Nostr channel plugin for NIP-04 encrypted direct messages.",
+  "description": "Bot Nostr channel plugin for NIP-04 encrypted direct messages.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "dependencies": {
@@ -12,18 +12,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*",
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -46,14 +46,36 @@
       "quickstartAllowFrom": true,
       "setup": {
         "fields": [
-          { "key": "privateKey", "kind": "string", "sensitive": true, "cli": { "flags": "--private-key <key>", "description": "Nostr private key" } },
-          { "key": "relayUrls", "kind": "string", "cli": { "flags": "--relay-urls <urls>", "description": "Nostr relay URLs" } },
-          { "key": "useEnv", "kind": "boolean", "cli": { "flags": "--use-env", "description": "Use NOSTR_PRIVATE_KEY" } }
+          {
+            "key": "privateKey",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--private-key <key>",
+              "description": "Nostr private key"
+            }
+          },
+          {
+            "key": "relayUrls",
+            "kind": "string",
+            "cli": {
+              "flags": "--relay-urls <urls>",
+              "description": "Nostr relay URLs"
+            }
+          },
+          {
+            "key": "useEnv",
+            "kind": "boolean",
+            "cli": {
+              "flags": "--use-env",
+              "description": "Use NOSTR_PRIVATE_KEY"
+            }
+          }
         ]
       }
     },
     "install": {
-      "npmSpec": "@openclaw/nostr",
+      "npmSpec": "@hanzo/bot-nostr",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.10"
     },
@@ -61,7 +83,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2"
+      "botVersion": "2026.7.2"
     },
     "release": {
       "publishToClawHub": true,

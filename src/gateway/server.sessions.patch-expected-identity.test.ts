@@ -1,7 +1,7 @@
 // Compare-and-swap session patches must reject reset replacements atomically.
 import { afterEach, expect, test } from "vitest";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { embeddedRunMock, writeSessionStore } from "./test-helpers.js";
 import {
   directSessionReq,
@@ -12,7 +12,7 @@ import {
 const { createSessionStoreDir } = setupGatewaySessionsTestHarness();
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
 });
 
 test.each([

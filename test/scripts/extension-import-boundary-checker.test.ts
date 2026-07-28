@@ -8,7 +8,7 @@ import { createExtensionImportBoundaryChecker } from "../../scripts/lib/extensio
 const tempDirs: string[] = [];
 
 function makeTempRoot(): string {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-extension-boundary-"));
+  const root = mkdtempSync(path.join(tmpdir(), "bot-extension-boundary-"));
   tempDirs.push(root);
   return root;
 }

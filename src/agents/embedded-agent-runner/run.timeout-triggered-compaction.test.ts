@@ -327,7 +327,7 @@ describe("timeout-triggered compaction", () => {
       currentThreadTs: "thread-1",
       currentMessageId: "message-1",
       senderId: "sender-1",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "bot",
       modelSelectionLocked: true,
       config: {
         agents: { defaults: { compaction: { model: "anthropic/claude-opus-4-6" } } },

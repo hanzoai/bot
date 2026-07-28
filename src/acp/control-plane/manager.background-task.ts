@@ -1,6 +1,6 @@
 /** Mirrors child ACP turns into detached-task status for requester-facing progress. */
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
+import type { BotConfig } from "../../config/types.bot.js";
 import { logVerbose } from "../../globals.js";
 import {
   createRunningTaskRun,
@@ -97,7 +97,7 @@ export function resolveBackgroundTaskTerminalResult(progressSummary: string): {
 /** Resolves the requester task context for a spawned child ACP session. */
 export function resolveBackgroundTaskContext(params: {
   deps: AcpSessionManagerDeps;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   requestId: string;
   text: string;

@@ -1,7 +1,7 @@
 import type { InternalSessionEntry as SessionEntry } from "../config/sessions.js";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";
 import { appendAssistantMessageToSessionTranscript } from "../config/sessions/transcript.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { GatewayRecoveryRuntime } from "../gateway/server-instance-runtime.types.js";
 import { resolveAgentIdFromSessionKey } from "../routing/session-key.js";
 import {
@@ -42,7 +42,7 @@ async function claimMainRestartRecoveryTombstone(params: {
 }
 
 export async function tombstoneMainRestartRecoveryWithNotice(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   entry: SessionEntry;
   gatewayRuntime: GatewayRecoveryRuntime;
   observation: MainSessionRecoveryObservation;

@@ -1,37 +1,37 @@
 // Msteams plugin module implements channel behavior.
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
+import { describeAccountSnapshot } from "bot/plugin-sdk/account-helpers";
 import type {
   ChannelMessageActionAdapter,
   ChannelMessageToolDiscovery,
-} from "openclaw/plugin-sdk/channel-contract";
-import { createChatChannelPlugin } from "openclaw/plugin-sdk/channel-core";
+} from "bot/plugin-sdk/channel-contract";
+import { createChatChannelPlugin } from "bot/plugin-sdk/channel-core";
 import {
   createChannelMessageAdapterFromOutbound,
   createRuntimeOutboundDelegates,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createPairingPrefixStripper } from "openclaw/plugin-sdk/channel-pairing";
+} from "bot/plugin-sdk/channel-outbound";
+import { createPairingPrefixStripper } from "bot/plugin-sdk/channel-pairing";
 import {
   createAllowlistProviderGroupPolicyWarningCollector,
   projectConfigWarningCollector,
-} from "openclaw/plugin-sdk/channel-policy";
+} from "bot/plugin-sdk/channel-policy";
 import {
   createChannelDirectoryAdapter,
   createRuntimeDirectoryLiveAdapter,
   listDirectoryEntriesFromSources,
-} from "openclaw/plugin-sdk/directory-runtime";
-import { normalizeMessagePresentation } from "openclaw/plugin-sdk/interactive-runtime";
-import { createLazyRuntimeNamedExport } from "openclaw/plugin-sdk/lazy-runtime";
-import { createComputedAccountStatusAdapter } from "openclaw/plugin-sdk/status-helpers";
+} from "bot/plugin-sdk/directory-runtime";
+import { normalizeMessagePresentation } from "bot/plugin-sdk/interactive-runtime";
+import { createLazyRuntimeNamedExport } from "bot/plugin-sdk/lazy-runtime";
+import { createComputedAccountStatusAdapter } from "bot/plugin-sdk/status-helpers";
 import {
   normalizeOptionalString,
   normalizeStringEntries,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { Type } from "typebox";
 import type {
   ChannelMessageActionName,
   ChannelOutboundAdapter,
   ChannelPlugin,
-  OpenClawConfig,
+  BotConfig,
 } from "../runtime-api.js";
 import {
   buildProbeChannelStatusSummary,
@@ -87,7 +87,7 @@ const MSTEAMS_GROUP_MANAGEMENT_ACTIONS = new Set<ChannelMessageActionName>([
 ]);
 
 const collectMSTeamsSecurityWarnings = createAllowlistProviderGroupPolicyWarningCollector<{
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }>({
   providerConfigPresent: (cfg) => cfg.channels?.msteams !== undefined,
   resolveGroupPolicy: ({ cfg }) => cfg.channels?.msteams?.groupPolicy,
@@ -1266,7 +1266,7 @@ export const msteamsPlugin: ChannelPlugin<ResolvedMSTeamsAccount, ProbeMSTeamsRe
       },
     },
     security: {
-      collectWarnings: projectConfigWarningCollector<{ cfg: OpenClawConfig }>(
+      collectWarnings: projectConfigWarningCollector<{ cfg: BotConfig }>(
         collectMSTeamsSecurityWarnings,
       ),
     },

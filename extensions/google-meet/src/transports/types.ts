@@ -4,7 +4,7 @@ import type {
   MeetingBrowserTab,
   MeetingSessionRecord,
   MeetingTranscriptSnapshot,
-} from "openclaw/plugin-sdk/meeting-runtime";
+} from "bot/plugin-sdk/meeting-runtime";
 import type { GoogleMeetMode, GoogleMeetModeInput, GoogleMeetTransport } from "../config.js";
 
 export const GOOGLE_MEET_TRANSCRIPT_MAX_LINES = 2_000;
@@ -135,7 +135,7 @@ export type GoogleMeetSession = MeetingSessionRecord<
     launched: boolean;
     nodeId?: string;
     browserProfile?: string;
-    /** Exact joined tab and whether OpenClaw may close it on leave. */
+    /** Exact joined tab and whether Bot may close it on leave. */
     browserTab?: GoogleMeetBrowserTab;
     audioBridge?: {
       type: "command-pair" | "node-command-pair" | "external-command";

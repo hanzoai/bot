@@ -7,7 +7,7 @@ let tagSequence = 0;
 
 function uniqueTag(): string {
   tagSequence += 1;
-  return `openclaw-lazy-test-${tagSequence}`;
+  return `bot-lazy-test-${tagSequence}`;
 }
 
 describe("ensureCustomElementDefined", () => {

@@ -2,15 +2,15 @@
 import type {
   ChannelDoctorConfigMutation,
   ChannelDoctorLegacyConfigRule,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { GroupToolPolicyConfig } from "openclaw/plugin-sdk/channel-policy";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-contract";
+import type { GroupToolPolicyConfig } from "bot/plugin-sdk/channel-policy";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   asObjectRecord,
   defineKeyMoveMigration,
   hasLegacyAccountStreamingAliases,
   normalizeChannelConfigEntries,
-} from "openclaw/plugin-sdk/runtime-doctor";
+} from "bot/plugin-sdk/runtime-doctor";
 
 const RESTRICTED_GROUP_TOOLS: GroupToolPolicyConfig = {
   deny: ["exec", "read", "write"],
@@ -106,14 +106,14 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "qqbot"],
     message:
-      'channels.qqbot streaming aliases and voiceDirectUploadFormats are legacy; use streaming.{mode,nativeTransport} and audioFormatPolicy.uploadDirectFormats. Run "openclaw doctor --fix".',
+      'channels.qqbot streaming aliases and voiceDirectUploadFormats are legacy; use streaming.{mode,nativeTransport} and audioFormatPolicy.uploadDirectFormats. Run "bot doctor --fix".',
     match: (value) =>
       hasLegacyStreamingValue(value) || voiceDirectUploadFormatsMigration.hasLegacy(value),
   },
   {
     path: ["channels", "qqbot", "accounts"],
     message:
-      'channels.qqbot account streaming aliases and voiceDirectUploadFormats are legacy; use streaming.{mode,nativeTransport} and audioFormatPolicy.uploadDirectFormats. Run "openclaw doctor --fix".',
+      'channels.qqbot account streaming aliases and voiceDirectUploadFormats are legacy; use streaming.{mode,nativeTransport} and audioFormatPolicy.uploadDirectFormats. Run "bot doctor --fix".',
     match: (value) =>
       hasLegacyAccountStreamingAliases(
         value,
@@ -124,13 +124,13 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "qqbot", "groups"],
     message:
-      'channels.qqbot.groups.<id>.toolPolicy is legacy and was ignored by QQBot group tool enforcement; use channels.qqbot.groups.<id>.tools instead. Run "openclaw doctor --fix".',
+      'channels.qqbot.groups.<id>.toolPolicy is legacy and was ignored by QQBot group tool enforcement; use channels.qqbot.groups.<id>.tools instead. Run "bot doctor --fix".',
     match: groupToolPolicyMigration.hasLegacy,
   },
   {
     path: ["channels", "qqbot", "accounts"],
     message:
-      'channels.qqbot.accounts.<id>.groups.<groupId>.toolPolicy is legacy and was ignored by QQBot group tool enforcement; use channels.qqbot.accounts.<id>.groups.<groupId>.tools instead. Run "openclaw doctor --fix".',
+      'channels.qqbot.accounts.<id>.groups.<groupId>.toolPolicy is legacy and was ignored by QQBot group tool enforcement; use channels.qqbot.accounts.<id>.groups.<groupId>.tools instead. Run "bot doctor --fix".',
     match: (value) =>
       hasLegacyAccountStreamingAliases(value, (account) =>
         groupToolPolicyMigration.hasLegacy(asObjectRecord(account)?.groups),
@@ -167,7 +167,7 @@ function normalizeQqbotEntry(params: {
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): ChannelDoctorConfigMutation {
   return normalizeChannelConfigEntries({
     cfg,

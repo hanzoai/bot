@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import type { ChannelAutostartSuppression } from "./server-channels.js";
 
@@ -9,11 +9,11 @@ type GatewaySecretsActivationReason = "startup" | "reload" | "restart-check";
  * surface that is safe to resolve during crash-loop recovery.
  */
 export function resolveGatewayStartupSecretProjection(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   reason: GatewaySecretsActivationReason;
   channelAutostartSuppression?: ChannelAutostartSuppression | null;
   env?: NodeJS.ProcessEnv;
-}): { sourceConfig: OpenClawConfig; assignmentConfig?: OpenClawConfig } {
+}): { sourceConfig: BotConfig; assignmentConfig?: BotConfig } {
   const sourceConfig = resolveGatewayStartupSourceConfig(params.config, params.env ?? process.env);
   if (
     params.reason !== "startup" ||
@@ -32,11 +32,11 @@ export function resolveGatewayStartupSecretProjection(params: {
 }
 
 export function resolveGatewayStartupSourceConfig(
-  config: OpenClawConfig,
+  config: BotConfig,
   env: NodeJS.ProcessEnv,
-): OpenClawConfig {
+): BotConfig {
   const skipChannels =
-    isTruthyEnvValue(env.OPENCLAW_SKIP_CHANNELS) || isTruthyEnvValue(env.OPENCLAW_SKIP_PROVIDERS);
+    isTruthyEnvValue(env.BOT_SKIP_CHANNELS) || isTruthyEnvValue(env.BOT_SKIP_PROVIDERS);
   if (!skipChannels || !config.channels) {
     return config;
   }

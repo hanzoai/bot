@@ -42,7 +42,7 @@ async function makeTempRepo(prefix: string) {
 
 async function writeEvidence(pathLocal: string, writeFile = true) {
   const evidence = {
-    kind: "openclaw.qa.evidence-summary",
+    kind: "bot.qa.evidence-summary",
     schemaVersion: 2,
     generatedAt: "2026-06-14T00:00:00.000Z",
     evidenceMode: "full",
@@ -186,7 +186,7 @@ describe("qa suite runtime launcher", () => {
       repoRoot,
       outputDir: ".artifacts/qa-e2e/flow-only-isolated",
       concurrency: 1,
-      runtimePair: ["openclaw", "codex"],
+      runtimePair: ["bot", "codex"],
       scenarioIds: ["channel-chat-baseline", "matrix-allowlist-hot-reload"],
     });
 
@@ -198,7 +198,7 @@ describe("qa suite runtime launcher", () => {
       expect.objectContaining({
         outputDir: path.join(outputDir, "flow", "isolated-1"),
         concurrency: 1,
-        runtimePair: ["openclaw", "codex"],
+        runtimePair: ["bot", "codex"],
         scenarioIds: ["channel-chat-baseline"],
       }),
     );
@@ -207,7 +207,7 @@ describe("qa suite runtime launcher", () => {
       expect.objectContaining({
         outputDir: path.join(outputDir, "flow", "isolated-2"),
         concurrency: 1,
-        runtimePair: ["openclaw", "codex"],
+        runtimePair: ["bot", "codex"],
         scenarioIds: ["matrix-allowlist-hot-reload"],
       }),
     );
@@ -381,7 +381,7 @@ describe("qa suite runtime launcher", () => {
       const result = await defaultFlowImplementation(params);
       const scenarioIds: readonly string[] = params?.scenarioIds ?? [];
       result.evidence = {
-        kind: "openclaw.qa.evidence-summary",
+        kind: "bot.qa.evidence-summary",
         schemaVersion: 2,
         generatedAt: "2026-06-14T00:00:00.000Z",
         evidenceMode: "full",
@@ -488,7 +488,7 @@ describe("qa suite runtime launcher", () => {
       outputDir: ".artifacts/qa-e2e/crabline-runtime-pair",
       providerMode: "mock-openai",
       channelDriver: "crabline",
-      runtimePair: ["openclaw", "codex"],
+      runtimePair: ["bot", "codex"],
       scenarioIds: ["telegram-help-command", "matrix-restart-resume"],
     });
 
@@ -496,7 +496,7 @@ describe("qa suite runtime launcher", () => {
     for (const call of runQaFlowSuite.mock.calls) {
       expect(call[0]).toEqual(
         expect.objectContaining({
-          runtimePair: ["openclaw", "codex"],
+          runtimePair: ["bot", "codex"],
         }),
       );
     }
@@ -512,7 +512,7 @@ describe("qa suite runtime launcher", () => {
         "utf8",
       ),
     ) as { run?: { runtimePair?: unknown } };
-    expect(summary.run?.runtimePair).toEqual(["openclaw", "codex"]);
+    expect(summary.run?.runtimePair).toEqual(["bot", "codex"]);
     await expect(
       fs.access(
         path.join(
@@ -1975,7 +1975,7 @@ describe("qa suite runtime launcher", () => {
   });
 
   it("preserves configured isolated worker start stagger overrides", async () => {
-    vi.stubEnv("OPENCLAW_QA_SUITE_WORKER_START_STAGGER_MS", "2500");
+    vi.stubEnv("BOT_QA_SUITE_WORKER_START_STAGGER_MS", "2500");
     const repoRoot = await makeTempRepo("qa-suite-stagger-env-");
     await runQaSuite({
       repoRoot,
@@ -2008,7 +2008,7 @@ describe("qa suite runtime launcher", () => {
     await expect(
       runQaSuite({
         repoRoot: process.cwd(),
-        runtimePair: ["openclaw", "codex"],
+        runtimePair: ["bot", "codex"],
         scenarioIds: ["control-ui-chat-flow-playwright"],
       }),
     ).rejects.toThrow("--runtime-pair requires execution.kind: flow scenarios");

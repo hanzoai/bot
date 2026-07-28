@@ -1,4 +1,4 @@
-import { getRootOptionAwareCommandPath } from "openclaw/plugin-sdk/cli-argv";
+import { getRootOptionAwareCommandPath } from "bot/plugin-sdk/cli-argv";
 
 /** Every Zoom meetings action emits one JSON result on stdout. */
 function isZoomMeetingsMachineOutput(params: { argv: readonly string[] }): boolean {

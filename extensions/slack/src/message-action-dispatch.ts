@@ -1,18 +1,18 @@
 // Slack plugin module implements message action dispatch behavior.
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-resolution";
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import { readBooleanParam } from "openclaw/plugin-sdk/boolean-param";
-import { resolveReactionMessageId } from "openclaw/plugin-sdk/channel-actions";
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
+import { normalizeAccountId } from "bot/plugin-sdk/account-resolution";
+import type { AgentToolResult } from "bot/plugin-sdk/agent-core";
+import { readBooleanParam } from "bot/plugin-sdk/boolean-param";
+import { resolveReactionMessageId } from "bot/plugin-sdk/channel-actions";
+import type { ChannelMessageActionContext } from "bot/plugin-sdk/channel-contract";
 import {
   normalizeLegacyInteractiveReply,
   normalizeMessagePresentation,
-} from "openclaw/plugin-sdk/interactive-runtime";
-import { readPositiveIntegerParam, readStringParam } from "openclaw/plugin-sdk/param-readers";
+} from "bot/plugin-sdk/interactive-runtime";
+import { readPositiveIntegerParam, readStringParam } from "bot/plugin-sdk/param-readers";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveDefaultSlackAccountId } from "./accounts.js";
 import { SLACK_MAX_BLOCKS } from "./blocks-input.js";
 import { buildSlackPresentationBlocks, canRenderSlackPresentation } from "./blocks-render.js";

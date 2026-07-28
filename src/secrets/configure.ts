@@ -6,12 +6,12 @@ import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { listAgentIds, resolveAgentDir, resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { AUTH_STORE_VERSION } from "../agents/auth-profiles/constants.js";
 import { loadPersistedAuthProfileStore } from "../agents/auth-profiles/persisted.js";
 import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type {
   ManualExecSecretProviderConfig,
   SecretProviderConfig,
@@ -88,7 +88,7 @@ function parseOptionalPositiveInt(value: string, max: number): number | undefine
   return parsed;
 }
 
-function getSecretProviders(config: OpenClawConfig): Record<string, SecretProviderConfig> {
+function getSecretProviders(config: BotConfig): Record<string, SecretProviderConfig> {
   if (!isRecord(config.secrets?.providers)) {
     return {};
   }
@@ -96,7 +96,7 @@ function getSecretProviders(config: OpenClawConfig): Record<string, SecretProvid
 }
 
 function setSecretProvider(
-  config: OpenClawConfig,
+  config: BotConfig,
   providerAlias: string,
   providerConfig: SecretProviderConfig,
 ): void {
@@ -107,7 +107,7 @@ function setSecretProvider(
   config.secrets.providers[providerAlias] = providerConfig;
 }
 
-function removeSecretProvider(config: OpenClawConfig, providerAlias: string): boolean {
+function removeSecretProvider(config: BotConfig, providerAlias: string): boolean {
   if (!isRecord(config.secrets?.providers)) {
     return false;
   }
@@ -166,7 +166,7 @@ function providerPresetHint(preset: SecretProviderIntegrationPreset): string {
 }
 
 function loadSecretProviderIntegrationPresets(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env: NodeJS.ProcessEnv;
 }): SecretProviderIntegrationPreset[] {
   const manifestRegistry = loadPluginManifestRegistry({
@@ -180,7 +180,7 @@ function loadSecretProviderIntegrationPresets(params: {
   });
 }
 
-function toSourceChoices(config: OpenClawConfig): Array<{ value: SecretRefSource; label: string }> {
+function toSourceChoices(config: BotConfig): Array<{ value: SecretRefSource; label: string }> {
   const hasSource = (source: SecretRefSource) =>
     Object.values(config.secrets?.providers ?? {}).some((provider) => provider?.source === source);
   const choices: Array<{ value: SecretRefSource; label: string }> = [
@@ -263,14 +263,14 @@ async function promptOptionalPositiveInt(params: {
 }
 
 function configureCandidateKey(candidate: {
-  configFile: "openclaw.json" | "auth-profiles.json";
+  configFile: "bot.json" | "auth-profiles.json";
   path: string;
   agentId?: string;
 }): string {
   if (candidate.configFile === "auth-profiles.json") {
     return `auth-profiles:${normalizeOptionalString(candidate.agentId) ?? ""}:${candidate.path}`;
   }
-  return `openclaw:${candidate.path}`;
+  return `bot:${candidate.path}`;
 }
 
 function hasSourceChoice(
@@ -299,7 +299,7 @@ function resolveSuggestedEnvSecretId(candidate: ConfigureCandidate): string | un
   return envCandidates[0];
 }
 
-function resolveConfigureAgentId(config: OpenClawConfig, explicitAgentId?: string): string {
+function resolveConfigureAgentId(config: BotConfig, explicitAgentId?: string): string {
   const knownAgentIds = new Set(listAgentIds(config));
   if (!explicitAgentId) {
     return resolveDefaultAgentId(config);
@@ -315,7 +315,7 @@ function resolveConfigureAgentId(config: OpenClawConfig, explicitAgentId?: strin
 }
 
 function loadAuthProfileStoreForConfigure(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   agentId: string;
 }): AuthProfileStore {
   const agentDir = resolveAgentDir(params.config, params.agentId);
@@ -635,7 +635,7 @@ async function promptProviderConfig(
 }
 
 async function configureProvidersInteractive(
-  config: OpenClawConfig,
+  config: BotConfig,
   env: NodeJS.ProcessEnv,
 ): Promise<void> {
   const presets = loadSecretProviderIntegrationPresets({ config, env });
@@ -834,7 +834,7 @@ export async function runSecretsConfigureInteractive(
     });
     const candidates = buildConfigureCandidatesForScope({
       config: stagedConfig,
-      authoredOpenClawConfig: snapshot.resolved,
+      authoredBotConfig: snapshot.resolved,
       authProfiles: {
         agentId: configureAgentId,
         store: authStore,
@@ -856,7 +856,7 @@ export async function runSecretsConfigureInteractive(
         value: configureCandidateKey(candidate),
         label: candidate.label,
         hint: [
-          candidate.configFile === "auth-profiles.json" ? "auth-profiles.json" : "openclaw.json",
+          candidate.configFile === "auth-profiles.json" ? "auth-profiles.json" : "bot.json",
           candidate.isDerived === true ? "derived" : undefined,
         ]
           .filter(Boolean)

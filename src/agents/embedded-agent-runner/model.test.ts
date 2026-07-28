@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@hanzo/bot-normalization-core/number-coercion";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { withEnvAsync } from "../../test-utils/env.js";
 import { discoverAuthStorage, discoverModels } from "../agent-model-discovery.js";
@@ -42,7 +42,7 @@ const preparedSnapshotState = vi.hoisted(() => ({
 
 vi.mock("../model-suppression.js", () => {
   // Mirrors the canonical manifest-driven suppression in
-  // extensions/qwen/openclaw.plugin.json and src/plugins/manifest-model-suppression.ts.
+  // extensions/qwen/bot.plugin.json and src/plugins/manifest-model-suppression.ts.
   function isQwenCodingPlanBaseUrl(value: string | undefined): boolean {
     const trimmed = value?.trim();
     if (!trimmed) {
@@ -138,10 +138,10 @@ vi.mock("../model-suppression.js", () => {
         (provider === "openai" || provider === "azure-openai-responses" || provider === "openai") &&
         id?.trim().toLowerCase() === "gpt-5.3-codex-spark"
       ) {
-        return `Unknown model: ${provider}/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run \`openclaw models auth login --provider openai\` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.`;
+        return `Unknown model: ${provider}/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run \`bot models auth login --provider openai\` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.`;
       }
       if (isUnsupportedXaiMultiAgentModel(provider, id)) {
-        return "Unknown model: xai/grok-4.20-multi-agent-0309. OpenClaw does not currently support xAI multi-agent models; choose another xAI model. See https://docs.openclaw.ai/providers/xai.";
+        return "Unknown model: xai/grok-4.20-multi-agent-0309. Bot does not currently support xAI multi-agent models; choose another xAI model. See https://docs.bot.ai/providers/xai.";
       }
       return undefined;
     },
@@ -154,7 +154,7 @@ vi.mock("../prepared-model-runtime.js", async () => {
   const createSnapshot = (input: {
     agentId?: string;
     agentDir: string;
-    config?: OpenClawConfig;
+    config?: BotConfig;
     workspaceDir?: string;
   }) => {
     const workspaceDir = discoveryContext.resolveModelWorkspaceDir(
@@ -228,7 +228,7 @@ vi.mock("./openrouter-model-capabilities.js", () => ({
     mockLoadOpenRouterModelCapabilities(modelId),
 }));
 
-import type { OpenClawConfig, OpenClawConfigInput } from "../../config/config.js";
+import type { BotConfig, BotConfigInput } from "../../config/config.js";
 import { COPILOT_INTEGRATION_ID, buildCopilotIdeHeaders } from "../copilot-dynamic-headers.js";
 import { getModelProviderLocalService } from "../provider-local-service.js";
 import { getModelProviderRequestTransport } from "../provider-request-config.js";
@@ -318,7 +318,7 @@ function resolveModelForTest(
   provider: string,
   modelId: string,
   agentDir?: string,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ) {
   // Most tests use fixed auth storage to keep assertions focused on model
   // resolution rather than auth discovery.
@@ -354,7 +354,7 @@ function resolveModelAsyncForTest(
   provider: string,
   modelId: string,
   agentDir?: string,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
   options?: {
     allowBundledStaticCatalogFallback?: boolean;
     preferBundledStaticCatalogTransport?: boolean;
@@ -440,7 +440,7 @@ describe("resolveModel", () => {
     });
     const cfg = {
       agents: { defaults: { workspace: "/tmp/config-derived-workspace" } },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = await resolveModelAsync("openai", "gpt-5.5", "/tmp/agent", cfg, {
       agentId: "main",
@@ -499,7 +499,7 @@ describe("resolveModel", () => {
             },
           },
         },
-      }) as OpenClawConfig;
+      }) as BotConfig;
 
     const first = await resolveModelAsync(
       "openai",
@@ -523,7 +523,7 @@ describe("resolveModel", () => {
   });
 
   it("does not poll generated plugin catalogs between lifecycle generations", async () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-model-cache-plugin-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-model-cache-plugin-"));
     const agentDir = path.join(rootDir, "agent");
     fs.mkdirSync(agentDir, { recursive: true });
     mockDiscoveredModel(discoverModels, {
@@ -557,7 +557,7 @@ describe("resolveModel", () => {
   });
 
   it("reuses inherited auth from one lifecycle generation", async () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-model-cache-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-model-cache-"));
     const agentDir = path.join(rootDir, "agent");
     const defaultAgentDir = path.join(rootDir, "default-agent");
     fs.mkdirSync(agentDir, { recursive: true });
@@ -569,7 +569,7 @@ describe("resolveModel", () => {
           { id: "worker", agentDir },
         ],
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     mockDiscoveredModel(discoverModels, {
       provider: "openai",
       modelId: "gpt-5.5",
@@ -601,7 +601,7 @@ describe("resolveModel", () => {
   });
 
   it("uses the resolved default agent workspace for prepared model discovery", () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-model-workspace-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-model-workspace-"));
     const agentDir = path.join(rootDir, "agent");
     const workspaceDir = path.join(rootDir, "workspace");
     fs.mkdirSync(agentDir, { recursive: true });
@@ -617,7 +617,7 @@ describe("resolveModel", () => {
       agents: {
         list: [{ id: "workspace-agent", default: true, agentDir, workspace: workspaceDir }],
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModel("openai", "gpt-5.5", agentDir, cfg, {
       runtimeHooks: createRuntimeHooks(),
@@ -647,7 +647,7 @@ describe("resolveModel", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig;
+      } as unknown as BotConfig;
       mockDiscoveredModel(discoverModels, {
         provider: "openai",
         modelId: "gpt-5.5",
@@ -676,13 +676,13 @@ describe("resolveModel", () => {
   );
 
   it("does not poll implicit main auth during request resolution", async () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-model-cache-state-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-model-cache-state-"));
     const agentDir = path.join(rootDir, "agents", "worker", "agent");
     const mainAgentDir = path.join(rootDir, "agents", "main", "agent");
     fs.mkdirSync(agentDir, { recursive: true });
     fs.mkdirSync(mainAgentDir, { recursive: true });
     try {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: rootDir }, async () => {
+      await withEnvAsync({ BOT_STATE_DIR: rootDir }, async () => {
         mockDiscoveredModel(discoverModels, {
           provider: "openai",
           modelId: "gpt-5.5",
@@ -775,7 +775,7 @@ describe("resolveModel", () => {
     expect(discoverModels).toHaveBeenCalledTimes(1);
   });
 
-  it("skips OpenClaw auth and model discovery during dynamic model resolution", async () => {
+  it("skips Bot auth and model discovery during dynamic model resolution", async () => {
     const result = await resolveModelAsync(
       "openrouter",
       "openrouter/auto",
@@ -903,7 +903,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     resolveBundledStaticCatalogModelMock.mockReturnValueOnce({
       provider: "openai",
       id: "gpt-5.3-codex",
@@ -995,7 +995,7 @@ describe("resolveModel", () => {
     );
   });
 
-  it("prefers user openclaw.json config over the Fireworks manifest for the same id", () => {
+  it("prefers user bot.json config over the Fireworks manifest for the same id", () => {
     resolveBundledStaticCatalogModelMock.mockReturnValue({
       ...makeModel("accounts/fireworks/models/kimi-k2p6"),
       provider: "fireworks",
@@ -1023,7 +1023,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest(
       "fireworks",
@@ -1234,7 +1234,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = await resolveModelAsync("mistral", "mistral-medium-3-5", "/tmp/agent", cfg, {
       allowBundledStaticCatalogFallback: true,
@@ -1345,7 +1345,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect((expectResolvedModel(result) as { mediaInput?: unknown }).mediaInput).toEqual({
       image: { maxBytes: 1, maxSidePx: 2048, preferredSidePx: 1536, tokenMode: "provider" },
@@ -1400,13 +1400,13 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(expectResolvedModel(result).input).toEqual(["text"]);
   });
 
-  it("defaults missing model cost before handing models to OpenClaw", () => {
-    const cfg: OpenClawConfig = {
+  it("defaults missing model cost before handing models to Bot", () => {
+    const cfg: BotConfig = {
       models: {
         providers: {
           openai: {
@@ -1448,7 +1448,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("custom", "missing-model", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -1469,7 +1469,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("google", "gemini-2.5-flash-lite", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -1490,7 +1490,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("google-vertex", "gemini-2.5-flash", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -1525,7 +1525,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("xiaomi-token-plan", "mimo-v2.5-pro", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -1569,7 +1569,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("groq", "llama-3.3-70b-versatile", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -1598,7 +1598,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("groq", "llama-3.3-70b-versatile", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -1610,7 +1610,7 @@ describe("resolveModel", () => {
   });
 
   it("leaves maxTokens undefined when no configured or catalog value is available (regression: #98295)", () => {
-    // Regression for https://github.com/openclaw/openclaw/issues/98295.
+    // Regression for https://github.com/hanzoai/bot/issues/98295.
     // A custom provider entry without maxTokens (and no matching bundled
     // static catalog row) must not synthesize an oversized output cap from
     // DEFAULT_CONTEXT_TOKENS. Leaving maxTokens undefined lets the transport
@@ -1632,7 +1632,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("xiaomi", "mimo-v2.5-pro", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -1682,7 +1682,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("deepseek", "deepseek-v4-pro", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -1748,7 +1748,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     const baseRuntimeHooks = createRuntimeHooks();
     const runProviderDynamicModel = vi.fn(() => ({
       provider: "deepseek",
@@ -1824,7 +1824,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = await resolveModelAsync("deepseek", "deepseek-v4-pro", "/tmp/agent", cfg, {
       runtimeHooks: createRuntimeHooks(),
@@ -1881,7 +1881,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     const baseRuntimeHooks = createRuntimeHooks();
     const runProviderDynamicModel = vi.fn(() => ({
       provider: "deepseek",
@@ -1950,7 +1950,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("deepseek", "deepseek-v4-pro", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -1996,7 +1996,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("deepseek", "deepseek-v4-pro", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -2037,7 +2037,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("xiaomi-token-plan", "mimo-v2.5-pro", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -2060,7 +2060,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("openai", "typo-model", "/tmp/agent", cfg);
 
@@ -2077,13 +2077,13 @@ describe("resolveModel", () => {
           },
         },
       },
-    } satisfies OpenClawConfigInput;
+    } satisfies BotConfigInput;
 
     const result = resolveModelForTest(
       "typoProvider",
       "typoed-model",
       "/tmp/agent",
-      cfg as unknown as OpenClawConfig,
+      cfg as unknown as BotConfig,
     );
 
     expect(result.model).toBeUndefined();
@@ -2099,13 +2099,13 @@ describe("resolveModel", () => {
           },
         },
       },
-    } satisfies OpenClawConfigInput;
+    } satisfies BotConfigInput;
 
     const result = resolveModelForTest(
       "openai",
       "typoed-model",
       "/tmp/agent",
-      cfg as unknown as OpenClawConfig,
+      cfg as unknown as BotConfig,
     );
 
     expect(result.model).toBeUndefined();
@@ -2139,7 +2139,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const claude = resolveModelForTest("my-router", "my-router/claude", "/tmp/agent", cfg);
     const claudeModel = expectResolvedModel(claude);
@@ -2171,7 +2171,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("my-gemini", "gemini-pro", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -2195,7 +2195,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("local-agent-proxy", "gpt-5.2", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -2227,7 +2227,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("ds4", "deepseek-v4-flash", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -2261,7 +2261,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("qwen", "qwen3.6-plus", "/tmp/agent", cfg);
 
@@ -2287,7 +2287,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("qwen", "qwen3.6-plus", "/tmp/agent", cfg);
 
@@ -2315,7 +2315,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("openai", "gpt-5.4-mini", "/tmp/agent", cfg);
 
@@ -2339,7 +2339,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("google-paid", "missing-model", "/tmp/agent", cfg);
 
@@ -2369,7 +2369,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("google", "gemini-2.5-pro", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -2394,7 +2394,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("custom-openai", "gpt-5.4", "/tmp/agent", cfg);
 
@@ -2422,7 +2422,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("custom-xai", "grok-4.1-fast", "/tmp/agent", cfg);
 
@@ -2456,7 +2456,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("github-copilot", "gpt-5.5", "/tmp/agent", cfg);
     const model = expectResolvedModel(result) as unknown as { headers?: Record<string, string> };
@@ -2479,7 +2479,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     // Requesting a non-listed model forces the providerCfg fallback branch.
     const result = resolveModelForTest("custom", "missing-model", "/tmp/agent", cfg);
@@ -2505,7 +2505,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("custom", "missing-model", "/tmp/agent", cfg);
     const model = expectResolvedModel(result) as unknown as { headers?: Record<string, string> };
@@ -2559,7 +2559,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("custom", "model-b", "/tmp/agent", cfg);
     const model = expectResolvedModel(result);
@@ -2601,7 +2601,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("ollama", "qwen3:32b", "/tmp/agent", cfg);
 
@@ -2633,7 +2633,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("ollama", "qwen3:32b", "/tmp/agent", cfg);
 
@@ -2664,7 +2664,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("ollama", "qwen3:32b", "/tmp/agent", cfg);
 
@@ -2691,13 +2691,13 @@ describe("resolveModel", () => {
           },
         },
       },
-    } satisfies OpenClawConfigInput;
+    } satisfies BotConfigInput;
 
     const result = resolveModelForTest(
       "openai",
       "gpt-5.5",
       "/tmp/agent",
-      cfg as unknown as OpenClawConfig,
+      cfg as unknown as BotConfig,
     );
 
     expect(result.error).toBeUndefined();
@@ -2723,13 +2723,13 @@ describe("resolveModel", () => {
           },
         },
       },
-    } satisfies OpenClawConfigInput;
+    } satisfies BotConfigInput;
 
     const result = resolveModelForTest(
       "openai",
       "gpt-5.5",
       "/tmp/agent",
-      cfg as unknown as OpenClawConfig,
+      cfg as unknown as BotConfig,
     );
 
     expect(result.error).toBeUndefined();
@@ -2761,7 +2761,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("ollama", "qwen3.5:9b", "/tmp/agent", cfg);
 
@@ -2800,7 +2800,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("ollama", "qwen3.5:9b", "/tmp/agent", cfg);
 
@@ -2828,7 +2828,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("ollama", "llama3.2", "/tmp/agent", cfg);
 
@@ -2857,7 +2857,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("custom", "model-b", "/tmp/agent", cfg);
 
@@ -2880,7 +2880,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("vllm", "Qwen/Qwen3-8B", "/tmp/agent", cfg);
 
@@ -2920,7 +2920,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("vllm", "Qwen/Qwen3-8B", "/tmp/agent", cfg);
 
@@ -2959,7 +2959,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("vllm", "Qwen/Qwen3-8B", "/tmp/agent", cfg);
 
@@ -2986,7 +2986,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("vllm", "Qwen/Qwen3-8B", "/tmp/agent", cfg);
 
@@ -3013,7 +3013,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("custom", "model-b", "/tmp/agent", cfg);
 
@@ -3036,7 +3036,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("custom", "vision-model", "/tmp/agent", cfg);
 
@@ -3064,7 +3064,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("bytedance", "vision-model", "/tmp/agent", cfg);
 
@@ -3088,7 +3088,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("moonshotai", "kimi-k2.6", "/tmp/agent", cfg);
 
@@ -3110,7 +3110,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("moonshot-ai", "kimi-k2.6", "/tmp/agent", cfg);
 
@@ -3137,7 +3137,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const result = resolveModelForTest("azure-openai-responses", "gpt-5.5", "/tmp/agent", cfg);
 
@@ -3390,7 +3390,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("custom", "vision-model", "/tmp/agent", cfg);
 
@@ -3422,7 +3422,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("mlx", modelId, "/tmp/agent", cfg);
 
@@ -3460,7 +3460,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("custom", "vision-model", "/tmp/agent", cfg);
 
@@ -3487,7 +3487,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("custom", "typoed-model", "/tmp/agent", cfg);
 
@@ -3507,7 +3507,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = await resolveModelAsync("microsoft-foundry", "Kimi-K2.6-1", "/tmp/agent", cfg, {
       runtimeHooks: createRuntimeHooks(),
@@ -3515,7 +3515,7 @@ describe("resolveModel", () => {
     });
 
     expect(result.error).toBe(
-      'Unknown model: microsoft-foundry/Kimi-K2.6-1. Found agents.defaults.models["microsoft-foundry/Kimi-K2.6-1"], but no matching models.providers["microsoft-foundry"].models[] entry. Add { "id": "Kimi-K2.6-1", "name": "Kimi-K2.6-1" } to models.providers["microsoft-foundry"].models[] to register this provider model. For custom or proxy providers, also set api and baseUrl so requests route to the intended endpoint. See https://docs.openclaw.ai/concepts/model-providers.',
+      'Unknown model: microsoft-foundry/Kimi-K2.6-1. Found agents.defaults.models["microsoft-foundry/Kimi-K2.6-1"], but no matching models.providers["microsoft-foundry"].models[] entry. Add { "id": "Kimi-K2.6-1", "name": "Kimi-K2.6-1" } to models.providers["microsoft-foundry"].models[] to register this provider model. For custom or proxy providers, also set api and baseUrl so requests route to the intended endpoint. See https://docs.bot.ai/concepts/model-providers.',
     );
   });
 
@@ -3549,7 +3549,7 @@ describe("resolveModel", () => {
       "openai-codex",
       "gpt-5.4",
       "/tmp/agent",
-      cfg as unknown as OpenClawConfig,
+      cfg as unknown as BotConfig,
       {
         runtimeHooks: createRuntimeHooks(),
         skipAgentDiscovery: true,
@@ -3557,7 +3557,7 @@ describe("resolveModel", () => {
     );
 
     expect(result.error).toBe(
-      'Unknown model: openai-codex/gpt-5.4. "openai-codex" is a legacy provider ID. Run `openclaw doctor --fix` to migrate legacy model and provider config to the current OpenAI format. If the provider has no authenticated profile, run `openclaw models status` to check provider auth and re-authenticate if needed. See https://docs.openclaw.ai/concepts/model-providers.',
+      'Unknown model: openai-codex/gpt-5.4. "openai-codex" is a legacy provider ID. Run `bot doctor --fix` to migrate legacy model and provider config to the current OpenAI format. If the provider has no authenticated profile, run `bot models status` to check provider auth and re-authenticate if needed. See https://docs.bot.ai/concepts/model-providers.',
     );
   });
 
@@ -3570,7 +3570,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = await resolveModelAsync("custom-provider", "some-model", "/tmp/agent", cfg, {
       runtimeHooks: createRuntimeHooks(),
@@ -3578,7 +3578,7 @@ describe("resolveModel", () => {
     });
 
     expect(result.error).toBe(
-      'Unknown model: custom-provider/some-model. Found agents.defaults.models["custom-provider/some-model"], but no matching models.providers["custom-provider"].models[] entry. Add { "id": "some-model", "name": "some-model" } to models.providers["custom-provider"].models[] to register this provider model. For custom or proxy providers, also set api and baseUrl so requests route to the intended endpoint. See https://docs.openclaw.ai/concepts/model-providers.',
+      'Unknown model: custom-provider/some-model. Found agents.defaults.models["custom-provider/some-model"], but no matching models.providers["custom-provider"].models[] entry. Add { "id": "some-model", "name": "some-model" } to models.providers["custom-provider"].models[] to register this provider model. For custom or proxy providers, also set api and baseUrl so requests route to the intended endpoint. See https://docs.bot.ai/concepts/model-providers.',
     );
   });
 
@@ -3593,7 +3593,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = await resolveModelAsync("openai", "gpt-5.3-codex", "/tmp/agent", cfg, {
       runtimeHooks: createRuntimeHooks(),
@@ -3601,7 +3601,7 @@ describe("resolveModel", () => {
     });
 
     expect(result.error).toBe(
-      'Unknown model: openai/gpt-5.3-codex. Found agents.defaults.models["openai/gpt-5.3-codex"] bound to the "codex" agent runtime. Models served by an agent runtime come from that runtime and its linked account, not from models.providers["openai"].models[] — registering it there will not make it usable. Confirm "gpt-5.3-codex" is still offered by the "codex" runtime and switch agents.defaults.model.primary to a currently available model (run `openclaw models list --provider openai` to list them). See https://docs.openclaw.ai/concepts/model-providers.',
+      'Unknown model: openai/gpt-5.3-codex. Found agents.defaults.models["openai/gpt-5.3-codex"] bound to the "codex" agent runtime. Models served by an agent runtime come from that runtime and its linked account, not from models.providers["openai"].models[] — registering it there will not make it usable. Confirm "gpt-5.3-codex" is still offered by the "codex" runtime and switch agents.defaults.model.primary to a currently available model (run `bot models list --provider openai` to list them). See https://docs.bot.ai/concepts/model-providers.',
     );
   });
 
@@ -3623,7 +3623,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("microsoft-foundry", "gpt-5.4", "/tmp/agent", cfg);
 
@@ -3648,7 +3648,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("anthropic", "claude-sonnet-4-5", "/tmp/agent", cfg);
 
@@ -3673,7 +3673,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     mockDiscoveredModel(discoverModels, {
       provider: "microsoft-foundry",
@@ -3739,7 +3739,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const models = buildInlineProviderModels(cfg.models?.providers ?? {});
     const model = models.find((entry) => entry.id === "openrouter/healer-alpha");
@@ -3954,7 +3954,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModel("openai", "gpt-5.5", "/tmp/agent", cfg, {
       authStorage: { mocked: true } as never,
@@ -4010,7 +4010,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("onehub", "glm-5", "/tmp/agent", cfg);
 
@@ -4069,7 +4069,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("bedrock", "bedrock-alias-exact-test", "/tmp/agent", cfg);
 
@@ -4191,7 +4191,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("openai", "gpt-5.4-codex", "/tmp/agent", cfg);
 
@@ -4231,7 +4231,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("openai", "gpt-5.4-codex", "/tmp/agent", cfg);
 
@@ -4264,7 +4264,7 @@ describe("resolveModel", () => {
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
+      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `bot models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
     );
   });
 
@@ -4279,13 +4279,13 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("xai", "grok-4.20-multi-agent-0309", "/tmp/agent", cfg);
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: xai/grok-4.20-multi-agent-0309. OpenClaw does not currently support xAI multi-agent models; choose another xAI model. See https://docs.openclaw.ai/providers/xai.",
+      "Unknown model: xai/grok-4.20-multi-agent-0309. Bot does not currently support xAI multi-agent models; choose another xAI model. See https://docs.bot.ai/providers/xai.",
     );
   });
 
@@ -4304,7 +4304,7 @@ describe("resolveModel", () => {
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
+      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `bot models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
     );
   });
 
@@ -4366,7 +4366,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("openai", "gpt-5.5-pro", "/tmp/agent", cfg);
 
@@ -4435,7 +4435,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("openai", "gpt-5.5", "/tmp/agent", cfg);
 
@@ -4584,7 +4584,7 @@ describe("resolveModel", () => {
           workspace: "/tmp/workspace",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = resolveModel("openai", "gpt-5.4", "/tmp/agent-state", cfg, {
       authStorage: { mocked: true } as never,
@@ -4646,7 +4646,7 @@ describe("resolveModel", () => {
           workspace: "/tmp/workspace",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = resolveModelWithRegistry({
       provider: "openai",
@@ -4714,7 +4714,7 @@ describe("resolveModel", () => {
 
     expect(result.model).toBeUndefined();
     expect(result.error).toBe(
-      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `openclaw models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
+      "Unknown model: openai/gpt-5.3-codex-spark. gpt-5.3-codex-spark is available only through ChatGPT/Codex OAuth. Run `bot models auth login --provider openai` and use openai/gpt-5.3-codex-spark with that OAuth profile; OpenAI API-key auth cannot use this model.",
     );
   });
 
@@ -4740,7 +4740,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("openai", "gpt-5.4", "/tmp/agent", cfg);
 
@@ -4776,7 +4776,7 @@ describe("resolveModel", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = resolveModelForTest("github-copilot", "gpt-5.4-mini", "/tmp/agent", cfg);
 

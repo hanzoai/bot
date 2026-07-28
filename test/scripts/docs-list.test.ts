@@ -26,7 +26,7 @@ afterEach(() => {
 
 describe("docs-list", () => {
   it("prints single-line read_when strings as read hints", () => {
-    const tempRepoRoot = makeTempRepoRoot("openclaw-docs-list-");
+    const tempRepoRoot = makeTempRepoRoot("bot-docs-list-");
     mkdirSync(path.join(tempRepoRoot, "docs"), { recursive: true });
     writeFileSync(
       path.join(tempRepoRoot, "docs", "page.md"),

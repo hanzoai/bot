@@ -8,7 +8,7 @@ import type {
   WorkerInferenceOptions,
 } from "../../packages/gateway-protocol/src/schema/worker-inference.js";
 import { toToolDefinitions } from "../agents/agent-tool-definition-adapter.js";
-import { createOpenClawCodingTools } from "../agents/agent-tools.js";
+import { createBotCodingTools } from "../agents/agent-tools.js";
 import { buildBootstrapContextForFiles } from "../agents/bootstrap-files.js";
 import { createNativeModelOwnedRuntimeModel } from "../agents/embedded-agent-runner/run/setup.js";
 import { guardSessionManager } from "../agents/session-tool-result-guard-wrapper.js";
@@ -123,7 +123,7 @@ export async function runWorkerEmbeddedTurn(
   const allowedToolNameSet = new Set<string>(params.allowedToolNames);
   const activeToolNames = WORKER_LOCAL_TOOL_NAMES.filter((name) => allowedToolNameSet.has(name));
   const localToolNameSet = new Set<string>(WORKER_LOCAL_TOOL_NAMES);
-  const localTools = createOpenClawCodingTools({
+  const localTools = createBotCodingTools({
     cwd: params.cwd,
     workspaceDir: params.cwd,
     sessionId: params.sessionId,
@@ -144,7 +144,7 @@ export async function runWorkerEmbeddedTurn(
       includeBaseCodingTools: true,
       includeShellTools: true,
       includeChannelTools: false,
-      includeOpenClawTools: false,
+      includeBotTools: false,
       includePluginTools: false,
     },
   }).filter((tool) => localToolNameSet.has(tool.name));

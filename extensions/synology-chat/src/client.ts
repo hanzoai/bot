@@ -5,15 +5,15 @@
 
 import * as http from "node:http";
 import * as https from "node:https";
-import { safeParseJsonWithSchema, safeParseWithSchema } from "openclaw/plugin-sdk/extension-shared";
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
-import { readByteStreamWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { sleep } from "openclaw/plugin-sdk/runtime-env";
+import { safeParseJsonWithSchema, safeParseWithSchema } from "bot/plugin-sdk/extension-shared";
+import { parseStrictNonNegativeInteger } from "bot/plugin-sdk/number-runtime";
+import { readByteStreamWithLimit } from "bot/plugin-sdk/response-limit-runtime";
+import { sleep } from "bot/plugin-sdk/runtime-env";
 import {
   formatErrorMessage,
   resolvePinnedHostnameWithPolicy,
-} from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/ssrf-runtime";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import { z } from "zod";
 
 const MIN_SEND_INTERVAL_MS = 500;

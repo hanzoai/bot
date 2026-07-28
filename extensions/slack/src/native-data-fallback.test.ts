@@ -18,7 +18,7 @@ function actionBlock(label: string, value: string) {
     elements: [
       {
         type: "button",
-        action_id: "openclaw:reply_button",
+        action_id: "bot:reply_button",
         text: { type: "plain_text", text: label },
         value,
       },

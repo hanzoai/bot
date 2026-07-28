@@ -1,6 +1,6 @@
-// OpenClaw overview tests cover summary output for rescue diagnostics.
+// Bot overview tests cover summary output for rescue diagnostics.
 import { describe, expect, it } from "vitest";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/config.js";
+import type { ConfigFileSnapshot, BotConfig } from "../config/config.js";
 import {
   formatSystemAgentOverview,
   formatSystemAgentOnboardingWelcome,
@@ -12,15 +12,15 @@ import {
 function createOverview(defaultModel?: string): SystemAgentOverview {
   return {
     config: {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       exists: true,
       valid: true,
       issues: [],
       hash: null,
     },
     references: {
-      docsUrl: "https://docs.openclaw.ai",
-      sourceUrl: "https://github.com/openclaw/openclaw",
+      docsUrl: "https://docs.bot.ai",
+      sourceUrl: "https://github.com/hanzoai/bot",
     },
     agents: [{ id: "main", isDefault: true, ...(defaultModel ? { model: defaultModel } : {}) }],
     defaultAgentId: "main",
@@ -41,7 +41,7 @@ function createOverview(defaultModel?: string): SystemAgentOverview {
 
 describe("loadSystemAgentOverview", () => {
   it("summarizes config, agents, model, tools, and gateway", async () => {
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: BotConfig = {
       agents: {
         defaults: { model: { primary: "openai/gpt-5.2" } },
         list: [
@@ -52,7 +52,7 @@ describe("loadSystemAgentOverview", () => {
       gateway: { port: 19001 },
     };
     const snapshot: ConfigFileSnapshot = {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       exists: true,
       raw: "{}",
       parsed: runtimeConfig,
@@ -67,10 +67,10 @@ describe("loadSystemAgentOverview", () => {
       legacyIssues: [],
     };
     const overview = await loadSystemAgentOverview({
-      env: { OPENCLAW_TEST_FAST: "1" },
+      env: { BOT_TEST_FAST: "1" },
       deps: {
         readConfigFileSnapshot: async () => snapshot,
-        resolveConfigPath: () => "/tmp/openclaw.json",
+        resolveConfigPath: () => "/tmp/bot.json",
         resolveGatewayPort: (cfg) => cfg?.gateway?.port ?? 8765,
         buildGatewayConnectionDetails: (input) => ({
           url: `ws://127.0.0.1:${input.config.gateway?.port ?? 8765}`,
@@ -96,12 +96,12 @@ describe("loadSystemAgentOverview", () => {
     expect(overview.gateway.url).toBe("ws://127.0.0.1:19001");
     expect(overview.gateway.reachable).toBe(false);
     expect(overview.references.docsPath).toMatch(/docs$/);
-    expect(overview.references.sourceUrl).toBe("https://github.com/openclaw/openclaw");
+    expect(overview.references.sourceUrl).toBe("https://github.com/hanzoai/bot");
     expect(formatSystemAgentOverview(overview)).toContain(
       'Next: run "gateway status" or "restart gateway"',
     );
     const startup = formatSystemAgentStartupMessage(overview);
-    expect(startup).toContain("Hi, I'm OpenClaw — caretaker");
+    expect(startup).toContain("Hi, I'm Bot — caretaker");
     expect(startup).toContain("Model: openai/gpt-5.2");
     expect(startup).toContain("Gateway: not reachable");
     expect(startup).not.toContain("`gateway status`");
@@ -115,11 +115,11 @@ describe("loadSystemAgentOverview", () => {
 
     const startup = formatSystemAgentStartupMessage(overview);
     expect(formatSystemAgentOverview(overview)).toContain(
-      'Next: run "openclaw onboard" to establish inference',
+      'Next: run "bot onboard" to establish inference',
     );
     expect(startup).toContain("Inference is unavailable");
-    expect(startup).toContain("Run `openclaw onboard`");
-    expect(startup.match(/`[^`]+`/g)).toEqual(["`openclaw onboard`"]);
+    expect(startup).toContain("Run `bot onboard`");
+    expect(startup.match(/`[^`]+`/g)).toEqual(["`bot onboard`"]);
     expect(startup).not.toContain("local Claude Code/Codex/Gemini login");
     expect(startup).not.toContain("typed commands as last resort");
   });

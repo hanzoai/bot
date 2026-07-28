@@ -1,4 +1,4 @@
-import type { AssistantMessage, AssistantMessageEvent, Model } from "@openclaw/llm-core";
+import type { AssistantMessage, AssistantMessageEvent, Model } from "@hanzo/bot-llm-core";
 import { describe, expect, it } from "vitest";
 import {
   processResponsesStream as processTransportStream,

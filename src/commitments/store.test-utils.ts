@@ -1,9 +1,9 @@
 // Test-only helpers for seeding and inspecting canonical commitment rows.
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
 import {
   commitmentRecordFromRow,
   commitmentRecordToRow,
@@ -19,7 +19,7 @@ function assertTestRuntime(): void {
 
 export function seedCommitmentsForTest(records: CommitmentRecord[]): void {
   assertTestRuntime();
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runBotStateWriteTransaction(({ db }) => {
     const commitmentsDb = getNodeSqliteKysely<CommitmentsDatabase>(db);
     executeSqliteQuerySync(db, commitmentsDb.deleteFrom("commitments"));
     for (let offset = 0; offset < records.length; offset += 500) {
@@ -35,7 +35,7 @@ export function seedCommitmentsForTest(records: CommitmentRecord[]): void {
 
 export function readCommitmentsForTest(): CommitmentRecord[] {
   assertTestRuntime();
-  const database = openOpenClawStateDatabase();
+  const database = openBotStateDatabase();
   return executeSqliteQuerySync(
     database.db,
     getNodeSqliteKysely<CommitmentsDatabase>(database.db)

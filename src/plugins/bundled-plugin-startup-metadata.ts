@@ -1,7 +1,7 @@
 // Narrow bundled-plugin facts used before the full metadata/runtime registry is available.
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { tryReadJsonSync } from "../infra/json-files.js";
 import { resolveBundledPluginsDir } from "./bundled-dir.js";
 
@@ -32,7 +32,7 @@ export function inspectBundledPluginStartupMetadata(params: {
     return undefined;
   }
   const pluginRoot = path.join(bundledPluginsDir, params.pluginId);
-  const manifest = tryReadJsonSync(path.join(pluginRoot, "openclaw.plugin.json"));
+  const manifest = tryReadJsonSync(path.join(pluginRoot, "bot.plugin.json"));
   if (!isRecord(manifest) || manifest.id !== params.pluginId) {
     return undefined;
   }

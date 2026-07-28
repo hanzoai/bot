@@ -1,4 +1,4 @@
-// SQLite state benchmark seeds OpenClaw DBs and reports hot-query proof lines.
+// SQLite state benchmark seeds Bot DBs and reports hot-query proof lines.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -6,13 +6,13 @@ import type { DatabaseSync, SQLInputValue } from "node:sqlite";
 import { pathToFileURL } from "node:url";
 import { expectDefined } from "../packages/normalization-core/src/expect.js";
 import {
-  openOpenClawAgentDatabase,
-  closeOpenClawAgentDatabasesForTest,
-} from "../src/state/openclaw-agent-db.js";
+  openBotAgentDatabase,
+  closeBotAgentDatabasesForTest,
+} from "../src/state/bot-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../src/state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../src/state/bot-state-db.js";
 import { parseStrictIntegerOption } from "./lib/dev-tooling-safety.ts";
 import {
   CliUsageError,
@@ -131,7 +131,7 @@ function applyScale(config: ProfileConfig): ProfileConfig {
 }
 
 function printUsage(): void {
-  console.log(`OpenClaw SQLite state benchmark
+  console.log(`Bot SQLite state benchmark
 
 Usage:
   node --import tsx scripts/bench-sqlite-state.ts [options]
@@ -508,13 +508,13 @@ function main(): void {
   const { options } = cli;
   const config = applyScale(PROFILES[options.profile]);
   const stateDir =
-    options.stateDir ?? fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sqlite-perf-"));
-  const env = { OPENCLAW_STATE_DIR: stateDir };
+    options.stateDir ?? fs.mkdtempSync(path.join(os.tmpdir(), "bot-sqlite-perf-"));
+  const env = { BOT_STATE_DIR: stateDir };
   const started = nowMs();
   try {
-    const stateDatabase = openOpenClawStateDatabase({ env });
+    const stateDatabase = openBotStateDatabase({ env });
     const agentDatabases = Array.from({ length: config.agentCount }, (_, index) =>
-      openOpenClawAgentDatabase({ agentId: `perf-agent-${index}`, env }),
+      openBotAgentDatabase({ agentId: `perf-agent-${index}`, env }),
     );
 
     const seedStarted = nowMs();
@@ -583,8 +583,8 @@ function main(): void {
     }
     printProofLines(report);
   } finally {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotAgentDatabasesForTest();
+    closeBotStateDatabaseForTest();
     if (!options.stateDir) {
       fs.rmSync(stateDir, { recursive: true, force: true });
     }

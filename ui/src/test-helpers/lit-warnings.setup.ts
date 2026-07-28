@@ -1,4 +1,4 @@
-import { buildControlUiSessionPath } from "@openclaw/session-url-contract";
+import { buildControlUiSessionPath } from "@hanzo/bot-session-url-contract";
 import { setSessionPathBuilder } from "../app-session-path-builder.ts";
 
 setSessionPathBuilder(buildControlUiSessionPath);
@@ -96,9 +96,9 @@ function globalLocalStorageIsUsable(): boolean {
     if (!existing) {
       return false;
     }
-    existing.setItem("__openclaw_probe__", "1");
-    const roundTrips = existing.getItem("__openclaw_probe__") === "1";
-    existing.removeItem("__openclaw_probe__");
+    existing.setItem("__bot_probe__", "1");
+    const roundTrips = existing.getItem("__bot_probe__") === "1";
+    existing.removeItem("__bot_probe__");
     return roundTrips;
   } catch {
     return false;
@@ -111,9 +111,9 @@ function usableWindowLocalStorage(): Storage | null {
     if (!candidate) {
       return null;
     }
-    candidate.setItem("__openclaw_probe__", "1");
-    const roundTrips = candidate.getItem("__openclaw_probe__") === "1";
-    candidate.removeItem("__openclaw_probe__");
+    candidate.setItem("__bot_probe__", "1");
+    const roundTrips = candidate.getItem("__bot_probe__") === "1";
+    candidate.removeItem("__bot_probe__");
     return roundTrips ? candidate : null;
   } catch {
     return null;

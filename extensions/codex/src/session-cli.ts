@@ -4,14 +4,14 @@ import {
   addGatewayClientOptions,
   callGatewayFromCli,
   type GatewayRpcOpts,
-} from "openclaw/plugin-sdk/gateway-runtime";
+} from "bot/plugin-sdk/gateway-runtime";
 import type {
   SessionCatalogHost as CodexSessionCatalogHost,
   SessionCatalogSession as CodexSessionCatalogSession,
-} from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sanitizeTerminalText } from "openclaw/plugin-sdk/text-chunking";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/session-catalog";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
+import { sanitizeTerminalText } from "bot/plugin-sdk/text-chunking";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import {
   CODEX_LOCAL_SESSION_HOST_ID,
   CODEX_SESSION_CATALOG_MAX_PAGE_LIMIT,
@@ -254,7 +254,7 @@ async function continueCodexSession(
     writeJson(result);
     return;
   }
-  writeLine(`OpenClaw session: ${singleLineTerminalText(result.sessionKey)}`);
+  writeLine(`Bot session: ${singleLineTerminalText(result.sessionKey)}`);
 }
 
 async function archiveCodexSession(
@@ -312,7 +312,7 @@ export function registerCodexSessionCli(program: Command): void {
   addGatewayClientOptions(
     codex
       .command("continue <thread-id>")
-      .description("Continue a Gateway-local Codex thread as an OpenClaw branch")
+      .description("Continue a Gateway-local Codex thread as an Bot branch")
       .option("--json", "Print the structured response", false),
   ).action(async (threadId: string, options: CodexGatewayOptions) => {
     await continueCodexSession(threadId, options);
@@ -324,7 +324,7 @@ export function registerCodexSessionCli(program: Command): void {
       .description("Archive a stored or idle Gateway-local Codex thread")
       .option(
         "--confirm-no-other-runner",
-        "Confirm no other Codex client or OpenClaw runner is using this thread",
+        "Confirm no other Codex client or Bot runner is using this thread",
         false,
       )
       .option("--json", "Print the structured response", false),

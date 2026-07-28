@@ -15,8 +15,8 @@ describe("detectChangedScope Windows routing", () => {
 
   it("routes shared test-state fixture changes to Windows", () => {
     for (const fixturePath of [
-      "src/test-utils/openclaw-test-state.ts",
-      "src/test-utils/openclaw-test-state.test.ts",
+      "src/test-utils/bot-test-state.ts",
+      "src/test-utils/bot-test-state.test.ts",
     ]) {
       expect(detectChangedScope([fixturePath]), fixturePath).toMatchObject({
         runNode: true,
@@ -30,7 +30,7 @@ describe("detectChangedScope Windows routing", () => {
       "src/commands/doctor-sqlite-compact.ts",
       "src/infra/node-sqlite.ts",
       "src/infra/update-managed-service-handoff.ts",
-      "src/state/openclaw-state-db.ts",
+      "src/state/bot-state-db.ts",
     ]) {
       expect(detectChangedScope([sqlitePath]), sqlitePath).toMatchObject({
         runNode: true,
@@ -42,7 +42,7 @@ describe("detectChangedScope Windows routing", () => {
   it("routes Windows SQLite path tests to Windows", () => {
     for (const testPath of [
       "src/infra/update-managed-service-handoff.test.ts",
-      "src/state/openclaw-database-paths.windows.test.ts",
+      "src/state/bot-database-paths.windows.test.ts",
     ]) {
       expect(detectChangedScope([testPath]), testPath).toMatchObject({
         runNode: true,

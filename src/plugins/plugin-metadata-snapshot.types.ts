@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginDiscoveryResult } from "./discovery.js";
 import type { InstalledPluginIndex } from "./installed-plugin-index-types.js";
 import type { PluginManifestRecord, PluginManifestRegistry } from "./manifest-registry.js";
@@ -68,7 +68,7 @@ export type PluginMetadataRegistryView = Pick<PluginMetadataSnapshot, "index" | 
 export type PluginMetadataManifestView = Pick<PluginMetadataSnapshot, "index" | "plugins">;
 
 export type LoadPluginMetadataSnapshotParams = {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   workspaceDir?: string;
   stateDir?: string;
   env?: NodeJS.ProcessEnv;

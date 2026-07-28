@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
+import { SessionManager } from "bot/plugin-sdk/agent-sessions";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { makeAgentAssistantMessage } from "../test-helpers/agent-message-fixtures.js";
 import {

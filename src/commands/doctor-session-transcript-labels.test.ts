@@ -12,18 +12,18 @@ import {
 } from "../config/sessions/session-accessor.sqlite-read.js";
 import { appendTranscriptEventsInTransaction } from "../config/sessions/session-accessor.sqlite-transcript-store.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabaseOptions,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+  runBotAgentWriteTransaction,
+  type BotAgentDatabaseOptions,
+} from "../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createBotTestState,
+  type BotTestState,
+} from "../test-utils/bot-test-state.js";
 
 const note = vi.hoisted(() => vi.fn());
 
@@ -34,7 +34,7 @@ import { noteSessionTranscriptLabelHealth } from "./doctor-session-transcript-la
 const AGENT_ID = "main";
 const SESSION_ID = "legacy-label-session";
 const SESSION_KEY = "agent:main:legacy-label-session";
-const CFG: OpenClawConfig = { agents: { list: [{ id: AGENT_ID }] } };
+const CFG: BotConfig = { agents: { list: [{ id: AGENT_ID }] } };
 
 function createLegacyLabelEvents(): {
   events: TranscriptEvent[];
@@ -96,14 +96,14 @@ function createLegacyLabelEvents(): {
   };
 }
 
-function seedLegacyLabelTranscript(databaseOptions: OpenClawAgentDatabaseOptions): void {
+function seedLegacyLabelTranscript(databaseOptions: BotAgentDatabaseOptions): void {
   const scope = {
     ...databaseOptions,
     sessionId: SESSION_ID,
     sessionKey: SESSION_KEY,
   };
   const { events } = createLegacyLabelEvents();
-  runOpenClawAgentWriteTransaction((database) => {
+  runBotAgentWriteTransaction((database) => {
     expect(appendTranscriptEventsInTransaction(database, scope, events)).toBe(events.length);
   }, databaseOptions);
 }
@@ -128,26 +128,26 @@ function findEventJson(
 }
 
 describe("doctor SQLite session transcript label migration", () => {
-  let state: OpenClawTestState;
+  let state: BotTestState;
 
   beforeEach(async () => {
     note.mockClear();
-    state = await createOpenClawTestState({
+    state = await createBotTestState({
       layout: "state-only",
-      prefix: "openclaw-doctor-transcript-labels-",
+      prefix: "bot-doctor-transcript-labels-",
     });
   });
 
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotAgentDatabasesForTest();
+    closeBotStateDatabaseForTest();
     await state.cleanup();
   });
 
   it("detects and idempotently rewrites legacy labels in user events", async () => {
     const databaseOptions = { agentId: AGENT_ID, env: state.env };
     seedLegacyLabelTranscript(databaseOptions);
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
     const before = readSqliteTranscriptSnapshot(database, SESSION_ID);
     const assistantJson = findEventJson(before.events, before.rows, "assistant");
     const midLineJson = findEventJson(before.events, before.rows, "mid-line-user");
@@ -160,7 +160,7 @@ describe("doctor SQLite session transcript label migration", () => {
 
     expect(readSqliteTranscriptSnapshot(database, SESSION_ID).rows).toEqual(before.rows);
     expect(note).toHaveBeenCalledWith(
-      '- Found 1 session with legacy inbound-context labels.\n- Run "openclaw doctor --fix" to rewrite them.',
+      '- Found 1 session with legacy inbound-context labels.\n- Run "bot doctor --fix" to rewrite them.',
       "Session transcript labels",
     );
 
@@ -261,11 +261,11 @@ describe("doctor SQLite session transcript label migration", () => {
         message: { role: "user", content: legacyContent },
       },
     ];
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       expect(appendTranscriptEventsInTransaction(database, scope, events)).toBe(events.length);
     }, databaseOptions);
 
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
     await noteSessionTranscriptLabelHealth({ cfg: CFG, env: state.env, shouldRepair: true });
 
     const repaired = readSqliteTranscriptSnapshot(database, SESSION_ID);
@@ -314,11 +314,11 @@ describe("doctor SQLite session transcript label migration", () => {
         message: { role: "user", content: legacyContent },
       },
     ];
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       expect(appendTranscriptEventsInTransaction(database, scope, events)).toBe(events.length);
     }, databaseOptions);
 
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
     await noteSessionTranscriptLabelHealth({ cfg: CFG, env: state.env, shouldRepair: true });
 
     const repaired = readSqliteTranscriptSnapshot(database, SESSION_ID);
@@ -341,7 +341,7 @@ describe("doctor SQLite session transcript label migration", () => {
     const customSqlitePath = resolveSqliteTargetFromSessionStorePath(customStorePath, {
       agentId: AGENT_ID,
     }).path;
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { list: [{ id: AGENT_ID }] },
       session: { store: customStorePath },
     };
@@ -351,7 +351,7 @@ describe("doctor SQLite session transcript label migration", () => {
       path: customSqlitePath,
     };
     seedLegacyLabelTranscript(databaseOptions);
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
 
     await noteSessionTranscriptLabelHealth({
       cfg,
@@ -360,7 +360,7 @@ describe("doctor SQLite session transcript label migration", () => {
     });
 
     expect(note).toHaveBeenCalledWith(
-      '- Found 1 session with legacy inbound-context labels.\n- Run "openclaw doctor --fix" to rewrite them.',
+      '- Found 1 session with legacy inbound-context labels.\n- Run "bot doctor --fix" to rewrite them.',
       "Session transcript labels",
     );
 
@@ -400,7 +400,7 @@ describe("doctor SQLite session transcript label migration", () => {
       "",
       // Fenced but NON-enumerated heading: the ```json fence does not prove provenance, so an
       // arbitrary user heading must NOT be marked (marking it would let the marker-only strippers
-      // hide the user's own JSON). Only the fixed OpenClaw labels in rule 1 are migrated.
+      // hide the user's own JSON). Only the fixed Bot labels in rule 1 are migrated.
       "Here is my own data:",
       "Notes (untrusted metadata):",
       "```json",
@@ -426,11 +426,11 @@ describe("doctor SQLite session transcript label migration", () => {
         message: { role: "user", content: antiCorruptionContent },
       },
     ];
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       expect(appendTranscriptEventsInTransaction(database, scope, events)).toBe(events.length);
     }, databaseOptions);
 
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
     const before = readSqliteTranscriptSnapshot(database, SESSION_ID);
 
     await noteSessionTranscriptLabelHealth({
@@ -492,11 +492,11 @@ describe("doctor SQLite session transcript label migration", () => {
         message: { role: "assistant", content: assistantEcho },
       },
     ];
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       expect(appendTranscriptEventsInTransaction(database, scope, events)).toBe(events.length);
     }, databaseOptions);
 
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
     await noteSessionTranscriptLabelHealth({ cfg: CFG, env: state.env, shouldRepair: true });
 
     const repaired = readSqliteTranscriptSnapshot(database, SESSION_ID);
@@ -549,11 +549,11 @@ describe("doctor SQLite session transcript label migration", () => {
         message: { role: "assistant", content: "normal response" },
       },
     ];
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       expect(appendTranscriptEventsInTransaction(database, scope, events)).toBe(events.length);
     }, databaseOptions);
 
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
     const readRowMetadata = () =>
       database.db
         .prepare(
@@ -567,7 +567,7 @@ describe("doctor SQLite session transcript label migration", () => {
     // Pin an explicitly OLD activity timestamp so we can prove the maintenance rewrite preserves
     // recency instead of jumping the session to repair-time.
     const OLD_UPDATED_AT = 1_000_000;
-    runOpenClawAgentWriteTransaction((db) => {
+    runBotAgentWriteTransaction((db) => {
       db.db
         .prepare(
           "UPDATE session_windows SET transcript_updated_at = ?, transcript_observed_at = ? WHERE session_id = ?",
@@ -631,15 +631,15 @@ describe("doctor SQLite session transcript label migration", () => {
         message: { role: "user", content: legacyFencedContent },
       },
     ];
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       expect(appendTranscriptEventsInTransaction(database, scope, events)).toBe(events.length);
     }, databaseOptions);
 
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
     // Force the message row to a distinctly OLD created_at, well before repair-time Date.now(). The
     // append-time FTS timestamp still holds the (recent) append value until the repair rebuilds it.
     const OLD_CREATED_AT = 1_000_000;
-    runOpenClawAgentWriteTransaction((db) => {
+    runBotAgentWriteTransaction((db) => {
       db.db
         .prepare("UPDATE transcript_events SET created_at = ? WHERE session_id = ?")
         .run(OLD_CREATED_AT, SESSION_ID);
@@ -694,11 +694,11 @@ describe("doctor SQLite session transcript label migration", () => {
         message: { role: "user", content: unfencedContent },
       },
     ];
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       expect(appendTranscriptEventsInTransaction(database, scope, events)).toBe(events.length);
     }, databaseOptions);
 
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
     const before = readSqliteTranscriptSnapshot(database, SESSION_ID);
 
     await noteSessionTranscriptLabelHealth({
@@ -750,11 +750,11 @@ describe("doctor SQLite session transcript label migration", () => {
         message: { role: "user", content: fencedContent },
       },
     ];
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       expect(appendTranscriptEventsInTransaction(database, scope, events)).toBe(events.length);
     }, databaseOptions);
 
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
 
     await noteSessionTranscriptLabelHealth({
       cfg: CFG,
@@ -814,11 +814,11 @@ describe("doctor SQLite session transcript label migration", () => {
         message: { role: "user", content: repliedContent },
       },
     ];
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       expect(appendTranscriptEventsInTransaction(database, scope, events)).toBe(events.length);
     }, databaseOptions);
 
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
 
     await noteSessionTranscriptLabelHealth({
       cfg: CFG,
@@ -871,11 +871,11 @@ describe("doctor SQLite session transcript label migration", () => {
         message: { role: "user", content: unfencedContent },
       },
     ];
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       expect(appendTranscriptEventsInTransaction(database, scope, events)).toBe(events.length);
     }, databaseOptions);
 
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
     const before = readSqliteTranscriptSnapshot(database, SESSION_ID);
 
     await noteSessionTranscriptLabelHealth({
@@ -930,7 +930,7 @@ describe("doctor SQLite session transcript label migration", () => {
         message: { role: "assistant", content: "response" },
       },
     ];
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       expect(
         appendTranscriptEventsInTransaction(
           database,
@@ -942,7 +942,7 @@ describe("doctor SQLite session transcript label migration", () => {
 
     // Corrupt the sibling row's event_json in place. transcript_events has no type/id columns,
     // so match on the encoded event body.
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       const changed = database.db
         .prepare(
           "UPDATE transcript_events SET event_json = ? WHERE session_id = ? AND event_json LIKE ?",
@@ -957,7 +957,7 @@ describe("doctor SQLite session transcript label migration", () => {
       shouldRepair: true,
     });
 
-    const database = openOpenClawAgentDatabase(databaseOptions);
+    const database = openBotAgentDatabase(databaseOptions);
 
     // The clean session was repaired.
     const cleanRepaired = readSqliteTranscriptSnapshot(database, SESSION_ID);

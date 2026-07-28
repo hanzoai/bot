@@ -7,7 +7,7 @@ read_when:
 title: "Gemini search"
 ---
 
-OpenClaw supports Gemini models with built-in
+Bot supports Gemini models with built-in
 [Google Search grounding](https://ai.google.dev/gemini-api/docs/grounding),
 which returns AI-synthesized answers backed by live Google Search results with
 citations.
@@ -24,7 +24,7 @@ citations.
     `models.providers.google.apiKey`, or configure a dedicated web-search key via:
 
     ```bash
-    openclaw configure --section web
+    bot configure --section web
     ```
 
   </Step>
@@ -63,7 +63,7 @@ then `models.providers.google.apiKey`. For base URLs, the dedicated
 `plugins.entries.google.config.webSearch.baseUrl` wins before
 `models.providers.google.baseUrl`.
 
-For a gateway install, put env keys in `~/.openclaw/.env`.
+For a gateway install, put env keys in `~/.bot/.env`.
 
 ## How it works
 
@@ -73,7 +73,7 @@ inline citations. The results include both the synthesized answer and the source
 URLs.
 
 - Citation URLs from Gemini grounding are automatically resolved from Google
-  redirect URLs to direct URLs via a HEAD request through OpenClaw's SSRF-guarded
+  redirect URLs to direct URLs via a HEAD request through Bot's SSRF-guarded
   fetch path (redirect following, http/https validation).
 - Redirect resolution uses strict SSRF defaults, so redirects to
   private/internal targets are blocked.

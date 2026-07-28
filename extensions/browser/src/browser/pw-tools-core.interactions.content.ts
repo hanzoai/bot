@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import type { FileChooser, Page } from "playwright-core";
 import { ACT_MAX_WAIT_TIME_MS, resolveActWaitTimeoutMs } from "./act-policy.js";
 import { normalizeBrowserEvaluateFunctionSource } from "./evaluate-source.js";

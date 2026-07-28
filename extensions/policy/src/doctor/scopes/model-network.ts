@@ -1,6 +1,6 @@
 // Policy doctor checks and findings for MCP, model provider, and network policy.
-import type { HealthCheck, HealthFinding } from "openclaw/plugin-sdk/health";
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
+import type { HealthCheck, HealthFinding } from "bot/plugin-sdk/health";
+import { normalizeProviderId } from "bot/plugin-sdk/provider-model-shared";
 import type { PolicyEvidence } from "../../policy-state.js";
 import { CHECK_IDS } from "../check-ids.js";
 import type { PolicyDoctorCheckDeps } from "../types.js";
@@ -83,7 +83,7 @@ export function mcpServerFindings(
         severity: "error",
         message: `MCP server '${server.id}' is denied by policy.`,
         source: "policy",
-        path: "openclaw config",
+        path: "bot config",
         ocPath: server.source,
         target: server.source,
         requirement: `oc://${policyDocName}/mcp/servers/deny`,
@@ -97,7 +97,7 @@ export function mcpServerFindings(
         severity: "error",
         message: `MCP server '${server.id}' is not in the policy allowlist.`,
         source: "policy",
-        path: "openclaw config",
+        path: "bot config",
         ocPath: server.source,
         target: server.source,
         requirement: `oc://${policyDocName}/mcp/servers/allow`,
@@ -146,7 +146,7 @@ function modelProviderConformanceFindings(
       severity: "error",
       message: `Model provider '${provider.id}' is denied by policy.`,
       source: "policy",
-      path: "openclaw config",
+      path: "bot config",
       ocPath: provider.source,
       target: provider.source,
       requirement: `oc://${policyDocName}/models/providers/deny`,
@@ -159,7 +159,7 @@ function modelProviderConformanceFindings(
       severity: "error",
       message: `Model provider '${provider.id}' is not in the policy allowlist.`,
       source: "policy",
-      path: "openclaw config",
+      path: "bot config",
       ocPath: provider.source,
       target: provider.source,
       requirement: `oc://${policyDocName}/models/providers/allow`,
@@ -182,7 +182,7 @@ function modelRefConformanceFindings(
       severity: "error",
       message: `Model ref '${modelRef.ref}' uses denied provider '${modelRef.provider}'.`,
       source: "policy",
-      path: "openclaw config",
+      path: "bot config",
       ocPath: modelRef.source,
       target: modelRef.source,
       requirement: `oc://${policyDocName}/models/providers/deny`,
@@ -195,7 +195,7 @@ function modelRefConformanceFindings(
       severity: "error",
       message: `Model ref '${modelRef.ref}' uses unapproved provider '${modelRef.provider}'.`,
       source: "policy",
-      path: "openclaw config",
+      path: "bot config",
       ocPath: modelRef.source,
       target: modelRef.source,
       requirement: `oc://${policyDocName}/models/providers/allow`,
@@ -222,7 +222,7 @@ export function networkFindings(
         severity: "error",
         message: `Network setting '${setting.id}' allows private-network access.`,
         source: "policy",
-        path: "openclaw config",
+        path: "bot config",
         ocPath: setting.source,
         target: setting.source,
         requirement: `oc://${policyDocName}/network/privateNetwork/allow`,

@@ -121,7 +121,7 @@ export function resolvePluginNpmProjectDir(params: {
   );
 }
 
-const PLUGIN_NPM_GENERATION_PROJECT_SEPARATOR = "__openclaw-generation__";
+const PLUGIN_NPM_GENERATION_PROJECT_SEPARATOR = "__bot-generation__";
 const PLUGIN_NPM_GENERATION_KEY_HASH_CHARS = 16;
 
 /** Resolves the managed npm artifact-generation project directory prefix for a package. */

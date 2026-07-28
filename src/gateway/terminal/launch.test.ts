@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   buildTerminalEnv,
   createTerminalLaunchPolicy,
@@ -9,7 +9,7 @@ import {
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
-const disabled: OpenClawConfig = { gateway: { terminal: { enabled: false } } };
+const disabled: BotConfig = { gateway: { terminal: { enabled: false } } };
 
 describe("createTerminalLaunchPolicy", () => {
   it("is enabled by default and fails closed when disabled, sandboxed, or unknown-agent", () => {
@@ -41,7 +41,7 @@ describe("createTerminalLaunchPolicy", () => {
   it("applies restart-bound revocations without granting access early", () => {
     const enabled = {
       gateway: { terminal: { enabled: true } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const policy = createTerminalLaunchPolicy(enabled);
 
     policy.prepareConfig(disabled, { restartPending: true });
@@ -57,7 +57,7 @@ describe("createTerminalLaunchPolicy", () => {
 
   it("preserves sandbox revocations across later restart-bound updates", () => {
     const workspace = tempDirs.make("term-policy-agent-");
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: BotConfig = {
       gateway: { terminal: { enabled: true } },
       agents: { defaults: { workspace }, list: [{ id: "ops" }] },
     };
@@ -154,7 +154,7 @@ describe("createTerminalLaunchPolicy", () => {
   });
 
   it("retains failed hot-reload revocations until a later commit succeeds", () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: BotConfig = {
       gateway: { terminal: { enabled: true } },
       agents: { defaults: { sandbox: { mode: "off" } } },
     };
@@ -190,7 +190,7 @@ describe("createTerminalLaunchPolicy", () => {
   });
 
   it("releases a rejected restart restriction after an accepted revert", () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: BotConfig = {
       gateway: { terminal: { enabled: true } },
     };
     const policy = createTerminalLaunchPolicy(baseConfig);
@@ -212,7 +212,7 @@ describe("createTerminalLaunchPolicy", () => {
   });
 
   it("commits a newer hot candidate after a rejected restart is retired", () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: BotConfig = {
       gateway: { terminal: { enabled: true } },
       agents: { defaults: { sandbox: { mode: "all" } } },
     };
@@ -235,7 +235,7 @@ describe("createTerminalLaunchPolicy", () => {
   });
 
   it("retires failed hot candidates without clearing committed restart restrictions", () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: BotConfig = {
       gateway: { terminal: { enabled: true } },
       agents: { defaults: { sandbox: { mode: "off" } } },
     };
@@ -351,7 +351,7 @@ describe("buildTerminalEnv", () => {
     expect(env.PATH).toBe("/usr/bin");
     expect(env.FOO).toBe("bar");
     expect(env.TERM).toBe("xterm-256color");
-    expect(env.OPENCLAW_TERMINAL).toBe("1");
+    expect(env.BOT_TERMINAL).toBe("1");
   });
 
   it("preserves an existing TERM", () => {

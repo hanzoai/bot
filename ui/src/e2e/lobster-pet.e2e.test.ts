@@ -11,7 +11,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 type BrowserLobsterPet = HTMLElement & {
@@ -32,7 +32,7 @@ async function mountPet(params: {
   seed: number;
 }) {
   await page.evaluate(async (fixture) => {
-    const pet = document.createElement("openclaw-lobster-pet") as BrowserLobsterPet;
+    const pet = document.createElement("bot-lobster-pet") as BrowserLobsterPet;
     pet.seed = fixture.seed;
     pet.mode = fixture.mode;
     pet.runOutcome = fixture.outcome;
@@ -43,7 +43,7 @@ async function mountPet(params: {
 
 async function settlePet() {
   await page.evaluate(
-    () => (document.querySelector("openclaw-lobster-pet") as BrowserLobsterPet).updateComplete,
+    () => (document.querySelector("bot-lobster-pet") as BrowserLobsterPet).updateComplete,
   );
 }
 
@@ -62,7 +62,7 @@ describeControlUiE2e("Control UI lobster pet", () => {
     await page.clock.install({ time: new Date("2026-07-09T12:00:00") });
     await installMockGateway(page);
     await page.goto(server.baseUrl);
-    await page.waitForFunction(() => Boolean(customElements.get("openclaw-lobster-pet")));
+    await page.waitForFunction(() => Boolean(customElements.get("bot-lobster-pet")));
     const loadedAt = await page.evaluate(() => Date.now());
     await page.clock.pauseAt(loadedAt + 1_000);
   });
@@ -85,7 +85,7 @@ describeControlUiE2e("Control UI lobster pet", () => {
     await settlePet();
     expect(await page.locator(".lobster-pet--vigil").count()).toBe(1);
     await page.evaluate(async () => {
-      const pet = document.querySelector("openclaw-lobster-pet") as BrowserLobsterPet;
+      const pet = document.querySelector("bot-lobster-pet") as BrowserLobsterPet;
       pet.mode = "idle";
       await pet.updateComplete;
     });

@@ -11,10 +11,10 @@ export type VolatileSessionTab = SessionTabInteractionIdentity & {
   lastUsedAt: number;
 };
 
-const volatileStateSymbol = Symbol.for("openclaw.browser.session-tabs.volatile");
-const activeDurableStateSymbol = Symbol.for("openclaw.browser.session-tabs.active-durable-keys");
+const volatileStateSymbol = Symbol.for("bot.browser.session-tabs.volatile");
+const activeDurableStateSymbol = Symbol.for("bot.browser.session-tabs.active-durable-keys");
 const coldNativeActivityStateSymbol = Symbol.for(
-  "openclaw.browser.session-tabs.cold-native-activity",
+  "bot.browser.session-tabs.cold-native-activity",
 );
 
 export function activeDurableStorageKeys(): Set<string> {

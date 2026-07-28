@@ -26,7 +26,7 @@ const pendingRelayEnsures = new WeakMap<ProfileRuntimeState, PendingRelayEnsure>
 
 /** Human guidance for a relay without a paired/connected extension. */
 export const EXTENSION_PAIRING_HINT =
-  "Install the OpenClaw Chrome extension, then run `openclaw browser extension pair` and paste the pairing string into the extension popup.";
+  "Install the Bot Chrome extension, then run `bot browser extension pair` and paste the pairing string into the extension popup.";
 
 function relays(state: BrowserServerState): Map<string, ExtensionRelayHandle> {
   if (!state.extensionRelays) {

@@ -1,4 +1,4 @@
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { embeddedAgentLog } from "bot/plugin-sdk/agent-harness-runtime";
 
 type CodexThreadLifecycleTimingSpan = {
   name: string;

@@ -115,19 +115,19 @@ describe("getTelegramSequentialKey", () => {
     ],
     [
       {
-        me: { username: "openclaw_bot" } as never,
+        me: { username: "bot_bot" } as never,
         message: mockMessage({
           chat: mockChat({ id: -100, type: "supergroup", is_forum: true }),
           is_topic_message: true,
           message_thread_id: 5907,
-          text: "/tell@openclaw_bot keep going!",
+          text: "/tell@bot_bot keep going!",
         }),
       },
       "telegram:-100:control",
     ],
     [
       {
-        me: { username: "openclaw_bot" } as never,
+        me: { username: "bot_bot" } as never,
         message: mockMessage({
           chat: mockChat({ id: -100, type: "supergroup", is_forum: true }),
           is_topic_message: true,
@@ -139,7 +139,7 @@ describe("getTelegramSequentialKey", () => {
     ],
     [
       {
-        me: { username: "openclaw_bot" } as never,
+        me: { username: "bot_bot" } as never,
         message: mockMessage({
           chat: mockChat({ id: -100, type: "supergroup", is_forum: true }),
           is_topic_message: true,
@@ -151,12 +151,12 @@ describe("getTelegramSequentialKey", () => {
     ],
     [
       {
-        me: { username: "openclaw_bot" } as never,
+        me: { username: "bot_bot" } as never,
         message: mockMessage({
           chat: mockChat({ id: -100, type: "supergroup", is_forum: true }),
           is_topic_message: true,
           message_thread_id: 5907,
-          text: "/stop@openclaw_bot!",
+          text: "/stop@bot_bot!",
         }),
       },
       "telegram:-100:control",
@@ -221,10 +221,10 @@ describe("getTelegramSequentialKey", () => {
     ],
     [
       {
-        me: { username: "openclaw_bot" } as never,
+        me: { username: "bot_bot" } as never,
         message: mockMessage({
           chat: mockChat({ id: 123 }),
-          text: "/btw@openclaw_bot what is the time?",
+          text: "/btw@bot_bot what is the time?",
         }),
       },
       "telegram:123:btw:1",

@@ -2,12 +2,12 @@
 import type {
   ProviderResolveDynamicModelContext,
   ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeModelCompat } from "openclaw/plugin-sdk/provider-model-shared";
+} from "bot/plugin-sdk/plugin-entry";
+import { normalizeModelCompat } from "bot/plugin-sdk/provider-model-shared";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveXaiCatalogEntry, XAI_BASE_URL } from "./model-definitions.js";
 import { normalizeXaiModelId } from "./model-id.js";
 import { applyXaiRuntimeModelCompat } from "./runtime-model-compat.js";

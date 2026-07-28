@@ -26,7 +26,7 @@ type ModelOptionGroup = {
   models: Array<{ ref: string; label: string }>;
 };
 
-const AUTOMATIC_UTILITY_VALUE = "__openclaw_automatic_utility__";
+const AUTOMATIC_UTILITY_VALUE = "__bot_automatic_utility__";
 
 function modelGroups(models: ModelPickerEntry[]): ModelOptionGroup[] {
   const groups = new Map<string, ModelOptionGroup>();

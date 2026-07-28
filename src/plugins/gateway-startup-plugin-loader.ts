@@ -1,6 +1,6 @@
 // Loads metadata snapshots and exposes Gateway startup planning entrypoints.
 import type { AmbientEnvTriggerPolicy } from "../channels/config-presence.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { GatewayStartupPluginPlan } from "./gateway-startup-plugin-contracts.js";
 import {
   createGatewayStartupMetadataPluginIdScope,
@@ -16,7 +16,7 @@ import {
 import type { PluginRegistrySnapshot } from "./plugin-registry-snapshot.js";
 
 export function resolveChannelPluginIds(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
 }): string[] {
@@ -24,7 +24,7 @@ export function resolveChannelPluginIds(params: {
 }
 
 export function resolveConfiguredDeferredChannelPluginIds(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
   ambientEnvTriggers?: AmbientEnvTriggerPolicy;
@@ -33,8 +33,8 @@ export function resolveConfiguredDeferredChannelPluginIds(params: {
 }
 
 export function resolveGatewayStartupPluginIdsFromRegistry(params: {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: BotConfig;
+  activationSourceConfig?: BotConfig;
   env: NodeJS.ProcessEnv;
   index: PluginRegistrySnapshot;
   manifestRegistry: PluginManifestRegistry;
@@ -45,8 +45,8 @@ export function resolveGatewayStartupPluginIdsFromRegistry(params: {
 }
 
 export function loadGatewayStartupPluginPlan(params: {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: BotConfig;
+  activationSourceConfig?: BotConfig;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
   index?: PluginRegistrySnapshot;
@@ -106,8 +106,8 @@ export function loadGatewayStartupPluginPlan(params: {
 }
 
 export function resolveGatewayStartupPluginIds(params: {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: BotConfig;
+  activationSourceConfig?: BotConfig;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
   workerProviderIds?: readonly string[];

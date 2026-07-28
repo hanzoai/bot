@@ -1,10 +1,10 @@
 // Media-understanding default model/provider selection from config, manifest
 // metadata, and capability declarations.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { providerSupportsCapability } from "../../packages/media-understanding-common/src/provider-supports.js";
 import { resolveRuntimeConfigCacheKey } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import { buildMediaUnderstandingManifestMetadataRegistry } from "./manifest-metadata.js";
 import {
   normalizeMediaExecutionProviderId,
@@ -46,7 +46,7 @@ function cacheConfigRegistry(
   return registry;
 }
 
-function resolveDefaultRegistry(cfg?: OpenClawConfig, workspaceDir?: string) {
+function resolveDefaultRegistry(cfg?: BotConfig, workspaceDir?: string) {
   if (!cfg) {
     defaultRegistryCache ??= buildMediaUnderstandingManifestMetadataRegistry();
     return defaultRegistryCache;
@@ -70,7 +70,7 @@ function providerHasDeclaredCapability(
 }
 
 function resolveConfiguredImageProviderModel(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   providerId: string;
 }): string | undefined {
   const normalizedProviderId = normalizeMediaProviderId(params.providerId);
@@ -94,7 +94,7 @@ function resolveConfiguredImageProviderModel(params: {
   return undefined;
 }
 
-function resolveConfiguredImageProviderIds(cfg?: OpenClawConfig): string[] {
+function resolveConfiguredImageProviderIds(cfg?: BotConfig): string[] {
   const providers = cfg?.models?.providers;
   if (!providers || typeof providers !== "object") {
     return [];
@@ -144,7 +144,7 @@ function insertConfiguredImageProviders(params: {
 export function resolveDefaultMediaModel(params: {
   providerId: string;
   capability: MediaUnderstandingCapability;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   providerRegistry?: Map<string, MediaUnderstandingProvider>;
   includeConfiguredImageModels?: boolean;
@@ -176,7 +176,7 @@ export function resolveDefaultMediaModel(params: {
 /** Resolves auto-discovery provider order for a media capability using manifest priorities. */
 export function resolveAutoMediaKeyProviders(params: {
   capability: MediaUnderstandingCapability;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   providerRegistry?: Map<string, MediaUnderstandingProvider>;
 }): string[] {
@@ -215,7 +215,7 @@ export function resolveAutoMediaKeyProviders(params: {
 /** Returns whether provider metadata declares native PDF document input support. */
 export function providerSupportsNativePdfDocument(params: {
   providerId: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   providerRegistry?: Map<string, MediaUnderstandingProvider>;
 }): boolean {
@@ -230,7 +230,7 @@ export function resolveDocumentMediaModel(params: {
   providerId: string;
   document: "pdf";
   mode: "textExtraction" | "image";
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   providerRegistry?: Map<string, MediaUnderstandingProvider>;
 }): string | false | undefined {

@@ -16,7 +16,7 @@ export function renderAgentSelect(params: {
   const selectedId = normalizeAgentId(params.agentId);
   return html`
     <span class="new-session-page__select new-session-page__select--agent">
-      <openclaw-agent-select
+      <bot-agent-select
         class="agent-select--compact"
         .options=${params.agents.map((agent) => ({
           value: normalizeAgentId(agent.id),
@@ -27,7 +27,7 @@ export function renderAgentSelect(params: {
         .accessibleLabel=${t("newSession.agent")}
         .disabled=${params.disabled}
         .onSelect=${params.onSelect}
-      ></openclaw-agent-select>
+      ></bot-agent-select>
     </span>
   `;
 }

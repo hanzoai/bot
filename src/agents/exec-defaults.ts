@@ -2,7 +2,7 @@
  * Resolves default exec tool settings from session and config context.
  */
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   loadExecApprovals,
   type ExecAsk,
@@ -68,14 +68,14 @@ function applySessionLegacyExecPolicyLayer(
 // Gather the shared config state once so exec resolution applies one
 // agent/global/session precedence order.
 function resolveExecConfigState(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   sessionEntry?: ExecSessionDefaults;
   execOverrides?: ExecPolicyOverrides;
   agentId?: string;
   sessionKey?: string;
   scope?: { kind: "defaults" };
 }): {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   host: ExecTarget;
   agentId: string | undefined;
   agentExec?: ResolvedExecConfig;
@@ -111,7 +111,7 @@ function resolveExecConfigState(params: {
 
 /** Resolves whether node exec is usable and any effective node binding. */
 export function resolveNodeExecEligibility(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   sessionEntry?: ExecSessionDefaults;
   execOverrides?: ExecPolicyOverrides;
   agentId?: string;
@@ -130,7 +130,7 @@ export function resolveNodeExecEligibility(params: {
 
 /** Resolves effective exec host, mode, approval policy, and node availability. */
 export function resolveExecDefaults(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   sessionEntry?: ExecSessionDefaults;
   execOverrides?: ExecPolicyOverrides;
   agentId?: string;

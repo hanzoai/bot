@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { SessionDiscussionProvider } from "../../plugins/session-discussion-registry.js";
 import { sessionDiscussionHandlers } from "./session-discussion.js";
 
@@ -44,9 +44,9 @@ vi.mock("./sessions-shared.js", () => ({
 
 const cfg = {
   agents: { defaults: { model: { primary: "openai/gpt-5.5" } } },
-} as OpenClawConfig;
+} as BotConfig;
 const sessionKey = "agent:main:thread";
-const storePath = "/tmp/openclaw/sessions.sqlite";
+const storePath = "/tmp/bot/sessions.sqlite";
 
 type Method = "session.discussion.info" | "session.discussion.open";
 

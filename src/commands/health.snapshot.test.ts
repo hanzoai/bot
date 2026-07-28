@@ -7,7 +7,7 @@ import type { ChannelAccountSnapshot } from "../channels/plugins/types.public.js
 import type { ChannelPlugin } from "../channels/plugins/types.public.js";
 import { createPluginRecord } from "../plugins/status.test-fixtures.js";
 import { MAX_TIMER_TIMEOUT_MS } from "../shared/number-coercion.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createBotTestState } from "../test-utils/bot-test-state.js";
 import type { HealthSummary } from "./health.js";
 
 let testConfig: Record<string, unknown> = {};
@@ -448,7 +448,7 @@ function createIMessageHealthPlugin(): HealthTestPlugin {
       probeAccount: async () => ({
         ok: false,
         error:
-          "imsg cannot access /Users/alice/Library/Messages/chat.db. Grant Full Disk Access to the Gateway/launcher process and restart Gateway. privateApi=/tmp/openclaw/private.sock",
+          "imsg cannot access /Users/alice/Library/Messages/chat.db. Grant Full Disk Access to the Gateway/launcher process and restart Gateway. privateApi=/tmp/bot/private.sock",
         privateApi: {
           rpcCommand: "imsg rpc --json",
           diagnostics: "sensitive transport details",
@@ -559,9 +559,9 @@ describe("getHealthSnapshot", () => {
     testConfig = { session: { store: "/tmp/x" } };
     testStore = {};
     setActivePluginRegistry(createTestRegistry([]));
-    const openClawState = await createOpenClawTestState({
+    const botState = await createBotTestState({
       layout: "state-only",
-      prefix: "openclaw-health-dq-",
+      prefix: "bot-health-dq-",
     });
     try {
       const { moveDeliveryQueueEntryToFailed, upsertDeliveryQueueEntry } =
@@ -594,7 +594,7 @@ describe("getHealthSnapshot", () => {
         ],
       });
     } finally {
-      await openClawState.cleanup();
+      await botState.cleanup();
     }
   });
 
@@ -655,7 +655,7 @@ describe("getHealthSnapshot", () => {
     expect(calls.join("\n")).toContain("/getMe");
     expect(calls.join("\n")).toContain("/getWebhookInfo");
 
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-health-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-health-"));
     const tokenFile = path.join(tmpDir, "telegram-token");
     try {
       fs.writeFileSync(tokenFile, "t-file\n", "utf-8");

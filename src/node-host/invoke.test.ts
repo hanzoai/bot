@@ -8,7 +8,7 @@ import type { GatewayClient } from "../gateway/client.js";
 import { saveExecApprovals, type ExecApprovalsSnapshot } from "../infra/exec-approvals.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import type { SkillBinsProvider } from "./invoke-types.js";
 import { handleInvoke } from "./invoke.js";
@@ -195,7 +195,7 @@ describe("node host invoke", () => {
   });
 
   it("lists node-host directories for the folder browser", async () => {
-    const root = fs.realpathSync(tempDirs.make("openclaw-node-fs-listdir-"));
+    const root = fs.realpathSync(tempDirs.make("bot-node-fs-listdir-"));
     fs.mkdirSync(path.join(root, "Projects"));
     fs.writeFileSync(path.join(root, "notes.txt"), "hidden from directory listing");
     const request = vi.fn<GatewayClient["request"]>().mockResolvedValue(null);
@@ -495,7 +495,7 @@ describe("node host invoke", () => {
   it.runIf(process.platform !== "win32")(
     "resolves node skill cwd locators before preparing system.run",
     async () => {
-      const stateDir = fs.realpathSync(tempDirs.make("openclaw-node-skill-cwd-"));
+      const stateDir = fs.realpathSync(tempDirs.make("bot-node-skill-cwd-"));
       const skillDir = path.join(stateDir, "skills", "cwd-skill");
       fs.mkdirSync(skillDir, { recursive: true });
       fs.writeFileSync(
@@ -503,7 +503,7 @@ describe("node host invoke", () => {
         "---\nname: cwd-skill\ndescription: Cwd skill\n---\n",
       );
 
-      await withEnvAsync({ OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ BOT_STATE_DIR: stateDir }, async () => {
         const request = vi.fn<GatewayClient["request"]>().mockResolvedValue(null);
         const skillBins: SkillBinsProvider = { current: async () => [] };
         await handleInvoke(
@@ -564,7 +564,7 @@ describe("node host invoke", () => {
   it.runIf(process.platform !== "win32")(
     "rejects blocked forwarded env overrides in system.run.prepare",
     async () => {
-      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-prepare-env-"));
+      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-prepare-env-"));
       const toolPath = path.join(tempDir, "tool");
       fs.writeFileSync(toolPath, "#!/bin/sh\nexit 0\n");
       fs.chmodSync(toolPath, 0o755);
@@ -674,10 +674,10 @@ describe("node host invoke", () => {
   });
 
   it("forwards suppressNotifyOnExit on completed system.run events", async () => {
-    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-node-event-suppress-"));
-    const stateDir = path.join(tempHome, ".openclaw");
+    const tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "bot-node-event-suppress-"));
+    const stateDir = path.join(tempHome, ".bot");
     try {
-      await withEnvAsync({ OPENCLAW_HOME: tempHome, OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ BOT_HOME: tempHome, BOT_STATE_DIR: stateDir }, async () => {
         saveExecApprovals({
           version: 1,
           defaults: { security: "allowlist", ask: "on-miss", askFallback: "deny" },
@@ -738,7 +738,7 @@ describe("node host invoke", () => {
         });
       });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeBotStateDatabaseForTest();
       fs.rmSync(tempHome, { recursive: true, force: true });
     }
   });

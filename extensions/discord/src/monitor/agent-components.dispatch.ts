@@ -1,16 +1,16 @@
 // Discord plugin module implements agent componentsispatch behavior.
-import { resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
+import { resolveHumanDelayConfig } from "bot/plugin-sdk/agent-runtime";
 import {
   formatInboundEnvelope,
   resolveEnvelopeFormatOptions,
   runChannelInboundEvent,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { logError } from "openclaw/plugin-sdk/logging-core";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { getAgentScopedMediaLocalRoots } from "openclaw/plugin-sdk/media-runtime";
-import { createNonExitingRuntime, logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/channel-inbound";
+import { isDangerousNameMatchingEnabled } from "bot/plugin-sdk/dangerous-name-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { logError } from "bot/plugin-sdk/logging-core";
+import { resolveMarkdownTableMode } from "bot/plugin-sdk/markdown-table-runtime";
+import { getAgentScopedMediaLocalRoots } from "bot/plugin-sdk/media-runtime";
+import { createNonExitingRuntime, logVerbose } from "bot/plugin-sdk/runtime-env";
 import { resolveDiscordMaxLinesPerMessage } from "../accounts.js";
 import { createDiscordRestClient } from "../client.js";
 import { resolveDiscordConversationIdentity } from "../conversation-identity.js";

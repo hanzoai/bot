@@ -1,7 +1,7 @@
 // Doctor checks and repairs for exec safeBins profiles and trusted binary directories.
 import { sanitizeForLog } from "../../../../packages/terminal-core/src/ansi.js";
 import { listAgentEntriesWithSource } from "../../../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { resolveCommandResolutionFromArgv } from "../../../infra/exec-command-resolution.js";
 import {
   normalizeConfiguredSafeBins,
@@ -48,7 +48,7 @@ type ExecSafeBinTrustedDirHintHit = {
   resolvedPath: string;
 };
 
-function collectExecSafeBinScopes(cfg: OpenClawConfig): ExecSafeBinScopeRef[] {
+function collectExecSafeBinScopes(cfg: BotConfig): ExecSafeBinScopeRef[] {
   const scopes: ExecSafeBinScopeRef[] = [];
   const globalExec = asObjectRecord(cfg.tools?.exec);
   const globalTrustedDirs = normalizeConfiguredTrustedSafeBinDirs(globalExec?.safeBinTrustedDirs);
@@ -102,7 +102,7 @@ function collectExecSafeBinScopes(cfg: OpenClawConfig): ExecSafeBinScopeRef[] {
 }
 
 /** Scan configured safeBins for missing profiles and risky low-friction entries. */
-export function scanExecSafeBinCoverage(cfg: OpenClawConfig): ExecSafeBinCoverageHit[] {
+export function scanExecSafeBinCoverage(cfg: BotConfig): ExecSafeBinCoverageHit[] {
   const hits: ExecSafeBinCoverageHit[] = [];
   for (const scope of collectExecSafeBinScopes(cfg)) {
     const interpreterBins = new Set(listInterpreterLikeSafeBins(scope.safeBins));
@@ -136,7 +136,7 @@ export function scanExecSafeBinCoverage(cfg: OpenClawConfig): ExecSafeBinCoverag
 
 /** Scan configured safeBins that resolve outside trusted binary directories. */
 export function scanExecSafeBinTrustedDirHints(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): ExecSafeBinTrustedDirHintHit[] {
   const hits: ExecSafeBinTrustedDirHintHit[] = [];
   for (const scope of collectExecSafeBinScopes(cfg)) {
@@ -244,8 +244,8 @@ export function collectExecSafeBinTrustedDirHintWarnings(
 }
 
 /** Scaffold missing custom safeBin profiles and warn on interpreter/risky entries. */
-export function maybeRepairExecSafeBinProfiles(cfg: OpenClawConfig): {
-  config: OpenClawConfig;
+export function maybeRepairExecSafeBinProfiles(cfg: BotConfig): {
+  config: BotConfig;
   changes: string[];
   warnings: string[];
 } {

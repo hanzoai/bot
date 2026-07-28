@@ -1,9 +1,9 @@
 import {
   buildChannelInboundEventContext,
   resolveChannelInboundRouteEnvelope,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { resolveStableChannelMessageIngress } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-inbound";
+import { resolveStableChannelMessageIngress } from "bot/plugin-sdk/channel-ingress-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import type { BuzzBus } from "./buzz-bus.js";
 import type { BuzzInboundMessage } from "./message-event.js";
 import { getBuzzRuntime } from "./runtime.js";
@@ -16,7 +16,7 @@ function senderLabel(pubkey: string): string {
 
 export async function handleBuzzInbound(params: {
   account: ResolvedBuzzAccount;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   bus: BuzzBus;
   message: BuzzInboundMessage;
 }) {

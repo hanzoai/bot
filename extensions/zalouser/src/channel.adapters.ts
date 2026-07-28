@@ -1,23 +1,23 @@
 // Zalouser plugin module implements channel.adapters behavior.
-import { createScopedDmSecurityResolver } from "openclaw/plugin-sdk/channel-config-helpers";
+import { createScopedDmSecurityResolver } from "bot/plugin-sdk/channel-config-helpers";
 import {
   defineChannelMessageAdapter,
   type ChannelMessageSendResult,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createPairingPrefixStripper } from "openclaw/plugin-sdk/channel-pairing";
+} from "bot/plugin-sdk/channel-outbound";
+import { createPairingPrefixStripper } from "bot/plugin-sdk/channel-pairing";
 import {
   resolveScopeRequireMention,
   resolveScopeToolsPolicy,
-} from "openclaw/plugin-sdk/channel-policy";
+} from "bot/plugin-sdk/channel-policy";
 import {
   createEmptyChannelResult,
   type ChannelOutboundAdapter,
   type OutboundDeliveryResult,
-} from "openclaw/plugin-sdk/channel-send-result";
-import { createStaticReplyToModeResolver } from "openclaw/plugin-sdk/conversation-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/channel-send-result";
+import { createStaticReplyToModeResolver } from "bot/plugin-sdk/conversation-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   checkZcaAuthenticated,
   listZalouserAccountIds,
@@ -29,7 +29,7 @@ import type {
   ChannelGroupContext,
   ChannelMessageActionAdapter,
   GroupToolPolicyConfig,
-  OpenClawConfig,
+  BotConfig,
 } from "./channel-api.js";
 import {
   DEFAULT_ACCOUNT_ID,
@@ -58,7 +58,7 @@ type ZalouserSendTextContext = {
   to: string;
   text: string;
   accountId?: string | null;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   onDeliveryResult?: (result: ChannelMessageSendResult) => Promise<void> | void;
 };
 
@@ -76,11 +76,11 @@ export function resolveZalouserQrProfile(accountId?: string | null): string {
   return normalized;
 }
 
-function resolveZalouserOutboundChunkMode(cfg: OpenClawConfig, accountId?: string) {
+function resolveZalouserOutboundChunkMode(cfg: BotConfig, accountId?: string) {
   return getZalouserRuntime().channel.text.resolveChunkMode(cfg, "zalouser", accountId);
 }
 
-function resolveZalouserOutboundTextChunkLimit(cfg: OpenClawConfig, accountId?: string) {
+function resolveZalouserOutboundTextChunkLimit(cfg: BotConfig, accountId?: string) {
   return getZalouserRuntime().channel.text.resolveTextChunkLimit(cfg, "zalouser", accountId, {
     fallbackLimit: ZALOUSER_TEXT_CHUNK_LIMIT,
   });
@@ -320,7 +320,7 @@ export const zalouserResolverAdapter = {
     kind,
     runtime,
   }: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string | null;
     inputs: string[];
     kind: "user" | "group";
@@ -384,7 +384,7 @@ export const zalouserAuthAdapter = {
     accountId,
     runtime,
   }: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string | null;
     runtime: RuntimeEnv;
   }) => {
@@ -440,7 +440,7 @@ export const zalouserPairingTextAdapter = {
   idLabel: "zalouserUserId",
   message: "Your pairing request has been approved.",
   normalizeAllowEntry: createPairingPrefixStripper(/^(zalouser|zlu):/i),
-  notify: async ({ cfg, id, message }: { cfg: OpenClawConfig; id: string; message: string }) => {
+  notify: async ({ cfg, id, message }: { cfg: BotConfig; id: string; message: string }) => {
     const { sendMessageZalouser } = await loadZalouserChannelRuntime();
     const account = resolveZalouserAccountSync({ cfg });
     const authenticated = await checkZcaAuthenticated(account.profile);

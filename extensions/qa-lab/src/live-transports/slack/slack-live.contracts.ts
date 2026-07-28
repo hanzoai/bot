@@ -1,6 +1,6 @@
 // QA Lab Slack live domain contracts and wire schemas.
 import type { WebClient } from "@slack/web-api";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { z } from "zod";
 import type { startQaGatewayChild } from "../../gateway-child.js";
 import { splitQaModelRef } from "../../model-selection.js";
@@ -106,7 +106,7 @@ export type SlackQaScenarioId =
 
 export type SlackQaApprovalKind = "exec" | "plugin";
 export type SlackQaApprovalDecision = "allow-always" | "allow-once" | "deny";
-export const SLACK_QA_APPROVAL_ACTION_PREFIX = "openclaw:approval:v1:";
+export const SLACK_QA_APPROVAL_ACTION_PREFIX = "bot:approval:v1:";
 export const SlackQaApprovalActionValueSchema = z
   .object({
     approvalId: z.string().min(1),
@@ -153,7 +153,7 @@ type SlackQaDirectTransportScenarioRun = {
 };
 
 export type SlackQaDirectTransportScenarioContext = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelId: string;
   sutAccountId: string;
   sutIdentity: SlackAuthIdentity;
@@ -291,15 +291,15 @@ export type SlackApprovalCheckpointMessage = {
   text: string;
 };
 
-export const SLACK_QA_APPROVAL_CHECKPOINT_DIR_ENV = "OPENCLAW_QA_SLACK_APPROVAL_CHECKPOINT_DIR";
+export const SLACK_QA_APPROVAL_CHECKPOINT_DIR_ENV = "BOT_QA_SLACK_APPROVAL_CHECKPOINT_DIR";
 export const SLACK_QA_APPROVAL_CHECKPOINT_TIMEOUT_MS_ENV =
-  "OPENCLAW_QA_SLACK_APPROVAL_CHECKPOINT_TIMEOUT_MS";
+  "BOT_QA_SLACK_APPROVAL_CHECKPOINT_TIMEOUT_MS";
 export const SLACK_QA_WEB_API_TIMEOUT_MS = 45_000;
 export const SLACK_QA_ENV_KEYS = [
-  "OPENCLAW_QA_SLACK_CHANNEL_ID",
-  "OPENCLAW_QA_SLACK_DRIVER_BOT_TOKEN",
-  "OPENCLAW_QA_SLACK_SUT_BOT_TOKEN",
-  "OPENCLAW_QA_SLACK_SUT_APP_TOKEN",
+  "BOT_QA_SLACK_CHANNEL_ID",
+  "BOT_QA_SLACK_DRIVER_BOT_TOKEN",
+  "BOT_QA_SLACK_SUT_BOT_TOKEN",
+  "BOT_QA_SLACK_SUT_APP_TOKEN",
 ] as const;
 
 export const slackQaCredentialPayloadSchema = z.object({

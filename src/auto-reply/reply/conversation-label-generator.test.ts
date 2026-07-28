@@ -37,7 +37,7 @@ describe("generateConversationLabel", () => {
       selection: {
         provider: "openai",
         modelId: "gpt-test",
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
       },
       model: { provider: "openai", id: "gpt-test", maxTokens: 8192 },
       auth: { apiKey: "resolved-key", mode: "api-key" },
@@ -110,7 +110,7 @@ describe("generateConversationLabel", () => {
       selection: {
         provider: "openai",
         modelId: "gpt-test",
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
       },
       model: { provider: "openai", id: "gpt-test", maxTokens: 1_024 },
       auth: { apiKey: "resolved-key", mode: "api-key" },
@@ -130,7 +130,7 @@ describe("generateConversationLabel", () => {
       selection: {
         provider: "openai",
         modelId: "gpt-5.5",
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
       },
       model: {
         provider: "openai",
@@ -176,14 +176,14 @@ describe("generateConversationLabel", () => {
         selection: {
           provider: "openai",
           modelId: "gpt-5.6-luna",
-          agentDir: "/tmp/openclaw-agent",
+          agentDir: "/tmp/bot-agent",
         },
       })
       .mockResolvedValueOnce({
         selection: {
           provider: "openai",
           modelId: "gpt-5.6-sol",
-          agentDir: "/tmp/openclaw-agent",
+          agentDir: "/tmp/bot-agent",
         },
         model: { provider: "openai", id: "gpt-5.6-sol", maxTokens: 8192 },
         auth: { apiKey: "test-api-key", mode: "api-key" },
@@ -210,7 +210,7 @@ describe("generateConversationLabel", () => {
         selection: {
           provider: "openai",
           modelId: "gpt-5.6-luna",
-          agentDir: "/tmp/openclaw-agent",
+          agentDir: "/tmp/bot-agent",
         },
         model: { provider: "openai", id: "gpt-5.6-luna", maxTokens: 8192 },
         auth: { apiKey: "test-api-key", mode: "oauth" },
@@ -219,7 +219,7 @@ describe("generateConversationLabel", () => {
         selection: {
           provider: "openai",
           modelId: "gpt-5.6-sol",
-          agentDir: "/tmp/openclaw-agent",
+          agentDir: "/tmp/bot-agent",
         },
         model: { provider: "openai", id: "gpt-5.6-sol", maxTokens: 8192 },
         auth: { apiKey: "test-api-key", mode: "oauth" },
@@ -350,7 +350,7 @@ describe("generateConversationLabelWithFallback", () => {
         provider: model.slice(0, slash),
         modelId: model.slice(slash + 1),
         profileId,
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
       };
     });
     prepareSimpleCompletionModelForAgent.mockImplementation(async ({ modelRef }) => {
@@ -361,7 +361,7 @@ describe("generateConversationLabelWithFallback", () => {
           provider: model.slice(0, slash),
           modelId: model.slice(slash + 1),
           profileId: "work",
-          agentDir: "/tmp/openclaw-agent",
+          agentDir: "/tmp/bot-agent",
         },
         model: {
           provider: model.slice(0, slash),
@@ -436,7 +436,7 @@ describe("generateConversationLabelWithFallback", () => {
       provider: modelRef.startsWith("anthropic/") ? "anthropic" : "openai",
       runtimeProvider: "openai",
       modelId: modelRef.split("/").slice(1).join("/"),
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
     }));
 
     await expect(
@@ -538,7 +538,7 @@ describe("generateConversationLabelWithFallback", () => {
       provider: "openai",
       modelId: "same-model",
       profileId: "work",
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
     });
     completeWithPreparedSimpleCompletionModel.mockResolvedValue({ content: [] });
 
@@ -554,7 +554,7 @@ describe("generateConversationLabelWithFallback", () => {
         provider: "openai",
         modelId: "resolved-same-model",
         profileId: "work",
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
       },
       model: { provider: "openai", id: "resolved-same-model", maxTokens: 8192 },
       auth: { apiKey: "resolved-key", mode: "api-key" },

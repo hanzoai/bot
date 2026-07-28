@@ -1,10 +1,10 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 /**
  * Channel setup config mutation helpers.
  *
  * Applies account names and validates setup results for channel onboarding adapters.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../../routing/session-key.js";
 import { resolveSingleAccountKeysToMove } from "./setup-promotion-helpers.js";
 import type { ChannelSetupAdapter } from "./types.adapters.js";
@@ -16,14 +16,14 @@ type ChannelSectionBase = {
   accounts?: Record<string, Record<string, unknown>>;
 };
 
-function channelHasAccounts(cfg: OpenClawConfig, channelKey: string): boolean {
+function channelHasAccounts(cfg: BotConfig, channelKey: string): boolean {
   const channels = cfg.channels as Record<string, unknown> | undefined;
   const base = channels?.[channelKey] as ChannelSectionBase | undefined;
   return Boolean(base?.accounts && Object.keys(base.accounts).length > 0);
 }
 
 function shouldStoreNameInAccounts(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelKey: string;
   accountId: string;
   alwaysUseAccounts?: boolean;
@@ -38,12 +38,12 @@ function shouldStoreNameInAccounts(params: {
 }
 
 export function applyAccountNameToChannelSection(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelKey: string;
   accountId: string;
   name?: string;
   alwaysUseAccounts?: boolean;
-}): OpenClawConfig {
+}): BotConfig {
   const trimmed = params.name?.trim();
   if (!trimmed) {
     return params.cfg;
@@ -70,7 +70,7 @@ export function applyAccountNameToChannelSection(params: {
           name: trimmed,
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
   }
   const baseAccounts: Record<string, Record<string, unknown>> = base?.accounts ?? {};
   const existingAccount = baseAccounts[accountId] ?? {};
@@ -93,15 +93,15 @@ export function applyAccountNameToChannelSection(params: {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 /** Moves a root-level channel name into `accounts.default` before adding named accounts. */
 export function migrateBaseNameToDefaultAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelKey: string;
   alwaysUseAccounts?: boolean;
-}): OpenClawConfig {
+}): BotConfig {
   if (params.alwaysUseAccounts) {
     return params.cfg;
   }
@@ -128,18 +128,18 @@ export function migrateBaseNameToDefaultAccount(params: {
         accounts,
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 /** Applies setup-time account naming and optional root-name migration in one step. */
 export function prepareScopedSetupConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelKey: string;
   accountId: string;
   name?: string;
   alwaysUseAccounts?: boolean;
   migrateBaseName?: boolean;
-}): OpenClawConfig {
+}): BotConfig {
   const namedConfig = applyAccountNameToChannelSection({
     cfg: params.cfg,
     channelKey: params.channelKey,
@@ -159,11 +159,11 @@ export function prepareScopedSetupConfig(params: {
 
 /** Applies a setup patch using account-scoped config semantics. */
 export function applySetupAccountConfigPatch(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelKey: string;
   accountId: string;
   patch: Record<string, unknown>;
-}): OpenClawConfig {
+}): BotConfig {
   return patchScopedAccountConfig({
     cfg: params.cfg,
     channelKey: params.channelKey,
@@ -235,7 +235,7 @@ export function createSetupInputPresenceValidator<
 >(params: {
   defaultAccountOnlyEnvError?: string;
   whenNotUseEnv?: SetupInputPresenceRequirement[];
-  validate?: (params: { cfg: OpenClawConfig; accountId: string; input: Input }) => string | null;
+  validate?: (params: { cfg: BotConfig; accountId: string; input: Input }) => string | null;
 }): NonNullable<ChannelSetupAdapter<Input>["validateInput"]> {
   return (inputParams) => {
     if (
@@ -290,7 +290,7 @@ export function createEnvPatchedAccountSetupAdapter(params: {
 
 /** Patches channel config at root for default accounts or under `accounts.<id>` for named accounts. */
 export function patchScopedAccountConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelKey: string;
   accountId: string;
   patch: Record<string, unknown>;
@@ -299,7 +299,7 @@ export function patchScopedAccountConfig(params: {
   ensureChannelEnabled?: boolean;
   ensureAccountEnabled?: boolean;
   scopeDefaultToAccounts?: boolean;
-}): OpenClawConfig {
+}): BotConfig {
   const accountId = normalizeAccountId(params.accountId);
   const channels = params.cfg.channels as Record<string, unknown> | undefined;
   const channelConfig = channels?.[params.channelKey];
@@ -335,7 +335,7 @@ export function patchScopedAccountConfig(params: {
           ...patch,
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
   }
 
   const accounts = base?.accounts ?? {};
@@ -363,7 +363,7 @@ export function patchScopedAccountConfig(params: {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 type ChannelSectionRecord = Record<string, unknown> & {
@@ -378,14 +378,14 @@ function cloneIfObject<T>(value: T): T {
 }
 
 function moveSingleAccountKeysIntoAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelKey: string;
   channel: ChannelSectionRecord;
   accounts: Record<string, Record<string, unknown>>;
   keysToMove: string[];
   targetAccountId: string;
   baseAccount?: Record<string, unknown>;
-}): OpenClawConfig {
+}): BotConfig {
   const nextAccount: Record<string, unknown> = { ...params.baseAccount };
   for (const key of params.keysToMove) {
     if (!(key in nextAccount)) {
@@ -408,7 +408,7 @@ function moveSingleAccountKeysIntoAccount(params: {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function resolveExistingAccountKey(
@@ -455,10 +455,10 @@ function resolveSingleAccountPromotionTarget(params: {
  * Promotes legacy single-account channel fields into the account map for multi-account setup.
  */
 export function moveSingleAccountChannelSectionToDefaultAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelKey: string;
   setupSurface?: ChannelSetupAdapter;
-}): OpenClawConfig {
+}): BotConfig {
   const channels = params.cfg.channels as Record<string, unknown> | undefined;
   const baseConfig = channels?.[params.channelKey];
   const base =

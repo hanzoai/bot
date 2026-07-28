@@ -1,12 +1,12 @@
-# OpenClaw Chutes Provider
+# Bot Chutes Provider
 
-Official OpenClaw provider plugin for Chutes.
+Official Bot provider plugin for Chutes.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/chutes-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-chutes-provider
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/chutes> for setup and configuration.
+See <https://docs.bot.ai/providers/chutes> for setup and configuration.

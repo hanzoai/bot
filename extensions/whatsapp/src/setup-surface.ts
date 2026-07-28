@@ -1,11 +1,11 @@
 // Whatsapp plugin module implements setup surface behavior.
-import type { ChannelSetupWizard } from "openclaw/plugin-sdk/setup";
+import type { ChannelSetupWizard } from "bot/plugin-sdk/setup";
 import {
   DEFAULT_ACCOUNT_ID,
   setSetupChannelEnabled,
   createSetupTranslator,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/setup";
+  type BotConfig,
+} from "bot/plugin-sdk/setup";
 import { listWhatsAppAccountIds, resolveWhatsAppAuthDir } from "./accounts.js";
 import { formatWhatsAppWebAuthStatusState, readWebAuthState } from "./auth-store.js";
 
@@ -16,7 +16,7 @@ const channel = "whatsapp" as const;
 type WhatsAppSetupLinkState = "linked" | "not-linked" | "unstable";
 
 async function readWhatsAppSetupLinkState(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   accountId: string,
 ): Promise<WhatsAppSetupLinkState> {
   const { authDir } = resolveWhatsAppAuthDir({ cfg, accountId });

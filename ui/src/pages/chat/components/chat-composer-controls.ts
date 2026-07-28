@@ -132,7 +132,7 @@ function renderComposerVoiceButton(props: ChatRunControlsProps) {
   // or replacing the button releases capture and cancels the active hold.
   return html`
     <span class="chat-talk-control">
-      <openclaw-tooltip .content=${label}>
+      <bot-tooltip .content=${label}>
         <button
           class=${active
             ? `chat-send-btn chat-send-btn--dictating${finalizing ? " chat-send-btn--dictation-finalizing" : ""}`
@@ -161,7 +161,7 @@ function renderComposerVoiceButton(props: ChatRunControlsProps) {
                   <span class="agent-chat__control-label">${label}</span>
                 `}
         </button>
-      </openclaw-tooltip>
+      </bot-tooltip>
       ${holding ? nothing : props.microphonePicker}
     </span>
   `;
@@ -197,7 +197,7 @@ export function renderChatPrimaryActions(props: ChatRunControlsProps) {
   };
   const abortAction = props.canAbort
     ? html`
-        <openclaw-tooltip .content=${t("chat.runControls.stop")}>
+        <bot-tooltip .content=${t("chat.runControls.stop")}>
           <button
             class="chat-send-btn chat-send-btn--stop"
             @click=${props.onAbort}
@@ -206,7 +206,7 @@ export function renderChatPrimaryActions(props: ChatRunControlsProps) {
             ${icons.stop}
             <span class="agent-chat__control-label">${t("chat.runControls.stop")}</span>
           </button>
-        </openclaw-tooltip>
+        </bot-tooltip>
       `
     : nothing;
 
@@ -217,7 +217,7 @@ export function renderChatPrimaryActions(props: ChatRunControlsProps) {
   const voiceErrored = props.voiceStatus === "error";
   const voiceButton = renderComposerVoiceButton(props);
   const sendAction = html`
-    <openclaw-tooltip
+    <bot-tooltip
       .content=${props.suggestionComposer
         ? t("chat.sessionSuggestions.suggestMessage")
         : props.isBusy
@@ -243,7 +243,7 @@ export function renderChatPrimaryActions(props: ChatRunControlsProps) {
               : t("chat.runControls.send")}</span
         >
       </button>
-    </openclaw-tooltip>
+    </bot-tooltip>
   `;
   const dictationPrimaryAction = html`
     ${props.dictation?.active || !hasComposedContent ? nothing : sendAction} ${voiceButton}
@@ -252,7 +252,7 @@ export function renderChatPrimaryActions(props: ChatRunControlsProps) {
     ${props.voiceActive && props.onToggleVoice
       ? html`
           <span class="chat-talk-control chat-talk-control--active">
-            <openclaw-tooltip .content=${t("chat.composer.stopVoiceInput")}>
+            <bot-tooltip .content=${t("chat.composer.stopVoiceInput")}>
               <button
                 class="chat-send-btn chat-send-btn--voice-live${voiceErrored
                   ? " chat-send-btn--voice-error"
@@ -268,7 +268,7 @@ export function renderChatPrimaryActions(props: ChatRunControlsProps) {
                     })}
                 <span class="chat-send-btn__voice-stop-glyph">${icons.stop}</span>
               </button>
-            </openclaw-tooltip>
+            </bot-tooltip>
             ${props.microphonePicker}
           </span>
           ${voiceErrored
@@ -284,7 +284,7 @@ export function renderChatPrimaryActions(props: ChatRunControlsProps) {
               `}
           ${props.voiceVideoCapable && props.onToggleCamera
             ? html`
-                <openclaw-tooltip
+                <bot-tooltip
                   .content=${props.voiceVideoEnabled
                     ? t("chat.composer.turnCameraOff")
                     : t("chat.composer.turnCameraOn")}
@@ -307,7 +307,7 @@ export function renderChatPrimaryActions(props: ChatRunControlsProps) {
                         : t("chat.composer.turnCameraOn")}</span
                     >
                   </button>
-                </openclaw-tooltip>
+                </bot-tooltip>
               `
             : nothing}
           ${abortAction}
@@ -316,7 +316,7 @@ export function renderChatPrimaryActions(props: ChatRunControlsProps) {
         ? html`
             ${hasComposedContent
               ? html`
-                  <openclaw-tooltip .content=${activeRunActionLabel}>
+                  <bot-tooltip .content=${activeRunActionLabel}>
                     <button
                       class="chat-send-btn"
                       @click=${storeDraftAndSend}
@@ -326,10 +326,10 @@ export function renderChatPrimaryActions(props: ChatRunControlsProps) {
                       ${icons.arrowUp}
                       <span class="agent-chat__control-label">${activeRunActionLabel}</span>
                     </button>
-                  </openclaw-tooltip>
+                  </bot-tooltip>
                 `
               : nothing}
-            <openclaw-tooltip .content=${t("chat.runControls.stop")}>
+            <bot-tooltip .content=${t("chat.runControls.stop")}>
               <button
                 class="chat-send-btn chat-send-btn--stop"
                 @click=${props.onAbort}
@@ -338,7 +338,7 @@ export function renderChatPrimaryActions(props: ChatRunControlsProps) {
                 ${icons.stop}
                 <span class="agent-chat__control-label">${t("chat.runControls.stop")}</span>
               </button>
-            </openclaw-tooltip>
+            </bot-tooltip>
           `
         : props.dictation
           ? dictationPrimaryAction

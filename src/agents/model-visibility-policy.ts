@@ -5,7 +5,7 @@ import {
   resolveAgentModelFallbackValues,
   resolveAgentModelPrimaryValue,
 } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveAgentConfig, resolveAgentModelFallbacksOverride } from "./agent-scope.js";
 import type { ModelCatalogEntry } from "./model-catalog.types.js";
 import type { ModelManifestNormalizationContext } from "./model-ref-shared.js";
@@ -19,7 +19,7 @@ export const RUNTIME_MODEL_VISIBILITY_NORMALIZATION = {
   allowPluginNormalization: true,
 } as const;
 
-function resolveAllowedFallbacks(params: { cfg: OpenClawConfig; agentId?: string }): string[] {
+function resolveAllowedFallbacks(params: { cfg: BotConfig; agentId?: string }): string[] {
   if (params.agentId) {
     const override = resolveAgentModelFallbacksOverride(params.cfg, params.agentId);
     if (override !== undefined) {
@@ -30,7 +30,7 @@ function resolveAllowedFallbacks(params: { cfg: OpenClawConfig; agentId?: string
 }
 
 function resolveAdditionalConfiguredModelRefs(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
 }): string[] {
   const defaults = params.cfg.agents?.defaults;
@@ -52,7 +52,7 @@ function resolveAdditionalConfiguredModelRefs(params: {
 
 export function createModelVisibilityPolicy(
   params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     catalog: ModelCatalogEntry[];
     defaultProvider: string;
     defaultModel?: string;

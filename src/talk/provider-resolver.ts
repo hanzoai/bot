@@ -4,7 +4,7 @@
  * This adapter applies the generic capability-provider resolver to Talk
  * providers, including default model injection and per-call config overrides.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveConfiguredCapabilityProvider } from "../plugin-sdk/provider-selection-runtime.js";
 import type { RealtimeVoiceProviderPlugin } from "../plugins/types.js";
 import {
@@ -27,9 +27,9 @@ export type ResolveConfiguredRealtimeVoiceProviderParams = {
   providerConfigs?: Record<string, Record<string, unknown> | undefined>;
   /** Last-mile overrides from a session/client request. */
   providerConfigOverrides?: Record<string, unknown>;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   /** Alternate config object used by generic provider selection internals. */
-  cfgForResolve?: OpenClawConfig;
+  cfgForResolve?: BotConfig;
   /** Test/runtime override for the provider list. */
   providers?: RealtimeVoiceProviderPlugin[];
   /** Model injected before provider-specific resolveConfig runs. */
@@ -42,7 +42,7 @@ export type ResolveConfiguredRealtimeVoiceProviderParams = {
 export function resolveRealtimeVoiceProviderCapabilities(params: {
   provider: RealtimeVoiceProviderPlugin;
   providerConfig: RealtimeVoiceProviderConfig;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   surface?: "browser-session" | "bridge";
 }): InternalRealtimeVoiceProviderCapabilities | undefined {
   if (params.surface === "browser-session") {
@@ -56,7 +56,7 @@ export function resolveRealtimeVoiceProviderCapabilities(params: {
 
 export function isRealtimeVoiceProviderConfigured(params: {
   provider: RealtimeVoiceProviderPlugin;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   providerConfig: RealtimeVoiceProviderConfig;
   surface?: "browser-session" | "bridge";
 }): boolean {
@@ -77,7 +77,7 @@ export function isRealtimeVoiceProviderConfigured(params: {
 export function resolveConfiguredRealtimeVoiceProvider(
   params: ResolveConfiguredRealtimeVoiceProviderParams,
 ): ResolvedRealtimeVoiceProvider {
-  const cfgForResolve = params.cfgForResolve ?? params.cfg ?? ({} as OpenClawConfig);
+  const cfgForResolve = params.cfgForResolve ?? params.cfg ?? ({} as BotConfig);
   const providers = params.providers ?? listRealtimeVoiceProviders(params.cfg);
   const resolution = resolveConfiguredCapabilityProvider({
     configuredProviderId: params.configuredProviderId,

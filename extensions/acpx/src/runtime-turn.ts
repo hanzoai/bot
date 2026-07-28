@@ -2,7 +2,7 @@
  * ACPX turn adapters. Modern runtimes can expose startTurn directly; legacy
  * runtimes that only stream runTurn events are adapted to the newer contract.
  */
-import { createDeferred } from "openclaw/plugin-sdk/extension-shared";
+import { createDeferred } from "bot/plugin-sdk/extension-shared";
 import type {
   AcpRuntime,
   AcpRuntimeEvent,

@@ -1,5 +1,5 @@
-// Browser control auth helpers resolve plugin browser credentials from OpenClaw config.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+// Browser control auth helpers resolve plugin browser credentials from Bot config.
+import type { BotConfig } from "../config/types.bot.js";
 import { loadBundledPluginPublicSurfaceModuleSync } from "./facade-loader.js";
 
 /** Browser control credentials resolved from config, env, or generated setup state. */
@@ -12,7 +12,7 @@ export type BrowserControlAuth = {
 
 /** Inputs used when resolving or creating browser control auth for the active config. */
 type EnsureBrowserControlAuthParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
 };
 
@@ -23,7 +23,7 @@ type EnsureBrowserControlAuthResult = {
 };
 
 type BrowserControlAuthSurface = {
-  resolveBrowserControlAuth: (cfg?: OpenClawConfig, env?: NodeJS.ProcessEnv) => BrowserControlAuth;
+  resolveBrowserControlAuth: (cfg?: BotConfig, env?: NodeJS.ProcessEnv) => BrowserControlAuth;
   shouldAutoGenerateBrowserAuth: (env: NodeJS.ProcessEnv) => boolean;
   ensureBrowserControlAuth: (
     params: EnsureBrowserControlAuthParams,
@@ -45,7 +45,7 @@ function loadBrowserControlAuthSurface(): BrowserControlAuthSurface {
 
 /** Resolves browser control auth from config/env without generating new credentials. */
 export function resolveBrowserControlAuth(
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): BrowserControlAuth {
   return loadBrowserControlAuthSurface().resolveBrowserControlAuth(cfg, env);

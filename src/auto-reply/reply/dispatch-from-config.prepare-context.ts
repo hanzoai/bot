@@ -1,7 +1,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveAgentWorkspaceDir, resolveSessionAgentId } from "../../agents/agent-scope.js";
 import {
   resolveEffectiveToolPolicy,

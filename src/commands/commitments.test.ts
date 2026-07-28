@@ -8,7 +8,7 @@ import { commitmentsDismissCommand, commitmentsListCommand } from "./commitments
 const mocks = vi.hoisted(() => ({
   listCommitments: vi.fn(),
   markCommitmentsStatus: vi.fn(),
-  resolveCommitmentDatabasePath: vi.fn(() => "/tmp/openclaw.sqlite"),
+  resolveCommitmentDatabasePath: vi.fn(() => "/tmp/bot.sqlite"),
   getRuntimeConfig: vi.fn(() => ({})),
 }));
 
@@ -79,7 +79,7 @@ describe("commitments command", () => {
 
     expect(logs.map(stripAnsi)).toEqual([
       "Commitments: 1",
-      "Store: /tmp/openclaw.sqlite",
+      "Store: /tmp/bot.sqlite",
       "Status filter: pending",
       "ID               Status     Kind             Due                      Scope                        Suggested text",
       "cm_escape        pending    event_check_in   2026-04-30T17:00:00.000Z main/telegram/+15551234567   How did it go?\\nspoofed",
@@ -222,7 +222,7 @@ describe("commitments command", () => {
       count: 1,
       status: "pending",
       agentId: null,
-      store: "/tmp/openclaw.sqlite",
+      store: "/tmp/bot.sqlite",
       commitments: [{ id: "cm_escape" }],
     });
   });

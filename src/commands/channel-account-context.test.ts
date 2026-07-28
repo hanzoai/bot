@@ -1,7 +1,7 @@
 // Channel account context tests cover default account resolution and read-only account inspection fallback.
 import { describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { resolveDefaultChannelAccountContext } from "./channel-account-context.js";
 
 vi.mock("../channels/read-only-account-inspect.js", () => ({
@@ -19,7 +19,7 @@ describe("resolveDefaultChannelAccountContext", () => {
       },
     } as unknown as ChannelPlugin;
 
-    const result = await resolveDefaultChannelAccountContext(plugin, {} as OpenClawConfig);
+    const result = await resolveDefaultChannelAccountContext(plugin, {} as BotConfig);
 
     expect(result.accountIds).toEqual(["acc-1"]);
     expect(result.defaultAccountId).toBe("acc-1");
@@ -44,7 +44,7 @@ describe("resolveDefaultChannelAccountContext", () => {
       },
     } as unknown as ChannelPlugin;
 
-    const result = await resolveDefaultChannelAccountContext(plugin, {} as OpenClawConfig);
+    const result = await resolveDefaultChannelAccountContext(plugin, {} as BotConfig);
 
     expect(isEnabled).toHaveBeenCalledWith(account, {});
     expect(isConfigured).toHaveBeenCalledWith(account, {});
@@ -65,11 +65,11 @@ describe("resolveDefaultChannelAccountContext", () => {
       },
     } as unknown as ChannelPlugin;
 
-    await expect(resolveDefaultChannelAccountContext(plugin, {} as OpenClawConfig)).rejects.toThrow(
+    await expect(resolveDefaultChannelAccountContext(plugin, {} as BotConfig)).rejects.toThrow(
       /missing secret/i,
     );
 
-    const result = await resolveDefaultChannelAccountContext(plugin, {} as OpenClawConfig, {
+    const result = await resolveDefaultChannelAccountContext(plugin, {} as BotConfig, {
       mode: "read_only",
       commandName: "status",
     });
@@ -94,7 +94,7 @@ describe("resolveDefaultChannelAccountContext", () => {
       },
     } as unknown as ChannelPlugin;
 
-    const result = await resolveDefaultChannelAccountContext(plugin, {} as OpenClawConfig, {
+    const result = await resolveDefaultChannelAccountContext(plugin, {} as BotConfig, {
       mode: "read_only",
     });
 

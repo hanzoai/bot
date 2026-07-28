@@ -48,7 +48,7 @@ describe("cron failure alert account routing", () => {
     },
   ])("$name", ({ globalAlert, jobAlert, expected }) => {
     const state = createCronServiceState({
-      storePath: "/tmp/openclaw-cron-failure-alert-account-routing.json",
+      storePath: "/tmp/bot-cron-failure-alert-account-routing.json",
       cronEnabled: true,
       defaultAgentId: "main",
       cronConfig: { failureAlert: globalAlert },

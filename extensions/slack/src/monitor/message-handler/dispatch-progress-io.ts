@@ -1,4 +1,4 @@
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
 import { formatSlackError } from "../../errors.js";
 import type { SlackDispatchSetup } from "./dispatch-setup.js";
 import { finalizeSlackPreviewEdit } from "./preview-finalize.js";

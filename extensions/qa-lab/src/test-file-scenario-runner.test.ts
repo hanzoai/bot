@@ -101,7 +101,7 @@ async function writeScriptProducerEvidence(params: {
     path.join(runRoot, "qa-evidence.json"),
     `${JSON.stringify(
       {
-        kind: "openclaw.qa.evidence-summary",
+        kind: "bot.qa.evidence-summary",
         schemaVersion: 2,
         generatedAt: "2026-06-14T00:00:00.000Z",
         evidenceMode: "full",
@@ -179,7 +179,7 @@ describe("qa test file scenario runner", () => {
         };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
+        BOT_QA_REF: "scenario-ref",
       } as NodeJS.ProcessEnv,
     });
 
@@ -407,7 +407,7 @@ describe("qa test file scenario runner", () => {
           path.join(runRoot, "qa-evidence.json"),
           `${JSON.stringify(
             {
-              kind: "openclaw.qa.evidence-summary",
+              kind: "bot.qa.evidence-summary",
               schemaVersion: 2,
               generatedAt: "2026-06-14T00:00:00.000Z",
               evidenceMode: "full",
@@ -463,7 +463,7 @@ describe("qa test file scenario runner", () => {
         };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
+        BOT_QA_REF: "scenario-ref",
       } as NodeJS.ProcessEnv,
     });
 
@@ -544,7 +544,7 @@ describe("qa test file scenario runner", () => {
         };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
+        BOT_QA_REF: "scenario-ref",
       } as NodeJS.ProcessEnv,
     });
 
@@ -703,7 +703,7 @@ describe("qa test file scenario runner", () => {
           path.join(runRoot, "qa-evidence.json"),
           `${JSON.stringify(
             {
-              kind: "openclaw.qa.evidence-summary",
+              kind: "bot.qa.evidence-summary",
               schemaVersion: 2,
               generatedAt: "2026-06-14T00:00:00.000Z",
               evidenceMode: "full",
@@ -759,7 +759,7 @@ describe("qa test file scenario runner", () => {
         };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
+        BOT_QA_REF: "scenario-ref",
       } as NodeJS.ProcessEnv,
     });
 
@@ -838,7 +838,7 @@ describe("qa test file scenario runner", () => {
           path.join(runRoot, "qa-evidence.json"),
           `${JSON.stringify(
             {
-              kind: "openclaw.qa.evidence-summary",
+              kind: "bot.qa.evidence-summary",
               schemaVersion: 2,
               generatedAt: "2026-06-14T00:00:00.000Z",
               evidenceMode: "full",
@@ -894,7 +894,7 @@ describe("qa test file scenario runner", () => {
         };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
+        BOT_QA_REF: "scenario-ref",
       } as NodeJS.ProcessEnv,
     });
 
@@ -943,7 +943,7 @@ describe("qa test file scenario runner", () => {
         };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
+        BOT_QA_REF: "scenario-ref",
       } as NodeJS.ProcessEnv,
     });
 
@@ -986,7 +986,7 @@ describe("qa test file scenario runner", () => {
         };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
+        BOT_QA_REF: "scenario-ref",
       } as NodeJS.ProcessEnv,
     });
 
@@ -1027,7 +1027,7 @@ describe("qa test file scenario runner", () => {
         await fs.writeFile(
           path.join(scenarioOutputDir, "qa-evidence.json"),
           `${JSON.stringify({
-            kind: "openclaw.qa.evidence-summary",
+            kind: "bot.qa.evidence-summary",
             schemaVersion: 2,
             generatedAt: "2026-06-14T00:00:00.000Z",
             evidenceMode: "full",
@@ -1049,8 +1049,8 @@ describe("qa test file scenario runner", () => {
         return { exitCode: 0, stdout: "script pass\n", stderr: "" };
       },
       env: {
-        OPENCLAW_QA_REF: "scenario-ref",
-        OPENCLAW_QA_PROFILE: "smoke-ci",
+        BOT_QA_REF: "scenario-ref",
+        BOT_QA_PROFILE: "smoke-ci",
       } as NodeJS.ProcessEnv,
     });
 
@@ -1081,7 +1081,7 @@ describe("qa test file scenario runner", () => {
         await fs.writeFile(
           path.join(scenarioOutputDir, "qa-evidence.json"),
           `${JSON.stringify({
-            kind: "openclaw.qa.evidence-summary",
+            kind: "bot.qa.evidence-summary",
             schemaVersion: 2,
             generatedAt: "2026-06-14T00:00:00.000Z",
             evidenceMode: "full",
@@ -1120,7 +1120,7 @@ describe("qa test file scenario runner", () => {
         );
         return { exitCode: 0, stdout: "script pass\n", stderr: "" };
       },
-      env: { OPENCLAW_QA_REF: "scenario-ref" } as NodeJS.ProcessEnv,
+      env: { BOT_QA_REF: "scenario-ref" } as NodeJS.ProcessEnv,
     });
 
     const evidence = validateQaEvidenceSummaryJson(
@@ -1158,7 +1158,7 @@ describe("qa test file scenario runner", () => {
       providerMode: "mock-openai",
       primaryModel: "mock-openai/gpt-5.6-luna",
       scenarios: [infrastructureFixture],
-      env: { OPENCLAW_QA_REF: "infrastructure-fixture" } as NodeJS.ProcessEnv,
+      env: { BOT_QA_REF: "infrastructure-fixture" } as NodeJS.ProcessEnv,
     });
     const evidence = validateQaEvidenceSummaryJson(
       JSON.parse(await fs.readFile(result.evidencePath, "utf8")),

@@ -2,19 +2,19 @@
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import { loadDeviceIdentityIfPresent, loadOrCreateDeviceIdentity } from "./device-identity.js";
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
 });
 
 describe("device identity state dir defaults", () => {
   it("writes the default identity to the shared state database", async () => {
-    await withStateDirEnv("openclaw-identity-state-", async ({ stateDir }) => {
+    await withStateDirEnv("bot-identity-state-", async ({ stateDir }) => {
       const identity = loadOrCreateDeviceIdentity();
-      const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+      const databasePath = path.join(stateDir, "state", "bot.sqlite");
 
       expect(loadDeviceIdentityIfPresent()).toEqual(identity);
       expect(fs.existsSync(databasePath)).toBe(true);
@@ -23,7 +23,7 @@ describe("device identity state dir defaults", () => {
   });
 
   it("reuses the stored identity on subsequent loads", async () => {
-    await withStateDirEnv("openclaw-identity-state-", async () => {
+    await withStateDirEnv("bot-identity-state-", async () => {
       const first = loadOrCreateDeviceIdentity();
       const second = loadOrCreateDeviceIdentity();
 
@@ -32,8 +32,8 @@ describe("device identity state dir defaults", () => {
   });
 
   it("keeps read-only lookup non-creating when the default database is absent", async () => {
-    await withStateDirEnv("openclaw-identity-state-", async ({ stateDir }) => {
-      const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+    await withStateDirEnv("bot-identity-state-", async ({ stateDir }) => {
+      const databasePath = path.join(stateDir, "state", "bot.sqlite");
 
       expect(loadDeviceIdentityIfPresent()).toBeNull();
       expect(fs.existsSync(databasePath)).toBe(false);

@@ -1,13 +1,13 @@
 // Telegram tests cover send plugin behavior.
 import fs from "node:fs";
 import type { Bot } from "grammy";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
+import { importFreshModule } from "bot/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { markdownToTelegramHtml, telegramHtmlToPlainTextFallback } from "./format.js";
 import {
@@ -52,7 +52,7 @@ const {
   probeVideoDimensions,
 } = getTelegramSendTestMocks();
 const telegramSendModule = await importTelegramSendModule();
-const { resetLogger, setLoggerOverride } = await import("openclaw/plugin-sdk/runtime-env");
+const { resetLogger, setLoggerOverride } = await import("bot/plugin-sdk/runtime-env");
 const {
   buildInlineKeyboard,
   createForumTopicTelegram,
@@ -399,7 +399,7 @@ let logCaptureCounter = 0;
 
 function captureInfoLogs(): string {
   logCaptureCounter += 1;
-  const logFile = `/tmp/openclaw-telegram-send-log-${process.pid}-${logCaptureCounter}.jsonl`;
+  const logFile = `/tmp/bot-telegram-send-log-${process.pid}-${logCaptureCounter}.jsonl`;
   fs.rmSync(logFile, { force: true });
   setLoggerOverride({ level: "info", consoleLevel: "silent", file: logFile });
   return logFile;
@@ -495,7 +495,7 @@ describe("sent-message-cache", () => {
   });
 
   it("keeps sent-message ownership across restart", async () => {
-    const persistedStorePath = `/tmp/openclaw-telegram-send-tests-${process.pid}-restart.json`;
+    const persistedStorePath = `/tmp/bot-telegram-send-tests-${process.pid}-restart.json`;
     const sentMessageCfg = { session: { store: persistedStorePath } };
 
     recordSentMessage(123, 1, sentMessageCfg);
@@ -511,7 +511,7 @@ describe("sent-message-cache", () => {
   });
 
   it("keeps expired custom-store cleanup away from the default store", () => {
-    const customStorePath = `/tmp/openclaw-telegram-send-tests-${process.pid}-custom-cleanup.json`;
+    const customStorePath = `/tmp/bot-telegram-send-tests-${process.pid}-custom-cleanup.json`;
     const customCfg = { session: { store: customStorePath } };
     const startedAt = new Date("2026-01-01T00:00:00.000Z");
     vi.useFakeTimers();
@@ -532,7 +532,7 @@ describe("sent-message-cache", () => {
   });
 
   it("keeps default and custom stores isolated while both are loaded", () => {
-    const customStorePath = `/tmp/openclaw-telegram-send-tests-${process.pid}-custom-isolated.json`;
+    const customStorePath = `/tmp/bot-telegram-send-tests-${process.pid}-custom-isolated.json`;
     const customCfg = { session: { store: customStorePath } };
 
     try {
@@ -924,7 +924,7 @@ describe("sendMessageTelegram", () => {
   });
 
   it("records sent text messages into the Telegram prompt context cache", async () => {
-    const storePath = `/tmp/openclaw-telegram-send-context-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-send-context-${process.pid}-${Date.now()}.json`;
     const cfg = { session: { store: storePath } };
     botApi.sendMessage.mockResolvedValueOnce({
       message_id: 1497,
@@ -984,13 +984,13 @@ describe("sendMessageTelegram", () => {
   });
 
   it("records a successful General-topic send when the response omits the thread id", async () => {
-    const storePath = `/tmp/openclaw-telegram-general-context-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-general-context-${process.pid}-${Date.now()}.json`;
     const chatId = "-1003966283270";
     botApi.sendMessage.mockResolvedValueOnce({
       message_id: 1498,
       date: 1_779_394_741,
       chat: { id: chatId, type: "supergroup", title: "QA forum" },
-      from: { id: 42, is_bot: true, first_name: "OpenClaw" },
+      from: { id: 42, is_bot: true, first_name: "Bot" },
       text: "Reply in General",
     });
 
@@ -1013,7 +1013,7 @@ describe("sendMessageTelegram", () => {
   });
 
   it("records transcript projection metadata without replacing Telegram time", async () => {
-    const storePath = `/tmp/openclaw-telegram-send-context-override-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-send-context-override-${process.pid}-${Date.now()}.json`;
     const cfg = { session: { store: storePath } };
     const cursor = createTelegramPromptContextProjectionCursor({
       transcriptMessageId: "assistant-final",
@@ -1050,7 +1050,7 @@ describe("sendMessageTelegram", () => {
   });
 
   it("records transcript projection metadata for native locations", async () => {
-    const storePath = `/tmp/openclaw-telegram-location-context-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-location-context-${process.pid}-${Date.now()}.json`;
     const cfg = { session: { store: storePath } };
     const cursor = createTelegramPromptContextProjectionCursor({
       transcriptMessageId: "assistant-location",
@@ -1279,7 +1279,7 @@ describe("sendMessageTelegram", () => {
 
   it("chunks long plain text when durable rich sends reject an invalid entity", async () => {
     const text = `Status includes openai:owner@example.com ${"A".repeat(5000)}`;
-    const storePath = `/tmp/openclaw-telegram-projection-rich-fallback-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-projection-rich-fallback-${process.pid}-${Date.now()}.json`;
     const cursor = createTelegramPromptContextProjectionCursor({
       transcriptMessageId: "assistant-rich",
     });
@@ -1406,11 +1406,11 @@ describe("sendMessageTelegram", () => {
     {
       name: "local path",
       markdown:
-        "See [scripts/yougile.py](/home/user/.openclaw/workspace/scripts/yougile.py#L41) and [docs](https://example.com/docs)",
+        "See [scripts/yougile.py](/home/user/.bot/workspace/scripts/yougile.py#L41) and [docs](https://example.com/docs)",
     },
     {
       name: "relative path",
-      markdown: "Edit [config](./openclaw.json) or see [docs](https://example.com/docs)",
+      markdown: "Edit [config](./bot.json) or see [docs](https://example.com/docs)",
     },
   ])("keeps rich delivery when a markdown link targets a $name", async (testCase) => {
     botApi.sendMessage.mockResolvedValue({ message_id: 48, chat: { id: "123" } });
@@ -1598,7 +1598,7 @@ describe("sendMessageTelegram", () => {
   });
 
   it("indexes every successful text chunk and marks only the last one final", async () => {
-    const storePath = `/tmp/openclaw-telegram-projection-chunks-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-projection-chunks-${process.pid}-${Date.now()}.json`;
     const cfg = { session: { store: storePath } };
     const cursor = createTelegramPromptContextProjectionCursor({
       transcriptMessageId: "assistant-chunks",
@@ -1629,7 +1629,7 @@ describe("sendMessageTelegram", () => {
   });
 
   it("records each HTML chunk using that message's visible text", async () => {
-    const storePath = `/tmp/openclaw-telegram-projection-html-chunks-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-projection-html-chunks-${process.pid}-${Date.now()}.json`;
     const cfg = { session: { store: storePath } };
     const cursor = createTelegramPromptContextProjectionCursor({
       transcriptMessageId: "assistant-html-chunks",
@@ -1671,7 +1671,7 @@ describe("sendMessageTelegram", () => {
   });
 
   it("does not consume a projection part for a rejected HTML attempt", async () => {
-    const storePath = `/tmp/openclaw-telegram-projection-html-fallback-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-projection-html-fallback-${process.pid}-${Date.now()}.json`;
     const cfg = { session: { store: storePath } };
     const cursor = createTelegramPromptContextProjectionCursor({
       transcriptMessageId: "assistant-html",
@@ -1722,7 +1722,7 @@ describe("sendMessageTelegram", () => {
   });
 
   it("reports the first Telegram chunk before a later chunk fails", async () => {
-    const storePath = `/tmp/openclaw-telegram-projection-partial-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-projection-partial-${process.pid}-${Date.now()}.json`;
     const cursor = createTelegramPromptContextProjectionCursor({
       transcriptMessageId: "assistant-partial",
     });
@@ -2193,7 +2193,7 @@ describe("sendMessageTelegram", () => {
   it("chunks long default markdown media follow-up text", async () => {
     const chatId = "123";
     const longText = `**${"A".repeat(5000)}**`;
-    const storePath = `/tmp/openclaw-telegram-projection-media-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-projection-media-${process.pid}-${Date.now()}.json`;
     const cfg = { session: { store: storePath } };
     const cursor = createTelegramPromptContextProjectionCursor({
       transcriptMessageId: "assistant-media",
@@ -3918,7 +3918,7 @@ describe("sendStickerTelegram", () => {
   }
 
   it("records a successful topic sticker for later message mutations", async () => {
-    const storePath = `/tmp/openclaw-telegram-sticker-context-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-sticker-context-${process.pid}-${Date.now()}.json`;
     const chatId = "-100123";
     const sendSticker = vi.fn().mockResolvedValue({
       message_id: 107,
@@ -4175,7 +4175,7 @@ describe("shared send behaviors", () => {
 
   it("retries media native quotes with a legacy reply before recording projection", async () => {
     const chatId = "123";
-    const storePath = `/tmp/openclaw-telegram-media-quote-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-media-quote-${process.pid}-${Date.now()}.json`;
     const cursor = createTelegramPromptContextProjectionCursor({
       transcriptMessageId: "assistant-media-quote",
     });
@@ -4592,7 +4592,7 @@ describe("sendPollTelegram", () => {
   });
 
   it("records a successful General-topic poll for later message mutations", async () => {
-    const storePath = `/tmp/openclaw-telegram-poll-context-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-poll-context-${process.pid}-${Date.now()}.json`;
     const chatId = "-100123";
     const sendPoll = vi.fn().mockResolvedValue({
       message_id: 124,

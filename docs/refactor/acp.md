@@ -24,7 +24,7 @@ surface; it is a safer internal contract for the existing ACP and ACPX behavior.
 ## Goals
 
 - Cleanup never signals a process unless current live evidence matches an
-  OpenClaw-owned lease.
+  Bot-owned lease.
 - `cancel`, `close`, and startup reaping have distinct lifecycle intents.
 - `sessions_list`, `sessions_history`, `sessions_send`, and status checks use
   the same requester-owned session model.
@@ -109,7 +109,7 @@ The wrapper process receives the lease id and gateway instance id as portable
 arguments:
 
 ```sh
---openclaw-acpx-lease-id ... --openclaw-gateway-instance-id ...
+--bot-acpx-lease-id ... --bot-gateway-instance-id ...
 ```
 
 When the platform allows it, verification should prefer live process metadata

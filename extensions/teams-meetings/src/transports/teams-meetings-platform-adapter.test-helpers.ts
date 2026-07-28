@@ -8,7 +8,7 @@ import { TEAMS_MEETINGS_PLATFORM_ADAPTER } from "./teams-meetings-platform-adapt
 export const URL =
   "https://teams.microsoft.com/l/meetup-join/19%3ameeting_test%40thread.v2/0?context=%7b%7d";
 export const CONSUMER_URL = "https://teams.live.com/meet/9326458712345?p=abc";
-export const MEETING_STATE_KEY = "__openclawTeamsMeeting";
+export const MEETING_STATE_KEY = "__botTeamsMeeting";
 
 export function consumerLightMeetingUrl(meetingCode: string, passcode: string) {
   const coordinates = btoa(JSON.stringify({ meetingCode, passcode }));
@@ -282,17 +282,17 @@ export async function runStatusScript(params: {
     window[MEETING_STATE_KEY] = params.priorMeeting;
   }
   if (params.priorAudioOutputs) {
-    window["__openclawTeamsAudioOutputs"] = params.priorAudioOutputs;
+    window["__botTeamsAudioOutputs"] = params.priorAudioOutputs;
   }
   if (params.priorCaptions) {
-    window["__openclawTeamsCaptions"] = params.priorCaptions;
+    window["__botTeamsCaptions"] = params.priorCaptions;
   }
   const script = teamsMeetingStatusScript({
     allowMicrophone: params.allowMicrophone,
     allowSessionAdoption: params.allowSessionAdoption ?? true,
     autoJoin: params.autoJoin ?? true,
     captureCaptions: params.captureCaptions ?? false,
-    guestName: "OpenClaw Guest",
+    guestName: "Bot Guest",
     meetingSessionId: params.meetingSessionId === undefined ? "session-1" : params.meetingSessionId,
     meetingUrl: params.meetingUrl ?? URL,
     readOnly: params.readOnly,
@@ -378,7 +378,7 @@ export function runLeaveScript(params: {
     };
   }
   if (params.priorAudioOutputs) {
-    window["__openclawTeamsAudioOutputs"] = params.priorAudioOutputs;
+    window["__botTeamsAudioOutputs"] = params.priorAudioOutputs;
   }
   const run = runInNewContext(
     `(${teamsMeetingLeaveScript({ leaveInitiated: params.leaveInitiated ?? false, meetingSessionId: params.meetingSessionId ?? "session-1", meetingUrl: URL })})`,

@@ -9,7 +9,7 @@ type SessionsResolutionTestApi = {
 
 function getTestApi(): SessionsResolutionTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.sessionsResolutionTestApi")
+    Symbol.for("bot.sessionsResolutionTestApi")
   ] as SessionsResolutionTestApi;
 }
 

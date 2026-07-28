@@ -12,7 +12,7 @@ describe("chat history canonical media filtering", () => {
       isEmptyUserTextOnlyMessage({
         role: "user",
         content: "",
-        __openclaw: { media },
+        __bot: { media },
       }),
     ).toBe(false);
   });

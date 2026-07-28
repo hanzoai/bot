@@ -8,7 +8,7 @@ import { isJsonObject } from "./protocol.js";
 const CODEX_SUBAGENT_NOTIFICATION_START = "<subagent_notification>";
 const CODEX_SUBAGENT_NOTIFICATION_END = "</subagent_notification>";
 
-/** Terminal status values OpenClaw accepts for Codex native subagent completion. */
+/** Terminal status values Bot accepts for Codex native subagent completion. */
 type CodexNativeSubagentCompletionStatus = "succeeded" | "failed" | "cancelled";
 
 type CodexNativeSubagentCompletionDetails = {

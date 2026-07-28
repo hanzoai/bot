@@ -19,26 +19,26 @@ describe("native route memory", () => {
   });
 
   it("drops corrupt and invalid entries", () => {
-    storage.setItem("openclaw.native.lastRoute", "{");
+    storage.setItem("bot.native.lastRoute", "{");
     expect(considerRouteRestore("chat", "/chat", "", storage, true)).toBeNull();
-    expect(storage.getItem("openclaw.native.lastRoute")).toBeNull();
+    expect(storage.getItem("bot.native.lastRoute")).toBeNull();
 
     storage.setItem(
-      "openclaw.native.lastRoute",
+      "bot.native.lastRoute",
       JSON.stringify({ routeId: "retired", pathname: "/retired", search: "" }),
     );
     expect(considerRouteRestore("chat", "/chat", "", storage, true)).toBeNull();
-    expect(storage.getItem("openclaw.native.lastRoute")).toBeNull();
+    expect(storage.getItem("bot.native.lastRoute")).toBeNull();
   });
 
   it("does nothing outside the native host", () => {
     storage.setItem(
-      "openclaw.native.lastRoute",
+      "bot.native.lastRoute",
       JSON.stringify({ routeId: "usage", pathname: "/usage", search: "" }),
     );
     persistRoute("chat", "/chat/main", "", storage, false);
     expect(considerRouteRestore("chat", "/chat", "", storage, false)).toBeNull();
-    expect(JSON.parse(storage.getItem("openclaw.native.lastRoute") ?? "{}")).toEqual({
+    expect(JSON.parse(storage.getItem("bot.native.lastRoute") ?? "{}")).toEqual({
       routeId: "usage",
       pathname: "/usage",
       search: "",

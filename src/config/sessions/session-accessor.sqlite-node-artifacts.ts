@@ -2,11 +2,11 @@ import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
 } from "../../infra/kysely-sync.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { BotAgentDatabase } from "../../state/bot-agent-db.js";
 import { getSessionKysely } from "./session-accessor.sqlite-scope.js";
 
 export function clearSessionCollaborationForKey(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionKey: string,
 ): void {
   const presentTables = readSessionNodeArtifactTables(database);
@@ -26,7 +26,7 @@ export function clearSessionCollaborationForKey(
 }
 
 export function rehomeLegacySessionNodeArtifacts(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   legacyKey: string,
   canonicalKey: string,
   options: { rehomeMembers?: boolean },
@@ -172,7 +172,7 @@ export function rehomeLegacySessionNodeArtifacts(
 }
 
 export function deleteSessionNodeArtifacts(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionKey: string,
 ): void {
   const db = getSessionKysely(database.db);
@@ -196,7 +196,7 @@ export function deleteSessionNodeArtifacts(
   clearSessionCollaborationForKey(database, sessionKey);
 }
 
-function readSessionNodeArtifactTables(database: OpenClawAgentDatabase): Set<string> {
+function readSessionNodeArtifactTables(database: BotAgentDatabase): Set<string> {
   const db = getSessionKysely(database.db);
   return new Set(
     executeSqliteQuerySync(

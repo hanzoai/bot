@@ -7,13 +7,13 @@ import {
   markMigrationItemError,
   markMigrationItemSkipped,
   MIGRATION_REASON_MISSING_SOURCE_OR_TARGET,
-} from "openclaw/plugin-sdk/migration";
-import type { MigrationItem } from "openclaw/plugin-sdk/plugin-entry";
-import { appendRegularFile, pathExists } from "openclaw/plugin-sdk/security-runtime";
+} from "bot/plugin-sdk/migration";
+import type { MigrationItem } from "bot/plugin-sdk/plugin-entry";
+import { appendRegularFile, pathExists } from "bot/plugin-sdk/security-runtime";
 import {
   isRecord as sharedIsRecord,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { parse as parseYaml } from "yaml";
 
 const HOME_SHORTHAND_RE = /^~(?=$|[\\/])/u;

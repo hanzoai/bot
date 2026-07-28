@@ -1,6 +1,6 @@
 export const REMOTE_WORKSPACE_SETUP_SCRIPT = String.raw`set -eu
 relative=$1
-root=$HOME/.openclaw-worker
+root=$HOME/.bot-worker
 
 ensure_private_directory() {
   directory=$1

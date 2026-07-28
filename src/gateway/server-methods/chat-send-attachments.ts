@@ -8,7 +8,7 @@ import {
   type StageSandboxMediaResult,
 } from "../../auto-reply/reply/stage-sandbox-media.js";
 import type { MsgContext, TemplateContext } from "../../auto-reply/templating.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { clearAgentRunContext } from "../../infra/agent-events.js";
 import { measureDiagnosticsTimelineSpan } from "../../infra/diagnostics-timeline.js";
 import { formatErrorMessage } from "../../infra/errors.js";
@@ -66,7 +66,7 @@ function shouldPassThroughManagedInboundPdfOffloadRef(ref: OffloadedRef): boolea
 async function prestageMediaPathOffloads(params: {
   offloadedRefs: OffloadedRef[];
   includeImageRefs?: boolean;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   agentId: string;
 }): Promise<{ paths: string[]; types: string[]; workspaceDir?: string }> {

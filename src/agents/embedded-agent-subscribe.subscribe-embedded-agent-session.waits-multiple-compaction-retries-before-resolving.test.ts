@@ -1,6 +1,6 @@
 // Compaction retry subscription tests cover retry wait accounting, compaction
 // event emission, abort-on-unsubscribe, and verbose tool summary behavior.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import { onAgentEvent } from "../infra/agent-events.js";
 import { createSubscribedSessionHarness } from "./embedded-agent-subscribe.e2e-harness.js";

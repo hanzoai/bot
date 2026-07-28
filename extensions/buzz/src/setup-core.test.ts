@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buzzSetupAdapter } from "./setup-core.js";
 
@@ -17,7 +17,7 @@ describe("buzzSetupAdapter", () => {
           privateKey: "11".repeat(32),
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = buzzSetupAdapter.applyAccountConfig({
       cfg,
@@ -39,7 +39,7 @@ describe("buzzSetupAdapter", () => {
 
     expect(
       buzzSetupAdapter.validateInput({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: "default",
         input: { relayUrl: "wss://buzz.example.com", useEnv: true },
       }),
@@ -55,7 +55,7 @@ describe("buzzSetupAdapter", () => {
           authTag: '["auth","owner","kind=9","signature"]',
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = buzzSetupAdapter.applyAccountConfig({
       cfg,
@@ -77,7 +77,7 @@ describe("buzzSetupAdapter", () => {
           authTag: '["auth","owner","kind=9","signature"]',
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = buzzSetupAdapter.applyAccountConfig({
       cfg,

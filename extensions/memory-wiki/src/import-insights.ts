@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 // Memory Wiki plugin module implements import insights behavior.
 import type { ResolvedMemoryWikiConfig } from "./config.js";
 import { parseWikiMarkdown } from "./markdown.js";

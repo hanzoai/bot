@@ -1,9 +1,9 @@
 import {
   resolveAcpSessionCwd,
   resolveAcpThreadSessionDetailLines,
-} from "@openclaw/acp-core/runtime/session-identifiers";
-import type { AcpRuntimeSessionMode } from "@openclaw/acp-core/runtime/types";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-acp-core/runtime/session-identifiers";
+import type { AcpRuntimeSessionMode } from "@hanzo/bot-acp-core/runtime/types";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { getAcpSessionManager } from "../acp/control-plane/manager.js";
 import type { AcpSpawnRuntimeCloseHandle } from "../acp/control-plane/spawn.js";
 import { formatThinkingLevels } from "../auto-reply/thinking.js";
@@ -18,7 +18,7 @@ import {
 import { resolveStorePath } from "../config/sessions/paths.js";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   getSessionBindingService,
   type SessionBindingRecord,
@@ -91,7 +91,7 @@ function resolveAcpRuntimeTimeoutSeconds(runTimeoutSeconds?: number): number | u
 }
 
 export function resolveAcpSpawnRuntimeOptions(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   targetAgentId: string;
   configAgentId?: string;
   model?: string;
@@ -146,7 +146,7 @@ export function resolveAcpSpawnRuntimeOptions(params: {
 }
 
 export async function initializeAcpSpawnRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   targetAgentId: string;
   runtimeMode: AcpRuntimeSessionMode;
@@ -198,7 +198,7 @@ export async function initializeAcpSpawnRuntime(params: {
 }
 
 export async function bindPreparedAcpThread(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   targetAgentId: string;
   label?: string;

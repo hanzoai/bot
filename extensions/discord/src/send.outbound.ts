@@ -1,15 +1,15 @@
 // Discord plugin module implements send.outbound behavior.
 import type { APIChannel, APIGuildForumChannel, APIGuildMediaChannel } from "discord-api-types/v10";
 import { ChannelType } from "discord-api-types/v10";
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
-import type { MarkdownTableMode, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import type { OutboundMediaAccess, PollInput } from "openclaw/plugin-sdk/media-runtime";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { resolveChunkMode, type ChunkMode } from "openclaw/plugin-sdk/reply-chunking";
-import type { RetryConfig } from "openclaw/plugin-sdk/retry-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { recordChannelActivity } from "bot/plugin-sdk/channel-activity-runtime";
+import type { MarkdownTableMode, BotConfig } from "bot/plugin-sdk/config-contracts";
+import { resolveMarkdownTableMode } from "bot/plugin-sdk/markdown-table-runtime";
+import type { OutboundMediaAccess, PollInput } from "bot/plugin-sdk/media-runtime";
+import { requireRuntimeConfig } from "bot/plugin-sdk/plugin-config-runtime";
+import { resolveChunkMode, type ChunkMode } from "bot/plugin-sdk/reply-chunking";
+import type { RetryConfig } from "bot/plugin-sdk/retry-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { resolveDiscordAccount } from "./accounts.js";
 import { createChannelMessage, createThread, type RequestClient } from "./internal/discord.js";
 import { renderDiscordMarkdown } from "./markdown.js";
@@ -42,7 +42,7 @@ import {
 } from "./send.shared.js";
 import type { DiscordSendResult } from "./send.types.js";
 type DiscordSendOpts = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   token?: string;
   accountId?: string;
   mediaUrl?: string;

@@ -25,12 +25,12 @@ import {
 
 const TEST_ENV_KEYS = [
   "HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_GATEWAY_URL",
-  "OPENCLAW_GATEWAY_TOKEN",
-  "OPENCLAW_GATEWAY_PASSWORD",
-  "OPENCLAW_GATEWAY_PORT",
+  "BOT_STATE_DIR",
+  "BOT_CONFIG_PATH",
+  "BOT_GATEWAY_URL",
+  "BOT_GATEWAY_TOKEN",
+  "BOT_GATEWAY_PASSWORD",
+  "BOT_GATEWAY_PORT",
 ];
 
 describe("plugin.approval.request delivery routing (real gateway)", () => {
@@ -43,23 +43,23 @@ describe("plugin.approval.request delivery routing (real gateway)", () => {
 
   beforeAll(async () => {
     envSnapshot = captureEnv(TEST_ENV_KEYS);
-    deleteTestEnvValue("OPENCLAW_CONFIG_PATH");
-    deleteTestEnvValue("OPENCLAW_GATEWAY_URL");
-    deleteTestEnvValue("OPENCLAW_GATEWAY_TOKEN");
-    deleteTestEnvValue("OPENCLAW_GATEWAY_PASSWORD");
+    deleteTestEnvValue("BOT_CONFIG_PATH");
+    deleteTestEnvValue("BOT_GATEWAY_URL");
+    deleteTestEnvValue("BOT_GATEWAY_TOKEN");
+    deleteTestEnvValue("BOT_GATEWAY_PASSWORD");
 
     tempHome = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-plugin-approval-turn-source-e2e-"),
+      path.join(os.tmpdir(), "bot-plugin-approval-turn-source-e2e-"),
     );
-    const stateDir = path.join(tempHome, ".openclaw");
+    const stateDir = path.join(tempHome, ".bot");
     await fs.mkdir(stateDir, { recursive: true });
     setTestEnvValue("HOME", tempHome);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("BOT_STATE_DIR", stateDir);
 
     const port = await getFreeGatewayPort();
     const token = "plugin-approval-turn-source-e2e-token";
     const url = `ws://127.0.0.1:${port}`;
-    setTestEnvValue("OPENCLAW_GATEWAY_PORT", String(port));
+    setTestEnvValue("BOT_GATEWAY_PORT", String(port));
 
     server = await startGatewayServer(port, {
       bind: "loopback",

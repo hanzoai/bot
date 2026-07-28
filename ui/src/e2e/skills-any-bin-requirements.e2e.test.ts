@@ -11,7 +11,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 let browser: Browser;
@@ -21,10 +21,10 @@ function codingAgentSkill(missingAnyBins: string[]) {
   return {
     name: "Coding Agent",
     description: "Delegate coding work to an available coding CLI.",
-    source: "openclaw-bundled",
+    source: "bot-bundled",
     bundled: true,
-    filePath: "/tmp/openclaw-e2e/skills/coding-agent/SKILL.md",
-    baseDir: "/tmp/openclaw-e2e/skills/coding-agent",
+    filePath: "/tmp/bot-e2e/skills/coding-agent/SKILL.md",
+    baseDir: "/tmp/bot-e2e/skills/coding-agent",
     skillKey: "coding-agent",
     always: false,
     disabled: false,
@@ -85,8 +85,8 @@ describeControlUiE2e("Control UI alternative skill binary requirements", () => {
     const gateway = await installMockGateway(page, {
       methodResponses: {
         "skills.status": {
-          workspaceDir: "/tmp/openclaw-e2e/workspace",
-          managedSkillsDir: "/tmp/openclaw-e2e/skills",
+          workspaceDir: "/tmp/bot-e2e/workspace",
+          managedSkillsDir: "/tmp/bot-e2e/skills",
           skills: [codingAgentSkill(["claude", "codex", "opencode"])],
         },
         "skills.install": { message: "Installed Codex CLI" },
@@ -98,7 +98,7 @@ describeControlUiE2e("Control UI alternative skill binary requirements", () => {
       expect(response?.status()).toBe(200);
       await page.getByRole("button", { name: "Open Coding Agent details" }).click();
 
-      const dialog = page.locator("openclaw-modal-dialog", { hasText: "Coding Agent" });
+      const dialog = page.locator("bot-modal-dialog", { hasText: "Coding Agent" });
       await expect.poll(async () => await dialog.count()).toBe(1);
       expect(await dialog.textContent()).toContain("bin:any of (claude, codex, opencode)");
       await dialog.getByRole("button", { name: "Install Codex CLI (npm)" }).click();
@@ -124,8 +124,8 @@ describeControlUiE2e("Control UI alternative skill binary requirements", () => {
     await installMockGateway(page, {
       methodResponses: {
         "skills.status": {
-          workspaceDir: "/tmp/openclaw-e2e/workspace",
-          managedSkillsDir: "/tmp/openclaw-e2e/skills",
+          workspaceDir: "/tmp/bot-e2e/workspace",
+          managedSkillsDir: "/tmp/bot-e2e/skills",
           skills: [codingAgentSkill([])],
         },
       },
@@ -136,7 +136,7 @@ describeControlUiE2e("Control UI alternative skill binary requirements", () => {
       expect(response?.status()).toBe(200);
       await page.getByRole("button", { name: "Open Coding Agent details" }).click();
 
-      const dialog = page.locator("openclaw-modal-dialog", { hasText: "Coding Agent" });
+      const dialog = page.locator("bot-modal-dialog", { hasText: "Coding Agent" });
       await expect.poll(async () => await dialog.count()).toBe(1);
       expect(await dialog.getByText("bin:any of", { exact: false }).count()).toBe(0);
       expect(await dialog.getByRole("button", { name: "Install Codex CLI (npm)" }).count()).toBe(0);

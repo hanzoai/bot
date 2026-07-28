@@ -1,5 +1,5 @@
 /** Prepares queued follow-up payloads for source-channel delivery. */
-import { hasOutboundReplyContent } from "openclaw/plugin-sdk/reply-payload";
+import { hasOutboundReplyContent } from "bot/plugin-sdk/reply-payload";
 import {
   hasCommittedSourceReplyDeliveryEvidence,
   hasCompletedSourceReplyDeliveryEvidence,
@@ -415,7 +415,7 @@ async function sendFollowupPayloads(params: {
   if (crossChannelFailure && !deliveredCrossChannelOrigin && defaults.opts?.onBlockReply) {
     await defaults.opts.onBlockReply({
       text:
-        "Follow-up completed, but OpenClaw could not deliver it to the originating channel. " +
+        "Follow-up completed, but Bot could not deliver it to the originating channel. " +
         "The reply content was not forwarded to this channel to avoid cross-channel misdelivery.",
       isError: true,
     });

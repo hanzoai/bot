@@ -1,7 +1,7 @@
 // Verifies guarded provider fetch wiring, stream cleanup, proxy, and local service behavior.
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@hanzo/bot-normalization-core/number-coercion";
 import { Stream } from "openai/streaming";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { Model } from "bot/plugin-sdk/llm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mintSecretSentinel } from "../secrets/sentinel.js";
 import { buildGuardedModelFetch } from "./provider-transport-fetch.js";
@@ -169,13 +169,13 @@ describe("buildGuardedModelFetch", () => {
       .mockReturnValue({ allowPrivateNetwork: false });
     shouldUseEnvHttpProxyForUrlMock.mockClear().mockReturnValue(false);
     withTrustedEnvProxyGuardedFetchModeMock.mockClear();
-    delete process.env.OPENCLAW_DEBUG_PROXY_ENABLED;
-    delete process.env.OPENCLAW_DEBUG_PROXY_URL;
-    delete process.env.OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS;
+    delete process.env.BOT_DEBUG_PROXY_ENABLED;
+    delete process.env.BOT_DEBUG_PROXY_URL;
+    delete process.env.BOT_SDK_RETRY_MAX_WAIT_SECONDS;
   });
 
   afterEach(() => {
-    delete process.env.OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS;
+    delete process.env.BOT_SDK_RETRY_MAX_WAIT_SECONDS;
   });
 
   function sentinelModel(): Model<"openai-responses"> {
@@ -356,7 +356,7 @@ describe("buildGuardedModelFetch", () => {
     const model = {
       id: "gpt-5.5",
       provider: "openai",
-      api: "openclaw-openai-chatgpt-responses-transport",
+      api: "bot-openai-chatgpt-responses-transport",
       baseUrl: "https://chatgpt.com/backend-api/codex",
     } as unknown as Model<"openai-responses">;
 
@@ -386,7 +386,7 @@ describe("buildGuardedModelFetch", () => {
     const model = {
       id: "gpt-5.5",
       provider: "openai",
-      api: "openclaw-openai-chatgpt-responses-transport",
+      api: "bot-openai-chatgpt-responses-transport",
       baseUrl: "https://chatgpt.com/backend-api/codex",
     } as unknown as Model<"openai-responses">;
 
@@ -426,7 +426,7 @@ describe("buildGuardedModelFetch", () => {
     const model = {
       id: "gpt-5.5",
       provider: "openai",
-      api: "openclaw-openai-chatgpt-responses-transport",
+      api: "bot-openai-chatgpt-responses-transport",
       baseUrl: "https://chatgpt.com/backend-api/codex",
     } as unknown as Model<"openai-responses">;
 
@@ -455,7 +455,7 @@ describe("buildGuardedModelFetch", () => {
     const model = {
       id: "gpt-5.5",
       provider: "openai",
-      api: "openclaw-openai-chatgpt-responses-transport",
+      api: "bot-openai-chatgpt-responses-transport",
       baseUrl: "https://chatgpt.com/backend-api/codex",
     } as unknown as Model<"openai-responses">;
 
@@ -1107,8 +1107,8 @@ describe("buildGuardedModelFetch", () => {
   });
 
   it("does not force explicit debug proxy overrides onto plain HTTP model transports", async () => {
-    process.env.OPENCLAW_DEBUG_PROXY_ENABLED = "1";
-    process.env.OPENCLAW_DEBUG_PROXY_URL = "http://127.0.0.1:7799";
+    process.env.BOT_DEBUG_PROXY_ENABLED = "1";
+    process.env.BOT_DEBUG_PROXY_URL = "http://127.0.0.1:7799";
     const model = {
       id: "kimi-k2.5:cloud",
       provider: "ollama",
@@ -2102,8 +2102,8 @@ describe("buildGuardedModelFetch", () => {
       }
     });
 
-    it("respects OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS", async () => {
-      process.env.OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS = "10";
+    it("respects BOT_SDK_RETRY_MAX_WAIT_SECONDS", async () => {
+      process.env.BOT_SDK_RETRY_MAX_WAIT_SECONDS = "10";
       fetchWithSsrFGuardMock.mockResolvedValue({
         response: new Response(null, {
           status: 429,
@@ -2120,8 +2120,8 @@ describe("buildGuardedModelFetch", () => {
       expect(response.headers.get("x-should-retry")).toBe("false");
     });
 
-    it("ignores partial OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS values", async () => {
-      process.env.OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS = "10s";
+    it("ignores partial BOT_SDK_RETRY_MAX_WAIT_SECONDS values", async () => {
+      process.env.BOT_SDK_RETRY_MAX_WAIT_SECONDS = "10s";
       fetchWithSsrFGuardMock.mockResolvedValue({
         response: new Response(null, {
           status: 429,
@@ -2139,9 +2139,9 @@ describe("buildGuardedModelFetch", () => {
     });
 
     it.each(["0x10", "1e3"])(
-      "ignores non-decimal OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS values: %s",
+      "ignores non-decimal BOT_SDK_RETRY_MAX_WAIT_SECONDS values: %s",
       async (value) => {
-        process.env.OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS = value;
+        process.env.BOT_SDK_RETRY_MAX_WAIT_SECONDS = value;
         fetchWithSsrFGuardMock.mockResolvedValue({
           response: new Response(null, {
             status: 429,
@@ -2159,8 +2159,8 @@ describe("buildGuardedModelFetch", () => {
       },
     );
 
-    it("ignores unsafe OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS values", async () => {
-      process.env.OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS = "9007199254740993";
+    it("ignores unsafe BOT_SDK_RETRY_MAX_WAIT_SECONDS values", async () => {
+      process.env.BOT_SDK_RETRY_MAX_WAIT_SECONDS = "9007199254740993";
       fetchWithSsrFGuardMock.mockResolvedValue({
         response: new Response(null, {
           status: 429,
@@ -2213,8 +2213,8 @@ describe("buildGuardedModelFetch", () => {
       expect(response.headers.get("x-should-retry")).toBeNull();
     });
 
-    it("can be disabled with OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS=0", async () => {
-      process.env.OPENCLAW_SDK_RETRY_MAX_WAIT_SECONDS = "0";
+    it("can be disabled with BOT_SDK_RETRY_MAX_WAIT_SECONDS=0", async () => {
+      process.env.BOT_SDK_RETRY_MAX_WAIT_SECONDS = "0";
       fetchWithSsrFGuardMock.mockResolvedValue({
         response: new Response(null, {
           status: 429,

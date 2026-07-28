@@ -30,7 +30,7 @@ vi.mock("../process/supervisor/index.js", () => ({
 const isWin = process.platform === "win32";
 const defaultShell = isWin
   ? undefined
-  : process.env.OPENCLAW_TEST_SHELL || getBashShellConfig().shell;
+  : process.env.BOT_TEST_SHELL || getBashShellConfig().shell;
 const tempDirs = createTempDirTracker();
 
 function requireTextContent(
@@ -243,13 +243,13 @@ describe("exec foreground failures", () => {
   it("returns a failed result for unavailable explicit host workdirs before launching", async () => {
     const missingWorkdir = path.join(
       os.tmpdir(),
-      `openclaw-missing-workdir-${process.pid}-${Date.now()}`,
+      `bot-missing-workdir-${process.pid}-${Date.now()}`,
     );
     fs.rmSync(missingWorkdir, { recursive: true, force: true });
 
     const fileWorkdir = path.join(
       os.tmpdir(),
-      `openclaw-file-workdir-${process.pid}-${Date.now()}`,
+      `bot-file-workdir-${process.pid}-${Date.now()}`,
     );
     fs.writeFileSync(fileWorkdir, "not a directory");
 
@@ -266,7 +266,7 @@ describe("exec foreground failures", () => {
   it("returns a failed result for unavailable configured host workdirs before launching", async () => {
     const missingDefaultWorkdir = path.join(
       os.tmpdir(),
-      `openclaw-missing-default-workdir-${process.pid}-${Date.now()}`,
+      `bot-missing-default-workdir-${process.pid}-${Date.now()}`,
     );
     fs.rmSync(missingDefaultWorkdir, { recursive: true, force: true });
 
@@ -292,7 +292,7 @@ describe("exec foreground failures", () => {
   });
 
   it("returns a failed result for unavailable configured sandbox workdirs before launching", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("bot-sandbox-workdir-");
     try {
       await expectUnavailableWorkdir({
         workdir: "/workspace/missing",
@@ -313,7 +313,7 @@ describe("exec foreground failures", () => {
   });
 
   it("defaults omitted sandbox workdirs to the sandbox workspace", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("bot-sandbox-workdir-");
     mockSuccessfulSpawn();
 
     const tool = createExecTool({
@@ -349,7 +349,7 @@ describe("exec foreground failures", () => {
   });
 
   it("lets backend-validated sandbox workdirs reach the backend without host stat fallback", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("bot-sandbox-workdir-");
     const buildExecSpec = vi.fn<NonNullable<BashSandboxConfig["buildExecSpec"]>>(
       async (params) => ({
         argv: ["remote-shell", params.command],
@@ -396,7 +396,7 @@ describe("exec foreground failures", () => {
   });
 
   it("finalizes backend sandbox exec tokens when process spawn fails", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("bot-sandbox-workdir-");
     const finalizeToken = { session: "remote-session" };
     const buildExecSpec = vi.fn<NonNullable<BashSandboxConfig["buildExecSpec"]>>(
       async (params) => ({
@@ -452,7 +452,7 @@ describe("exec foreground failures", () => {
   });
 
   it("rejects unsafe commands before backend workdir validation", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("bot-sandbox-workdir-");
     const buildExecSpec = vi.fn<NonNullable<BashSandboxConfig["buildExecSpec"]>>(
       async (params) => ({
         argv: ["remote-shell", params.command],
@@ -500,7 +500,7 @@ describe("exec foreground failures", () => {
   });
 
   it("does not preflight remote-only backend workdirs from the local workspace root", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("bot-sandbox-workdir-");
     fs.writeFileSync(path.join(workspaceDir, "script.py"), "print($TOKEN)\n");
     const buildExecSpec = vi.fn<NonNullable<BashSandboxConfig["buildExecSpec"]>>(
       async (params) => ({
@@ -546,7 +546,7 @@ describe("exec foreground failures", () => {
   });
 
   it("uses the mapped host cwd for existing relative backend-validated sandbox workdirs", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("bot-sandbox-workdir-");
     const srcDir = path.join(workspaceDir, "src");
     fs.mkdirSync(srcDir);
     const buildExecSpec = vi.fn<NonNullable<BashSandboxConfig["buildExecSpec"]>>(
@@ -595,7 +595,7 @@ describe("exec foreground failures", () => {
   });
 
   it("fails backend-validated sandbox workdirs before launch when backend validation rejects", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
+    const workspaceDir = tempDirs.make("bot-sandbox-workdir-");
     const validateWorkdir = vi.fn<NonNullable<BashSandboxConfig["validateWorkdir"]>>(
       async () => null,
     );
@@ -642,8 +642,8 @@ describe("exec foreground failures", () => {
   });
 
   it("returns a failed result for unavailable explicit sandbox workdirs before launching a command", async () => {
-    const workspaceDir = tempDirs.make("openclaw-sandbox-workdir-");
-    const outsideDir = tempDirs.make("openclaw-outside-workdir-");
+    const workspaceDir = tempDirs.make("bot-sandbox-workdir-");
+    const outsideDir = tempDirs.make("bot-outside-workdir-");
     fs.writeFileSync(path.join(workspaceDir, "not-dir"), "not a directory");
     try {
       for (const workdir of ["/workspace/missing", "   ", "/workspace/not-dir", outsideDir]) {

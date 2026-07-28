@@ -59,7 +59,7 @@ function renderStatusPreviewRow(task: TaskSummary): TemplateResult {
           ? html`<span class="chat-tasks-rail__task-sep" aria-hidden="true">·</span>
               <span>
                 ${active
-                  ? html`<openclaw-elapsed-time .startMs=${timeMs}></openclaw-elapsed-time>`
+                  ? html`<bot-elapsed-time .startMs=${timeMs}></bot-elapsed-time>`
                   : formatRelativeTimestamp(timeMs)}
               </span>`
           : nothing}
@@ -119,16 +119,16 @@ export function renderBackgroundTasksStatusRow(
       ${status.startedMs !== null
         ? html`
             <span class="chat-tasks-status__time" aria-hidden="true">
-              <openclaw-elapsed-time .startMs=${status.startedMs}></openclaw-elapsed-time>
+              <bot-elapsed-time .startMs=${status.startedMs}></bot-elapsed-time>
             </span>
             <span class="chat-tasks-status__sep" aria-hidden="true">·</span>
           `
         : nothing}
       <span class="agent-chat__sr-only" role="status">${label}</span>
-      <openclaw-tooltip class="chat-tasks-status__preview">
+      <bot-tooltip class="chat-tasks-status__preview">
         <button class="chat-tasks-status__link" type="button" @click=${openRail}>${label}</button>
         ${renderStatusPreview(backgroundTasks)}
-      </openclaw-tooltip>
+      </bot-tooltip>
     </div>
   `;
 }

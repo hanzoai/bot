@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { CronJob } from "../cron/types.js";
 import { reconcileHeartbeatMonitorJobs } from "./server-cron-heartbeat-jobs.js";
 
@@ -50,7 +50,7 @@ describe("reconcileHeartbeatMonitorJobs", () => {
         defaults: { heartbeat: { every: "15m" } },
         list: [{ id: "main" }, { id: "ops" }],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await reconcileHeartbeatMonitorJobs({
       cron: { add, list, remove } as never,
@@ -107,7 +107,7 @@ describe("reconcileHeartbeatMonitorJobs", () => {
     const list = vi.fn(async () => [monitorJob("main")]);
     const cfg = {
       agents: { defaults: { heartbeat: { every: "0m" } } },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await reconcileHeartbeatMonitorJobs({
       cron: { add, list, remove } as never,
@@ -135,7 +135,7 @@ describe("reconcileHeartbeatMonitorJobs", () => {
         defaults: { heartbeat: { every: "30m" } },
         list: [{ id: "a" }, { id: "b" }],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await reconcileHeartbeatMonitorJobs({
       cron: { add, list, remove } as never,

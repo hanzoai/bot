@@ -2,7 +2,7 @@
 import {
   normalizeOptionalString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -15,7 +15,7 @@ import {
   isConfiguredSessionStoreAgentId,
   resolveExistingAgentSessionStoreTargetsSync,
 } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../../routing/session-key.js";
 import { resolveSessionKeyForRun } from "../server-session-key.js";
 import { resolveRequestedSessionAgentId as resolveRequestedGlobalAgentId } from "../session-create-service.js";
@@ -61,7 +61,7 @@ export function resolveAbortSessionKey(params: {
 
 function resolveSessionKeyAgentId(
   sessionKey: string | undefined,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): string | undefined {
   const key = normalizeOptionalString(sessionKey);
   if (!key) {
@@ -77,7 +77,7 @@ function resolveSessionKeyAgentId(
 function sessionKeyBelongsToAgent(
   sessionKey: string | undefined,
   agentId: string,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): boolean {
   const key = normalizeOptionalString(sessionKey);
   if (cfg.session?.scope === "global" && key?.toLowerCase() === "global") {
@@ -88,7 +88,7 @@ function sessionKeyBelongsToAgent(
 }
 
 function resolveScopedAbortKey(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   key: string | undefined;
   agentId: string | undefined;
 }): string | undefined {

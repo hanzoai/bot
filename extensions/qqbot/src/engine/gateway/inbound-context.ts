@@ -1,6 +1,6 @@
 // Qqbot plugin module implements inbound context behavior.
-import type { ChannelIngressDecision } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { ChannelIngressDecision } from "bot/plugin-sdk/channel-ingress-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import type { EngineAdapters } from "../adapter/index.js";
 import type { QQBotGroupCommandLevel } from "../config/group.js";
 import type { GroupActivationMode } from "../group/activation.js";
@@ -75,7 +75,7 @@ export interface InboundContext {
 
 export interface InboundPipelineDeps {
   account: GatewayAccount;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   log?: EngineLogger;
   runtime: GatewayPluginRuntime;
   startTyping: (event: QueuedMessage) => Promise<{

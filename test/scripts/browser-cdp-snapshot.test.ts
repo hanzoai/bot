@@ -9,7 +9,7 @@ const SCRIPT_PATH = "scripts/e2e/lib/browser-cdp-snapshot/assert-snapshot.mjs";
 const tempDirs: string[] = [];
 
 function makeTempRoot(): string {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-browser-cdp-snapshot-"));
+  const root = mkdtempSync(path.join(tmpdir(), "bot-browser-cdp-snapshot-"));
   tempDirs.push(root);
   return root;
 }
@@ -34,7 +34,7 @@ describe("browser CDP snapshot assertions", () => {
     writeFileSync(snapshotPath, "x".repeat(33), "utf8");
 
     const result = runAssertSnapshot(snapshotPath, {
-      OPENCLAW_BROWSER_CDP_SNAPSHOT_MAX_BYTES: "32",
+      BOT_BROWSER_CDP_SNAPSHOT_MAX_BYTES: "32",
     });
 
     expect(result.status).toBe(1);

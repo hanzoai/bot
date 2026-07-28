@@ -10,7 +10,7 @@ import {
   normalizeBundleMcpServerConfig,
   normalizeStringRecord,
 } from "../bundle-mcp-adapter.js";
-import { withOpenClawMcpCaptureHeader, writeTemporaryBundleMcpJson } from "./bundle-mcp-runtime.js";
+import { withBotMcpCaptureHeader, writeTemporaryBundleMcpJson } from "./bundle-mcp-runtime.js";
 
 const GEMINI_MCP_SERVER_FIELDS = { strings: ["type"], booleans: ["trust"] } as const;
 
@@ -80,7 +80,7 @@ export async function writeGeminiSystemSettings(
   if (!isRecord(settings.mcp) || !isRecord(settings.mcpServers)) {
     throw new Error("Gemini MCP settings merge produced an invalid object");
   }
-  const temporary = await writeTemporaryBundleMcpJson("openclaw-gemini-mcp-", settings);
+  const temporary = await writeTemporaryBundleMcpJson("bot-gemini-mcp-", settings);
   return {
     env: {
       ...inheritedEnv,
@@ -101,8 +101,8 @@ export async function writeGeminiMcpCaptureSettings(params: {
   }
   const settings = await readJsonObject(existingSettingsPath);
   const temporary = await writeTemporaryBundleMcpJson(
-    "openclaw-gemini-mcp-attempt-",
-    withOpenClawMcpCaptureHeader(settings, params.captureKey),
+    "bot-gemini-mcp-attempt-",
+    withBotMcpCaptureHeader(settings, params.captureKey),
   );
   return {
     env: {

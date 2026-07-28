@@ -1,5 +1,5 @@
 // Codex tests cover native execution policy plugin behavior.
-import type { getSessionEntry as getSessionEntryType } from "openclaw/plugin-sdk/session-store-runtime";
+import type { getSessionEntry as getSessionEntryType } from "bot/plugin-sdk/session-store-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveCodexNativeExecutionPolicy } from "./native-execution-policy.js";
 
@@ -7,8 +7,8 @@ const sessionStoreMocks = vi.hoisted(() => ({
   getSessionEntry: vi.fn<typeof getSessionEntryType>(),
 }));
 
-vi.mock("openclaw/plugin-sdk/session-store-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/session-store-runtime")>();
+vi.mock("bot/plugin-sdk/session-store-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/session-store-runtime")>();
   return {
     ...actual,
     getSessionEntry: sessionStoreMocks.getSessionEntry,

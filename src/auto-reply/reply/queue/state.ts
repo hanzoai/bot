@@ -1,5 +1,5 @@
 // Tracks queue state for active, pending, and recently deduped reply runs.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { ModelFallbackRouteResolution } from "../../../agents/model-fallback.types.js";
 import { resolveGlobalMap } from "../../../shared/global-singleton.js";
 import { applyQueueRuntimeSettings } from "../../../utils/queue-helpers.js";
@@ -53,7 +53,7 @@ export const DEFAULT_QUEUE_DROP: QueueDropPolicy = "summarize";
  * Share followup queues across bundled chunks so busy-session enqueue/drain
  * logic observes one queue registry per process.
  */
-const FOLLOWUP_QUEUES_KEY = Symbol.for("openclaw.followupQueues");
+const FOLLOWUP_QUEUES_KEY = Symbol.for("bot.followupQueues");
 
 export const FOLLOWUP_QUEUES = resolveGlobalMap<string, FollowupQueueState>(FOLLOWUP_QUEUES_KEY);
 

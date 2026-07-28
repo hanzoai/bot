@@ -1,7 +1,7 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import {
   applySessionPatchProjection,
   loadSessionEntryReadOnly,

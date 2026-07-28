@@ -1,4 +1,4 @@
-// Provider Auth script supports OpenClaw repository automation.
+// Provider Auth script supports Bot repository automation.
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -38,7 +38,7 @@ export function resolveProviderAuth(input: {
       authKeyFlag: "anthropic-api-key",
       modelId:
         input.modelId ||
-        process.env.OPENCLAW_PARALLELS_ANTHROPIC_MODEL ||
+        process.env.BOT_PARALLELS_ANTHROPIC_MODEL ||
         "anthropic/claude-sonnet-4-6",
     },
     minimax: {
@@ -46,14 +46,14 @@ export function resolveProviderAuth(input: {
       authChoice: "minimax-global-api",
       authKeyFlag: "minimax-api-key",
       modelId:
-        input.modelId || process.env.OPENCLAW_PARALLELS_MINIMAX_MODEL || "minimax/MiniMax-M2.7",
+        input.modelId || process.env.BOT_PARALLELS_MINIMAX_MODEL || "minimax/MiniMax-M2.7",
     },
     openai: {
       apiKeyEnv: input.apiKeyEnv || "OPENAI_API_KEY",
       authChoice: "openai-api-key",
       authKeyFlag: "openai-api-key",
       modelId:
-        input.modelId || process.env.OPENCLAW_PARALLELS_OPENAI_MODEL || "openai/gpt-5.6-luna",
+        input.modelId || process.env.BOT_PARALLELS_OPENAI_MODEL || "openai/gpt-5.6-luna",
     },
   };
   const resolved = providerDefaults[input.provider];
@@ -73,11 +73,11 @@ export function resolveWindowsProviderAuth(input: {
   if (input.provider !== "openai" || input.modelId) {
     return auth;
   }
-  const windowsModel = process.env.OPENCLAW_PARALLELS_WINDOWS_OPENAI_MODEL?.trim();
+  const windowsModel = process.env.BOT_PARALLELS_WINDOWS_OPENAI_MODEL?.trim();
   if (windowsModel) {
     return { ...auth, modelId: windowsModel };
   }
-  if (process.env.OPENCLAW_PARALLELS_OPENAI_MODEL?.trim()) {
+  if (process.env.BOT_PARALLELS_OPENAI_MODEL?.trim()) {
     return auth;
   }
   return { ...auth, modelId: "openai/gpt-5.6-luna" };
@@ -92,13 +92,13 @@ export function resolveParallelsModelTimeoutSeconds(platform?: Platform): number
   const platformEnvName =
     platform === undefined
       ? undefined
-      : `OPENCLAW_PARALLELS_${platform.toUpperCase()}_MODEL_TIMEOUT_S`;
+      : `BOT_PARALLELS_${platform.toUpperCase()}_MODEL_TIMEOUT_S`;
   const platformEnv = platformEnvName === undefined ? undefined : process.env[platformEnvName];
   const defaultSeconds = platform === "macos" || platform === "windows" ? 1800 : 900;
   if (platformEnvName && platformEnv?.trim()) {
     return parsePositiveInt(platformEnv, platformEnvName);
   }
-  return readPositiveIntEnv("OPENCLAW_PARALLELS_MODEL_TIMEOUT_S", defaultSeconds);
+  return readPositiveIntEnv("BOT_PARALLELS_MODEL_TIMEOUT_S", defaultSeconds);
 }
 
 function providerTimeoutConfigJson(
@@ -217,11 +217,11 @@ export function resolveLatestVersion(
   const runCommand = deps.runCommand ?? run;
   const resolveTempDir = deps.tempDir ?? tmpdir;
   const writeFile = deps.writeFile ?? writeFileSync;
-  const userConfigDir = createTempDir(path.join(resolveTempDir(), "openclaw-npm-"));
+  const userConfigDir = createTempDir(path.join(resolveTempDir(), "bot-npm-"));
   const userConfigPath = path.join(userConfigDir, "npmrc");
   try {
     writeFile(userConfigPath, "", "utf8");
-    return runCommand("npm", ["view", "openclaw", "version", "--userconfig", userConfigPath], {
+    return runCommand("npm", ["view", "bot", "version", "--userconfig", userConfigPath], {
       quiet: true,
     }).stdout.trim();
   } finally {

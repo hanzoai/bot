@@ -17,7 +17,7 @@ import {
 
 const originalEnv = captureEnv([
   "HOME",
-  "OPENCLAW_STATE_DIR",
+  "BOT_STATE_DIR",
   "SHELL",
   COMPLETION_SKIP_PLUGIN_COMMANDS_ENV,
 ]);
@@ -33,7 +33,7 @@ function status(overrides: Partial<ShellCompletionStatus> = {}): ShellCompletion
     shell: "zsh",
     profileInstalled: true,
     cacheExists: true,
-    cachePath: "/tmp/openclaw.zsh",
+    cachePath: "/tmp/bot.zsh",
     usesSlowPattern: false,
     ...overrides,
   };
@@ -41,22 +41,22 @@ function status(overrides: Partial<ShellCompletionStatus> = {}): ShellCompletion
 
 describe("shell completion health mapping", () => {
   it("recognizes cached Bash completion from the documented login profile", async () => {
-    const homeDir = tempDirs.make("openclaw-bash-profile-home-");
-    const stateDir = tempDirs.make("openclaw-bash-profile-state-");
+    const homeDir = tempDirs.make("bot-bash-profile-home-");
+    const stateDir = tempDirs.make("bot-bash-profile-state-");
     setTestEnvValue("HOME", homeDir);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("BOT_STATE_DIR", stateDir);
     setTestEnvValue("SHELL", "/bin/bash");
 
-    const cachePath = path.join(stateDir, "completions", "openclaw.bash");
+    const cachePath = path.join(stateDir, "completions", "bot.bash");
     await fs.mkdir(path.dirname(cachePath), { recursive: true });
-    await fs.writeFile(cachePath, "complete -W 'status' openclaw\n", "utf-8");
+    await fs.writeFile(cachePath, "complete -W 'status' bot\n", "utf-8");
     await fs.writeFile(
       path.join(homeDir, ".bash_profile"),
-      `# OpenClaw Completion\n[ -f "${cachePath}" ] && source "${cachePath}"\n`,
+      `# Bot Completion\n[ -f "${cachePath}" ] && source "${cachePath}"\n`,
       "utf-8",
     );
 
-    await expect(checkShellCompletionStatus("openclaw", { shell: "bash" })).resolves.toEqual({
+    await expect(checkShellCompletionStatus("bot", { shell: "bash" })).resolves.toEqual({
       shell: "bash",
       profileInstalled: true,
       cacheExists: true,
@@ -66,38 +66,38 @@ describe("shell completion health mapping", () => {
   });
 
   it("reports slow dynamic Bash completion from the documented login profile", async () => {
-    const homeDir = tempDirs.make("openclaw-bash-slow-profile-home-");
-    const stateDir = tempDirs.make("openclaw-bash-slow-profile-state-");
+    const homeDir = tempDirs.make("bot-bash-slow-profile-home-");
+    const stateDir = tempDirs.make("bot-bash-slow-profile-state-");
     setTestEnvValue("HOME", homeDir);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("BOT_STATE_DIR", stateDir);
     setTestEnvValue("SHELL", "/bin/bash");
 
     await fs.writeFile(
       path.join(homeDir, ".bash_profile"),
-      "source <(openclaw completion --shell bash)\n",
+      "source <(bot completion --shell bash)\n",
       "utf-8",
     );
 
-    await expect(checkShellCompletionStatus("openclaw", { shell: "bash" })).resolves.toEqual({
+    await expect(checkShellCompletionStatus("bot", { shell: "bash" })).resolves.toEqual({
       shell: "bash",
       profileInstalled: true,
       cacheExists: false,
-      cachePath: path.join(stateDir, "completions", "openclaw.bash"),
+      cachePath: path.join(stateDir, "completions", "bot.bash"),
       usesSlowPattern: true,
     });
   });
 
   it("checks an explicit shell instead of the detected environment shell", async () => {
-    const homeDir = tempDirs.make("openclaw-completion-home-");
-    const stateDir = tempDirs.make("openclaw-completion-state-");
+    const homeDir = tempDirs.make("bot-completion-home-");
+    const stateDir = tempDirs.make("bot-completion-state-");
     setTestEnvValue("HOME", homeDir);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    setTestEnvValue("BOT_STATE_DIR", stateDir);
     setTestEnvValue("SHELL", "/bin/zsh");
 
-    const current = await checkShellCompletionStatus("openclaw", { shell: "fish" });
+    const current = await checkShellCompletionStatus("bot", { shell: "fish" });
 
     expect(current.shell).toBe("fish");
-    expect(current.cachePath).toBe(path.join(stateDir, "completions", "openclaw.fish"));
+    expect(current.cachePath).toBe(path.join(stateDir, "completions", "bot.fish"));
     expect(current.profileInstalled).toBe(false);
     expect(current.cacheExists).toBe(false);
   });
@@ -116,7 +116,7 @@ describe("shell completion health mapping", () => {
       {
         kind: "state",
         action: "would-generate-completion-cache",
-        target: "/tmp/openclaw.zsh",
+        target: "/tmp/bot.zsh",
         dryRunSafe: true,
       },
       {
@@ -135,14 +135,14 @@ describe("shell completion health mapping", () => {
       expect.objectContaining({
         severity: "info",
         message: expect.stringContaining("cache is missing"),
-        fixHint: expect.stringContaining("openclaw doctor --fix"),
+        fixHint: expect.stringContaining("bot doctor --fix"),
       }),
     ]);
     expect(shellCompletionStatusToRepairEffects(current)).toEqual([
       {
         kind: "state",
         action: "would-regenerate-completion-cache",
-        target: "/tmp/openclaw.zsh",
+        target: "/tmp/bot.zsh",
         dryRunSafe: true,
       },
     ]);
@@ -187,22 +187,22 @@ function mockPrompter(confirmValue = true) {
 }
 
 async function setupDoctorCompletionTest(usesSlowPattern: boolean) {
-  const homeDir = tempDirs.make("openclaw-doctor-home-");
-  const stateDir = tempDirs.make("openclaw-doctor-state-");
+  const homeDir = tempDirs.make("bot-doctor-home-");
+  const stateDir = tempDirs.make("bot-doctor-state-");
   setTestEnvValue("HOME", homeDir);
-  setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+  setTestEnvValue("BOT_STATE_DIR", stateDir);
   setTestEnvValue("SHELL", "/bin/bash");
 
   const profilePath = path.join(homeDir, usesSlowPattern ? ".bashrc" : ".bash_profile");
   if (usesSlowPattern) {
     await fs.writeFile(
       profilePath,
-      '# test bashrc\n[ -f "/tmp/nonexistent" ] && source <(openclaw completion bash)\n',
+      '# test bashrc\n[ -f "/tmp/nonexistent" ] && source <(bot completion bash)\n',
       "utf-8",
     );
     const cacheDir = path.join(stateDir, "completions");
     await fs.mkdir(cacheDir, { recursive: true });
-    await fs.writeFile(path.join(cacheDir, "openclaw.bash"), "# completion cache\n", "utf-8");
+    await fs.writeFile(path.join(cacheDir, "bot.bash"), "# completion cache\n", "utf-8");
   }
   return profilePath;
 }
@@ -228,7 +228,7 @@ describe("doctorShellCompletion", () => {
 
     await doctorShellCompletion({} as never, mockPrompter());
 
-    expect(installCompletionMock).toHaveBeenCalledWith("bash", true, "openclaw");
+    expect(installCompletionMock).toHaveBeenCalledWith("bash", true, "bot");
     expect(noteSpy).toHaveBeenCalledWith(
       expect.stringContaining("source ~/.bash_profile"),
       "Shell completion",
@@ -241,12 +241,12 @@ describe("doctorShellCompletion", () => {
   ])(
     "uses explicit $generationMode cache generation even with an ambient skip guard",
     async ({ generationMode, expectedSkipValue }) => {
-      const stateDir = tempDirs.make("openclaw-doctor-state-");
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      const stateDir = tempDirs.make("bot-doctor-state-");
+      setTestEnvValue("BOT_STATE_DIR", stateDir);
       setTestEnvValue(COMPLETION_SKIP_PLUGIN_COMMANDS_ENV, "1");
 
       await expect(
-        ensureCompletionCacheExists("openclaw", {
+        ensureCompletionCacheExists("bot", {
           shell: "powershell",
           generationMode,
         }),

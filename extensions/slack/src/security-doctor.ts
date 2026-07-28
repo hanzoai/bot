@@ -1,5 +1,5 @@
 // Slack plugin module implements security doctor behavior.
-import { buildMutableAllowEntryDetector } from "openclaw/plugin-sdk/channel-policy";
+import { buildMutableAllowEntryDetector } from "bot/plugin-sdk/channel-policy";
 
 export const isSlackMutableAllowEntry = buildMutableAllowEntryDetector({
   stableIdPattern:

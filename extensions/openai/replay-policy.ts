@@ -2,7 +2,7 @@
 import type {
   ProviderReplayPolicy,
   ProviderReplayPolicyContext,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "bot/plugin-sdk/plugin-entry";
 
 const RESPONSES_FAMILY_APIS = new Set([
   "openai-responses",

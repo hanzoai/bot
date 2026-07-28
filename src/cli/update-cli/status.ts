@@ -1,4 +1,4 @@
-// `openclaw update status`: combines install metadata, configured channel, and remote update checks.
+// `bot update status`: combines install metadata, configured channel, and remote update checks.
 import { getTerminalTableWidth, renderTable } from "../../../packages/terminal-core/src/table.js";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import {
@@ -108,7 +108,7 @@ export async function updateStatusCommand(opts: UpdateStatusOptions): Promise<vo
     },
   ];
 
-  defaultRuntime.log(theme.heading("OpenClaw update status"));
+  defaultRuntime.log(theme.heading("Bot update status"));
   defaultRuntime.log("");
   defaultRuntime.log(
     renderTable({

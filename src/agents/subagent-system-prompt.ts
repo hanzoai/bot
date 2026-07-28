@@ -3,7 +3,7 @@
  *
  * Produces role, completion, delegation, ACP, and native-command guidance for spawned child sessions.
  */
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeUniqueStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import { DEFAULT_SUBAGENT_MAX_SPAWN_DEPTH } from "../config/agent-limits.js";
 import type { DeliveryContext } from "../utils/delivery-context.types.js";
 
@@ -81,8 +81,8 @@ export function buildSubagentSystemPrompt(params: {
       ...(acpEnabled
         ? [
             'ACP harness: `sessions_spawn(runtime:"acp")`; set `agentId` unless default. Codex only explicit ACP/acpx.',
-            "`agents_list`/`subagents` = OpenClaw runtime=subagent only; ACP ids from `acp.allowedAgents`.",
-            "Never ask user for slash/CLI or exec openclaw/acpx when sessions_spawn can act.",
+            "`agents_list`/`subagents` = Bot runtime=subagent only; ACP ids from `acp.allowedAgents`.",
+            "Never ask user for slash/CLI or exec bot/acpx when sessions_spawn can act.",
             "Subagent results auto-announce; ACP continues bound thread. No polling.",
           ]
         : []),

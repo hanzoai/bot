@@ -314,7 +314,7 @@ export function main(argv = process.argv.slice(2)) {
     process.exit(2);
   }
 
-  if (process.env.OPENCLAW_BUILD_ALL_NO_PNPM === "1" && action === "build") {
+  if (process.env.BOT_BUILD_ALL_NO_PNPM === "1" && action === "build") {
     run(process.execPath, [path.join(repoRoot, "node_modules/vite/bin/vite.js"), "build", ...rest]);
     return;
   }

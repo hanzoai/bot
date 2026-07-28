@@ -1,6 +1,6 @@
 // Discord tests cover client plugin behavior.
 import { ApplicationCommandType, ComponentType, Routes } from "discord-api-types/v10";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "bot/plugin-sdk/number-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Client } from "./client.js";
 import { BaseCommand } from "./commands.js";
@@ -493,7 +493,7 @@ describe("Client gateway event queue", () => {
     );
   }
 
-  it("uses OpenClaw Discord event queue defaults", () => {
+  it("uses Bot Discord event queue defaults", () => {
     const client = createQueuedClient({
       listeners: [],
       eventQueue: {},

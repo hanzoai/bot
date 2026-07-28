@@ -1,13 +1,13 @@
 // Input file helpers normalize inline, fetched, and local media inputs.
-import { canonicalizeBase64, estimateBase64DecodedBytes } from "@openclaw/media-core/base64";
-import { parseMediaContentLength } from "@openclaw/media-core/content-length";
-import { detectMime } from "@openclaw/media-core/mime";
+import { canonicalizeBase64, estimateBase64DecodedBytes } from "@hanzo/bot-media-core/base64";
+import { parseMediaContentLength } from "@hanzo/bot-media-core/content-length";
+import { detectMime } from "@hanzo/bot-media-core/mime";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
+import type { BotConfig } from "../config/types.bot.js";
 import { readResponseWithLimit } from "../infra/http-body.js";
 import { fetchWithSsrFGuard } from "../infra/net/fetch-guard.js";
 import type { SsrFPolicy } from "../infra/net/ssrf.js";
@@ -215,7 +215,7 @@ async function fetchWithGuard(params: {
     timeoutMs: params.timeoutMs,
     policy: params.policy,
     auditContext: params.auditContext,
-    init: { headers: { "User-Agent": "OpenClaw-Gateway/1.0" } },
+    init: { headers: { "User-Agent": "Bot-Gateway/1.0" } },
   });
 
   try {
@@ -402,7 +402,7 @@ export async function extractImageContentFromSource(
 export async function extractFileContentFromSource(params: {
   source: InputFileSource;
   limits: InputFileLimits;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): Promise<InputFileExtractResult> {
   const { source, limits } = params;
   const filename = source.filename || "file";

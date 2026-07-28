@@ -1,6 +1,6 @@
 /**
  * @deprecated Legacy reply-pipeline subpath. New channel message code should
- * use `openclaw/plugin-sdk/channel-outbound`.
+ * use `bot/plugin-sdk/channel-outbound`.
  */
 
 export {

@@ -1,6 +1,6 @@
 // Qqbot tests cover interaction handler plugin behavior.
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { ApprovalResolveResult } from "bot/plugin-sdk/approval-gateway-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSdkAccessAdapter } from "../../bridge/sdk-adapter.js";
 import { registerPlatformAdapter, type PlatformAdapter } from "../adapter/index.js";
@@ -66,7 +66,7 @@ const account = makeAccount();
 
 const runtime = {} as GatewayPluginRuntime;
 
-function makeRestrictedCfg(approvers: string[]): OpenClawConfig {
+function makeRestrictedCfg(approvers: string[]): BotConfig {
   return {
     channels: {
       qqbot: {
@@ -78,10 +78,10 @@ function makeRestrictedCfg(approvers: string[]): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
-function makeCommandAuthorizedFallbackCfg(): OpenClawConfig {
+function makeCommandAuthorizedFallbackCfg(): BotConfig {
   return {
     channels: {
       qqbot: {
@@ -90,7 +90,7 @@ function makeCommandAuthorizedFallbackCfg(): OpenClawConfig {
         allowFrom: ["ATTACKER_OPENID"],
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function makeApprovalEvent(overrides: Partial<InteractionEvent> = {}): InteractionEvent {
@@ -376,7 +376,7 @@ describe("createInteractionHandler approval buttons", () => {
               allowFrom: ["accessGroup:operators"],
             },
           },
-        }) as OpenClawConfig,
+        }) as BotConfig,
       resolveCommandAuthorized: (params) => access.resolveSlashCommandAuthorization(params),
     });
 
@@ -402,7 +402,7 @@ describe("createInteractionHandler approval buttons", () => {
               },
             },
           },
-        }) as OpenClawConfig,
+        }) as BotConfig,
     });
 
     handler(makeApprovalEvent());
@@ -423,7 +423,7 @@ describe("createInteractionHandler approval buttons", () => {
               allowFrom: ["OWNER_OPENID"],
             },
           },
-        }) as OpenClawConfig,
+        }) as BotConfig,
     });
 
     handler(makeApprovalEvent());
@@ -463,7 +463,7 @@ describe("createInteractionHandler approval buttons", () => {
         },
       },
     ],
-  ] satisfies Array<[string, OpenClawConfig]>)(
+  ] satisfies Array<[string, BotConfig]>)(
     "rejects fallback approval buttons when %s does not grant command auth",
     async (_name, cfg) => {
       const handler = createInteractionHandler(account, runtime, undefined, {

@@ -1,5 +1,5 @@
 import path from "node:path";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import JSON5 from "json5";
 import { isSensitiveConfigPath } from "./sensitive-paths.js";
 import type { ConfigValidationIssue } from "./types.js";
@@ -344,7 +344,7 @@ export function attachConfigIssueDiagnostics(
   const sourceFile =
     typeof params.configPath === "string" && params.configPath.trim()
       ? path.basename(params.configPath)
-      : "openclaw.json";
+      : "bot.json";
   return issues.map((issue) => {
     const segments = issue.pathSegments;
     if (!segments || segments.length === 0) {

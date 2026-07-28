@@ -1,20 +1,20 @@
 // Frontmatter tests cover shared Markdown frontmatter parsing helpers.
 import { describe, expect, it, test } from "vitest";
 import {
-  applyOpenClawManifestInstallCommonFields,
+  applyBotManifestInstallCommonFields,
   getFrontmatterString,
   normalizeStringList,
   parseFrontmatterBool,
-  parseOpenClawManifestInstallBase,
-  resolveOpenClawManifestBlock,
-  resolveOpenClawManifestInstall,
-  resolveOpenClawManifestOs,
-  resolveOpenClawManifestRequires,
+  parseBotManifestInstallBase,
+  resolveBotManifestBlock,
+  resolveBotManifestInstall,
+  resolveBotManifestOs,
+  resolveBotManifestRequires,
 } from "./frontmatter.js";
 
 function expectInstallBase(
-  parsed: ReturnType<typeof parseOpenClawManifestInstallBase>,
-): NonNullable<ReturnType<typeof parseOpenClawManifestInstallBase>> {
+  parsed: ReturnType<typeof parseBotManifestInstallBase>,
+): NonNullable<ReturnType<typeof parseBotManifestInstallBase>> {
   if (parsed === undefined) {
     throw new Error("Expected manifest install base");
   }
@@ -40,28 +40,28 @@ describe("shared/frontmatter", () => {
     expect(parseFrontmatterBool("maybe", false)).toBe(false);
   });
 
-  test("resolveOpenClawManifestBlock reads current manifest keys and custom metadata fields", () => {
+  test("resolveBotManifestBlock reads current manifest keys and custom metadata fields", () => {
     expect(
-      resolveOpenClawManifestBlock({
+      resolveBotManifestBlock({
         frontmatter: {
-          metadata: "{ openclaw: { foo: 1, bar: 'baz' } }",
+          metadata: "{ bot: { foo: 1, bar: 'baz' } }",
         },
       }),
     ).toEqual({ foo: 1, bar: "baz" });
 
     expect(
-      resolveOpenClawManifestBlock({
+      resolveBotManifestBlock({
         frontmatter: {
-          pluginMeta: "{ openclaw: { foo: 2 } }",
+          pluginMeta: "{ bot: { foo: 2 } }",
         },
         key: "pluginMeta",
       }),
     ).toEqual({ foo: 2 });
   });
 
-  test("resolveOpenClawManifestBlock reads legacy manifest keys", () => {
+  test("resolveBotManifestBlock reads legacy manifest keys", () => {
     expect(
-      resolveOpenClawManifestBlock({
+      resolveBotManifestBlock({
         frontmatter: {
           metadata: "{ clawdbot: { requires: { bins: ['op'] }, install: [] } }",
         },
@@ -69,54 +69,54 @@ describe("shared/frontmatter", () => {
     ).toEqual({ requires: { bins: ["op"] }, install: [] });
   });
 
-  test("resolveOpenClawManifestBlock prefers current manifest keys over legacy keys", () => {
+  test("resolveBotManifestBlock prefers current manifest keys over legacy keys", () => {
     expect(
-      resolveOpenClawManifestBlock({
+      resolveBotManifestBlock({
         frontmatter: {
           metadata:
-            "{ openclaw: { requires: { bins: ['current'] } }, clawdbot: { requires: { bins: ['legacy'] } } }",
+            "{ bot: { requires: { bins: ['current'] } }, clawdbot: { requires: { bins: ['legacy'] } } }",
         },
       }),
     ).toEqual({ requires: { bins: ["current"] } });
   });
 
-  test("resolveOpenClawManifestBlock returns undefined for invalid input", () => {
-    expect(resolveOpenClawManifestBlock({ frontmatter: {} })).toBeUndefined();
+  test("resolveBotManifestBlock returns undefined for invalid input", () => {
+    expect(resolveBotManifestBlock({ frontmatter: {} })).toBeUndefined();
     expect(
-      resolveOpenClawManifestBlock({ frontmatter: { metadata: "not-json5" } }),
+      resolveBotManifestBlock({ frontmatter: { metadata: "not-json5" } }),
     ).toBeUndefined();
-    expect(resolveOpenClawManifestBlock({ frontmatter: { metadata: "123" } })).toBeUndefined();
-    expect(resolveOpenClawManifestBlock({ frontmatter: { metadata: "[]" } })).toBeUndefined();
+    expect(resolveBotManifestBlock({ frontmatter: { metadata: "123" } })).toBeUndefined();
+    expect(resolveBotManifestBlock({ frontmatter: { metadata: "[]" } })).toBeUndefined();
     expect(
-      resolveOpenClawManifestBlock({ frontmatter: { metadata: "{ nope: { a: 1 } }" } }),
+      resolveBotManifestBlock({ frontmatter: { metadata: "{ nope: { a: 1 } }" } }),
     ).toBeUndefined();
   });
 
   it("normalizes manifest requirement and os lists", () => {
     expect(
-      resolveOpenClawManifestRequires({
+      resolveBotManifestRequires({
         requires: {
           bins: "bun, node",
           anyBins: [" ffmpeg ", ""],
-          env: ["OPENCLAW_TOKEN", " OPENCLAW_URL "],
+          env: ["BOT_TOKEN", " BOT_URL "],
           config: null,
         },
       }),
     ).toEqual({
       bins: ["bun", "node"],
       anyBins: ["ffmpeg"],
-      env: ["OPENCLAW_TOKEN", "OPENCLAW_URL"],
+      env: ["BOT_TOKEN", "BOT_URL"],
       config: [],
     });
-    expect(resolveOpenClawManifestRequires({})).toBeUndefined();
-    expect(resolveOpenClawManifestOs({ os: [" darwin ", "linux", ""] })).toEqual([
+    expect(resolveBotManifestRequires({})).toBeUndefined();
+    expect(resolveBotManifestOs({ os: [" darwin ", "linux", ""] })).toEqual([
       "darwin",
       "linux",
     ]);
   });
 
   it("parses and applies install common fields", () => {
-    const parsed = parseOpenClawManifestInstallBase(
+    const parsed = parseBotManifestInstallBase(
       {
         type: " Brew ",
         id: "brew.git",
@@ -138,9 +138,9 @@ describe("shared/frontmatter", () => {
       label: "Git",
       bins: ["git", "git"],
     });
-    expect(parseOpenClawManifestInstallBase({ kind: "bad" }, ["brew"])).toBeUndefined();
+    expect(parseBotManifestInstallBase({ kind: "bad" }, ["brew"])).toBeUndefined();
     expect(
-      applyOpenClawManifestInstallCommonFields<{
+      applyBotManifestInstallCommonFields<{
         extra: boolean;
         id?: string;
         label?: string;
@@ -155,7 +155,7 @@ describe("shared/frontmatter", () => {
   });
 
   it("prefers explicit kind, ignores invalid common fields, and leaves missing ones untouched", () => {
-    const parsed = parseOpenClawManifestInstallBase(
+    const parsed = parseBotManifestInstallBase(
       {
         kind: " npm ",
         type: "brew",
@@ -177,7 +177,7 @@ describe("shared/frontmatter", () => {
       kind: "npm",
     });
     expect(
-      applyOpenClawManifestInstallCommonFields(
+      applyBotManifestInstallCommonFields(
         { id: "keep", label: "Keep", bins: ["bun"] },
         parsed!,
       ),
@@ -190,7 +190,7 @@ describe("shared/frontmatter", () => {
 
   it("maps install entries through the parser and filters rejected specs", () => {
     expect(
-      resolveOpenClawManifestInstall(
+      resolveBotManifestInstall(
         {
           install: [{ id: "keep" }, { id: "drop" }, "bad"],
         },

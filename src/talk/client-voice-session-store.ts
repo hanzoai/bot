@@ -1,8 +1,8 @@
 /** SQLite-backed persistence for durable per-agent Talk voice-call records. */
 import {
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  openBotAgentDatabase,
+  type BotAgentDatabase,
+} from "../state/bot-agent-db.js";
 
 export const VOICE_SESSION_CACHE_SCOPE = "talk-client-voice-sessions";
 export const VOICE_SESSION_RECORD_VERSION = 1;
@@ -110,7 +110,7 @@ export function readVoiceSessionRecord(
   agentId: string,
   voiceSessionId: string,
 ): ClientVoiceSessionRecord | undefined {
-  const database = openOpenClawAgentDatabase({ agentId });
+  const database = openBotAgentDatabase({ agentId });
   const row = database.db
     .prepare("SELECT value_json FROM cache_entries WHERE scope = ? AND key = ?")
     .get(VOICE_SESSION_CACHE_SCOPE, voiceSessionId) as { value_json?: unknown } | undefined;
@@ -118,7 +118,7 @@ export function readVoiceSessionRecord(
 }
 
 export function readVoiceSessionRecordInTransaction(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   voiceSessionId: string,
 ): ClientVoiceSessionRecord | undefined {
   const row = database.db
@@ -128,7 +128,7 @@ export function readVoiceSessionRecordInTransaction(
 }
 
 export function writeVoiceSessionRecordInTransaction(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   record: ClientVoiceSessionRecord,
 ): void {
   database.db

@@ -1,8 +1,8 @@
 // Clickclack tests cover inbound plugin behavior.
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { buildAgentSessionKey, resolveAgentRoute } from "openclaw/plugin-sdk/routing";
+import { createPluginRuntimeMock } from "bot/plugin-sdk/channel-test-helpers";
+import type { PluginRuntime } from "bot/plugin-sdk/core";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
+import { buildAgentSessionKey, resolveAgentRoute } from "bot/plugin-sdk/routing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   recordPendingDiscussionOpen,
@@ -588,7 +588,7 @@ describe("handleClickClackInbound", () => {
       agentId: "research",
       sessionId: "session-id",
       serverBaseUrl: "http://127.0.0.1:8080",
-      externalRef: "openclaw:test:research",
+      externalRef: "bot:test:research",
       externalUrl: "",
       workspaceRef: "wsp_1",
       workspaceId: "wsp_1",
@@ -664,7 +664,7 @@ describe("handleClickClackInbound", () => {
       agentId: "research",
       sessionId: "old-session-id",
       serverBaseUrl: "http://127.0.0.1:8080",
-      externalRef: "openclaw:test:research",
+      externalRef: "bot:test:research",
       externalUrl: "",
       workspaceRef: "wsp_1",
       workspaceId: "wsp_1",
@@ -707,7 +707,7 @@ describe("handleClickClackInbound", () => {
       agentId: "research",
       sessionId: "session-id",
       serverBaseUrl: "http://127.0.0.1:8080",
-      externalRef: "openclaw:test:research",
+      externalRef: "bot:test:research",
       externalUrl: "",
       workspaceRef: "wsp_1",
       workspaceId: "wsp_1",
@@ -755,7 +755,7 @@ describe("handleClickClackInbound", () => {
       agentId: "research",
       sessionId: "session-id",
       serverBaseUrl: "http://127.0.0.1:8080",
-      externalRef: "openclaw:test:research",
+      externalRef: "bot:test:research",
       externalUrl: "",
       workspaceRef: "wsp_1",
       workspaceId: "wsp_1",
@@ -798,7 +798,7 @@ describe("handleClickClackInbound", () => {
       agentId: "research",
       sessionId: "session-id",
       serverBaseUrl: "http://127.0.0.1:8080",
-      externalRef: "openclaw:test:research",
+      externalRef: "bot:test:research",
       externalUrl: "",
       workspaceRef: "wsp_1",
       workspaceId: "wsp_1",
@@ -829,7 +829,7 @@ describe("handleClickClackInbound", () => {
       agentId: "research",
       sessionId: "session-id",
       serverBaseUrl: "http://127.0.0.1:8080",
-      externalRef: "openclaw:test:released",
+      externalRef: "bot:test:released",
       externalUrl: "",
       workspaceRef: "wsp_1",
       workspaceId: "wsp_1",
@@ -863,7 +863,7 @@ describe("handleClickClackInbound", () => {
       agentId: "research",
       sessionId: "session-id",
       serverBaseUrl: "http://127.0.0.1:8080",
-      externalRef: "openclaw:test:renamed-account",
+      externalRef: "bot:test:renamed-account",
       externalUrl: "",
       workspaceRef: "wsp_1",
       workspaceId: "wsp_1",
@@ -904,7 +904,7 @@ describe("handleClickClackInbound", () => {
         serverBaseUrl: "http://127.0.0.1:8080",
         workspaceId: "wsp_1",
         sessionId: "session-id",
-        externalRef: "openclaw:test:pending",
+        externalRef: "bot:test:pending",
         credentialFingerprint: "test-fingerprint",
       },
     });
@@ -927,7 +927,7 @@ describe("handleClickClackInbound", () => {
       agentId: "research",
       sessionId: "session-id",
       serverBaseUrl: "http://127.0.0.1:8080",
-      externalRef: "openclaw:test:research",
+      externalRef: "bot:test:research",
       externalUrl: "",
       workspaceRef: "wsp_1",
       workspaceId: "wsp_1",

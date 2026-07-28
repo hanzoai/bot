@@ -3,9 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
 import { withTempDir } from "../test-utils/temp-dir.js";
 import {
   clearDeviceAuthToken,
@@ -17,19 +17,19 @@ import { executeSqliteQuerySync, getNodeSqliteKysely } from "./kysely-sync.js";
 
 function createEnv(stateDir: string): NodeJS.ProcessEnv {
   return {
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_TEST_FAST: "1",
+    BOT_STATE_DIR: stateDir,
+    BOT_TEST_FAST: "1",
   };
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 
 describe("infra/device-auth-store", () => {
   it("stores and loads normalized device auth tokens in SQLite", async () => {
-    await withTempDir("openclaw-device-auth-", async (stateDir) => {
+    await withTempDir("bot-device-auth-", async (stateDir) => {
       vi.spyOn(Date, "now").mockReturnValue(1234);
       const env = createEnv(stateDir);
 
@@ -54,7 +54,7 @@ describe("infra/device-auth-store", () => {
   });
 
   it("isolates device ids and overwrites only the normalized role", async () => {
-    await withTempDir("openclaw-device-auth-", async (stateDir) => {
+    await withTempDir("bot-device-auth-", async (stateDir) => {
       const env = createEnv(stateDir);
       vi.spyOn(Date, "now").mockReturnValueOnce(1).mockReturnValueOnce(2).mockReturnValueOnce(3);
 
@@ -79,9 +79,9 @@ describe("infra/device-auth-store", () => {
   });
 
   it("fails closed for malformed canonical scope metadata", async () => {
-    await withTempDir("openclaw-device-auth-", async (stateDir) => {
+    await withTempDir("bot-device-auth-", async (stateDir) => {
       const env = createEnv(stateDir);
-      const { db } = openOpenClawStateDatabase({ env });
+      const { db } = openBotStateDatabase({ env });
       executeSqliteQuerySync(
         db,
         getNodeSqliteKysely<{
@@ -109,19 +109,19 @@ describe("infra/device-auth-store", () => {
   });
 
   it("fails closed with repair guidance while retired JSON remains", async () => {
-    await withTempDir("openclaw-device-auth-", async (stateDir) => {
+    await withTempDir("bot-device-auth-", async (stateDir) => {
       const env = createEnv(stateDir);
       const legacyPath = path.join(stateDir, "identity", "device-auth.json");
       fs.mkdirSync(path.dirname(legacyPath), { recursive: true });
       fs.writeFileSync(legacyPath, '{"version":1}');
-      openOpenClawStateDatabase({ env })
+      openBotStateDatabase({ env })
         .db.prepare(
           "INSERT INTO device_auth_tokens (device_id, role, token, scopes_json, updated_at_ms) VALUES (?, ?, ?, ?, ?)",
         )
         .run("device-1", "operator", "sqlite-token", "[]", 1);
 
       expect(() => loadDeviceAuthToken({ deviceId: "device-1", role: "operator", env })).toThrow(
-        "openclaw doctor --fix",
+        "bot doctor --fix",
       );
       expect(() =>
         storeDeviceAuthToken({
@@ -130,12 +130,12 @@ describe("infra/device-auth-store", () => {
           token: "replacement",
           env,
         }),
-      ).toThrow("openclaw doctor --fix");
+      ).toThrow("bot doctor --fix");
     });
   });
 
   it("clears only the requested role and device", async () => {
-    await withTempDir("openclaw-device-auth-", async (stateDir) => {
+    await withTempDir("bot-device-auth-", async (stateDir) => {
       const env = createEnv(stateDir);
       storeDeviceAuthToken({ deviceId: "device-1", role: "operator", token: "operator", env });
       storeDeviceAuthToken({ deviceId: "device-1", role: "node", token: "node", env });

@@ -1,7 +1,7 @@
-import { buildChannelOutboundSessionRoute } from "openclaw/plugin-sdk/channel-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { buildChannelOutboundSessionRoute } from "bot/plugin-sdk/channel-core";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 // Googlechat plugin module implements targets behavior.
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveGoogleChatAccount, type ResolvedGoogleChatAccount } from "./accounts.js";
 import { findGoogleChatDirectMessage, getGoogleChatSpace } from "./api.js";
 import type { GoogleChatSpace } from "./types.js";
@@ -94,7 +94,7 @@ export async function resolveGoogleChatOutboundSpace(params: {
 }
 
 export async function resolveGoogleChatOutboundSessionRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   accountId?: string | null;
   target: string;

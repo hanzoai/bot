@@ -1,5 +1,5 @@
-import { MODEL_SELECTION_LOCKED_MESSAGE } from "openclaw/plugin-sdk/model-session-runtime";
-import type { PluginCommandContext } from "openclaw/plugin-sdk/plugin-entry";
+import { MODEL_SELECTION_LOCKED_MESSAGE } from "bot/plugin-sdk/model-session-runtime";
+import type { PluginCommandContext } from "bot/plugin-sdk/plugin-entry";
 import { resolveCodexBindingAppServerConnection } from "./app-server/binding-connection.js";
 import type { CodexComputerUseSetupParams } from "./app-server/computer-use.js";
 import { isJsonObject, type JsonValue } from "./app-server/protocol.js";
@@ -183,7 +183,7 @@ export async function handleNativeGoal(
   }
   const binding = await deps.bindingStore.read(target.identity);
   if (!binding?.threadId) {
-    return "No Codex thread is attached to this OpenClaw session yet.";
+    return "No Codex thread is attached to this Bot session yet.";
   }
   const connection = resolveCodexBindingAppServerConnection({
     binding,
@@ -411,7 +411,7 @@ export async function startThreadAction(
   }
   const binding = await deps.bindingStore.read(target.identity);
   if (!binding?.threadId) {
-    return `No Codex thread is attached to this OpenClaw session yet.`;
+    return `No Codex thread is attached to this Bot session yet.`;
   }
   const connection = resolveCodexBindingAppServerConnection({
     binding,

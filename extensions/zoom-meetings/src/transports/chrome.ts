@@ -5,7 +5,7 @@ import {
   createNodeMeetingRealtimeAudioTransport,
   startMeetingAgentRealtimeEngine,
   startMeetingRealtimeEngine,
-} from "openclaw/plugin-sdk/meeting-runtime";
+} from "bot/plugin-sdk/meeting-runtime";
 import type { ZoomMeetingsConfig, ZoomMeetingsMode } from "../config.js";
 import {
   ZOOM_MEETINGS_SYSTEM_PROFILER_COMMAND,

@@ -1,4 +1,4 @@
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { GatewaySessionRow, SessionsListResult } from "../../api/types.ts";
 
 // Lifecycle notes are transient UI state, so bound them for long-lived board tabs.

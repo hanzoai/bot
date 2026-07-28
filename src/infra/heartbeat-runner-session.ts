@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import {
   canonicalizeMainSessionAlias,
@@ -6,7 +6,7 @@ import {
 } from "../config/sessions/main-session.js";
 import { resolveStorePath } from "../config/sessions/paths.js";
 import { loadSessionEntry, patchSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   isSubagentSessionKey,
   normalizeAgentId,
@@ -17,7 +17,7 @@ import { resolveMainScopedEventSessionKey } from "./event-session-routing.js";
 import type { HeartbeatConfig } from "./heartbeat-runner-config.js";
 
 export function resolveHeartbeatSession(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId?: string,
   heartbeat?: HeartbeatConfig,
   forcedSessionKey?: string,

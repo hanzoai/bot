@@ -1,5 +1,5 @@
 import type { cleanupBrowserSessionsForLifecycleEnd } from "../browser-lifecycle-cleanup.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { callGateway as defaultCallGateway } from "../gateway/call.js";
 import type { DetachedTaskFindResult } from "../tasks/detached-task-runtime-contract.js";
 import type { SubagentLifecycleEndedReason } from "./subagent-lifecycle-events.js";
@@ -14,7 +14,7 @@ export type SubagentRegistryLifecycleParams = {
   runs: Map<string, SubagentRunRecord>;
   resumedRuns: Set<string>;
   subagentAnnounceTimeoutMs: number;
-  getRuntimeConfig(): OpenClawConfig;
+  getRuntimeConfig(): BotConfig;
   persist(): void;
   persistOrThrow(): void;
   clearPendingLifecycleError(runId: string): void;

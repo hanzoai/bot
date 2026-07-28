@@ -13,15 +13,15 @@ describe("scripts/test-live-codex-harness-docker.sh", () => {
   it("mounts cache and npm tool dirs outside the bind-mounted Docker home", () => {
     const script = fs.readFileSync(SCRIPT_PATH, "utf8");
 
-    expect(script).toContain('DOCKER_CACHE_CONTAINER_DIR="/tmp/openclaw-cache"');
-    expect(script).toContain('DOCKER_CLI_TOOLS_CONTAINER_DIR="/tmp/openclaw-npm-global"');
-    expect(script).toContain("openclaw_live_codex_harness_is_ci()");
-    expect(script).toContain("openclaw_live_is_ci");
+    expect(script).toContain('DOCKER_CACHE_CONTAINER_DIR="/tmp/bot-cache"');
+    expect(script).toContain('DOCKER_CLI_TOOLS_CONTAINER_DIR="/tmp/bot-npm-global"');
+    expect(script).toContain("bot_live_codex_harness_is_ci()");
+    expect(script).toContain("bot_live_is_ci");
     expect(script).toContain('-e XDG_CACHE_HOME="$DOCKER_CACHE_CONTAINER_DIR"');
     expect(script).toContain('-e NPM_CONFIG_PREFIX="$DOCKER_CLI_TOOLS_CONTAINER_DIR"');
-    expect(script).toContain('openclaw_live_prepare_bind_dir_for_container_user "$CLI_TOOLS_DIR"');
-    expect(script).toContain('openclaw_live_prepare_bind_dir_for_container_user "$CACHE_HOME_DIR"');
-    expect(script).toContain("openclaw_live_uses_managed_bind_dirs");
+    expect(script).toContain('bot_live_prepare_bind_dir_for_container_user "$CLI_TOOLS_DIR"');
+    expect(script).toContain('bot_live_prepare_bind_dir_for_container_user "$CACHE_HOME_DIR"');
+    expect(script).toContain("bot_live_uses_managed_bind_dirs");
     expect(script).toContain('-v "$CACHE_HOME_DIR":"$DOCKER_CACHE_CONTAINER_DIR"');
     expect(script).toContain('-v "$CLI_TOOLS_DIR":"$DOCKER_CLI_TOOLS_CONTAINER_DIR"');
     expect(script).not.toContain('-v "$CACHE_HOME_DIR":/home/node/.cache');
@@ -32,13 +32,13 @@ describe("scripts/test-live-codex-harness-docker.sh", () => {
     const script = fs.readFileSync(SCRIPT_PATH, "utf8");
 
     expect(script).toContain(
-      "OPENCLAW_LIVE_CODEX_HARNESS_AUTH=codex-auth requires ~/.codex/auth.json before building the live Docker image",
+      "BOT_LIVE_CODEX_HARNESS_AUTH=codex-auth requires ~/.codex/auth.json before building the live Docker image",
     );
     expect(script).toContain(
-      "If this is a Testbox/API-key run, set OPENCLAW_LIVE_CODEX_HARNESS_AUTH=api-key and run through openclaw-testbox-env.",
+      "If this is a Testbox/API-key run, set BOT_LIVE_CODEX_HARNESS_AUTH=api-key and run through bot-testbox-env.",
     );
     expect(script.indexOf("requires ~/.codex/auth.json before building")).toBeLessThan(
-      script.indexOf('OPENCLAW_LIVE_DOCKER_REPO_ROOT="$ROOT_DIR"'),
+      script.indexOf('BOT_LIVE_DOCKER_REPO_ROOT="$ROOT_DIR"'),
     );
   });
 
@@ -54,18 +54,18 @@ describe("scripts/test-live-codex-harness-docker.sh", () => {
     const script = fs.readFileSync(SCRIPT_PATH, "utf8");
 
     expect(script).toContain('DOCKER_USER="$(id -u):$(id -g)"');
-    expect(script).toContain("if openclaw_live_uses_managed_bind_dirs; then");
+    expect(script).toContain("if bot_live_uses_managed_bind_dirs; then");
     expect(script).toContain('if [[ "$CODEX_HARNESS_AUTH_MODE" == "api-key" ]]; then');
     expect(script).toContain('if [[ -z "${DOCKER_HOME_DIR:-}" ]]; then');
     expect(script).not.toContain('DOCKER_USER="0:0"');
     expect(script).toContain(
-      'DOCKER_HOME_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/openclaw-docker-home.XXXXXX")"',
+      'DOCKER_HOME_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/bot-docker-home.XXXXXX")"',
     );
     expect(script).toContain(
-      'CONFIG_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/openclaw-docker-config.XXXXXX")"',
+      'CONFIG_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/bot-docker-config.XXXXXX")"',
     );
     expect(script).toContain(
-      'WORKSPACE_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/openclaw-docker-workspace.XXXXXX")"',
+      'WORKSPACE_DIR="$(mktemp -d "${RUNNER_TEMP:-/tmp}/bot-docker-workspace.XXXXXX")"',
     );
     expect(script).toContain('DOCKER_CACHE_CONTAINER_DIR="/home/node/.cache"');
     expect(script).toContain('DOCKER_CLI_TOOLS_CONTAINER_DIR="/home/node/.npm-global"');
@@ -75,7 +75,7 @@ describe("scripts/test-live-codex-harness-docker.sh", () => {
     );
     expect(script).toContain('if [[ "$CODEX_HARNESS_AUTH_MODE" != "api-key" ]]; then');
     expect(script.indexOf('PROFILE_STATUS="api-key-env"')).toBeLessThan(
-      script.indexOf("openclaw_live_append_array DOCKER_RUN_ARGS PROFILE_MOUNT"),
+      script.indexOf("bot_live_append_array DOCKER_RUN_ARGS PROFILE_MOUNT"),
     );
     expect(script).toContain("cleanup_codex_live_mounts() {");
     expect(script).toContain(
@@ -91,13 +91,13 @@ describe("scripts/test-live-codex-harness-docker.sh", () => {
     const script = fs.readFileSync(SCRIPT_PATH, "utf8");
 
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_BIND_PROVIDER="${OPENCLAW_LIVE_CODEX_BIND_PROVIDER:-}"',
+      '-e BOT_LIVE_CODEX_BIND_PROVIDER="${BOT_LIVE_CODEX_BIND_PROVIDER:-}"',
     );
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_BIND_REQUEST_TIMEOUT_MS="${OPENCLAW_LIVE_CODEX_BIND_REQUEST_TIMEOUT_MS:-}"',
+      '-e BOT_LIVE_CODEX_BIND_REQUEST_TIMEOUT_MS="${BOT_LIVE_CODEX_BIND_REQUEST_TIMEOUT_MS:-}"',
     );
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_BIND_TIMEOUT_MS="${OPENCLAW_LIVE_CODEX_BIND_TIMEOUT_MS:-}"',
+      '-e BOT_LIVE_CODEX_BIND_TIMEOUT_MS="${BOT_LIVE_CODEX_BIND_TIMEOUT_MS:-}"',
     );
   });
 
@@ -105,34 +105,34 @@ describe("scripts/test-live-codex-harness-docker.sh", () => {
     const script = fs.readFileSync(SCRIPT_PATH, "utf8");
 
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_HARNESS_RESUME_STRESS="${OPENCLAW_LIVE_CODEX_HARNESS_RESUME_STRESS:-0}"',
+      '-e BOT_LIVE_CODEX_HARNESS_RESUME_STRESS="${BOT_LIVE_CODEX_HARNESS_RESUME_STRESS:-0}"',
     );
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_HARNESS_EXPECTED_EFFORT="${OPENCLAW_LIVE_CODEX_HARNESS_EXPECTED_EFFORT:-}"',
+      '-e BOT_LIVE_CODEX_HARNESS_EXPECTED_EFFORT="${BOT_LIVE_CODEX_HARNESS_EXPECTED_EFFORT:-}"',
     );
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_HARNESS_RESUME_STRESS_HISTORY_TURNS="${OPENCLAW_LIVE_CODEX_HARNESS_RESUME_STRESS_HISTORY_TURNS:-4}"',
+      '-e BOT_LIVE_CODEX_HARNESS_RESUME_STRESS_HISTORY_TURNS="${BOT_LIVE_CODEX_HARNESS_RESUME_STRESS_HISTORY_TURNS:-4}"',
     );
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_HARNESS_RESUME_STRESS_RESTARTS="${OPENCLAW_LIVE_CODEX_HARNESS_RESUME_STRESS_RESTARTS:-3}"',
+      '-e BOT_LIVE_CODEX_HARNESS_RESUME_STRESS_RESTARTS="${BOT_LIVE_CODEX_HARNESS_RESUME_STRESS_RESTARTS:-3}"',
     );
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_HARNESS_SUBAGENT_COUNT="${OPENCLAW_LIVE_CODEX_HARNESS_SUBAGENT_COUNT:-1}"',
+      '-e BOT_LIVE_CODEX_HARNESS_SUBAGENT_COUNT="${BOT_LIVE_CODEX_HARNESS_SUBAGENT_COUNT:-1}"',
     );
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_HARNESS_COMPACTION_STRESS="${OPENCLAW_LIVE_CODEX_HARNESS_COMPACTION_STRESS:-0}"',
+      '-e BOT_LIVE_CODEX_HARNESS_COMPACTION_STRESS="${BOT_LIVE_CODEX_HARNESS_COMPACTION_STRESS:-0}"',
     );
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_HARNESS_COMPACTION_STRESS_TURNS="${OPENCLAW_LIVE_CODEX_HARNESS_COMPACTION_STRESS_TURNS:-4}"',
+      '-e BOT_LIVE_CODEX_HARNESS_COMPACTION_STRESS_TURNS="${BOT_LIVE_CODEX_HARNESS_COMPACTION_STRESS_TURNS:-4}"',
     );
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_HARNESS_LARGE_OUTPUT_BYTES="${OPENCLAW_LIVE_CODEX_HARNESS_LARGE_OUTPUT_BYTES:-300000}"',
+      '-e BOT_LIVE_CODEX_HARNESS_LARGE_OUTPUT_BYTES="${BOT_LIVE_CODEX_HARNESS_LARGE_OUTPUT_BYTES:-300000}"',
     );
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_HARNESS_CODE_MODE_ONLY="${OPENCLAW_LIVE_CODEX_HARNESS_CODE_MODE_ONLY:-0}"',
+      '-e BOT_LIVE_CODEX_HARNESS_CODE_MODE_ONLY="${BOT_LIVE_CODEX_HARNESS_CODE_MODE_ONLY:-0}"',
     );
     expect(script).toContain(
-      '-e OPENCLAW_LIVE_CODEX_HARNESS_DISABLE_LOOP_RELAY="${OPENCLAW_LIVE_CODEX_HARNESS_DISABLE_LOOP_RELAY:-0}"',
+      '-e BOT_LIVE_CODEX_HARNESS_DISABLE_LOOP_RELAY="${BOT_LIVE_CODEX_HARNESS_DISABLE_LOOP_RELAY:-0}"',
     );
   });
 
@@ -141,9 +141,9 @@ describe("scripts/test-live-codex-harness-docker.sh", () => {
 
     expect(script).toContain('"$ROOT_DIR/extensions/codex/package.json"');
     expect(script).toContain("process.stdout.write(`@openai/codex@${version}`);");
-    expect(script).toContain('-e OPENCLAW_LIVE_CODEX_CLI_PACKAGE_SPEC="$CODEX_CLI_PACKAGE_SPEC"');
+    expect(script).toContain('-e BOT_LIVE_CODEX_CLI_PACKAGE_SPEC="$CODEX_CLI_PACKAGE_SPEC"');
     expect(script).toContain(
-      'run_setup_command npm install -g "$OPENCLAW_LIVE_CODEX_CLI_PACKAGE_SPEC"',
+      'run_setup_command npm install -g "$BOT_LIVE_CODEX_CLI_PACKAGE_SPEC"',
     );
     expect(script).not.toContain("run_setup_command npm install -g @openai/codex");
   });
@@ -153,7 +153,7 @@ describe("scripts/test-live-codex-harness-docker.sh", () => {
 
     expect(script).toContain("Failed to extract accountId from token");
     expect(script).toContain(
-      "ERROR: Codex auth cannot extract accountId from the available token; refresh OPENCLAW_CODEX_AUTH_JSON or use OPENCLAW_LIVE_CODEX_HARNESS_AUTH=api-key.",
+      "ERROR: Codex auth cannot extract accountId from the available token; refresh BOT_CODEX_AUTH_JSON or use BOT_LIVE_CODEX_HARNESS_AUTH=api-key.",
     );
     expect(script).not.toContain(
       "SKIP: Codex auth cannot extract accountId from the available token; skipping live Codex harness lane.",
@@ -173,13 +173,13 @@ describe("scripts/test-live-codex-harness-docker.sh", () => {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_LIVE_CODEX_HARNESS_SETUP_TIMEOUT_SECONDS: "180s",
+        BOT_LIVE_CODEX_HARNESS_SETUP_TIMEOUT_SECONDS: "180s",
       },
     });
 
     expect(result.status).toBe(2);
     expect(result.stderr).toContain(
-      "invalid OPENCLAW_LIVE_CODEX_HARNESS_SETUP_TIMEOUT_SECONDS: 180s",
+      "invalid BOT_LIVE_CODEX_HARNESS_SETUP_TIMEOUT_SECONDS: 180s",
     );
     expect(result.stderr).not.toContain("requires ~/.codex/auth.json");
     expect(result.stderr).not.toContain("docker");

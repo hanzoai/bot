@@ -27,7 +27,7 @@ export function createReplyDispatchEvent(
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.dispatchFromConfigTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.dispatchFromConfigTestApi")] = {
     createReplyDispatchEvent,
   };
 }

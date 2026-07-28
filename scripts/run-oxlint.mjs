@@ -40,7 +40,7 @@ const OXLINT_VALUE_FLAGS = new Set([
   "--tsconfig",
   "--warn",
 ]);
-const OPENCLAW_FOCUSED_CONFIG_FLAG = "--openclaw-focused-config";
+const BOT_FOCUSED_CONFIG_FLAG = "--bot-focused-config";
 
 /**
  * Returns whether oxlint args need package-boundary declaration artifacts first.
@@ -220,8 +220,8 @@ async function prepareExtensionPackageBoundaryArtifacts(env) {
  * Applies wrapper policy and runs oxlint with the final argument list.
  */
 export async function main(argv = process.argv.slice(2), runtimeEnv = process.env) {
-  const focusedConfig = argv.includes(OPENCLAW_FOCUSED_CONFIG_FLAG);
-  const oxlintArgs = argv.filter((arg) => arg !== OPENCLAW_FOCUSED_CONFIG_FLAG);
+  const focusedConfig = argv.includes(BOT_FOCUSED_CONFIG_FLAG);
+  const oxlintArgs = argv.filter((arg) => arg !== BOT_FOCUSED_CONFIG_FLAG);
   const localEnv = resolveLocalHeavyCheckEnv(runtimeEnv);
   // Focused configs are syntax-only guards; keep wrapper process handling
   // without the broad type-aware policy or package artifact preparation.
@@ -233,7 +233,7 @@ export async function main(argv = process.argv.slice(2), runtimeEnv = process.en
   const oxlintPath = resolveRepoToolBinPath("oxlint");
   const needsArtifactPreparation =
     !focusedConfig &&
-    env.OPENCLAW_OXLINT_SKIP_PREPARE !== "1" &&
+    env.BOT_OXLINT_SKIP_PREPARE !== "1" &&
     shouldPrepareExtensionPackageBoundaryArtifacts(finalArgs);
   if (sparseTargets.skippedTargets.length > 0) {
     console.error(
@@ -252,7 +252,7 @@ export async function main(argv = process.argv.slice(2), runtimeEnv = process.en
   }
 
   const releaseLock =
-    env.OPENCLAW_OXLINT_SKIP_LOCK === "1" || focusedConfig
+    env.BOT_OXLINT_SKIP_LOCK === "1" || focusedConfig
       ? () => {}
       : shouldAcquireLocalHeavyCheckLockForOxlint(finalArgs, {
             cwd: process.cwd(),

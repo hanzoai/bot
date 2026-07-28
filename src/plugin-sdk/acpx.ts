@@ -17,12 +17,12 @@ export type {
   AcpRuntimeTurnResult,
   AcpRuntimeTurnResultError,
   AcpSessionUpdateTag,
-} from "@openclaw/acp-core/runtime/types";
+} from "@hanzo/bot-acp-core/runtime/types";
 export type {
-  OpenClawPluginApi,
-  OpenClawPluginConfigSchema,
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
+  BotPluginApi,
+  BotPluginConfigSchema,
+  BotPluginService,
+  BotPluginServiceContext,
   PluginLogger,
 } from "../plugins/types.js";
 export type {

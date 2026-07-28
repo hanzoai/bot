@@ -5,7 +5,7 @@ import path from "node:path";
 import type {
   OpenKeyedStoreOptions,
   PluginStateKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/plugin-state-runtime";
 import pMap, { pMapSkip } from "p-map";
 
 const LEGACY_IMPORT_RUN_READ_CONCURRENCY = 16;
@@ -66,7 +66,7 @@ let configuredImportRunStore: MemoryWikiImportRunStateStore | undefined;
 const memoryImportRunsByVault = new Map<string, Map<string, ChatGptImportRunRecord>>();
 
 export function resolveMemoryWikiImportRunsDir(vaultRoot: string): string {
-  return path.join(vaultRoot, ".openclaw-wiki", "import-runs");
+  return path.join(vaultRoot, ".bot-wiki", "import-runs");
 }
 
 function resolveVaultRootKey(vaultRoot: string): string {

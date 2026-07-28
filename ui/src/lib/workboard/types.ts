@@ -4,11 +4,11 @@ import type {
   WorkboardPriority,
   WorkboardStatus,
   WorkboardTemplateId,
-} from "@openclaw/workboard-contract";
+} from "@hanzo/bot-workboard-contract";
 import type { GatewaySessionRow } from "../../api/types.ts";
 
-export * from "@openclaw/workboard-contract";
-export type { WorkboardBoardSummary } from "@openclaw/workboard-contract";
+export * from "@hanzo/bot-workboard-contract";
+export type { WorkboardBoardSummary } from "@hanzo/bot-workboard-contract";
 
 type WorkboardLifecycleState =
   | "unlinked"

@@ -1,20 +1,20 @@
 // Frontmatter helpers parse skill metadata from SKILL.md files.
-import { readStringValue } from "@openclaw/normalization-core/string-coerce";
+import { readStringValue } from "@hanzo/bot-normalization-core/string-coerce";
 import { parseFrontmatterBlockResult } from "../../../packages/markdown-core/src/frontmatter.js";
 import { validateRegistryNpmSpec } from "../../infra/npm-registry-spec.js";
 import {
-  applyOpenClawManifestInstallCommonFields,
+  applyBotManifestInstallCommonFields,
   getFrontmatterString,
   normalizeStringList,
-  parseOpenClawManifestInstallBase,
+  parseBotManifestInstallBase,
   parseFrontmatterBool,
-  resolveOpenClawManifestBlock,
-  resolveOpenClawManifestInstall,
-  resolveOpenClawManifestOs,
-  resolveOpenClawManifestRequires,
+  resolveBotManifestBlock,
+  resolveBotManifestInstall,
+  resolveBotManifestOs,
+  resolveBotManifestRequires,
 } from "../../shared/frontmatter.js";
 import type {
-  OpenClawSkillMetadata,
+  BotSkillMetadata,
   ParsedSkillFrontmatter,
   SkillEntry,
   SkillInstallSpec,
@@ -116,12 +116,12 @@ function normalizeSafeDownloadUrl(raw: unknown): string | undefined {
 }
 
 function parseInstallSpec(input: unknown): SkillInstallSpec | undefined {
-  const parsed = parseOpenClawManifestInstallBase(input, ["brew", "node", "go", "uv", "download"]);
+  const parsed = parseBotManifestInstallBase(input, ["brew", "node", "go", "uv", "download"]);
   if (!parsed) {
     return undefined;
   }
   const { raw } = parsed;
-  const spec = applyOpenClawManifestInstallCommonFields<SkillInstallSpec>(
+  const spec = applyBotManifestInstallCommonFields<SkillInstallSpec>(
     {
       kind: parsed.kind as SkillInstallSpec["kind"],
     },
@@ -190,16 +190,16 @@ function parseInstallSpec(input: unknown): SkillInstallSpec | undefined {
   return spec;
 }
 
-export function resolveOpenClawMetadata(
+export function resolveBotMetadata(
   frontmatter: ParsedSkillFrontmatter,
-): OpenClawSkillMetadata | undefined {
-  const metadataObj = resolveOpenClawManifestBlock({ frontmatter });
+): BotSkillMetadata | undefined {
+  const metadataObj = resolveBotManifestBlock({ frontmatter });
   if (!metadataObj) {
     return undefined;
   }
-  const requires = resolveOpenClawManifestRequires(metadataObj);
-  const install = resolveOpenClawManifestInstall(metadataObj, parseInstallSpec);
-  const osRaw = resolveOpenClawManifestOs(metadataObj);
+  const requires = resolveBotManifestRequires(metadataObj);
+  const install = resolveBotManifestInstall(metadataObj, parseInstallSpec);
+  const osRaw = resolveBotManifestOs(metadataObj);
   return {
     always: typeof metadataObj.always === "boolean" ? metadataObj.always : undefined,
     emoji: readStringValue(metadataObj.emoji),

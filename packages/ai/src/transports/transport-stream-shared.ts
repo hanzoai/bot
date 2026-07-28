@@ -3,8 +3,8 @@
  *
  * Sanitizes provider payloads, merges metadata, and formats streamed assistant events.
  */
-import type { Usage } from "@openclaw/llm-core";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import type { Usage } from "@hanzo/bot-llm-core";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { sanitizeSurrogates } from "../internal/shared.js";
 import { createAssistantMessageEventStream } from "../utils/event-stream.js";
 import { redactSensitiveText } from "./transport-utils.js";

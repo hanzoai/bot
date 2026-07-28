@@ -1,8 +1,8 @@
-// Configured OpenClaw assistant tests cover route-owned, tool-free planning.
+// Configured Bot assistant tests cover route-owned, tool-free planning.
 import { describe, expect, it, vi } from "vitest";
 import type { RunCliAgentParams } from "../agents/cli-runner/types.js";
 import { fingerprintResolvedProviderAuth } from "../agents/execution-auth-binding.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { planSystemAgentCommandWithConfiguredModel } from "./assistant.js";
 import { SystemAgentInferenceUnavailableError } from "./inference-error.js";
 import { resolveSystemAgentConfiguredRouteFromConfig } from "./inference-route.js";
@@ -26,7 +26,7 @@ vi.mock("../agents/harness/runtime-plugin.js", async (importOriginal) => ({
 function overview(defaultModel?: string): SystemAgentOverview {
   return {
     config: {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       exists: true,
       valid: true,
       issues: [],
@@ -43,15 +43,15 @@ function overview(defaultModel?: string): SystemAgentOverview {
     },
     gateway: { url: "ws://127.0.0.1:18789", source: "local loopback", reachable: false },
     references: {
-      docsUrl: "https://docs.openclaw.ai",
-      sourceUrl: "https://github.com/openclaw/openclaw",
+      docsUrl: "https://docs.bot.ai",
+      sourceUrl: "https://github.com/hanzoai/bot",
     },
   };
 }
 
-function snapshot(config: OpenClawConfig) {
+function snapshot(config: BotConfig) {
   return {
-    path: "/tmp/openclaw.json",
+    path: "/tmp/bot.json",
     exists: true,
     valid: true,
     hash: "hash",
@@ -62,7 +62,7 @@ function snapshot(config: OpenClawConfig) {
   };
 }
 
-describe("OpenClaw configured-model planner", () => {
+describe("Bot configured-model planner", () => {
   it("rejects a low-level missing binding before config lookup or model execution", async () => {
     const readConfigFileSnapshot = vi.fn();
     const runCliAgent = vi.fn();
@@ -87,13 +87,13 @@ describe("OpenClaw configured-model planner", () => {
       agents: {
         defaults: {
           model: "openai/gpt-5.5",
-          models: { "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } } },
+          models: { "openai/gpt-5.5": { agentRuntime: { id: "bot" } } },
         },
       },
       auth: {
         profiles: { "openai:p2": { provider: "openai", mode: "api_key" } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const configuredRoute = await resolveSystemAgentConfiguredRouteFromConfig(config);
     if (!configuredRoute) {
       throw new Error("missing test route");
@@ -144,7 +144,7 @@ describe("OpenClaw configured-model planner", () => {
         ...authDeps,
         readConfigFileSnapshot: vi.fn(async () => snapshot(config)) as never,
         runEmbeddedAgent: runEmbeddedAgent as never,
-        createTempDir: async () => "/tmp/openclaw-planner",
+        createTempDir: async () => "/tmp/bot-planner",
         removeTempDir: async () => {},
       },
     });
@@ -173,7 +173,7 @@ describe("OpenClaw configured-model planner", () => {
   it("fails closed before planning when the verified route loses its config", async () => {
     const config = {
       agents: { defaults: { model: "openai/gpt-5.5" } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const { binding, deps } = await createSystemAgentVerifiedInferenceTestFixture(config);
     const runCliAgent = vi.fn();
     const runEmbeddedAgent = vi.fn();
@@ -204,12 +204,12 @@ describe("OpenClaw configured-model planner", () => {
   it("rejects a model result when its owner changes during planner cleanup", async () => {
     const config = {
       agents: { defaults: { model: "openai/gpt-5.5" } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const changedConfig = {
       agents: { defaults: { model: "anthropic/claude-opus-4-8" } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const { binding, deps } = await createSystemAgentVerifiedInferenceTestFixture(config);
-    let currentConfig: OpenClawConfig = config;
+    let currentConfig: BotConfig = config;
     const runEmbeddedAgent = vi.fn(async () => ({
       payloads: [{ text: '{"reply":"Ready."}' }],
     }));
@@ -223,7 +223,7 @@ describe("OpenClaw configured-model planner", () => {
           ...deps,
           readConfigFileSnapshot: vi.fn(async () => snapshot(currentConfig)) as never,
           runEmbeddedAgent: runEmbeddedAgent as never,
-          createTempDir: async () => "/tmp/openclaw-planner",
+          createTempDir: async () => "/tmp/bot-planner",
           removeTempDir: async () => {
             currentConfig = changedConfig;
           },
@@ -234,7 +234,7 @@ describe("OpenClaw configured-model planner", () => {
   });
 
   it("plans through the configured default agent CLI route with native tools disabled", async () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       agents: {
         defaults: {},
         list: [
@@ -265,7 +265,7 @@ describe("OpenClaw configured-model planner", () => {
         readConfigFileSnapshot: vi.fn(async () => snapshot(config)) as never,
         runCliAgent: runCliAgent as never,
         runEmbeddedAgent: vi.fn() as never,
-        createTempDir: async () => "/tmp/openclaw-planner",
+        createTempDir: async () => "/tmp/bot-planner",
         removeTempDir,
       },
     });
@@ -284,17 +284,17 @@ describe("OpenClaw configured-model planner", () => {
         authProfileId: "claude-cli:ops",
         executionMode: "side-question",
         disableTools: true,
-        workspaceDir: "/tmp/openclaw-planner",
-        cwd: "/tmp/openclaw-planner",
+        workspaceDir: "/tmp/bot-planner",
+        cwd: "/tmp/bot-planner",
         cleanupCliLiveSessionOnRunEnd: true,
       }),
     );
     expect(runCliAgent.mock.calls[0]?.[0]?.toolsAllow).toBeUndefined();
-    expect(removeTempDir).toHaveBeenCalledWith("/tmp/openclaw-planner");
+    expect(removeTempDir).toHaveBeenCalledWith("/tmp/bot-planner");
   });
 
   it("plans through the configured default agent embedded runtime without tools", async () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       agents: {
         list: [
           {
@@ -321,7 +321,7 @@ describe("OpenClaw configured-model planner", () => {
         readConfigFileSnapshot: vi.fn(async () => snapshot(config)) as never,
         runCliAgent: vi.fn() as never,
         runEmbeddedAgent: runEmbeddedAgent as never,
-        createTempDir: async () => "/tmp/openclaw-planner",
+        createTempDir: async () => "/tmp/bot-planner",
         removeTempDir: async () => {},
         resolveAssistantTimeoutMs: () => 120_000,
       },
@@ -365,7 +365,7 @@ describe("OpenClaw configured-model planner", () => {
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const { binding, deps } = await createSystemAgentVerifiedInferenceTestFixture(config);
     const runEmbeddedAgent = vi.fn(async () => ({
       payloads: [{ text: '{"reply":"Ready.","command":"gateway status"}' }],
@@ -379,7 +379,7 @@ describe("OpenClaw configured-model planner", () => {
         ...deps,
         readConfigFileSnapshot: vi.fn(async () => snapshot(config)) as never,
         runEmbeddedAgent: runEmbeddedAgent as never,
-        createTempDir: async () => "/tmp/openclaw-planner",
+        createTempDir: async () => "/tmp/bot-planner",
         removeTempDir: async () => {},
       },
     });

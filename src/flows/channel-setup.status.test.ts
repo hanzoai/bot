@@ -273,7 +273,7 @@ describe("resolveChannelSetupSelectionContributions", () => {
       }),
     );
 
-    await withEnvAsync({ OPENCLAW_LOCALE: "zh-CN" }, async () => {
+    await withEnvAsync({ BOT_LOCALE: "zh-CN" }, async () => {
       const summary = await collectChannelStatus({
         cfg: {} as never,
         accountOverrides: {},
@@ -294,7 +294,7 @@ describe("resolveChannelSetupSelectionContributions", () => {
     listChatChannels.mockReturnValue([makeMeta("discord", "Discord")]);
     isChannelConfigured.mockReturnValue(true);
 
-    await withEnvAsync({ OPENCLAW_LOCALE: "zh-CN" }, async () => {
+    await withEnvAsync({ BOT_LOCALE: "zh-CN" }, async () => {
       await noteChannelStatus({
         cfg: {} as never,
         prompter: { note } as never,
@@ -328,10 +328,10 @@ describe("resolveChannelSetupSelectionContributions", () => {
     expect(note).toHaveBeenCalledWith(
       [
         "Inbound DM safety defaults to pairing: unknown senders get a pairing code first.",
-        "Approve with: openclaw pairing approve <channel> <code>",
+        "Approve with: bot pairing approve <channel> <code>",
         'Open/public DMs require dmPolicy="open" plus allowFrom=["*"].',
-        'For multi-user DMs, isolate sessions with: openclaw config set session.dmScope "per-channel-peer" (or "per-account-channel-peer" for multi-account channels).',
-        "Docs: https://docs.openclaw.ai/channels/pairing",
+        'For multi-user DMs, isolate sessions with: bot config set session.dmScope "per-channel-peer" (or "per-account-channel-peer" for multi-account channels).',
+        "Docs: https://docs.bot.ai/channels/pairing",
         "",
         "bad\\nid: Blurb\\nline",
       ].join("\n"),
@@ -342,7 +342,7 @@ describe("resolveChannelSetupSelectionContributions", () => {
   it("localizes built-in channel primer copy", async () => {
     const note = vi.fn(async () => undefined);
 
-    await withEnvAsync({ OPENCLAW_LOCALE: "zh-CN" }, async () => {
+    await withEnvAsync({ BOT_LOCALE: "zh-CN" }, async () => {
       await noteChannelPrimer(
         { note } as never,
         [
@@ -407,7 +407,7 @@ describe("resolveChannelSetupSelectionContributions", () => {
     if (typeof docsLink !== "function") {
       throw new Error("Expected docs link formatter");
     }
-    expect(docsLink("/channels/zalo", "Docs")).toBe("https://docs.openclaw.ai/channels/zalo");
+    expect(docsLink("/channels/zalo", "Docs")).toBe("https://docs.bot.ai/channels/zalo");
     expect(lines).toEqual(["Zalo\\nBot — Setup\\nhelp"]);
   });
 
@@ -430,7 +430,7 @@ describe("resolveChannelSetupSelectionContributions", () => {
       }),
     );
 
-    withEnv({ OPENCLAW_LOCALE: "zh-CN" }, () => {
+    withEnv({ BOT_LOCALE: "zh-CN" }, () => {
       const lines = resolveChannelSelectionNoteLines({
         cfg: {} as never,
         installedPlugins: [],

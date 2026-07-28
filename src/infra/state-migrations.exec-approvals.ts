@@ -3,8 +3,8 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { root, type Root } from "@openclaw/fs-safe";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
+import { runBotStateWriteTransaction } from "../state/bot-state-db.js";
 import { formatErrorMessage } from "./errors.js";
 import {
   resolveExecApprovalsPath,
@@ -41,7 +41,7 @@ const MIGRATION_LOCK_POLL_INTERVAL_MS = 25;
 const utf8Decoder = new TextDecoder("utf-8", { fatal: true });
 
 type ExecApprovalsMigrationDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  BotStateKyselyDatabase,
   "exec_approvals_config" | "migration_runs" | "migration_sources"
 >;
 
@@ -59,7 +59,7 @@ export function detectLegacyExecApprovals(params: {
   stateDir: string;
   doctorOnlyStateMigrations?: boolean;
 }): LegacyExecApprovalsDetection {
-  const env = { ...process.env, OPENCLAW_STATE_DIR: params.stateDir };
+  const env = { ...process.env, BOT_STATE_DIR: params.stateDir };
   const sourcePath = resolveExecApprovalsPath(env);
   const sourcePresent = legacyMigrationSourceOrClaimMayExist(sourcePath, DOCTOR_CLAIM_SUFFIX);
   return {
@@ -108,7 +108,7 @@ function decideAndRecordMigration(params: {
   const legacyFile =
     params.snapshot.raw === null ? null : tryParsePersistedExecApprovals(params.snapshot.raw);
 
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db }) => {
       const stateDb = getNodeSqliteKysely<ExecApprovalsMigrationDatabase>(db);
       const canonical = readExecApprovalsConfigRow(db);
@@ -253,7 +253,7 @@ function decideAndRecordMigration(params: {
 }
 
 function markSourceRemoved(sourceKey: string, env: NodeJS.ProcessEnv): void {
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       executeSqliteQuerySync(
         db,
@@ -468,7 +468,7 @@ export async function migrateLegacyExecApprovals(params: {
   if (!detected?.hasLegacy) {
     return { changes: [], warnings: [] };
   }
-  const env = { ...(params.env ?? process.env), OPENCLAW_STATE_DIR: params.stateDir };
+  const env = { ...(params.env ?? process.env), BOT_STATE_DIR: params.stateDir };
   let lock: Awaited<ReturnType<typeof acquireGatewayLock>>;
   try {
     lock = await acquireGatewayLock({
@@ -486,7 +486,7 @@ export async function migrateLegacyExecApprovals(params: {
     return {
       changes: [],
       warnings: [
-        `Failed migrating legacy exec approvals: ${detail}. Stop the Gateway, then run \`openclaw doctor --fix\` again.`,
+        `Failed migrating legacy exec approvals: ${detail}. Stop the Gateway, then run \`bot doctor --fix\` again.`,
       ],
     };
   }

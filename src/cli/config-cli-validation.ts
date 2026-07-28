@@ -1,10 +1,10 @@
-import { isRecord as isPlainRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord as isPlainRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { ConfigFileSnapshot } from "../config/config.js";
 import { readConfigFileSnapshot } from "../config/config.js";
 import { formatConfigIssueLines } from "../config/issue-format.js";
 import { attachConfigIssueDiagnostics } from "../config/issue-location.js";
 import { isPluginPackagingRuntimeOutputInvalidConfigSnapshot } from "../config/recovery-policy.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   coerceSecretRef,
   resolveSecretInputRef,
@@ -37,7 +37,7 @@ function formatInvalidConfigRepairHint(
 ): string {
   return isPluginPackagingRuntimeOutputInvalidConfigSnapshot(snapshot)
     ? formatPluginPackagingRuntimeOutputRecoveryHint()
-    : `Run \`${formatCliCommand("openclaw doctor --fix")}\` ${doctorMessage}`;
+    : `Run \`${formatCliCommand("bot doctor --fix")}\` ${doctorMessage}`;
 }
 
 export async function loadValidConfig(runtime: RuntimeEnv = defaultRuntime) {
@@ -45,7 +45,7 @@ export async function loadValidConfig(runtime: RuntimeEnv = defaultRuntime) {
   if (snapshot.valid) {
     return snapshot;
   }
-  runtime.error(`OpenClaw config is invalid: ${shortenHomePath(snapshot.path)}`);
+  runtime.error(`Bot config is invalid: ${shortenHomePath(snapshot.path)}`);
   const displayIssues = attachConfigIssueDiagnostics(snapshot.issues, {
     raw: snapshot.raw,
     parsed: snapshot.parsed,
@@ -83,7 +83,7 @@ function collectSecretRefsFromUnknown(value: unknown): SecretRef[] {
 }
 
 export function collectDryRunRefs(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   operations: ConfigSetOperation[];
 }): SecretRef[] {
   const refsByKey = new Map<string, SecretRef>();
@@ -132,7 +132,7 @@ export function collectDryRunRefs(params: {
 
 export async function collectDryRunResolvabilityErrors(params: {
   refs: SecretRef[];
-  config: OpenClawConfig;
+  config: BotConfig;
 }): Promise<ConfigSetDryRunError[]> {
   const failures: ConfigSetDryRunError[] = [];
   for (const ref of params.refs) {
@@ -151,7 +151,7 @@ export async function collectDryRunResolvabilityErrors(params: {
 
 export function collectDryRunStaticErrorsForSkippedExecRefs(params: {
   refs: SecretRef[];
-  config: OpenClawConfig;
+  config: BotConfig;
 }): ConfigSetDryRunError[] {
   const failures: ConfigSetDryRunError[] = [];
   for (const ref of params.refs) {
@@ -207,7 +207,7 @@ export function selectDryRunRefsForResolution(params: {
   return { refsToResolve, skippedExecRefs };
 }
 
-export function collectDryRunSchemaErrors(config: OpenClawConfig): ConfigSetDryRunError[] {
+export function collectDryRunSchemaErrors(config: BotConfig): ConfigSetDryRunError[] {
   const validated = validateConfigObjectRawWithPlugins(config);
   if (validated.ok) {
     return [];
@@ -226,7 +226,7 @@ function touchesSecretProviderCollection(path: readonly string[]): boolean {
 }
 
 export function collectPluginIntegrationProviderErrors(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   operations: ConfigSetOperation[];
 }): ConfigSetDryRunError[] {
   const providers = params.config.secrets?.providers ?? {};

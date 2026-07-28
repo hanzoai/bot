@@ -8,7 +8,7 @@ import {
 // The env variable name is part of the observable contract the messages
 // reference; the mode resolver is internal and proven through the public
 // isGatewayExternallySupervised surface.
-const GATEWAY_SUPERVISOR_MODE_ENV = "OPENCLAW_SUPERVISOR_MODE";
+const GATEWAY_SUPERVISOR_MODE_ENV = "BOT_SUPERVISOR_MODE";
 
 describe("gateway supervision", () => {
   it.each([
@@ -29,8 +29,8 @@ describe("gateway supervision", () => {
         [GATEWAY_SUPERVISOR_MODE_ENV]: "external",
       }),
     ).toThrow(
-      "OpenClaw gateway lifecycle is managed by an external supervisor " +
-        "(OPENCLAW_SUPERVISOR_MODE=external). Use that supervisor to restart the gateway.",
+      "Bot gateway lifecycle is managed by an external supervisor " +
+        "(BOT_SUPERVISOR_MODE=external). Use that supervisor to restart the gateway.",
     );
   });
 

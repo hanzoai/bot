@@ -12,7 +12,7 @@ import { t } from "../../i18n/index.ts";
 import { normalizeAgentLabel } from "../../lib/agents/display.ts";
 import { isGatewayMethodAdvertised } from "../../lib/gateway-methods.ts";
 import { normalizeAgentId } from "../../lib/sessions/session-key.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import {
   buildModelProviderCards,
@@ -87,7 +87,7 @@ function mergeProbeResults(cardId: string, results: ModelsProbeResult[]): Models
   };
 }
 
-export class ModelProvidersPage extends OpenClawLightDomElement {
+export class ModelProvidersPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -684,6 +684,6 @@ export class ModelProvidersPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-model-providers-page")) {
-  customElements.define("openclaw-model-providers-page", ModelProvidersPage);
+if (!customElements.get("bot-model-providers-page")) {
+  customElements.define("bot-model-providers-page", ModelProvidersPage);
 }

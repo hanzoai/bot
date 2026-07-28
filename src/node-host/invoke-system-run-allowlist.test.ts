@@ -3,7 +3,7 @@ import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import { resolveExecApprovalsFromFile, type ExecCommandSegment } from "../infra/exec-approvals.js";
 import { planShellAuthorization } from "../infra/exec-authorization-plan.js";
@@ -180,7 +180,7 @@ describe("resolveSystemRunExecArgv", () => {
   it.runIf(process.platform === "win32")(
     "executes the allowlisted path instead of a workspace shadow executable",
     async () => {
-      const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-windows-shadow-"));
+      const fixtureRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-windows-shadow-"));
       const trustedBin = path.join(fixtureRoot, "trusted-bin");
       const workspace = path.join(fixtureRoot, "workspace");
       fs.mkdirSync(trustedBin);

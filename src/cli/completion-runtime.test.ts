@@ -21,10 +21,10 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 async function withBashCompletionHome(
   run: (paths: { homeDir: string; stateDir: string }) => Promise<void>,
 ): Promise<void> {
-  const homeDir = tempDirs.make("openclaw-bash-completion-home-");
-  const stateDir = tempDirs.make("openclaw-bash-completion-state-");
+  const homeDir = tempDirs.make("bot-bash-completion-home-");
+  const stateDir = tempDirs.make("bot-bash-completion-state-");
 
-  await withEnvAsync({ HOME: homeDir, OPENCLAW_STATE_DIR: stateDir }, async () => {
+  await withEnvAsync({ HOME: homeDir, BOT_STATE_DIR: stateDir }, async () => {
     await run({ homeDir, stateDir });
   });
 }
@@ -38,16 +38,16 @@ describe("completion-runtime", () => {
 
   it("recognizes cached Bash completion installed into the login profile", async () => {
     await withBashCompletionHome(async ({ homeDir }) => {
-      const cachePath = resolveCompletionCachePath("bash", "openclaw");
+      const cachePath = resolveCompletionCachePath("bash", "bot");
       await fs.mkdir(path.dirname(cachePath), { recursive: true });
-      await fs.writeFile(cachePath, "complete -W 'status' openclaw\n", "utf-8");
+      await fs.writeFile(cachePath, "complete -W 'status' bot\n", "utf-8");
 
-      await installCompletion("bash", true, "openclaw");
+      await installCompletion("bash", true, "bot");
 
       const profilePath = path.join(homeDir, ".bash_profile");
       await expect(fs.readFile(profilePath, "utf-8")).resolves.toContain(cachePath);
-      await expect(isCompletionInstalled("bash", "openclaw")).resolves.toBe(true);
-      await expect(usesSlowDynamicCompletion("bash", "openclaw")).resolves.toBe(false);
+      await expect(isCompletionInstalled("bash", "bot")).resolves.toBe(true);
+      await expect(usesSlowDynamicCompletion("bash", "bot")).resolves.toBe(false);
 
       const shell = spawnSync(
         "bash",
@@ -55,15 +55,15 @@ describe("completion-runtime", () => {
           "--noprofile",
           "--norc",
           "-c",
-          'source "$1"; complete -p openclaw',
-          "openclaw",
+          'source "$1"; complete -p bot',
+          "bot",
           profilePath,
         ],
         { encoding: "utf8" },
       );
       expect(shell.stderr).toBe("");
       expect(shell.status).toBe(0);
-      expect(shell.stdout).toContain("complete -W 'status' openclaw");
+      expect(shell.stdout).toContain("complete -W 'status' bot");
     });
   });
 
@@ -71,12 +71,12 @@ describe("completion-runtime", () => {
     await withBashCompletionHome(async ({ homeDir }) => {
       await fs.writeFile(
         path.join(homeDir, ".bash_profile"),
-        "source <(openclaw completion --shell bash)\n",
+        "source <(bot completion --shell bash)\n",
         "utf-8",
       );
 
-      await expect(isCompletionInstalled("bash", "openclaw")).resolves.toBe(true);
-      await expect(usesSlowDynamicCompletion("bash", "openclaw")).resolves.toBe(true);
+      await expect(isCompletionInstalled("bash", "bot")).resolves.toBe(true);
+      await expect(usesSlowDynamicCompletion("bash", "bot")).resolves.toBe(true);
     });
   });
 
@@ -84,21 +84,21 @@ describe("completion-runtime", () => {
     await withBashCompletionHome(async ({ homeDir }) => {
       const bashrc = path.join(homeDir, ".bashrc");
       const bashProfile = path.join(homeDir, ".bash_profile");
-      const cachePath = resolveCompletionCachePath("bash", "openclaw");
+      const cachePath = resolveCompletionCachePath("bash", "bot");
       await fs.writeFile(bashrc, "# existing interactive Bash profile\n", "utf-8");
       await fs.writeFile(bashProfile, "# existing Bash login profile\n", "utf-8");
       await fs.mkdir(path.dirname(cachePath), { recursive: true });
-      await fs.writeFile(cachePath, "complete -W 'status' openclaw\n", "utf-8");
+      await fs.writeFile(cachePath, "complete -W 'status' bot\n", "utf-8");
 
       expect(resolveCompletionProfilePath("bash")).toBe(bashrc);
-      await installCompletion("bash", true, "openclaw");
+      await installCompletion("bash", true, "bot");
 
       await expect(fs.readFile(bashrc, "utf-8")).resolves.toContain(cachePath);
       await expect(fs.readFile(bashProfile, "utf-8")).resolves.toBe(
         "# existing Bash login profile\n",
       );
-      await expect(isCompletionInstalled("bash", "openclaw")).resolves.toBe(true);
-      await expect(usesSlowDynamicCompletion("bash", "openclaw")).resolves.toBe(false);
+      await expect(isCompletionInstalled("bash", "bot")).resolves.toBe(true);
+      await expect(usesSlowDynamicCompletion("bash", "bot")).resolves.toBe(false);
     });
   });
 
@@ -157,20 +157,20 @@ describe("completion-runtime", () => {
   });
 
   it("installs PowerShell completion into the concrete profile path", async () => {
-    const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-completion-home-"));
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-completion-state-bob's-"));
+    const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-completion-home-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-completion-state-bob's-"));
 
     try {
-      await withEnvAsync({ HOME: homeDir, OPENCLAW_STATE_DIR: stateDir }, async () => {
-        const cachePath = resolveCompletionCachePath("powershell", "openclaw");
+      await withEnvAsync({ HOME: homeDir, BOT_STATE_DIR: stateDir }, async () => {
+        const cachePath = resolveCompletionCachePath("powershell", "bot");
         await fs.mkdir(path.dirname(cachePath), { recursive: true });
         await fs.writeFile(cachePath, "# powershell completion\n", "utf-8");
 
-        await installCompletion("powershell", true, "openclaw");
+        await installCompletion("powershell", true, "bot");
 
         const profilePath = resolveCompletionProfilePath("powershell");
         const profile = await fs.readFile(profilePath, "utf-8");
-        expect(profile).toBe(`# OpenClaw Completion\n. '${cachePath.replace(/'/g, "''")}'\n`);
+        expect(profile).toBe(`# Bot Completion\n. '${cachePath.replace(/'/g, "''")}'\n`);
       });
     } finally {
       await fs.rm(homeDir, { recursive: true, force: true });
@@ -179,12 +179,12 @@ describe("completion-runtime", () => {
   });
 
   it("rejects install when the completion cache is missing", async () => {
-    const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-completion-home-"));
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-completion-state-"));
+    const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-completion-home-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-completion-state-"));
 
     try {
-      await withEnvAsync({ HOME: homeDir, OPENCLAW_STATE_DIR: stateDir }, async () => {
-        await expect(installCompletion("zsh", true, "openclaw")).rejects.toThrow(
+      await withEnvAsync({ HOME: homeDir, BOT_STATE_DIR: stateDir }, async () => {
+        await expect(installCompletion("zsh", true, "bot")).rejects.toThrow(
           "Completion cache not found",
         );
       });

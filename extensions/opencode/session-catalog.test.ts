@@ -3,11 +3,11 @@ import { once } from "node:events";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { BotPluginApi } from "bot/plugin-sdk/plugin-entry";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 type ResolveAcpSessionAvailability =
-  (typeof import("openclaw/plugin-sdk/acp-runtime"))["resolveAcpSessionAvailability"];
+  (typeof import("bot/plugin-sdk/acp-runtime"))["resolveAcpSessionAvailability"];
 
 const nodeHostMocks = vi.hoisted(() => ({
   runNodePtyCommand: vi.fn(async () => ({ exitCode: 0 })),
@@ -33,14 +33,14 @@ vi.mock("node:child_process", async (importOriginal) => {
   return { ...actual, spawn: childProcessMocks.spawn };
 });
 
-vi.mock("openclaw/plugin-sdk/acp-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/acp-runtime")>()),
+vi.mock("bot/plugin-sdk/acp-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("bot/plugin-sdk/acp-runtime")>()),
   resolveAcpSessionAvailability: acpRuntimeMocks.resolveAcpSessionAvailability,
 }));
 
-vi.mock("openclaw/plugin-sdk/session-transcript-runtime", async (importOriginal) => {
+vi.mock("bot/plugin-sdk/session-transcript-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/session-transcript-runtime")>();
+    await importOriginal<typeof import("bot/plugin-sdk/session-transcript-runtime")>();
   return {
     ...actual,
     withSessionTranscriptWriteLock: async (
@@ -69,8 +69,8 @@ vi.mock("openclaw/plugin-sdk/session-transcript-runtime", async (importOriginal)
   };
 });
 
-vi.mock("openclaw/plugin-sdk/node-host", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/node-host")>();
+vi.mock("bot/plugin-sdk/node-host", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/node-host")>();
   return {
     ...actual,
     runNodePtyCommand: nodeHostMocks.runNodePtyCommand,
@@ -110,30 +110,30 @@ const originalPathExt = process.env.PATHEXT;
 const originalUnrelatedEnv = process.env.CATALOG_UNRELATED_ENV;
 
 function captureOpenCodeSessionRegistrations(pluginConfig: unknown = {}) {
-  const catalogs: Array<Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0]> = [];
-  const commands: Array<Parameters<OpenClawPluginApi["registerNodeHostCommand"]>[0]> = [];
-  const policies: Array<Parameters<OpenClawPluginApi["registerNodeInvokePolicy"]>[0]> = [];
+  const catalogs: Array<Parameters<BotPluginApi["registerSessionCatalog"]>[0]> = [];
+  const commands: Array<Parameters<BotPluginApi["registerNodeHostCommand"]>[0]> = [];
+  const policies: Array<Parameters<BotPluginApi["registerNodeInvokePolicy"]>[0]> = [];
   registerOpenCodeSessionCatalog({
     pluginConfig,
     runtime: { nodes: { list: vi.fn().mockResolvedValue({ nodes: [] }) } },
-    registerSessionCatalog: (catalog: Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0]) =>
+    registerSessionCatalog: (catalog: Parameters<BotPluginApi["registerSessionCatalog"]>[0]) =>
       catalogs.push(catalog),
     registerNodeHostCommand: (
-      command: Parameters<OpenClawPluginApi["registerNodeHostCommand"]>[0],
+      command: Parameters<BotPluginApi["registerNodeHostCommand"]>[0],
     ) => commands.push(command),
     registerNodeInvokePolicy: (
-      policy: Parameters<OpenClawPluginApi["registerNodeInvokePolicy"]>[0],
+      policy: Parameters<BotPluginApi["registerNodeInvokePolicy"]>[0],
     ) => policies.push(policy),
-  } as unknown as OpenClawPluginApi);
+  } as unknown as BotPluginApi);
   return { catalogs, commands, policies };
 }
 
 function captureOpenCodeContinuationCatalog() {
-  let provider: Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0] | undefined;
+  let provider: Parameters<BotPluginApi["registerSessionCatalog"]>[0] | undefined;
   const entries: Array<{ sessionKey: string; entry: Record<string, unknown> }> = [];
   const createSessionEntry = vi.fn(
     async (
-      params: Parameters<OpenClawPluginApi["runtime"]["agent"]["session"]["createSessionEntry"]>[0],
+      params: Parameters<BotPluginApi["runtime"]["agent"]["session"]["createSessionEntry"]>[0],
     ) => {
       const sessionKey = `agent:${params.agentId ?? "main"}:${params.key}`;
       const entry = {
@@ -185,7 +185,7 @@ function captureOpenCodeContinuationCatalog() {
     },
     registerNodeHostCommand: vi.fn(),
     registerNodeInvokePolicy: vi.fn(),
-  } as unknown as OpenClawPluginApi);
+  } as unknown as BotPluginApi);
   return { createSessionEntry, entries, provider: provider! };
 }
 
@@ -194,7 +194,7 @@ async function installFakeOpenCode(
   sessionTitle = "Catalog session",
   toolInput: unknown = { command: "pwd" },
 ): Promise<string> {
-  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-opencode-catalog-"));
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "bot-opencode-catalog-"));
   temporaryDirectories.push(directory);
   const executable = path.join(directory, "opencode");
   const session = {
@@ -268,7 +268,7 @@ if (args[0] === "--pure" && args[1] === "db" && args.includes("--format") && arg
 }
 
 async function installHangingOpenCode(): Promise<void> {
-  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-opencode-stream-"));
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), "bot-opencode-stream-"));
   temporaryDirectories.push(directory);
   const executableName = process.platform === "win32" ? "opencode.js" : "opencode";
   await fs.writeFile(
@@ -405,7 +405,7 @@ describe("OpenCode session catalog", () => {
         "threadId is invalid",
       );
 
-      let provider: Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0] | undefined;
+      let provider: Parameters<BotPluginApi["registerSessionCatalog"]>[0] | undefined;
       registerOpenCodeSessionCatalog({
         pluginConfig: {},
         runtime: { nodes: { list: vi.fn().mockResolvedValue({ nodes: [] }) } },
@@ -414,7 +414,7 @@ describe("OpenCode session catalog", () => {
         },
         registerNodeHostCommand: vi.fn(),
         registerNodeInvokePolicy: vi.fn(),
-      } as unknown as OpenClawPluginApi);
+      } as unknown as BotPluginApi);
       await expect(
         provider!.read({ hostId: "gateway", threadId: "ses_test", limit: 2 }),
       ).resolves.toMatchObject({ threadId: "ses_test", items: expect.any(Array) });
@@ -511,7 +511,7 @@ describe("OpenCode session catalog", () => {
         'Tool call\n\nbash\n{"command":"pwd"}',
         "Tool result\n\n/workspace",
       ]);
-      expect(transcriptMocks.messages[0]?.["__openclaw"]).toEqual({
+      expect(transcriptMocks.messages[0]?.["__bot"]).toEqual({
         mirrorOrigin: "opencode-catalog-import",
       });
     },
@@ -594,7 +594,7 @@ describe("OpenCode session catalog", () => {
     "opens validated local sessions with the upstream terminal resume contract",
     async () => {
       await installFakeOpenCode();
-      let provider: Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0] | undefined;
+      let provider: Parameters<BotPluginApi["registerSessionCatalog"]>[0] | undefined;
       registerOpenCodeSessionCatalog({
         pluginConfig: {},
         runtime: { nodes: { list: vi.fn().mockResolvedValue({ nodes: [] }) } },
@@ -603,7 +603,7 @@ describe("OpenCode session catalog", () => {
         },
         registerNodeHostCommand: vi.fn(),
         registerNodeInvokePolicy: vi.fn(),
-      } as unknown as OpenClawPluginApi);
+      } as unknown as BotPluginApi);
 
       await expect(provider!.list({ hostIds: ["gateway"] })).resolves.toEqual([
         expect.objectContaining({
@@ -672,7 +672,7 @@ describe("OpenCode session catalog", () => {
   );
 
   it("marks paired-node sessions terminal-capable only when the resume command is advertised", async () => {
-    let provider: Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0] | undefined;
+    let provider: Parameters<BotPluginApi["registerSessionCatalog"]>[0] | undefined;
     const page = {
       payloadJSON: JSON.stringify({
         sessions: [
@@ -710,7 +710,7 @@ describe("OpenCode session catalog", () => {
       },
       registerNodeHostCommand: vi.fn(),
       registerNodeInvokePolicy: vi.fn(),
-    } as unknown as OpenClawPluginApi);
+    } as unknown as BotPluginApi);
 
     await expect(
       provider!.list({
@@ -765,7 +765,7 @@ describe("OpenCode session catalog", () => {
   });
 
   it("bridges paired-node list and read requests without undefined transport fields", async () => {
-    let provider: Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0] | undefined;
+    let provider: Parameters<BotPluginApi["registerSessionCatalog"]>[0] | undefined;
     const invoke = vi
       .fn()
       .mockResolvedValueOnce({
@@ -810,7 +810,7 @@ describe("OpenCode session catalog", () => {
       },
       registerNodeHostCommand: vi.fn(),
       registerNodeInvokePolicy: vi.fn(),
-    } as unknown as OpenClawPluginApi;
+    } as unknown as BotPluginApi;
 
     registerOpenCodeSessionCatalog(api);
     const catalog = provider;
@@ -970,7 +970,7 @@ describe("OpenCode session catalog", () => {
   );
 
   it("fans out paired-node listing instead of blocking later hosts", async () => {
-    let provider: Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0] | undefined;
+    let provider: Parameters<BotPluginApi["registerSessionCatalog"]>[0] | undefined;
     let releaseSlow: ((value: unknown) => void) | undefined;
     const slow = new Promise<unknown>((resolve) => {
       releaseSlow = resolve;
@@ -1010,7 +1010,7 @@ describe("OpenCode session catalog", () => {
       },
       registerNodeHostCommand: vi.fn(),
       registerNodeInvokePolicy: vi.fn(),
-    } as unknown as OpenClawPluginApi;
+    } as unknown as BotPluginApi;
     registerOpenCodeSessionCatalog(api);
 
     const listing = provider!.list({ hostIds: ["node:node-a", "node:node-b"] });

@@ -1,14 +1,14 @@
 // Applies Tool Search overlays on top of the selected runtime config.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { applyLocalModelLeanToolSearchDefaults } from "./local-model-lean.js";
 import { resolveAgentRuntimeToolConfig } from "./tool-runtime-config.js";
 
 export function resolveAgentToolSearchRuntimeConfig(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   agentId?: string;
   sessionKey?: string;
   forceDirectMessageTool?: boolean;
-}): OpenClawConfig | undefined {
+}): BotConfig | undefined {
   // Select before overlay cloning; cloning source config first loses snapshot identity and can
   // reintroduce unresolved SecretRefs into plugin tool factories.
   const runtimeConfig = resolveAgentRuntimeToolConfig(params.config);

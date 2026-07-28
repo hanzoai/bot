@@ -2,11 +2,11 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import type { ChannelLegacyStateMigrationPlan } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { fileExists } from "openclaw/plugin-sdk/security-runtime";
-import { resolveStateDir } from "openclaw/plugin-sdk/state-paths";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { ChannelLegacyStateMigrationPlan } from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { fileExists } from "bot/plugin-sdk/security-runtime";
+import { resolveStateDir } from "bot/plugin-sdk/state-paths";
+import { uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   listIMessageAccountIds,
   resolveDefaultIMessageAccountId,
@@ -358,7 +358,7 @@ function detectSentEchoMigration(params: {
 }
 
 function detectCatchupCursorMigrations(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   stateDir?: string;
 }): ChannelLegacyStateMigrationPlan[] {
@@ -419,7 +419,7 @@ function detectCatchupCursorMigrations(params: {
 }
 
 export async function detectIMessageLegacyStateMigrations(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   stateDir?: string;
 }): Promise<ChannelLegacyStateMigrationPlan[]> {

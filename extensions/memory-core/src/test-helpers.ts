@@ -1,9 +1,9 @@
 // Memory Core helper module supports test helpers behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { createPluginStateKeyedStoreForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import type { OpenKeyedStoreOptions } from "bot/plugin-sdk/plugin-state-runtime";
+import { createPluginStateKeyedStoreForTests } from "bot/plugin-sdk/plugin-state-test-runtime";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
 import { afterAll, beforeAll } from "vitest";
 import {
   normalizeDailyIngestionState,
@@ -209,7 +209,7 @@ export function createMemoryCoreTestHarness() {
   beforeAll(async () => {
     await configureMemoryCoreDreamingStateForTests();
     fixtureRoot = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "memory-core-test-fixtures-"),
+      path.join(resolvePreferredBotTmpDir(), "memory-core-test-fixtures-"),
     );
   });
 

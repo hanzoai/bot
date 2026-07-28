@@ -1,5 +1,5 @@
 /** Decides when cron heartbeat acknowledgements should stay out of visible delivery. */
-import { hasOutboundReplyContent } from "openclaw/plugin-sdk/reply-payload";
+import { hasOutboundReplyContent } from "bot/plugin-sdk/reply-payload";
 import { stripHeartbeatToken } from "../auto-reply/heartbeat.js";
 
 type HeartbeatDeliveryPayload = {

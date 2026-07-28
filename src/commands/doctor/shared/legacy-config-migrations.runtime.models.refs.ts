@@ -598,4 +598,4 @@ export function rewriteKnownModelRefs(
 }
 
 export const RETIRED_MODEL_REF_MESSAGE =
-  'Configured retired model refs are no longer in the bundled catalogs; run "openclaw doctor --fix" to upgrade them.';
+  'Configured retired model refs are no longer in the bundled catalogs; run "bot doctor --fix" to upgrade them.';

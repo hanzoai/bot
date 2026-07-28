@@ -1,5 +1,5 @@
 import { consume } from "@lit/context";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { html, nothing } from "lit";
 import { property } from "lit/decorators.js";
 import type { GatewaySessionRow, SessionsListResult } from "../../api/types.ts";
@@ -12,7 +12,7 @@ import { resolveSessionKey } from "../../lib/sessions/index.ts";
 import { sessionNavigationTarget } from "../../lib/sessions/route-navigation.ts";
 import { normalizeAgentId } from "../../lib/sessions/session-key.ts";
 import { filterSkillWorkshopProposals } from "../../lib/skill-workshop/index.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { renderSkillWorkshopHeaderControls, setSkillWorkshopMode } from "./header-controls.ts";
 import {
@@ -301,7 +301,7 @@ function renderSkillWorkshopPage(
   `;
 }
 
-class SkillWorkshopPage extends OpenClawLightDomElement {
+class SkillWorkshopPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context?: SkillWorkshopPageContext;
   @property({ attribute: false }) data?: SkillWorkshopRouteData;
@@ -653,6 +653,6 @@ class SkillWorkshopPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-skill-workshop-page")) {
-  customElements.define("openclaw-skill-workshop-page", SkillWorkshopPage);
+if (!customElements.get("bot-skill-workshop-page")) {
+  customElements.define("bot-skill-workshop-page", SkillWorkshopPage);
 }

@@ -6,12 +6,12 @@
 import {
   asOptionalObjectRecord,
   asOptionalRecord as readRecordField,
-} from "@openclaw/normalization-core/record-coerce";
+} from "@hanzo/bot-normalization-core/record-coerce";
 import {
   normalizeOptionalLowercaseString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import {
   HEARTBEAT_RESPONSE_TOOL_NAME,
   normalizeHeartbeatToolResponse,
@@ -498,17 +498,17 @@ function extractLiveExecOutput(result: unknown): string | undefined {
   return typeof output === "string" ? truncateLiveExecOutput(output) : undefined;
 }
 
-function isOpenClawExecutable(token: string | undefined): boolean {
+function isBotExecutable(token: string | undefined): boolean {
   const executable = normalizeOptionalLowercaseString(token);
-  return executable?.split(/[\\/]/).at(-1) === "openclaw";
+  return executable?.split(/[\\/]/).at(-1) === "bot";
 }
 
-function isOpenClawPackageSpec(token: string | undefined): boolean {
+function isBotPackageSpec(token: string | undefined): boolean {
   const packageSpec = normalizeOptionalLowercaseString(token);
-  return packageSpec?.startsWith("openclaw@") === true && packageSpec.length > "openclaw@".length;
+  return packageSpec?.startsWith("bot@") === true && packageSpec.length > "bot@".length;
 }
 
-function skipOpenClawPackageRunner(
+function skipBotPackageRunner(
   tokens: string[],
   startIndex: number,
 ): { commandIndex: number; acceptsPackageSpec: boolean } {
@@ -561,7 +561,7 @@ function skipOpenClawPackageRunner(
   return { commandIndex, acceptsPackageSpec };
 }
 
-function isOpenClawCronAddShellCommand(args: unknown): boolean {
+function isBotCronAddShellCommand(args: unknown): boolean {
   const record = asOptionalObjectRecord(args);
   const command = readStringValue(record?.command) ?? readStringValue(record?.cmd);
   if (!command || hasTopLevelShellControlOperator(command)) {
@@ -580,7 +580,7 @@ function isOpenClawCronAddShellCommand(args: unknown): boolean {
   while (/^[A-Za-z_][A-Za-z0-9_]*=/u.test(tokens[commandIndex] ?? "")) {
     commandIndex += 1;
   }
-  const packageRunner = skipOpenClawPackageRunner(tokens, commandIndex);
+  const packageRunner = skipBotPackageRunner(tokens, commandIndex);
   commandIndex = packageRunner.commandIndex;
 
   let cliArgIndex = commandIndex + 1;
@@ -594,8 +594,8 @@ function isOpenClawCronAddShellCommand(args: unknown): boolean {
   const action = normalizeOptionalLowercaseString(tokens[cliArgIndex + 1]);
   const actionArgs = tokens.slice(cliArgIndex + 2);
   return (
-    (isOpenClawExecutable(tokens[commandIndex]) ||
-      (packageRunner.acceptsPackageSpec && isOpenClawPackageSpec(tokens[commandIndex]))) &&
+    (isBotExecutable(tokens[commandIndex]) ||
+      (packageRunner.acceptsPackageSpec && isBotPackageSpec(tokens[commandIndex]))) &&
     normalizeOptionalLowercaseString(tokens[cliArgIndex]) === "cron" &&
     (action === "add" || action === "create") &&
     !actionArgs.some((token) => token === "-h" || token === "--help")
@@ -603,7 +603,7 @@ function isOpenClawCronAddShellCommand(args: unknown): boolean {
 }
 
 function didShellCronAddSucceed(args: unknown, result: unknown): boolean {
-  if (!isOpenClawCronAddShellCommand(args)) {
+  if (!isBotCronAddShellCommand(args)) {
     return false;
   }
   const details = readExecToolDetails(result);
@@ -1604,7 +1604,7 @@ export async function handleToolExecutionEnd(
       data: {
         phase: "update",
         title: "Plan updated",
-        source: "openclaw",
+        source: "bot",
         ...planUpdate,
       },
     };

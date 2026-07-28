@@ -1,5 +1,5 @@
 // Cloud-worker dispatch for managed-worktree sessions.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -94,7 +94,7 @@ export const sessionDispatchHandlers: GatewayRequestHandlers = {
         undefined,
         errorShape(
           ErrorCodes.INVALID_REQUEST,
-          `cloud worker dispatch requires the OpenClaw runtime, not ${sessionRuntime}`,
+          `cloud worker dispatch requires the Bot runtime, not ${sessionRuntime}`,
         ),
       );
       return;

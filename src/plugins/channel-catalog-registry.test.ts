@@ -1,5 +1,5 @@
 // Covers channel catalog registry loading and reset behavior.
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "bot/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import type { PluginCandidate, PluginDiscoveryResult } from "./discovery.js";
@@ -11,15 +11,15 @@ afterEach(() => {
   vi.doUnmock("./installed-plugin-index-record-reader.js");
 });
 
-const ENV: NodeJS.ProcessEnv = { HOME: "/tmp/openclaw-test-home" };
+const ENV: NodeJS.ProcessEnv = { HOME: "/tmp/bot-test-home" };
 let loadCase = 0;
 
 const RECORDS: Record<string, PluginInstallRecord> = {
   weixin: {
     source: "npm",
-    spec: "@tencent-weixin/openclaw-weixin@2.3.7",
+    spec: "@tencent-weixin/bot-weixin@2.3.7",
     installPath:
-      "/tmp/openclaw-test-home/.openclaw/npm/node_modules/@tencent-weixin/openclaw-weixin",
+      "/tmp/bot-test-home/.bot/npm/node_modules/@tencent-weixin/bot-weixin",
   } as PluginInstallRecord,
 };
 
@@ -43,7 +43,7 @@ async function loadWithMocks(params: {
     return params.loadRecords ? params.loadRecords(opts.env) : RECORDS;
   });
 
-  vi.doMock("./discovery.js", () => ({ discoverOpenClawPlugins: discoverSpy }));
+  vi.doMock("./discovery.js", () => ({ discoverBotPlugins: discoverSpy }));
   vi.doMock("./installed-plugin-index-record-reader.js", () => ({
     loadInstalledPluginIndexInstallRecordsSync: loadRecordsSpy,
   }));
@@ -76,10 +76,10 @@ function createChannelCandidate(params: {
 }): PluginCandidate {
   return {
     idHint: params.idHint ?? "hint-plugin",
-    source: "/tmp/openclaw-test-plugin/index.js",
-    rootDir: "/tmp/openclaw-test-plugin",
+    source: "/tmp/bot-test-plugin/index.js",
+    rootDir: "/tmp/bot-test-plugin",
     origin: params.origin ?? "global",
-    packageName: "@vendor/openclaw-test-plugin",
+    packageName: "@vendor/bot-test-plugin",
     packageManifest: {
       ...(params.pluginId ? { plugin: { id: params.pluginId } } : {}),
       channel: {
@@ -128,14 +128,14 @@ describe("listChannelCatalogEntries", () => {
     module.listChannelCatalogEntries({ ...baseline, workspaceDir: "/tmp/workspace-b" });
     module.listChannelCatalogEntries({
       ...baseline,
-      env: { HOME: "/tmp/openclaw-other-home" },
+      env: { HOME: "/tmp/bot-other-home" },
     });
     module.listChannelCatalogEntries({ ...baseline, extraPaths: ["/tmp/plugins/b"] });
     module.listChannelCatalogEntries({ ...baseline, installRecords: otherInstallRecords });
     module.listChannelCatalogEntries({ ...baseline, installRecords: otherInstallRecords });
     otherInstallRecords.telegram = {
       source: "npm",
-      spec: "@openclaw/telegram@1.0.0",
+      spec: "@hanzo/bot-telegram@1.0.0",
     } as PluginInstallRecord;
     module.listChannelCatalogEntries({ ...baseline, installRecords: otherInstallRecords });
 
@@ -173,7 +173,7 @@ describe("listChannelCatalogEntries", () => {
     const supplied: Record<string, PluginInstallRecord> = {
       slack: {
         source: "npm",
-        spec: "@openclaw/slack@1.0.0",
+        spec: "@hanzo/bot-slack@1.0.0",
       } as PluginInstallRecord,
     };
 
@@ -244,9 +244,9 @@ describe("listChannelCatalogEntries", () => {
       {
         pluginId: "package-plugin",
         origin: "global",
-        packageName: "@vendor/openclaw-test-plugin",
+        packageName: "@vendor/bot-test-plugin",
         workspaceDir: undefined,
-        rootDir: "/tmp/openclaw-test-plugin",
+        rootDir: "/tmp/bot-test-plugin",
         channel: {
           id: "test-channel",
           name: "Test Channel",

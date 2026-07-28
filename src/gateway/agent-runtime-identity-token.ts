@@ -1,7 +1,7 @@
 // Purpose-scoped local agent runtime identity token for Gateway clients.
 import { createHmac } from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { normalizeChatType } from "../channels/chat-type.js";
 import type { ChannelId } from "../channels/plugins/types.public.js";
 import type { InternalChannelThreadingToolContext } from "../channels/threading-tool-context-internal.js";
@@ -11,7 +11,7 @@ import { normalizeAgentId } from "../routing/session-key.js";
 import { safeEqualSecret } from "../security/secret-equal.js";
 import type { AgentRuntimeMessageActionContext } from "./message-action-turn-capability.js";
 
-const AGENT_RUNTIME_IDENTITY_TOKEN_CONTEXT = "openclaw:gateway-agent-runtime-identity-token:v1";
+const AGENT_RUNTIME_IDENTITY_TOKEN_CONTEXT = "bot:gateway-agent-runtime-identity-token:v1";
 const AGENT_RUNTIME_IDENTITY_TOKEN_KIND = "agent-runtime";
 const MESSAGE_ACTION_TOKEN_TTL_MS = 60_000;
 const CRON_SELF_MANAGEMENT_TOKEN_TTL_MS = 60_000;

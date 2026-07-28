@@ -4,12 +4,12 @@ import { existsSync } from "node:fs";
 import { createRequire } from "node:module";
 import { hostname } from "node:os";
 import type { DatabaseSync } from "node:sqlite";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { getFileLockProcessStartTime, isPidDefinitelyDead } from "../shared/pid-alive.js";
-import { withOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { withOpenClawStateStartupMigrationCheckpointDatabase } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { withBotStateDatabaseReadOnly } from "../state/bot-state-db-readonly.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
+import { withBotStateStartupMigrationCheckpointDatabase } from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 import { VERSION } from "../version.js";
 import {
   executeSqliteQuerySync,
@@ -19,7 +19,7 @@ import {
 import { runSqliteImmediateTransactionSync } from "./sqlite-transaction.js";
 
 type StartupMigrationCheckpointDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  BotStateKyselyDatabase,
   "schema_meta" | "state_leases"
 >;
 
@@ -123,7 +123,7 @@ function withStartupMigrationCheckpointDatabase<T>(
   env: NodeJS.ProcessEnv,
   callback: (db: DatabaseSync) => T,
 ): T {
-  return withOpenClawStateStartupMigrationCheckpointDatabase(callback, { env });
+  return withBotStateStartupMigrationCheckpointDatabase(callback, { env });
 }
 
 function writeStartupMigrationCheckpointDatabase<T>(
@@ -161,11 +161,11 @@ export function hasActiveStartupMigrationLease(
 ): boolean {
   const env = params.env ?? process.env;
   const nowMs = params.nowMs ?? Date.now();
-  const pathname = resolveOpenClawStateSqlitePath(env);
+  const pathname = resolveBotStateSqlitePath(env);
   if (!existsSync(pathname)) {
     return false;
   }
-  return withOpenClawStateDatabaseReadOnly(
+  return withBotStateDatabaseReadOnly(
     ({ db }) => {
       const stateDb = getNodeSqliteKysely<StartupMigrationCheckpointDatabase>(db);
       const lease = executeSqliteQueryTakeFirstSync(
@@ -260,7 +260,7 @@ export function acquireStartupMigrationLease(
     } else if (existing) {
       const ownerHint = existingOwner ? ` (held by pid ${existingOwner.pid})` : "";
       throw new Error(
-        `OpenClaw startup migrations are already running for this state directory; retry after the other gateway finishes or after ${new Date(existing.expiresAt ?? expiresAt).toISOString()}.${ownerHint}`,
+        `Bot startup migrations are already running for this state directory; retry after the other gateway finishes or after ${new Date(existing.expiresAt ?? expiresAt).toISOString()}.${ownerHint}`,
       );
     }
     executeSqliteQuerySync(
@@ -301,7 +301,7 @@ export function acquireStartupMigrationLease(
         );
         if (result.numAffectedRows !== 1n) {
           throw new Error(
-            "OpenClaw startup migration lease was lost before startup migrations completed; restart the gateway so migrations can run under a fresh lease.",
+            "Bot startup migration lease was lost before startup migrations completed; restart the gateway so migrations can run under a fresh lease.",
           );
         }
       });
@@ -355,7 +355,7 @@ export function recordSuccessfulStartupMigrations(
       );
       if (!activeLease) {
         throw new Error(
-          "OpenClaw startup migration lease was lost before checkpoint recording; restart the gateway so migrations can run under a fresh lease.",
+          "Bot startup migration lease was lost before checkpoint recording; restart the gateway so migrations can run under a fresh lease.",
         );
       }
     }

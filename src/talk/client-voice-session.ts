@@ -7,7 +7,7 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { buildSessionCreationStamp } from "../config/sessions/session-entry-provenance.js";
 import { mergeSessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   onTrustedInternalDiagnosticEvent,
   onTrustedToolExecutionEvent,
@@ -16,9 +16,9 @@ import {
 import { buildOutboundSessionContext } from "../infra/outbound/session-context.js";
 import { resolveSessionDeliveryTarget } from "../infra/outbound/targets-session.js";
 import {
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
+  openBotAgentDatabase,
+  runBotAgentWriteTransaction,
+} from "../state/bot-agent-db.js";
 import { truncateUtf16Safe } from "../utils.js";
 import {
   deactivateClientVoiceConfirmationSession,
@@ -43,7 +43,7 @@ import {
 
 const voiceSessionByRunId = new Map<string, ClientVoiceRunBinding>();
 const voiceSessionOperations = new Map<string, Promise<void>>();
-const deferredDigestConfigs = new Map<string, OpenClawConfig>();
+const deferredDigestConfigs = new Map<string, BotConfig>();
 let unsubscribeToolEffects: (() => void) | undefined;
 let unsubscribeRunCompletion: (() => void) | undefined;
 
@@ -101,7 +101,7 @@ function recordClientVoiceToolEffect(event: TrustedToolExecutionEvent): void {
   if (!binding) {
     return;
   }
-  runOpenClawAgentWriteTransaction(
+  runBotAgentWriteTransaction(
     (database) => {
       const record = readRecordInTransaction(database, binding.voiceSessionId);
       if (!record) {
@@ -172,7 +172,7 @@ export function createOrResumeClientVoiceSession(params: {
   const voiceSessionId = params.voiceSessionId?.trim() || randomUUID();
   const provider = params.provider?.trim() || undefined;
   const now = params.now ?? Date.now();
-  runOpenClawAgentWriteTransaction(
+  runBotAgentWriteTransaction(
     (database) => {
       const existing = readRecordInTransaction(database, voiceSessionId);
       if (existing) {
@@ -260,10 +260,10 @@ export function registerClientVoiceConsultRun(params: {
   sessionKey: string;
   voiceSessionId: string;
   runId: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): void {
   let recordClosed = false;
-  runOpenClawAgentWriteTransaction(
+  runBotAgentWriteTransaction(
     (database) => {
       const record = readRecordInTransaction(database, params.voiceSessionId);
       if (!record) {
@@ -350,7 +350,7 @@ export function resolveOpenClientVoiceSessionId(params: {
   agentId: string;
   sessionKey: string;
 }): string | undefined {
-  const database = openOpenClawAgentDatabase({ agentId: params.agentId });
+  const database = openBotAgentDatabase({ agentId: params.agentId });
   const rows = database.db
     .prepare("SELECT value_json FROM cache_entries WHERE scope = ? ORDER BY updated_at DESC")
     .all(CACHE_SCOPE) as Array<{ value_json?: unknown }>;
@@ -408,7 +408,7 @@ async function appendVoiceTranscript(params: {
   role: "user" | "assistant";
   text: string;
   timestamp?: number;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): Promise<void> {
   await runVoiceSessionOperation(params.agentId, params.voiceSessionId, async () => {
     const text = truncateUtf16Safe(params.text.trim(), MAX_TRANSCRIPT_CHARS);
@@ -453,7 +453,7 @@ async function appendVoiceTranscript(params: {
         now: timestamp,
       },
     );
-    runOpenClawAgentWriteTransaction(
+    runBotAgentWriteTransaction(
       (database) => {
         const current = readRecordInTransaction(database, params.voiceSessionId);
         if (!current) {
@@ -519,7 +519,7 @@ function formatMutationDigest(effects: ClientVoiceToolEffect[]): string | undefi
 
 async function deliverMutationDigest(
   record: ClientVoiceSessionRecord,
-  config: OpenClawConfig,
+  config: BotConfig,
   target: { channel: string; to: string; accountId?: string; threadId?: string | number | null },
   text: string,
 ): Promise<void> {
@@ -547,7 +547,7 @@ async function deliverMutationDigest(
 
 async function deliverMutationDigestOnce(
   record: ClientVoiceSessionRecord,
-  config: OpenClawConfig,
+  config: BotConfig,
 ): Promise<void> {
   if (record.digestDeliveredAt) {
     return;
@@ -579,7 +579,7 @@ async function deliverMutationDigestOnce(
     text,
   );
   const deliveredAt = Date.now();
-  runOpenClawAgentWriteTransaction(
+  runBotAgentWriteTransaction(
     (database) => {
       const current = readRecordInTransaction(database, record.voiceSessionId);
       if (!current || current.digestDeliveredAt) {
@@ -633,7 +633,7 @@ async function closeClientVoiceSessionInternal(params: {
   agentId: string;
   sessionKey: string;
   voiceSessionId: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   now?: number;
 }): Promise<void> {
   const existing = readRecord(params.agentId, params.voiceSessionId);
@@ -642,7 +642,7 @@ async function closeClientVoiceSessionInternal(params: {
   }
   assertOwnership(existing, params);
   const now = params.now ?? Date.now();
-  runOpenClawAgentWriteTransaction(
+  runBotAgentWriteTransaction(
     (database) => {
       const current = readRecordInTransaction(database, params.voiceSessionId);
       if (!current) {
@@ -689,7 +689,7 @@ export async function closeClientVoiceSession(params: {
   agentId: string;
   sessionKey: string;
   voiceSessionId: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   now?: number;
 }): Promise<void> {
   await runVoiceSessionOperation(params.agentId, params.voiceSessionId, async () => {
@@ -700,7 +700,7 @@ export async function closeClientVoiceSession(params: {
 /** Close abandoned open calls idle for the fixed six-hour recovery window. */
 export async function closeStaleClientVoiceSessions(params: {
   agentId: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   excludeVoiceSessionId?: string;
   now?: number;
   warn?: (message: string) => void;
@@ -709,7 +709,7 @@ export async function closeStaleClientVoiceSessions(params: {
   // A new voice session is the natural retry point for a digest whose delivery
   // failed after its own call had already closed and its runs completed.
   await retryDeferredMutationDigests(params.agentId);
-  const database = openOpenClawAgentDatabase({ agentId: params.agentId });
+  const database = openBotAgentDatabase({ agentId: params.agentId });
   const rows = database.db
     .prepare("SELECT value_json FROM cache_entries WHERE scope = ? AND updated_at <= ?")
     .all(CACHE_SCOPE, now - STALE_AFTER_MS) as Array<{ value_json?: unknown }>;
@@ -755,6 +755,6 @@ const clientVoiceSessionTesting = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.clientVoiceSessionTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.clientVoiceSessionTestApi")] =
     clientVoiceSessionTesting;
 }

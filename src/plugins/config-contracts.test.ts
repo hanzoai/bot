@@ -5,7 +5,7 @@ import type { PluginManifestRegistry } from "./manifest-registry.js";
 const mocks = vi.hoisted(() => {
   const loadManifestRegistry = vi.fn();
   return {
-    discoverOpenClawPlugins: vi.fn(() => ({ candidates: [], diagnostics: [] })),
+    discoverBotPlugins: vi.fn(() => ({ candidates: [], diagnostics: [] })),
     loadBundledManifestRegistry: vi.fn(),
     loadPluginManifestRegistryForInstalledIndex: loadManifestRegistry,
     loadPluginManifestRegistryForPluginRegistry: loadManifestRegistry,
@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => {
 });
 
 vi.mock("./discovery.js", () => ({
-  discoverOpenClawPlugins: mocks.discoverOpenClawPlugins,
+  discoverBotPlugins: mocks.discoverBotPlugins,
 }));
 
 vi.mock("./manifest-registry.js", () => ({
@@ -49,7 +49,7 @@ function createPluginRecord(
 ): PluginManifestRecord {
   return {
     rootDir: `/tmp/${overrides.id}`,
-    manifestPath: `/tmp/${overrides.id}/openclaw.plugin.json`,
+    manifestPath: `/tmp/${overrides.id}/bot.plugin.json`,
     channelConfigs: undefined,
     configUiHints: undefined,
     configSchema: undefined,
@@ -74,7 +74,7 @@ function createPluginRecord(
     skills: [],
     settingsFiles: undefined,
     hooks: [],
-    source: `/tmp/${overrides.id}/openclaw.plugin.json`,
+    source: `/tmp/${overrides.id}/bot.plugin.json`,
     setupSource: undefined,
     startupDeferConfiguredChannelFullLoadUntilAfterListen: undefined,
     channelCatalogMeta: undefined,
@@ -84,8 +84,8 @@ function createPluginRecord(
 
 describe("resolvePluginConfigContractsById", () => {
   beforeEach(() => {
-    mocks.discoverOpenClawPlugins.mockReset();
-    mocks.discoverOpenClawPlugins.mockReturnValue({ candidates: [], diagnostics: [] });
+    mocks.discoverBotPlugins.mockReset();
+    mocks.discoverBotPlugins.mockReturnValue({ candidates: [], diagnostics: [] });
     mocks.loadBundledManifestRegistry.mockReset();
     mocks.loadBundledManifestRegistry.mockReturnValue(createRegistry([]));
     mocks.loadPluginManifestRegistryForInstalledIndex.mockReset();

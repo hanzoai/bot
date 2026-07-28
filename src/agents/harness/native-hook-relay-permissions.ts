@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@hanzo/bot-normalization-core/number-coercion";
 import { stripAnsi } from "../../../packages/terminal-core/src/ansi.js";
 import { isApprovalNotFoundError } from "../../infra/approval-errors.js";
 import { toErrorObject } from "../../infra/errors.js";
@@ -159,7 +159,7 @@ async function resolveNativeHookRelayPreToolUseApproval(
       handled: true,
       outcome: "denied",
       reason:
-        "OpenClaw tool policy rewrote Codex app-server approval params; refusing original request.",
+        "Bot tool policy rewrote Codex app-server approval params; refusing original request.",
     };
   }
   return { handled: true, outcome: "approved-once" };
@@ -262,7 +262,7 @@ function nativeHookRelayPermissionAllowAlwaysKey(params: {
   request: NativeHookRelayPermissionApprovalRequest;
 }): string {
   const hash = createHash("sha256");
-  hash.update("openclaw:native-hook-relay:permission-allow-always:v2");
+  hash.update("bot:native-hook-relay:permission-allow-always:v2");
   hash.update("\0");
   hash.update(params.registration.relayId);
   hash.update("\0");
@@ -484,7 +484,7 @@ async function requestNativeHookRelayPermissionApproval(
     "plugin.approval.request",
     { timeoutMs: timeoutMs + 10_000 },
     {
-      pluginId: `openclaw-native-hook-relay-${request.provider}`,
+      pluginId: `bot-native-hook-relay-${request.provider}`,
       title: truncateText(
         `${nativeHookRelayProviderDisplayName(request.provider)} permission request`,
         MAX_APPROVAL_TITLE_LENGTH,

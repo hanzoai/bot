@@ -2,8 +2,8 @@ import {
   configureAiTransportHost,
   getAiTransportHost,
   type AiProviderRequestCapabilities,
-} from "@openclaw/ai";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@hanzo/bot-ai";
+import type { BotConfig } from "../config/types.bot.js";
 import "../llm/ai-transport-host.js";
 import type { ProviderRuntimeModel } from "../plugins/provider-runtime-model.types.js";
 import {
@@ -45,17 +45,17 @@ export function configureAiTransportRuntimeHost(): void {
       resolveProviderStream: (params) =>
         resolveProviderStreamFn({
           ...params,
-          config: params.config as OpenClawConfig | undefined,
+          config: params.config as BotConfig | undefined,
           context: {
             ...params.context,
-            config: params.context.config as OpenClawConfig | undefined,
+            config: params.context.config as BotConfig | undefined,
             model: params.context.model as ProviderRuntimeModel,
           },
         }),
       resolveTransportTurnState: (params) =>
         resolveProviderTransportTurnStateWithPlugin({
           ...params,
-          config: params.config as OpenClawConfig | undefined,
+          config: params.config as BotConfig | undefined,
           context: {
             ...params.context,
             model: params.context.model as ProviderRuntimeModel | undefined,
@@ -64,10 +64,10 @@ export function configureAiTransportRuntimeHost(): void {
       wrapSimpleCompletionStream: (params) =>
         wrapProviderSimpleCompletionStreamFn({
           ...params,
-          config: params.config as OpenClawConfig | undefined,
+          config: params.config as BotConfig | undefined,
           context: {
             ...params.context,
-            config: params.context.config as OpenClawConfig | undefined,
+            config: params.context.config as BotConfig | undefined,
             model: params.context.model as ProviderRuntimeModel,
           },
         }),

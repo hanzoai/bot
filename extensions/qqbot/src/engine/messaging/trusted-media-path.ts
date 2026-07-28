@@ -1,15 +1,15 @@
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/sandbox";
-import { resolveLocalPathFromRootsSync } from "openclaw/plugin-sdk/security-runtime";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/sandbox";
+import { resolveLocalPathFromRootsSync } from "bot/plugin-sdk/security-runtime";
 import { resolveQQBotPayloadLocalFilePath } from "../utils/platform.js";
 
 // The temp root is process-stable, so resolve it once. Only the success value is
 // cached: a transient provisioning failure returns null without poisoning later
 // calls.
 let cachedTrustedTmpRoot: string | undefined;
-function trustedOpenClawTmpRoot(): string | null {
+function trustedBotTmpRoot(): string | null {
   if (cachedTrustedTmpRoot === undefined) {
     try {
-      cachedTrustedTmpRoot = resolvePreferredOpenClawTmpDir();
+      cachedTrustedTmpRoot = resolvePreferredBotTmpDir();
     } catch {
       return null;
     }
@@ -25,7 +25,7 @@ function trustedOpenClawTmpRoot(): string | null {
  * same check runs at three sites (`resolveOutboundMediaPath`, the voice send
  * re-check, and structured-payload validation), so they must all agree or a file
  * accepted at one gate is rejected at the next. Beyond the QQ Bot media storage
- * roots, this also trusts OpenClaw's permission-hardened temp root, where
+ * roots, this also trusts Bot's permission-hardened temp root, where
  * framework scratch media is written (e.g. cron auto-TTS voice files). Core
  * already treats that temp root as a sanctioned media root (`buildMediaLocalRoots`);
  * without it here, auto-routed sends are dropped and cron delivery silently loses
@@ -44,7 +44,7 @@ export function resolveTrustedOutboundMediaPath(
     return storageRootPath;
   }
 
-  const tmpRoot = trustedOpenClawTmpRoot();
+  const tmpRoot = trustedBotTmpRoot();
   if (!tmpRoot) {
     return null;
   }
@@ -52,7 +52,7 @@ export function resolveTrustedOutboundMediaPath(
     resolveLocalPathFromRootsSync({
       filePath: p,
       roots: [tmpRoot],
-      label: "OpenClaw temp media root",
+      label: "Bot temp media root",
       allowMissing: options.allowMissing === true,
     })?.path ?? null
   );

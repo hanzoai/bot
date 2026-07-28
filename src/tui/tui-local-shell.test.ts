@@ -99,7 +99,7 @@ describe("createLocalShellRunner", () => {
     expect(harness.closeOverlay).toHaveBeenCalledWith(harness.overlayHandle);
   });
 
-  it("sets OPENCLAW_SHELL when running local shell commands", async () => {
+  it("sets BOT_SHELL when running local shell commands", async () => {
     const spawnCommand = vi.fn((_command: string, _options: unknown) => {
       const stdout = new EventEmitter();
       const stderr = new EventEmitter();
@@ -128,7 +128,7 @@ describe("createLocalShellRunner", () => {
     expect(harness.createSelectorSpy).toHaveBeenCalledTimes(1);
     expect(spawnCommand).toHaveBeenCalledTimes(1);
     const spawnOptions = requireSpawnOptions(spawnCommand);
-    expect(spawnOptions.env?.OPENCLAW_SHELL).toBe("tui-local");
+    expect(spawnOptions.env?.BOT_SHELL).toBe("tui-local");
     expect(spawnOptions.env?.PATH).toBe("/tmp/bin");
     expect(harness.messages).toContain("local shell: enabled for this session");
   });

@@ -1,5 +1,5 @@
 import { getChannelPlugin } from "../channels/plugins/index.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { runOutsideGatewayRootWorkAdmission } from "../process/gateway-work-admission.js";
 import type { ChannelKind } from "./config-reload-plan.js";
@@ -10,7 +10,7 @@ import { collectChannelOperationFailures } from "./server-reload-utils.js";
 export async function restartGatewayChannels(options: {
   params: GatewayReloadHandlerParams;
   plan: GatewayReloadPlan;
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   channelsToRestart: Set<ChannelKind>;
   restartChannelAccounts: ReadonlyMap<ChannelKind, Set<string>>;
   activePluginChannelsAfterReload: ReadonlySet<ChannelKind> | null;

@@ -14,9 +14,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.BOT_CAPTURE_UI_PROOF === "1";
 const proofDir = path.join(process.cwd(), ".artifacts", "control-ui-e2e", "question-flow");
 
 let browser: Browser;
@@ -94,7 +94,7 @@ async function openQuestionPage() {
 }
 
 function panelFor(page: Page, prompt: string) {
-  return page.locator("openclaw-chat-question-panel").filter({ hasText: prompt });
+  return page.locator("bot-chat-question-panel").filter({ hasText: prompt });
 }
 
 async function emitRequested(
@@ -150,7 +150,7 @@ describeControlUiE2e("Control UI Gateway question flow", () => {
     const panel = panelFor(page, "Where should I deploy?");
     await panel.waitFor();
     await expect
-      .poll(() => page.locator(".chat-thread openclaw-chat-question-panel").count())
+      .poll(() => page.locator(".chat-thread bot-chat-question-panel").count())
       .toBe(0);
     await expect.poll(() => panel.getByText("1/1", { exact: true }).count()).toBe(1);
     await expect.poll(() => panel.getByPlaceholder("Type your own answer here").count()).toBe(1);

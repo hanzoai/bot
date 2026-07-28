@@ -7,14 +7,14 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import { withOpenClawStateDatabaseReadOnly } from "./openclaw-state-db-readonly.js";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
-import type { DB as OpenClawStateKyselyDatabase } from "./openclaw-state-db.generated.js";
+import { withBotStateDatabaseReadOnly } from "./bot-state-db-readonly.js";
+import { tableExists } from "./bot-state-db-schema-helpers.js";
+import type { DB as BotStateKyselyDatabase } from "./bot-state-db.generated.js";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "./openclaw-state-db.paths.js";
+  runBotStateWriteTransaction,
+  type BotStateDatabaseOptions,
+} from "./bot-state-db.js";
+import { resolveBotStateSqlitePath } from "./bot-state-db.paths.js";
 
 const OnboardingRecommendationMatchSchema = z.object({
   appLabel: z.string(),
@@ -85,7 +85,7 @@ export type OnboardingRecommendationsStore = {
 };
 
 type OnboardingRecommendationsDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  BotStateKyselyDatabase,
   "onboarding_recommendations"
 >;
 
@@ -112,14 +112,14 @@ function hashOnboardingRecommendationInventory(
 
 function readOnboardingRecommendations(
   configKey: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): OnboardingRecommendationsRecord | null {
-  const pathname = options.path ?? resolveOpenClawStateSqlitePath(options.env ?? process.env);
+  const pathname = options.path ?? resolveBotStateSqlitePath(options.env ?? process.env);
   if (!existsSync(pathname)) {
     return null;
   }
   // CLI reads must not join the Gateway's writable SQLite lifecycle (#101290).
-  return withOpenClawStateDatabaseReadOnly(({ db: database }) => {
+  return withBotStateDatabaseReadOnly(({ db: database }) => {
     if (!tableExists(database, "onboarding_recommendations")) {
       return null;
     }
@@ -153,13 +153,13 @@ function readOnboardingRecommendations(
 function writeOnboardingRecommendationsOffer(
   configKey: string,
   params: WriteOnboardingRecommendationsOfferParams,
-  databaseOptions: OpenClawStateDatabaseOptions = {},
+  databaseOptions: BotStateDatabaseOptions = {},
 ): OnboardingRecommendationsRecord {
   const nowMs = params.nowMs ?? Date.now();
   const inventoryHash = hashOnboardingRecommendationInventory(params.inventory);
   const matches = OnboardingRecommendationMatchesSchema.parse(params.matches);
   const acceptedAt = params.answered ? nowMs : null;
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<OnboardingRecommendationsDatabase>(database.db);
       const existing = executeSqliteQueryTakeFirstSync(
@@ -224,10 +224,10 @@ function writeOnboardingRecommendationsOffer(
 function acknowledgeOnboardingRecommendations(
   configKey: string,
   params: AcknowledgeOnboardingRecommendationsParams = {},
-  databaseOptions: OpenClawStateDatabaseOptions = {},
+  databaseOptions: BotStateDatabaseOptions = {},
 ): OnboardingRecommendationsRecord | null {
   const nowMs = params.nowMs ?? Date.now();
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<OnboardingRecommendationsDatabase>(database.db);
       const existing = executeSqliteQueryTakeFirstSync(
@@ -291,11 +291,11 @@ function acknowledgeOnboardingRecommendations(
 function updatePendingOnboardingRecommendations(
   configKey: string,
   params: UpdatePendingOnboardingRecommendationsParams,
-  databaseOptions: OpenClawStateDatabaseOptions = {},
+  databaseOptions: BotStateDatabaseOptions = {},
 ): OnboardingRecommendationsRecord | null {
   const nowMs = params.nowMs ?? Date.now();
   const matches = OnboardingRecommendationMatchesSchema.parse(params.matches);
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<OnboardingRecommendationsDatabase>(database.db);
       const existing = executeSqliteQueryTakeFirstSync(
@@ -353,9 +353,9 @@ function updatePendingOnboardingRecommendations(
 function clearPendingOnboardingRecommendations(
   configKey: string,
   params: ClearPendingOnboardingRecommendationsParams,
-  databaseOptions: OpenClawStateDatabaseOptions = {},
+  databaseOptions: BotStateDatabaseOptions = {},
 ): boolean {
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<OnboardingRecommendationsDatabase>(database.db);
       const result = executeSqliteQuerySync(
@@ -378,9 +378,9 @@ function clearPendingOnboardingRecommendations(
 
 function clearOnboardingRecommendations(
   configKey: string,
-  databaseOptions: OpenClawStateDatabaseOptions = {},
+  databaseOptions: BotStateDatabaseOptions = {},
 ): boolean {
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     (database) => {
       const db = getNodeSqliteKysely<OnboardingRecommendationsDatabase>(database.db);
       const result = executeSqliteQuerySync(
@@ -396,7 +396,7 @@ function clearOnboardingRecommendations(
 
 export function createOnboardingRecommendationsStore(params: {
   workspaceDir: string;
-  database?: OpenClawStateDatabaseOptions;
+  database?: BotStateDatabaseOptions;
 }): OnboardingRecommendationsStore {
   // Doctor owns the one-time `primary` migration; a runtime fallback would recreate
   // cross-workspace reads. Every operation stays bound to one canonical workspace key.

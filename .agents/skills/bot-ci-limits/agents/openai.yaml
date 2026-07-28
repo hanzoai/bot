@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bot CI Limits"
+  short_description: "Tune Bot CI fanout and runner budgets"
+  default_prompt: "Use $bot-ci-limits to inspect Bot CI pressure, tune runner-registration fanout safely, and document the exact validation before landing."

@@ -11,7 +11,7 @@
 // `cancel` step to nothing. A non-cancel write fault latches streamFailed and
 // the full reply is intentionally re-delivered as blocks even though a prefix
 // already streamed (duplication over truncation — see reply-stream-controller).
-// Refresh goldens with OPENCLAW_TRACE_UPDATE=1 (see delivery-trace harness docs).
+// Refresh goldens with BOT_TRACE_UPDATE=1 (see delivery-trace harness docs).
 import {
   deliveryTraceScenarios,
   expectDeliveryTraceMatchesGolden,
@@ -19,13 +19,13 @@ import {
   type DeliveryTraceInStep,
   type DeliveryTraceScenarioName,
   type WireRecorder,
-} from "openclaw/plugin-sdk/channel-contract-testing";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { chunkMarkdownTextWithMode, resolveChunkMode } from "openclaw/plugin-sdk/reply-chunking";
-import { convertMarkdownTables } from "openclaw/plugin-sdk/text-chunking";
+} from "bot/plugin-sdk/channel-contract-testing";
+import type { PluginRuntime } from "bot/plugin-sdk/core";
+import { resolveMarkdownTableMode } from "bot/plugin-sdk/markdown-table-runtime";
+import { chunkMarkdownTextWithMode, resolveChunkMode } from "bot/plugin-sdk/reply-chunking";
+import { convertMarkdownTables } from "bot/plugin-sdk/text-chunking";
 import { describe, it } from "vitest";
-import type { OpenClawConfig, ReplyPayload } from "../runtime-api.js";
+import type { BotConfig, ReplyPayload } from "../runtime-api.js";
 import { createMSTeamsReplyDispatcher } from "./reply-dispatcher.js";
 import { setMSTeamsRuntime } from "./runtime.js";
 import type { MSTeamsTurnContext } from "./sdk-types.js";
@@ -238,7 +238,7 @@ function setupMSTeamsTrace(recorder: WireRecorder, traceCase: MSTeamsTraceCase) 
     stream,
   });
   const created = createMSTeamsReplyDispatcher({
-    cfg: { channels: { msteams: {} } } as OpenClawConfig,
+    cfg: { channels: { msteams: {} } } as BotConfig,
     agentId: "agent",
     sessionKey: "agent:msteams:trace",
     runtime: { error: () => {} } as never,
@@ -248,7 +248,7 @@ function setupMSTeamsTrace(recorder: WireRecorder, traceCase: MSTeamsTraceCase) 
     conversationRef: {
       activityId: "inbound-activity",
       user: { id: "29:trace-user", name: "Trace User" },
-      agent: { id: "28:trace-bot", name: "OpenClaw" },
+      agent: { id: "28:trace-bot", name: "Bot" },
       conversation: {
         id: traceCase.conversationId,
         conversationType: traceCase.conversationType,

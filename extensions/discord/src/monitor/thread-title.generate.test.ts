@@ -1,14 +1,14 @@
 // Discord tests cover thread title.generate plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   completeWithPreparedSimpleCompletionModel,
   extractAssistantText,
   prepareSimpleCompletionModelForAgent,
-} from "openclaw/plugin-sdk/simple-completion-runtime";
+} from "bot/plugin-sdk/simple-completion-runtime";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_DISCORD_TEST_CONFIG } from "../test-support/config.js";
 
-vi.mock("openclaw/plugin-sdk/simple-completion-runtime", { spy: true });
+vi.mock("bot/plugin-sdk/simple-completion-runtime", { spy: true });
 
 const completeWithPreparedSimpleCompletionModelMock =
   vi.fn<typeof completeWithPreparedSimpleCompletionModel>();
@@ -58,7 +58,7 @@ beforeEach(() => {
     selection: {
       provider: "anthropic",
       modelId: "claude-sonnet-4-6",
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
     },
     model: {
       provider: "anthropic",
@@ -117,7 +117,7 @@ describe("generateThreadTitle", () => {
         provider: "openrouter",
         modelId: "anthropic/claude-sonnet-4-5",
         profileId: "work",
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
       },
       model: {
         provider: "openrouter",
@@ -136,7 +136,7 @@ describe("generateThreadTitle", () => {
           model: "openrouter/anthropic/claude-sonnet-4-5@work",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await generateThreadTitle({
       cfg,
@@ -191,7 +191,7 @@ describe("generateThreadTitle", () => {
       selection: {
         provider: "anthropic",
         modelId: "claude-sonnet-4-6",
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
       },
     } as Awaited<ReturnType<typeof prepareSimpleCompletionModelForAgent>>);
 
@@ -269,7 +269,7 @@ describe("generateThreadTitle", () => {
       selection: {
         provider: "anthropic",
         modelId: "claude-haiku-4-5",
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
       },
       model: {
         provider: "anthropic",

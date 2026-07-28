@@ -1,7 +1,7 @@
 /** Shared image-generation request, provider, capability, and result contracts. */
 import type { MediaNormalizationEntry } from "../../packages/media-generation-core/src/normalization.js";
 import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { SsrFPolicy } from "../infra/net/ssrf.js";
 
 /** Binary image asset returned by an image-generation provider. */
@@ -57,7 +57,7 @@ export type ImageGenerationSourceImage = {
 };
 
 export type ImageGenerationProviderConfiguredContext = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
 };
 
@@ -66,7 +66,7 @@ export type ImageGenerationRequest = {
   provider: string;
   model: string;
   prompt: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentDir?: string;
   authStore?: AuthProfileStore;
   timeoutMs?: number;

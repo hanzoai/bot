@@ -1,4 +1,4 @@
-// Verifies state-dir migrations preserve existing OpenClaw runtime data.
+// Verifies state-dir migrations preserve existing Bot runtime data.
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -15,7 +15,7 @@ import {
 
 async function withStateDirFixture(run: (root: string) => Promise<void>): Promise<void> {
   try {
-    await withTempDir({ prefix: "openclaw-state-dir-" }, async (root) => {
+    await withTempDir({ prefix: "bot-state-dir-" }, async (root) => {
       await run(root);
     });
   } finally {
@@ -51,13 +51,13 @@ describe("legacy state dir auto-migration", () => {
     });
   });
 
-  it("skips state-dir migration when OPENCLAW_STATE_DIR is explicitly set", async () => {
+  it("skips state-dir migration when BOT_STATE_DIR is explicitly set", async () => {
     await withStateDirFixture(async (root) => {
       const legacyDir = path.join(root, ".clawdbot");
       fs.mkdirSync(legacyDir, { recursive: true });
 
       const result = await autoMigrateLegacyStateDir({
-        env: { OPENCLAW_STATE_DIR: path.join(root, "custom-state") } as NodeJS.ProcessEnv,
+        env: { BOT_STATE_DIR: path.join(root, "custom-state") } as NodeJS.ProcessEnv,
         homedir: () => root,
       });
 
@@ -92,7 +92,7 @@ describe("legacy state dir auto-migration", () => {
       );
 
       const result = await autoMigrateLegacyStateDir({
-        env: { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
+        env: { BOT_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
         homedir: () => root,
       });
 
@@ -132,7 +132,7 @@ describe("legacy state dir auto-migration", () => {
                 spec: "demo@latest",
                 version: "1.0.0",
               }),
-              manifestPath: "/plugins/demo/openclaw.plugin.json",
+              manifestPath: "/plugins/demo/bot.plugin.json",
               manifestHash: "test",
               rootDir: "/plugins/demo",
               origin: "global",
@@ -162,7 +162,7 @@ describe("legacy state dir auto-migration", () => {
       );
 
       const result = await autoMigrateLegacyStateDir({
-        env: { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
+        env: { BOT_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
         homedir: () => root,
       });
 
@@ -194,7 +194,7 @@ describe("legacy state dir auto-migration", () => {
       fs.writeFileSync(archivePath, legacyJson, "utf8");
 
       const first = await autoMigrateLegacyStateDir({
-        env: { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
+        env: { BOT_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
         homedir: () => root,
       });
 
@@ -210,7 +210,7 @@ describe("legacy state dir auto-migration", () => {
 
       resetAutoMigrateLegacyStateDirForTest();
       const second = await autoMigrateLegacyStateDir({
-        env: { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
+        env: { BOT_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
         homedir: () => root,
       });
       expect(second.changes).toStrictEqual([]);
@@ -237,7 +237,7 @@ describe("legacy state dir auto-migration", () => {
       fs.writeFileSync(archivePath, "older archive", "utf8");
 
       const first = await autoMigrateLegacyStateDir({
-        env: { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
+        env: { BOT_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
         homedir: () => root,
       });
 
@@ -254,7 +254,7 @@ describe("legacy state dir auto-migration", () => {
 
       resetAutoMigrateLegacyStateDirForTest();
       const second = await autoMigrateLegacyStateDir({
-        env: { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
+        env: { BOT_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
         homedir: () => root,
       });
       expect(second.changes).toStrictEqual([]);
@@ -289,7 +289,7 @@ describe("legacy state dir auto-migration", () => {
 
   it("migrates the legacy plugin install index before config reads", async () => {
     await withStateDirFixture(async (root) => {
-      const stateDir = path.join(root, ".openclaw");
+      const stateDir = path.join(root, ".bot");
       const sourcePath = path.join(stateDir, "plugins", "installs.json");
       fs.mkdirSync(path.dirname(sourcePath), { recursive: true });
       fs.writeFileSync(

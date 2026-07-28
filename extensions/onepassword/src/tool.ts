@@ -1,9 +1,9 @@
-import type { AnyAgentTool, OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
-import { jsonResult } from "openclaw/plugin-sdk/tool-results";
+import type { AnyAgentTool, BotPluginToolContext } from "bot/plugin-sdk/plugin-entry";
+import { jsonResult } from "bot/plugin-sdk/tool-results";
 import type {
   PluginHookToolResultPersistEvent,
   PluginHookToolResultPersistResult,
-} from "openclaw/plugin-sdk/types";
+} from "bot/plugin-sdk/types";
 import { parseToolInput, type OnePasswordBroker } from "./broker.js";
 import { OnePasswordError } from "./errors.js";
 import { AUTHORIZATION_NONCE_PARAM } from "./pending-authorization.js";
@@ -92,7 +92,7 @@ export function redactPersistedOnePasswordResult(
 
 export function createOnePasswordTool(
   broker: OnePasswordBroker,
-  invocation: OpenClawPluginToolContext,
+  invocation: BotPluginToolContext,
 ): AnyAgentTool {
   return {
     name: "onepassword",

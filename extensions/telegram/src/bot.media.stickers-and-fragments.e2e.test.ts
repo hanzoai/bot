@@ -235,7 +235,7 @@ describe("telegram stickers", () => {
 describe("telegram local Bot API media", () => {
   it("reads a container-local file from its trusted host volume mount", async () => {
     const token = "123:test-token";
-    const tempRoot = await realpath(await mkdtemp(path.join(os.tmpdir(), "openclaw-tg-local-")));
+    const tempRoot = await realpath(await mkdtemp(path.join(os.tmpdir(), "bot-tg-local-")));
     const relativePath = path.join(token, "documents", "file_12.zip");
     try {
       await mkdir(path.dirname(path.join(tempRoot, relativePath)), { recursive: true });
@@ -300,7 +300,7 @@ describe("telegram text fragments", () => {
             date: 1736380800,
             text: part1,
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "bot_bot" },
           getFile: async () => ({}),
         });
 
@@ -312,7 +312,7 @@ describe("telegram text fragments", () => {
             date: 1736380801,
             text: part2,
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "bot_bot" },
           getFile: async () => ({}),
         });
 
@@ -377,7 +377,7 @@ describe("telegram text fragments", () => {
             date: 1736380800,
             text: part1,
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "bot_bot" },
           getFile: async () => ({}),
         });
 
@@ -389,7 +389,7 @@ describe("telegram text fragments", () => {
             date: 1736380801,
             text: part2,
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "bot_bot" },
           getFile: async () => ({}),
         });
 
@@ -451,9 +451,9 @@ describe("telegram text fragments", () => {
             message_thread_id: 101,
             is_topic_message: true,
             date: 1736380800,
-            text: `@openclaw_bot topic-one ${"A".repeat(4050)}`,
+            text: `@bot_bot topic-one ${"A".repeat(4050)}`,
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "bot_bot" },
           getFile: async () => ({}),
         });
 
@@ -465,9 +465,9 @@ describe("telegram text fragments", () => {
             message_thread_id: 202,
             is_topic_message: true,
             date: 1736380801,
-            text: `@openclaw_bot topic-two ${"B".repeat(4050)}`,
+            text: `@bot_bot topic-two ${"B".repeat(4050)}`,
           },
-          me: { username: "openclaw_bot" },
+          me: { username: "bot_bot" },
           getFile: async () => ({}),
         });
 

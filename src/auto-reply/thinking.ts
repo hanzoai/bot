@@ -1,5 +1,5 @@
 // Thinking/reasoning level catalog helpers for auto-reply model controls.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import { resolveClaudeThinkingProfile } from "../plugins/provider-claude-thinking.js";
 import {
   BASE_THINKING_LEVELS,
@@ -32,7 +32,7 @@ export type {
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveProviderThinkingProfile } from "../plugins/provider-thinking.js";
 import type { ProviderThinkingProfile } from "../plugins/provider-thinking.types.js";
 

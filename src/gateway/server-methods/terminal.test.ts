@@ -1,8 +1,8 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GATEWAY_CLIENT_CAPS } from "../../../packages/gateway-protocol/src/client-info.js";
 import { ErrorCodes } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import type { SessionCatalogProvider } from "../../plugins/session-catalog.js";
@@ -47,7 +47,7 @@ vi.mock("../node-invoke-plugin-policy.js", () => ({
 function makeOpts(
   params: unknown,
   terminalConfig: { enabled?: boolean } | undefined,
-  terminalPolicyConfig?: OpenClawConfig,
+  terminalPolicyConfig?: BotConfig,
   nodeRegistry: {
     get: (nodeId: string) => unknown;
     invoke?: (params: unknown) => Promise<unknown>;
@@ -76,7 +76,7 @@ function makeOpts(
     list: vi.fn((): TerminalSessionSummary[] => []),
     upload: vi.fn(async () => ({ path: "/tmp/upload/report.pdf", size: 4 })),
   };
-  const runtimeConfig = { gateway: { terminal: terminalConfig } } as OpenClawConfig;
+  const runtimeConfig = { gateway: { terminal: terminalConfig } } as BotConfig;
   const policy = createTerminalLaunchPolicy(runtimeConfig);
   if (terminalPolicyConfig) {
     policy.prepareConfig(terminalPolicyConfig, { restartPending: true });

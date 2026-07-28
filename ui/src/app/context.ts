@@ -64,7 +64,7 @@ export type ApplicationInitialUserMessage = {
   role: "user";
   content: unknown[];
   timestamp: number;
-  __openclaw?: { idempotencyKey?: string; seq?: number };
+  __bot?: { idempotencyKey?: string; seq?: number };
 };
 
 type InitialUserMessageHandoff = {
@@ -106,4 +106,4 @@ export type ApplicationContext<TRouteId extends string = string> = {
 };
 
 export const applicationContext =
-  createContext<ApplicationContext<RouteId>>("openclaw.application");
+  createContext<ApplicationContext<RouteId>>("bot.application");

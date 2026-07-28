@@ -38,7 +38,7 @@ describe("renderAgentScopeControl", () => {
       container,
     );
 
-    const select = container.querySelector<AgentSelectElement>("openclaw-agent-select");
+    const select = container.querySelector<AgentSelectElement>("bot-agent-select");
     await select?.updateComplete;
 
     expect(select?.closest("label")).toBeNull();
@@ -62,7 +62,7 @@ describe("renderAgentScopeControl", () => {
       container,
     );
 
-    const select = container.querySelector<AgentSelectElement>("openclaw-agent-select");
+    const select = container.querySelector<AgentSelectElement>("bot-agent-select");
     expect(select).not.toBeNull();
     await select?.updateComplete;
     expect(select?.options.map((option) => option.value)).toEqual(["", "main", "retired"]);
@@ -95,7 +95,7 @@ describe("renderAgentScopeControl", () => {
       container,
     );
 
-    const select = container.querySelector<AgentSelectElement>("openclaw-agent-select");
+    const select = container.querySelector<AgentSelectElement>("bot-agent-select");
     await select?.updateComplete;
     expect(select?.value).toBe("");
     expect(select?.options.map((option) => option.value)).toEqual([
@@ -125,7 +125,7 @@ describe("renderAgentScopeControl", () => {
       container,
     );
 
-    const select = container.querySelector<AgentSelectElement>("openclaw-agent-select");
+    const select = container.querySelector<AgentSelectElement>("bot-agent-select");
     await select?.updateComplete;
     expect(select?.value).toBe("main");
     expect(select?.options.map((option) => option.value)).toEqual(["main", "writer"]);
@@ -150,7 +150,7 @@ describe("renderAgentScopeControl", () => {
       container,
     );
 
-    const select = container.querySelector<AgentSelectElement>("openclaw-agent-select");
+    const select = container.querySelector<AgentSelectElement>("bot-agent-select");
     expect(select?.value).toBe("writer");
     expect(select?.options.map((option) => option.value)).toEqual(["main", "writer"]);
     select?.onSelect("main");

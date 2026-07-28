@@ -1,6 +1,6 @@
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
-import { formatAllowFromLowercase } from "openclaw/plugin-sdk/allow-from";
-import { createTopLevelChannelConfigAdapter } from "openclaw/plugin-sdk/channel-config-helpers";
+import { DEFAULT_ACCOUNT_ID } from "bot/plugin-sdk/account-id";
+import { formatAllowFromLowercase } from "bot/plugin-sdk/allow-from";
+import { createTopLevelChannelConfigAdapter } from "bot/plugin-sdk/channel-config-helpers";
 import { resolveMSTeamsCredentials } from "./token.js";
 
 export type ResolvedMSTeamsAccount = {

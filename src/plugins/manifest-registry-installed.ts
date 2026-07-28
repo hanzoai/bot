@@ -1,14 +1,14 @@
 /** Builds manifest registry records from installed plugin index snapshots. */
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeOptionalTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { normalizeOptionalTrimmedStringList } from "@hanzo/bot-normalization-core/string-normalization";
 import {
   resolveChannelSetupFieldCliAttributeName,
   type ChannelSetupFieldMetadata,
 } from "../channels/plugins/setup-contract.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { tryReadJsonSync } from "../infra/json-files.js";
 import type { PluginCandidate } from "./discovery.js";
 import { hashJson } from "./installed-plugin-index-hash.js";
@@ -21,7 +21,7 @@ import {
   DEFAULT_PLUGIN_ENTRY_CANDIDATES,
   getPackageManifestMetadata,
   normalizeManifestChannelCommandDefaults,
-  type OpenClawPackageManifest,
+  type BotPackageManifest,
   type PackageManifest,
   type PluginPackageChannel,
   type PluginPackageChannelCliOption,
@@ -45,7 +45,7 @@ const MAX_INSTALLED_PACKAGE_METADATA_CACHE_ENTRIES = 256;
 const MAX_INSTALLED_MANIFEST_REGISTRY_REALPATH_CACHE_ENTRIES = 512;
 
 type InstalledPackageMetadata = {
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: BotPackageManifest;
   packageDependencies?: PluginDependencySpecMap;
   packageOptionalDependencies?: PluginDependencySpecMap;
 };
@@ -675,7 +675,7 @@ function toPluginCandidate(
 
 export function loadPluginManifestRegistryForInstalledIndex(params: {
   index: InstalledPluginIndex;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   pluginIds?: readonly string[];

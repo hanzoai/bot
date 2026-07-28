@@ -5,7 +5,7 @@
  * owns the QQ passive-reply budget accounting and token-refresh retry.
  */
 
-import { createTypingKeepaliveLoop } from "openclaw/plugin-sdk/channel-outbound";
+import { createTypingKeepaliveLoop } from "bot/plugin-sdk/channel-outbound";
 import { claimMessageReply } from "../messaging/outbound-reply.js";
 import type { ReplyLimitResult } from "../messaging/reply-limiter.js";
 import { formatErrorMessage } from "../utils/format.js";

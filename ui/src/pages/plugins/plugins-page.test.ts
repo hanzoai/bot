@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import type {
@@ -198,7 +198,7 @@ async function mountPage(
   routeData?: PluginsRouteData,
 ): Promise<{ page: TestPluginsPage; provider: ApplicationContextProvider }> {
   const provider = createApplicationContextProvider(context);
-  const page = document.createElement("openclaw-plugins-page") as unknown as TestPluginsPage;
+  const page = document.createElement("bot-plugins-page") as unknown as TestPluginsPage;
   page.routeData = routeData;
   provider.append(page);
   document.body.append(provider);

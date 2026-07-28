@@ -1,13 +1,13 @@
 /**
  * Active Memory plugin entry. Runtime behavior lives in focused sibling modules.
  */
-import { resolveAgentDir, resolveAgentWorkspaceDir } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { resolveAgentDir, resolveAgentWorkspaceDir } from "bot/plugin-sdk/agent-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   normalizePluginsConfig,
   resolveLivePluginConfigObject,
-} from "openclaw/plugin-sdk/plugin-config-runtime";
-import { definePluginEntry, type OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+} from "bot/plugin-sdk/plugin-config-runtime";
+import { definePluginEntry, type BotPluginApi } from "bot/plugin-sdk/plugin-entry";
 import {
   applyCliRuntimeRecallTimeoutDefault,
   hasDeprecatedModelFallbackPolicy,
@@ -80,15 +80,15 @@ export default definePluginEntry({
   id: "active-memory",
   name: "Active Memory",
   description: "Proactively surfaces relevant memory before eligible conversational replies.",
-  register(api: OpenClawPluginApi) {
-    const readCurrentConfig = (): OpenClawConfig | undefined => {
+  register(api: BotPluginApi) {
+    const readCurrentConfig = (): BotConfig | undefined => {
       try {
         return (
-          (api.runtime.config?.current?.() as OpenClawConfig | undefined) ??
-          (api.config as OpenClawConfig | undefined)
+          (api.runtime.config?.current?.() as BotConfig | undefined) ??
+          (api.config as BotConfig | undefined)
         );
       } catch {
-        return api.config as OpenClawConfig | undefined;
+        return api.config as BotConfig | undefined;
       }
     };
     let config = normalizePluginConfig(api.pluginConfig, readCurrentConfig());
@@ -114,7 +114,7 @@ export default definePluginEntry({
     const refreshLiveConfigFromRuntime = () => {
       const livePluginConfig = resolveLivePluginConfigObject(
         api.runtime.config?.current
-          ? () => api.runtime.config.current() as OpenClawConfig
+          ? () => api.runtime.config.current() as BotConfig
           : undefined,
         "active-memory",
         api.pluginConfig as Record<string, unknown>,
@@ -145,7 +145,7 @@ export default definePluginEntry({
         }
         refreshLiveConfigFromRuntime();
         if (isGlobal) {
-          const currentConfig = api.runtime.config.current() as OpenClawConfig;
+          const currentConfig = api.runtime.config.current() as BotConfig;
           if (action === "status") {
             return {
               text: `Active Memory: ${isActiveMemoryGloballyEnabled(currentConfig) ? "on" : "off"} globally.`,

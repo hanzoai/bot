@@ -44,9 +44,9 @@ type TrustedSessionFileState = {
   fingerprint: SessionFileFingerprint;
 };
 
-// Controllers in the same OpenClaw process can legitimately take turns writing
+// Controllers in the same Bot process can legitimately take turns writing
 // the same session file while another attempt is released for model I/O. Track
-// only fingerprints that changed while OpenClaw held the write lock so the
+// only fingerprints that changed while Bot held the write lock so the
 // takeover fence can distinguish those locked in-process writes from unowned
 // external file changes.
 const ownedSessionFileWrites = new Map<string, OwnedSessionFileWriteHistory>();

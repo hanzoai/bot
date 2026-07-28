@@ -1,6 +1,6 @@
 // Plugins CLI policy tests cover plugin command policy checks and warnings.
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import {
   buildPluginRegistrySnapshotReport,
   enablePluginInConfig,
@@ -14,7 +14,7 @@ import {
   writeConfigFile,
 } from "./plugins-cli-test-helpers.js";
 
-const ORIGINAL_OPENCLAW_NIX_MODE = process.env.OPENCLAW_NIX_MODE;
+const ORIGINAL_BOT_NIX_MODE = process.env.BOT_NIX_MODE;
 
 describe("plugins cli policy mutations", () => {
   const compatibilityPluginIds = [
@@ -27,10 +27,10 @@ describe("plugins cli policy mutations", () => {
   });
 
   afterEach(() => {
-    if (ORIGINAL_OPENCLAW_NIX_MODE === undefined) {
-      delete process.env.OPENCLAW_NIX_MODE;
+    if (ORIGINAL_BOT_NIX_MODE === undefined) {
+      delete process.env.BOT_NIX_MODE;
     } else {
-      process.env.OPENCLAW_NIX_MODE = ORIGINAL_OPENCLAW_NIX_MODE;
+      process.env.BOT_NIX_MODE = ORIGINAL_BOT_NIX_MODE;
     }
   });
 
@@ -43,7 +43,7 @@ describe("plugins cli policy mutations", () => {
     });
   }
 
-  function requireFirstWrittenConfig(): OpenClawConfig {
+  function requireFirstWrittenConfig(): BotConfig {
     const call = writeConfigFile.mock.calls[0];
     if (!call) {
       throw new Error("expected writeConfigFile to be called");
@@ -56,8 +56,8 @@ describe("plugins cli policy mutations", () => {
   }
 
   function requirePluginEntries(
-    config: OpenClawConfig,
-  ): NonNullable<NonNullable<OpenClawConfig["plugins"]>["entries"]> {
+    config: BotConfig,
+  ): NonNullable<NonNullable<BotConfig["plugins"]>["entries"]> {
     if (!config.plugins?.entries) {
       throw new Error("expected plugin entries in config");
     }
@@ -65,14 +65,14 @@ describe("plugins cli policy mutations", () => {
   }
 
   it("refreshes the persisted plugin registry after enabling a plugin", async () => {
-    const sourceConfig = {} as OpenClawConfig;
+    const sourceConfig = {} as BotConfig;
     const enabledConfig = {
       plugins: {
         entries: {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     loadConfig.mockReturnValue(sourceConfig);
     enablePluginInConfig.mockReturnValue({
       config: enabledConfig,
@@ -119,7 +119,7 @@ describe("plugins cli policy mutations", () => {
       reason: "blocked by allowlist",
     },
   ])("does not mutate plugin state when $policy blocks enablement", async ({ plugins, reason }) => {
-    const sourceConfig = { plugins } as OpenClawConfig;
+    const sourceConfig = { plugins } as BotConfig;
     loadConfig.mockReturnValue(sourceConfig);
     enablePluginInConfig.mockReturnValue({
       config: sourceConfig,
@@ -137,17 +137,17 @@ describe("plugins cli policy mutations", () => {
   });
 
   it("refuses plugin enablement in Nix mode before config mutation", async () => {
-    const previous = process.env.OPENCLAW_NIX_MODE;
-    process.env.OPENCLAW_NIX_MODE = "1";
+    const previous = process.env.BOT_NIX_MODE;
+    process.env.BOT_NIX_MODE = "1";
     try {
       await expect(runPluginsCommand(["plugins", "enable", "alpha"])).rejects.toThrow(
-        "OPENCLAW_NIX_MODE=1",
+        "BOT_NIX_MODE=1",
       );
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_NIX_MODE;
+        delete process.env.BOT_NIX_MODE;
       } else {
-        process.env.OPENCLAW_NIX_MODE = previous;
+        process.env.BOT_NIX_MODE = previous;
       }
     }
 
@@ -162,7 +162,7 @@ describe("plugins cli policy mutations", () => {
           alpha: { enabled: true },
         },
       },
-    } as OpenClawConfig);
+    } as BotConfig);
     mockPluginRegistry(["alpha"]);
 
     await runPluginsCommand(["plugins", "disable", "alpha"]);
@@ -188,14 +188,14 @@ describe("plugins cli policy mutations", () => {
   it.each(compatibilityPluginIds)(
     "enables compatibility id $alias through canonical plugin $pluginId",
     async ({ alias, pluginId }) => {
-      const sourceConfig = {} as OpenClawConfig;
+      const sourceConfig = {} as BotConfig;
       const enabledConfig = {
         plugins: {
           entries: {
             [pluginId]: { enabled: true },
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
       loadConfig.mockReturnValue(sourceConfig);
       enablePluginInConfig.mockReturnValue({
         config: enabledConfig,
@@ -229,7 +229,7 @@ describe("plugins cli policy mutations", () => {
             [pluginId]: { enabled: true },
           },
         },
-      } as OpenClawConfig);
+      } as BotConfig);
       mockPluginRegistry([pluginId]);
 
       await runPluginsCommand(["plugins", "disable", alias]);
@@ -258,7 +258,7 @@ describe("plugins cli policy mutations", () => {
       );
 
       expect(runtimeErrors).toContain(
-        "Plugin not found: missing-plugin. Run `openclaw plugins list` to see installed plugins, or `openclaw plugins search missing-plugin` to look for installable plugins.",
+        "Plugin not found: missing-plugin. Run `bot plugins list` to see installed plugins, or `bot plugins search missing-plugin` to look for installable plugins.",
       );
       expect(enablePluginInConfig).not.toHaveBeenCalled();
       expect(writeConfigFile).not.toHaveBeenCalled();
@@ -267,7 +267,7 @@ describe("plugins cli policy mutations", () => {
   );
 
   it("does not create a channel config when disabling a channel plugin by policy", async () => {
-    loadConfig.mockReturnValue({} as OpenClawConfig);
+    loadConfig.mockReturnValue({} as BotConfig);
     mockPluginRegistry(["twitch"]);
 
     await runPluginsCommand(["plugins", "disable", "twitch"]);

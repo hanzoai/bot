@@ -43,7 +43,7 @@ const env = {
   NODE_ENV: "production",
 };
 const OUTPUT_SOURCE_MAPS = process.env.OUTPUT_SOURCE_MAPS === "1";
-const RUN_NODE_SKIP_DTS_BUILD = process.env.OPENCLAW_RUN_NODE_SKIP_DTS_BUILD === "1";
+const RUN_NODE_SKIP_DTS_BUILD = process.env.BOT_RUN_NODE_SKIP_DTS_BUILD === "1";
 const TSDOWN_DECLARATIONS = !RUN_NODE_SKIP_DTS_BUILD;
 
 const SUPPRESSED_EVAL_WARNING_PATHS = [
@@ -81,7 +81,7 @@ function matchesExternalOption(
 }
 
 function buildInputOptions(options: InputOptionsArg): InputOptionsReturn {
-  if (process.env.OPENCLAW_BUILD_VERBOSE === "1") {
+  if (process.env.BOT_BUILD_VERBOSE === "1") {
     return undefined;
   }
 
@@ -164,7 +164,7 @@ function nodeWorkspacePackageBuildConfig(packageDir: string, config: UserConfig 
 }
 
 const bundledPluginBuildEntries = collectBundledPluginBuildEntries();
-const shouldBuildPrivateQaEntries = process.env.OPENCLAW_BUILD_PRIVATE_QA === "1";
+const shouldBuildPrivateQaEntries = process.env.BOT_BUILD_PRIVATE_QA === "1";
 const selectedPluginSdkEntrypoints = shouldBuildPrivateQaEntries
   ? pluginSdkEntrypoints
   : productionPluginSdkEntrypoints;
@@ -206,7 +206,7 @@ const explicitNeverBundleDependencies = [
   "@lancedb/lancedb",
   "@larksuiteoapi/node-sdk",
   "@matrix-org/matrix-sdk-crypto-nodejs",
-  "@openclaw/ai",
+  "@hanzo/bot-ai",
   "@vitest/expect",
   "jimp",
   "matrix-js-sdk",
@@ -225,20 +225,20 @@ function shouldNeverBundleDependency(id: string): boolean {
 
 function shouldAlwaysBundleDependency(id: string): boolean {
   return (
-    id === "openclaw/plugin-sdk/ssrf-runtime-internal" ||
+    id === "bot/plugin-sdk/ssrf-runtime-internal" ||
     id === "@openclaw/fs-safe" ||
     id.startsWith("@openclaw/fs-safe/") ||
-    id === "@openclaw/normalization-core" ||
-    id.startsWith("@openclaw/normalization-core/") ||
-    id === "@openclaw/retry" ||
-    id === "@openclaw/media-core" ||
-    id.startsWith("@openclaw/media-core/") ||
+    id === "@hanzo/bot-normalization-core" ||
+    id.startsWith("@hanzo/bot-normalization-core/") ||
+    id === "@hanzo/bot-retry" ||
+    id === "@hanzo/bot-media-core" ||
+    id.startsWith("@hanzo/bot-media-core/") ||
     [
-      "@openclaw/acp-core",
-      "@openclaw/session-url-contract",
-      "@openclaw/workboard-contract",
+      "@hanzo/bot-acp-core",
+      "@hanzo/bot-session-url-contract",
+      "@hanzo/bot-workboard-contract",
     ].includes(id) ||
-    id.startsWith("@openclaw/acp-core/") ||
+    id.startsWith("@hanzo/bot-acp-core/") ||
     id === "zod" ||
     id.startsWith("zod/")
   );
@@ -281,7 +281,7 @@ function buildCoreDistEntries(): Record<string, string> {
     "audit/audit-event-writer.worker": "src/audit/audit-event-writer.worker.ts",
     "config/sessions/session-transcript-reconcile.worker":
       "src/config/sessions/session-transcript-reconcile.worker.ts",
-    "state/openclaw-database-verify.worker": "src/state/openclaw-database-verify.worker.ts",
+    "state/bot-database-verify.worker": "src/state/bot-database-verify.worker.ts",
     "system-agent/setup-inference-detection.worker":
       "src/system-agent/setup-inference-detection.worker.ts",
     "acp/control-plane/manager": "src/acp/control-plane/manager.ts",
@@ -318,7 +318,7 @@ function buildCoreDistEntries(): Record<string, string> {
     "plugins/runtime/index": "src/plugins/runtime/index.ts",
     "llm-slug-generator": "src/hooks/llm-slug-generator.ts",
     "mcp/plugin-tools-serve": "src/mcp/plugin-tools-serve.ts",
-    "mcp/openclaw-tools-serve": "src/mcp/openclaw-tools-serve.ts",
+    "mcp/bot-tools-serve": "src/mcp/bot-tools-serve.ts",
   };
 }
 
@@ -420,13 +420,13 @@ function buildLlmCoreDistEntries(): Record<string, string> {
 
 function shouldExternalizeAgentCoreDependency(id: string): boolean {
   return (
-    id === "@openclaw/ai" ||
-    id.startsWith("@openclaw/ai/") ||
-    id === "@openclaw/llm-core" ||
-    id.startsWith("@openclaw/llm-core/") ||
+    id === "@hanzo/bot-ai" ||
+    id.startsWith("@hanzo/bot-ai/") ||
+    id === "@hanzo/bot-llm-core" ||
+    id.startsWith("@hanzo/bot-llm-core/") ||
     id === "ignore" ||
-    id === "openclaw" ||
-    id.startsWith("openclaw/") ||
+    id === "bot" ||
+    id.startsWith("bot/") ||
     id === "typebox" ||
     id.startsWith("typebox/") ||
     id === "yaml" ||
@@ -439,7 +439,7 @@ function shouldExternalizeGatewayProtocolDependency(id: string): boolean {
 }
 
 function shouldExternalizeGatewayClientDependency(id: string): boolean {
-  return ["ws", "@openclaw/gateway-protocol"].some(
+  return ["ws", "@hanzo/bot-gateway-protocol"].some(
     (dependency) => id === dependency || id.startsWith(`${dependency}/`),
   );
 }
@@ -449,7 +449,7 @@ function shouldExternalizeNetPolicyDependency(id: string): boolean {
 }
 
 function shouldExternalizeSpeechCoreDependency(id: string): boolean {
-  return id === "openclaw" || id.startsWith("openclaw/");
+  return id === "bot" || id.startsWith("bot/");
 }
 
 function shouldExternalizeLlmCoreDependency(id: string): boolean {

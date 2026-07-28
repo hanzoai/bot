@@ -17,7 +17,7 @@ is_canonical_pr_number() {
 pr_operation_lock_ref() {
   local pr="$1"
   is_canonical_pr_number "$pr" || return 1
-  printf 'refs/openclaw/pr-operation-locks/%s\n' "$pr"
+  printf 'refs/bot/pr-operation-locks/%s\n' "$pr"
 }
 
 pr_operation_lock_zero_oid() {
@@ -129,11 +129,11 @@ clear_pr_operation_lock_state() {
 
 notify_pr_operation_phase() {
   local phase="$1"
-  if [ -z "${OPENCLAW_PR_LOCK_NOTIFY_FD:-}" ]; then
+  if [ -z "${BOT_PR_LOCK_NOTIFY_FD:-}" ]; then
     return 0
   fi
-  case "$OPENCLAW_PR_LOCK_NOTIFY_FD" in ''|*[!0-9]*) return 1 ;; esac
-  printf 'phase\t%s\n' "$phase" >&"$OPENCLAW_PR_LOCK_NOTIFY_FD"
+  case "$BOT_PR_LOCK_NOTIFY_FD" in ''|*[!0-9]*) return 1 ;; esac
+  printf 'phase\t%s\n' "$phase" >&"$BOT_PR_LOCK_NOTIFY_FD"
 }
 
 begin_pr_operation_validation_phase() {
@@ -174,7 +174,7 @@ release_pr_operation_lock() {
     return 0
   fi
 
-  if [ -n "${OPENCLAW_PR_LOCK_NOTIFY_FD:-}" ]; then
+  if [ -n "${BOT_PR_LOCK_NOTIFY_FD:-}" ]; then
     # The outer supervisor releases only after a clean group drain. A failed,
     # interrupted, or controller-lost operation leaves this exact ref sticky.
     clear_pr_operation_lock_state
@@ -222,11 +222,11 @@ release_pr_operation_lock() {
 }
 
 notify_pr_operation_lock_supervisor() {
-  if [ -z "${OPENCLAW_PR_LOCK_NOTIFY_FD:-}" ]; then
+  if [ -z "${BOT_PR_LOCK_NOTIFY_FD:-}" ]; then
     return 0
   fi
-  case "$OPENCLAW_PR_LOCK_NOTIFY_FD" in ''|*[!0-9]*) return 1 ;; esac
-  printf '%s\t%s\n' "$PR_OPERATION_LOCK_REF" "$PR_OPERATION_LOCK_OWNER_OID" >&"$OPENCLAW_PR_LOCK_NOTIFY_FD"
+  case "$BOT_PR_LOCK_NOTIFY_FD" in ''|*[!0-9]*) return 1 ;; esac
+  printf '%s\t%s\n' "$PR_OPERATION_LOCK_REF" "$PR_OPERATION_LOCK_OWNER_OID" >&"$BOT_PR_LOCK_NOTIFY_FD"
 }
 
 recover_pr_operation_lock() {
@@ -274,7 +274,7 @@ prepare_pr_operation_lock_candidate() {
   token=$(node -e 'process.stdout.write(require("node:crypto").randomUUID())') || return 1
   group_status=$(pr_operation_lock_process_group_status "$$") || return 1
   [ "$group_status" = "live" ] || return 1
-  supervisor_pid="${OPENCLAW_PR_LOCK_SUPERVISOR_PID:-$$}"
+  supervisor_pid="${BOT_PR_LOCK_SUPERVISOR_PID:-$$}"
   case "$supervisor_pid" in ''|0|1|*[!0-9]*) return 1 ;; esac
   supervisor_birth=$(pr_operation_lock_process_birth "$supervisor_pid") || return 1
   owner_oid=$(printf 'version=3\nstate=active\npgid=%s\nsupervisor_pid=%s\nsupervisor_birth=%s\ntoken=%s\n' \

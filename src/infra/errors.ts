@@ -1,5 +1,5 @@
 // Normalizes error objects for codes, names, messages, and redacted logs.
-import { formatErrorMessage as formatSharedErrorMessage } from "@openclaw/normalization-core/error-coercion";
+import { formatErrorMessage as formatSharedErrorMessage } from "@hanzo/bot-normalization-core/error-coercion";
 import { redactSensitiveText } from "../logging/redact.js";
 
 export function extractErrorCode(err: unknown): string | undefined {
@@ -71,7 +71,7 @@ export function formatErrorMessage(err: unknown): string {
   return formatSharedErrorMessage(err, { redact: redactSensitiveText });
 }
 
-export { stringifyNonErrorCause, toErrorObject } from "@openclaw/normalization-core/error-coercion";
+export { stringifyNonErrorCause, toErrorObject } from "@hanzo/bot-normalization-core/error-coercion";
 
 export function formatUncaughtError(err: unknown): string {
   if (extractErrorCode(err) === "INVALID_CONFIG") {

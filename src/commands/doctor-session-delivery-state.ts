@@ -2,16 +2,16 @@ import fs from "node:fs";
 import type { DatabaseSync } from "node:sqlite";
 import { resolveAllAgentSessionStoreCandidateTargetsSync } from "../config/sessions/targets.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { normalizeLegacySessionEntryDelivery } from "../infra/state-migrations.legacy-session-store.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
+import { withBotAgentDatabaseReadOnly } from "../state/bot-agent-db-readonly.js";
+import type { DB as BotAgentKyselyDatabase } from "../state/bot-agent-db.generated.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  isOpenClawAgentDatabaseOpen,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
+  closeBotAgentDatabaseByPath,
+  isBotAgentDatabaseOpen,
+  runBotAgentWriteTransaction,
+} from "../state/bot-agent-db.js";
 import {
   deliveryContextFromSession,
   sessionDeliveryChannel,
@@ -35,14 +35,14 @@ type DeliveryRewrite = {
 /** Scan or rewrite legacy delivery fields inside existing session row JSON. */
 export function repairCanonicalSessionDeliveryStates(params: {
   apply: boolean;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
 }): SessionDeliveryStateRepairReport {
   const targets = listExistingAgentDatabaseTargets(params.cfg, params.env);
   let found = 0;
   let repaired = 0;
   for (const target of targets) {
-    const inspected = withOpenClawAgentDatabaseReadOnly(
+    const inspected = withBotAgentDatabaseReadOnly(
       (database) => collectDeliveryRewrites(database.db),
       { agentId: target.agentId, env: params.env, path: target.sqlitePath },
     );
@@ -53,16 +53,16 @@ export function repairCanonicalSessionDeliveryStates(params: {
     if (!params.apply || inspected.value.length === 0) {
       continue;
     }
-    const wasOpen = isOpenClawAgentDatabaseOpen(target.sqlitePath);
+    const wasOpen = isBotAgentDatabaseOpen(target.sqlitePath);
     try {
-      repaired += runOpenClawAgentWriteTransaction(
+      repaired += runBotAgentWriteTransaction(
         (database) => applyDeliveryRewrites(database.db),
         { agentId: target.agentId, env: params.env, path: target.sqlitePath },
         { operationLabel: "doctor.canonicalize-session-delivery-state" },
       );
     } finally {
       if (!wasOpen) {
-        closeOpenClawAgentDatabaseByPath(target.sqlitePath);
+        closeBotAgentDatabaseByPath(target.sqlitePath);
       }
     }
   }
@@ -70,7 +70,7 @@ export function repairCanonicalSessionDeliveryStates(params: {
 }
 
 function listExistingAgentDatabaseTargets(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv,
 ): Array<{ agentId: string; sqlitePath: string }> {
   const seenPaths = new Set<string>();
@@ -85,7 +85,7 @@ function listExistingAgentDatabaseTargets(
 }
 
 function collectDeliveryRewrites(database: DatabaseSync): DeliveryRewrite[] {
-  const db = getNodeSqliteKysely<OpenClawAgentKyselyDatabase>(database);
+  const db = getNodeSqliteKysely<BotAgentKyselyDatabase>(database);
   const rows = executeSqliteQuerySync(
     database,
     db.selectFrom("session_nodes").select(["session_key", "current_session_id", "entry_json"]),
@@ -118,7 +118,7 @@ function collectDeliveryRewrites(database: DatabaseSync): DeliveryRewrite[] {
 }
 
 function applyDeliveryRewrites(database: DatabaseSync): number {
-  const db = getNodeSqliteKysely<OpenClawAgentKyselyDatabase>(database);
+  const db = getNodeSqliteKysely<BotAgentKyselyDatabase>(database);
   const rewrites = collectDeliveryRewrites(database);
   for (const rewrite of rewrites) {
     executeSqliteQuerySync(

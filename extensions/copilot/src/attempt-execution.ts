@@ -3,7 +3,7 @@ import type {
   AgentHarnessAttemptParams,
   AgentMessage,
   SandboxContext,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   resolveAttemptFsWorkspaceOnly,
   resolveAttemptSpawnWorkspaceDir,
@@ -12,7 +12,7 @@ import {
   runAgentHarnessAfterCompactionHook,
   runAgentHarnessBeforeCompactionHook,
   clearActiveEmbeddedRun,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import { registerCopilotActiveRun } from "./attempt-active-run.js";
 import { deferBackgroundCompactionCleanup } from "./attempt-cleanup.js";
 import {

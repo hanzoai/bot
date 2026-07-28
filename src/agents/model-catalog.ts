@@ -1,13 +1,13 @@
 /**
  * Loads bundled, manifest, and discovered model catalog entries.
  */
-import { resolveClaudeFable5ModelIdentity } from "@openclaw/llm-core";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { resolveClaudeFable5ModelIdentity } from "@hanzo/bot-llm-core";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import { isDiagnosticFlagEnabled } from "../infra/diagnostic-flags.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { planEffectiveModelCatalogRows } from "../model-catalog/index.js";
@@ -65,7 +65,7 @@ type DiscoveredModel = {
 export type BuildPreparedModelCatalogParams = {
   agentDir: string;
   authCredentials: Readonly<AuthStorageData>;
-  config: OpenClawConfig;
+  config: BotConfig;
   modelRegistry: ModelRegistry;
   readOnly?: boolean;
   includeProviderPluginAugmentation?: boolean;
@@ -79,7 +79,7 @@ type ManifestModelCatalogCacheEntry = {
   snapshot: PluginMetadataSnapshot;
   rows: ModelCatalogEntry[];
 };
-let manifestModelCatalogCache = new WeakMap<OpenClawConfig, ManifestModelCatalogCacheEntry>();
+let manifestModelCatalogCache = new WeakMap<BotConfig, ManifestModelCatalogCacheEntry>();
 const modelSuppressionLoader = createLazyImportLoader(
   () => import("./model-suppression.runtime.js"),
 );
@@ -330,7 +330,7 @@ function createModelCatalogSnapshot(
 
 function resolveEligibleManifestCatalogPlugins(
   snapshot: PluginMetadataSnapshot,
-  config: OpenClawConfig,
+  config: BotConfig,
 ): PluginMetadataSnapshot["plugins"] {
   return snapshot.plugins.filter(
     (plugin) =>
@@ -344,7 +344,7 @@ function resolveEligibleManifestCatalogPlugins(
 }
 
 export function loadManifestModelCatalog(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
   fallbackToMetadataScan?: boolean;

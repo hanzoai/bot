@@ -1,7 +1,7 @@
 ---
-summary: "Use Xiaomi MiMo pay-as-you-go and Token Plan models with OpenClaw"
+summary: "Use Xiaomi MiMo pay-as-you-go and Token Plan models with Bot"
 read_when:
-  - You want Xiaomi MiMo models in OpenClaw
+  - You want Xiaomi MiMo models in Bot
   - You need Xiaomi MiMo auth or Token Plan setup
 title: "Xiaomi MiMo"
 ---
@@ -36,27 +36,27 @@ providers plus a speech (TTS) provider:
     Pay-as-you-go:
 
     ```bash
-    openclaw onboard --auth-choice xiaomi-api-key
+    bot onboard --auth-choice xiaomi-api-key
     ```
 
     Token Plan:
 
     ```bash
-    openclaw onboard --auth-choice xiaomi-token-plan-sgp
+    bot onboard --auth-choice xiaomi-token-plan-sgp
     ```
 
     Or pass the keys directly:
 
     ```bash
-    openclaw onboard --auth-choice xiaomi-api-key --xiaomi-api-key "$XIAOMI_API_KEY"
-    openclaw onboard --auth-choice xiaomi-token-plan-sgp --xiaomi-token-plan-api-key "$XIAOMI_TOKEN_PLAN_API_KEY"
+    bot onboard --auth-choice xiaomi-api-key --xiaomi-api-key "$XIAOMI_API_KEY"
+    bot onboard --auth-choice xiaomi-token-plan-sgp --xiaomi-token-plan-api-key "$XIAOMI_TOKEN_PLAN_API_KEY"
     ```
 
   </Step>
   <Step title="Verify the model is available">
     ```bash
-    openclaw models list --provider xiaomi
-    openclaw models list --provider xiaomi-token-plan
+    bot models list --provider xiaomi
+    bot models list --provider xiaomi-token-plan
     ```
   </Step>
 </Steps>
@@ -95,7 +95,7 @@ provider is not offered without one of those.
 ## Reasoning models
 
 `mimo-v2.5` and `mimo-v2.5-pro` support
-OpenClaw's [`/think` directive](/tools/thinking) with levels `off`,
+Bot's [`/think` directive](/tools/thinking) with levels `off`,
 `minimal`, `low`, `medium`, `high`, `xhigh`, and `max` (default `high`).
 
 ## Text-to-speech
@@ -133,11 +133,11 @@ message.
 
 Built-in voices: `mimo_default`, `default_zh`, `default_en`, `Mia`, `Chloe`,
 `Milo`, `Dean`. The preset-voice model `mimo-v2.5-tts` uses `audio.voice`, so
-OpenClaw sends `speakerVoice` for that model.
+Bot sends `speakerVoice` for that model.
 
 The voicedesign model `mimo-v2.5-tts-voicedesign` generates the voice from a
 natural-language style prompt instead of a preset voice id. Set `style` to
-the desired voice description; OpenClaw sends it as the `user` message, sends
+the desired voice description; Bot sends it as the `user` message, sends
 the spoken text as the `assistant` message, and omits `audio.voice` for this
 model.
 
@@ -157,7 +157,7 @@ model.
 ```
 
 For channels that request a voice-note synthesis target (Discord, Feishu,
-Matrix, Telegram, and WhatsApp), OpenClaw transcodes Xiaomi output to 48kHz
+Matrix, Telegram, and WhatsApp), Bot transcodes Xiaomi output to 48kHz
 mono Opus with `ffmpeg` before delivery.
 
 ## Config example
@@ -256,10 +256,10 @@ Token Plan charges against a fixed subscription's Credits rather than per-token 
   <Accordion title="Troubleshooting">
     - If models do not appear, confirm the relevant key env var or auth profile is present and valid.
     - For Token Plan, confirm the chosen onboarding region matches the subscription page base URL and that the key starts with `tp-`.
-    - When the Gateway runs as a daemon, ensure the key is available to that process (for example in `~/.openclaw/.env` or via `env.shellEnv`).
+    - When the Gateway runs as a daemon, ensure the key is available to that process (for example in `~/.bot/.env` or via `env.shellEnv`).
 
     <Warning>
-    Keys set only in your interactive shell are not visible to daemon-managed gateway processes. Use `~/.openclaw/.env` or `env.shellEnv` config for persistent availability.
+    Keys set only in your interactive shell are not visible to daemon-managed gateway processes. Use `~/.bot/.env` or `env.shellEnv` config for persistent availability.
     </Warning>
 
   </Accordion>
@@ -275,7 +275,7 @@ Token Plan charges against a fixed subscription's Credits rather than per-token 
     `/think` directive syntax and level mapping.
   </Card>
   <Card title="Configuration reference" href="/gateway/configuration-reference" icon="gear">
-    Full OpenClaw configuration reference.
+    Full Bot configuration reference.
   </Card>
   <Card title="Xiaomi MiMo console" href="https://platform.xiaomimimo.com" icon="arrow-up-right-from-square">
     Xiaomi MiMo dashboard and API key management.

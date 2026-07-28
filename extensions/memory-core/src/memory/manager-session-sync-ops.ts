@@ -5,7 +5,7 @@ import {
   createSubsystemLogger,
   onInternalSessionTranscriptUpdate,
   resolveSessionTranscriptsDirForAgent,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+} from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import {
   isSessionArchiveArtifactName,
   isUsageCountedSessionTranscriptFileName,
@@ -17,15 +17,15 @@ import {
   sessionPathForSessionIdentity,
   statSessionEntrySync,
   type SessionTranscriptCorpusEntry,
-} from "openclaw/plugin-sdk/memory-core-host-engine-qmd";
+} from "bot/plugin-sdk/memory-core-host-engine-qmd";
 import {
   isFileMissingError,
   retryTransientMemoryRead,
   runWithConcurrency,
   type MemorySessionSyncTarget,
   type MemorySyncParams,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
+import { normalizeAgentId } from "bot/plugin-sdk/routing";
 import { shouldSyncSessionsForReindex } from "./manager-session-reindex.js";
 import {
   resolveMemorySessionStartupDirtyFiles,

@@ -30,7 +30,7 @@ function readAckHash(ack: unknown): string | null {
  * Gateway contract: requireConfigBaseHash in
  * src/gateway/server-methods/config.ts rejects writes whose baseHash no
  * longer matches the file with exactly this message. A conflict means another
- * writer changed openclaw.json; retrying the whole-form draft would clobber
+ * writer changed bot.json; retrying the whole-form draft would clobber
  * their edit, so callers surface a reload affordance instead.
  */
 function isConfigBaseHashConflictError(err: unknown): boolean {

@@ -1,10 +1,10 @@
 // Mattermost tests cover the shared outbound delivery path.
-import { sendDurableMessageBatch } from "openclaw/plugin-sdk/channel-outbound";
+import { sendDurableMessageBatch } from "bot/plugin-sdk/channel-outbound";
 import {
   createTestRegistry,
   releasePinnedPluginChannelRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/channel-test-helpers";
+} from "bot/plugin-sdk/channel-test-helpers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const sendMessageMattermostMock = vi.hoisted(() => vi.fn());

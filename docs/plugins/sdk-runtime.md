@@ -25,7 +25,7 @@ register(api) {
 }
 ```
 
-`api.runtime.version` is the current OpenClaw product version, sourced from the shared version resolver so plugins see the same value the CLI reports.
+`api.runtime.version` is the current Bot product version, sourced from the shared version resolver so plugins see the same value the CLI reports.
 
 ## Config loading and writes
 
@@ -46,9 +46,9 @@ The mutation helpers return `afterWrite` plus a typed `followUp` summary so call
 Use `current()`, a passed-in `cfg`, `mutateConfigFile(...)`, or
 `replaceConfigFile(...)` for runtime config access and writes.
 
-For direct SDK imports, prefer the focused config subpaths over the broad `openclaw/plugin-sdk/config-runtime` compatibility barrel: `config-contracts` for types, `runtime-config-snapshot` for current process snapshots, and `config-mutation` for writes. Read entry-scoped values from `api.pluginConfig`; use a supplied tool context only for its runtime-wide config snapshot, and keep plugin-specific merging at that boundary. Bundled plugin tests should mock these focused subpaths directly instead of mocking the broad compatibility barrel.
+For direct SDK imports, prefer the focused config subpaths over the broad `bot/plugin-sdk/config-runtime` compatibility barrel: `config-contracts` for types, `runtime-config-snapshot` for current process snapshots, and `config-mutation` for writes. Read entry-scoped values from `api.pluginConfig`; use a supplied tool context only for its runtime-wide config snapshot, and keep plugin-specific merging at that boundary. Bundled plugin tests should mock these focused subpaths directly instead of mocking the broad compatibility barrel.
 
-Internal OpenClaw runtime code follows the same direction: load config once at the CLI, gateway, or process boundary, then pass that value through. Successful mutation writes refresh the process runtime snapshot and advance its internal revision; long-lived caches should key off the runtime-owned cache key instead of serializing config locally. Long-lived runtime modules have a zero-tolerance scanner for ambient `loadConfig()` calls; use a passed `cfg`, a request `context.getRuntimeConfig()`, or `getRuntimeConfig()` at an explicit process boundary.
+Internal Bot runtime code follows the same direction: load config once at the CLI, gateway, or process boundary, then pass that value through. Successful mutation writes refresh the process runtime snapshot and advance its internal revision; long-lived caches should key off the runtime-owned cache key instead of serializing config locally. Long-lived runtime modules have a zero-tolerance scanner for ambient `loadConfig()` calls; use a passed `cfg`, a request `context.getRuntimeConfig()`, or `getRuntimeConfig()` at an explicit process boundary.
 
 Provider and channel execution paths must use the active runtime config snapshot, not a file snapshot returned for config readback or editing. File snapshots preserve source values such as SecretRef markers for UI and writes; provider callbacks need the resolved runtime view. When a helper may be called with either the active source snapshot or the active runtime snapshot, route through `selectApplicableRuntimeConfig()` before reading credentials.
 
@@ -56,9 +56,9 @@ Provider and channel execution paths must use the active runtime config snapshot
 
 Model-picker integrations use two focused runtime subpaths. Import the typed
 `ModelPickerAction` and `ModelPickerCapabilityProfile` contracts from
-`openclaw/plugin-sdk/interactive-runtime`. Import
+`bot/plugin-sdk/interactive-runtime`. Import
 `applySessionModelSelection(...)` and its result types from
-`openclaw/plugin-sdk/model-session-runtime`; this is the live-session mutation
+`bot/plugin-sdk/model-session-runtime`; this is the live-session mutation
 seam, including its authoritative conflict check and post-commit effects. The
 lower-level session-entry model helpers are not a picker persistence API.
 
@@ -104,7 +104,7 @@ return {
 };
 ```
 
-Use `openclaw/plugin-sdk/pair-loop-guard-runtime` directly only for custom
+Use `bot/plugin-sdk/pair-loop-guard-runtime` directly only for custom
 two-party event loops that do not go through the shared inbound reply runner.
 
 ## Runtime namespaces
@@ -153,7 +153,7 @@ two-party event loops that do not go through the shared inbound reply runner.
     });
     ```
 
-    `runEmbeddedAgent(...)` is the neutral helper for starting a normal OpenClaw agent turn from plugin code. It uses the same provider/model resolution and agent-harness selection as channel-triggered replies.
+    `runEmbeddedAgent(...)` is the neutral helper for starting a normal Bot agent turn from plugin code. It uses the same provider/model resolution and agent-harness selection as channel-triggered replies.
 
     `runEmbeddedPiAgent(...)` remains as a deprecated compatibility alias for existing plugins. New code should use `runEmbeddedAgent(...)`.
 
@@ -202,7 +202,7 @@ two-party event loops that do not go through the shared inbound reply runner.
 
     `createSessionEntry(...)` creates a new canonical session row and transcript. Its trusted `initialEntry` surface is deliberately narrow. A plugin may select an owned `agentHarnessId`; seed an owned CLI backend with `cliBackendId`, `model`, and `cliSessionBinding`; or seed a persistent ACP session with `acpBackendId` and `acpSessionBinding: { acpAgentId, agentSessionId }`. The ACP variant persists the supplied native agent session id through the canonical SQLite ACP metadata owner so the first turn resumes that external session. The injected runtime restricts plugin-owned CLI and ACP sessions to the calling plugin's `plugin:<id>:` namespace; harness ids must be owned through `registerAgentHarness(...)`. These are ownership invariants, not a sandbox between in-process plugins. Creation rejects an existing row; `label` and `spawnedCwd` are separate creation fields rather than trusted-entry patches.
 
-    Before advertising an ACP-backed action, use `resolveAcpSessionAvailability(...)` from `openclaw/plugin-sdk/acp-runtime`. It applies the canonical enablement, dispatch, allowed-agent, registered-backend, and backend-health checks; recheck it immediately before creating the session.
+    Before advertising an ACP-backed action, use `resolveAcpSessionAvailability(...)` from `bot/plugin-sdk/acp-runtime`. It applies the canonical enablement, dispatch, allowed-agent, registered-backend, and backend-health checks; recheck it immediately before creating the session.
 
     Creation holds the session lifecycle mutation fence through `afterCreate`, so new work waits for plugin-owned initialization to finish and pre-existing admitted work makes creation fail. The callback receives a clone of the created state. If it returns a patch, that patch may contain only `pluginExtensions`, and its value is the complete final `pluginExtensions` field. A callback or final-persistence failure rolls back the unchanged new row and transcript; guarded rollback preserves a row changed or claimed concurrently. `recoverMatchingInitialEntry: true` is only for retrying interrupted initialization when the persisted trusted fields match exactly, and recovery requires `afterCreate` to return a final patch.
 
@@ -212,13 +212,13 @@ two-party event loops that do not go through the shared inbound reply runner.
 
     `resolveStorePath(...)` and `updateSessionStoreEntry(...)` round out the session helpers: `resolveStorePath` resolves the session store path for a given scope, and `updateSessionStoreEntry({ storePath, sessionKey, update })` patches one entry directly by store path when the caller already knows it.
 
-    `loadTranscriptEventsSync(...)` is available for synchronous doctor and repair paths that cannot use the async transcript runtime. It returns raw `SessionStoreTranscriptEvent` records. Normal plugin runtime code should prefer `openclaw/plugin-sdk/session-transcript-runtime`.
+    `loadTranscriptEventsSync(...)` is available for synchronous doctor and repair paths that cannot use the async transcript runtime. It returns raw `SessionStoreTranscriptEvent` records. Normal plugin runtime code should prefer `bot/plugin-sdk/session-transcript-runtime`.
 
     `formatSqliteSessionFileMarker(...)`, `parseSqliteSessionFileMarker(...)`, and `sqliteSessionFileMarkerMatchesSession(...)` are transitional helpers for code that still receives a legacy field named `sessionFile`. A parsed SQLite marker identifies a live SQLite transcript target; it is not a filesystem path. New APIs should carry typed session identity instead of marker strings.
 
-    For transcript reads and writes, import `openclaw/plugin-sdk/session-transcript-runtime` and use `resolveSessionTranscriptIdentity(...)`, `resolveSessionTranscriptTarget(...)`, `readSessionTranscriptEvents(...)`, `readSessionTranscriptRawDelta(...)`, `readSessionTranscriptVisibleMessageDelta(...)`, `readVisibleSessionTranscriptMessageEntries(...)`, `appendSessionTranscriptMessageByIdentity(...)`, `publishSessionTranscriptUpdateByIdentity(...)`, or `withSessionTranscriptWriteLock(...)` with `{ agentId, sessionKey, sessionId }`. These APIs let plugins identify a transcript, read raw events or visible branch-safe message entries, append messages, publish updates, and run related operations under the same transcript write lock without depending on active transcript file paths. `readVisibleSessionTranscriptMessageEntries(...)` returns ordered read metadata; its `seq` field is not a resumable cursor.
+    For transcript reads and writes, import `bot/plugin-sdk/session-transcript-runtime` and use `resolveSessionTranscriptIdentity(...)`, `resolveSessionTranscriptTarget(...)`, `readSessionTranscriptEvents(...)`, `readSessionTranscriptRawDelta(...)`, `readSessionTranscriptVisibleMessageDelta(...)`, `readVisibleSessionTranscriptMessageEntries(...)`, `appendSessionTranscriptMessageByIdentity(...)`, `publishSessionTranscriptUpdateByIdentity(...)`, or `withSessionTranscriptWriteLock(...)` with `{ agentId, sessionKey, sessionId }`. These APIs let plugins identify a transcript, read raw events or visible branch-safe message entries, append messages, publish updates, and run related operations under the same transcript write lock without depending on active transcript file paths. `readVisibleSessionTranscriptMessageEntries(...)` returns ordered read metadata; its `seq` field is not a resumable cursor.
 
-    `appendSessionTranscriptMessageByIdentity(...)` is a low-level append of an already canonical message. Plugins must not synthesize media-bearing user rows with top-level `MediaPath`, `MediaPaths`, `MediaUrl`, `MediaUrls`, `MediaType`, or `MediaTypes`. Channel ingress should pass ordered facts through `MsgContext.media` and let the host own user-turn persistence. A host-prepared persisted user message carries canonical ordered facts under `message.__openclaw.media`; the generic append API does not infer or repair legacy parallel arrays.
+    `appendSessionTranscriptMessageByIdentity(...)` is a low-level append of an already canonical message. Plugins must not synthesize media-bearing user rows with top-level `MediaPath`, `MediaPaths`, `MediaUrl`, `MediaUrls`, `MediaType`, or `MediaTypes`. Channel ingress should pass ordered facts through `MsgContext.media` and let the host own user-turn persistence. A host-prepared persisted user message carries canonical ordered facts under `message.__bot.media`; the generic append API does not infer or repair legacy parallel arrays.
 
     `readSessionTranscriptRawDelta(...)` returns a bounded `page`, `reset`, or `missing` result. Pass the opaque `page.cursor` into the next call. Pure appends preserve the cursor, while transcript replacement returns `reset` with a new bootstrap cursor. Pages default to 1,000 events and 1,000,000 serialized bytes; callers may request up to 10,000 events and 64 MiB. When the next event alone exceeds `maxBytes`, the page is empty and reports `requiredBytes`; retry with at least that byte limit when it is no greater than 64 MiB. Larger individual events require the complete-read API. A cursor identifies position only and never grants access to another session.
 
@@ -239,7 +239,7 @@ two-party event loops that do not go through the shared inbound reply runner.
 
   <Accordion title="api.runtime.llm">
     Run a host-owned text completion without importing provider internals or
-    duplicating OpenClaw model/auth/base URL preparation.
+    duplicating Bot model/auth/base URL preparation.
 
     ```typescript
     const result = await api.runtime.llm.complete({
@@ -283,7 +283,7 @@ two-party event loops that do not go through the shared inbound reply runner.
     Studio adapters. The host owns startup serialization, readiness probes,
     request leases, abort handling, and idle shutdown.
 
-    The helper uses the same simple-completion preparation path as OpenClaw's
+    The helper uses the same simple-completion preparation path as Bot's
     built-in runtime and the host-owned runtime config snapshot. Context engines
     receive a session-bound `llm.complete` capability, so model calls use the
     active session's agent and do not silently fall back to the default agent. The
@@ -413,17 +413,17 @@ two-party event loops that do not go through the shared inbound reply runner.
     drops them when the node disconnects, and a node can replace them with
     `node.pluginTools.update` after local plugin/MCP inventory changes.
 
-    Inside the Gateway this runtime is in-process. In plugin CLI commands it calls the configured Gateway over RPC, so commands such as `openclaw googlemeet recover-tab` can inspect paired nodes from the terminal. Node commands still go through normal Gateway node pairing, command allowlists, plugin node-invoke policies, and node-local command handling.
+    Inside the Gateway this runtime is in-process. In plugin CLI commands it calls the configured Gateway over RPC, so commands such as `bot googlemeet recover-tab` can inspect paired nodes from the terminal. Node commands still go through normal Gateway node pairing, command allowlists, plugin node-invoke policies, and node-local command handling.
 
     Plugins that expose node-hosted agent tools can set `agentTool.defaultPlatforms` for non-dangerous commands that should be allowlisted by default. Omit it when operators must opt in with `gateway.nodes.commands.allow`. Dangerous node-host commands should register a node-invoke policy with `api.registerNodeInvokePolicy(...)`; the policy runs in the Gateway after command allowlist checks and before the command is forwarded to the node, so direct `node.invoke` calls, node-hosted plugin tools, and higher-level plugin tools share the same enforcement path.
 
     <Warning>
-    The optional `scopes` field requests Gateway operator scopes for the invocation. OpenClaw honors it only for bundled plugins and trusted official plugin installations; requests from other plugins do not elevate the call. Use it only when a trusted plugin must invoke a node command with a stricter Gateway scope, such as `operator.admin`.
+    The optional `scopes` field requests Gateway operator scopes for the invocation. Bot honors it only for bundled plugins and trusted official plugin installations; requests from other plugins do not elevate the call. Use it only when a trusted plugin must invoke a node command with a stricter Gateway scope, such as `operator.admin`.
     </Warning>
 
   </Accordion>
   <Accordion title="api.runtime.tasks">
-    Bind Task Flow and Task Run state to an existing OpenClaw session key or trusted tool context.
+    Bind Task Flow and Task Run state to an existing Bot session key or trusted tool context.
 
     - `api.runtime.tasks.managedFlows` is mutation-capable: create, advance, and cancel Task Flows.
     - `api.runtime.tasks.flows` and `api.runtime.tasks.runs` are read-only DTO views for listing and status lookups; both expose `bindSession(...)` / `fromToolContext(...)` plus `get`, `list`, `findLatest`, and `resolve`.
@@ -458,7 +458,7 @@ two-party event loops that do not go through the shared inbound reply runner.
     });
     ```
 
-    Use `bindSession({ sessionKey, requesterOrigin })` when you already have a trusted OpenClaw session key from your own binding layer. Do not bind from raw user input.
+    Use `bindSession({ sessionKey, requesterOrigin })` when you already have a trusted Bot session key from your own binding layer. Do not bind from raw user input.
 
   </Accordion>
   <Accordion title="api.runtime.tts">
@@ -467,13 +467,13 @@ two-party event loops that do not go through the shared inbound reply runner.
     ```typescript
     // Standard TTS
     const clip = await api.runtime.tts.textToSpeech({
-      text: "Hello from OpenClaw",
+      text: "Hello from Bot",
       cfg: api.config,
     });
 
     // Telephony-optimized TTS
     const telephonyClip = await api.runtime.tts.textToSpeechTelephony({
-      text: "Hello from OpenClaw",
+      text: "Hello from Bot",
       cfg: api.config,
     });
 
@@ -598,7 +598,7 @@ two-party event loops that do not go through the shared inbound reply runner.
 
     const result = await api.runtime.webSearch.search({
       config: api.config,
-      args: { query: "OpenClaw plugin SDK", count: 5 },
+      args: { query: "Bot plugin SDK", count: 5 },
     });
     ```
 
@@ -613,14 +613,14 @@ two-party event loops that do not go through the shared inbound reply runner.
     const isVoice = api.runtime.media.isVoiceCompatibleAudio(filePath);
     const metadata = await api.runtime.media.getImageMetadata(filePath);
     const resized = await api.runtime.media.resizeToJpeg(buffer, { maxWidth: 800 });
-    const terminalQr = await api.runtime.media.renderQrTerminal("https://openclaw.ai");
-    const pngQr = await api.runtime.media.renderQrPngBase64("https://openclaw.ai", {
+    const terminalQr = await api.runtime.media.renderQrTerminal("https://bot.ai");
+    const pngQr = await api.runtime.media.renderQrPngBase64("https://bot.ai", {
       scale: 6, // 1-12
       marginModules: 4, // 0-16
     });
-    const pngQrDataUrl = await api.runtime.media.renderQrPngDataUrl("https://openclaw.ai");
-    const tmpRoot = resolvePreferredOpenClawTmpDir();
-    const pngQrFile = await api.runtime.media.writeQrPngTempFile("https://openclaw.ai", {
+    const pngQrDataUrl = await api.runtime.media.renderQrPngDataUrl("https://bot.ai");
+    const tmpRoot = resolvePreferredBotTmpDir();
+    const pngQrFile = await api.runtime.media.writeQrPngTempFile("https://bot.ai", {
       tmpRoot,
       dirPrefix: "my-plugin-qr-",
       fileName: "qr.png",
@@ -770,7 +770,7 @@ two-party event loops that do not go through the shared inbound reply runner.
 
     `openChannelIngressQueue<TPayload>(...)` opens a persisted ingress queue scoped to the calling plugin, for buffering inbound events that need at-least-once processing across restarts. When stale-claim recovery uses `shouldRecover`, also provide `shouldRecoverCorrupt` if corrupt claimed payloads should be quarantined: its payload-independent claim identity lets the plugin preserve live owner and lane policy before the queue tombstones the row.
 
-    `withLease(...)` serializes cooperative plugin work across OpenClaw processes. Choose `database: { scope: "shared" }` for one global owner or `{ scope: "agent", agentId }` for independent per-agent ownership. Forward the callback's `AbortSignal` into every fallible operation. `assertOwned()` is a point-in-time checkpoint before starting another important step; the host also verifies ownership after the callback. Lease loss or caller cancellation aborts the signal. Acquisition waits and heartbeats happen outside short synchronous SQLite transactions; plugins never receive database paths or handles. This is cooperative cancellation, not a fencing token or authorization for unfenced external writes.
+    `withLease(...)` serializes cooperative plugin work across Bot processes. Choose `database: { scope: "shared" }` for one global owner or `{ scope: "agent", agentId }` for independent per-agent ownership. Forward the callback's `AbortSignal` into every fallible operation. `assertOwned()` is a point-in-time checkpoint before starting another important step; the host also verifies ownership after the callback. Lease loss or caller cancellation aborts the signal. Acquisition waits and heartbeats happen outside short synchronous SQLite transactions; plugins never receive database paths or handles. This is cooperative cancellation, not a fencing token or authorization for unfenced external writes.
 
     `openChannelIngressDrain(...)` opens the core channel-agnostic worker over that queue (or creates a queue when none is supplied). The drain owns stale-claim recovery, per-lane claim serialization, complete-at-adoption or complete-on-dispatch-return, retry/dead-letter disposition, optional pre-adoption supersede, and claim→adoption stall timeout. Wire claim ownership into reply generation with `turnAdoptionLifecycle` (via `bindIngressLifecycleToReplyOptions` from `plugin-sdk/channel-outbound`). Channel plugins keep accept-side enqueue, lane derivation, non-retryable classification, and any supersede authorization policy.
 
@@ -812,7 +812,7 @@ two-party event loops that do not go through the shared inbound reply runner.
     });
     ```
 
-    Use `saveRemoteMedia(...)` when a remote URL should become OpenClaw media. Use `saveResponseMedia(...)` when the plugin already fetched a `Response` with plugin-owned auth, redirect, or allowlist handling. Use `readRemoteMediaBuffer(...)` only when the plugin needs raw bytes for inspection, transforms, decryption, or reupload. `fetchRemoteMedia(...)` remains a deprecated compatibility alias for `readRemoteMediaBuffer(...)`.
+    Use `saveRemoteMedia(...)` when a remote URL should become Bot media. Use `saveResponseMedia(...)` when the plugin already fetched a `Response` with plugin-owned auth, redirect, or allowlist handling. Use `readRemoteMediaBuffer(...)` only when the plugin needs raw bytes for inspection, transforms, decryption, or reupload. `fetchRemoteMedia(...)` remains a deprecated compatibility alias for `readRemoteMediaBuffer(...)`.
 
     `api.runtime.channel.mentions` is the shared inbound mention-policy surface for bundled channel plugins that use runtime injection:
 
@@ -893,8 +893,8 @@ Use `createPluginRuntimeStore` to store the runtime reference for use outside th
 <Steps>
   <Step title="Create the store">
     ```typescript
-    import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
-    import type { PluginRuntime } from "openclaw/plugin-sdk/runtime-store";
+    import { createPluginRuntimeStore } from "bot/plugin-sdk/runtime-store";
+    import type { PluginRuntime } from "bot/plugin-sdk/runtime-store";
 
     const store = createPluginRuntimeStore<PluginRuntime>({
       pluginId: "my-plugin",
@@ -942,7 +942,7 @@ Beyond `api.runtime`, the API object also provides:
 <ParamField path="api.name" type="string">
   Plugin display name.
 </ParamField>
-<ParamField path="api.config" type="OpenClawConfig">
+<ParamField path="api.config" type="BotConfig">
   Current config snapshot (active in-memory runtime snapshot when available).
 </ParamField>
 <ParamField path="api.pluginConfig" type="Record<string, unknown>">

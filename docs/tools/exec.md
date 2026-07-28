@@ -6,7 +6,7 @@ read_when:
 title: "Exec tool"
 ---
 
-Run shell commands in the workspace. `exec` is a mutating shell surface: commands can create, edit, or delete files wherever the selected host or sandbox filesystem permits. Disabling OpenClaw filesystem tools such as `write`, `edit`, or `apply_patch` does not make `exec` read-only.
+Run shell commands in the workspace. `exec` is a mutating shell surface: commands can create, edit, or delete files wherever the selected host or sandbox filesystem permits. Disabling Bot filesystem tools such as `write`, `edit`, or `apply_patch` does not make `exec` read-only.
 
 Supports foreground and background execution via `process`. If `process` is disallowed, `exec` runs synchronously and ignores `yieldMs`/`background`. Background sessions are scoped per agent; `process` only sees sessions from the same agent.
 
@@ -71,11 +71,11 @@ Notes:
 - `exec host=node` is the only shell-execution path for nodes; the legacy `nodes.run` wrapper has been removed.
 - On non-Windows hosts, exec uses `SHELL` when set; if `SHELL` is `fish`, it prefers `bash` (or `sh`) from `PATH` to avoid fish-incompatible bashisms, then falls back to `SHELL` if neither exists.
 - On Windows hosts, exec prefers PowerShell 7 (`pwsh`) discovery (Program Files, ProgramW6432, then PATH), then falls back to Windows PowerShell 5.1.
-- On non-Windows gateway hosts, bash and zsh exec commands use a startup snapshot. OpenClaw captures sourceable aliases/functions and a small safe environment set from shell startup files into `$OPENCLAW_STATE_DIR/cache/shell-snapshots/`, then sources that snapshot before each exec command. Secret-looking variables are excluded; sandbox and node exec do not use this snapshot. Set `OPENCLAW_EXEC_SHELL_SNAPSHOT=0` in the Gateway process environment to disable this snapshot path.
+- On non-Windows gateway hosts, bash and zsh exec commands use a startup snapshot. Bot captures sourceable aliases/functions and a small safe environment set from shell startup files into `$BOT_STATE_DIR/cache/shell-snapshots/`, then sources that snapshot before each exec command. Secret-looking variables are excluded; sandbox and node exec do not use this snapshot. Set `BOT_EXEC_SHELL_SNAPSHOT=0` in the Gateway process environment to disable this snapshot path.
 - Host execution (`gateway`/`node`) rejects `env.PATH` and loader overrides (`LD_*`/`DYLD_*`) to prevent binary hijacking or injected code.
-- OpenClaw sets `OPENCLAW_SHELL=exec` in the spawned command environment (including PTY and sandbox execution) so shell/profile rules can detect exec-tool context.
-- For channel-origin runs, OpenClaw also exposes a narrow sender/chat identity JSON payload in `OPENCLAW_CHANNEL_CONTEXT` when the channel provided those ids.
-- `exec` cannot run `openclaw channels login` or `/approve` shell commands: `openclaw channels login` is an interactive channel-auth flow, and `/approve` needs to go through the approval command handler, not a shell. Run channel login in a terminal on the gateway host, or use a channel-specific login agent tool when one exists (for example `whatsapp_login`).
+- Bot sets `BOT_SHELL=exec` in the spawned command environment (including PTY and sandbox execution) so shell/profile rules can detect exec-tool context.
+- For channel-origin runs, Bot also exposes a narrow sender/chat identity JSON payload in `BOT_CHANNEL_CONTEXT` when the channel provided those ids.
+- `exec` cannot run `bot channels login` or `/approve` shell commands: `bot channels login` is an interactive channel-auth flow, and `/approve` needs to go through the approval command handler, not a shell. Run channel login in a terminal on the gateway host, or use a channel-specific login agent tool when one exists (for example `whatsapp_login`).
 - Important: sandboxing is **off by default**. If sandboxing is off, implicit `host=auto` resolves to `gateway`. Explicit `host=sandbox` still fails closed instead of silently running on the gateway host. Enable sandboxing or use `host=gateway` with approvals.
 - Script preflight checks (for common Python/Node shell-syntax mistakes) only inspect files inside the effective `workdir` boundary. If a script path resolves outside `workdir`, preflight is skipped for that file. Preflight also skips entirely when `host=gateway` and the effective policy is `security=full` with `ask=off`.
 - For long-running work that starts now, start it once and rely on automatic completion wake when it is enabled and the command emits output or fails. Use `process` for logs, status, input, or intervention; do not emulate scheduling with sleep loops, timeout loops, or repeated polling.
@@ -124,14 +124,14 @@ Example:
 | `deny`      | `deny`      | `off`     | Exec is denied.                                                                                                                |
 | `allowlist` | `allowlist` | `off`     | Only allowlisted/safe-bin commands run; nothing else is asked.                                                                 |
 | `ask`       | `allowlist` | `on-miss` | Allowlist matches run directly; everything else asks a human.                                                                  |
-| `auto`      | `allowlist` | `on-miss` | Allowlist/safe-bin matches run directly; everything else routes through OpenClaw's native auto reviewer before asking a human. |
+| `auto`      | `allowlist` | `on-miss` | Allowlist/safe-bin matches run directly; everything else routes through Bot's native auto reviewer before asking a human. |
 | `full`      | `full`      | `off`     | No approval gate.                                                                                                              |
 
 Per-session `/exec ask=always` still asks a human every time regardless of the persisted mode.
 
-Auto-review approval is single-use. On the gateway, OpenClaw supplies the resolved executable path to the reviewer and pins execution to that same path. Commands that cannot be reduced to one enforceable execution plan—such as heredocs, shell expansions, or unsupported wrapper quoting—fall back to human approval even if the model would otherwise allow them.
+Auto-review approval is single-use. On the gateway, Bot supplies the resolved executable path to the reviewer and pins execution to that same path. Commands that cannot be reduced to one enforceable execution plan—such as heredocs, shell expansions, or unsupported wrapper quoting—fall back to human approval even if the model would otherwise allow them.
 
-Codex app-server command approvals that are not already decided by explicit runtime or native policy use the human approval route. OpenClaw does not run its configured exec reviewer for these requests because Codex does not expose an enforceable resolved executable that can bind the review decision to the command Codex runs.
+Codex app-server command approvals that are not already decided by explicit runtime or native policy use the human approval route. Bot does not run its configured exec reviewer for these requests because Codex does not expose an enforceable resolved executable that can bind the review decision to the command Codex runs.
 
 ### Inline eval (`strictInlineEval`)
 
@@ -143,14 +143,14 @@ When `tools.exec.strictInlineEval` is `true`, inline interpreter-eval forms requ
   - macOS: `/opt/homebrew/bin`, `/usr/local/bin`, `/usr/bin`, `/bin`
   - Linux: `/usr/local/bin`, `/usr/bin`, `/bin`
   - To prevent user shell configuration (like `~/.zshenv` or `/etc/zshenv`) from overriding priority paths during startup, `tools.exec.pathPrepend` entries are securely prepended to the final `PATH` inside the shell command right before execution.
-- `host=sandbox`: runs `sh -lc` (login shell) inside the container, so `/etc/profile` may reset `PATH`. OpenClaw prepends `env.PATH` after profile sourcing via an internal env var (no shell interpolation); `tools.exec.pathPrepend` applies here too.
+- `host=sandbox`: runs `sh -lc` (login shell) inside the container, so `/etc/profile` may reset `PATH`. Bot prepends `env.PATH` after profile sourcing via an internal env var (no shell interpolation); `tools.exec.pathPrepend` applies here too.
 - `host=node`: only non-blocked env overrides you pass are sent to the node. `env.PATH` overrides are rejected for host execution and ignored by node hosts. If you need additional PATH entries on a node, configure the node host service environment (systemd/launchd) or install tools in standard locations.
 
 Per-agent node binding (use the keyed agent ID in config):
 
 ```bash
-openclaw config get agents.entries
-openclaw config set 'agents.entries.main.tools.exec.node' "node-id-or-name"
+bot config get agents.entries
+bot config set 'agents.entries.main.tools.exec.node' "node-id-or-name"
 ```
 
 Control UI: the **Devices** page includes a small "Exec node binding" panel for the same settings.
@@ -194,7 +194,7 @@ Use the two controls for different jobs:
 
 Do not treat `safeBins` as a generic allowlist, and do not add interpreter/runtime binaries (for example `python3`, `node`, `ruby`, `bash`). If you need those, use explicit allowlist entries and keep approval prompts enabled.
 
-`openclaw security audit` warns when interpreter/runtime `safeBins` entries are missing explicit profiles, and `openclaw doctor --fix` can scaffold missing custom `safeBinProfiles` entries. `openclaw security audit` and `openclaw doctor` also warn when you explicitly add broad-behavior bins such as `jq` back into `safeBins` (`jq` can read environment data and load jq code from modules or startup files, so prefer explicit allowlist entries or approval-gated runs instead). `jq` is denied as a safe bin even when it is explicitly listed. If you explicitly allowlist interpreters, enable `tools.exec.strictInlineEval` so inline code-eval forms still require reviewer or explicit approval.
+`bot security audit` warns when interpreter/runtime `safeBins` entries are missing explicit profiles, and `bot doctor --fix` can scaffold missing custom `safeBinProfiles` entries. `bot security audit` and `bot doctor` also warn when you explicitly add broad-behavior bins such as `jq` back into `safeBins` (`jq` can read environment data and load jq code from modules or startup files, so prefer explicit allowlist entries or approval-gated runs instead). `jq` is denied as a safe bin even when it is explicitly listed. If you explicitly allowlist interpreters, enable `tools.exec.strictInlineEval` so inline code-eval forms still require reviewer or explicit approval.
 
 For full policy details and examples, see [Exec approvals](/tools/exec-approvals-advanced#safe-bins-stdin-only) and [Safe bins versus allowlist](/tools/exec-approvals-advanced#safe-bins-versus-allowlist).
 

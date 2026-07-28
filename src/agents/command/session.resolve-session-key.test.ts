@@ -1,6 +1,6 @@
 // Covers cross-store session-key resolution for multi-agent session stores.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
 
 const hoisted = vi.hoisted(() => ({
@@ -56,7 +56,7 @@ function expectResolvedRequestSession(params: {
       session: {
         store: "/stores/{agentId}.json",
       },
-    } satisfies OpenClawConfig,
+    } satisfies BotConfig,
     sessionId: params.sessionId,
   });
 
@@ -126,7 +126,7 @@ describe("resolveSessionKeyForRequest", () => {
         session: {
           store: "/stores/{agentId}.json",
         },
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
       sessionId: "resume-agent-1",
       agentId: "embedded-agent",
     });
@@ -156,7 +156,7 @@ describe("resolveSessionKeyForRequest", () => {
         session: {
           store: "/stores/{agentId}.json",
         },
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
       sessionId: "sid",
       clone: false,
     });

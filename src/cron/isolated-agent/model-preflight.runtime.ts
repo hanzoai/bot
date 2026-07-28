@@ -1,10 +1,10 @@
 /** Preflights local model-provider endpoints before scheduled cron runner startup. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { isLocalProviderBaseUrl } from "../../agents/model-provider-local.js";
 import type { ModelProviderConfig } from "../../config/types.models.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { fetchWithSsrFGuard } from "../../infra/net/fetch-guard.js";
 import type { SsrFPolicy } from "../../infra/net/ssrf.js";
 import { redactSensitiveText } from "../../logging/redact.js";
@@ -43,7 +43,7 @@ type CachedEndpointPreflightResult = {
 const preflightCache = new Map<string, CachedEndpointPreflightResult>();
 
 function resolveProviderConfig(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   provider: string,
 ): ModelProviderConfig | undefined {
   const providers = cfg.models?.providers;
@@ -172,7 +172,7 @@ function formatUnavailableReason(params: {
 }): string {
   return [
     `Agent cron job uses ${params.provider}/${params.model} but the local provider preflight failed at ${params.baseUrl}.`,
-    `The candidate is unavailable for this cron run; OpenClaw will retry its provider preflight on a later scheduled run.`,
+    `The candidate is unavailable for this cron run; Bot will retry its provider preflight on a later scheduled run.`,
     `Last error: ${formatPreflightError(params.error)}`,
   ].join(" ");
 }
@@ -226,7 +226,7 @@ async function probeLocalProviderEndpoint(params: {
 
 /** Checks local model-provider reachability before a scheduled cron run starts. */
 export async function preflightCronModelProvider(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   provider: string;
   model: string;
   nowMs?: number;

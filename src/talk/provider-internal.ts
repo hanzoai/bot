@@ -5,7 +5,7 @@
  * public Plugin SDK. External providers continue to implement only the stable
  * RealtimeVoiceProviderPlugin contract.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { RealtimeVoiceProviderPlugin } from "../plugins/types.js";
 import type {
   RealtimeVoiceBrowserSession,
@@ -14,7 +14,7 @@ import type {
   RealtimeVoiceProviderConfig,
 } from "./provider-types.js";
 
-const INTERNAL_REALTIME_VOICE_PROVIDER = Symbol.for("openclaw.internal.realtime-voice-provider.v1");
+const INTERNAL_REALTIME_VOICE_PROVIDER = Symbol.for("bot.internal.realtime-voice-provider.v1");
 
 export type InternalRealtimeVoiceProviderCapabilities = RealtimeVoiceProviderCapabilities & {
   /** The provider owns agent delegation instead of exposing client-side function tools. */
@@ -33,11 +33,11 @@ export type InternalRealtimeVoiceBrowserSessionCreateRequest =
 
 type InternalRealtimeVoiceProviderApi = {
   isBrowserSessionConfigured: (ctx: {
-    cfg?: OpenClawConfig;
+    cfg?: BotConfig;
     providerConfig: RealtimeVoiceProviderConfig;
   }) => boolean;
   resolveBrowserSessionCapabilities?: (ctx: {
-    cfg?: OpenClawConfig;
+    cfg?: BotConfig;
     providerConfig: RealtimeVoiceProviderConfig;
   }) => InternalRealtimeVoiceProviderCapabilities;
   cancelBrowserSession?: (
@@ -61,7 +61,7 @@ function readInternalRealtimeVoiceProviderApi(
 
 export function isInternalRealtimeVoiceBrowserSessionConfigured(params: {
   provider: RealtimeVoiceProviderPlugin;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   providerConfig: RealtimeVoiceProviderConfig;
 }): boolean {
   return (
@@ -74,7 +74,7 @@ export function isInternalRealtimeVoiceBrowserSessionConfigured(params: {
 
 export function resolveInternalRealtimeVoiceBrowserSessionCapabilities(params: {
   provider: RealtimeVoiceProviderPlugin;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   providerConfig: RealtimeVoiceProviderConfig;
 }): InternalRealtimeVoiceProviderCapabilities | undefined {
   return readInternalRealtimeVoiceProviderApi(params.provider)?.resolveBrowserSessionCapabilities?.(

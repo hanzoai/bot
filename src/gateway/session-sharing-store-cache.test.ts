@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as sessionsConfig from "../config/sessions.js";
 import * as sessionAccessor from "../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
+import { withBotTestState } from "../test-utils/bot-test-state.js";
 import type { GatewayClient } from "./server-methods/types.js";
 import {
   authorizeResolvedSessionMutation,
@@ -11,7 +11,7 @@ import {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
+  closeBotAgentDatabasesForTest();
 });
 
 function identifiedClient(userId: string): GatewayClient {
@@ -20,7 +20,7 @@ function identifiedClient(userId: string): GatewayClient {
       minProtocol: 1,
       maxProtocol: 1,
       client: {
-        id: "openclaw-control-ui",
+        id: "bot-control-ui",
         version: "test",
         platform: "test",
         mode: "webchat",
@@ -40,7 +40,7 @@ function identifiedClient(userId: string): GatewayClient {
 
 describe("session mutation authorization store caches", () => {
   it("materializes and discovers each store once when one request resolves multiple targets", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withBotTestState({ scenario: "minimal" }, async () => {
       for (const [sessionKey, sessionId] of [
         ["agent:main:cache-one", "session-cache-one"],
         ["agent:main:cache-two", "session-cache-two"],
@@ -109,7 +109,7 @@ describe("session mutation authorization store caches", () => {
       },
     },
   ])("matches uncached $name authorization", async ({ sessionKey, entry }) => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withBotTestState({ scenario: "minimal" }, async () => {
       await sessionAccessor.upsertSessionEntry({ agentId: "main", sessionKey }, entry);
       const cfg = {};
       const requestClient = identifiedClient("viewer@example.com");

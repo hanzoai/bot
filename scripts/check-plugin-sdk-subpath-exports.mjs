@@ -48,10 +48,10 @@ function readPrivateLocalOnlySubpaths() {
 }
 
 function parsePluginSdkSubpath(specifier) {
-  if (!specifier.startsWith("openclaw/plugin-sdk/")) {
+  if (!specifier.startsWith("bot/plugin-sdk/")) {
     return null;
   }
-  const subpath = specifier.slice("openclaw/plugin-sdk/".length);
+  const subpath = specifier.slice("bot/plugin-sdk/".length);
   return subpath || null;
 }
 
@@ -164,12 +164,12 @@ async function collectViolations() {
 async function main() {
   const violations = await collectViolations();
   if (violations.length === 0) {
-    console.log("OK: all referenced openclaw/plugin-sdk/<subpath> imports are exported.");
+    console.log("OK: all referenced bot/plugin-sdk/<subpath> imports are exported.");
     return;
   }
 
   console.error(
-    "Rule: every referenced openclaw/plugin-sdk/<subpath> must be public or use its required private boundary.",
+    "Rule: every referenced bot/plugin-sdk/<subpath> must be public or use its required private boundary.",
   );
   for (const violation of violations) {
     console.error(

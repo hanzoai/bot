@@ -172,7 +172,7 @@ export const WHATSAPP_QA_DELIVERY_SCENARIOS: WhatsAppQaScenarioDefinition[] = [
       return {
         configMode: "allowlist",
         expectReply: false,
-        input: `openclawqa blocked group should not reply with ${quietToken}`,
+        input: `botqa blocked group should not reply with ${quietToken}`,
         matchText: quietToken,
         target: "group",
       };

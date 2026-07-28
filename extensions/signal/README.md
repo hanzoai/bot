@@ -1,13 +1,13 @@
-# Signal OpenClaw channel
+# Signal Bot channel
 
-Official OpenClaw channel plugin for Signal.
+Official Bot channel plugin for Signal.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/signal
+bot plugins install @hanzo/bot-signal
 ```
 
 ## Docs
 
-See `docs/channels/signal.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/channels/signal`.
+See `docs/channels/signal.md` in the Bot repository, or the published docs at `https://docs.bot.ai/channels/signal`.

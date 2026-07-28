@@ -24,7 +24,7 @@ export type SessionCreateParams = {
   worktree?: boolean;
   /** Base ref for the managed worktree branch; requires worktree. */
   worktreeBaseRef?: string;
-  /** Worktree name (branch becomes openclaw/<name>); requires worktree. */
+  /** Worktree name (branch becomes bot/<name>); requires worktree. */
   worktreeName?: string;
   /** Bind session exec to host=node with this node id (operator.admin). */
   execNode?: string;

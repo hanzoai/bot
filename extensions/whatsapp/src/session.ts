@@ -8,16 +8,16 @@ import type {
   WAMessageKey,
   proto,
 } from "baileys";
-import { formatCliCommand } from "openclaw/plugin-sdk/cli-runtime";
-import { VERSION } from "openclaw/plugin-sdk/cli-runtime";
+import { formatCliCommand } from "bot/plugin-sdk/cli-runtime";
+import { VERSION } from "bot/plugin-sdk/cli-runtime";
 import {
   createHttp1EnvHttpProxyAgent,
   createHttp1ProxyAgent,
   createNodeProxyAgent,
-} from "openclaw/plugin-sdk/fetch-runtime";
-import { danger, success } from "openclaw/plugin-sdk/runtime-env";
-import { getChildLogger, toPinoLikeLogger } from "openclaw/plugin-sdk/runtime-env";
-import { ensureDir, resolveUserPath } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/fetch-runtime";
+import { danger, success } from "bot/plugin-sdk/runtime-env";
+import { getChildLogger, toPinoLikeLogger } from "bot/plugin-sdk/runtime-env";
+import { ensureDir, resolveUserPath } from "bot/plugin-sdk/text-utility-runtime";
 import {
   readCredsJsonRaw,
   restoreCredsFromBackupIfNeeded,
@@ -66,7 +66,7 @@ const LOGGED_OUT_STATUS = 401;
 const WHATSAPP_WEBSOCKET_PROXY_TARGET = "https://mmg.whatsapp.net/";
 const CREDS_FLUSH_TIMEOUT_MESSAGE =
   "Queued WhatsApp creds save did not finish before auth bootstrap; skipping repair and continuing with primary creds.";
-const OPENCLAW_WHATSAPP_WEB_SOCKET_URL_ENV = "OPENCLAW_WHATSAPP_WEB_SOCKET_URL";
+const BOT_WHATSAPP_WEB_SOCKET_URL_ENV = "BOT_WHATSAPP_WEB_SOCKET_URL";
 
 async function rejectUnsafeWebCredsPath(authDir: string): Promise<void> {
   await assertWebCredsPathRegularFileOrMissing(resolveWebCredsPath(authDir));
@@ -179,7 +179,7 @@ function resolveWaWebSocketUrl(value: string | URL | undefined): string | URL | 
 }
 
 function resolveEnvWaWebSocketUrl(): string | undefined {
-  const value = resolveWaWebSocketUrl(process.env[OPENCLAW_WHATSAPP_WEB_SOCKET_URL_ENV]);
+  const value = resolveWaWebSocketUrl(process.env[BOT_WHATSAPP_WEB_SOCKET_URL_ENV]);
   if (!value) {
     return undefined;
   }
@@ -187,10 +187,10 @@ function resolveEnvWaWebSocketUrl(): string | undefined {
   try {
     url = new URL(value);
   } catch {
-    throw new Error(`${OPENCLAW_WHATSAPP_WEB_SOCKET_URL_ENV} must be a valid URL.`);
+    throw new Error(`${BOT_WHATSAPP_WEB_SOCKET_URL_ENV} must be a valid URL.`);
   }
   if (url.protocol !== "ws:" && url.protocol !== "wss:") {
-    throw new Error(`${OPENCLAW_WHATSAPP_WEB_SOCKET_URL_ENV} must use ws:// or wss://.`);
+    throw new Error(`${BOT_WHATSAPP_WEB_SOCKET_URL_ENV} must use ws:// or wss://.`);
   }
   return url.toString();
 }
@@ -340,7 +340,7 @@ async function createWaSocketInternal(
     version,
     logger,
     printQRInTerminal: false,
-    browser: ["openclaw", "cli", VERSION],
+    browser: ["bot", "cli", VERSION],
     syncFullHistory: false,
     fireInitQueries: receiveMode !== "directory",
     markOnlineOnConnect: false,
@@ -402,7 +402,7 @@ async function createWaSocketInternal(
           if (status === LOGGED_OUT_STATUS) {
             console.error(
               danger(
-                `WhatsApp session logged out. Run: ${formatCliCommand("openclaw channels login")}`,
+                `WhatsApp session logged out. Run: ${formatCliCommand("bot channels login")}`,
               ),
             );
           }

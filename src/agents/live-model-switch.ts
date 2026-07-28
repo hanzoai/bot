@@ -1,8 +1,8 @@
 /**
  * Resolves and persists live-session model switch requests.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveStorePath } from "../config/sessions/paths.js";
 import {
   loadSessionEntry,
@@ -10,7 +10,7 @@ import {
   patchSessionEntry,
 } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveSessionAgentId } from "./agent-scope.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "./defaults.js";
 import {
@@ -32,7 +32,7 @@ const OPENAI_PROVIDER_ID = "openai";
 const OPENAI_CODEX_PROVIDER_ID = "openai";
 
 function resolveLiveSessionModelSelection(params: {
-  cfg?: OpenClawConfig | undefined;
+  cfg?: BotConfig | undefined;
   sessionKey?: string;
   agentId?: string;
   defaultProvider: string;
@@ -67,7 +67,7 @@ function resolveLiveSessionModelSelection(params: {
  * can evaluate the persisted selection against the exact row they may rewrite.
  */
 function resolveSelectionFromSessionEntry(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: SessionEntry | undefined;
   agentId?: string;
   defaultProvider: string;
@@ -173,7 +173,7 @@ function hasDifferentLiveSessionModelSelection(
  * user-initiated `/model` switches and system-initiated fallback rotations.
  */
 export function shouldSwitchToLiveModel(params: {
-  cfg?: OpenClawConfig | undefined;
+  cfg?: BotConfig | undefined;
   sessionKey?: string;
   agentId?: string;
   defaultProvider: string;
@@ -248,7 +248,7 @@ export function shouldSwitchToLiveModel(params: {
  * a newer selection is never consumed by this run's result.
  */
 export async function consolidateLiveModelSwitchAfterRun(params: {
-  cfg?: OpenClawConfig | undefined;
+  cfg?: BotConfig | undefined;
   sessionKey?: string;
   agentId?: string;
   providerUsed?: string;

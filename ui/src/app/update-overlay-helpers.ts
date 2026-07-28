@@ -71,9 +71,9 @@ export function resolveUpdateStatusBanner(params: {
       dirty: "Commit or stash changes, then retry.",
       "no-upstream": "Set an upstream branch, then retry.",
       "not-git-install":
-        "Not a git checkout. Run `openclaw update` from the CLI for a global reinstall.",
-      "not-openclaw-root":
-        "Run the update from an OpenClaw checkout or use the CLI global reinstall path.",
+        "Not a git checkout. Run `bot update` from the CLI for a global reinstall.",
+      "not-bot-root":
+        "Run the update from an Bot checkout or use the CLI global reinstall path.",
       "deps-install-failed": "Dependency install failed. Fix the install error and retry.",
       "build-failed": "Build failed. Fix the build error and retry.",
       "build-dirty":
@@ -89,7 +89,7 @@ export function resolveUpdateStatusBanner(params: {
         "The replacement process never became healthy. The previous process stayed up so you can recover.",
       "managed-service-handoff-already-running":
         "Another managed update is already running. Wait for it to complete, then refresh update status.",
-      "doctor-failed": "Doctor repair failed. Run `openclaw doctor --non-interactive` and retry.",
+      "doctor-failed": "Doctor repair failed. Run `bot doctor --non-interactive` and retry.",
     }[reason] ?? "See the gateway logs for the exact failure and retry once the cause is fixed.";
   return {
     tone: status === "skipped" ? "warn" : "danger",
@@ -127,7 +127,7 @@ export function resolvePostRestartUpdateBanner(
 export function resolvePendingUpdateHandoffTimeoutBanner(): ApplicationStatusBanner {
   return {
     tone: "danger",
-    text: "Update handoff started, but completion was not reported after reconnect. Run `openclaw update status` for the final result.",
+    text: "Update handoff started, but completion was not reported after reconnect. Run `bot update status` for the final result.",
   };
 }
 

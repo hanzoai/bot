@@ -1,12 +1,12 @@
 // Discord plugin module implements token behavior.
-import type { BaseTokenResolution } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/routing";
-import { resolveAccountEntry } from "openclaw/plugin-sdk/routing";
+import type { BaseTokenResolution } from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/routing";
+import { resolveAccountEntry } from "bot/plugin-sdk/routing";
 import {
   normalizeResolvedSecretInputString,
   resolveSecretInputString,
-} from "openclaw/plugin-sdk/secret-input";
+} from "bot/plugin-sdk/secret-input";
 import { selectDiscordRuntimeConfig } from "./runtime-config.js";
 
 type DiscordTokenSource = "env" | "config" | "none";
@@ -35,7 +35,7 @@ export function normalizeDiscordToken(raw: unknown, path: string): string | unde
 }
 
 function resolveDiscordTokenValue(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   value: unknown;
   path: string;
 }): DiscordTokenValueResolution {
@@ -58,7 +58,7 @@ function resolveDiscordTokenValue(params: {
 }
 
 export function resolveDiscordToken(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   opts: { accountId?: string | null; envToken?: string | null } = {},
 ): DiscordTokenResolution {
   const selectedCfg = selectDiscordRuntimeConfig(cfg);

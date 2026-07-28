@@ -81,7 +81,7 @@ describe("config view", () => {
     catalogOpenTarget: "viewer" as const,
     setCatalogOpenTarget: vi.fn(),
     gatewayUrl: "",
-    assistantName: "OpenClaw",
+    assistantName: "Bot",
   });
 
   it("lets config pages grow with their content instead of creating an inner viewport", async () => {
@@ -453,7 +453,7 @@ describe("config view", () => {
     const { container } = renderConfigView({ needsApply: true, onApply });
 
     const banner = queryRequired(container, ".config-apply-banner", HTMLElement);
-    expect(banner.textContent).toContain("Saved to openclaw.json — restart the gateway to apply.");
+    expect(banner.textContent).toContain("Saved to bot.json — restart the gateway to apply.");
     const applyButton = findButtonByText(container, "Restart & apply");
     expect(applyButton.disabled).toBe(false);
     applyButton.click();
@@ -1117,7 +1117,7 @@ describe("config view", () => {
     const container = document.createElement("div");
     const props: ConfigProps = {
       ...baseProps(),
-      configPath: "/tmp/openclaw-a.json5",
+      configPath: "/tmp/bot-a.json5",
       formMode: "raw",
       raw: '{\n  token: "TOKEN_A_AFTER"\n}\n',
       originalRaw: '{\n  token: "TOKEN_A_BEFORE"\n}\n',
@@ -1155,7 +1155,7 @@ describe("config view", () => {
       '"TOKEN_A_AFTER"',
     );
 
-    props.configPath = "/tmp/openclaw-b.json5";
+    props.configPath = "/tmp/bot-b.json5";
     props.raw = '{\n  token: "TOKEN_B_AFTER"\n}\n';
     props.originalRaw = '{\n  token: "TOKEN_B_BEFORE"\n}\n';
     props.formValue = {
@@ -1308,7 +1308,7 @@ describe("config view", () => {
     const secretRefValue = {
       channels: {
         discord: {
-          token: { source: "env", provider: "default", id: "__OPENCLAW_REDACTED__" },
+          token: { source: "env", provider: "default", id: "__BOT_REDACTED__" },
         },
       },
     };

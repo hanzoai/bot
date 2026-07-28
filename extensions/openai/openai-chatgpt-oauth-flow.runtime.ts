@@ -5,8 +5,8 @@
  * It is only intended for CLI use, not browser environments.
  */
 
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { parseOAuthAuthorizationInput } from "openclaw/plugin-sdk/provider-oauth-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { parseOAuthAuthorizationInput } from "bot/plugin-sdk/provider-oauth-runtime";
 import { resolveCodexAuthIdentity } from "./openai-chatgpt-auth-identity.js";
 import {
   createOAuthLoginCancelledError,
@@ -196,7 +196,7 @@ function getAccountId(accessToken: string): string | null {
  * @param options.onManualCodeInput - Optional promise that resolves with user-pasted code.
  *                                    Races with browser callback - whichever completes first wins.
  *                                    Useful for showing paste input immediately alongside browser flow.
- * @param options.originator - OAuth originator parameter (defaults to "openclaw")
+ * @param options.originator - OAuth originator parameter (defaults to "bot")
  */
 export async function loginOpenAICodex(options: {
   onAuth: (info: { url: string; instructions?: string }) => Promise<void> | void;
@@ -208,7 +208,7 @@ export async function loginOpenAICodex(options: {
 }): Promise<OAuthCredentials> {
   throwIfOAuthLoginAborted(options.signal);
   const { verifier, redirectUri, state, url } = await createOpenAIAuthorizationFlow(
-    options.originator ?? "openclaw",
+    options.originator ?? "bot",
     REDIRECT_URI,
   );
   const server = await startLocalOAuthServer(state);

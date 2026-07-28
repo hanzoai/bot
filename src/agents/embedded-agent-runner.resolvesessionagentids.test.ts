@@ -1,6 +1,6 @@
 // Covers resolving the active agent id from session keys and explicit config.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { resolveSessionAgentIds } from "./agent-scope.js";
 
 describe("resolveSessionAgentIds", () => {
@@ -8,7 +8,7 @@ describe("resolveSessionAgentIds", () => {
     agents: {
       list: [{ id: "main" }, { id: "beta", default: true }],
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 
   it("falls back to the configured default when sessionKey is missing", () => {
     const { defaultAgentId, sessionAgentId } = resolveSessionAgentIds({

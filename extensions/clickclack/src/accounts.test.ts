@@ -1,7 +1,7 @@
 // Clickclack tests cover accounts plugin behavior.
 import fs from "node:fs";
 import path from "node:path";
-import { withTempDir } from "openclaw/plugin-sdk/test-env";
+import { withTempDir } from "bot/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   listClickClackAccountIds,
@@ -264,7 +264,7 @@ describe("ClickClack account resolution", () => {
     const cfg = {
       channels: {
         clickclack: {
-          baseUrl: "https://clack.openclaw.ai/",
+          baseUrl: "https://clack.bot.ai/",
           apiBaseUrl: "http://127.0.0.1:8484/",
           workspace: "default",
           token: "test-token-placeholder",
@@ -287,14 +287,14 @@ describe("ClickClack account resolution", () => {
     const fallbackCfg = {
       channels: {
         clickclack: {
-          baseUrl: "https://clack.openclaw.ai/",
+          baseUrl: "https://clack.bot.ai/",
           workspace: "default",
           token: "test-token-placeholder",
         },
       },
     } satisfies CoreConfig;
     expect(resolveClickClackAccount({ cfg: fallbackCfg }).apiEndpoint).toBe(
-      "https://clack.openclaw.ai",
+      "https://clack.bot.ai",
     );
   });
 
@@ -308,7 +308,7 @@ describe("ClickClack account resolution", () => {
           workspace: "default",
           discussions: {
             enabled: true,
-            controlUrlBase: "https://team.openclaw.ai/",
+            controlUrlBase: "https://team.bot.ai/",
           },
           accounts: {
             support: {
@@ -323,13 +323,13 @@ describe("ClickClack account resolution", () => {
     expect(resolveClickClackAccount({ cfg }).discussions).toEqual({
       enabled: true,
       workspace: "default",
-      controlUrlBase: "https://team.openclaw.ai/",
+      controlUrlBase: "https://team.bot.ai/",
       section: "Sessions",
     });
     expect(resolveClickClackAccount({ cfg, accountId: "support" }).discussions).toEqual({
       enabled: true,
       workspace: "operations",
-      controlUrlBase: "https://team.openclaw.ai/",
+      controlUrlBase: "https://team.bot.ai/",
       section: "Live work",
     });
   });

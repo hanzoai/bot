@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { withSecureTestNodeExecPath } from "../secrets/test-node-command.test-support.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
@@ -55,7 +55,7 @@ afterEach(async () => {
 });
 
 describe("resolveCommandSecretRefsViaGateway", () => {
-  function makeTalkProviderApiKeySecretRefConfig(envKey: string): OpenClawConfig {
+  function makeTalkProviderApiKeySecretRefConfig(envKey: string): BotConfig {
     return buildTalkTestProviderConfig({ source: "env", provider: "default", id: envKey });
   }
 
@@ -103,10 +103,10 @@ describe("resolveCommandSecretRefsViaGateway", () => {
   }
 
   async function createExecProviderConfig(refId: string): Promise<{
-    config: OpenClawConfig;
+    config: BotConfig;
     markerPath: string;
   }> {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-command-secret-exec-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-command-secret-exec-"));
     tempRoots.add(root);
     const markerPath = path.join(root, "executed");
     const resolverScript = [
@@ -115,7 +115,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
       "process.stdin.on('data', (chunk) => { stdin += chunk; });",
       "process.stdin.on('end', () => {",
       "  const request = JSON.parse(stdin);",
-      "  fs.writeFileSync(process.env.OPENCLAW_EXEC_MARKER, 'executed');",
+      "  fs.writeFileSync(process.env.BOT_EXEC_MARKER, 'executed');",
       "  const values = Object.fromEntries(request.ids.map((id) => [id, 'exec-local-key']));",
       "  process.stdout.write(JSON.stringify({ protocolVersion: 1, values }));",
       "});",
@@ -134,14 +134,14 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               source: "exec",
               command: process.execPath,
               args: ["-e", resolverScript],
-              env: { OPENCLAW_EXEC_MARKER: markerPath },
+              env: { BOT_EXEC_MARKER: markerPath },
               allowInsecurePath: true,
               allowSymlinkCommand: true,
               jsonOnly: true,
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     };
   }
 
@@ -258,7 +258,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
   it("returns config unchanged when no target SecretRefs are configured", async () => {
     const config = {
       ...buildTalkTestProviderConfig("plain"), // pragma: allowlist secret
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     const result = await resolveCommandSecretRefsViaGateway({
       config,
       commandName: "memory status",
@@ -284,7 +284,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = await resolveCommandSecretRefsViaGateway({
       config,
@@ -402,7 +402,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         commandName: "message",
         targetIds: new Set(["channels.discord.accounts.*.token"]),
         allowedPaths: new Set(["channels.discord.accounts.ops.token"]),
@@ -504,7 +504,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         commandName: "message",
         targetIds: new Set(["channels.discord.accounts.*.token"]),
         allowedPaths: new Set(["channels.discord.accounts.ops.token"]),
@@ -566,7 +566,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
                   },
                 },
               },
-            } as unknown as OpenClawConfig,
+            } as unknown as BotConfig,
             commandName: "infer web search",
             targetIds: new Set(["plugins.entries.firecrawl.config.webSearch.apiKey"]),
             allowedPaths: new Set(["plugins.entries.firecrawl.config.webSearch.apiKey"]),
@@ -613,7 +613,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               default: { source: "env" },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as BotConfig,
         commandName: "memory status",
         targetIds: new Set(["talk.providers.*.apiKey"]),
       });
@@ -709,8 +709,8 @@ describe("resolveCommandSecretRefsViaGateway", () => {
   it("skips gateway resolution when gateway credentials would execute exec SecretRefs", async () => {
     await withEnvAsync(
       {
-        OPENCLAW_GATEWAY_PASSWORD: undefined,
-        OPENCLAW_GATEWAY_TOKEN: undefined,
+        BOT_GATEWAY_PASSWORD: undefined,
+        BOT_GATEWAY_TOKEN: undefined,
         TALK_API_KEY: "local-fallback-key",
       },
       async () => {
@@ -740,7 +740,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
                 },
               },
             },
-          } as OpenClawConfig,
+          } as BotConfig,
           commandName: "doctor preview",
           targetIds: new Set(["talk.providers.*.apiKey"]),
           mode: "read_only_status",
@@ -787,7 +787,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
                 },
               },
             },
-          } as unknown as OpenClawConfig,
+          } as unknown as BotConfig,
           commandName: "agent",
           targetIds: new Set(["plugins.entries.google.config.webSearch.apiKey"]),
         });
@@ -832,7 +832,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
                 },
               },
             },
-          } as unknown as OpenClawConfig,
+          } as unknown as BotConfig,
           commandName: "agent",
           targetIds: new Set(["plugins.entries.firecrawl.config.webFetch.apiKey"]),
         });
@@ -882,7 +882,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
                 },
               },
             },
-          } as unknown as OpenClawConfig,
+          } as unknown as BotConfig,
           commandName: "infer web fetch",
           targetIds: new Set(["plugins.entries.firecrawl.config.webSearch.apiKey"]),
           allowedPaths: new Set(["plugins.entries.firecrawl.config.webSearch.apiKey"]),
@@ -940,7 +940,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
                 },
               },
             },
-          } as unknown as OpenClawConfig,
+          } as unknown as BotConfig,
           commandName: "infer web fetch",
           targetIds: new Set(["plugins.entries.firecrawl.config.webSearch.apiKey"]),
           allowedPaths: new Set(["plugins.entries.firecrawl.config.webSearch.apiKey"]),
@@ -983,7 +983,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as BotConfig,
         commandName: "infer web search",
         targetIds: new Set(["models.providers.*.apiKey"]),
         allowedPaths: new Set(["models.providers.google.apiKey"]),
@@ -1027,7 +1027,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         commandName: "agent",
         targetIds: new Set(["plugins.entries.google.config.webSearch.apiKey"]),
       });
@@ -1183,7 +1183,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const result = await resolveCommandSecretRefsViaGateway({
       config,
@@ -1299,7 +1299,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         commandName: "agent",
         targetIds: new Set([webPath]),
       });
@@ -1338,7 +1338,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     },
     {
       label: "fetch",
@@ -1361,7 +1361,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     },
   ])("fails closed when a configured web $label provider owner cannot be proven", async (test) => {
     const restoreDeps = test.setupDeps();
@@ -1440,7 +1440,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         commandName: "reply",
         targetIds: new Set(["talk.providers.*.apiKey"]),
       });
@@ -1474,7 +1474,7 @@ describe("resolveCommandSecretRefsViaGateway", () => {
               password: { source: "env", provider: "default", id: gatewayEnvKey },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as BotConfig,
         commandName: "status",
         targetIds: new Set(["talk.providers.*.apiKey"]),
         mode: "read_only_status",

@@ -3,7 +3,7 @@
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionEntry } from "../config/sessions.js";
 import type {
@@ -11,7 +11,7 @@ import type {
   SessionEntryPatchContext,
   SessionEntryPatchOptions,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { AgentEventPayload } from "../infra/agent-events.js";
 import {
   getActiveGatewayRootWorkCount,
@@ -91,7 +91,7 @@ const mocks = vi.hoisted(() => ({
   callGateway: vi.fn<(request: { method?: string }) => Promise<Record<string, unknown>>>(),
   onAgentEvent: vi.fn<(_handler: (event: AgentEventPayload) => void) => typeof noop>(() => noop),
   getAgentRunContext: vi.fn<(_runId: string) => unknown>(() => undefined),
-  getRuntimeConfig: vi.fn<() => OpenClawConfig>(() => ({
+  getRuntimeConfig: vi.fn<() => BotConfig>(() => ({
     agents: { defaults: { subagents: { archiveAfterMinutes: 0 } } },
     session: { mainKey: "main", scope: "per-sender" as const },
   })),
@@ -514,7 +514,7 @@ describe("subagent registry seam flow", () => {
   });
 
   it("keeps collector records when attachment cleanup cannot prove a safe path", async () => {
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-swarm-archive-"));
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-swarm-archive-"));
     const attachmentsRootDir = path.join(tempRoot, "root");
     const attachmentsDir = path.join(tempRoot, "outside");
     await fs.mkdir(attachmentsRootDir);
@@ -3989,7 +3989,7 @@ describe("subagent registry seam flow", () => {
       runSubagentEnded: mocks.runSubagentEnded,
     } as never);
     const attachmentsRootDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-old-tombstone-attachments-"),
+      path.join(os.tmpdir(), "bot-old-tombstone-attachments-"),
     );
     const attachmentsDir = path.join(attachmentsRootDir, "child");
     await fs.mkdir(attachmentsDir, { recursive: true });
@@ -5460,7 +5460,7 @@ describe("subagent registry seam flow", () => {
 
   it("removes attachments for killed delete-mode runs", async () => {
     const attachmentsRootDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-kill-attachments-"),
+      path.join(os.tmpdir(), "bot-kill-attachments-"),
     );
     const attachmentsDir = path.join(attachmentsRootDir, "child");
     await fs.mkdir(attachmentsDir, { recursive: true });
@@ -5672,7 +5672,7 @@ describe("subagent registry seam flow", () => {
 
   it("removes attachments for released delete-mode runs", async () => {
     const attachmentsRootDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-release-attachments-"),
+      path.join(os.tmpdir(), "bot-release-attachments-"),
     );
     const attachmentsDir = path.join(attachmentsRootDir, "child");
     await fs.mkdir(attachmentsDir, { recursive: true });

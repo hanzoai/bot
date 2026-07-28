@@ -10,7 +10,7 @@ import {
   resolveAgentModelFallbackValues,
 } from "../config/model-input.js";
 import type { OptionalBootstrapFileName } from "../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { applyPrimaryModel } from "../plugins/provider-model-primary.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -23,7 +23,7 @@ export type OnboardingAgentTarget = {
 };
 
 export function resolveOnboardingAgentTarget(
-  config: OpenClawConfig,
+  config: BotConfig,
   explicitAgentId?: string,
 ): OnboardingAgentTarget {
   const agentId = normalizeAgentId(explicitAgentId ?? resolveDefaultAgentId(config));
@@ -49,10 +49,10 @@ export async function ensureOnboardingAgentWorkspace(
 }
 
 export function applyOnboardingPrimaryModel(
-  config: OpenClawConfig,
+  config: BotConfig,
   target: OnboardingAgentTarget,
   model: string,
-): OpenClawConfig {
+): BotConfig {
   const entry = config.agents?.entries?.[target.agentId];
   if (entry?.model === undefined) {
     return applyPrimaryModel(config, model);

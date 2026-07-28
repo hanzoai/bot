@@ -38,8 +38,8 @@ function lazyTestApi(key: string): object {
 }
 
 export const embeddingTesting = lazyTestApi(
-  "openclaw.amazonBedrockEmbeddingTestApi",
+  "bot.amazonBedrockEmbeddingTestApi",
 ) as BedrockEmbeddingTestApi;
 export const streamTesting = lazyTestApi(
-  "openclaw.amazonBedrockStreamTestApi",
+  "bot.amazonBedrockStreamTestApi",
 ) as BedrockStreamTestApi;

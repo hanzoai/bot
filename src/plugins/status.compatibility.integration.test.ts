@@ -13,7 +13,7 @@ import {
 import { buildPluginCompatibilitySnapshotNotices } from "./status.js";
 
 function addStartupActivation(pluginDir: string, onStartup: boolean): void {
-  const manifestPath = path.join(pluginDir, "openclaw.plugin.json");
+  const manifestPath = path.join(pluginDir, "bot.plugin.json");
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8")) as Record<string, unknown>;
   fs.writeFileSync(
     manifestPath,
@@ -24,7 +24,7 @@ function addStartupActivation(pluginDir: string, onStartup: boolean): void {
 
 function buildSnapshotCompatibilityNoticeCodes(plugin: { dir: string; file: string; id: string }) {
   const stateDir = makeTempDir();
-  return withEnv({ OPENCLAW_STATE_DIR: stateDir }, () => {
+  return withEnv({ BOT_STATE_DIR: stateDir }, () => {
     useNoBundledPlugins();
     return buildPluginCompatibilitySnapshotNotices({
       config: {

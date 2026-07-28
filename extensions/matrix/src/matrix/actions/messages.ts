@@ -1,5 +1,5 @@
 import type { Direction } from "matrix-js-sdk/lib/models/event-timeline.js";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { fetchMatrixPollMessageSummary, resolveMatrixPollRootEventId } from "../poll-summary.js";
 import { isPollEventType, isPollStartType } from "../poll-types.js";
 import { editMessageMatrix, sendMessageMatrix } from "../send.js";
@@ -13,7 +13,7 @@ import {
   type MatrixRawEvent,
 } from "./types.js";
 
-const MATRIX_THREAD_RELATIONS_START_CURSOR_PREFIX = "openclaw.matrix.thread-relations-start:";
+const MATRIX_THREAD_RELATIONS_START_CURSOR_PREFIX = "bot.matrix.thread-relations-start:";
 
 export async function sendMatrixMessage(
   to: string,

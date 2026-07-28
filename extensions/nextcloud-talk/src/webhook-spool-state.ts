@@ -1,5 +1,5 @@
 // Nextcloud Talk plugin module owns webhook ingress identity and legacy-state migration.
-import type { ChannelIngressQueue } from "openclaw/plugin-sdk/channel-outbound";
+import type { ChannelIngressQueue } from "bot/plugin-sdk/channel-outbound";
 
 export const NEXTCLOUD_TALK_INGRESS_PAYLOAD_VERSION = 1;
 

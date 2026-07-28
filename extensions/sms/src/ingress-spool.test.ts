@@ -2,7 +2,7 @@
 import { mkdtemp, realpath, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createChannelIngressQueueForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import { createChannelIngressQueueForTests } from "bot/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SmsChannelRuntime } from "./inbound.js";
 import { createSmsIngressSpool } from "./ingress-spool.js";
@@ -35,7 +35,7 @@ type SmsIngressDeliver = NonNullable<Parameters<typeof createSmsIngressSpool>[0]
 type SmsIngressSpool = ReturnType<typeof createSmsIngressSpool>;
 
 async function createStateDir(): Promise<string> {
-  const created = await mkdtemp(path.join(os.tmpdir(), "openclaw-sms-ingress-"));
+  const created = await mkdtemp(path.join(os.tmpdir(), "bot-sms-ingress-"));
   const resolved = await realpath(created);
   stateDirs.push(resolved);
   return resolved;

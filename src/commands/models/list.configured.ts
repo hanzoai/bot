@@ -8,7 +8,7 @@ import {
   resolveAgentModelFallbackValues,
   resolveAgentModelPrimaryValue,
 } from "../../config/model-input.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.js";
 import type { ConfiguredEntry } from "./list.types.js";
 import { createModelCatalogProviderAliasCanonicalizer } from "./provider-aliases.js";
@@ -18,7 +18,7 @@ const DISPLAY_MODEL_PARSE_OPTIONS = { allowPluginNormalization: false } as const
 
 /** Returns canonical configured model entries with default/fallback/image/configured tags. */
 export function resolveConfiguredEntries(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   metadataSnapshot?: Pick<PluginMetadataSnapshot, "manifestRegistry">,
 ) {
   const resolvedDefault = resolveConfiguredModelRef({

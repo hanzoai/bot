@@ -1,13 +1,13 @@
 // Whatsapp plugin module implements broadcast behavior.
-import type { AckReactionHandle } from "openclaw/plugin-sdk/channel-feedback";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import { buildAgentSessionKey, deriveLastRoutePolicy } from "openclaw/plugin-sdk/routing";
+import type { AckReactionHandle } from "bot/plugin-sdk/channel-feedback";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { resolveAgentRoute } from "bot/plugin-sdk/routing";
+import { buildAgentSessionKey, deriveLastRoutePolicy } from "bot/plugin-sdk/routing";
 import {
   buildAgentMainSessionKey,
   DEFAULT_MAIN_KEY,
   normalizeAgentId,
-} from "openclaw/plugin-sdk/routing";
+} from "bot/plugin-sdk/routing";
 import { resolveWhatsAppGroupSessionRoute } from "../../group-session-key.js";
 import { requireWhatsAppInboundAdmission } from "../../inbound/admission.js";
 import type { AdmittedWebInboundMessage } from "../../inbound/types.js";
@@ -16,7 +16,7 @@ import { whatsappInboundLog } from "../loggers.js";
 import type { GroupHistoryEntry } from "./inbound-context.js";
 
 function buildBroadcastRouteKeys(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   msg: AdmittedWebInboundMessage;
   route: ReturnType<typeof resolveAgentRoute>;
   peerId: string;
@@ -50,7 +50,7 @@ function buildBroadcastRouteKeys(params: {
 }
 
 export async function maybeBroadcastMessage(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   msg: AdmittedWebInboundMessage;
   peerId: string;
   route: ReturnType<typeof resolveAgentRoute>;

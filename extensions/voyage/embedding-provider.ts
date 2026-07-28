@@ -5,8 +5,8 @@ import {
   resolveRemoteEmbeddingBearerClient,
   type MemoryEmbeddingProvider,
   type MemoryEmbeddingProviderCreateOptions,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
-import type { SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/memory-core-host-engine-embeddings";
+import type { SsrFPolicy } from "bot/plugin-sdk/ssrf-runtime";
 
 export type VoyageEmbeddingClient = {
   baseUrl: string;

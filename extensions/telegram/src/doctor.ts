@@ -2,14 +2,14 @@
 import type {
   ChannelDoctorAdapter,
   ChannelDoctorEmptyAllowlistAccountContext,
-} from "openclaw/plugin-sdk/channel-contract";
+} from "bot/plugin-sdk/channel-contract";
 import {
   resolveChannelStreamingBlockEnabled,
   resolveChannelStreamingPreviewToolProgress,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { inspectTelegramAccount } from "./account-inspect.js";
 import {
   listTelegramAccountIds,
@@ -59,7 +59,7 @@ function hasAllowFromEntries(values?: DoctorAllowFromList): boolean {
 }
 
 function collectTelegramAccountScopes(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): Array<{ prefix: string; pathSegments: string[]; account: Record<string, unknown> }> {
   const scopes: Array<{
     prefix: string;
@@ -143,7 +143,7 @@ function describeConfigValueType(value: unknown): string {
   return typeof value;
 }
 
-function scanTelegramMalformedGroupsConfig(cfg: OpenClawConfig): TelegramMalformedGroupsHit[] {
+function scanTelegramMalformedGroupsConfig(cfg: BotConfig): TelegramMalformedGroupsHit[] {
   const hits: TelegramMalformedGroupsHit[] = [];
   for (const scope of collectTelegramAccountScopes(cfg)) {
     if (!Object.hasOwn(scope.account, "groups")) {
@@ -178,7 +178,7 @@ function collectTelegramMalformedGroupsWarnings(params: {
   ];
 }
 
-function scanTelegramInvalidAllowFromEntries(cfg: OpenClawConfig): TelegramAllowFromInvalidHit[] {
+function scanTelegramInvalidAllowFromEntries(cfg: BotConfig): TelegramAllowFromInvalidHit[] {
   const hits: TelegramAllowFromInvalidHit[] = [];
   const scanList = (pathLabel: string, list: unknown) => {
     if (!Array.isArray(list)) {
@@ -215,7 +215,7 @@ function collectTelegramInvalidAllowFromWarnings(params: {
   ];
 }
 
-function scanTelegramBotEndpointApiRoots(cfg: OpenClawConfig): TelegramApiRootBotEndpointHit[] {
+function scanTelegramBotEndpointApiRoots(cfg: BotConfig): TelegramApiRootBotEndpointHit[] {
   const hits: TelegramApiRootBotEndpointHit[] = [];
   for (const scope of collectTelegramAccountScopes(cfg)) {
     const value = scope.account.apiRoot;
@@ -246,7 +246,7 @@ function collectTelegramApiRootWarnings(params: {
   ];
 }
 
-function formatTelegramAccountConfigPath(cfg: OpenClawConfig, accountId: string): string {
+function formatTelegramAccountConfigPath(cfg: BotConfig, accountId: string): string {
   const telegram = asObjectRecord((cfg.channels as Record<string, unknown> | undefined)?.telegram);
   const accounts = asObjectRecord(telegram?.accounts);
   if (!accounts || Object.keys(accounts).length === 0) {
@@ -256,7 +256,7 @@ function formatTelegramAccountConfigPath(cfg: OpenClawConfig, accountId: string)
 }
 
 function scanTelegramSelectedQuoteToolProgressWarnings(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): TelegramSelectedQuoteToolProgressHit[] {
   if (!asObjectRecord((cfg.channels as Record<string, unknown> | undefined)?.telegram)) {
     return [];
@@ -298,8 +298,8 @@ function collectTelegramSelectedQuoteToolProgressWarnings(params: {
   ];
 }
 
-function maybeRepairTelegramApiRoots(cfg: OpenClawConfig): {
-  config: OpenClawConfig;
+function maybeRepairTelegramApiRoots(cfg: BotConfig): {
+  config: BotConfig;
   changes: string[];
 } {
   const hits = scanTelegramBotEndpointApiRoots(cfg);
@@ -331,7 +331,7 @@ function maybeRepairTelegramApiRoots(cfg: OpenClawConfig): {
 }
 
 function collectTelegramMissingEnvTokenWarnings(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
 }): string[] {
   if (resolveDefaultTelegramAccountId(params.cfg) !== "default") {
@@ -350,8 +350,8 @@ function collectTelegramMissingEnvTokenWarnings(params: {
   ];
 }
 
-async function repairTelegramConfig(params: { cfg: OpenClawConfig }): Promise<{
-  config: OpenClawConfig;
+async function repairTelegramConfig(params: { cfg: BotConfig }): Promise<{
+  config: BotConfig;
   changes: string[];
 }> {
   const apiRootRepair = maybeRepairTelegramApiRoots(params.cfg);
@@ -362,8 +362,8 @@ async function repairTelegramConfig(params: { cfg: OpenClawConfig }): Promise<{
   };
 }
 
-async function maybeRepairTelegramAllowFromUsernames(cfg: OpenClawConfig): Promise<{
-  config: OpenClawConfig;
+async function maybeRepairTelegramAllowFromUsernames(cfg: BotConfig): Promise<{
+  config: BotConfig;
   changes: string[];
 }> {
   const hits = scanTelegramInvalidAllowFromEntries(cfg);
@@ -389,7 +389,7 @@ async function maybeRepairTelegramAllowFromUsernames(cfg: OpenClawConfig): Promi
   }
 
   const { getChannelsCommandSecretTargetIds, resolveCommandSecretRefsViaGateway } =
-    await import("openclaw/plugin-sdk/runtime");
+    await import("bot/plugin-sdk/runtime");
 
   const { resolvedConfig } = await resolveCommandSecretRefsViaGateway({
     config: cfg,

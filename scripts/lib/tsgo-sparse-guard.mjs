@@ -13,7 +13,7 @@ const CORE_TEST_CONFIGS = new Set([
 
 const CORE_PROD_CONFIGS = new Set(["tsconfig.core.json"]);
 const UI_PROD_CONFIGS = new Set(["tsconfig.ui.json"]);
-const TSGO_SPARSE_SKIP_ENV_KEY = "OPENCLAW_TSGO_SPARSE_SKIP";
+const TSGO_SPARSE_SKIP_ENV_KEY = "BOT_TSGO_SPARSE_SKIP";
 const CORE_PROD_SPARSE_ROOTS = ["packages"];
 const UI_PROD_SPARSE_ROOTS = ["packages", "src", "ui/config", "ui/src"];
 const CORE_TEST_SPARSE_ROOTS = ["packages", "ui/config", "ui/src"];
@@ -47,7 +47,7 @@ const CORE_PROD_REQUIRED_PATHS = [
 
 const UI_PROD_REQUIRED_PATHS = [
   {
-    path: "apps/shared/OpenClawKit/Sources/OpenClawKit/Resources/tool-display.json",
+    path: "apps/shared/BotKit/Sources/BotKit/Resources/tool-display.json",
     whenPresent: "ui/src/lib/chat/tool-display.ts",
   },
 ];

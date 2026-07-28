@@ -204,7 +204,7 @@ describe("dependency guard script", () => {
       findTrustedDependencyGuardActor({
         candidates: untrustedAuthorCandidate,
         isDependencyApprover: async (login) =>
-          login === "security-user" || login === "repo-admin" ? "openclaw-secops" : null,
+          login === "security-user" || login === "repo-admin" ? "bot-secops" : null,
       }),
     ).resolves.toBeNull();
     await expect(
@@ -224,7 +224,7 @@ describe("dependency guard script", () => {
       headSha,
     });
 
-    expect(body).toContain("<!-- openclaw:dependency-graph-guard -->");
+    expect(body).toContain("<!-- bot:dependency-graph-guard -->");
     expect(body).toContain("Dependency graph changes noted");
     expect(body).toContain("informational");
     expect(body).toContain("@repo-admin");
@@ -313,26 +313,26 @@ describe("dependency guard script", () => {
 
   it("trusts only configured dependency guard marker comment authors", () => {
     const trustedAuthors = dependencyGuardCommentAuthors(
-      "github-actions[bot], openclaw-autoscrub[bot]",
+      "github-actions[bot], bot-autoscrub[bot]",
     );
 
     expect(
       isDependencyGuardMarkerComment(
         {
-          body: "<!-- openclaw:dependency-graph-guard -->",
-          user: { login: "openclaw-autoscrub[bot]" },
+          body: "<!-- bot:dependency-graph-guard -->",
+          user: { login: "bot-autoscrub[bot]" },
         },
-        "<!-- openclaw:dependency-graph-guard -->",
+        "<!-- bot:dependency-graph-guard -->",
         trustedAuthors,
       ),
     ).toBe(true);
     expect(
       isDependencyGuardMarkerComment(
         {
-          body: "<!-- openclaw:dependency-graph-guard -->",
+          body: "<!-- bot:dependency-graph-guard -->",
           user: { login: "contributor" },
         },
-        "<!-- openclaw:dependency-graph-guard -->",
+        "<!-- bot:dependency-graph-guard -->",
         trustedAuthors,
       ),
     ).toBe(false);
@@ -342,7 +342,7 @@ describe("dependency guard script", () => {
           body: "no marker",
           user: { login: "github-actions[bot]" },
         },
-        "<!-- openclaw:dependency-graph-guard -->",
+        "<!-- bot:dependency-graph-guard -->",
         trustedAuthors,
       ),
     ).toBe(false);
@@ -361,7 +361,7 @@ describe("dependency guard script", () => {
       ],
     });
 
-    expect(body).toContain("<!-- openclaw:dependency-graph-guard -->");
+    expect(body).toContain("<!-- bot:dependency-graph-guard -->");
     expect(body).toContain("Dependency graph changes are blocked");
     expect(body).toContain("`pnpm-lock.yaml` changed.");
     expect(body).toContain("`tools/nested/pnpm-lock.yaml` changed.");
@@ -432,14 +432,14 @@ describe("dependency guard script", () => {
     const sameRepoPullRequest = {
       head: {
         ref: "contributor/change",
-        repo: { full_name: "openclaw/openclaw" },
+        repo: { full_name: "hanzoai/bot" },
         sha: headSha,
       },
     };
     const forkPullRequest = {
       head: {
         ref: "contributor/change",
-        repo: { full_name: "external/openclaw" },
+        repo: { full_name: "external/bot" },
         sha: headSha,
       },
     };
@@ -447,29 +447,29 @@ describe("dependency guard script", () => {
       maintainer_can_modify: true,
       head: {
         ref: "contributor/change",
-        repo: { full_name: "external/openclaw" },
+        repo: { full_name: "external/bot" },
         sha: headSha,
       },
     };
 
     expect(
       canAutoscrubPullRequest({
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "bot",
+        repo: "bot",
         pullRequest: sameRepoPullRequest,
       }),
     ).toBe(true);
     expect(
       canAutoscrubPullRequest({
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "bot",
+        repo: "bot",
         pullRequest: forkPullRequest,
       }),
     ).toBe(false);
     expect(
       canAutoscrubPullRequest({
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "bot",
+        repo: "bot",
         pullRequest: editableForkPullRequest,
       }),
     ).toBe(true);
@@ -482,7 +482,7 @@ describe("dependency guard script", () => {
       lockfileChanges: ["pnpm-lock.yaml", "tools/nested/pnpm-lock.yaml"],
     });
 
-    expect(body).toContain("<!-- openclaw:dependency-graph-guard -->");
+    expect(body).toContain("<!-- bot:dependency-graph-guard -->");
     expect(body).toContain("Dependency lockfile changes were removed");
     expect(body).toContain("did not change dependency graph fields in package manifests");
     expect(body).toContain("`pnpm-lock.yaml`");
@@ -564,26 +564,26 @@ describe("dependency guard script", () => {
     const commit = await createAutoscrubCommit(
       { baseApi, writeApi },
       {
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "bot",
+        repo: "bot",
         pullRequest: {
           base: { sha: "base-sha" },
           head: { ref: "contributor/change", sha: headSha },
         },
         lockfileChanges: ["pnpm-lock.yaml"],
-        targetRepository: { owner: "contributor", repo: "openclaw" },
+        targetRepository: { owner: "contributor", repo: "bot" },
       },
     );
 
     expect(commit).toEqual({ sha: staleSha });
     expect(calls.map((call) => `${call.api}:${call.path}`)).toEqual([
-      "base:/repos/openclaw/openclaw/contents/pnpm-lock.yaml?ref=base-sha",
+      "base:/repos/hanzoai/bot/contents/pnpm-lock.yaml?ref=base-sha",
       "write:graphql",
     ]);
     expect(calls[1]?.variables).toMatchObject({
       input: {
         branch: {
-          repositoryNameWithOwner: "contributor/openclaw",
+          repositoryNameWithOwner: "contributor/bot",
           branchName: "contributor/change",
         },
         expectedHeadOid: headSha,
@@ -603,7 +603,7 @@ describe("dependency guard script", () => {
   it("renders a cleared guard comment that preserves approval freshness", () => {
     const body = renderClearedDependencyGuardComment({ headSha });
 
-    expect(body).toContain("<!-- openclaw:dependency-graph-guard -->");
+    expect(body).toContain("<!-- bot:dependency-graph-guard -->");
     expect(body).toContain("Dependency graph guard cleared");
     expect(body).toContain(headSha);
     expect(body).toContain("requires a fresh `/allow-dependencies-change` comment");
@@ -661,7 +661,7 @@ describe("dependency guard script", () => {
       )) as typeof fetch;
 
     try {
-      await expect(githubApi("token").request("/repos/openclaw/openclaw")).rejects.toMatchObject({
+      await expect(githubApi("token").request("/repos/hanzoai/bot")).rejects.toMatchObject({
         message: `403 Forbidden: GitHub error response body exceeded ${GITHUB_ERROR_BODY_MAX_BYTES} bytes`,
         status: 403,
       });
@@ -678,7 +678,7 @@ describe("dependency guard script", () => {
 
     await expect(
       githubApi("token", { fetchImpl, retryDelaysMs: [0] }).request(
-        "/repos/openclaw/openclaw/pulls/1/files",
+        "/repos/hanzoai/bot/pulls/1/files",
       ),
     ).resolves.toEqual({ ok: true });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
@@ -691,7 +691,7 @@ describe("dependency guard script", () => {
 
     await expect(
       githubApi("token", { fetchImpl, retryDelaysMs: [0] }).request(
-        "/repos/openclaw/openclaw/issues/1/comments",
+        "/repos/hanzoai/bot/issues/1/comments",
         { method: "POST", body: "{}" },
       ),
     ).rejects.toMatchObject({ status: 503 });
@@ -707,7 +707,7 @@ describe("dependency guard script", () => {
             headers: { "content-length": "65" },
           }),
         )) as typeof fetch,
-    }).request("/repos/openclaw/openclaw");
+    }).request("/repos/hanzoai/bot");
 
     await expect(request).rejects.toThrow("GitHub response body exceeded 64 bytes");
     expect(GITHUB_RESPONSE_BODY_MAX_BYTES).toBeGreaterThan(64);
@@ -728,9 +728,9 @@ describe("dependency guard script", () => {
         markFetchStarted();
         return new Promise(() => {});
       }) as typeof fetch,
-    }).request("/repos/openclaw/openclaw");
+    }).request("/repos/hanzoai/bot");
     const rejection = expect(request).rejects.toThrow(
-      /GitHub API GET \/repos\/openclaw\/openclaw exceeded timeout 5ms/u,
+      /GitHub API GET \/repos\/bot\/bot exceeded timeout 5ms/u,
     );
 
     await fetchStarted;
@@ -762,9 +762,9 @@ describe("dependency guard script", () => {
           ),
         );
       }) as typeof fetch,
-    }).request("/repos/openclaw/openclaw");
+    }).request("/repos/hanzoai/bot");
     const rejection = expect(request).rejects.toThrow(
-      /GitHub API GET \/repos\/openclaw\/openclaw exceeded timeout 5ms/u,
+      /GitHub API GET \/repos\/bot\/bot exceeded timeout 5ms/u,
     );
 
     await fetchStarted;

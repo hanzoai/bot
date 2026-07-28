@@ -1,5 +1,5 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import type { ExecCommandAnalysis } from "./exec-command-analysis-types.js";
 import { resolveCommandResolutionFromArgv } from "./exec-command-resolution.js";
 

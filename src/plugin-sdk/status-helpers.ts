@@ -3,7 +3,7 @@ import { normalizeOptionalString } from "../../packages/normalization-core/src/s
 import type { ChannelStatusAdapter } from "../channels/plugins/types.adapters.js";
 import type { ChannelAccountSnapshot } from "../channels/plugins/types.core.js";
 import type { ChannelStatusIssue } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 export type { ChannelAccountSnapshot } from "../channels/plugins/types.core.js";
 export type { ChannelStatusIssue } from "../channels/plugins/types.public.js";
 export { isRecord } from "../channels/plugins/status-issues/shared.js";
@@ -57,7 +57,7 @@ type ComputedAccountStatusBase = {
 
 type ComputedAccountStatusAdapterParams<ResolvedAccount, Probe, Audit> = {
   account: ResolvedAccount;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runtime?: ChannelAccountSnapshot;
   probe?: Probe;
   audit?: Audit;

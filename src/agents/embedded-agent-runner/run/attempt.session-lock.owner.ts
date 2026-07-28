@@ -1,4 +1,4 @@
-import { clampTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
+import { clampTimerTimeoutMs } from "@hanzo/bot-normalization-core/number-coercion";
 import { toErrorObject } from "../../../infra/errors.js";
 import { resolveGlobalSingleton } from "../../../shared/global-singleton.js";
 import { resolveEmbeddedSessionFileKey } from "../session-file-key.js";
@@ -22,7 +22,7 @@ type SessionFileOwnerState = {
 };
 
 const EMBEDDED_ATTEMPT_SESSION_FILE_OWNER_STATE_KEY = Symbol.for(
-  "openclaw.embeddedAttemptSessionFileOwnerState",
+  "bot.embeddedAttemptSessionFileOwnerState",
 );
 
 const sessionFileOwnerState = resolveGlobalSingleton(
@@ -168,6 +168,6 @@ function resetEmbeddedAttemptSessionFileOwnersForTest(): void {
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.embeddedAttemptSessionFileOwnersTestApi")
+    Symbol.for("bot.embeddedAttemptSessionFileOwnersTestApi")
   ] = { resetEmbeddedAttemptSessionFileOwnersForTest };
 }

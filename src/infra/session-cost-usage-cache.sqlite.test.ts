@@ -3,14 +3,14 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanupTempDirs, makeTempDir } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+  resolveBotAgentSqlitePath,
+} from "../state/bot-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
 import { withEnv } from "../test-utils/env.js";
 import {
   deleteSessionCostUsageRollupsExcept,
@@ -22,7 +22,7 @@ import {
 const tempDirs: string[] = [];
 
 function countRegisteredAgentDatabases(): number {
-  const row = openOpenClawStateDatabase()
+  const row = openBotStateDatabase()
     .db.prepare("SELECT count(*) AS count FROM agent_databases")
     .get() as {
     count: number;
@@ -31,35 +31,35 @@ function countRegisteredAgentDatabases(): number {
 }
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeBotAgentDatabasesForTest();
+  closeBotStateDatabaseForTest();
   cleanupTempDirs(tempDirs);
 });
 
 describe("session cost usage SQLite cache", () => {
   it("returns empty values without creating a missing agent database", () => {
-    const stateDir = makeTempDir(tempDirs, "openclaw-usage-cache-missing-");
+    const stateDir = makeTempDir(tempDirs, "bot-usage-cache-missing-");
 
-    withEnv({ OPENCLAW_STATE_DIR: stateDir }, () => {
-      const databasePath = resolveOpenClawAgentSqlitePath({ agentId: "worker-1" });
+    withEnv({ BOT_STATE_DIR: stateDir }, () => {
+      const databasePath = resolveBotAgentSqlitePath({ agentId: "worker-1" });
 
       expect(readSessionCostUsageRollupRows("worker-1", databasePath)).toEqual([]);
       expect(isSessionCostUsageRefreshRunning("worker-1", databasePath)).toBe(false);
       expect(fs.existsSync(databasePath)).toBe(false);
-      expect(fs.existsSync(path.join(stateDir, "state", "openclaw.sqlite"))).toBe(false);
+      expect(fs.existsSync(path.join(stateDir, "state", "bot.sqlite"))).toBe(false);
     });
   });
 
   it("does not register readonly cache reads while writes still register", () => {
-    const stateDir = makeTempDir(tempDirs, "openclaw-usage-cache-registry-");
+    const stateDir = makeTempDir(tempDirs, "bot-usage-cache-registry-");
 
-    withEnv({ OPENCLAW_STATE_DIR: stateDir }, () => {
+    withEnv({ BOT_STATE_DIR: stateDir }, () => {
       const agentId = "worker-1";
-      const database = openOpenClawAgentDatabase({ agentId });
+      const database = openBotAgentDatabase({ agentId });
       const databasePath = database.path;
-      closeOpenClawAgentDatabasesForTest();
+      closeBotAgentDatabasesForTest();
 
-      const stateDatabase = openOpenClawStateDatabase();
+      const stateDatabase = openBotStateDatabase();
       stateDatabase.db.prepare("DELETE FROM agent_databases").run();
       expect(countRegisteredAgentDatabases()).toBe(0);
 
@@ -85,9 +85,9 @@ describe("session cost usage SQLite cache", () => {
     { label: "changed totals", refreshedValue: '{"totalTokens":2}' },
     { label: "unchanged totals at a newer revision", refreshedValue: '{"totalTokens":1}' },
   ])("preserves a refreshed usage rollup with $label during pruning", ({ refreshedValue }) => {
-    const stateDir = makeTempDir(tempDirs, "openclaw-usage-cache-prune-race-");
+    const stateDir = makeTempDir(tempDirs, "bot-usage-cache-prune-race-");
 
-    withEnv({ OPENCLAW_STATE_DIR: stateDir }, () => {
+    withEnv({ BOT_STATE_DIR: stateDir }, () => {
       const agentId = "worker-1";
       const rollupId = "session.jsonl";
       const staleValue = '{"totalTokens":1}';

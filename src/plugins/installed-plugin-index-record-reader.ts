@@ -1,13 +1,13 @@
 /** Reads installed-index records back into manifest registry records. */
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { tryReadJsonSync } from "../infra/json-files.js";
 import { isPrereleaseResolutionAllowed, parseRegistryNpmSpec } from "../infra/npm-registry-spec.js";
 import { isNotFoundPathError, normalizeWindowsPathForComparison } from "../infra/path-guards.js";
 import { compareValidSemver } from "../infra/semver.js";
-import { withOpenClawStateDatabaseReadOnly } from "../state/openclaw-state-db-readonly.js";
+import { withBotStateDatabaseReadOnly } from "../state/bot-state-db-readonly.js";
 import {
   resolveDefaultPluginNpmDir,
   resolvePluginNpmProjectsDir,
@@ -85,16 +85,16 @@ function readStringRecord(value: unknown): Record<string, string> {
 }
 
 function hasPackagePluginMetadata(manifest: Record<string, unknown>): boolean {
-  const openclaw = manifest.openclaw;
-  if (!isRecord(openclaw)) {
+  const bot = manifest.bot;
+  if (!isRecord(bot)) {
     return false;
   }
-  const extensions = openclaw.extensions;
+  const extensions = bot.extensions;
   return Array.isArray(extensions) && extensions.some((entry) => typeof entry === "string");
 }
 
 function readManifestPluginId(packageDir: string): string | undefined {
-  const manifest = readJsonObjectFileSync(path.join(packageDir, "openclaw.plugin.json"));
+  const manifest = readJsonObjectFileSync(path.join(packageDir, "bot.plugin.json"));
   const id = typeof manifest?.id === "string" ? manifest.id.trim() : "";
   return id || undefined;
 }
@@ -132,7 +132,7 @@ function readManagedNpmInstallTimestampMs(params: {
   projectRoot: string;
   sharedLegacyRoot: boolean;
 }): number {
-  // Isolated flat/generation roots have an OpenClaw-owned project manifest that
+  // Isolated flat/generation roots have an Bot-owned project manifest that
   // is rewritten during install. The legacy root is shared, so only its
   // package-local directory mtime can represent this plugin's install.
   const timestampPaths = params.sharedLegacyRoot
@@ -255,10 +255,10 @@ function emitManagedNpmRecoveryFallbackWarning(params: {
   candidates: readonly RecoveredManagedNpmInstallCandidate[];
 }): void {
   process.emitWarning(
-    `Managed npm recovery found ${params.candidates.length} installs for plugin "${params.pluginId}" without an authoritative active path; selected the most recently installed candidate. Run \`openclaw doctor --fix\` to persist and retire stale generations.`,
+    `Managed npm recovery found ${params.candidates.length} installs for plugin "${params.pluginId}" without an authoritative active path; selected the most recently installed candidate. Run \`bot doctor --fix\` to persist and retire stale generations.`,
     {
-      code: "OPENCLAW_PLUGIN_INSTALL_RECOVERY_FALLBACK",
-      type: "OpenClawPluginRecoveryWarning",
+      code: "BOT_PLUGIN_INSTALL_RECOVERY_FALLBACK",
+      type: "BotPluginRecoveryWarning",
       detail: JSON.stringify({
         pluginId: params.pluginId,
         selectedInstallPath: params.selected.installRecord.installPath,
@@ -472,7 +472,7 @@ function readPersistedInstalledPluginIndexForRecords(
     return tryReadJsonSync(options.filePath);
   }
   try {
-    return withOpenClawStateDatabaseReadOnly(({ db }) => {
+    return withBotStateDatabaseReadOnly(({ db }) => {
       const row = db
         .prepare(
           `

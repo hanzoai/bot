@@ -17,7 +17,7 @@ import {
   sendMatrixPreflightAudioTranscriptEcho,
 } from "./preflight-audio.js";
 
-const cfg = {} as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig;
+const cfg = {} as import("bot/plugin-sdk/config-contracts").BotConfig;
 
 describe("isMatrixAudioContent", () => {
   it("accepts Matrix audio messages and audio files", () => {
@@ -83,7 +83,7 @@ describe("resolveMatrixPreflightAudioTranscript", () => {
   it("suppresses shared echo during pre-mention transcription", async () => {
     const echoCfg = {
       tools: { media: { audio: { echoTranscript: true, echoFormat: "echo: {transcript}" } } },
-    } as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig;
+    } as import("bot/plugin-sdk/config-contracts").BotConfig;
     transcribeFirstAudioMock.mockResolvedValue("hello from voice");
 
     await resolveMatrixPreflightAudioTranscript({
@@ -145,7 +145,7 @@ describe("sendMatrixPreflightAudioTranscriptEcho", () => {
       transcript: "hello bot",
       cfg: {
         tools: { media: { audio: { echoTranscript: true, echoFormat: "heard: {transcript}" } } },
-      } as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig,
+      } as import("bot/plugin-sdk/config-contracts").BotConfig,
       accountId: "ops",
       originatingTo: "room:!room:example.org",
       messageThreadId: "$thread",
@@ -169,7 +169,7 @@ describe("sendMatrixPreflightAudioTranscriptEcho", () => {
       transcript: "tickets cost $$40, confirm with $&",
       cfg: {
         tools: { media: { audio: { echoTranscript: true, echoFormat: "heard: {transcript}" } } },
-      } as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig,
+      } as import("bot/plugin-sdk/config-contracts").BotConfig,
       accountId: "ops",
       originatingTo: "room:!room:example.org",
     });

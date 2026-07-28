@@ -3,9 +3,9 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { stripAnsi } from "../../../../packages/terminal-core/src/ansi.js";
 import { sanitizeTerminalText } from "../../../../packages/terminal-core/src/safe-text.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import type { PluginInstallRecord } from "../../../config/types.plugins.js";
-import { isOpenClawOrgNpmSpec, parseRegistryNpmSpec } from "../../../infra/npm-registry-spec.js";
+import { isBotOrgNpmSpec, parseRegistryNpmSpec } from "../../../infra/npm-registry-spec.js";
 import type { UpdateChannel } from "../../../infra/update-channels.js";
 import { buildClawHubPluginInstallRecordFields } from "../../../plugins/clawhub-install-records.js";
 import {
@@ -41,7 +41,7 @@ function shouldFallbackClawHubToNpm(params: {
   result: { ok: false; code?: string };
   npmSpec?: string;
 }): boolean {
-  if (!isOpenClawOrgNpmSpec(params.npmSpec)) {
+  if (!isBotOrgNpmSpec(params.npmSpec)) {
     return false;
   }
   return (
@@ -61,7 +61,7 @@ export function appendClawHubRiskAcknowledgementGuidance(params: {
   }
   const sanitizedSpec = sanitizeTerminalText(params.spec);
   const shellSpec = shellQuotePosixArg(sanitizedSpec);
-  return `${params.message} To review and acknowledge this ClawHub package, run \`openclaw plugins install ${shellSpec} --acknowledge-clawhub-risk\` from a trusted shell, then rerun repair.`;
+  return `${params.message} To review and acknowledge this ClawHub package, run \`bot plugins install ${shellSpec} --acknowledge-clawhub-risk\` from a trusted shell, then rerun repair.`;
 }
 
 function shellQuotePosixArg(value: string): string {
@@ -115,7 +115,7 @@ function formatInstalledConfiguredPluginChange(params: {
 
 export async function installCandidate(params: {
   candidate: DownloadableInstallCandidate;
-  config: OpenClawConfig;
+  config: BotConfig;
   records: Record<string, PluginInstallRecord>;
   env: NodeJS.ProcessEnv;
   updateChannel?: UpdateChannel;

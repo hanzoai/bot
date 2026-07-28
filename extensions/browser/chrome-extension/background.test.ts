@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const RELAY_WATCHDOG_ALARM = "openclaw-relay-watchdog";
-const RELAY_OPENING_DEADLINE_ALARM = "openclaw-relay-opening-deadline";
+const RELAY_WATCHDOG_ALARM = "bot-relay-watchdog";
+const RELAY_OPENING_DEADLINE_ALARM = "bot-relay-opening-deadline";
 const START_TIME_MS = Date.parse("2026-07-16T08:00:00.000Z");
 
 type SocketEvent = { data?: unknown };
@@ -198,7 +198,7 @@ async function startPendingPageShare(
     },
   ]);
   const response = vi.fn();
-  expect(harness.messageListener({ type: "sendPageToOpenClaw", tabId: 1 }, {}, response)).toBe(
+  expect(harness.messageListener({ type: "sendPageToBot", tabId: 1 }, {}, response)).toBe(
     true,
   );
   await vi.waitFor(() => {
@@ -329,7 +329,7 @@ describe("page-share relay request lifecycle", () => {
     await vi.waitFor(() => {
       expect(pending.response).toHaveBeenCalledWith({
         ok: false,
-        error: "Browser relay disconnected before OpenClaw acknowledged the page share.",
+        error: "Browser relay disconnected before Bot acknowledged the page share.",
       });
     });
     expect(pending.response).toHaveBeenCalledOnce();
@@ -346,7 +346,7 @@ describe("page-share relay request lifecycle", () => {
       expect(unpairResponse).toHaveBeenCalledWith({ ok: true });
       expect(pending.response).toHaveBeenCalledWith({
         ok: false,
-        error: "Browser relay disconnected before OpenClaw acknowledged the page share.",
+        error: "Browser relay disconnected before Bot acknowledged the page share.",
       });
     });
     expect(pending.socket.close).toHaveBeenCalledOnce();
@@ -374,7 +374,7 @@ describe("page-share relay request lifecycle", () => {
       expect(pairResponse).toHaveBeenCalledWith({ ok: true });
       expect(pending.response).toHaveBeenCalledWith({
         ok: false,
-        error: "Browser relay disconnected before OpenClaw acknowledged the page share.",
+        error: "Browser relay disconnected before Bot acknowledged the page share.",
       });
     });
     expect(pending.socket.close).toHaveBeenCalledOnce();
@@ -444,7 +444,7 @@ describe("page-share relay request lifecycle", () => {
     await vi.waitFor(() => {
       expect(original.response).toHaveBeenCalledWith({
         ok: false,
-        error: "Browser relay disconnected before OpenClaw acknowledged the page share.",
+        error: "Browser relay disconnected before Bot acknowledged the page share.",
       });
       expect(replacement.response).toHaveBeenCalledWith({ ok: true });
     });

@@ -1,13 +1,13 @@
 // Line plugin module implements bot behavior.
 import type { webhook } from "@line/bot-sdk";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { DEFAULT_GROUP_HISTORY_LIMIT, type HistoryEntry } from "openclaw/plugin-sdk/reply-history";
-import { getRuntimeConfig } from "openclaw/plugin-sdk/runtime-config-snapshot";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { DEFAULT_GROUP_HISTORY_LIMIT, type HistoryEntry } from "bot/plugin-sdk/reply-history";
+import { getRuntimeConfig } from "bot/plugin-sdk/runtime-config-snapshot";
 import {
   createNonExitingRuntime,
   logVerbose,
   type RuntimeEnv,
-} from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/runtime-env";
 import { resolveLineAccount } from "./accounts.js";
 import { handleLineWebhookEvents } from "./bot-handlers.js";
 import type { LineInboundContext } from "./bot-message-context.js";
@@ -19,7 +19,7 @@ interface LineBotOptions {
   channelSecret: string;
   accountId?: string;
   runtime?: RuntimeEnv;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   mediaMaxMb?: number;
   onMessage?: (
     ctx: LineInboundContext,

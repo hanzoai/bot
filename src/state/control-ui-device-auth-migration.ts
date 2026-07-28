@@ -1,4 +1,4 @@
-import { compareOpenClawVersions } from "../config/version.js";
+import { compareBotVersions } from "../config/version.js";
 // Durable transition state for installs upgrading from the retired Control UI device-auth bypass.
 import {
   importConfigMachineState,
@@ -6,7 +6,7 @@ import {
   updateConfigMachineState,
   writeConfigMachineState,
 } from "./config-machine-state.js";
-import type { OpenClawStateDatabaseOptions } from "./openclaw-state-db.js";
+import type { BotStateDatabaseOptions } from "./bot-state-db.js";
 
 export const CONTROL_UI_DEVICE_AUTH_MIGRATION_STATE_KEY = "gateway.controlUi.deviceAuthMigration";
 const DEVICE_AUTH_MIGRATION_CUTOVER_VERSION = "2026.7.2";
@@ -78,13 +78,13 @@ export function isLegacyControlUiDeviceAuthMigrationInput(params: {
   return (
     params.disabledDeviceAuth &&
     (typeof params.lastTouchedVersion !== "string" ||
-      compareOpenClawVersions(params.lastTouchedVersion, DEVICE_AUTH_MIGRATION_CUTOVER_VERSION) ===
+      compareBotVersions(params.lastTouchedVersion, DEVICE_AUTH_MIGRATION_CUTOVER_VERSION) ===
         -1)
   );
 }
 
 export function readControlUiDeviceAuthMigrationState(
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): ControlUiDeviceAuthMigrationState | undefined {
   return normalizeState(
     readConfigMachineState(CONTROL_UI_DEVICE_AUTH_MIGRATION_STATE_KEY, options),
@@ -96,7 +96,7 @@ export function readControlUiDeviceAuthMigrationState(
  * preserve a completed receipt so stale config cannot reopen migration access.
  */
 export function importPendingControlUiDeviceAuthMigration(
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): ControlUiDeviceAuthMigrationState {
   const pending: ControlUiDeviceAuthMigrationState = {
     version: 1,
@@ -109,7 +109,7 @@ export function importPendingControlUiDeviceAuthMigration(
 
 export function completeControlUiDeviceAuthMigration(
   deviceId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): ControlUiDeviceAuthMigrationState {
   const normalizedDeviceId = deviceId.trim();
   if (!normalizedDeviceId) {
@@ -128,7 +128,7 @@ export function completeControlUiDeviceAuthMigration(
 }
 
 export function recoverControlUiDeviceAuthMigrationClaim(
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): ControlUiDeviceAuthMigrationState | undefined {
   const initial = readControlUiDeviceAuthMigrationState(options);
   if (initial?.status !== "pending" || !initial.claimedDeviceId) {
@@ -153,7 +153,7 @@ export function recoverControlUiDeviceAuthMigrationClaim(
 
 export function claimControlUiDeviceAuthMigration(
   deviceId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): boolean {
   const normalizedDeviceId = deviceId.trim();
   if (!normalizedDeviceId) {
@@ -185,7 +185,7 @@ export function claimControlUiDeviceAuthMigration(
 
 export function releaseControlUiDeviceAuthMigrationClaim(
   deviceId: string,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): void {
   const normalizedDeviceId = deviceId.trim();
   const initial = readControlUiDeviceAuthMigrationState(options);

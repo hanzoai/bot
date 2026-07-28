@@ -1,6 +1,6 @@
 // Migrate Hermes tests cover apply result identity.
 import path from "node:path";
-import type { MigrationPlan } from "openclaw/plugin-sdk/plugin-entry";
+import type { MigrationPlan } from "bot/plugin-sdk/plugin-entry";
 import { afterEach, describe, expect, it } from "vitest";
 import { applyHermesPlan } from "./apply.js";
 import { cleanupTempRoots, makeContext, makeTempRoot } from "./test/provider-helpers.js";

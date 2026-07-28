@@ -3,7 +3,7 @@
  * for agent model authentication.
  */
 import { randomBytes } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { sha256Base64Url } from "../infra/crypto-digest.js";
 import { resolveExpiresAtMsFromDurationSeconds } from "../infra/parse-finite-number.js";
 import type { OAuthCredentials } from "../llm/oauth.js";

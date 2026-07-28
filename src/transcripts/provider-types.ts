@@ -1,5 +1,5 @@
 // Transcript provider contracts for external and manual transcript sources.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 /**
  * Public contracts for transcript source providers.
@@ -57,7 +57,7 @@ export type TranscriptSessionDescriptor = {
 
 /** Request passed to providers that can start live transcript capture. */
 export type TranscriptStartRequest = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   session: TranscriptSessionDescriptor;
   abortSignal?: AbortSignal;
   startupWaitMs?: number;
@@ -83,7 +83,7 @@ export type TranscriptsStartResult =
 
 /** Request passed to providers that can stop live transcript capture. */
 export type TranscriptStopRequest = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   sessionId: string;
   source: TranscriptSourceLocator;
   reason?: string;
@@ -111,7 +111,7 @@ export type TranscriptSourceStatus = {
 
 /** Request passed to providers that import post-hoc transcript text. */
 export type TranscriptImportRequest = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   session: TranscriptSessionDescriptor;
   text: string;
   speakerLabel?: string;
@@ -127,7 +127,7 @@ export type TranscriptSourceProvider = {
   stop?: (request: TranscriptStopRequest) => Promise<TranscriptsStopResult>;
   status?: (
     source: TranscriptSourceLocator,
-    cfg?: OpenClawConfig,
+    cfg?: BotConfig,
   ) => Promise<TranscriptSourceStatus[]>;
   importTranscript?: (request: TranscriptImportRequest) => Promise<TranscriptUtterance[]>;
 };

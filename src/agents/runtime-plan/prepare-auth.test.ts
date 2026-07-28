@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { Model } from "../../llm/types.js";
 import type { AuthProfileStore } from "../auth-profiles.js";
 import { resolveAgentHarnessPreparedAuthSupport } from "../harness/support.js";
@@ -76,7 +76,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             xai: { apiKey: "xai:bound", baseUrl: "", models: [] },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: authStore(
         {
@@ -137,7 +137,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               xai: { apiKey: "xai:bound", baseUrl: "", models: [] },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         authProfileStore: store,
         sessionAuthProfileId: "xai:backup",
@@ -161,7 +161,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: authStore({
         "xai:bound": {
@@ -264,7 +264,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             vault: { source: "file", path: "/tmp/secrets.json", mode: "json" },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: authStore(
         {
@@ -337,7 +337,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
         modelId: "grok-4",
         config: {
           auth: { order: { xai: ["xai:missing"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         authProfileStore: authStore({
           "xai:backup": {
@@ -357,7 +357,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
         modelId: "grok-4",
         config: {
           auth: { order: { xai: [] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         authProfileStore: authStore({
           "xai:backup": {
@@ -424,7 +424,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
     expect(plan.modelRoute).toBeUndefined();
     expect(plan.deferredRouteSupport).toEqual({
       requestTransportOverrides: "none",
-      runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+      runtimePolicy: { compatibleIds: ["bot", "codex"] },
     });
     expect(resolveAgentHarnessPreparedAuthSupport({ plan })).toEqual({ source: "harness" });
   });
@@ -441,7 +441,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             openai: { apiKey: "OPENAI_API_KEY", baseUrl: "", models: [] },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       harnessId: "codex",
       harnessRuntime: "codex",
@@ -474,7 +474,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               openai: { apiKey: "OPENAI_API_KEY", baseUrl: "", models: [] },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         harnessId: "codex",
         harnessRuntime: "codex",
@@ -553,7 +553,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             },
           },
           secrets: { providers: { default: { source: "env" } } },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: { DIRECT_OPENAI_KEY: "sk-direct" },
         harnessId: "codex",
         harnessRuntime: "codex",
@@ -594,7 +594,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               openai: { apiKey: "configured-platform-key", baseUrl: "", models: [] },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         authProfileStore: store,
       }),
@@ -624,7 +624,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         harnessId: "codex",
         harnessRuntime: "codex",
@@ -658,7 +658,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         harnessId: "codex",
         harnessRuntime: "codex",
@@ -735,7 +735,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             openai: { baseUrl: "https://api.openai.com/v1", models: [] },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       harnessId: "codex",
       harnessRuntime: "codex",
@@ -747,7 +747,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             keyRef: {
               source: "env",
               provider: "default",
-              id: "OPENCLAW_TEST_MISSING_PREPARED_AUTH",
+              id: "BOT_TEST_MISSING_PREPARED_AUTH",
             },
           },
           "openai:backup": {
@@ -781,7 +781,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             vault: { source: "file", path: "/tmp/secrets.json", mode: "json" },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       harnessId: "codex",
       harnessRuntime: "codex",
@@ -838,7 +838,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             vault: { source: "file", path: "/tmp/secrets.json", mode: "json" },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       harnessId: "codex",
       harnessRuntime: "codex",
@@ -893,7 +893,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: { DIRECT_OPENAI_KEY: "sk-direct" },
         harnessId: "codex",
         harnessRuntime: "codex",
@@ -929,7 +929,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         sessionAuthProfileId: "openai:platform",
         sessionAuthProfileSource: "user",
         authProfileStore: authStore({
@@ -956,7 +956,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const plan = prepareAgentRuntimeAuthPlan({
       provider: "openai",
       modelId: "gpt-5.5",
@@ -1001,7 +1001,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: { OPENAI_API_KEY: "ambient-platform-key" },
         authProfileStore: authStore(
           {
@@ -1059,7 +1059,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             xai: { auth: "api-key", apiKey: "xai-key", baseUrl: "", models: [] },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: authStore({
         "xai:auto": { type: "api_key", provider: "xai", key: "profile-key" },
@@ -1092,7 +1092,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: authStore(
         {
@@ -1139,7 +1139,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               openai: { apiKey: "openai:bound", baseUrl: "", models: [] },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         authProfileStore: authStore({
           "openai:bound": {
@@ -1169,7 +1169,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         authProfileStore: authStore(
           {
@@ -1217,7 +1217,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               openai: { apiKey: "openai:bound", baseUrl: "", models: [] },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         authProfileStore: store,
       }),
@@ -1241,7 +1241,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: authStore({
         "openai:bound": {
@@ -1283,7 +1283,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             vault: { source: "file", path: "/tmp/openai-secrets.json", mode: "json" },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: authStore(
         {
@@ -1332,7 +1332,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             vault: { source: "file", path: "/tmp/openai-secrets.json", mode: "json" },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: authStore(
         {
@@ -1374,7 +1374,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const store = authStore(
       {
         "openai:platform-backup": {
@@ -1485,7 +1485,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             openai: { apiKey: "configured-platform-key", baseUrl: "", models: [] },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: store,
     });
@@ -1537,7 +1537,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
       label: "Platform profile then ambient OAuth token",
       config: {
         models: { providers: { openai: { auth: "oauth", baseUrl: "", models: [] } } },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: { OPENAI_API_KEY: "ambient-oauth-token" },
       profileId: "openai:platform",
       profile: {
@@ -1585,7 +1585,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
       const store = authStore({});
       const prepared = prepareAgentRuntimeAuth({
         provider: "openai",
@@ -1666,7 +1666,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             vault: { source: "file", path: "/tmp/openai-secrets.json", mode: "json" },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: authStore(
         {
@@ -1722,7 +1722,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: authStore({}),
     });
@@ -1758,7 +1758,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: authStore({
         "openai:platform": {
@@ -1801,7 +1801,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       authProfileStore: authStore({}),
     });
@@ -1839,7 +1839,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
         modelId: "gpt-5.5",
         config: {
           models: { providers: { openai: { auth, baseUrl: "", models: [] } } },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         authProfileStore: authStore({ "openai:wrong-route": profile }),
       }),
@@ -1853,7 +1853,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
         modelId: "gpt-5.5",
         config: {
           models: { providers: { openai: { auth: "oauth", baseUrl: "", models: [] } } },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         authProfileStore: authStore({}),
         harnessId: "codex",
@@ -1881,7 +1881,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: {},
         authProfileStore: authStore({}),
       }),
@@ -1908,7 +1908,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
       baseUrl: "https://relay.example.test/v1",
       authRequirement: "api-key",
       requestTransportOverrides: "none",
-      runtimePolicy: { compatibleIds: ["openclaw"] },
+      runtimePolicy: { compatibleIds: ["bot"] },
     });
   });
 
@@ -2011,7 +2011,7 @@ describe("prepareAgentRuntimeAuthPlan", () => {
               "openai:missing": { provider: "openai", mode: "oauth" },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         authProfileStore: authStore({}),
         sessionAuthProfileId: "openai:missing",
         sessionAuthProfileSource: "user",

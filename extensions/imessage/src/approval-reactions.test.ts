@@ -1,6 +1,6 @@
 // Imessage tests cover approval reactions plugin behavior.
-import { buildTypedExecApprovalPendingReplyPayload } from "openclaw/plugin-sdk/approval-reply-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+import { buildTypedExecApprovalPendingReplyPayload } from "bot/plugin-sdk/approval-reply-runtime";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   addIMessageApprovalReactionHintToStructuredPayload,

@@ -1,6 +1,6 @@
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sanitizeTerminalText } from "openclaw/plugin-sdk/text-chunking";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
+import { sanitizeTerminalText } from "bot/plugin-sdk/text-chunking";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { CodexThread, CodexThreadTurnsListResponse } from "./app-server/protocol.js";
 import {
   CODEX_INTERACTIVE_CUSTOM_THREAD_SOURCES,
@@ -383,7 +383,7 @@ function parseCatalogSession(
   );
   const gitBranch = parseOptionalCatalogString(value.gitBranch, "Git branch", MAX_METADATA_LENGTH);
   const sessionKey = options.allowSessionKey
-    ? parseOptionalCatalogString(value.sessionKey, "OpenClaw session key", MAX_SESSION_KEY_LENGTH)
+    ? parseOptionalCatalogString(value.sessionKey, "Bot session key", MAX_SESSION_KEY_LENGTH)
     : undefined;
   const createdAt = readFiniteNumber(value.createdAt);
   const updatedAt = readFiniteNumber(value.updatedAt);

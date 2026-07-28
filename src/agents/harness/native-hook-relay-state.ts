@@ -1,6 +1,6 @@
 import type { NativeHookRelaySharedState } from "./native-hook-relay-types.js";
 
-const NATIVE_HOOK_RELAY_STATE_SYMBOL = Symbol.for("openclaw.nativeHookRelay.state");
+const NATIVE_HOOK_RELAY_STATE_SYMBOL = Symbol.for("bot.nativeHookRelay.state");
 
 function getNativeHookRelaySharedState(): NativeHookRelaySharedState {
   const globalRecord = globalThis as typeof globalThis & {

@@ -405,7 +405,7 @@ describe("sessions_spawn tool", () => {
   });
 
   it("creates visible worktree sessions and registers completion announce", async () => {
-    await withTempDir({ prefix: "openclaw-visible-spawn-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-visible-spawn-" }, async (dir) => {
       const callGateway = vi.fn(async () => ({
         key: "agent:main:dashboard:child",
         runStarted: true,
@@ -597,7 +597,7 @@ describe("sessions_spawn tool", () => {
   });
 
   it("rejects cwd escape for sandboxed visible sessions", async () => {
-    await withTempDir({ prefix: "openclaw-visible-sandbox-cwd-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-visible-sandbox-cwd-" }, async (dir) => {
       const callGateway = vi.fn();
       const tool = createSessionsSpawnTool({
         agentSessionKey: "agent:main:main",
@@ -627,7 +627,7 @@ describe("sessions_spawn tool", () => {
   });
 
   it("allows cwd within a sandboxed visible session workspace", async () => {
-    await withTempDir({ prefix: "openclaw-visible-sandbox-cwd-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-visible-sandbox-cwd-" }, async (dir) => {
       const workspace = path.join(dir, "workspace");
       const cwd = path.join(workspace, "packages", "app");
       const callGateway = vi.fn(async () => ({
@@ -1000,7 +1000,7 @@ describe("sessions_spawn tool", () => {
   });
 
   it("applies spawn depth limits to visible dashboard descendants", async () => {
-    await withTempDir({ prefix: "openclaw-visible-depth-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-visible-depth-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const childKey = "agent:main:dashboard:child";
       await upsertSessionEntry(
@@ -1508,7 +1508,7 @@ describe("sessions_spawn tool", () => {
     expect(hoisted.spawnAcpDirectMock).not.toHaveBeenCalled();
   });
 
-  it("accepts ACP spawns when inherited allows include OpenClaw command tools", async () => {
+  it("accepts ACP spawns when inherited allows include Bot command tools", async () => {
     registerAcpBackendForTest();
     const tool = createSessionsSpawnTool({
       agentSessionKey: "agent:main:main",

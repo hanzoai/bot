@@ -7,8 +7,8 @@ import {
   readSessionTranscriptMessageEvents,
   replaceSessionEntry,
 } from "../../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeBotAgentDatabasesForTest } from "../../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import {
   authorizeClientVoiceConfirmation,
   checkClientVoiceToolConfirmationPolicy,
@@ -23,7 +23,7 @@ import { clientVoiceSessionTesting } from "../../talk/client-voice-session.test-
 import { captureEnv, setTestEnvValue } from "../../test-utils/env.js";
 import { talkClientHandlers } from "./talk-client.js";
 
-const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+const envSnapshot = captureEnv(["BOT_STATE_DIR"]);
 const sessionKey = "agent:main:main";
 const sessionId = "voice-transcript-session";
 let tempDir: string;
@@ -52,9 +52,9 @@ async function invokeClose(params: Record<string, unknown>) {
 describe("talk.client.transcript", () => {
   beforeEach(async () => {
     tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-talk-transcript-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "bot-talk-transcript-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     await replaceSessionEntry(
       { agentId: "main", sessionKey },
       { sessionId, updatedAt: Date.now() },
@@ -65,8 +65,8 @@ describe("talk.client.transcript", () => {
     clientVoiceSessionTesting.reset();
     resetClientVoiceConfirmationStateForTest();
     vi.useRealTimers();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotAgentDatabasesForTest();
+    closeBotStateDatabaseForTest();
     envSnapshot.restore();
     await fs.rm(tempDir, { recursive: true, force: true });
   });

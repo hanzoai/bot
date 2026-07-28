@@ -1,18 +1,18 @@
 // Fal provider module implements model/runtime integration.
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
+import { resolveGeneratedMediaMaxBytes } from "bot/plugin-sdk/media-generation-runtime";
 import {
   downloadGeneratedMusicAsset,
   extractGeneratedMusicFileCandidates,
   type MusicGenerationProvider,
   type MusicGenerationRequest,
-} from "openclaw/plugin-sdk/music-generation";
-import { isProviderApiKeyConfigured } from "openclaw/plugin-sdk/provider-auth";
+} from "bot/plugin-sdk/music-generation";
+import { isProviderApiKeyConfigured } from "bot/plugin-sdk/provider-auth";
 import {
   assertOkOrThrowHttpError,
   postJsonRequest,
   readProviderJsonResponse,
-} from "openclaw/plugin-sdk/provider-http";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/provider-http";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveFalHttpRequestConfig } from "./http-config.js";
 
 const DEFAULT_FAL_MUSIC_MODEL = "fal-ai/minimax-music/v2.6";

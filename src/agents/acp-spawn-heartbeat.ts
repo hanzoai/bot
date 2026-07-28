@@ -1,9 +1,9 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { DEFAULT_HEARTBEAT_EVERY } from "../auto-reply/heartbeat.js";
 import { parseDurationMs } from "../cli/parse-duration.js";
 import { resolveStorePath } from "../config/sessions/paths.js";
 import { loadSessionEntryReadOnly } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { areHeartbeatsEnabled } from "../infra/heartbeat-wake.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";
 import { deliveryContextFromSession } from "../utils/delivery-context.js";
@@ -11,7 +11,7 @@ import { listAgentEntries } from "./agent-scope-config.js";
 import { resolveAgentConfig, resolveDefaultAgentId } from "./agent-scope.js";
 
 export function isHeartbeatEnabledForSessionAgent(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey?: string;
 }): boolean {
   if (!areHeartbeatsEnabled()) {
@@ -49,9 +49,9 @@ export function isHeartbeatEnabledForSessionAgent(params: {
 }
 
 function resolveHeartbeatConfigForAgent(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
-}): NonNullable<NonNullable<OpenClawConfig["agents"]>["defaults"]>["heartbeat"] {
+}): NonNullable<NonNullable<BotConfig["agents"]>["defaults"]>["heartbeat"] {
   const defaults = params.cfg.agents?.defaults?.heartbeat;
   const overrides = resolveAgentConfig(params.cfg, params.agentId)?.heartbeat;
   if (!defaults && !overrides) {
@@ -64,7 +64,7 @@ function resolveHeartbeatConfigForAgent(params: {
 }
 
 export function hasSessionLocalHeartbeatRelayRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   parentSessionKey: string;
   requesterAgentId: string;
 }): boolean {

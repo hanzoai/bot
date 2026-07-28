@@ -8,7 +8,7 @@ import {
 type CellStatus = "pass" | "fail" | "skip";
 
 type RuntimeCell = {
-  runtime: "openclaw" | "codex";
+  runtime: "bot" | "codex";
   status: CellStatus;
   details?: string;
   runtimeErrorClass?: string;
@@ -18,12 +18,12 @@ type RuntimeCell = {
 type ScenarioParams = {
   name: string;
   status: CellStatus;
-  openclawStatus?: CellStatus;
+  botStatus?: CellStatus;
   codexStatus?: CellStatus;
   codexDetails?: string;
 };
 
-function cell(runtime: "openclaw" | "codex", status: CellStatus, details?: string): RuntimeCell {
+function cell(runtime: "bot" | "codex", status: CellStatus, details?: string): RuntimeCell {
   return {
     runtime,
     status,
@@ -41,7 +41,7 @@ function scenario(params: ScenarioParams) {
       scenarioId,
       drift: params.status === "pass" ? "none" : "failure-mode",
       cells: {
-        openclaw: cell("openclaw", params.openclawStatus ?? "pass"),
+        bot: cell("bot", params.botStatus ?? "pass"),
         codex: cell("codex", params.codexStatus ?? "pass", params.codexDetails),
       },
     },
@@ -51,7 +51,7 @@ function scenario(params: ScenarioParams) {
 function summary(scenarios: ReturnType<typeof scenario>[]) {
   return {
     run: {
-      runtimePair: ["openclaw", "codex"],
+      runtimePair: ["bot", "codex"],
       scenarioIds: scenarios.map((entry) => entry.runtimeParity.scenarioId),
     },
     counts: {
@@ -149,11 +149,11 @@ describe("frozen QA runtime-pair summary validation", () => {
   });
 
   const rejectedSkips: Array<
-    [string, Partial<Pick<ScenarioParams, "codexDetails" | "openclawStatus">>]
+    [string, Partial<Pick<ScenarioParams, "codexDetails" | "botStatus">>]
   > = [
     ["unannotated skip", { codexDetails: "implementation unavailable" }],
-    ["paired skip", { openclawStatus: "skip" }],
-    ["failed peer", { openclawStatus: "fail" }],
+    ["paired skip", { botStatus: "skip" }],
+    ["failed peer", { botStatus: "fail" }],
   ];
 
   it.each(rejectedSkips)("rejects %s", (_label, overrides) => {
@@ -278,7 +278,7 @@ describe("frozen QA runtime-pair summary validation", () => {
   it("cross-checks generated report JSON and Markdown", () => {
     const fixture = summary([scenario({ name: "Passing", status: "pass" })]);
     const reportSummary = {
-      runtimePair: ["openclaw", "codex"],
+      runtimePair: ["bot", "codex"],
       totalScenarios: 1,
       passedScenarios: 1,
       failedScenarios: 0,
@@ -288,7 +288,7 @@ describe("frozen QA runtime-pair summary validation", () => {
           status: "pass",
           drift: "none",
           driftDetails: undefined,
-          openclawStatus: "pass",
+          botStatus: "pass",
           codexStatus: "pass",
         },
       ],
@@ -296,7 +296,7 @@ describe("frozen QA runtime-pair summary validation", () => {
       pass: true,
     };
     const markdown =
-      "# OpenClaw Runtime Parity Report — openclaw vs codex\n\n- Verdict: pass\n\n### Passing\n\n- status: pass\n- drift: none\n- openclaw: pass (0 tool calls)\n- codex: pass (0 tool calls)\n";
+      "# Bot Runtime Parity Report — bot vs codex\n\n- Verdict: pass\n\n### Passing\n\n- status: pass\n- drift: none\n- bot: pass (0 tool calls)\n- codex: pass (0 tool calls)\n";
     expect(validateQaRuntimePairReport(fixture, reportSummary, markdown)).toMatchObject({
       total: 1,
       passed: 1,

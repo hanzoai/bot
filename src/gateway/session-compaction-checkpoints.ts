@@ -31,7 +31,7 @@ import { parseSqliteSessionFileMarker } from "../config/sessions/sqlite-marker.j
 import { streamSessionTranscriptLines } from "../config/sessions/transcript-stream.js";
 import { scanSessionTranscriptTree } from "../config/sessions/transcript-tree.js";
 import { CURRENT_SESSION_VERSION } from "../config/sessions/version.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { buildCheckpointSessionResetPatch } from "./session-compaction-checkpoint-entry.js";
 import { resolveGatewaySessionStoreTarget } from "./session-utils.js";
@@ -102,7 +102,7 @@ type RestoreCheckpointSessionParams = {
 };
 
 type PersistSessionCompactionCheckpointParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   sessionId: string;
   reason: SessionCompactionCheckpointReason;

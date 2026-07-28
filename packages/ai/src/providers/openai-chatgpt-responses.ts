@@ -26,11 +26,11 @@ function loadNodeOs(): typeof NodeOs | null {
 // NEVER convert to top-level runtime imports - breaks browser/Vite builds
 const os = loadNodeOs();
 
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
+import { toErrorObject } from "@hanzo/bot-normalization-core/error-coercion";
 import {
   resolveTimerTimeoutMs,
   clampTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@hanzo/bot-normalization-core/number-coercion";
 import { getEnvApiKey } from "../env-api-keys.js";
 import { getAiTransportHost, resolveAiTransportHeaderSentinels } from "../host.js";
 import { parseRetryAfterHttpDateMs } from "../internal/retry-after.js";
@@ -1668,10 +1668,10 @@ function buildBaseCodexHeaders(
   }
   headers.set("Authorization", `Bearer ${token}`);
   headers.set("chatgpt-account-id", accountId);
-  headers.set("originator", "openclaw");
+  headers.set("originator", "bot");
   const userAgent = os
-    ? `openclaw (${os.platform()} ${os.release()}; ${os.arch()})`
-    : "openclaw (browser)";
+    ? `bot (${os.platform()} ${os.release()}; ${os.arch()})`
+    : "bot (browser)";
   headers.set("User-Agent", userAgent);
   return headers;
 }

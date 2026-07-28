@@ -57,7 +57,7 @@ async function expectSyncedSkillConfinement(params: {
 
 beforeAll(async () => {
   fixtureRoot = await fs.realpath(
-    await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skills-sync-suite-")),
+    await fs.mkdtemp(path.join(os.tmpdir(), "bot-skills-sync-suite-")),
   );
   syncSourceTemplateDir = await createCaseDir("source-template");
   await writeSkill({
@@ -303,7 +303,7 @@ describe("buildWorkspaceSkillsPrompt", () => {
       name: "image-lab",
       description: "Generates images",
       metadata:
-        '{"openclaw":{"requires":{"env":["GEMINI_API_KEY"]},"primaryEnv":"GEMINI_API_KEY"}}',
+        '{"bot":{"requires":{"env":["GEMINI_API_KEY"]},"primaryEnv":"GEMINI_API_KEY"}}',
       body: "# Image Lab\n",
     });
 
@@ -357,7 +357,7 @@ describe("buildWorkspaceSkillsPrompt", () => {
       dir: path.join(sourceWorkspace, "skills", "remote-only"),
       name: "remote-only",
       description: "Sandbox-only bin",
-      metadata: '{"openclaw":{"requires":{"anyBins":["missingbin","sandboxbin"]}}}',
+      metadata: '{"bot":{"requires":{"anyBins":["missingbin","sandboxbin"]}}}',
     });
 
     await syncSkillsToWorkspace({

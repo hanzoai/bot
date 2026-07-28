@@ -13,7 +13,7 @@ const { audioPortMock } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("openclaw/plugin-sdk/outbound-media", () => ({
+vi.mock("bot/plugin-sdk/outbound-media", () => ({
   loadOutboundMediaFromUrl: vi.fn(),
 }));
 
@@ -54,8 +54,8 @@ vi.mock("./sender.js", () => ({
   UploadDailyLimitExceededError: MockUploadDailyLimitExceededError,
 }));
 
-import { loadOutboundMediaFromUrl } from "openclaw/plugin-sdk/outbound-media";
-import { resolveLocalPathFromRootsSync } from "openclaw/plugin-sdk/security-runtime";
+import { loadOutboundMediaFromUrl } from "bot/plugin-sdk/outbound-media";
+import { resolveLocalPathFromRootsSync } from "bot/plugin-sdk/security-runtime";
 import {
   resolveOutboundMediaLocalRoots,
   resolveWorkspaceScopedLocalRoots,
@@ -71,13 +71,13 @@ import { OUTBOUND_ERROR_CODES } from "./outbound-types.js";
 import { sendMedia as sendOutboundMedia } from "./outbound.js";
 import { sendMedia as senderSendMedia } from "./sender.js";
 
-vi.mock("openclaw/plugin-sdk/security-runtime", { spy: true });
+vi.mock("bot/plugin-sdk/security-runtime", { spy: true });
 
 const mockedLoadOutboundMediaFromUrl = vi.mocked(loadOutboundMediaFromUrl);
 const mockedSenderSendMedia = vi.mocked(senderSendMedia);
 
-let openclawHome: string;
-let originalOpenClawHome: string | undefined;
+let botHome: string;
+let originalBotHome: string | undefined;
 
 function makeCtx() {
   return {
@@ -91,24 +91,24 @@ function makeCtx() {
       config: {},
     },
     mediaAccess: {
-      localRoots: ["/tmp/openclaw-sandbox"],
+      localRoots: ["/tmp/bot-sandbox"],
       workspaceDir: "/tmp/workspace",
       readFile: async () => Buffer.from("report"),
     },
-    mediaLocalRoots: ["/tmp/openclaw-sandbox"],
+    mediaLocalRoots: ["/tmp/bot-sandbox"],
     mediaReadFile: async () => Buffer.from("report"),
   };
 }
 
 beforeEach(async () => {
   vi.clearAllMocks();
-  originalOpenClawHome = process.env.OPENCLAW_HOME;
+  originalBotHome = process.env.BOT_HOME;
   // realpath: macOS tmpdir is a /var -> /private/var symlink and trusted-root
   // resolution returns canonicalized paths that assertions compare against.
-  openclawHome = await fs.realpath(
+  botHome = await fs.realpath(
     await fs.mkdtemp(path.join(os.tmpdir(), "qqbot-host-read-voice-")),
   );
-  process.env.OPENCLAW_HOME = openclawHome;
+  process.env.BOT_HOME = botHome;
   audioPortMock.audioFileToSilkBase64.mockResolvedValue(undefined);
   audioPortMock.isAudioFile.mockReturnValue(true);
   audioPortMock.shouldTranscodeVoice.mockReturnValue(false);
@@ -116,13 +116,13 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  if (originalOpenClawHome === undefined) {
-    delete process.env.OPENCLAW_HOME;
+  if (originalBotHome === undefined) {
+    delete process.env.BOT_HOME;
   } else {
-    process.env.OPENCLAW_HOME = originalOpenClawHome;
+    process.env.BOT_HOME = originalBotHome;
   }
-  if (openclawHome) {
-    await fs.rm(openclawHome, { recursive: true, force: true });
+  if (botHome) {
+    await fs.rm(botHome, { recursive: true, force: true });
   }
 });
 
@@ -185,21 +185,21 @@ describe("resolveOutboundMediaPath", () => {
     expect(
       resolveOutboundMediaLocalRoots({
         mediaAccess: {
-          localRoots: ["/tmp/openclaw-sandbox"],
+          localRoots: ["/tmp/bot-sandbox"],
           workspaceDir: "/tmp/agent-workspace",
         },
-        mediaLocalRoots: ["/tmp/openclaw-sandbox"],
+        mediaLocalRoots: ["/tmp/bot-sandbox"],
       }),
-    ).toEqual(["/tmp/openclaw-sandbox"]);
+    ).toEqual(["/tmp/bot-sandbox"]);
   });
 
   it("maps only authorized virtual workspace roots for host-read loading", () => {
     expect(
       resolveWorkspaceScopedLocalRoots(
-        ["/workspace/attachments", "/tmp/openclaw-sandbox", "/workspace/../media"],
+        ["/workspace/attachments", "/tmp/bot-sandbox", "/workspace/../media"],
         "/tmp/agent-workspace",
       ),
-    ).toEqual(["/tmp/agent-workspace/attachments", "/tmp/openclaw-sandbox"]);
+    ).toEqual(["/tmp/agent-workspace/attachments", "/tmp/bot-sandbox"]);
   });
 
   it.each(["/workspace/../media/secret.pdf", "../media/secret.pdf"])(
@@ -233,7 +233,7 @@ describe("trySendViaHostRead error handling", () => {
   it("returns OutboundResult.error when loadOutboundMediaFromUrl rejects", async () => {
     mockedLoadOutboundMediaFromUrl.mockRejectedValue(new Error("sandbox host read failed"));
 
-    const result = await sendPhoto(makeCtx(), "/tmp/openclaw-sandbox/report.docx");
+    const result = await sendPhoto(makeCtx(), "/tmp/bot-sandbox/report.docx");
 
     expect(result).toMatchObject({ channel: "qqbot", error: expect.any(String) });
     expect(result.error).toContain("sandbox host read failed");
@@ -241,7 +241,7 @@ describe("trySendViaHostRead error handling", () => {
   });
 
   it("falls back to normal local sends for trusted media paths outside host-read roots", async () => {
-    const trustedMediaDir = path.join(openclawHome, ".openclaw", "media", "qqbot");
+    const trustedMediaDir = path.join(botHome, ".bot", "media", "qqbot");
     await fs.mkdir(trustedMediaDir, { recursive: true });
     const trustedMediaPath = path.join(trustedMediaDir, "trusted-report.docx");
     await fs.writeFile(trustedMediaPath, Buffer.from("trusted report"));
@@ -341,7 +341,7 @@ describe("trySendViaHostRead error handling", () => {
     });
     mockedSenderSendMedia.mockRejectedValue(new Error("qq upload quota exceeded"));
 
-    const result = await sendPhoto(makeCtx(), "/tmp/openclaw-sandbox/chart.png");
+    const result = await sendPhoto(makeCtx(), "/tmp/bot-sandbox/chart.png");
 
     expect(result).toMatchObject({ channel: "qqbot", error: expect.any(String) });
     expect(result.error).toContain("qq upload quota exceeded");
@@ -385,7 +385,7 @@ describe("trySendViaHostRead error handling", () => {
       "/tmp/workspace/report.docx",
       expect.objectContaining({
         mediaAccess: expect.objectContaining({
-          localRoots: ["/tmp/openclaw-sandbox"],
+          localRoots: ["/tmp/bot-sandbox"],
           workspaceDir: "/tmp/workspace",
         }),
         workspaceDir: "/tmp/workspace",
@@ -406,7 +406,7 @@ describe("trySendViaHostRead error handling", () => {
       {
         ...makeCtx(),
         mediaAccess: {
-          localRoots: ["/tmp/openclaw-sandbox"],
+          localRoots: ["/tmp/bot-sandbox"],
           readFile: async () => Buffer.from("report"),
         },
         mediaLocalRoots: [],
@@ -432,7 +432,7 @@ describe("trySendViaHostRead error handling", () => {
       {
         ...makeCtx(),
         mediaAccess: {
-          localRoots: ["/tmp/openclaw-sandbox"],
+          localRoots: ["/tmp/bot-sandbox"],
           readFile: async () => Buffer.from("image"),
         },
         mediaLocalRoots: [],
@@ -513,11 +513,11 @@ describe("trySendViaHostRead error handling", () => {
 
   it("loads virtual-root workspace media through the real outbound loader", async () => {
     const actualOutboundMedia = await vi.importActual<
-      typeof import("openclaw/plugin-sdk/outbound-media")
-    >("openclaw/plugin-sdk/outbound-media");
+      typeof import("bot/plugin-sdk/outbound-media")
+    >("bot/plugin-sdk/outbound-media");
     mockedLoadOutboundMediaFromUrl.mockImplementation(actualOutboundMedia.loadOutboundMediaFromUrl);
     mockedSenderSendMedia.mockResolvedValue({ id: "media-1", timestamp: 123 });
-    const workspaceDir = path.join(openclawHome, "agent-workspace");
+    const workspaceDir = path.join(botHome, "agent-workspace");
     const reportPath = path.join(workspaceDir, "attachments", "report.txt");
     await fs.mkdir(path.dirname(reportPath), { recursive: true });
     await fs.writeFile(reportPath, "hello");
@@ -648,7 +648,7 @@ describe("trySendViaHostRead error handling", () => {
       expect.objectContaining({
         maxBytes: expect.any(Number),
         mediaAccess: expect.objectContaining({
-          localRoots: ["/tmp/openclaw-sandbox"],
+          localRoots: ["/tmp/bot-sandbox"],
           workspaceDir: "/tmp/workspace",
         }),
       }),

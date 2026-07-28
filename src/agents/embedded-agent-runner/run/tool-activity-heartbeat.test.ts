@@ -128,18 +128,18 @@ describe("heartbeat wrapper metadata preservation", () => {
   it("preserves before-tool-call marker on heartbeat-wrapped tools", () => {
     const source: Record<string, unknown> = { name: "test-tool", execute: vi.fn() as never };
     // Simulate a tool that has gone through the before-tool-call hook
-    Object.defineProperty(source, Symbol.for("openclaw:beforeToolCallWrapped"), {
+    Object.defineProperty(source, Symbol.for("bot:beforeToolCallWrapped"), {
       value: true,
       enumerable: true,
     });
-    Object.defineProperty(source, Symbol.for("openclaw:beforeToolCallSourceTool"), {
+    Object.defineProperty(source, Symbol.for("bot:beforeToolCallSourceTool"), {
       value: { name: "inner-tool" },
       enumerable: false,
     });
 
     const wrapped = wrapEmbeddedAttemptToolWithActivity(source as never, RUN) as typeof source;
 
-    expect((wrapped as Record<symbol, unknown>)[Symbol.for("openclaw:beforeToolCallWrapped")]).toBe(
+    expect((wrapped as Record<symbol, unknown>)[Symbol.for("bot:beforeToolCallWrapped")]).toBe(
       true,
     );
   });

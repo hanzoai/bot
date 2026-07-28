@@ -7,9 +7,9 @@ import { ErrorCodes } from "../../packages/gateway-protocol/src/index.js";
 import { writeAcpSessionMetaForMigration } from "../acp/runtime/session-meta.js";
 import { resolveStorePath, type SessionEntry } from "../config/sessions.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { BotConfig } from "../config/types.bot.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { withStateDirEnv as withRawStateDirEnv } from "../test-helpers/state-dir-env.js";
 import { resolveSessionKeyFromResolveParams } from "./sessions-resolve.js";
 
@@ -17,8 +17,8 @@ describe("resolveSessionKeyFromResolveParams store canonicalization", () => {
   const freshUpdatedAt = () => Date.now();
 
   function closeSessionSqliteDatabasesForTest(): void {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotAgentDatabasesForTest();
+    closeBotStateDatabaseForTest();
   }
 
   async function withStateDirEnv<T>(
@@ -48,12 +48,12 @@ describe("resolveSessionKeyFromResolveParams store canonicalization", () => {
   });
 
   it("resolves configured default-agent main sessions by sessionId and label", async () => {
-    await withStateDirEnv("openclaw-sessions-resolve-alias-", async ({ stateDir }) => {
+    await withStateDirEnv("bot-sessions-resolve-alias-", async ({ stateDir }) => {
       const storePath = path.join(stateDir, "sessions.json");
       const cfg = {
         session: { store: storePath, mainKey: "main" },
         agents: { list: [{ id: "ops", default: true }] },
-      } satisfies OpenClawConfig;
+      } satisfies BotConfig;
       await seedSessionStore(storePath, {
         "agent:ops:main": {
           sessionId: "sess-default-alias",
@@ -79,8 +79,8 @@ describe("resolveSessionKeyFromResolveParams store canonicalization", () => {
   });
 
   it("does not resolve another agent store when agentId is scoped", async () => {
-    await withStateDirEnv("openclaw-sessions-resolve-agent-scope-", async () => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("bot-sessions-resolve-agent-scope-", async () => {
+      const cfg: BotConfig = {
         agents: { list: [{ id: "main", default: true }, { id: "work" }] },
       };
       const workStorePath = resolveStorePath(cfg.session?.store, { agentId: "work" });
@@ -121,8 +121,8 @@ describe("resolveSessionKeyFromResolveParams store canonicalization", () => {
   });
 
   it("preserves cross-agent ambiguity when agentId is absent", async () => {
-    await withStateDirEnv("openclaw-sessions-resolve-cross-agent-", async () => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("bot-sessions-resolve-cross-agent-", async () => {
+      const cfg: BotConfig = {
         agents: { list: [{ id: "main", default: true }, { id: "work" }] },
       };
       const updatedAt = freshUpdatedAt();
@@ -174,11 +174,11 @@ describe("resolveSessionKeyFromResolveParams store canonicalization", () => {
   });
 
   it("still rejects non-alias agent:main matches when main is no longer configured", async () => {
-    await withStateDirEnv("openclaw-sessions-resolve-stale-main-", async () => {
+    await withStateDirEnv("bot-sessions-resolve-stale-main-", async () => {
       const cfg = {
         session: { mainKey: "main", store: undefined },
         agents: { list: [{ id: "ops", default: true }] },
-      } satisfies OpenClawConfig;
+      } satisfies BotConfig;
       await seedSessionStore(resolveStorePath(cfg.session?.store, { agentId: "main" }), {
         "agent:main:guildchat:direct:u1": {
           sessionId: "sess-stale-main",
@@ -203,8 +203,8 @@ describe("resolveSessionKeyFromResolveParams store canonicalization", () => {
   });
 
   it("does not adopt legacy main aliases from discovered deleted-agent stores", async () => {
-    await withStateDirEnv("openclaw-sessions-resolve-discovered-main-", async () => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("bot-sessions-resolve-discovered-main-", async () => {
+      const cfg: BotConfig = {
         agents: { list: [{ id: "ops", default: true }] },
       };
       const staleMainStorePath = resolveStorePath(cfg.session?.store, { agentId: "main" });
@@ -245,8 +245,8 @@ describe("resolveSessionKeyFromResolveParams store canonicalization", () => {
   });
 
   it("resolves ACP harness session keys from real stores when harness id is not in agents.list", async () => {
-    await withStateDirEnv("openclaw-sessions-resolve-acp-harness-", async () => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("bot-sessions-resolve-acp-harness-", async () => {
+      const cfg: BotConfig = {
         agents: { list: [{ id: "main", default: true }] },
       };
       const acpKey = "agent:claude:acp:11111111-1111-4111-8111-111111111111";
@@ -295,8 +295,8 @@ describe("resolveSessionKeyFromResolveParams store canonicalization", () => {
   });
 
   it("repairs ACP metadata when the session store key was already canonicalized", async () => {
-    await withStateDirEnv("openclaw-sessions-resolve-acp-harness-partial-", async () => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("bot-sessions-resolve-acp-harness-partial-", async () => {
+      const cfg: BotConfig = {
         agents: { list: [{ id: "main", default: true }] },
       };
       const acpKey = "agent:claude:acp:44444444-4444-4444-8444-444444444444";
@@ -339,8 +339,8 @@ describe("resolveSessionKeyFromResolveParams store canonicalization", () => {
   });
 
   it("rejects ACP-shaped bridge sessions without ACP runtime metadata under deleted agents", async () => {
-    await withStateDirEnv("openclaw-sessions-resolve-acp-bridge-deleted-", async () => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("bot-sessions-resolve-acp-bridge-deleted-", async () => {
+      const cfg: BotConfig = {
         agents: { list: [{ id: "main", default: true }] },
       };
       const acpBridgeKey = "agent:deleted-agent:acp:bridge-session-without-runtime-meta";
@@ -384,8 +384,8 @@ describe("resolveSessionKeyFromResolveParams store canonicalization", () => {
   });
 
   it("rejects configured ACP binding sessions when their owning agent is deleted", async () => {
-    await withStateDirEnv("openclaw-sessions-resolve-acp-binding-deleted-", async () => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("bot-sessions-resolve-acp-binding-deleted-", async () => {
+      const cfg: BotConfig = {
         agents: { list: [{ id: "main", default: true }] },
       };
       const acpBindingKey = "agent:deleted-agent:acp:binding:discord:default:feedface";
@@ -429,8 +429,8 @@ describe("resolveSessionKeyFromResolveParams store canonicalization", () => {
   });
 
   it("rejects an explicit listed deleted main key instead of remapping to the live default main", async () => {
-    await withStateDirEnv("openclaw-sessions-resolve-key-deleted-main-", async () => {
-      const cfg: OpenClawConfig = {
+    await withStateDirEnv("bot-sessions-resolve-key-deleted-main-", async () => {
+      const cfg: BotConfig = {
         agents: { list: [{ id: "ops", default: true }] },
       };
       const liveDefaultStorePath = resolveStorePath(cfg.session?.store, { agentId: "ops" });

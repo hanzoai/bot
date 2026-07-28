@@ -1,6 +1,6 @@
-/** Pure repair rules for OpenClaw-generated plugin model catalogs. */
+/** Pure repair rules for Bot-generated plugin model catalogs. */
 
-export const PLUGIN_MODEL_CATALOG_GENERATED_BY = "openclaw-plugin-model-catalog-v1";
+export const PLUGIN_MODEL_CATALOG_GENERATED_BY = "bot-plugin-model-catalog-v1";
 
 type PluginModelCatalogRepair = {
   contents: string;

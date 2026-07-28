@@ -1,4 +1,4 @@
-// Covers the hosted OpenClaw marketplace feed refresh command.
+// Covers the hosted Bot marketplace feed refresh command.
 import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -37,7 +37,7 @@ vi.mock("../plugins/official-external-plugin-catalog.js", () => ({
 }));
 
 async function createTimelinePath(): Promise<string> {
-  const dir = await mkdtemp(path.join(tmpdir(), "openclaw-marketplace-refresh-"));
+  const dir = await mkdtemp(path.join(tmpdir(), "bot-marketplace-refresh-"));
   return path.join(dir, "timeline.jsonl");
 }
 
@@ -78,7 +78,7 @@ describe("plugins marketplace refresh", () => {
         entries: [],
       },
       metadata: {
-        url: "https://packages.acme.example/openclaw/feed",
+        url: "https://packages.acme.example/bot/feed",
         status: 200,
         checksum: "feed-sha",
         etag: '"abc"',
@@ -113,7 +113,7 @@ describe("plugins marketplace refresh", () => {
         sequence: 7,
       },
       metadata: {
-        url: "https://packages.acme.example/openclaw/feed",
+        url: "https://packages.acme.example/bot/feed",
         status: 200,
         checksum: "feed-sha",
         etag: '"abc"',
@@ -141,7 +141,7 @@ describe("plugins marketplace refresh", () => {
         entries: [],
       },
       metadata: {
-        url: "https://packages.acme.example/openclaw/feed",
+        url: "https://packages.acme.example/bot/feed",
         status: 200,
         checksum: "feed-sha",
       },
@@ -179,7 +179,7 @@ describe("plugins marketplace refresh", () => {
         entries: [],
       },
       metadata: {
-        url: "https://packages.acme.example/openclaw/feed",
+        url: "https://packages.acme.example/bot/feed",
         status: 200,
         checksum: "sha256:abcdef",
       },
@@ -217,7 +217,7 @@ describe("plugins marketplace refresh", () => {
     mocks.getRuntimeConfig.mockReturnValue({});
     mocks.loadConfiguredHostedOfficialExternalPluginCatalogEntries.mockResolvedValue({
       source: "bundled-fallback",
-      entries: [{ name: "@openclaw/acpx" }],
+      entries: [{ name: "@hanzo/bot-acpx" }],
       error: "hosted catalog feed returned HTTP 503",
       metadata: {
         url: "https://clawhub.ai/v1/feeds/plugins",
@@ -238,7 +238,7 @@ describe("plugins marketplace refresh", () => {
     mocks.getRuntimeConfig.mockReturnValue({});
     mocks.loadConfiguredHostedOfficialExternalPluginCatalogEntries.mockResolvedValue({
       source: "bundled-fallback",
-      entries: [{ name: "@openclaw/acpx" }],
+      entries: [{ name: "@hanzo/bot-acpx" }],
       error:
         "hosted catalog feed fetch failed for https://clawhub.ai/v1/feeds/plugins?token=secret#frag",
       metadata: {
@@ -277,7 +277,7 @@ describe("plugins marketplace refresh", () => {
     mocks.getRuntimeConfig.mockReturnValue({});
     mocks.loadConfiguredHostedOfficialExternalPluginCatalogEntries.mockResolvedValue({
       source: "bundled-fallback",
-      entries: [{ name: "@openclaw/acpx" }],
+      entries: [{ name: "@hanzo/bot-acpx" }],
       error: "hosted catalog feed checksum mismatch: expected sha256:expected",
       metadata: {
         url: "https://clawhub.ai/v1/feeds/plugins",
@@ -302,7 +302,7 @@ describe("plugins marketplace refresh", () => {
 
   it("emits bounded diagnostics for refresh without raw feed URLs", async () => {
     const timelinePath = await createTimelinePath();
-    vi.stubEnv("OPENCLAW_DIAGNOSTICS_TIMELINE_PATH", timelinePath);
+    vi.stubEnv("BOT_DIAGNOSTICS_TIMELINE_PATH", timelinePath);
     const config = {
       diagnostics: { flags: ["timeline"] },
     };
@@ -318,7 +318,7 @@ describe("plugins marketplace refresh", () => {
         entries: [],
       },
       metadata: {
-        url: "https://user:secret@packages.acme.example/openclaw/feed?token=leak#frag",
+        url: "https://user:secret@packages.acme.example/bot/feed?token=leak#frag",
         status: 200,
         checksum: "feed-sha",
         etag: '"abc"',
@@ -336,13 +336,13 @@ describe("plugins marketplace refresh", () => {
     await runPluginMarketplaceRefreshCommand({
       expectedSha256: "feed-sha",
       feedProfile: "acme",
-      feedUrl: "https://override.example/openclaw/feed?token=override-leak",
+      feedUrl: "https://override.example/bot/feed?token=override-leak",
     });
 
     const [event] = await readTimeline(timelinePath);
     expect(mocks.loadConfiguredHostedOfficialExternalPluginCatalogEntries).toHaveBeenCalledWith(
       expect.objectContaining({
-        feedUrl: "https://override.example/openclaw/feed?token=override-leak",
+        feedUrl: "https://override.example/bot/feed?token=override-leak",
       }),
     );
     expect(event?.name).toBe("plugins.marketplace.feed.refresh");

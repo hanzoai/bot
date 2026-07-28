@@ -8,7 +8,7 @@ import { readPluginInstallIndex } from "../plugin-index-sqlite.mjs";
 const command = process.argv[2];
 const SCENARIOS = new Set([
   "base",
-  "acpx-openclaw-tools-bridge",
+  "acpx-bot-tools-bridge",
   "feishu-channel",
   "bootstrap-persona",
   "channel-post-core-restore",
@@ -108,7 +108,7 @@ function seedLegacySessionMetadata(stateDir) {
         resolvedSkills: [
           {
             name: "legacy-heavy-skill-cache",
-            filePath: "/tmp/openclaw-old-package/skills/legacy-heavy-skill-cache/SKILL.md",
+            filePath: "/tmp/bot-old-package/skills/legacy-heavy-skill-cache/SKILL.md",
           },
         ],
       },
@@ -248,17 +248,17 @@ function seedLegacyCronScheduledAuthority(stateDir) {
 }
 
 function getScenario() {
-  const scenario = process.env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIO || "base";
+  const scenario = process.env.BOT_UPGRADE_SURVIVOR_SCENARIO || "base";
   assert(SCENARIOS.has(scenario), `unknown upgrade survivor scenario: ${scenario}`);
   return scenario;
 }
 
 function getConfig() {
-  return readJson(requireEnv("OPENCLAW_CONFIG_PATH"));
+  return readJson(requireEnv("BOT_CONFIG_PATH"));
 }
 
 function getCoverage() {
-  const file = process.env.OPENCLAW_UPGRADE_SURVIVOR_CONFIG_COVERAGE_JSON;
+  const file = process.env.BOT_UPGRADE_SURVIVOR_CONFIG_COVERAGE_JSON;
   if (!file || !fs.existsSync(file)) {
     return null;
   }
@@ -281,8 +281,8 @@ function hasCoverage(coverage) {
 }
 
 function seedState() {
-  const stateDir = requireEnv("OPENCLAW_STATE_DIR");
-  const workspace = requireEnv("OPENCLAW_TEST_WORKSPACE_DIR");
+  const stateDir = requireEnv("BOT_STATE_DIR");
+  const workspace = requireEnv("BOT_TEST_WORKSPACE_DIR");
   const scenario = getScenario();
 
   write(
@@ -294,7 +294,7 @@ function seedState() {
       write(path.join(workspace, fileName), contents);
     }
   }
-  writeJson(path.join(workspace, ".openclaw", "workspace-state.json"), {
+  writeJson(path.join(workspace, ".bot", "workspace-state.json"), {
     version: 1,
     setupCompletedAt: "2026-04-01T00:00:00.000Z",
   });
@@ -329,7 +329,7 @@ function seedState() {
 
   const runtimeRoot = path.join(stateDir, "plugin-runtime-deps");
   for (const plugin of ["discord", "telegram", "whatsapp"]) {
-    writeJson(path.join(runtimeRoot, plugin, ".openclaw-runtime-deps-stamp.json"), {
+    writeJson(path.join(runtimeRoot, plugin, ".bot-runtime-deps-stamp.json"), {
       version: 0,
       plugin,
       stale: true,
@@ -338,7 +338,7 @@ function seedState() {
       path.join(
         runtimeRoot,
         plugin,
-        ".openclaw-runtime-deps-copy-stale",
+        ".bot-runtime-deps-copy-stale",
         "node_modules",
         "stale-sentinel",
         "package.json",
@@ -347,13 +347,13 @@ function seedState() {
     );
   }
   if (scenario === "versioned-runtime-deps") {
-    const version = process.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_VERSION || "2026.4.24";
+    const version = process.env.BOT_UPGRADE_SURVIVOR_BASELINE_VERSION || "2026.4.24";
     for (const plugin of ["discord", "feishu", "telegram", "whatsapp"]) {
       writeJson(
         path.join(
           runtimeRoot,
-          `openclaw-${version}-${plugin}`,
-          ".openclaw-runtime-deps-stamp.json",
+          `bot-${version}-${plugin}`,
+          ".bot-runtime-deps-stamp.json",
         ),
         {
           packageVersion: version,
@@ -364,7 +364,7 @@ function seedState() {
       write(
         path.join(
           runtimeRoot,
-          `openclaw-${version}-${plugin}`,
+          `bot-${version}-${plugin}`,
           "node_modules",
           "stale-sentinel",
           "package.json",
@@ -444,13 +444,13 @@ function assertConfigSurvived() {
     }
   }
 
-  if (hasCoverage(coverage) && acceptsIntent(coverage, "acpx-openclaw-tools-bridge")) {
+  if (hasCoverage(coverage) && acceptsIntent(coverage, "acpx-bot-tools-bridge")) {
     const pluginAllow = config.plugins?.allow ?? [];
     assert(pluginAllow.includes("acpx"), "ACPX plugin allow entry missing");
     assert(config.plugins?.entries?.acpx?.enabled === true, "ACPX plugin entry changed");
     assert(
-      config.plugins?.entries?.acpx?.config?.openClawToolsMcpBridge === true,
-      "ACPX OpenClaw tools bridge config changed",
+      config.plugins?.entries?.acpx?.config?.botToolsMcpBridge === true,
+      "ACPX Bot tools bridge config changed",
     );
   }
 
@@ -543,17 +543,17 @@ function assertConfigSurvived() {
 
   if (hasCoverage(coverage) && acceptsIntent(coverage, "logging")) {
     assert(
-      config.logging?.file === "~/openclaw-upgrade-survivor/gateway.jsonl",
+      config.logging?.file === "~/bot-upgrade-survivor/gateway.jsonl",
       "logging.file tilde path changed",
     );
   }
 }
 
 function assertStateSurvived() {
-  const stateDir = requireEnv("OPENCLAW_STATE_DIR");
-  const workspace = requireEnv("OPENCLAW_TEST_WORKSPACE_DIR");
+  const stateDir = requireEnv("BOT_STATE_DIR");
+  const workspace = requireEnv("BOT_TEST_WORKSPACE_DIR");
   const scenario = getScenario();
-  const stage = process.env.OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival";
+  const stage = process.env.BOT_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival";
   assert(fs.existsSync(path.join(workspace, "IDENTITY.md")), "workspace identity file missing");
   assert(
     fs.existsSync(path.join(stateDir, "agents", "main", "sessions", "legacy-session.json")),
@@ -592,7 +592,7 @@ function assertStateSurvived() {
     }
   }
   if (scenario === "stale-source-plugin-shadow") {
-    const staleRoot = path.join(stateDir, "extensions", "opik-openclaw");
+    const staleRoot = path.join(stateDir, "extensions", "opik-bot");
     assert(
       fs.existsSync(path.join(staleRoot, "src", "index.ts")),
       "source-only plugin shadow fixture missing",
@@ -602,10 +602,10 @@ function assertStateSurvived() {
     if (stage === "baseline") {
       return;
     }
-    const version = process.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_VERSION || "2026.4.24";
+    const version = process.env.BOT_UPGRADE_SURVIVOR_BASELINE_VERSION || "2026.4.24";
     const runtimeRoot = path.join(stateDir, "plugin-runtime-deps");
     const staleVersionedRoots = fs.existsSync(runtimeRoot)
-      ? fs.readdirSync(runtimeRoot).filter((entry) => entry.startsWith(`openclaw-${version}-`))
+      ? fs.readdirSync(runtimeRoot).filter((entry) => entry.startsWith(`bot-${version}-`))
       : [];
     assert(
       staleVersionedRoots.length === 0,
@@ -637,7 +637,7 @@ function assertAuthProfileMigrationSurvived(stateDir, stage) {
       .filter((entry) => entry.startsWith(prefix));
     assert(archives.length === 1, `expected one legacy auth archive for ${source}`);
   }
-  const agentDatabase = new DatabaseSync(path.join(agentDir, "openclaw-agent.sqlite"), {
+  const agentDatabase = new DatabaseSync(path.join(agentDir, "bot-agent.sqlite"), {
     readOnly: true,
   });
   try {
@@ -660,7 +660,7 @@ function assertAuthProfileMigrationSurvived(stateDir, stage) {
   } finally {
     agentDatabase.close();
   }
-  const stateDatabase = new DatabaseSync(path.join(stateDir, "state", "openclaw.sqlite"), {
+  const stateDatabase = new DatabaseSync(path.join(stateDir, "state", "bot.sqlite"), {
     readOnly: true,
   });
   try {
@@ -680,7 +680,7 @@ function assertAuthProfileMigrationSurvived(stateDir, stage) {
 
 function assertCronScheduledAuthorityMigrated(stateDir, stage) {
   const legacyStorePath = path.join(stateDir, "cron", "jobs.json");
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const databasePath = path.join(stateDir, "state", "bot.sqlite");
   if (stage === "baseline") {
     if (fs.existsSync(legacyStorePath)) {
       const jobs = readJson(legacyStorePath).jobs ?? [];
@@ -754,7 +754,7 @@ function assertMeetingTranscriptsMigrated(stateDir, stage) {
     "archived meeting transcript JSONL missing",
   );
 
-  const databasePath = path.join(stateDir, "state", "openclaw.sqlite");
+  const databasePath = path.join(stateDir, "state", "bot.sqlite");
   const db = new DatabaseSync(databasePath, { readOnly: true });
   try {
     const session = db
@@ -798,7 +798,7 @@ function assertMeetingTranscriptsMigrated(stateDir, stage) {
   }
 
   const exportedDir = execFileSync(
-    "openclaw",
+    "bot",
     ["transcripts", "path", "2026-07-01/design-review", "--dir"],
     { encoding: "utf8", env: process.env },
   ).trim();
@@ -822,7 +822,7 @@ function assertSessionMetadataMigrated(stateDir) {
   const legacyStorePath = path.join(stateDir, "sessions", "sessions.json");
   const agentSessionsDir = path.join(stateDir, "agents", "main", "sessions");
   const targetStorePath = path.join(agentSessionsDir, "sessions.json");
-  const dbPath = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const dbPath = path.join(stateDir, "agents", "main", "agent", "bot-agent.sqlite");
   assert(
     !fs.existsSync(legacyStorePath),
     `legacy sessions.json survived migration: ${legacyStorePath}`,
@@ -888,7 +888,7 @@ function readMigratedSessionStore(stateDir, targetStorePath) {
     return readJson(targetStorePath);
   }
 
-  const dbPath = path.join(stateDir, "agents", "main", "agent", "openclaw-agent.sqlite");
+  const dbPath = path.join(stateDir, "agents", "main", "agent", "bot-agent.sqlite");
   assert(fs.existsSync(dbPath), `agent session store missing: ${targetStorePath} or ${dbPath}`);
 
   let db;
@@ -923,7 +923,7 @@ function readMigratedSessionStore(stateDir, targetStorePath) {
 }
 
 function readInstalledPluginIndex() {
-  const stateDir = requireEnv("OPENCLAW_STATE_DIR");
+  const stateDir = requireEnv("BOT_STATE_DIR");
   const index = readPluginInstallIndex({ stateDir });
   assert(index.installRecords, "installed plugin index missing");
   return index;
@@ -960,7 +960,7 @@ function assertExternalPluginInstall(records, pluginId, packageName) {
     `configured external ${pluginId} package name changed: ${packageJson.name}`,
   );
   if (installedFromNpm) {
-    const stateDir = requireEnv("OPENCLAW_STATE_DIR");
+    const stateDir = requireEnv("BOT_STATE_DIR");
     assert(
       isPathInsideManagedNpmProjectPackageRoot({ stateDir, installPath, packageName }),
       `configured external ${pluginId} npm install path outside managed npm project root: ${installPath}`,
@@ -975,7 +975,7 @@ function assertExternalPluginInstall(records, pluginId, packageName) {
     record.clawhubPackage === packageName,
     `configured external ${pluginId} ClawHub package changed: ${record.clawhubPackage}`,
   );
-  const extensionsRoot = path.join(requireEnv("OPENCLAW_STATE_DIR"), "extensions");
+  const extensionsRoot = path.join(requireEnv("BOT_STATE_DIR"), "extensions");
   assert(
     isPathInside(extensionsRoot, installPath),
     `configured external ${pluginId} ClawHub install path outside managed extensions root: ${installPath}`,
@@ -984,7 +984,7 @@ function assertExternalPluginInstall(records, pluginId, packageName) {
 
 function assertConfiguredPluginInstalls() {
   const coverage = getCoverage();
-  const stage = process.env.OPENCLAW_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival";
+  const stage = process.env.BOT_UPGRADE_SURVIVOR_ASSERT_STAGE || "survival";
   if (!hasCoverage(coverage) || !acceptsIntent(coverage, "configured-plugin-installs")) {
     return;
   }
@@ -995,11 +995,11 @@ function assertConfiguredPluginInstalls() {
   const records = index.installRecords ?? {};
   assertOptionalConfiguredPluginIndex(records, index.plugins ?? [], {
     bundled: true,
-    packageName: "@openclaw/matrix",
+    packageName: "@hanzo/bot-matrix",
     pluginId: "matrix",
   });
   assertOptionalConfiguredPluginIndex(records, index.plugins ?? [], {
-    packageName: "@openclaw/brave-plugin",
+    packageName: "@hanzo/bot-brave-plugin",
     pluginId: "brave",
   });
   assert(!records.telegram, "internal telegram plugin should not be installed externally");
@@ -1081,11 +1081,11 @@ function assertUpdateRunSelfUpgrade([file]) {
   const qaAccounts = summary?.qaChannel?.status?.channelAccounts?.["qa-channel"];
   const targetServiceStarts = (summary?.supervisorHandoff?.systemctlInvocations ?? [])
     .map(normalizeSystemctlInvocation)
-    .filter((invocation) => invocation === "start openclaw-gateway.service");
+    .filter((invocation) => invocation === "start bot-gateway.service");
 
   assert(summary?.status === "passed", "update.run self-upgrade summary did not pass");
   assert(sourceVersion === "2026.4.26", `unexpected source version: ${String(sourceVersion)}`);
-  assert(summary?.source?.spec === "openclaw@2026.4.26", "source package spec was not exact");
+  assert(summary?.source?.spec === "bot@2026.4.26", "source package spec was not exact");
   assert(summary?.target?.tag === "latest", "target tag was not latest");
   assert(
     compareStableVersions(targetVersion, sourceVersion) > 0,

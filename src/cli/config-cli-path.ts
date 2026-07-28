@@ -1,5 +1,5 @@
-import { isRecord as isPlainRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { isRecord as isPlainRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import JSON5 from "json5";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";
 import { parseConfigPathArrayIndex } from "../shared/path-array-index.js";
@@ -194,9 +194,9 @@ export function formatConfigUnsetMissingPathMessage(params: {
   runtimeOnly: boolean;
 }): string {
   if (params.runtimeOnly) {
-    return `Config path not found in authored config: ${params.path}. It only exists after runtime defaults are applied, so there is nothing for config unset to remove. Use ${formatCliCommand("openclaw config set <path> <value>")} to override the inherited value.`;
+    return `Config path not found in authored config: ${params.path}. It only exists after runtime defaults are applied, so there is nothing for config unset to remove. Use ${formatCliCommand("bot config set <path> <value>")} to override the inherited value.`;
   }
-  return `Config path not found: ${params.path}. Nothing was changed. Run ${formatCliCommand("openclaw config get <path>")} first if you are unsure of the path.`;
+  return `Config path not found: ${params.path}. Nothing was changed. Run ${formatCliCommand("bot config get <path>")} first if you are unsure of the path.`;
 }
 
 function isSchemaRecord(value: unknown): value is JsonSchemaRecord {

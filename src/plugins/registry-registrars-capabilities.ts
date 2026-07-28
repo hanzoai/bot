@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { registerContextEngineForOwner } from "../context-engine/registry.js";
 import {
   getDetachedTaskLifecycleRuntimeRegistration,
@@ -12,14 +12,14 @@ import { registerRegistryPluginInteractiveHandler } from "./interactive-registry
 import type { PluginRegistryState } from "./registry-state.js";
 import type { PluginRecord } from "./registry-types.js";
 import { defaultSlotIdForKey } from "./slots.js";
-import type { OpenClawPluginApi, PluginRegistrationMode } from "./types.js";
+import type { BotPluginApi, PluginRegistrationMode } from "./types.js";
 
 export function createCapabilityRegistrars(state: PluginRegistryState) {
   const { registry, pushDiagnostic } = state;
 
   const registerDetachedTaskRuntime = (
     record: PluginRecord,
-    runtime: Parameters<OpenClawPluginApi["registerDetachedTaskRuntime"]>[0],
+    runtime: Parameters<BotPluginApi["registerDetachedTaskRuntime"]>[0],
   ) => {
     const existing = getDetachedTaskLifecycleRuntimeRegistration();
     if (existing && existing.pluginId !== record.id) {
@@ -36,7 +36,7 @@ export function createCapabilityRegistrars(state: PluginRegistryState) {
 
   const registerInteractiveHandler = (
     record: PluginRecord,
-    registration: Parameters<OpenClawPluginApi["registerInteractiveHandler"]>[0],
+    registration: Parameters<BotPluginApi["registerInteractiveHandler"]>[0],
   ) => {
     const result = registerRegistryPluginInteractiveHandler(record.id, registration, {
       pluginName: record.name,
@@ -61,8 +61,8 @@ export function createCapabilityRegistrars(state: PluginRegistryState) {
 
   const registerContextEngine = (
     record: PluginRecord,
-    id: Parameters<OpenClawPluginApi["registerContextEngine"]>[0],
-    factory: Parameters<OpenClawPluginApi["registerContextEngine"]>[1],
+    id: Parameters<BotPluginApi["registerContextEngine"]>[0],
+    factory: Parameters<BotPluginApi["registerContextEngine"]>[1],
     registrationMode: PluginRegistrationMode,
   ) => {
     const normalizedId = normalizeOptionalString(id) ?? "";
@@ -113,10 +113,10 @@ export function createCapabilityRegistrars(state: PluginRegistryState) {
 
   const registerCompactionProvider = (
     record: PluginRecord,
-    provider: Parameters<OpenClawPluginApi["registerCompactionProvider"]>[0],
+    provider: Parameters<BotPluginApi["registerCompactionProvider"]>[0],
   ) => {
     const id = normalizeOptionalString(
-      (provider as Partial<Parameters<OpenClawPluginApi["registerCompactionProvider"]>[0]> | null)
+      (provider as Partial<Parameters<BotPluginApi["registerCompactionProvider"]>[0]> | null)
         ?.id,
     );
     if (!id) {

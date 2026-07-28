@@ -6,7 +6,7 @@ export function buildOfficialChannelCatalog(params?: { repoRoot?: string; cwd?: 
     version?: string;
     description?: string;
     source?: string;
-    openclaw: {
+    bot: {
       plugin?: Record<string, unknown>;
       channel: Record<string, unknown>;
       install: {

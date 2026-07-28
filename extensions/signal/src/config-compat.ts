@@ -1,7 +1,7 @@
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-resolution";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-resolution";
 // Signal compatibility migration moves shipped flat transport config into account ownership.
-import type { ChannelDoctorConfigMutation } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { ChannelDoctorConfigMutation } from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import type { SignalTransportConfig } from "./account-types.js";
 import {
   allocateSignalManagedNativePort,
@@ -26,15 +26,15 @@ const LEGACY_TRANSPORT_FIELDS = [
 ] as const;
 
 const PENDING_LEGACY_TRANSPORT_WARNING =
-  "- channels.signal: legacy auto transport is ambiguous while its endpoint is unavailable; bring the endpoint online and rerun openclaw doctor --fix, or replace the retired fields with an explicit account-owned transport in openclaw.json.";
+  "- channels.signal: legacy auto transport is ambiguous while its endpoint is unavailable; bring the endpoint online and rerun bot doctor --fix, or replace the retired fields with an explicit account-owned transport in bot.json.";
 const PENDING_LEGACY_INVALID_URL_WARNING =
-  "- channels.signal: legacy httpUrl is invalid; keep the current config, correct httpUrl, then run openclaw doctor --fix.";
+  "- channels.signal: legacy httpUrl is invalid; keep the current config, correct httpUrl, then run bot doctor --fix.";
 const PENDING_LEGACY_INVALID_HOST_WARNING =
-  "- channels.signal: legacy httpHost is invalid; keep the current config, correct httpHost, then run openclaw doctor --fix.";
+  "- channels.signal: legacy httpHost is invalid; keep the current config, correct httpHost, then run bot doctor --fix.";
 const PENDING_LEGACY_INVALID_PORT_WARNING =
-  "- channels.signal: legacy httpPort must be an integer between 1 and 65535; correct httpPort, then run openclaw doctor --fix.";
+  "- channels.signal: legacy httpPort must be an integer between 1 and 65535; correct httpPort, then run bot doctor --fix.";
 const PENDING_LEGACY_CONTAINER_ACCOUNT_WARNING =
-  "- channels.signal: legacy container transport requires an account number; add channels.signal.account (or the relevant channels.signal.accounts.*.account) and rerun openclaw doctor --fix.";
+  "- channels.signal: legacy container transport requires an account number; add channels.signal.account (or the relevant channels.signal.accounts.*.account) and rerun bot doctor --fix.";
 
 type DetectTransport = (params: {
   url: string;
@@ -383,9 +383,9 @@ function shouldMaterializeTransport(entries: Record<string, unknown>[], index: n
 }
 
 export function clearLegacySignalTransportFieldsForAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
-}): OpenClawConfig {
+}): BotConfig {
   const next = structuredClone(params.cfg);
   const signal = next.channels?.signal as unknown;
   if (!isRecord(signal)) {
@@ -478,10 +478,10 @@ function allocateMigratedManagedPorts(params: {
 }
 
 function applyMigratedSignalTransports(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entries: Record<string, unknown>[];
   transports: Array<SignalTransportConfig | undefined>;
-}): OpenClawConfig | undefined {
+}): BotConfig | undefined {
   const next = structuredClone(params.cfg);
   const nextSignal = next.channels?.signal as unknown;
   if (!isRecord(nextSignal)) {
@@ -517,7 +517,7 @@ function applyMigratedSignalTransports(params: {
   return next;
 }
 
-function hasContainerTransportWithoutEffectiveAccount(cfg: OpenClawConfig): boolean {
+function hasContainerTransportWithoutEffectiveAccount(cfg: BotConfig): boolean {
   const signal = cfg.channels?.signal as unknown;
   if (!isRecord(signal)) {
     return false;
@@ -562,7 +562,7 @@ function hasContainerTransportWithoutEffectiveAccount(cfg: OpenClawConfig): bool
 }
 
 export async function migrateLegacySignalTransportConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   detect?: DetectTransport;
 }): Promise<ChannelDoctorConfigMutation> {
   const signal = params.cfg.channels?.signal as unknown;
@@ -659,7 +659,7 @@ export async function migrateLegacySignalTransportConfig(params: {
 }
 
 export function migrateLegacySignalTransportConfigSync(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): ChannelDoctorConfigMutation {
   const signal = cfg.channels?.signal as unknown;
   if (!isRecord(signal)) {

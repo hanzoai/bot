@@ -1,4 +1,4 @@
-import { createOpenClawTestState, type OpenClawTestState } from "openclaw/plugin-sdk/test-state";
+import { createBotTestState, type BotTestState } from "bot/plugin-sdk/test-state";
 import { afterEach, beforeEach } from "vitest";
 import {
   describe,
@@ -20,15 +20,15 @@ import {
 
 registerCodexEventProjectorTestLifecycle();
 
-let openClawState: OpenClawTestState;
+let botState: BotTestState;
 beforeEach(async () => {
-  openClawState = await createOpenClawTestState({
+  botState = await createBotTestState({
     layout: "state-only",
-    prefix: "openclaw-codex-media-state-",
+    prefix: "bot-codex-media-state-",
   });
 });
 afterEach(async () => {
-  await openClawState.cleanup();
+  await botState.cleanup();
 });
 
 describe("CodexAppServerEventProjector media projection", () => {

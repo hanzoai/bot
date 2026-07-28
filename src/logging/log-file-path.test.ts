@@ -12,21 +12,21 @@ const date = new Date(2026, 6, 22, 12, 0, 0);
 
 describe("resolveConfiguredLogFilePath", () => {
   it.each([
-    { name: "unset", env: {}, expected: "openclaw-2026-07-22.log" },
+    { name: "unset", env: {}, expected: "bot-2026-07-22.log" },
     {
       name: "explicit default",
-      env: { OPENCLAW_PROFILE: "Default" },
-      expected: "openclaw-2026-07-22.log",
+      env: { BOT_PROFILE: "Default" },
+      expected: "bot-2026-07-22.log",
     },
     {
       name: "named",
-      env: { OPENCLAW_PROFILE: "dev" },
-      expected: "openclaw-dev-2026-07-22.log",
+      env: { BOT_PROFILE: "dev" },
+      expected: "bot-dev-2026-07-22.log",
     },
     {
       name: "sanitized",
-      env: { OPENCLAW_PROFILE: "QA_Profile" },
-      expected: "openclaw--1q-1a-0-1profile-2026-07-22.log",
+      env: { BOT_PROFILE: "QA_Profile" },
+      expected: "bot--1q-1a-0-1profile-2026-07-22.log",
     },
   ])("uses the $name profile filename", ({ env, expected }) => {
     const resolved = resolveConfiguredLogFilePath(undefined, { date, env });
@@ -37,25 +37,25 @@ describe("resolveConfiguredLogFilePath", () => {
   it("keeps profiles distinct when sanitization would otherwise collide", () => {
     const underscored = resolveConfiguredLogFilePath(undefined, {
       date,
-      env: { OPENCLAW_PROFILE: "QA_Profile" },
+      env: { BOT_PROFILE: "QA_Profile" },
     });
     const dashed = resolveConfiguredLogFilePath(undefined, {
       date,
-      env: { OPENCLAW_PROFILE: "qa-profile" },
+      env: { BOT_PROFILE: "qa-profile" },
     });
 
     expect(underscored).not.toBe(dashed);
-    expect(path.basename(dashed)).toBe("openclaw-qa--profile-2026-07-22.log");
+    expect(path.basename(dashed)).toBe("bot-qa--profile-2026-07-22.log");
   });
 
   it("keeps escaped output distinct from a profile that resembles the encoding", () => {
     const transformed = resolveConfiguredLogFilePath(undefined, {
       date,
-      env: { OPENCLAW_PROFILE: "QA_Profile" },
+      env: { BOT_PROFILE: "QA_Profile" },
     });
     const lookalike = resolveConfiguredLogFilePath(undefined, {
       date,
-      env: { OPENCLAW_PROFILE: "-1q-1a-0-1profile" },
+      env: { BOT_PROFILE: "-1q-1a-0-1profile" },
     });
 
     expect(transformed).not.toBe(lookalike);
@@ -64,14 +64,14 @@ describe("resolveConfiguredLogFilePath", () => {
   it("bounds direct environment profiles that exceed the CLI length contract", () => {
     const first = resolveConfiguredLogFilePath(undefined, {
       date,
-      env: { OPENCLAW_PROFILE: "A".repeat(80) },
+      env: { BOT_PROFILE: "A".repeat(80) },
     });
     const second = resolveConfiguredLogFilePath(undefined, {
       date,
-      env: { OPENCLAW_PROFILE: "B".repeat(80) },
+      env: { BOT_PROFILE: "B".repeat(80) },
     });
 
-    expect(path.basename(first)).toMatch(/^openclaw--3[a-f0-9]{64}-2026-07-22\.log$/u);
+    expect(path.basename(first)).toMatch(/^bot--3[a-f0-9]{64}-2026-07-22\.log$/u);
     expect(path.basename(first).length).toBeLessThanOrEqual(255);
     expect(first).not.toBe(second);
   });
@@ -79,10 +79,10 @@ describe("resolveConfiguredLogFilePath", () => {
   it("preserves an explicit logging.file override", () => {
     expect(
       resolveConfiguredLogFilePath(
-        { logging: { file: "/var/log/openclaw/custom.log" } },
-        { date, env: { OPENCLAW_PROFILE: "dev" } },
+        { logging: { file: "/var/log/bot/custom.log" } },
+        { date, env: { BOT_PROFILE: "dev" } },
       ),
-    ).toBe("/var/log/openclaw/custom.log");
+    ).toBe("/var/log/bot/custom.log");
   });
 });
 
@@ -90,33 +90,33 @@ describe("profile rolling log families", () => {
   it("preserves the profile segment across date rollover", () => {
     expect(
       resolveRollingLogFilePathForDate(
-        "/tmp/openclaw/openclaw-dev-2026-07-22.log",
+        "/tmp/hanzoai/bot-dev-2026-07-22.log",
         new Date(2026, 6, 23, 12, 0, 0),
       ),
-    ).toBe("/tmp/openclaw/openclaw-dev-2026-07-23.log");
+    ).toBe("/tmp/hanzoai/bot-dev-2026-07-23.log");
   });
 
   it("expands the legacy YYYY-MM-DD placeholder", () => {
     expect(
       resolveRollingLogFilePathForDate(
-        "/tmp/openclaw/openclaw-YYYY-MM-DD.log",
+        "/tmp/hanzoai/bot-YYYY-MM-DD.log",
         new Date(2026, 6, 23, 12, 0, 0),
       ),
-    ).toBe("/tmp/openclaw/openclaw-2026-07-23.log");
+    ).toBe("/tmp/hanzoai/bot-2026-07-23.log");
   });
 
   it("keeps default and named profile fallback families separate", () => {
     expect(
-      isSameRollingLogFileFamily("openclaw-dev-2026-07-22.log", "openclaw-dev-2026-07-21.log"),
+      isSameRollingLogFileFamily("bot-dev-2026-07-22.log", "bot-dev-2026-07-21.log"),
     ).toBe(true);
     expect(
-      isSameRollingLogFileFamily("openclaw-dev-2026-07-22.log", "openclaw-2026-07-22.log"),
+      isSameRollingLogFileFamily("bot-dev-2026-07-22.log", "bot-2026-07-22.log"),
     ).toBe(false);
   });
 
   it("keeps legacy explicit dated paths rolling without broadening the override contract", () => {
-    expect(isLegacyRollingLogFilePath("openclaw-2026-07-22.log")).toBe(true);
-    expect(isLegacyRollingLogFilePath("openclaw-YYYY-MM-DD.log")).toBe(true);
-    expect(isLegacyRollingLogFilePath("openclaw-dev-2026-07-22.log")).toBe(false);
+    expect(isLegacyRollingLogFilePath("bot-2026-07-22.log")).toBe(true);
+    expect(isLegacyRollingLogFilePath("bot-YYYY-MM-DD.log")).toBe(true);
+    expect(isLegacyRollingLogFilePath("bot-dev-2026-07-22.log")).toBe(false);
   });
 });

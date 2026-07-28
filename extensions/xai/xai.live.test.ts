@@ -2,37 +2,37 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { encodePngRgba, fillPixel } from "openclaw/plugin-sdk/media-runtime";
-import type { OpenClawPluginToolFactory } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { encodePngRgba, fillPixel } from "bot/plugin-sdk/media-runtime";
+import type { BotPluginToolFactory } from "bot/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "bot/plugin-sdk/plugin-test-api";
 import {
   createCapturedPluginRegistration,
   registerProviderPlugin,
   requireRegisteredProvider,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-test-runtime";
 import {
-  expectOpenClawLiveTranscriptMarker,
+  expectBotLiveTranscriptMarker,
   runRealtimeSttLiveTest,
-} from "openclaw/plugin-sdk/provider-test-contracts";
+} from "bot/plugin-sdk/provider-test-contracts";
 import {
   REALTIME_VOICE_AUDIO_FORMAT_PCM16_24KHZ,
   type RealtimeVoiceBridge,
   type RealtimeVoiceBridgeEvent,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { isBillingErrorMessage } from "openclaw/plugin-sdk/test-live";
+} from "bot/plugin-sdk/realtime-voice";
+import { isBillingErrorMessage } from "bot/plugin-sdk/test-live";
 import { describe, expect, it } from "vitest";
 import { createCodeExecutionTool } from "./code-execution.js";
 import plugin from "./index.js";
 
 const XAI_API_KEY = process.env.XAI_API_KEY ?? "";
-const LIVE_IMAGE_MODEL = process.env.OPENCLAW_LIVE_XAI_IMAGE_MODEL?.trim() || "grok-imagine-image";
-const ENABLE_VIDEO_LIVE = process.env.OPENCLAW_LIVE_XAI_VIDEO === "1";
-const liveEnabled = XAI_API_KEY.trim().length > 0 && process.env.OPENCLAW_LIVE_TEST === "1";
+const LIVE_IMAGE_MODEL = process.env.BOT_LIVE_XAI_IMAGE_MODEL?.trim() || "grok-imagine-image";
+const ENABLE_VIDEO_LIVE = process.env.BOT_LIVE_XAI_VIDEO === "1";
+const liveEnabled = XAI_API_KEY.trim().length > 0 && process.env.BOT_LIVE_TEST === "1";
 const describeLive = liveEnabled ? describe : describe.skip;
 const EMPTY_AUTH_STORE = { version: 1, profiles: {} } as const;
 
-function createLiveConfig(): OpenClawConfig {
+function createLiveConfig(): BotConfig {
   return {
     models: {
       providers: {
@@ -108,8 +108,8 @@ function registerXaiRealtimeVoiceProvider() {
   return requireRegisteredProvider(captured.realtimeVoiceProviders, "xai");
 }
 
-function registerXaiToolFactories(): Map<string, OpenClawPluginToolFactory> {
-  const factories = new Map<string, OpenClawPluginToolFactory>();
+function registerXaiToolFactories(): Map<string, BotPluginToolFactory> {
+  const factories = new Map<string, BotPluginToolFactory>();
   plugin.register(
     createTestPluginApi({
       registerTool(tool, options) {
@@ -174,7 +174,7 @@ describeLive("xai plugin live", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
       const explicitConfig = {
         plugins: {
           entries: {
@@ -186,7 +186,7 @@ describeLive("xai plugin live", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
 
       expect(
         codeExecutionFactory({
@@ -280,7 +280,7 @@ describeLive("xai plugin live", () => {
       expect(voices?.some((voice) => voice.id === "altair")).toBe(true);
 
       const audioFile = await speechProvider.synthesize({
-        text: "OpenClaw xAI text to speech integration test OK.",
+        text: "Bot xAI text to speech integration test OK.",
         cfg,
         providerConfig: {
           apiKey: XAI_API_KEY,
@@ -297,7 +297,7 @@ describeLive("xai plugin live", () => {
       expect(audioFile.audioBuffer.byteLength).toBeGreaterThan(512);
 
       const streaming = await speechProvider.streamSynthesize?.({
-        text: "OpenClaw xAI streaming text to speech integration test OK.",
+        text: "Bot xAI streaming text to speech integration test OK.",
         cfg,
         providerConfig: {
           apiKey: XAI_API_KEY,
@@ -329,7 +329,7 @@ describeLive("xai plugin live", () => {
       }
 
       const telephony = await speechProvider.synthesizeTelephony?.({
-        text: "OpenClaw xAI telephony check OK.",
+        text: "Bot xAI telephony check OK.",
         cfg,
         providerConfig: {
           apiKey: XAI_API_KEY,
@@ -353,7 +353,7 @@ describeLive("xai plugin live", () => {
       const mediaProvider = requireRegisteredProvider(mediaProviders, "xai");
       const speechProvider = requireRegisteredProvider(speechProviders, "xai");
       const cfg = createLiveConfig();
-      const phrase = "OpenClaw xAI speech to text integration test OK.";
+      const phrase = "Bot xAI speech to text integration test OK.";
 
       const audioFile = await speechProvider.synthesize({
         text: phrase,
@@ -378,7 +378,7 @@ describeLive("xai plugin live", () => {
 
       const normalized = transcript?.text.toLowerCase() ?? "";
       expect(transcript?.model).toBeUndefined();
-      expectOpenClawLiveTranscriptMarker(normalized);
+      expectBotLiveTranscriptMarker(normalized);
       expect(normalized).toContain("speech");
       expect(normalized).toContain("text");
       expect(normalized).toContain("integration");
@@ -433,7 +433,7 @@ describeLive("xai plugin live", () => {
       const realtimeProvider = requireRegisteredProvider(realtimeTranscriptionProviders, "xai");
       const speechProvider = requireRegisteredProvider(speechProviders, "xai");
       const cfg = createLiveConfig();
-      const phrase = "OpenClaw xAI realtime transcription integration test OK.";
+      const phrase = "Bot xAI realtime transcription integration test OK.";
 
       const telephony = await speechProvider.synthesizeTelephony?.({
         text: phrase,
@@ -470,7 +470,7 @@ describeLive("xai plugin live", () => {
       });
 
       const normalized = transcripts.join(" ").toLowerCase();
-      expectOpenClawLiveTranscriptMarker(normalized);
+      expectBotLiveTranscriptMarker(normalized);
       expect(normalized).toContain("transcription");
       expect(partials.length + transcripts.length).toBeGreaterThan(0);
     });
@@ -481,7 +481,7 @@ describeLive("xai plugin live", () => {
     const realtimeProvider = registerXaiRealtimeVoiceProvider();
     const speechProvider = requireRegisteredProvider(speechProviders, "xai");
     const cfg = createLiveConfig();
-    const marker = "OPENCLAW_XAI_RESUME_42";
+    const marker = "BOT_XAI_RESUME_42";
     const input = await speechProvider.synthesizeTelephony?.({
       text: "Stop counting now.",
       cfg,
@@ -522,11 +522,11 @@ describeLive("xai plugin live", () => {
       },
       audioFormat: REALTIME_VOICE_AUDIO_FORMAT_PCM16_24KHZ,
       instructions:
-        "Reply briefly to spoken input. When a text message asks to call the live probe, call openclaw_live_probe. After a tool result, say its marker exactly.",
+        "Reply briefly to spoken input. When a text message asks to call the live probe, call bot_live_probe. After a tool result, say its marker exactly.",
       tools: [
         {
           type: "function",
-          name: "openclaw_live_probe",
+          name: "bot_live_probe",
           description: "Return the live validation marker.",
           parameters: {
             type: "object",
@@ -683,9 +683,9 @@ describeLive("xai plugin live", () => {
         finalUserTranscripts.slice(userTranscriptsBeforeBargeIn).join(" ").toLowerCase(),
       ).toMatch(/stop|interrupt/);
 
-      bridge.sendUserMessage?.("Call openclaw_live_probe now with token bluebird.");
+      bridge.sendUserMessage?.("Call bot_live_probe now with token bluebird.");
       await waitForXaiLive("realtime tool call", () => toolCalls.length > 0);
-      expect(toolCalls[0]?.name).toBe("openclaw_live_probe");
+      expect(toolCalls[0]?.name).toBe("bot_live_probe");
       await bridge.submitToolResult(toolCalls[0]?.callId ?? "", { marker });
       await waitForXaiLive("tool-result audio", () =>
         finalAssistantTranscripts.some((text) => text.includes(marker)),
@@ -815,7 +815,7 @@ describeLive("xai plugin live", () => {
           }
           expect(video.mimeType.startsWith("video/")).toBe(true);
           expect(video.buffer.byteLength).toBeGreaterThan(1_000);
-          const outputPath = process.env.OPENCLAW_LIVE_XAI_VIDEO_OUTPUT?.trim();
+          const outputPath = process.env.BOT_LIVE_XAI_VIDEO_OUTPUT?.trim();
           if (outputPath) {
             await fs.writeFile(outputPath, video.buffer);
           }
@@ -865,7 +865,7 @@ describeLive("xai plugin live", () => {
           }
           expect(video.mimeType.startsWith("video/")).toBe(true);
           expect(video.buffer.byteLength).toBeGreaterThan(1_000);
-          const outputPath = process.env.OPENCLAW_LIVE_XAI_VIDEO_15_OUTPUT?.trim();
+          const outputPath = process.env.BOT_LIVE_XAI_VIDEO_15_OUTPUT?.trim();
           if (outputPath) {
             await fs.writeFile(outputPath, video.buffer);
           }

@@ -347,7 +347,7 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.worktreeRunLeaseTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.worktreeRunLeaseTestApi")] = {
     testing,
   };
 }

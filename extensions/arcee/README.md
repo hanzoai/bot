@@ -1,12 +1,12 @@
-# OpenClaw Arcee AI Provider
+# Bot Arcee AI Provider
 
-Official OpenClaw provider plugin for Arcee AI.
+Official Bot provider plugin for Arcee AI.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/arcee-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-arcee-provider
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/arcee> for setup and configuration.
+See <https://docs.bot.ai/providers/arcee> for setup and configuration.

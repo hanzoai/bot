@@ -24,7 +24,7 @@ describe("qa runtime parity prompt-cache reporting", () => {
     if (!scenario?.runtimeParity) {
       throw new Error("runtime parity fixture missing");
     }
-    scenario.runtimeParity.cells.openclaw.usage = {
+    scenario.runtimeParity.cells.bot.usage = {
       inputTokens: 10,
       outputTokens: 5,
       totalTokens: 85,
@@ -41,7 +41,7 @@ describe("qa runtime parity prompt-cache reporting", () => {
 
     const report = buildQaRuntimeParityReport({ summary });
 
-    expect(report.scenarios[0]?.openclawUsage).toEqual({
+    expect(report.scenarios[0]?.botUsage).toEqual({
       totalTokens: 85,
       inputTokens: 10,
       outputTokens: 5,
@@ -61,14 +61,14 @@ describe("qa runtime parity prompt-cache reporting", () => {
       cacheWriteTokens: 0,
       cacheHitPercent: 50,
     });
-    expect(report.usage.openclaw).toMatchObject({
+    expect(report.usage.bot).toMatchObject({
       totalTokens: 100,
       grossInputTokens: 90,
       uncachedInputTokens: 30,
       cachedInputTokens: 60,
       cacheWriteTokens: 10,
     });
-    expect(report.usage.openclaw?.cacheHitPercent).toBeCloseTo((60 / 90) * 100);
+    expect(report.usage.bot?.cacheHitPercent).toBeCloseTo((60 / 90) * 100);
     expect(report.usage.codex).toMatchObject({
       totalTokens: 33,
       grossInputTokens: 25,
@@ -79,10 +79,10 @@ describe("qa runtime parity prompt-cache reporting", () => {
     });
     const markdown = renderQaRuntimeParityMarkdownReport(report);
     expect(markdown).toContain("## Prompt Cache");
-    expect(markdown).toContain("| openclaw | 90 | 30 | 60 | 10 | 10 | 100 | 66.7% |");
+    expect(markdown).toContain("| bot | 90 | 30 | 60 | 10 | 10 | 100 | 66.7% |");
     expect(markdown).toContain("| codex | 25 | 17 | 8 | 0 | 8 | 33 | 32.0% |");
     expect(markdown).toContain(
-      "prompt cache: openclaw 75.0% (60 cached, 20 uncached input); codex 50.0% (8 cached, 8 uncached input)",
+      "prompt cache: bot 75.0% (60 cached, 20 uncached input); codex 50.0% (8 cached, 8 uncached input)",
     );
   });
 
@@ -92,14 +92,14 @@ describe("qa runtime parity prompt-cache reporting", () => {
     if (!first?.runtimeParity || !second?.runtimeParity) {
       throw new Error("runtime parity fixtures missing");
     }
-    first.runtimeParity.cells.openclaw.usage = {
+    first.runtimeParity.cells.bot.usage = {
       inputTokens: 10,
       outputTokens: 5,
       totalTokens: 85,
       cacheRead: 60,
       cacheWrite: 10,
     };
-    second.runtimeParity.cells.openclaw.usage = {
+    second.runtimeParity.cells.bot.usage = {
       inputTokens: 10,
       outputTokens: 5,
       totalTokens: 115,
@@ -108,14 +108,14 @@ describe("qa runtime parity prompt-cache reporting", () => {
     };
 
     const report = buildQaRuntimeParityReport({ summary });
-    expect(report.usage.openclaw).toMatchObject({
+    expect(report.usage.bot).toMatchObject({
       totalTokens: 200,
       grossInputTokens: 190,
       uncachedInputTokens: 30,
       cachedInputTokens: 160,
       cacheWriteTokens: 10,
     });
-    expect(report.usage.openclaw?.cacheHitPercent).toBeCloseTo((160 / 190) * 100);
+    expect(report.usage.bot?.cacheHitPercent).toBeCloseTo((160 / 190) * 100);
   });
 
   it("reports unavailable runtime captures as N/A instead of fabricated zero-token usage", () => {
@@ -123,19 +123,19 @@ describe("qa runtime parity prompt-cache reporting", () => {
       summary: {
         scenarios: [{ name: "Missing runtime capture", status: "fail" }],
         counts: { total: 1, passed: 0, failed: 1 },
-        run: { providerMode: "live-frontier", runtimePair: ["openclaw", "codex"] },
+        run: { providerMode: "live-frontier", runtimePair: ["bot", "codex"] },
       },
     });
-    expect(report.usage).toEqual({ openclaw: null, codex: null });
-    expect(report.scenarios[0]).toMatchObject({ openclawUsage: null, codexUsage: null });
+    expect(report.usage).toEqual({ bot: null, codex: null });
+    expect(report.scenarios[0]).toMatchObject({ botUsage: null, codexUsage: null });
     const markdown = renderQaRuntimeParityMarkdownReport(report);
-    expect(markdown).toContain("| openclaw | N/A | N/A | N/A | N/A | N/A | N/A | N/A |");
+    expect(markdown).toContain("| bot | N/A | N/A | N/A | N/A | N/A | N/A | N/A |");
     expect(markdown).toContain("| codex | N/A | N/A | N/A | N/A | N/A | N/A | N/A |");
   });
 
   it("keeps missing cache telemetry unknown while preserving measured token totals", () => {
     const report = buildQaRuntimeParityReport({ summary: makeRuntimeParitySummary() });
-    expect(report.scenarios[0]?.openclawUsage).toMatchObject({
+    expect(report.scenarios[0]?.botUsage).toMatchObject({
       inputTokens: 10,
       outputTokens: 5,
       totalTokens: 15,
@@ -145,7 +145,7 @@ describe("qa runtime parity prompt-cache reporting", () => {
       cacheWriteTokens: null,
       cacheHitPercent: null,
     });
-    expect(report.usage.openclaw).toMatchObject({
+    expect(report.usage.bot).toMatchObject({
       inputTokens: 20,
       outputTokens: 10,
       totalTokens: 30,
@@ -156,7 +156,7 @@ describe("qa runtime parity prompt-cache reporting", () => {
       cacheHitPercent: null,
     });
     expect(renderQaRuntimeParityMarkdownReport(report)).toContain(
-      "| openclaw | N/A | N/A | N/A | N/A | 10 | 30 | N/A |",
+      "| bot | N/A | N/A | N/A | N/A | 10 | 30 | N/A |",
     );
   });
 
@@ -166,7 +166,7 @@ describe("qa runtime parity prompt-cache reporting", () => {
     if (!first?.runtimeParity) {
       throw new Error("runtime parity fixture missing");
     }
-    first.runtimeParity.cells.openclaw.usage = {
+    first.runtimeParity.cells.bot.usage = {
       inputTokens: 10,
       outputTokens: 5,
       totalTokens: 85,
@@ -174,7 +174,7 @@ describe("qa runtime parity prompt-cache reporting", () => {
       cacheWrite: 10,
     };
     const report = buildQaRuntimeParityReport({ summary });
-    expect(report.usage.openclaw).toMatchObject({
+    expect(report.usage.bot).toMatchObject({
       inputTokens: 20,
       outputTokens: 10,
       totalTokens: 100,
@@ -188,7 +188,7 @@ describe("qa runtime parity prompt-cache reporting", () => {
 
   it("distinguishes a measured zero cache hit from missing cache telemetry", () => {
     const report = buildQaRuntimeParityReport({ summary: makeMeasuredRuntimeParitySummary() });
-    expect(report.usage.openclaw).toMatchObject({
+    expect(report.usage.bot).toMatchObject({
       inputTokens: 20,
       grossInputTokens: 20,
       uncachedInputTokens: 20,
@@ -197,7 +197,7 @@ describe("qa runtime parity prompt-cache reporting", () => {
       cacheHitPercent: 0,
     });
     expect(renderQaRuntimeParityMarkdownReport(report)).toContain(
-      "| openclaw | 20 | 20 | 0 | 0 | 10 | 30 | 0.0% |",
+      "| bot | 20 | 20 | 0 | 0 | 10 | 30 | 0.0% |",
     );
   });
 
@@ -205,7 +205,7 @@ describe("qa runtime parity prompt-cache reporting", () => {
     const summary = makeMeasuredRuntimeParitySummary();
     for (const scenario of summary.scenarios) {
       if (scenario.runtimeParity) {
-        scenario.runtimeParity.cells.openclaw.usage = {
+        scenario.runtimeParity.cells.bot.usage = {
           inputTokens: 0,
           outputTokens: 0,
           totalTokens: 0,
@@ -215,13 +215,13 @@ describe("qa runtime parity prompt-cache reporting", () => {
       }
     }
     const report = buildQaRuntimeParityReport({ summary });
-    expect(report.usage.openclaw).toMatchObject({
+    expect(report.usage.bot).toMatchObject({
       grossInputTokens: 0,
       cachedInputTokens: 0,
       cacheHitPercent: null,
     });
     expect(renderQaRuntimeParityMarkdownReport(report)).toContain(
-      "| openclaw | 0 | 0 | 0 | 0 | 0 | 0 | N/A |",
+      "| bot | 0 | 0 | 0 | 0 | 0 | 0 | N/A |",
     );
   });
 });

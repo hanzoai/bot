@@ -1,4 +1,4 @@
-import type { ModelCatalog } from "@openclaw/model-catalog-core/model-catalog-types";
+import type { ModelCatalog } from "@hanzo/bot-model-catalog-core/model-catalog-types";
 import type { ChannelConfigRuntimeSchema } from "../channels/plugins/types.config.js";
 import type { ConfigUiPresentation } from "../shared/config-ui-hints-types.js";
 import type { JsonSchemaObject } from "../shared/json-schema.types.js";
@@ -17,7 +17,7 @@ export type PluginConfigUiHint = {
 };
 
 /** Top-level plugin manifest format. */
-export type PluginFormat = "openclaw" | "bundle";
+export type PluginFormat = "bot" | "bundle";
 
 /** Supported external bundle manifest formats. */
 export type PluginBundleFormat = "codex" | "claude" | "cursor";
@@ -227,7 +227,7 @@ export type PluginManifestSetup = {
 };
 
 export type PluginManifestQaRunner = {
-  /** Subcommand mounted beneath `openclaw qa`, for example `matrix`. */
+  /** Subcommand mounted beneath `bot qa`, for example `matrix`. */
   commandName: string;
   /** Optional user-facing help text for fallback host stubs. */
   description?: string;

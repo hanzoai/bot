@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempDir } from "openclaw/plugin-sdk/test-env";
+import { withTempDir } from "bot/plugin-sdk/test-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   replaceArtifactMappings: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/memory-core-host-engine-qmd", () => ({
+vi.mock("bot/plugin-sdk/memory-core-host-engine-qmd", () => ({
   buildSessionEntry: mocks.buildSessionEntry,
   isSessionArchiveArtifactName: () => false,
   listSessionTranscriptCorpusEntriesForAgent: mocks.corpusEntries,

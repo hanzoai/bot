@@ -5,8 +5,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MsgContext } from "../auto-reply/templating.js";
-import type { OpenClawConfig } from "../config/types.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import type { BotConfig } from "../config/types.js";
+import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { CLI_OUTPUT_MAX_BUFFER } from "./defaults.constants.js";
 import { createSafeAudioFixtureBuffer } from "./runner.test-utils.js";
@@ -40,7 +40,7 @@ const mockedRunFfmpeg = runFfmpegMock;
 const mockedConvertHeicToJpeg = convertHeicToJpegMock;
 const mockedRunExec = runExecMock;
 
-const TEMP_MEDIA_PREFIX = "openclaw-media-";
+const TEMP_MEDIA_PREFIX = "bot-media-";
 const SHA256_HEX_PATTERN = /^[0-9a-f]{64}$/;
 let suiteTempMediaRootDir = "";
 let tempMediaDirCounter = 0;
@@ -64,7 +64,7 @@ async function getSharedTempMediaCacheDir() {
   return sharedTempMediaCacheDir;
 }
 
-function createGroqAudioConfig(): OpenClawConfig {
+function createGroqAudioConfig(): BotConfig {
   return {
     tools: {
       media: {
@@ -143,7 +143,7 @@ function expectCliRunOptions(options: unknown) {
   });
 }
 
-function createMediaDisabledConfig(): OpenClawConfig {
+function createMediaDisabledConfig(): BotConfig {
   return {
     tools: {
       media: {
@@ -155,7 +155,7 @@ function createMediaDisabledConfig(): OpenClawConfig {
   };
 }
 
-function createMediaDisabledConfigWithAllowedMimes(allowedMimes: string[]): OpenClawConfig {
+function createMediaDisabledConfigWithAllowedMimes(allowedMimes: string[]): BotConfig {
   return {
     ...createMediaDisabledConfig(),
     gateway: {
@@ -208,8 +208,8 @@ async function withMediaAutoDetectEnv<T>(
       GROQ_API_KEY: undefined,
       DEEPGRAM_API_KEY: undefined,
       GEMINI_API_KEY: undefined,
-      OPENCLAW_ANTIGRAVITY_CLI: undefined,
-      OPENCLAW_AGENT_DIR: undefined,
+      BOT_ANTIGRAVITY_CLI: undefined,
+      BOT_AGENT_DIR: undefined,
       ...env,
     },
     run,
@@ -234,14 +234,14 @@ async function createAudioCtx(params?: {
 
 async function setupAudioAutoDetectCase(stdout?: string): Promise<{
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }> {
   const ctx = await createAudioCtx({
     fileName: "sample.wav",
     mediaType: "audio/wav",
     content: createSafeAudioFixtureBuffer(2048),
   });
-  const cfg: OpenClawConfig = { tools: { media: { audio: {} } } };
+  const cfg: BotConfig = { tools: { media: { audio: {} } } };
   if (stdout !== undefined) {
     mockedRunExec.mockResolvedValueOnce({
       stdout,
@@ -270,7 +270,7 @@ async function applyWithDisabledMedia(params: {
   body: string;
   mediaPath: string;
   mediaType?: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }) {
   const ctx: MsgContext = {
     Body: params.body,
@@ -358,7 +358,7 @@ describe("applyMediaUnderstanding", () => {
     ({ applyMediaUnderstanding } = await import("./apply.js"));
     ({ clearMediaUnderstandingBinaryCacheForTests } = await import("./runner.test-support.js"));
 
-    const baseDir = resolvePreferredOpenClawTmpDir();
+    const baseDir = resolvePreferredBotTmpDir();
     await fs.mkdir(baseDir, { recursive: true });
     suiteTempMediaRootDir = await fs.mkdtemp(path.join(baseDir, TEMP_MEDIA_PREFIX));
   });
@@ -469,7 +469,7 @@ describe("applyMediaUnderstanding", () => {
       media: [{ url: "https://example.com/note.ogg", contentType: "audio/ogg" }],
       ChatType: "direct",
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [{ provider: "groq", capabilities: ["audio"] }],
@@ -508,7 +508,7 @@ describe("applyMediaUnderstanding", () => {
     });
     ctx.Surface = "whatsapp";
 
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [{ provider: "groq", capabilities: ["audio"] }],
@@ -548,7 +548,7 @@ describe("applyMediaUnderstanding", () => {
       ChatType: "dm",
     };
     const transcribeAudio = vi.fn(async () => ({ text: "should-not-run" }));
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [{ provider: "groq", capabilities: ["audio"] }],
@@ -579,7 +579,7 @@ describe("applyMediaUnderstanding", () => {
         kind: "audio.transcription",
         attachmentIndex: 0,
         text: "[Voice note could not be transcribed because the audio attachment was too small]",
-        provider: "openclaw",
+        provider: "bot",
         model: "synthetic-empty-audio",
       },
     ]);
@@ -598,7 +598,7 @@ describe("applyMediaUnderstanding", () => {
       content: Buffer.alloc(100),
     });
     const transcribeAudio = vi.fn(async () => ({ text: "should-not-run" }));
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [{ provider: "groq", capabilities: ["audio"] }],
@@ -625,7 +625,7 @@ describe("applyMediaUnderstanding", () => {
         kind: "audio.transcription",
         attachmentIndex: 0,
         text: "[Voice note could not be transcribed because the audio attachment was too small]",
-        provider: "openclaw",
+        provider: "bot",
         model: "synthetic-empty-audio",
       },
     ]);
@@ -644,7 +644,7 @@ describe("applyMediaUnderstanding", () => {
       content: Buffer.from([0, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
     });
     const transcribeAudio = vi.fn(async () => ({ text: "should-not-run" }));
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [{ provider: "groq", capabilities: ["audio"] }],
@@ -669,7 +669,7 @@ describe("applyMediaUnderstanding", () => {
 
   it("falls back to CLI model when provider fails", async () => {
     const ctx = await createAudioCtx();
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [
@@ -713,7 +713,7 @@ describe("applyMediaUnderstanding", () => {
 
   it("reads parakeet-mlx transcript from output-dir txt file", async () => {
     const ctx = await createAudioCtx({ fileName: "sample.wav", mediaType: "audio/wav" });
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [
@@ -752,7 +752,7 @@ describe("applyMediaUnderstanding", () => {
 
   it("falls back to stdout for parakeet-mlx when output format is not txt", async () => {
     const ctx = await createAudioCtx({ fileName: "sample.wav", mediaType: "audio/wav" });
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [
@@ -914,7 +914,7 @@ describe("applyMediaUnderstanding", () => {
       mediaType: "audio/ogg",
       content: createSafeAudioFixtureBuffer(2048),
     });
-    const cfg: OpenClawConfig = { tools: { media: { audio: {} } } };
+    const cfg: BotConfig = { tools: { media: { audio: {} } } };
 
     mockedRunFfmpeg.mockImplementationOnce(async (args: string[]) => {
       const wavPath = args.at(-1);
@@ -975,7 +975,7 @@ describe("applyMediaUnderstanding", () => {
       mediaType: "audio/wav",
       content: createSafeAudioFixtureBuffer(2048),
     });
-    const cfg: OpenClawConfig = { tools: { media: { audio: {} } } };
+    const cfg: BotConfig = { tools: { media: { audio: {} } } };
     mockedResolveApiKey.mockResolvedValue({
       source: "none",
       mode: "api-key",
@@ -984,7 +984,7 @@ describe("applyMediaUnderstanding", () => {
     await withMediaAutoDetectEnv(
       {
         PATH: emptyBinDir,
-        OPENCLAW_AGENT_DIR: isolatedAgentDir,
+        BOT_AGENT_DIR: isolatedAgentDir,
       },
       async () => {
         const result = await applyMediaUnderstanding({ ctx, cfg });
@@ -1007,7 +1007,7 @@ describe("applyMediaUnderstanding", () => {
       mediaType: "audio/wav",
       content: createSafeAudioFixtureBuffer(2048),
     });
-    const cfg: OpenClawConfig = { tools: { media: { audio: {} } } };
+    const cfg: BotConfig = { tools: { media: { audio: {} } } };
     mockedResolveApiKey.mockResolvedValue({
       source: "none",
       mode: "api-key",
@@ -1016,7 +1016,7 @@ describe("applyMediaUnderstanding", () => {
     await withMediaAutoDetectEnv(
       {
         PATH: binDir,
-        OPENCLAW_AGENT_DIR: isolatedAgentDir,
+        BOT_AGENT_DIR: isolatedAgentDir,
       },
       async () => {
         const result = await applyMediaUnderstanding({ ctx, cfg });
@@ -1041,7 +1041,7 @@ describe("applyMediaUnderstanding", () => {
       Body: "",
       media: [{ path: imagePath, contentType: "image/jpeg" }],
     };
-    const cfg: OpenClawConfig = { tools: { media: { image: {} } } };
+    const cfg: BotConfig = { tools: { media: { image: {} } } };
     mockedResolveApiKey.mockResolvedValue({
       source: "none",
       mode: "api-key",
@@ -1064,7 +1064,7 @@ describe("applyMediaUnderstanding", () => {
     const [_probeCommand, _probeArgs, probeOptions] = getRunExecCall(0);
     expect(probeOptions).toEqual({
       timeoutMs: 3000,
-      cwd: expect.stringContaining("openclaw-antigravity-probe-"),
+      cwd: expect.stringContaining("bot-antigravity-probe-"),
     });
     const [command, args, options] = getRunExecCall(1);
     expect(command).toBe(path.join(binDir, "agy"));
@@ -1092,7 +1092,7 @@ describe("applyMediaUnderstanding", () => {
       Body: "show Dom",
       media: [{ path: imagePath, contentType: "image/jpeg" }],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [
@@ -1138,7 +1138,7 @@ describe("applyMediaUnderstanding", () => {
       Body: "",
       media: [{ path: imagePath, contentType: "image/jpeg" }],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [
@@ -1178,7 +1178,7 @@ describe("applyMediaUnderstanding", () => {
       Body: "",
       media: [{ path: relativeImagePath, contentType: "image/jpeg" }],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [
@@ -1198,7 +1198,7 @@ describe("applyMediaUnderstanding", () => {
     const result = await applyMediaUnderstanding({
       ctx,
       cfg,
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
       workspaceDir,
       providers: {
         openai: {
@@ -1212,7 +1212,7 @@ describe("applyMediaUnderstanding", () => {
     expect(result.appliedImage).toBe(true);
     expect(describeImage).toHaveBeenCalledWith(
       expect.objectContaining({
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         workspaceDir,
         fileName: "workspace.jpg",
         provider: "openai",
@@ -1231,7 +1231,7 @@ describe("applyMediaUnderstanding", () => {
       Body: "",
       media: [{ path: imagePath, contentType: "image/heic" }],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [
@@ -1251,7 +1251,7 @@ describe("applyMediaUnderstanding", () => {
     const result = await applyMediaUnderstanding({
       ctx,
       cfg,
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
       providers: {
         openai: {
           id: "openai",
@@ -1283,7 +1283,7 @@ describe("applyMediaUnderstanding", () => {
       Body: "",
       media: [{ path: audioPath, contentType: "audio/ogg" }],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           audio: {
@@ -1319,7 +1319,7 @@ describe("applyMediaUnderstanding", () => {
       Transcript: "preflight transcript",
       media: [{ path: audioPath, contentType: "audio/ogg", transcribed: true }],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [{ provider: "groq", capabilities: ["audio"] }],
@@ -1367,7 +1367,7 @@ describe("applyMediaUnderstanding", () => {
         { path: audioPathB, contentType: "audio/ogg" },
       ],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [{ provider: "groq", capabilities: ["audio"] }],
@@ -1413,7 +1413,7 @@ describe("applyMediaUnderstanding", () => {
         { path: tinyPath, contentType: "audio/ogg" },
       ],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [{ provider: "groq", capabilities: ["audio"] }],
@@ -1466,7 +1466,7 @@ describe("applyMediaUnderstanding", () => {
         { path: videoPath, contentType: "video/mp4" },
       ],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [
@@ -1535,7 +1535,7 @@ describe("applyMediaUnderstanding", () => {
         { path: filePath, contentType: "text/plain" },
       ],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [
@@ -1589,7 +1589,7 @@ describe("applyMediaUnderstanding", () => {
         { path: videoPath, contentType: "video/mp4" },
       ],
     };
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         media: {
           models: [

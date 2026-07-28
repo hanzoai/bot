@@ -327,7 +327,7 @@ function renderSkillsToolbar(
         ? html`
             <div class="plugins-field skills-toolbar__agent">
               <span>${t("usage.filters.agent")}</span>
-              <openclaw-agent-select
+              <bot-agent-select
                 class="agent-select--settings"
                 name="skills-agent"
                 .options=${agents.map((agent) => {
@@ -345,7 +345,7 @@ function renderSkillsToolbar(
                 .accessibleLabel=${t("usage.filters.agent")}
                 .disabled=${skillControlsLocked(props) || !props.connected || agents.length < 2}
                 .onSelect=${props.onAgentChange}
-              ></openclaw-agent-select>
+              ></bot-agent-select>
             </div>
           `
         : nothing}
@@ -486,9 +486,9 @@ function renderClawHubDetailDialog(props: SkillsProps) {
   const detailImageUrl = skillIconUrl ?? profileImageUrl;
 
   return html`
-    <openclaw-modal-dialog
+    <bot-modal-dialog
       label=${detail?.skill?.displayName ?? props.clawhubDetailSlug ?? t("skillsPage.notFound")}
-      style="--openclaw-modal-width: min(1040px, calc(100vw - 32px));"
+      style="--bot-modal-width: min(1040px, calc(100vw - 32px));"
       @modal-cancel=${props.onClawHubDetailClose}
     >
       <div class="md-preview-dialog__panel">
@@ -563,7 +563,7 @@ function renderClawHubDetailDialog(props: SkillsProps) {
                 : html`<div class="muted">${t("skillsPage.notFound")}</div>`}
         </div>
       </div>
-    </openclaw-modal-dialog>
+    </bot-modal-dialog>
   `;
 }
 
@@ -612,7 +612,7 @@ function renderSkillDetail(skill: SkillStatusEntry, props: SkillsProps) {
   const installOption = skill.install.find((option) =>
     option.bins.some((bin) => missingBins.has(bin)),
   );
-  const showBundledBadge = Boolean(skill.bundled && skill.source !== "openclaw-bundled");
+  const showBundledBadge = Boolean(skill.bundled && skill.source !== "bot-bundled");
   const missing = computeSkillMissing(skill);
   const reasons = computeSkillReasons(skill);
   const verdict = verdictForSkill(skill, props.clawhubVerdicts);
@@ -620,9 +620,9 @@ function renderSkillDetail(skill: SkillStatusEntry, props: SkillsProps) {
     props.detailTab === "card" && skill.skillCard?.present ? "card" : "overview";
 
   return html`
-    <openclaw-modal-dialog
+    <bot-modal-dialog
       label=${skill.name}
-      style="--openclaw-modal-width: min(1040px, calc(100vw - 32px));"
+      style="--bot-modal-width: min(1040px, calc(100vw - 32px));"
       @modal-cancel=${props.onDetailClose}
     >
       <div class="md-preview-dialog__panel">
@@ -778,7 +778,7 @@ function renderSkillDetail(skill: SkillStatusEntry, props: SkillsProps) {
           </div>
         </div>
       </div>
-    </openclaw-modal-dialog>
+    </bot-modal-dialog>
   `;
 }
 

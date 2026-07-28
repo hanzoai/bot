@@ -14,7 +14,7 @@ import type {
   ChannelThreadingToolContext,
 } from "../../channels/plugins/types.public.js";
 import { appendAssistantMessageToSessionTranscript } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   normalizeMessagePresentation,
   renderMessagePresentationFallbackText,
@@ -49,7 +49,7 @@ type OutboundGatewayContext = {
 
 /** Shared execution context for message-tool send and poll actions. */
 type OutboundSendContext = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: ChannelId;
   params: Record<string, unknown>;
   /** Active agent id for per-agent outbound media root scoping. */

@@ -2,14 +2,14 @@
 import type {
   ChannelDoctorConfigMutation,
   ChannelDoctorLegacyConfigRule,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   asObjectRecord,
   defineChannelAliasMigration,
   hasLegacyAccountStreamingAliases,
   stripRetiredChannelKeys,
-} from "openclaw/plugin-sdk/runtime-doctor";
+} from "bot/plugin-sdk/runtime-doctor";
 import { normalizeCompatibilityConfig as normalizeAckReactionConfig } from "./doctor.js";
 
 // WhatsApp's nested streaming schema is delivery-only ({chunkMode, block});
@@ -31,17 +31,17 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "whatsapp", "exposeErrorText"],
     message:
-      'channels.whatsapp.exposeErrorText is retired and ignored. Run "openclaw doctor --fix".',
+      'channels.whatsapp.exposeErrorText is retired and ignored. Run "bot doctor --fix".',
   },
   {
     path: ["channels", "whatsapp", "accounts"],
     message:
-      'channels.whatsapp.accounts.<id>.exposeErrorText is retired and ignored. Run "openclaw doctor --fix".',
+      'channels.whatsapp.accounts.<id>.exposeErrorText is retired and ignored. Run "bot doctor --fix".',
     match: (value) => hasLegacyAccountStreamingAliases(value, hasExposeErrorText),
   },
 ];
 
-function removeExposeErrorText(cfg: OpenClawConfig, changes: string[]): OpenClawConfig {
+function removeExposeErrorText(cfg: BotConfig, changes: string[]): BotConfig {
   return stripRetiredChannelKeys({
     cfg,
     channelId: "whatsapp",
@@ -54,7 +54,7 @@ function removeExposeErrorText(cfg: OpenClawConfig, changes: string[]): OpenClaw
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): ChannelDoctorConfigMutation {
   const ackReaction = normalizeAckReactionConfig({ cfg });
   const retiredConfig = removeExposeErrorText(ackReaction.config, ackReaction.changes);

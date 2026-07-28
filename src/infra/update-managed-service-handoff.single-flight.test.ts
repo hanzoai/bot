@@ -23,7 +23,7 @@ function createSpawnMock() {
 }
 
 function signalHandoffReady(child: ReturnType<typeof createSpawnMock>): void {
-  child.stdout.write("OPENCLAW_UPDATE_HANDOFF_READY\n");
+  child.stdout.write("BOT_UPDATE_HANDOFF_READY\n");
 }
 
 vi.mock("node:child_process", async () => {
@@ -55,28 +55,28 @@ describe("managed service update handoff single-flight", () => {
     const { startManagedServiceUpdateHandoff } =
       await import("./update-managed-service-handoff.js");
     const first = startManagedServiceUpdateHandoff({
-      root: "/tmp/openclaw",
+      root: "/tmp/bot",
       timeoutMs: 1_800_000,
       restartDrainTimeoutMs: 300_000,
       restartDelayMs: 500,
       parentPid: 12345,
       execPath: "/usr/local/bin/node",
-      argv1: "/opt/openclaw/openclaw.mjs",
+      argv1: "/opt/hanzoai/bot.mjs",
       supervisor: "launchd",
-      env: { OPENCLAW_LAUNCHD_LABEL: "com.example.openclaw.test" },
+      env: { BOT_LAUNCHD_LABEL: "com.example.bot.test" },
       handoffId: "handoff-first",
       meta: { handoffId: "handoff-first" },
     });
     const second = startManagedServiceUpdateHandoff({
-      root: "/tmp/openclaw",
+      root: "/tmp/bot",
       timeoutMs: 1_800_000,
       restartDrainTimeoutMs: 300_000,
       restartDelayMs: 500,
       parentPid: 12345,
       execPath: "/usr/local/bin/node",
-      argv1: "/opt/openclaw/openclaw.mjs",
+      argv1: "/opt/hanzoai/bot.mjs",
       supervisor: "launchd",
-      env: { OPENCLAW_LAUNCHD_LABEL: "com.example.openclaw.test" },
+      env: { BOT_LAUNCHD_LABEL: "com.example.bot.test" },
       handoffId: "handoff-second",
       meta: { handoffId: "handoff-second" },
     });
@@ -98,11 +98,11 @@ describe("managed service update handoff single-flight", () => {
     const nextChild = createSpawnMock();
     spawnMock.mockReturnValueOnce(nextChild);
     const next = startManagedServiceUpdateHandoff({
-      root: "/tmp/openclaw",
+      root: "/tmp/bot",
       restartDrainTimeoutMs: 300_000,
       parentPid: 12345,
       execPath: "/usr/local/bin/node",
-      argv1: "/opt/openclaw/openclaw.mjs",
+      argv1: "/opt/hanzoai/bot.mjs",
       handoffId: "handoff-next",
       meta: { handoffId: "handoff-next" },
     });
@@ -121,11 +121,11 @@ describe("managed service update handoff single-flight", () => {
       await import("./update-managed-service-handoff.js");
 
     const resultPromise = startManagedServiceUpdateHandoff({
-      root: "/tmp/openclaw",
+      root: "/tmp/bot",
       restartDrainTimeoutMs: 300_000,
       parentPid: 12345,
       execPath: "/usr/local/bin/node",
-      argv1: "/opt/openclaw/openclaw.mjs",
+      argv1: "/opt/hanzoai/bot.mjs",
       meta: {},
     });
     await vi.waitFor(() => expect(spawnMock).toHaveBeenCalledTimes(1), FAST_WAIT_OPTS);

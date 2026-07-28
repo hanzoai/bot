@@ -3,10 +3,10 @@ import path from "node:path";
 import {
   DEFAULT_MEMORY_DEEP_DREAMING_MAX_PROMOTED_SNIPPET_TOKENS,
   formatMemoryDreamingDay,
-} from "openclaw/plugin-sdk/memory-core-host-status";
-import { appendMemoryHostEvent } from "openclaw/plugin-sdk/memory-host-events";
-import { replaceFileAtomic } from "openclaw/plugin-sdk/security-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/memory-core-host-status";
+import { appendMemoryHostEvent } from "bot/plugin-sdk/memory-host-events";
+import { replaceFileAtomic } from "bot/plugin-sdk/security-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { compactMemoryForBudget, DEFAULT_MEMORY_FILE_MAX_CHARS } from "./memory-budget.js";
 import { rehydratePromotionCandidate } from "./short-term-promotion-rehydrate.js";
 import { readStore, withShortTermLock, writeStore } from "./short-term-promotion-store.js";
@@ -26,7 +26,7 @@ import {
 } from "./short-term-promotion-utils.js";
 import { resolveMemoryCoreNowMs, resolveMemoryCoreTimestamp } from "./time.js";
 
-const PROMOTION_MARKER_PREFIX = "openclaw-memory-promotion:";
+const PROMOTION_MARKER_PREFIX = "bot-memory-promotion:";
 const PROMOTED_SNIPPET_CHARS_PER_TOKEN_ESTIMATE = 4;
 
 function buildPromotionSection(
@@ -160,7 +160,7 @@ function extractPromotionMarkers(memoryText: string): Set<string> {
   // Marker keys include source paths, so spaces are valid. Capture until the
   // comment close; otherwise a path like "memory/project alpha/..." is missed
   // and the same candidate can be appended again.
-  const matches = memoryText.matchAll(/<!--\s*openclaw-memory-promotion:([^\n]*?)\s*-->/gi);
+  const matches = memoryText.matchAll(/<!--\s*bot-memory-promotion:([^\n]*?)\s*-->/gi);
   for (const match of matches) {
     const key = match[1]?.trim();
     if (key) {

@@ -9,9 +9,9 @@ import type { ExecApprovalDecision, ExecApprovalRequestPayload } from "../infra/
 import type { PluginApprovalRequestPayload } from "../infra/plugin-approvals.js";
 import { MAX_TIMER_TIMEOUT_MS } from "../shared/number-coercion.js";
 import {
-  closeOpenClawStateDatabase,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabase,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
 import {
   ExecApprovalManager,
   InvalidApprovalIdError,
@@ -40,7 +40,7 @@ describe("ExecApprovalManager", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
-    closeOpenClawStateDatabase();
+    closeBotStateDatabase();
     for (const dir of tempDirs.splice(0)) {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -53,7 +53,7 @@ describe("ExecApprovalManager", () => {
       onLifecycle?: ExecApprovalManagerOptions<ExecApprovalRequestPayload>["onLifecycle"];
     } = {},
   ) {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-manager-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-approval-manager-"));
     tempDirs.push(dir);
     const databaseOptions = { path: path.join(dir, "state.sqlite") };
     return {
@@ -364,7 +364,7 @@ describe("ExecApprovalManager", () => {
   });
 
   it("passes the source agent when deriving a global-session stream audience", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-manager-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-approval-manager-"));
     tempDirs.push(dir);
     const databaseOptions = { path: path.join(dir, "state.sqlite") };
     const resolveAudienceSessionKeys = vi.fn((sessionKey: string, agentId?: string | null) => [
@@ -572,7 +572,7 @@ describe("ExecApprovalManager", () => {
     expect(durableJson).not.toContain("/hidden/cwd/value");
     expect(durableJson).not.toContain("hidden-env-hash");
 
-    const database = openOpenClawStateDatabase(databaseOptions);
+    const database = openBotStateDatabase(databaseOptions);
     const row = database.db
       .prepare("SELECT presentation_json FROM operator_approvals WHERE approval_id = ?")
       .get(record.id) as { presentation_json?: unknown } | undefined;
@@ -628,7 +628,7 @@ describe("ExecApprovalManager", () => {
   });
 
   it("rejects unrenderable persistent plugin requests before creating a row or waiter", () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-approval-manager-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-approval-manager-"));
     tempDirs.push(dir);
     const databaseOptions = { path: path.join(dir, "state.sqlite") };
     const manager = new ExecApprovalManager<PluginApprovalRequestPayload>({

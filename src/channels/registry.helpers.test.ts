@@ -1,6 +1,6 @@
 // Registry helper tests cover channel registry fixtures and lookup helpers.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import {
@@ -66,20 +66,20 @@ describe("channel registry helpers", () => {
     const line = formatChannelSelectionLine(telegram, formatTestLink);
     expect(line).not.toContain("Docs:");
     expect(line).toContain("/channels/telegram");
-    expect(line).toContain("https://openclaw.ai");
+    expect(line).toContain("https://bot.ai");
   });
 
   it("prefers the pinned channel registry when resolving registered plugin channels", () => {
-    const startupRegistry = createRegistryWithRegisteredChannel("openclaw-weixin", ["weixin"]);
+    const startupRegistry = createRegistryWithRegisteredChannel("bot-weixin", ["weixin"]);
     setActivePluginRegistry(startupRegistry);
     pinActivePluginChannelRegistry(startupRegistry);
 
     const replacementRegistry = createRegistryWithRegisteredChannel("qqbot", ["qq"]);
     setActivePluginRegistry(replacementRegistry);
 
-    expect(listRegisteredChannelPluginIds()).toEqual(["openclaw-weixin"]);
-    expect(normalizeAnyChannelId("weixin")).toBe("openclaw-weixin");
-    expect(getRegisteredChannelPluginMeta("OPENCLAW-WEIXIN")?.aliases).toEqual(["weixin"]);
+    expect(listRegisteredChannelPluginIds()).toEqual(["bot-weixin"]);
+    expect(normalizeAnyChannelId("weixin")).toBe("bot-weixin");
+    expect(getRegisteredChannelPluginMeta("BOT-WEIXIN")?.aliases).toEqual(["weixin"]);
   });
 
   it("falls back to the active registry when the pinned channel registry has no channels", () => {

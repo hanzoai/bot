@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { normalizeLowercaseStringOrEmpty } from "../../packages/normalization-core/src/string-coerce.js";
 import type { ResolvedConfiguredAcpBinding } from "../acp/persistent-bindings.types.js";
 import { buildChatChannelMetaById } from "../channels/chat-meta-shared.js";
@@ -24,13 +24,13 @@ import type {
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
 import type { ChannelMeta } from "../channels/plugins/types.public.js";
 import type { ReplyToMode } from "../config/types.base.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { buildOutboundBaseSessionKey } from "../infra/outbound/base-session-key.js";
 import type { OutboundDeliveryResult } from "../infra/outbound/deliver.js";
 import { normalizeOutboundThreadId } from "../infra/outbound/thread-id.js";
 import { resolveBundledPluginsDir } from "../plugins/bundled-dir.js";
 import type { PluginRuntime } from "../plugins/runtime/types.js";
-import type { OpenClawPluginApi } from "../plugins/types.js";
+import type { BotPluginApi } from "../plugins/types.js";
 import { resolveThreadSessionKeys } from "../routing/session-key.js";
 import {
   normalizeSessionKeyPreservingOpaquePeerIds,
@@ -43,12 +43,12 @@ export type {
   AgentHarness,
   AnyAgentTool,
   MediaUnderstandingProviderPlugin,
-  OpenClawPluginApi,
-  OpenClawPluginCommandDefinition,
-  OpenClawPluginConfigSchema,
-  OpenClawPluginDefinition,
-  OpenClawPluginService,
-  OpenClawPluginServiceContext,
+  BotPluginApi,
+  BotPluginCommandDefinition,
+  BotPluginConfigSchema,
+  BotPluginDefinition,
+  BotPluginService,
+  BotPluginServiceContext,
   PluginCommandContext,
   PluginCommandResult,
   PluginAgentEventEmitParams,
@@ -135,17 +135,17 @@ export type {
   UnifiedModelCatalogEntry,
   UnifiedModelCatalogKind,
   UnifiedModelCatalogSource,
-} from "@openclaw/model-catalog-core/model-catalog-types";
+} from "@hanzo/bot-model-catalog-core/model-catalog-types";
 export type { ProviderRuntimeModel } from "../plugins/provider-runtime-model.types.js";
 export type {
-  OpenClawPluginActiveModelContext,
-  OpenClawPluginToolContext,
-  OpenClawPluginToolFactory,
+  BotPluginActiveModelContext,
+  BotPluginToolContext,
+  BotPluginToolFactory,
 } from "../plugins/types.js";
 export type {
-  OpenClawPluginGatewayEventScope,
-  OpenClawPluginGatewayEvents,
-  OpenClawPluginSessionsChangedEvent,
+  BotPluginGatewayEventScope,
+  BotPluginGatewayEvents,
+  BotPluginSessionsChangedEvent,
 } from "../plugins/gateway-events.js";
 export type {
   MemoryPluginCapability,
@@ -161,7 +161,7 @@ export type {
   PluginHookReplyDispatchEvent,
   PluginHookReplyDispatchResult,
 } from "../plugins/types.js";
-export type { OpenClawConfig } from "../config/config.js";
+export type { BotConfig } from "../config/config.js";
 export type { OutboundIdentity } from "../infra/outbound/identity.js";
 export type { HistoryEntry } from "../auto-reply/reply/history.types.js";
 export type { ReplyPayload } from "./reply-payload.js";
@@ -287,7 +287,7 @@ export { resolveConfiguredAcpBindingRecord } from "../acp/persistent-bindings.re
 
 /** Ensure a configured ACP binding has live runtime state before channel delivery uses it. */
 export async function ensureConfiguredAcpBindingReady(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   configuredBinding: ResolvedConfiguredAcpBinding | null;
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const runtime = await import("../acp/persistent-bindings.lifecycle.js");
@@ -361,7 +361,7 @@ export function stripTargetKindPrefix(raw: string): string {
  * message adapters.
  */
 export function buildChannelOutboundSessionRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   channel: string;
   accountId?: string | null;
@@ -500,8 +500,8 @@ type DefineChannelPluginEntryOptions<TPlugin = ChannelPlugin> = {
   plugin: TPlugin;
   configSchema?: ChannelEntryConfigSchema<TPlugin> | (() => ChannelEntryConfigSchema<TPlugin>);
   setRuntime?: (runtime: PluginRuntime) => void;
-  registerCliMetadata?: (api: OpenClawPluginApi) => void;
-  registerFull?: (api: OpenClawPluginApi) => void;
+  registerCliMetadata?: (api: BotPluginApi) => void;
+  registerFull?: (api: BotPluginApi) => void;
 };
 
 type DefinedChannelPluginEntry<TPlugin> = {
@@ -509,7 +509,7 @@ type DefinedChannelPluginEntry<TPlugin> = {
   name: string;
   description: string;
   configSchema: ChannelEntryConfigSchema<TPlugin>;
-  register: (api: OpenClawPluginApi) => void;
+  register: (api: BotPluginApi) => void;
   channelPlugin: TPlugin;
   setChannelRuntime?: (runtime: PluginRuntime) => void;
 };
@@ -585,7 +585,7 @@ export function defineChannelPluginEntry<TPlugin>({
     name,
     description,
     configSchema: resolvedConfigSchema,
-    register(api: OpenClawPluginApi) {
+    register(api: BotPluginApi) {
       if (api.registrationMode === "cli-metadata") {
         registerCliMetadata?.(api);
         return;
@@ -670,7 +670,7 @@ type ChatChannelThreadingReplyModeOptions<TResolvedAccount> =
   | { topLevelReplyToMode: string }
   | {
       scopedAccountReplyToMode: {
-        resolveAccount: (cfg: OpenClawConfig, accountId?: string | null) => TResolvedAccount;
+        resolveAccount: (cfg: BotConfig, accountId?: string | null) => TResolvedAccount;
         resolveReplyToMode: (
           account: TResolvedAccount,
           chatType?: string | null,

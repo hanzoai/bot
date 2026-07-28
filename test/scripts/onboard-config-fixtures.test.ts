@@ -26,8 +26,8 @@ function readJson(file: string) {
 
 describe("onboard config fixture helpers", () => {
   it("writes reset fixtures consumed by the reset assertion", () => {
-    const root = makeTempDir(tempDirs, "openclaw-onboard-config-");
-    const configPath = path.join(root, "openclaw.json");
+    const root = makeTempDir(tempDirs, "bot-onboard-config-");
+    const configPath = path.join(root, "bot.json");
 
     const writeResult = runScript(WRITE_CONFIG_SCRIPT, ["reset", configPath]);
 
@@ -58,8 +58,8 @@ describe("onboard config fixture helpers", () => {
   });
 
   it("writes skills fixtures consumed by the skills assertion", () => {
-    const root = makeTempDir(tempDirs, "openclaw-onboard-config-skills-");
-    const configPath = path.join(root, "openclaw.json");
+    const root = makeTempDir(tempDirs, "bot-onboard-config-skills-");
+    const configPath = path.join(root, "bot.json");
 
     const writeResult = runScript(WRITE_CONFIG_SCRIPT, ["skills", configPath]);
 
@@ -88,7 +88,7 @@ describe("onboard config fixture helpers", () => {
   });
 
   it("accepts local and remote onboard assertion fixtures", () => {
-    const root = makeTempDir(tempDirs, "openclaw-onboard-config-success-");
+    const root = makeTempDir(tempDirs, "bot-onboard-config-success-");
     const workspace = path.join(root, "workspace");
     const localConfigPath = path.join(root, "local.json");
     const remoteConfigPath = path.join(root, "remote.json");
@@ -143,7 +143,7 @@ describe("onboard config fixture helpers", () => {
   });
 
   it("accepts channel configuration assertions for scrubbed channel secrets", () => {
-    const root = makeTempDir(tempDirs, "openclaw-onboard-config-channels-");
+    const root = makeTempDir(tempDirs, "bot-onboard-config-channels-");
     const configPath = path.join(root, "channels.json");
     writeFileSync(
       configPath,
@@ -164,8 +164,8 @@ describe("onboard config fixture helpers", () => {
   });
 
   it("reports assertion mismatches with stable field labels", () => {
-    const root = makeTempDir(tempDirs, "openclaw-onboard-config-mismatch-");
-    const configPath = path.join(root, "openclaw.json");
+    const root = makeTempDir(tempDirs, "bot-onboard-config-mismatch-");
+    const configPath = path.join(root, "bot.json");
     writeFileSync(
       configPath,
       `${JSON.stringify(
@@ -194,8 +194,8 @@ describe("onboard config fixture helpers", () => {
   });
 
   it("rejects unknown writer and assertion scenarios", () => {
-    const root = makeTempDir(tempDirs, "openclaw-onboard-config-unknown-");
-    const configPath = path.join(root, "openclaw.json");
+    const root = makeTempDir(tempDirs, "bot-onboard-config-unknown-");
+    const configPath = path.join(root, "bot.json");
     writeFileSync(configPath, "{}\n", "utf8");
 
     const writeResult = runScript(WRITE_CONFIG_SCRIPT, ["unknown", configPath]);

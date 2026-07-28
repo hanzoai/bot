@@ -1,4 +1,4 @@
-import { MeetingPlatformAdapter } from "openclaw/plugin-sdk/meeting-runtime";
+import { MeetingPlatformAdapter } from "bot/plugin-sdk/meeting-runtime";
 import { zoomMeetingStatusAccessSource } from "./zoom-meetings-status-access-source.js";
 import { zoomMeetingStatusPageSource } from "./zoom-meetings-status-page-source.js";
 
@@ -132,7 +132,7 @@ export function zoomMeetingStatusPreludeSource(params: MeetingStatusPreludeParam
   }
   if (canMutateSession && !inCall && !identityAwaitingRerender) retireOwnedAudioBridges();
   if (canMutateSession && (identityVerifiedBeforeCall || identityPreservedInCall)) {
-    window.__openclawZoomMeeting = {
+    window.__botZoomMeeting = {
       ...(priorMeeting?.identity === expectedIdentity && !meetingOwnerConflict ? priorMeeting : {}),
       identity: expectedIdentity,
       sessionId: sessionId || priorMeeting?.sessionId,
@@ -151,7 +151,7 @@ export function zoomMeetingStatusPreludeSource(params: MeetingStatusPreludeParam
       (priorMeeting.awaitingAdmission !== true && markerAgeMs >= identityRetentionMs)
     )
   ) {
-    delete window.__openclawZoomMeeting;
+    delete window.__botZoomMeeting;
   }
   const microphone = first(selectors.microphone) || findTextButton(/mute|unmute|microphone/i);
   let microphoneState = identityVerified ? (toggleState(microphone, "microphone") || (devicesDisabled ? "off" : undefined)) : undefined;
@@ -232,7 +232,7 @@ export function zoomMeetingStatusPreludeSource(params: MeetingStatusPreludeParam
   let audioInputDeviceLabel;
   let audioInputRouteError;
   const ensureVirtualAudioInput = async () => {
-    const preparedInput = window.__openclawZoomMeeting;
+    const preparedInput = window.__botZoomMeeting;
     if (preparedInput?.identity === expectedIdentity && (!sessionId || preparedInput?.sessionId === sessionId)) {
       delete preparedInput.audioInputDeviceId;
     }
@@ -365,11 +365,11 @@ export function zoomMeetingStatusPreludeSource(params: MeetingStatusPreludeParam
   if (committedOwnerConflict && !canMutateSession) {
     manualAction = manualActionFor("zoom-session-conflict", "This Zoom tab is owned by another active meeting session.");
   } else if (!inCall && loginRequired) {
-    manualAction = manualActionFor("zoom-login-required", tenantLoginRequired ? "This Zoom tenant requires sign-in or email verification. Complete it in the OpenClaw browser profile, then retry." : "Sign in to Zoom in the OpenClaw browser profile, then retry the meeting join.");
+    manualAction = manualActionFor("zoom-login-required", tenantLoginRequired ? "This Zoom tenant requires sign-in or email verification. Complete it in the Bot browser profile, then retry." : "Sign in to Zoom in the Bot browser profile, then retry the meeting join.");
   } else if (!inCall && lobbyWaiting) {
-    manualAction = manualActionFor("zoom-admission-required", "Admit the OpenClaw guest from the Zoom lobby, then retry speech.");
+    manualAction = manualActionFor("zoom-admission-required", "Admit the Bot guest from the Zoom lobby, then retry speech.");
   } else if (!inCall && permissionRequired) {
-    manualAction = manualActionFor("zoom-permission-required", allowMicrophone ? "Allow microphone permission for Zoom in the OpenClaw browser profile, then retry." : "Dismiss the Zoom device-permission prompt or continue without devices, then retry.");
+    manualAction = manualActionFor("zoom-permission-required", allowMicrophone ? "Allow microphone permission for Zoom in the Bot browser profile, then retry." : "Dismiss the Zoom device-permission prompt or continue without devices, then retry.");
   } else if (controlManualAction) {
     manualAction = controlManualAction;
   }
@@ -382,10 +382,10 @@ export function zoomMeetingStatusPreludeSource(params: MeetingStatusPreludeParam
     platform: {
       displayName: "Zoom",
       globals: {
-        audioOutputs: "__openclawZoomAudioOutputs",
-        captionArchive: "__openclawZoomCaptionArchive",
-        captions: "__openclawZoomCaptions",
-        meeting: "__openclawZoomMeeting",
+        audioOutputs: "__botZoomAudioOutputs",
+        captionArchive: "__botZoomCaptionArchive",
+        captions: "__botZoomCaptions",
+        meeting: "__botZoomMeeting",
       },
       manualActionReasonPrefix: "zoom",
     },

@@ -9,7 +9,7 @@ import { saveAuthProfileStore } from "../agents/auth-profiles/store.js";
 import { clearConfigCache, clearRuntimeConfigSnapshot } from "../config/config.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
 import { clearSecretsRuntimeSnapshot } from "./runtime.js";
 import { asConfig } from "./runtime.test-support.js";
 
@@ -95,7 +95,7 @@ describe("secrets runtime fast path", () => {
     clearSecretsRuntimeSnapshot();
     clearRuntimeConfigSnapshot();
     clearConfigCache();
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
     vi.resetModules();
   });
 
@@ -113,7 +113,7 @@ describe("secrets runtime fast path", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/openclaw-agent-main"],
+      agentDirs: ["/tmp/bot-agent-main"],
       loadAuthStore: emptyAuthStore,
     });
 
@@ -121,7 +121,7 @@ describe("secrets runtime fast path", () => {
     expect(requireGatewayAuth(snapshot).token).toBe("plain-startup-token");
     expect(snapshot.authStores).toEqual([
       {
-        agentDir: "/tmp/openclaw-agent-main",
+        agentDir: "/tmp/bot-agent-main",
         store: emptyAuthStore(),
       },
     ]);
@@ -149,7 +149,7 @@ describe("secrets runtime fast path", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/openclaw-agent-main"],
+      agentDirs: ["/tmp/bot-agent-main"],
       loadAuthStore: emptyAuthStore,
     });
 
@@ -173,7 +173,7 @@ describe("secrets runtime fast path", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/openclaw-agent-main"],
+      agentDirs: ["/tmp/bot-agent-main"],
       loadAuthStore: emptyAuthStore,
     });
 
@@ -186,7 +186,7 @@ describe("secrets runtime fast path", () => {
     await prepareSecretsRuntimeSnapshot({
       config: asConfig(explicitMainRoster()),
       env: {},
-      agentDirs: ["/tmp/openclaw-agent-main"],
+      agentDirs: ["/tmp/bot-agent-main"],
       loadAuthStore: () => ({
         version: 1,
         profiles: {
@@ -217,7 +217,7 @@ describe("secrets runtime fast path", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/openclaw-agent-main"],
+      agentDirs: ["/tmp/bot-agent-main"],
       loadAuthStore: emptyAuthStore,
     });
 
@@ -226,10 +226,10 @@ describe("secrets runtime fast path", () => {
 
   it("skips the startup-only fast path when the inherited main auth store exists", async () => {
     const { prepareSecretsRuntimeFastPathSnapshot } = await import("./runtime-fast-path.js");
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-runtime-fast-path-"));
+    const root = mkdtempSync(path.join(tmpdir(), "bot-runtime-fast-path-"));
     const env: NodeJS.ProcessEnv = {
       HOME: root,
-      OPENCLAW_STATE_DIR: root,
+      BOT_STATE_DIR: root,
     };
     const mainAgentDir = path.join(root, "agents", "main", "agent");
     const agentDir = path.join(root, "custom-agent");
@@ -255,8 +255,8 @@ describe("secrets runtime fast path", () => {
   it("detects retired OAuth before entering the secrets fast path", async () => {
     const { assertAuthProfileMigrationReady, hasLegacyAuthProfileSourcesForStartup } =
       await import("../agents/auth-profiles/legacy-source-diagnostic.js");
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-runtime-legacy-preflight-"));
-    const env: NodeJS.ProcessEnv = { HOME: root, OPENCLAW_STATE_DIR: root };
+    const root = mkdtempSync(path.join(tmpdir(), "bot-runtime-legacy-preflight-"));
+    const env: NodeJS.ProcessEnv = { HOME: root, BOT_STATE_DIR: root };
     const credentialsPath = resolveLegacyOAuthPath(env);
     mkdirSync(path.dirname(credentialsPath), { recursive: true });
     writeFileSync(credentialsPath, '{"openai":{"access":"fake"}}\n');
@@ -281,10 +281,10 @@ describe("secrets runtime fast path", () => {
     const { activateSecretsRuntimeSnapshotState, getActiveSecretsRuntimeSnapshot } =
       await import("./runtime-state.js");
     const { refreshActiveProviderAuthRuntimeSnapshot } = await import("./runtime.js");
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-runtime-fast-path-refresh-"));
+    const root = mkdtempSync(path.join(tmpdir(), "bot-runtime-fast-path-refresh-"));
     const env: NodeJS.ProcessEnv = {
       HOME: root,
-      OPENCLAW_STATE_DIR: root,
+      BOT_STATE_DIR: root,
     };
     const agentDir = path.join(root, "custom-agent");
     mkdirSync(agentDir, { recursive: true });
@@ -327,7 +327,7 @@ describe("secrets runtime fast path", () => {
       prepareSecretsRuntimeSnapshot,
       refreshActiveProviderAuthRuntimeSnapshot,
     } = await import("./runtime.js");
-    const agentDir = "/tmp/openclaw-agent-refresh-cas";
+    const agentDir = "/tmp/bot-agent-refresh-cas";
     let publishNewerSnapshot = false;
     let newerSnapshot: Awaited<ReturnType<typeof prepareSecretsRuntimeSnapshot>> | null = null;
     const loadInitialAuthStore = () => {
@@ -369,7 +369,7 @@ describe("secrets runtime fast path", () => {
       prepareSecretsRuntimeSnapshot,
       refreshActiveProviderAuthRuntimeSnapshot,
     } = await import("./runtime.js");
-    const agentDir = "/tmp/openclaw-agent-auth-store-refresh-cas";
+    const agentDir = "/tmp/bot-agent-auth-store-refresh-cas";
     const oldStore: AuthProfileStore = {
       version: 1,
       profiles: {
@@ -419,7 +419,7 @@ describe("secrets runtime fast path", () => {
       getActiveSecretsRuntimeSnapshot,
       prepareSecretsRuntimeSnapshot,
     } = await import("./runtime.js");
-    const agentDir = "/tmp/openclaw-agent-preflight-cas";
+    const agentDir = "/tmp/bot-agent-preflight-cas";
     const authStore = (key: string): AuthProfileStore => ({
       version: 1,
       profiles: {
@@ -466,10 +466,10 @@ describe("secrets runtime fast path", () => {
       await import("../agents/auth-profiles/store.js");
     const { prepareSecretsRuntimeFastPathSnapshot } = await import("./runtime-fast-path.js");
     const { activateSecretsRuntimeSnapshotState } = await import("./runtime-state.js");
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-runtime-fast-path-empty-store-"));
+    const root = mkdtempSync(path.join(tmpdir(), "bot-runtime-fast-path-empty-store-"));
     const env: NodeJS.ProcessEnv = {
       HOME: root,
-      OPENCLAW_STATE_DIR: root,
+      BOT_STATE_DIR: root,
     };
     const agentDir = path.join(root, "custom-agent");
     mkdirSync(agentDir, { recursive: true });

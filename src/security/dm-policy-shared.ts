@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 // Shares direct-message policy normalization for channel audits.
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import { resolveChannelIngressEffectiveAllowFromLists } from "../channels/message-access/effective-allow-from.js";
 import { readChannelIngressStoreAllowFromForDmPolicy } from "../channels/message-access/store-allow-from.js";
 import type { ChannelId } from "../channels/plugins/channel-id.types.js";
@@ -35,7 +35,7 @@ export function resolvePinnedMainDmOwnerFromAllowlist(params: {
     : null;
 }
 
-/** @deprecated Use `resolveChannelMessageIngress` from `openclaw/plugin-sdk/channel-ingress-runtime`. */
+/** @deprecated Use `resolveChannelMessageIngress` from `bot/plugin-sdk/channel-ingress-runtime`. */
 export function resolveEffectiveAllowFromLists(params: {
   allowFrom?: Array<string | number> | null;
   groupAllowFrom?: Array<string | number> | null;
@@ -83,7 +83,7 @@ const dmGroupAccess = (
  * Resolve sender access for `dmPolicy=open`, where `*` means fully open and a configured
  * allowlist still restricts the accepted sender set.
  *
- * @deprecated Use `resolveChannelMessageIngress` from `openclaw/plugin-sdk/channel-ingress-runtime`.
+ * @deprecated Use `resolveChannelMessageIngress` from `bot/plugin-sdk/channel-ingress-runtime`.
  */
 export function resolveOpenDmAllowlistAccess(params: {
   effectiveAllowFrom: Array<string | number>;
@@ -142,7 +142,7 @@ const GROUP_ACCESS_RESULT: Record<
   ),
 };
 
-/** @deprecated Use `resolveChannelMessageIngress` or `readChannelIngressStoreAllowFromForDmPolicy` from `openclaw/plugin-sdk/channel-ingress-runtime`. */
+/** @deprecated Use `resolveChannelMessageIngress` or `readChannelIngressStoreAllowFromForDmPolicy` from `bot/plugin-sdk/channel-ingress-runtime`. */
 export async function readStoreAllowFromForDmPolicy(params: {
   provider: ChannelId;
   accountId: string;
@@ -228,7 +228,7 @@ function resolveLegacyDmGroupAccessDecision(params: {
 /**
  * Resolve legacy DM/group sender admission and return the effective allowlists used.
  *
- * @deprecated Use `resolveChannelMessageIngress` from `openclaw/plugin-sdk/channel-ingress-runtime`.
+ * @deprecated Use `resolveChannelMessageIngress` from `bot/plugin-sdk/channel-ingress-runtime`.
  */
 export function resolveDmGroupAccessWithLists(params: DmGroupAccessInputParams): {
   decision: DmGroupAccessDecision;

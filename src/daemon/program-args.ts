@@ -18,7 +18,7 @@ type GatewayProgramArgs = {
 
 type GatewayRuntimePreference = "auto" | "node";
 
-export const OPENCLAW_WRAPPER_ENV_KEY = "OPENCLAW_WRAPPER";
+export const BOT_WRAPPER_ENV_KEY = "BOT_WRAPPER";
 const NODE_BINARY_LOOKUP_TIMEOUT_MS = 5_000;
 
 async function resolveCliEntrypointPathForService(): Promise<string> {
@@ -49,7 +49,7 @@ async function resolveCliEntrypointPathForService(): Promise<string> {
     }
     // Prefer the original (possibly symlinked) path over the resolved realpath.
     // This keeps LaunchAgent/systemd paths stable across package version updates,
-    // since symlinks like node_modules/openclaw -> .pnpm/openclaw@X.Y.Z/...
+    // since symlinks like node_modules/bot -> .pnpm/bot@X.Y.Z/...
     // are automatically updated by pnpm, while the resolved path contains
     // version-specific directories that break after updates.
     const normalizedLooksLikeDist = isGatewayDistEntrypointPath(normalized);
@@ -135,7 +135,7 @@ function appendNodeModulesBinCandidates(
   if (parts[binIndex - 1] !== "node_modules") {
     return;
   }
-  // openclaw from node_modules/.bin points at the package root sibling.
+  // bot from node_modules/.bin points at the package root sibling.
   const binName = path.basename(inputPath);
   const nodeModulesDir = parts.slice(0, binIndex).join(path.sep);
   const packageRoot = path.join(nodeModulesDir, binName);
@@ -182,7 +182,7 @@ async function resolveBinaryPath(binary: string): Promise<string> {
   }
 }
 
-export async function resolveOpenClawWrapperPath(
+export async function resolveBotWrapperPath(
   inputPath: string | undefined,
 ): Promise<string | undefined> {
   const trimmed = inputPath?.trim();
@@ -201,7 +201,7 @@ export async function resolveOpenClawWrapperPath(
   } catch (error) {
     const detail = error instanceof Error ? ` (${error.message})` : "";
     throw new Error(
-      `${OPENCLAW_WRAPPER_ENV_KEY} must point to an executable file: ${resolved}${detail}`,
+      `${BOT_WRAPPER_ENV_KEY} must point to an executable file: ${resolved}${detail}`,
       { cause: error },
     );
   }
@@ -215,7 +215,7 @@ async function resolveCliProgramArguments(params: {
   nodePath?: string;
   wrapperPath?: string;
 }): Promise<GatewayProgramArgs> {
-  const wrapperPath = await resolveOpenClawWrapperPath(params.wrapperPath);
+  const wrapperPath = await resolveBotWrapperPath(params.wrapperPath);
   if (wrapperPath) {
     return { programArguments: [wrapperPath, ...params.args] };
   }

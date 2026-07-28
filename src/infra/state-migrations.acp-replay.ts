@@ -6,8 +6,8 @@ import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
 import { isDeepStrictEqual } from "node:util";
 import type { SessionUpdate } from "@agentclientprotocol/sdk";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
+import { runBotStateWriteTransaction } from "../state/bot-state-db.js";
 import { isRecord } from "../utils.js";
 import { withFileLock } from "./file-lock.js";
 import {
@@ -59,7 +59,7 @@ type LegacySourceIdentity = {
 };
 
 type AcpReplayMigrationDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  BotStateKyselyDatabase,
   "acp_replay_events" | "acp_replay_sessions"
 >;
 
@@ -332,7 +332,7 @@ export async function migrateLegacyAcpReplayLedger(params: {
             }
           }
 
-          runOpenClawStateWriteTransaction(
+          runBotStateWriteTransaction(
             ({ db }) => {
               const replayDb = getNodeSqliteKysely<AcpReplayMigrationDatabase>(db);
               const missingSessions: LegacyAcpReplaySession[] = [];
@@ -404,7 +404,7 @@ export async function migrateLegacyAcpReplayLedger(params: {
                 importedSessions += 1;
               }
             },
-            { env: { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } },
+            { env: { ...process.env, BOT_STATE_DIR: params.stateDir } },
           );
           await fs.unlink(claimPath);
           return {

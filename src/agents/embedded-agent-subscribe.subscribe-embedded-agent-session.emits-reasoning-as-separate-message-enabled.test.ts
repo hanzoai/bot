@@ -1,6 +1,6 @@
 // Reasoning block reply tests cover message_end extraction of native reasoning
 // and tag-promoted thinking when reasoning output is enabled.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import {
   THINKING_TAG_CASES,

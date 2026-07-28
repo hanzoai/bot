@@ -1,6 +1,6 @@
 // Daemon lifecycle core tests cover service lifecycle transitions and platform adapters.
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type { GatewayServiceControlArgs } from "../../daemon/service-types.js";
 import type { GatewayService } from "../../daemon/service.js";
 import {
@@ -12,7 +12,7 @@ import {
   stubEmptyGatewayEnv,
 } from "./test-helpers/lifecycle-core-harness.js";
 
-const loadConfig = vi.fn<() => OpenClawConfig>(() => ({
+const loadConfig = vi.fn<() => BotConfig>(() => ({
   gateway: {
     auth: {
       token: "config-token",
@@ -112,7 +112,7 @@ function stubServiceGatewayTokenEnv() {
   service.readCommand.mockResolvedValue({
     programArguments: [],
     environment: {
-      OPENCLAW_GATEWAY_TOKEN: "service-token",
+      BOT_GATEWAY_TOKEN: "service-token",
       SERVICE_GATEWAY_TOKEN: "service-token",
     },
   });
@@ -160,7 +160,7 @@ describe("runServiceRestart token drift", () => {
     clearGatewayRestartIntentSync.mockClear();
     service.readCommand.mockResolvedValue({
       programArguments: [],
-      environment: { OPENCLAW_GATEWAY_TOKEN: "service-token" },
+      environment: { BOT_GATEWAY_TOKEN: "service-token" },
     });
     stubEmptyGatewayEnv();
   });
@@ -177,7 +177,7 @@ describe("runServiceRestart token drift", () => {
         runServiceStart({
           serviceNoun: "Gateway",
           service: unsupportedService,
-          renderStartHints: () => ["openclaw gateway install"],
+          renderStartHints: () => ["bot gateway install"],
           opts: { json: true },
           onNotLoaded,
         }),
@@ -221,7 +221,7 @@ describe("runServiceRestart token drift", () => {
         runServiceRestart({
           serviceNoun: "Gateway",
           service: unsupportedService,
-          renderStartHints: () => ["openclaw gateway install"],
+          renderStartHints: () => ["bot gateway install"],
           opts: { json: true },
           onNotLoaded,
           postRestartCheck,
@@ -236,29 +236,29 @@ describe("runServiceRestart token drift", () => {
 
   it("prints the container restart hint when restart is requested for a not-loaded service", async () => {
     service.isLoaded.mockResolvedValue(false);
-    vi.stubEnv("OPENCLAW_CONTAINER_HINT", "openclaw-demo-container");
+    vi.stubEnv("BOT_CONTAINER_HINT", "bot-demo-container");
 
     await runServiceRestart({
       serviceNoun: "Gateway",
       service,
       renderStartHints: () => [
-        "Restart the container or the service that manages it for openclaw-demo-container.",
-        "openclaw gateway install",
+        "Restart the container or the service that manages it for bot-demo-container.",
+        "bot gateway install",
       ],
       opts: { json: false },
     });
 
     expect(runtimeLogs).toContain("Gateway service not loaded.");
     expect(runtimeLogs).toContain(
-      "Start with: Restart the container or the service that manages it for openclaw-demo-container.",
+      "Start with: Restart the container or the service that manages it for bot-demo-container.",
     );
   });
 
   it("repairs managed port drift before restarting", async () => {
     service.readRuntime.mockResolvedValue({ status: "running", pid: 1234 });
     service.readCommand.mockResolvedValue({
-      programArguments: ["openclaw", "gateway", "--port", "18789"],
-      environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+      programArguments: ["bot", "gateway", "--port", "18789"],
+      environment: { BOT_GATEWAY_PORT: "18789" },
     });
     type RepairLoadedService = NonNullable<
       Parameters<typeof runServiceRestart>[0]["repairLoadedService"]
@@ -320,9 +320,9 @@ describe("runServiceRestart token drift", () => {
     });
     service.readCommand.mockResolvedValue({
       programArguments: [],
-      environment: { OPENCLAW_GATEWAY_TOKEN: "env-token" },
+      environment: { BOT_GATEWAY_TOKEN: "env-token" },
     });
-    vi.stubEnv("OPENCLAW_GATEWAY_TOKEN", "env-token");
+    vi.stubEnv("BOT_GATEWAY_TOKEN", "env-token");
 
     await runServiceRestart(createServiceRunArgs(true));
 
@@ -603,8 +603,8 @@ describe("runServiceRestart token drift", () => {
   it("warns in json when an already-running gateway definition needs repair", async () => {
     service.readRuntime.mockResolvedValue({ status: "running", pid: 4242 });
     service.readCommand.mockResolvedValue({
-      programArguments: ["openclaw", "gateway", "run"],
-      environment: { OPENCLAW_SERVICE_VERSION: "2026.4.24" },
+      programArguments: ["bot", "gateway", "run"],
+      environment: { BOT_SERVICE_VERSION: "2026.4.24" },
     });
 
     await runServiceStart(createServiceRunArgs());
@@ -613,7 +613,7 @@ describe("runServiceRestart token drift", () => {
     expect(payload.result).toBe("already-running");
     expect(payload.warnings).toEqual([
       expect.stringMatching(
-        /^Gateway service already running, but its installed service definition needs repair: service was installed by OpenClaw 2026\.4\.24, current CLI is .+; run `openclaw gateway restart` to apply\.$/,
+        /^Gateway service already running, but its installed service definition needs repair: service was installed by Bot 2026\.4\.24, current CLI is .+; run `bot gateway restart` to apply\.$/,
       ),
     ]);
     expect(service.start).not.toHaveBeenCalled();
@@ -622,8 +622,8 @@ describe("runServiceRestart token drift", () => {
   it("prints one warning line when an already-running gateway definition needs repair", async () => {
     service.readRuntime.mockResolvedValue({ status: "running", pid: 4242 });
     service.readCommand.mockResolvedValue({
-      programArguments: ["openclaw", "gateway", "run"],
-      environment: { OPENCLAW_SERVICE_VERSION: "2026.4.24" },
+      programArguments: ["bot", "gateway", "run"],
+      environment: { BOT_SERVICE_VERSION: "2026.4.24" },
     });
 
     await runServiceStart({
@@ -638,7 +638,7 @@ describe("runServiceRestart token drift", () => {
       ),
     );
     expect(repairWarnings).toHaveLength(1);
-    expect(repairWarnings[0]).toContain("run `openclaw gateway restart` to apply.");
+    expect(repairWarnings[0]).toContain("run `bot gateway restart` to apply.");
     expect(service.start).not.toHaveBeenCalled();
   });
 
@@ -715,8 +715,8 @@ describe("runServiceRestart token drift", () => {
 
   it("repairs stale loaded services during start before reporting success", async () => {
     service.readCommand.mockResolvedValue({
-      programArguments: ["openclaw", "gateway"],
-      environment: { OPENCLAW_SERVICE_VERSION: "2026.4.24" },
+      programArguments: ["bot", "gateway"],
+      environment: { BOT_SERVICE_VERSION: "2026.4.24" },
     });
     type RepairLoadedService = NonNullable<
       Parameters<typeof runServiceStart>[0]["repairLoadedService"]
@@ -728,7 +728,7 @@ describe("runServiceRestart token drift", () => {
       return {
         result: "started" as const,
         message: "Gateway service definition repaired and started.",
-        warnings: ["service was installed by OpenClaw 2026.4.24, current CLI is 2026.5.2"],
+        warnings: ["service was installed by Bot 2026.4.24, current CLI is 2026.5.2"],
         loaded: true,
       };
     });
@@ -753,7 +753,7 @@ describe("runServiceRestart token drift", () => {
     expect(payload.message).toBe("Gateway service definition repaired and started.");
     expect(payload.warnings).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("service was installed by OpenClaw"),
+        expect.stringContaining("service was installed by Bot"),
         expect.stringContaining("custom behavior and will be overwritten"),
       ]),
     );
@@ -762,8 +762,8 @@ describe("runServiceRestart token drift", () => {
 
   it("fails start with an install hint when a stale loaded service has no repair callback", async () => {
     service.readCommand.mockResolvedValue({
-      programArguments: ["openclaw", "gateway"],
-      environment: { OPENCLAW_SERVICE_VERSION: "2026.4.24" },
+      programArguments: ["bot", "gateway"],
+      environment: { BOT_SERVICE_VERSION: "2026.4.24" },
     });
 
     await expect(runServiceStart(createServiceRunArgs())).rejects.toThrow("__exit__:1");
@@ -771,7 +771,7 @@ describe("runServiceRestart token drift", () => {
     const payload = readJsonLog<{ ok?: boolean; error?: string; hints?: string[] }>();
     expect(payload.ok).toBe(false);
     expect(payload.error).toContain("service needs repair");
-    expect(payload.hints).toEqual(["openclaw gateway install --force"]);
+    expect(payload.hints).toEqual(["bot gateway install --force"]);
     expect(service.start).not.toHaveBeenCalled();
   });
 
@@ -793,7 +793,7 @@ describe("runServiceRestart token drift", () => {
     await runServiceStart({
       serviceNoun: "Gateway",
       service,
-      renderStartHints: () => ["openclaw gateway install"],
+      renderStartHints: () => ["bot gateway install"],
       opts: { json: true },
     });
 
@@ -805,10 +805,10 @@ describe("runServiceRestart token drift", () => {
     }>();
     expect(payload.ok).toBe(true);
     expect(payload.result).toBe("not-loaded");
-    expect(payload.hints?.includes("openclaw gateway install")).toBe(true);
+    expect(payload.hints?.includes("bot gateway install")).toBe(true);
     expect(
       payload.hintItems?.some(
-        (item) => item.kind === "install" && item.text === "openclaw gateway install",
+        (item) => item.kind === "install" && item.text === "bot gateway install",
       ),
     ).toBe(true);
     expect(service.start).not.toHaveBeenCalled();

@@ -1174,7 +1174,7 @@ export function createSessionCapability(gateway: SessionGateway): SessionCapabil
   const create = async (params: SessionCreateParams = {}) =>
     (await createResult(params))?.key ?? null;
 
-  const LEGACY_GROUPS_STORAGE_KEY = "openclaw:sessions:custom-groups";
+  const LEGACY_GROUPS_STORAGE_KEY = "bot:sessions:custom-groups";
   const GROUPS_LIST_METHOD = "sessions.groups.list";
   const GROUPS_RETRY_DEFAULT_MS = 500;
   const GROUPS_RETRY_MIN_MS = 100;

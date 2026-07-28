@@ -36,7 +36,7 @@ export async function ensureDebugProxyCa(certDir: string): Promise<{
       "-out",
       certPath,
       "-subj",
-      "/CN=OpenClaw Debug Proxy",
+      "/CN=Bot Debug Proxy",
     ],
     { logOutput: false },
   );

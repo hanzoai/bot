@@ -2,12 +2,12 @@
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { root, type Root } from "@openclaw/fs-safe";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
 import { formatErrorMessage } from "./errors.js";
 import { acquireGatewayLock, GatewayLockError } from "./gateway-lock.js";
 import {
@@ -64,7 +64,7 @@ const RELAY_REGISTRATION_KEYS = new Set([
 ]);
 
 type ApnsMigrationDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  BotStateKyselyDatabase,
   "apns_registrations" | "apns_registration_tombstones" | "migration_runs" | "migration_sources"
 >;
 
@@ -190,7 +190,7 @@ function receiptSourceKey(sourcePath: string): string {
 
 function readMigrationReceipt(sourcePath: string, env: NodeJS.ProcessEnv): MigrationReceipt | null {
   const sourceKey = receiptSourceKey(sourcePath);
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openBotStateDatabase({ env });
   const row = executeSqliteQueryTakeFirstSync(
     db,
     getNodeSqliteKysely<ApnsMigrationDatabase>(db)
@@ -216,7 +216,7 @@ function importAndRecordReceipt(params: {
   const sourceKey = receiptSourceKey(params.sourcePath);
   const runId = `${sourceKey}:${params.snapshot.sha256.slice(0, 16)}`;
   const now = Date.now();
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db }) => {
       const stateDb = getNodeSqliteKysely<ApnsMigrationDatabase>(db);
       const existingReceipt = executeSqliteQueryTakeFirstSync(
@@ -327,7 +327,7 @@ function importAndRecordReceipt(params: {
 }
 
 function markSourceRemoved(sourceKey: string, env: NodeJS.ProcessEnv): void {
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       executeSqliteQuerySync(
         db,
@@ -557,7 +557,7 @@ export async function migrateLegacyApnsRegistrations(params: {
     return { changes: [], warnings: [] };
   }
 
-  const env = { ...(params.env ?? process.env), OPENCLAW_STATE_DIR: params.stateDir };
+  const env = { ...(params.env ?? process.env), BOT_STATE_DIR: params.stateDir };
   let lock: Awaited<ReturnType<typeof acquireGatewayLock>>;
   try {
     lock = await acquireGatewayLock({
@@ -575,7 +575,7 @@ export async function migrateLegacyApnsRegistrations(params: {
     return {
       changes: [],
       warnings: [
-        `Failed migrating legacy APNs state: ${detail}. Stop the Gateway and run \`openclaw doctor --fix\` again.`,
+        `Failed migrating legacy APNs state: ${detail}. Stop the Gateway and run \`bot doctor --fix\` again.`,
       ],
     };
   }

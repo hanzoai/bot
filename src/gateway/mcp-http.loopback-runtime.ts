@@ -367,17 +367,17 @@ export function clearActiveMcpLoopbackRuntimeByOwnerToken(ownerToken: string): v
 }
 
 const MCP_AUTH_HEADERS = {
-  Authorization: "Bearer ${OPENCLAW_MCP_TOKEN}",
+  Authorization: "Bearer ${BOT_MCP_TOKEN}",
 } as const;
 
 const MCP_CAPTURE_HEADERS = {
-  "x-openclaw-cli-capture-key": "${OPENCLAW_MCP_CLI_CAPTURE_KEY}",
+  "x-bot-cli-capture-key": "${BOT_MCP_CLI_CAPTURE_KEY}",
 } as const;
 
 function createMcpServerConfig(port: number, headers: Record<string, string>) {
   return {
     mcpServers: {
-      openclaw: {
+      bot: {
         type: "http",
         url: `http://127.0.0.1:${port}/mcp`,
         alwaysLoad: true,

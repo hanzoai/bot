@@ -4,11 +4,11 @@ import {
   resolveScopeRequireMention,
   resolveScopeToolsPolicy,
   type GroupToolPolicyConfig,
-} from "openclaw/plugin-sdk/channel-policy";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
+} from "bot/plugin-sdk/channel-policy";
+import type { BotConfig } from "bot/plugin-sdk/core";
 
 type IMessageGroupContext = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   groupId?: string | null;
   senderPolicyMode?: "always" | "never";

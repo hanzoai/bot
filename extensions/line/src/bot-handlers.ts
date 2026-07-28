@@ -1,32 +1,32 @@
 // Line plugin module implements bot handlers behavior.
 import type { webhook } from "@line/bot-sdk";
-import { buildMentionRegexes, matchesMentionPatterns } from "openclaw/plugin-sdk/channel-inbound";
-import { resolveStableChannelMessageIngress } from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { createChannelPairingChallengeIssuer } from "openclaw/plugin-sdk/channel-pairing";
-import { hasControlCommand } from "openclaw/plugin-sdk/command-auth-native";
-import type { GroupPolicy, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { buildMentionRegexes, matchesMentionPatterns } from "bot/plugin-sdk/channel-inbound";
+import { resolveStableChannelMessageIngress } from "bot/plugin-sdk/channel-ingress-runtime";
+import { createChannelPairingChallengeIssuer } from "bot/plugin-sdk/channel-pairing";
+import { hasControlCommand } from "bot/plugin-sdk/command-auth-native";
+import type { GroupPolicy, BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   readChannelAllowFromStore,
   resolvePairingIdLabel,
   upsertChannelPairingRequest,
-} from "openclaw/plugin-sdk/conversation-runtime";
+} from "bot/plugin-sdk/conversation-runtime";
 import {
   DEFAULT_GROUP_HISTORY_LIMIT,
   createChannelHistoryWindow,
   type HistoryEntry,
-} from "openclaw/plugin-sdk/reply-history";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-import { danger, logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/reply-history";
+import { resolveAgentRoute } from "bot/plugin-sdk/routing";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime";
+import { danger, logVerbose } from "bot/plugin-sdk/runtime-env";
 import {
   resolveAllowlistProviderRuntimeGroupPolicy,
   resolveDefaultGroupPolicy,
   warnMissingProviderGroupPolicyFallbackOnce,
-} from "openclaw/plugin-sdk/runtime-group-policy";
+} from "bot/plugin-sdk/runtime-group-policy";
 import {
   normalizeOptionalString,
   normalizeStringEntries,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { firstDefined, normalizeLineAllowEntry } from "./bot-access.js";
 import {
   buildLineMessageContext,
@@ -68,7 +68,7 @@ function isDownloadableLineMessageType(
 }
 
 interface LineHandlerContext {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   account: ResolvedLineAccount;
   runtime: RuntimeEnv;
   mediaMaxBytes: number;

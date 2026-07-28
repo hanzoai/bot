@@ -117,7 +117,7 @@ function renderChatQueueItem(item: ChatQueueItem, props: ChatQueueProps) {
         ${busy
           ? nothing
           : html`
-              <openclaw-tooltip .content=${t("chat.queue.removeQueuedMessage")}>
+              <bot-tooltip .content=${t("chat.queue.removeQueuedMessage")}>
                 <button
                   class="chat-queue__remove"
                   type="button"
@@ -126,7 +126,7 @@ function renderChatQueueItem(item: ChatQueueItem, props: ChatQueueProps) {
                 >
                   ${icons.x}
                 </button>
-              </openclaw-tooltip>
+              </bot-tooltip>
             `}
       </span>
       ${

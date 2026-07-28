@@ -4,8 +4,8 @@ import {
   computeBackoff,
   sleepWithAbort,
   type BackoffPolicy,
-} from "openclaw/plugin-sdk/runtime-env";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/runtime-env";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   isRecoverableTelegramNetworkError,
   isTelegramRateLimitError,

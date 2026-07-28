@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { createCapturedPluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { createCapturedPluginRegistration } from "bot/plugin-sdk/plugin-test-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { resolveHomePath } from "./helpers.js";
 import pluginEntry from "./index.js";
@@ -28,16 +28,16 @@ describe("Hermes migration provider", () => {
     expect(captured.migrationProviders.map((provider) => provider.id)).toEqual(["hermes"]);
   });
 
-  it("resolves tilde source paths against the OS home when OPENCLAW_HOME is set", () => {
-    const previous = process.env.OPENCLAW_HOME;
-    process.env.OPENCLAW_HOME = path.join(path.sep, "tmp", "openclaw-home");
+  it("resolves tilde source paths against the OS home when BOT_HOME is set", () => {
+    const previous = process.env.BOT_HOME;
+    process.env.BOT_HOME = path.join(path.sep, "tmp", "bot-home");
     try {
       expect(resolveHomePath("~/.hermes")).toBe(path.join(os.homedir(), ".hermes"));
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_HOME;
+        delete process.env.BOT_HOME;
       } else {
-        process.env.OPENCLAW_HOME = previous;
+        process.env.BOT_HOME = previous;
       }
     }
   });

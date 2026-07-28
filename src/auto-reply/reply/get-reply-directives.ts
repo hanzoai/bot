@@ -2,7 +2,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { listAgentEntries } from "../../agents/agent-scope.js";
 import { DEFAULT_CONTEXT_TOKENS } from "../../agents/defaults.js";
 import { resolveFastModeState } from "../../agents/fast-mode.js";
@@ -11,7 +11,7 @@ import { resolveSandboxRuntimeStatus } from "../../agents/sandbox/runtime-status
 import { resolveEffectiveAgentRuntime } from "../../agents/thinking-runtime.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { isSessionWorkStartInvalidatedError } from "../../config/sessions/lifecycle.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { isFastTestRuntimeEnv } from "../../infra/env.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 import { ModelSelectionLockedError } from "../../sessions/model-overrides.js";
@@ -55,7 +55,7 @@ import { stripInlineStatus } from "./reply-inline.js";
 import { resolveRuntimePolicySessionKey } from "./runtime-policy-session-key.js";
 import type { TypingController } from "./typing.js";
 
-type AgentDefaults = NonNullable<OpenClawConfig["agents"]>["defaults"];
+type AgentDefaults = NonNullable<BotConfig["agents"]>["defaults"];
 
 const commandsRegistryLoader = createLazyImportLoader(
   () => import("../commands-registry.runtime.js"),
@@ -155,7 +155,7 @@ type ReplyDirectiveResult =
 
 export async function resolveReplyDirectives(params: {
   ctx: FinalizedRuntimeMsgContext;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   agentDir: string;
   workspaceDir: string;

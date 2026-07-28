@@ -2,15 +2,15 @@
 import {
   resolveStableChannelMessageIngress,
   type StableChannelIngressIdentityParams,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "bot/plugin-sdk/channel-ingress-runtime";
 import {
   bindIngressLifecycleToReplyOptions,
   runPassiveAccountLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createChannelPairingController } from "openclaw/plugin-sdk/channel-pairing";
-import { attachChannelToResult } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { stripMarkdown } from "openclaw/plugin-sdk/text-chunking";
+} from "bot/plugin-sdk/channel-outbound";
+import { createChannelPairingController } from "bot/plugin-sdk/channel-pairing";
+import { attachChannelToResult } from "bot/plugin-sdk/channel-send-result";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { stripMarkdown } from "bot/plugin-sdk/text-chunking";
 import type { ChannelOutboundAdapter, ChannelPlugin } from "./channel-api.js";
 import type { MetricEvent, MetricsSnapshot } from "./metrics.js";
 import { startNostrBus, type NostrBusHandle } from "./nostr-bus.js";
@@ -297,7 +297,7 @@ export const nostrPairingTextAdapter = {
     message,
     accountId,
   }: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     id: string;
     message: string;
     accountId?: string;

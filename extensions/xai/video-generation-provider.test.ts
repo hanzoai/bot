@@ -2,9 +2,9 @@
 import {
   getProviderHttpMocks,
   installProviderHttpMockCleanup,
-} from "openclaw/plugin-sdk/provider-http-test-mocks";
-import { expectExplicitVideoGenerationCapabilities } from "openclaw/plugin-sdk/provider-test-contracts";
-import type { VideoGenerationRequest } from "openclaw/plugin-sdk/video-generation";
+} from "bot/plugin-sdk/provider-http-test-mocks";
+import { expectExplicitVideoGenerationCapabilities } from "bot/plugin-sdk/provider-test-contracts";
+import type { VideoGenerationRequest } from "bot/plugin-sdk/video-generation";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const {

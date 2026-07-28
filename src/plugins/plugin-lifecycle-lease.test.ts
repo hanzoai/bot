@@ -3,13 +3,13 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
+import { withBotTestState } from "../test-utils/bot-test-state.js";
 import { readPersistedInstalledPluginIndex } from "./installed-plugin-index-store.js";
 import { withPluginLifecycleLease } from "./plugin-lifecycle-lease.js";
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
 });
 
 async function waitForPath(filePath: string): Promise<void> {
@@ -54,7 +54,7 @@ function runLeaseChild(scriptPath: string, args: string[]): Promise<void> {
 
 describe("plugin lifecycle lease", () => {
   it("serializes lifecycle work sharing one state directory", async () => {
-    await withOpenClawTestState({ label: "plugin-lifecycle-lease" }, async (state) => {
+    await withBotTestState({ label: "plugin-lifecycle-lease" }, async (state) => {
       const firstEntered = deferred();
       const releaseFirst = deferred();
       const events: string[] = [];
@@ -88,14 +88,14 @@ describe("plugin lifecycle lease", () => {
   });
 
   it("uses an explicit shared database path instead of each caller's default state", async () => {
-    await withOpenClawTestState({ label: "plugin-lifecycle-explicit-path" }, async (state) => {
+    await withBotTestState({ label: "plugin-lifecycle-explicit-path" }, async (state) => {
       const databasePath = state.path("shared-plugin-lifecycle.sqlite");
       const firstEntered = deferred();
       const releaseFirst = deferred();
       const events: string[] = [];
       const first = withPluginLifecycleLease(
         {
-          env: { ...state.env, OPENCLAW_STATE_DIR: state.path("state-a") },
+          env: { ...state.env, BOT_STATE_DIR: state.path("state-a") },
           path: databasePath,
           leaseMs: 1_000,
           waitMs: 3_000,
@@ -109,7 +109,7 @@ describe("plugin lifecycle lease", () => {
       await firstEntered.promise;
       const second = withPluginLifecycleLease(
         {
-          env: { ...state.env, OPENCLAW_STATE_DIR: state.path("state-b") },
+          env: { ...state.env, BOT_STATE_DIR: state.path("state-b") },
           path: databasePath,
           leaseMs: 1_000,
           waitMs: 3_000,
@@ -129,7 +129,7 @@ describe("plugin lifecycle lease", () => {
   });
 
   it("serializes lifecycle work across processes", async () => {
-    await withOpenClawTestState({ label: "plugin-lifecycle-processes" }, async (state) => {
+    await withBotTestState({ label: "plugin-lifecycle-processes" }, async (state) => {
       const firstMarker = state.path("first-entered");
       const releaseMarker = state.path("release-first");
       const secondMarker = state.path("second-entered");
@@ -144,7 +144,7 @@ describe("plugin lifecycle lease", () => {
           import fs from "node:fs/promises";
           import { withPluginLifecycleLease } from ${JSON.stringify(leaseModuleUrl)};
           const [role, stateDir, firstMarker, releaseMarker, secondMarker, secondReady, secondResult] = process.argv.slice(2);
-          const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+          const env = { ...process.env, BOT_STATE_DIR: stateDir };
           if (role === "second") {
             await fs.writeFile(secondReady, "ready");
             try {
@@ -192,7 +192,7 @@ describe("plugin lifecycle lease", () => {
       let assertionError: unknown;
       try {
         await expect(fs.readFile(secondResult, "utf8")).resolves.toBe(
-          "OPENCLAW_STATE_LEASE_TIMEOUT",
+          "BOT_STATE_LEASE_TIMEOUT",
         );
         await expect(fs.access(secondMarker)).rejects.toMatchObject({ code: "ENOENT" });
       } catch (error) {
@@ -210,7 +210,7 @@ describe("plugin lifecycle lease", () => {
   });
 
   it("reloads install records after waiting for another process", async () => {
-    await withOpenClawTestState({ label: "plugin-lifecycle-record-cache" }, async (state) => {
+    await withBotTestState({ label: "plugin-lifecycle-record-cache" }, async (state) => {
       const leaseModuleUrl = pathToFileURL(
         path.resolve("src/plugins/plugin-lifecycle-lease.ts"),
       ).href;
@@ -230,8 +230,8 @@ describe("plugin lifecycle lease", () => {
             writePersistedInstalledPluginIndexInstallRecords,
           } from ${JSON.stringify(recordsModuleUrl)};
           const [pluginId, stateDir, readyMarker, goMarker] = process.argv.slice(2);
-          process.env.OPENCLAW_STATE_DIR = stateDir;
-          const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+          process.env.BOT_STATE_DIR = stateDir;
+          const env = { ...process.env, BOT_STATE_DIR: stateDir };
           await loadInstalledPluginIndexInstallRecords();
           await fs.writeFile(readyMarker, "ready");
           while (true) {
@@ -263,14 +263,14 @@ describe("plugin lifecycle lease", () => {
       await fs.writeFile(goMarker, "go");
       await Promise.all([alpha, beta]);
 
-      closeOpenClawStateDatabaseForTest();
+      closeBotStateDatabaseForTest();
       const persisted = await readPersistedInstalledPluginIndex({ env: state.env });
       expect(Object.keys(persisted?.installRecords ?? {}).toSorted()).toEqual(["alpha", "beta"]);
     });
   });
 
   it("reuses the active lease for nested lifecycle work", async () => {
-    await withOpenClawTestState({ label: "plugin-lifecycle-reentrant" }, async (state) => {
+    await withBotTestState({ label: "plugin-lifecycle-reentrant" }, async (state) => {
       const events: string[] = [];
       await withPluginLifecycleLease({ env: state.env, leaseMs: 1_000, waitMs: 0 }, async () => {
         events.push("outer");

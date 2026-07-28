@@ -2,7 +2,7 @@
  * Normalizes timestamps and formats user-facing dates/times for agent prompts.
  */
 import { execFileSync } from "node:child_process";
-import { resolveDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveDateTimestampMs } from "@hanzo/bot-normalization-core/number-coercion";
 
 export type ResolvedTimeFormat = "12" | "24";
 

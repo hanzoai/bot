@@ -11,7 +11,7 @@ import { getChannelPlugin } from "../channels/plugins/registry.js";
 import type { ChannelLegacyStateMigrationPlan } from "../channels/plugins/types.core.js";
 import type { ChannelId } from "../channels/plugins/types.public.js";
 import { resolveOAuthDir, resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import {
   createPluginStateKeyedStore,
@@ -34,11 +34,11 @@ import {
   normalizeAgentId,
 } from "../routing/session-key.js";
 import {
-  detectOpenClawStateDatabaseSchemaMigrations,
-  repairOpenClawStateDatabaseSchema,
-  type OpenClawStateDatabaseSchemaMigration,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  detectBotStateDatabaseSchemaMigrations,
+  repairBotStateDatabaseSchema,
+  type BotStateDatabaseSchemaMigration,
+} from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 import { acquireGatewayLock } from "./gateway-lock.js";
 import {
   detectLegacyAcpReplayLedger,
@@ -175,14 +175,14 @@ import {
   migrateLegacyWorkspaceState,
 } from "./state-migrations.workspace-setup.js";
 
-function describeStateSchemaMigration(migration: OpenClawStateDatabaseSchemaMigration): string {
+function describeStateSchemaMigration(migration: BotStateDatabaseSchemaMigration): string {
   switch (migration.kind) {
     case "agent-databases-composite-primary-key":
       return "agent database registry primary key → agent_id,path";
     case "audit-events-v2":
       return "audit event ledger → versioned message lifecycle schema";
     case "operator-approvals-system-agent":
-      return "operator approvals → OpenClaw system changes";
+      return "operator approvals → Bot system changes";
     case "session-watch-cursor-provenance-v4":
       return "session watch cursors → provenance column";
     case "strict-tables-v3":
@@ -203,7 +203,7 @@ export function resetAutoMigrateLegacyStateForTest(): void {
 }
 
 async function collectChannelLegacyStateMigrationPlans(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   stateDir: string;
   oauthDir: string;
@@ -233,8 +233,8 @@ async function collectChannelLegacyStateMigrationPlans(params: {
 }
 
 async function collectPluginDoctorStateMigrationPlans(params: {
-  cfg: OpenClawConfig;
-  pluginDoctorConfig?: OpenClawConfig;
+  cfg: BotConfig;
+  pluginDoctorConfig?: BotConfig;
   env: NodeJS.ProcessEnv;
   stateDir: string;
   oauthDir: string;
@@ -297,7 +297,7 @@ function createPluginDoctorStateMigrationContext(
   };
 }
 
-function resolveDoctorStateMigrationAgentId(cfg: OpenClawConfig): string {
+function resolveDoctorStateMigrationAgentId(cfg: BotConfig): string {
   try {
     return normalizeAgentId(resolveDefaultAgentId(cfg));
   } catch {
@@ -307,8 +307,8 @@ function resolveDoctorStateMigrationAgentId(cfg: OpenClawConfig): string {
 }
 
 export async function detectLegacyStateMigrations(params: {
-  cfg: OpenClawConfig;
-  pluginDoctorConfig?: OpenClawConfig;
+  cfg: BotConfig;
+  pluginDoctorConfig?: BotConfig;
   env?: NodeJS.ProcessEnv;
   homedir?: () => string;
   pluginSessionStoreAgentIds?: readonly string[];
@@ -402,14 +402,14 @@ export async function detectLegacyStateMigrations(params: {
   const pluginInstallIndexPath = resolveLegacyInstalledPluginIndexStorePath({ stateDir });
   const hasPluginInstallIndex = fileExists(pluginInstallIndexPath);
   const debugProxyCaptureSidecar = detectLegacyDebugProxyCaptureSidecar(stateDir, env);
-  const stateSchemaMigrations = detectOpenClawStateDatabaseSchemaMigrations({
-    env: { ...env, OPENCLAW_STATE_DIR: stateDir },
+  const stateSchemaMigrations = detectBotStateDatabaseSchemaMigrations({
+    env: { ...env, BOT_STATE_DIR: stateDir },
   });
-  const stateEnv = { ...env, OPENCLAW_STATE_DIR: stateDir };
+  const stateEnv = { ...env, BOT_STATE_DIR: stateDir };
   const hasLegacyWorktrees =
     params.doctorOnlyStateMigrations === true &&
     stateSchemaMigrations.length === 0 &&
-    fileExists(resolveOpenClawStateSqlitePath(stateEnv)) &&
+    fileExists(resolveBotStateSqlitePath(stateEnv)) &&
     hasLegacyRegistryWorktrees(stateEnv);
   const taskRunsSidecarPath = resolveLegacyTaskRunsSidecarPath(stateDir);
   const flowRunsSidecarPath = resolveLegacyFlowRunsSidecarPath(stateDir);
@@ -837,7 +837,7 @@ export async function detectLegacyStateMigrations(params: {
 
 async function runPluginDoctorStateMigrationPlans(params: {
   detected: LegacyStateDetection;
-  config: OpenClawConfig;
+  config: BotConfig;
   env: NodeJS.ProcessEnv;
 }): Promise<MigrationMessages> {
   const changes: string[] = [];
@@ -873,7 +873,7 @@ async function runPluginDoctorStateMigrationPlans(params: {
 
 async function migratePluginDoctorStatePlans(params: {
   plans: readonly DetectedPluginDoctorStateMigrationPlan[];
-  config: OpenClawConfig;
+  config: BotConfig;
   env: NodeJS.ProcessEnv;
   stateDir: string;
   oauthDir: string;
@@ -889,7 +889,7 @@ async function migratePluginDoctorStatePlans(params: {
   try {
     lock = await acquireGatewayLock({
       allowInTests: true,
-      env: { ...params.env, OPENCLAW_STATE_DIR: params.stateDir },
+      env: { ...params.env, BOT_STATE_DIR: params.stateDir },
       pollIntervalMs: PLUGIN_DOCTOR_MIGRATION_LOCK_POLL_INTERVAL_MS,
       role: "sqlite-maintenance",
       timeoutMs: PLUGIN_DOCTOR_MIGRATION_LOCK_TIMEOUT_MS,
@@ -937,7 +937,7 @@ async function migratePluginDoctorStatePlans(params: {
 }
 
 export async function autoMigrateLegacyPluginDoctorState(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env?: NodeJS.ProcessEnv;
   homedir?: () => string;
   log?: MigrationLogger;
@@ -956,8 +956,8 @@ export async function autoMigrateLegacyPluginDoctorState(params: {
   });
   const stateDir = resolveStateDir(env, params.homedir ?? os.homedir);
   const oauthDir = resolveOAuthDir(env, stateDir);
-  const stateSchema = repairOpenClawStateDatabaseSchema({
-    env: { ...env, OPENCLAW_STATE_DIR: stateDir },
+  const stateSchema = repairBotStateDatabaseSchema({
+    env: { ...env, BOT_STATE_DIR: stateDir },
   });
   const changes = [...stateDirResult.changes, ...stateSchema.changes];
   const warnings = [...stateDirResult.warnings, ...stateSchema.warnings];
@@ -1004,14 +1004,14 @@ function migrateLegacyStateSchema(
   changes: string[];
   warnings: string[];
 } {
-  return repairOpenClawStateDatabaseSchema({
-    env: { ...env, OPENCLAW_STATE_DIR: detected.stateDir },
+  return repairBotStateDatabaseSchema({
+    env: { ...env, BOT_STATE_DIR: detected.stateDir },
   });
 }
 
 export async function runLegacyStateMigrations(params: {
   detected: LegacyStateDetection;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   env?: NodeJS.ProcessEnv;
   now?: () => number;
   recoverCorruptTargetStore?: boolean;
@@ -1033,7 +1033,7 @@ export async function runLegacyStateMigrations(params: {
     {
       run: () => {
         const discardedWorktrees = detected.worktrees.hasLegacy
-          ? discardLegacyRegistryWorktrees({ ...env, OPENCLAW_STATE_DIR: stateDir })
+          ? discardLegacyRegistryWorktrees({ ...env, BOT_STATE_DIR: stateDir })
           : 0;
         return {
           changes:
@@ -1161,7 +1161,7 @@ export async function runLegacyStateMigrations(params: {
       run: () =>
         migrateLegacyChannelPairingState({
           detected: detected.channelPairing,
-          env: { ...env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...env, BOT_STATE_DIR: stateDir },
         }),
     },
     {
@@ -1177,7 +1177,7 @@ export async function runLegacyStateMigrations(params: {
           ? { changes: [], warnings: [] }
           : runPluginDoctorStateMigrationPlans({
               detected,
-              config: params.config ?? ({} as OpenClawConfig),
+              config: params.config ?? ({} as BotConfig),
               env,
             }),
     },
@@ -1190,8 +1190,8 @@ export async function runLegacyStateMigrations(params: {
     {
       run: () =>
         migrateLegacyAcpSessionMetadata({
-          cfg: params.config ?? ({} as OpenClawConfig),
-          env: { ...env, OPENCLAW_STATE_DIR: stateDir },
+          cfg: params.config ?? ({} as BotConfig),
+          env: { ...env, BOT_STATE_DIR: stateDir },
           now,
         }),
     },
@@ -1237,8 +1237,8 @@ type AutomaticDetectedStateMigrationResult = {
 
 async function runAutomaticDetectedStateMigrations(params: {
   detected: LegacyStateDetection;
-  config: OpenClawConfig;
-  sessionConfig: OpenClawConfig;
+  config: BotConfig;
+  sessionConfig: BotConfig;
   env: NodeJS.ProcessEnv;
   now?: () => number;
   pluginSessionStoreAgentIds: readonly string[];
@@ -1273,7 +1273,7 @@ async function runAutomaticDetectedStateMigrations(params: {
   });
   const channelPairing = migrateLegacyChannelPairingState({
     detected: detected.channelPairing,
-    env: { ...env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...env, BOT_STATE_DIR: stateDir },
   });
   const preSessionChannelPlans = await runLegacyMigrationPlans(
     detected.channelPlans.plans.filter((plan) => plan.kind === "plugin-state-import"),
@@ -1345,8 +1345,8 @@ async function runAutomaticDetectedStateMigrations(params: {
  * Safe to run multiple times (idempotent). See #29683.
  */
 export async function autoMigrateLegacyState(params: {
-  cfg: OpenClawConfig;
-  pluginDoctorConfig?: OpenClawConfig;
+  cfg: BotConfig;
+  pluginDoctorConfig?: BotConfig;
   env?: NodeJS.ProcessEnv;
   homedir?: () => string;
   log?: MigrationLogger;
@@ -1377,8 +1377,8 @@ export async function autoMigrateLegacyState(params: {
   });
   const stateDir = resolveStateDir(env, homedir);
   autoMigrateChecked.add(`${path.resolve(stateDir)}\0${migrationMode}`);
-  const stateSchema = repairOpenClawStateDatabaseSchema({
-    env: { ...env, OPENCLAW_STATE_DIR: stateDir },
+  const stateSchema = repairBotStateDatabaseSchema({
+    env: { ...env, BOT_STATE_DIR: stateDir },
   });
   if (stateSchema.warnings.length > 0) {
     return {
@@ -1391,7 +1391,7 @@ export async function autoMigrateLegacyState(params: {
   }
   const mediaPersistence =
     params.doctorOnlyStateMigrations === true
-      ? migrateLegacyMediaPersistence({ env: { ...env, OPENCLAW_STATE_DIR: stateDir } })
+      ? migrateLegacyMediaPersistence({ env: { ...env, BOT_STATE_DIR: stateDir } })
       : { changes: [], warnings: [] };
   if (mediaPersistence.warnings.length > 0) {
     return {
@@ -1408,7 +1408,7 @@ export async function autoMigrateLegacyState(params: {
   const pluginDoctorConfig = params.pluginDoctorConfig ?? params.cfg;
   const configMachineState = migrateLegacyConfigMachineState({
     config: pluginDoctorConfig,
-    env: { ...env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...env, BOT_STATE_DIR: stateDir },
   });
   const pluginSessionStoreAgentIds = listPluginDoctorSessionStoreAgentIds({
     config: pluginDoctorConfig,
@@ -1484,7 +1484,7 @@ export async function autoMigrateLegacyState(params: {
     stateDir: detected.stateDir,
     now: params.now,
   });
-  const hasCustomAgentDir = env.OPENCLAW_AGENT_DIR?.trim() || env.PI_CODING_AGENT_DIR?.trim();
+  const hasCustomAgentDir = env.BOT_AGENT_DIR?.trim() || env.PI_CODING_AGENT_DIR?.trim();
   const initialMigrationSources = [
     stateDirResult,
     stateSchema,

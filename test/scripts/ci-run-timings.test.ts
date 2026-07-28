@@ -148,7 +148,7 @@ describe("scripts/ci-run-timings.mjs", () => {
     for (const message of [
       "gh: API secondary rate limit exceeded (HTTP 403)",
       "gh: HTTP 429: too many requests",
-      "Command failed: gh api repos/openclaw/openclaw/actions/runs/1/jobs\nHTTP 502",
+      "Command failed: gh api repos/hanzoai/bot/actions/runs/1/jobs\nHTTP 502",
       "read ECONNRESET",
     ]) {
       expect(isRetryableGhJsonErrorMessage(message)).toBe(true);

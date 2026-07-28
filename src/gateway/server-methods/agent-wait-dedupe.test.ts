@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DedupeEntry } from "../server-shared.js";
 import { setGatewayDedupeEntry } from "./agent-job.js";

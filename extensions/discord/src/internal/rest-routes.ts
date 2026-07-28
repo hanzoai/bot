@@ -2,7 +2,7 @@
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/number-runtime";
 
 type QueryValue = string | number | boolean;
 

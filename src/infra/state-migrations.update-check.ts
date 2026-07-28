@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
+import { runBotStateWriteTransaction } from "../state/bot-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -11,7 +11,7 @@ import { fileExists } from "./state-migrations.fs.js";
 import { archiveLegacyImportSource } from "./state-migrations.storage.js";
 import type { LegacyStateDetection, MigrationMessages } from "./state-migrations.types.js";
 
-type LegacyUpdateCheckImportDatabase = Pick<OpenClawStateKyselyDatabase, "update_check_state">;
+type LegacyUpdateCheckImportDatabase = Pick<BotStateKyselyDatabase, "update_check_state">;
 
 type LegacyUpdateCheckState = {
   lastCheckedAt?: string;
@@ -119,7 +119,7 @@ export function migrateLegacyUpdateCheckState(params: {
   let imported = false;
   let shouldArchive = false;
   try {
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       ({ db }) => {
         const stateDb = getNodeSqliteKysely<LegacyUpdateCheckImportDatabase>(db);
         const existing = executeSqliteQueryTakeFirstSync(
@@ -160,7 +160,7 @@ export function migrateLegacyUpdateCheckState(params: {
         imported = true;
         shouldArchive = true;
       },
-      { env: { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } },
+      { env: { ...process.env, BOT_STATE_DIR: params.stateDir } },
     );
   } catch (err) {
     warnings.push(`Failed migrating legacy update-check state: ${String(err)}`);

@@ -5,8 +5,8 @@ import {
   clampTimerTimeoutMs,
   parseFiniteNumber,
   resolveTimerTimeoutMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
+} from "bot/plugin-sdk/number-runtime";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
 import { serializeRequestBody } from "./rest-body.js";
 import {
   DiscordError,
@@ -76,7 +76,7 @@ const defaultOptions = {
   tokenHeader: "Bot" as const,
   baseUrl: "https://discord.com/api",
   apiVersion: 10,
-  userAgent: "OpenClaw Discord",
+  userAgent: "Bot Discord",
   timeout: 15_000,
   queueRequests: true,
   maxQueueSize: 1000,

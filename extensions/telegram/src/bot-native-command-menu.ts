@@ -2,12 +2,12 @@
 import { createHash } from "node:crypto";
 import type { Bot } from "grammy";
 import type { LanguageCode } from "grammy/types";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
 import {
   normalizeOptionalString,
   readStringValue,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { withTelegramApiErrorLogging } from "./api-logging.js";
 import { normalizeTelegramCommandName, TELEGRAM_COMMAND_NAME_PATTERN } from "./command-config.js";
 
@@ -501,7 +501,7 @@ export function syncTelegramMenuCommands(params: {
     // Skip sync if the command list hasn't changed since the last successful
     // sync. This prevents hitting Telegram's 429 rate limit when the gateway
     // is restarted several times in quick succession.
-    // See: openclaw/openclaw#32017
+    // See: hanzoai/bot#32017
     const currentHash = hashCommandList(commandsToRegister);
     const cachedHash = readCachedCommandHash(accountId, botIdentity);
     if (cachedHash === currentHash) {

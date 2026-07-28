@@ -21,7 +21,7 @@ type NativeEsmGraphProbe = {
 let nativeEsmGraphProbe: NativeEsmGraphProbe;
 
 function makeTempDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-native-require-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-native-require-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -102,7 +102,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
   it("declines missing dependency errors when source-transform fallback is available", () => {
     const dir = makeTempDir();
     const modulePath = path.join(dir, "plugin.cjs");
-    fs.writeFileSync(modulePath, 'require("openclaw/plugin-sdk/core");\n', "utf8");
+    fs.writeFileSync(modulePath, 'require("bot/plugin-sdk/core");\n', "utf8");
 
     expect(
       tryNativeRequireJavaScriptModule(modulePath, {
@@ -127,7 +127,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
     );
     fs.writeFileSync(
       modulePath,
-      'import { defineChannelMessageAdapter } from "openclaw/plugin-sdk/channel-outbound";\nexport const marker = defineChannelMessageAdapter();\n',
+      'import { defineChannelMessageAdapter } from "bot/plugin-sdk/channel-outbound";\nexport const marker = defineChannelMessageAdapter();\n',
       "utf8",
     );
     fs.writeFileSync(
@@ -136,7 +136,7 @@ describe("tryNativeRequireJavaScriptModule", () => {
         `import { tryNativeRequireJavaScriptModule } from ${JSON.stringify(nativeRequireModuleUrl)};`,
         `const result = tryNativeRequireJavaScriptModule(${JSON.stringify(modulePath)}, {`,
         "  allowWindows: true,",
-        `  aliasMap: { "openclaw/plugin-sdk/channel-outbound": ${JSON.stringify(sdkPath)} },`,
+        `  aliasMap: { "bot/plugin-sdk/channel-outbound": ${JSON.stringify(sdkPath)} },`,
         "});",
         "if (!result.ok) {",
         '  throw new Error("native require declined ESM graph");',

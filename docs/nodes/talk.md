@@ -20,7 +20,7 @@ Client-owned realtime Talk forwards provider tool calls through `talk.client.too
 
 Finalized realtime user and assistant utterances are always appended live to the active agent session, so later chat and voice turns share one history. Client-owned transports report their finalized transcripts with stable entry ids; Gateway relay sessions append the same events server-side. Provider sessions also receive the bounded realtime profile context used by Discord voice.
 
-Voice-originated consult runs require a new, exact spoken confirmation before high-impact actions such as sending messages, controlling nodes, browser/computer actions, service changes, destructive shell commands, or publication. The confirmation applies only to the canonical final execution arguments and is consumed once; if a policy or hook rewrites the approved action, OpenClaw blocks it until the rewritten action is confirmed. Unrelated concurrent runs remain unaffected. When a call closes, OpenClaw can send a compact **Voice call changes** digest for mutating tools to the session's last non-WebChat delivery target.
+Voice-originated consult runs require a new, exact spoken confirmation before high-impact actions such as sending messages, controlling nodes, browser/computer actions, service changes, destructive shell commands, or publication. The confirmation applies only to the canonical final execution arguments and is consumed once; if a policy or hook rewrites the approved action, Bot blocks it until the rewritten action is confirmed. Unrelated concurrent runs remain unaffected. When a call closes, Bot can send a compact **Voice call changes** digest for mutating tools to the session's last non-WebChat delivery target.
 
 Transcription-only Talk emits the same Talk event envelope as realtime and STT/TTS sessions, but uses `mode: "transcription"` and `brain: "none"`. All Talk sessions broadcast events on the `talk.event` channel; clients subscribe to it for partial/final transcript updates (`transcript.delta`/`transcript.done`) and other session telemetry.
 
@@ -56,7 +56,7 @@ Rules:
 
 Supported keys: `voice` / `voice_id` / `voiceId`, `model` / `model_id` / `modelId`, `speed`, `rate` (WPM), `stability`, `similarity`, `style`, `speakerBoost`, `seed`, `normalize`, `lang`, `output_format`, `latency_tier`, `once`.
 
-## Config (`~/.openclaw/openclaw.json`)
+## Config (`~/.hanzoai/bot.json`)
 
 ```json5
 {
@@ -104,7 +104,7 @@ an additional Talk auth setting. This experimental fallback supports client-owne
 Gateway relay and backend voice bridges still require OpenAI Platform
 credentials.
 
-OpenClaw does not read or copy the Codex OAuth token. The Codex app-server owns
+Bot does not read or copy the Codex OAuth token. The Codex app-server owns
 the subscription-authenticated realtime connection and starts an ephemeral,
 read-only thread seeded with bounded context from the active agent session.
 Codex owns the realtime model, base prompt, and agent handoff on this route;
@@ -124,15 +124,15 @@ added as developer context without replacing Codex's native delegation prompt.
 | `silenceTimeoutMs`                       | `700` ms macOS/Android, `900` ms iOS       | Pause window before Talk sends the transcript.                                                                                                                                                                                                                             |
 | `interruptOnSpeech`                      | `true`                                     |                                                                                                                                                                                                                                                                            |
 | `outputFormat`                           | `pcm_44100` macOS/iOS, `pcm_24000` Android | Set `mp3_*` to force MP3 streaming.                                                                                                                                                                                                                                        |
-| `consultThinkingLevel`                   | unset                                      | Thinking level override for the agent run behind realtime `openclaw_agent_consult` calls.                                                                                                                                                                                  |
-| `consultFastMode`                        | unset                                      | Fast-mode override for realtime `openclaw_agent_consult` calls.                                                                                                                                                                                                            |
+| `consultThinkingLevel`                   | unset                                      | Thinking level override for the agent run behind realtime `bot_agent_consult` calls.                                                                                                                                                                                  |
+| `consultFastMode`                        | unset                                      | Fast-mode override for realtime `bot_agent_consult` calls.                                                                                                                                                                                                            |
 | `realtime.provider`                      | -                                          | `openai` for WebRTC, `google` for provider WebSocket, or a bridge-only provider through Gateway relay.                                                                                                                                                                     |
 | `realtime.providers.<id>`                | -                                          | Provider-owned realtime config. Browsers receive only ephemeral/constrained session credentials, never a standard API key.                                                                                                                                                 |
 | `realtime.providers.openai.speakerVoice` | `alloy`                                    | Built-in OpenAI Realtime voice id (the older `voice` key still works but is deprecated). Current `gpt-realtime-2.1` voices: `alloy`, `ash`, `ballad`, `cedar`, `coral`, `echo`, `marin`, `sage`, `shimmer`, `verse`; `marin` and `cedar` are recommended for best quality. |
 | `realtime.transport`                     | -                                          | `webrtc`: client-owned OpenAI WebRTC on iOS and in the browser. `provider-websocket`: browser-owned, stays on Gateway relay on iOS. `gateway-relay`: keeps provider audio on the Gateway; Android uses realtime only with this transport.                                  |
 | `realtime.brain`                         | -                                          | `agent-consult` routes realtime tool calls through Gateway policy; `direct-tools` is legacy direct-tool compatibility; `none` is for transcription/external orchestration.                                                                                                 |
-| `realtime.consultRouting`                | -                                          | `provider-direct` preserves the provider's direct reply when it skips `openclaw_agent_consult`; `force-agent-consult` routes finalized user transcripts through OpenClaw instead.                                                                                          |
-| `realtime.instructions`                  | -                                          | Appends provider-facing system instructions to OpenClaw's built-in realtime prompt. On the Codex OAuth fallback, the text is developer context and Codex's native delegation prompt stays authoritative.                                                                   |
+| `realtime.consultRouting`                | -                                          | `provider-direct` preserves the provider's direct reply when it skips `bot_agent_consult`; `force-agent-consult` routes finalized user transcripts through Bot instead.                                                                                          |
+| `realtime.instructions`                  | -                                          | Appends provider-facing system instructions to Bot's built-in realtime prompt. On the Codex OAuth fallback, the text is developer context and Codex's native delegation prompt stays authoritative.                                                                   |
 
 `talk.catalog` exposes canonical provider ids and registry aliases, each provider's valid modes/transports/brain strategies/realtime audio formats/capability flags, and the runtime-selected readiness result. First-party Talk clients should read that catalog instead of maintaining provider aliases locally; treat an older Gateway that omits group readiness as unverified rather than definitively unconfigured. Streaming transcription providers are discovered through `talk.catalog.transcription`; the current Gateway relay uses the Voice Call streaming provider config until a dedicated Talk transcription config surface ships.
 
@@ -164,7 +164,7 @@ added as developer context without replacing Codex's native delegation prompt.
 - Requires Speech + Microphone permissions.
 - Native Talk uses the active Gateway session and only falls back to history polling when response events are unavailable.
 - The gateway resolves Talk playback through `talk.speak` using the active Talk provider. Android falls back to local system TTS only when that RPC is unavailable.
-- macOS local MLX playback uses the bundled `openclaw-mlx-tts` helper when present, or an executable on `PATH`. Set `OPENCLAW_MLX_TTS_BIN` to point at a custom helper binary during development.
+- macOS local MLX playback uses the bundled `bot-mlx-tts` helper when present, or an executable on `PATH`. Set `BOT_MLX_TTS_BIN` to point at a custom helper binary during development.
 - Voice directive value ranges (ElevenLabs): `stability`, `similarity`, and `style` accept `0..1`; `speed` accepts `0.5..2`; `latency_tier` accepts `0..4`.
 
 ## Related

@@ -1,24 +1,24 @@
 ---
-summary: "CLI reference for `openclaw commitments` (inspect and dismiss inferred follow-ups)"
+summary: "CLI reference for `bot commitments` (inspect and dismiss inferred follow-ups)"
 read_when:
   - You want to inspect inferred follow-up commitments
   - You want to dismiss pending check-ins
   - You are auditing what heartbeat may deliver
-title: "`openclaw commitments`"
+title: "`bot commitments`"
 ---
 
 Inspect and dismiss records left by the retired inferred commitments experiment.
-OpenClaw no longer creates or delivers new commitments, but keeps the maintenance
+Bot no longer creates or delivers new commitments, but keeps the maintenance
 command so upgrades can audit and clean up existing SQLite rows.
 
-With no subcommand, `openclaw commitments` lists pending commitments.
+With no subcommand, `bot commitments` lists pending commitments.
 
 ## Usage
 
 ```bash
-openclaw commitments [--all] [--agent <id>] [--status <status>] [--json]
-openclaw commitments list [--all] [--agent <id>] [--status <status>] [--json]
-openclaw commitments dismiss <id...> [--json]
+bot commitments [--all] [--agent <id>] [--status <status>] [--json]
+bot commitments list [--all] [--agent <id>] [--status <status>] [--json]
+bot commitments dismiss <id...> [--json]
 ```
 
 ## Options
@@ -38,37 +38,37 @@ openclaw commitments dismiss <id...> [--json]
 List pending commitments:
 
 ```bash
-openclaw commitments
+bot commitments
 ```
 
 List every stored commitment:
 
 ```bash
-openclaw commitments --all
+bot commitments --all
 ```
 
 Filter to one agent:
 
 ```bash
-openclaw commitments --agent main
+bot commitments --agent main
 ```
 
 Filter by status:
 
 ```bash
-openclaw commitments --status dismissed
+bot commitments --status dismissed
 ```
 
 Dismiss one or more commitments:
 
 ```bash
-openclaw commitments dismiss cm_abc123 cm_def456
+bot commitments dismiss cm_abc123 cm_def456
 ```
 
 Export as JSON:
 
 ```bash
-openclaw commitments --all --json
+bot commitments --all --json
 ```
 
 ## Output

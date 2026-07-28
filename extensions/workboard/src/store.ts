@@ -1,6 +1,6 @@
 // Workboard plugin module implements store behavior.
 import { randomUUID } from "node:crypto";
-import type { WorkboardAttachment, WorkboardCard } from "@openclaw/workboard-contract";
+import type { WorkboardAttachment, WorkboardCard } from "@hanzo/bot-workboard-contract";
 import type {
   PersistedWorkboardAttachment,
   PersistedWorkboardBoard,

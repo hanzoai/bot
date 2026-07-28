@@ -8,7 +8,7 @@ import {
   resolveConfigSnapshotHash,
 } from "../../config/config.js";
 import { extractDeliveryInfo } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   formatDoctorNonInteractiveHint,
   type RestartSentinelPayload,
@@ -52,7 +52,7 @@ function normalizeTrustedProxyAuthForCompare(auth: ReturnType<typeof resolveGate
 }
 
 /** Compares the effective shared Gateway auth surface that active clients use. */
-export function didSharedGatewayAuthChange(prev: OpenClawConfig, next: OpenClawConfig): boolean {
+export function didSharedGatewayAuthChange(prev: BotConfig, next: BotConfig): boolean {
   const prevResolvedAuth = resolveGatewayAuth({
     authConfig: prev.gateway?.auth,
     env: process.env,
@@ -97,8 +97,8 @@ export function didSharedGatewayAuthChange(prev: OpenClawConfig, next: OpenClawC
 
 /** Compares against the active secrets-expanded config when one is available. */
 export function didActiveSharedGatewayAuthChange(params: {
-  fallbackPrev: OpenClawConfig;
-  next: OpenClawConfig;
+  fallbackPrev: BotConfig;
+  next: BotConfig;
 }): boolean {
   return didSharedGatewayAuthChange(
     getActiveSecretsRuntimeSnapshot()?.config ?? params.fallbackPrev,
@@ -120,7 +120,7 @@ function queueSharedGatewayAuthDisconnect(
 
 function queueSharedGatewayAuthGenerationRefresh(
   shouldRefresh: boolean,
-  nextConfig: OpenClawConfig,
+  nextConfig: BotConfig,
   context?: GatewayRequestContext,
 ): void {
   if (!shouldRefresh) {
@@ -133,7 +133,7 @@ function queueSharedGatewayAuthGenerationRefresh(
 
 function resolveConfigRestartRequirement(params: {
   changedPaths: string[];
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
 }): { requiresRestart: boolean; scheduleDirectRestart: boolean } {
   const reloadSettings = resolveGatewayReloadSettings(params.nextConfig);
   const plan = buildGatewayReloadPlan(params.changedPaths, { candidateConfig: params.nextConfig });
@@ -218,12 +218,12 @@ async function tryWriteRestartSentinelPayload(payload: RestartSentinelPayload): 
 export async function commitGatewayConfigWrite(params: {
   snapshot: ConfigWriteSnapshot;
   writeOptions: ConfigWriteOptions;
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   context?: GatewayRequestContext;
   disconnectSharedAuthClients?: boolean;
 }): Promise<{
   path: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   hash: string | null;
   queueFollowUp: () => void;
 }> {
@@ -264,7 +264,7 @@ export async function resolveGatewayConfigRestartWriteResult(params: {
   mode: "config.patch" | "config.apply";
   configPath: string;
   changedPaths: string[];
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   actor: ControlPlaneActor;
   context?: GatewayRequestContext;
 }): Promise<{

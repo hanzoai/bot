@@ -1,13 +1,13 @@
-# Fireworks OpenClaw provider
+# Fireworks Bot provider
 
-Official OpenClaw provider plugin for Fireworks.
+Official Bot provider plugin for Fireworks.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/fireworks-provider
+bot plugins install @hanzo/bot-fireworks-provider
 ```
 
 ## Docs
 
-See `docs/providers/fireworks.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/providers/fireworks`.
+See `docs/providers/fireworks.md` in the Bot repository, or the published docs at `https://docs.bot.ai/providers/fireworks`.

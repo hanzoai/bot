@@ -12,7 +12,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 let browser: Browser;
@@ -27,8 +27,8 @@ async function renderLoginGate(page: Page): Promise<void> {
 
 async function mountLoginGate(page: Page): Promise<void> {
   await page.evaluate(async () => {
-    await customElements.whenDefined("openclaw-login-gate");
-    const gate = document.createElement("openclaw-login-gate") as HTMLElement & {
+    await customElements.whenDefined("bot-login-gate");
+    const gate = document.createElement("bot-login-gate") as HTMLElement & {
       props: Record<string, unknown>;
       updateComplete: Promise<unknown>;
     };
@@ -68,7 +68,7 @@ describeControlUiE2e("Control UI responsive login gate E2E", () => {
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(
-        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set BOT_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
       );
     }
     server = await startControlUiE2eServer();

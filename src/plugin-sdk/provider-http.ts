@@ -5,7 +5,7 @@ export {
   inspectTlsCertificateError,
   type TlsCertificateErrorDetails,
   type TlsCertificateErrorKind,
-} from "@openclaw/ai/internal/shared";
+} from "@hanzo/bot-ai/internal/shared";
 export {
   assertOkOrThrowHttpError,
   assertOkOrThrowProviderError,

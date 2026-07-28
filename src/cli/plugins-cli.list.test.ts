@@ -1,6 +1,6 @@
 // Plugins CLI list tests cover plugin listing output and installed-state formatting.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { createPluginRecord } from "../plugins/status.test-fixtures.js";
 import {
   buildPluginDiagnosticsReport,
@@ -110,7 +110,7 @@ describe("plugins cli list", () => {
     };
     loadConfig.mockReturnValue({});
     readConfigFileSnapshot.mockResolvedValueOnce({
-      path: "/tmp/openclaw-config.json5",
+      path: "/tmp/bot-config.json5",
       exists: true,
       raw: "{}",
       parsed: sourceConfig,
@@ -140,7 +140,7 @@ describe("plugins cli list", () => {
       'plugins.slots.contextEngine: slot references missing plugin "lossless-claw".',
     );
     expect(output).toContain(
-      'Run "openclaw doctor --fix" to remove stale plugin ids and dangling channel references.',
+      'Run "bot doctor --fix" to remove stale plugin ids and dangling channel references.',
     );
     expect(output).toContain(
       "No plugin install-tree issues detected; configuration warnings remain.",
@@ -162,7 +162,7 @@ describe("plugins cli list", () => {
     };
     loadConfig.mockReturnValue(sourceConfig);
     readConfigFileSnapshot.mockResolvedValueOnce({
-      path: "/tmp/openclaw-config.json5",
+      path: "/tmp/bot-config.json5",
       exists: true,
       raw: "{}",
       parsed: sourceConfig,
@@ -186,8 +186,8 @@ describe("plugins cli list", () => {
     const output = runtimeLogs.join("\n");
     expect(output).toContain("Plugin configuration:");
     expect(output).toContain('Configured runtime "codex" requires the Codex plugin');
-    expect(output).toContain("openclaw doctor --fix");
-    expect(output).toContain("openclaw plugins install @openclaw/codex");
+    expect(output).toContain("bot doctor --fix");
+    expect(output).toContain("bot plugins install @hanzo/bot-codex");
     expect(output).toContain(
       "No plugin install-tree issues detected; configuration warnings remain.",
     );
@@ -211,8 +211,8 @@ describe("plugins cli list", () => {
     const output = runtimeLogs.join("\n");
     expect(output).toContain("Plugin configuration:");
     expect(output).toContain('Configured runtime "acpx" requires the ACPX Runtime plugin');
-    expect(output).toContain("openclaw doctor --fix");
-    expect(output).toContain("openclaw plugins install @openclaw/acpx");
+    expect(output).toContain("bot doctor --fix");
+    expect(output).toContain("bot plugins install @hanzo/bot-acpx");
     expect(output).not.toContain("No plugin issues detected.");
   });
 
@@ -239,8 +239,8 @@ describe("plugins cli list", () => {
     expect(output).toContain('Configured runtime "acpx" requires the ACPX Runtime plugin');
     expect(output).toContain("Set plugins.entries.acpx.enabled=true");
     expect(output).toContain("disable ACP/acpx in acp config");
-    expect(output).not.toContain('runtime policy to "openclaw"');
-    expect(output).not.toContain("openclaw plugins install @openclaw/acpx");
+    expect(output).not.toContain('runtime policy to "bot"');
+    expect(output).not.toContain("bot plugins install @hanzo/bot-acpx");
     expect(output).not.toContain("No plugin issues detected.");
   });
 
@@ -262,8 +262,8 @@ describe("plugins cli list", () => {
     expect(output).toContain('Configured runtime "acpx" requires the ACPX Runtime plugin');
     expect(output).toContain('Enable the "acpx" plugin');
     expect(output).toContain("disable ACP/acpx in acp config");
-    expect(output).not.toContain('runtime policy to "openclaw"');
-    expect(output).not.toContain("openclaw plugins install @openclaw/acpx");
+    expect(output).not.toContain('runtime policy to "bot"');
+    expect(output).not.toContain("bot plugins install @hanzo/bot-acpx");
     expect(output).not.toContain("No plugin issues detected.");
   });
 
@@ -335,7 +335,7 @@ describe("plugins cli list", () => {
     expect(output).toContain('Configured runtime "codex" requires the Codex plugin');
     expect(output).toContain('but "codex" is disabled');
     expect(output).toContain('Enable the "codex" plugin');
-    expect(output).not.toContain("openclaw plugins install @openclaw/codex");
+    expect(output).not.toContain("bot plugins install @hanzo/bot-codex");
     expect(output).not.toContain("No plugin issues detected.");
   });
 
@@ -366,8 +366,8 @@ describe("plugins cli list", () => {
     expect(output).toContain('Configured runtime "codex" requires the Codex plugin');
     expect(output).toContain('but "codex" is blocked by plugin configuration');
     expect(output).toContain('Remove "codex" from plugins.deny');
-    expect(output).not.toContain('Run "openclaw doctor --fix" to install');
-    expect(output).not.toContain("openclaw plugins install @openclaw/codex");
+    expect(output).not.toContain('Run "bot doctor --fix" to install');
+    expect(output).not.toContain("bot plugins install @hanzo/bot-codex");
     expect(output).not.toContain("No plugin issues detected.");
   });
 
@@ -400,8 +400,8 @@ describe("plugins cli list", () => {
     expect(output).toContain('Configured runtime "codex" requires the Codex plugin');
     expect(output).toContain('but "codex" is blocked by plugin configuration');
     expect(output).toContain("Set plugins.entries.codex.enabled=true");
-    expect(output).not.toContain('Run "openclaw doctor --fix" to install');
-    expect(output).not.toContain("openclaw plugins install @openclaw/codex");
+    expect(output).not.toContain('Run "bot doctor --fix" to install');
+    expect(output).not.toContain("bot plugins install @hanzo/bot-codex");
     expect(output).not.toContain("No plugin issues detected.");
   });
 
@@ -411,7 +411,7 @@ describe("plugins cli list", () => {
         createPluginRecord({
           id: "discord",
           origin: "config",
-          source: "/tmp/openclaw-upstream/extensions/discord/index.ts",
+          source: "/tmp/bot-upstream/extensions/discord/index.ts",
           status: "error",
           error: "Cannot find module 'chalk'",
         }),
@@ -420,9 +420,9 @@ describe("plugins cli list", () => {
         {
           level: "warn",
           pluginId: "discord",
-          source: "/tmp/openclaw/npm/node_modules/@openclaw/discord/index.ts",
+          source: "/tmp/bot/npm/node_modules/@hanzo/bot-discord/index.ts",
           message:
-            "duplicate plugin id resolved by explicit config-selected plugin; global plugin will be overridden by config plugin (/tmp/openclaw-upstream/extensions/discord/index.ts)",
+            "duplicate plugin id resolved by explicit config-selected plugin; global plugin will be overridden by config plugin (/tmp/bot-upstream/extensions/discord/index.ts)",
         },
       ],
     });
@@ -434,9 +434,9 @@ describe("plugins cli list", () => {
     expect(output).toContain(
       "discord: duplicate plugin id resolved by explicit config-selected plugin",
     );
-    expect(output).toContain("active: /tmp/openclaw-upstream/extensions/discord/index.ts");
-    expect(output).toContain("shadowed: /tmp/openclaw/npm/node_modules/@openclaw/discord/index.ts");
-    expect(output).toContain("openclaw plugins registry --refresh");
+    expect(output).toContain("active: /tmp/bot-upstream/extensions/discord/index.ts");
+    expect(output).toContain("shadowed: /tmp/bot/npm/node_modules/@hanzo/bot-discord/index.ts");
+    expect(output).toContain("bot plugins registry --refresh");
   });
 
   it("does not report healthy config-selected plugin source shadowing as doctor issue", async () => {
@@ -445,7 +445,7 @@ describe("plugins cli list", () => {
         createPluginRecord({
           id: "discord",
           origin: "config",
-          source: "/tmp/openclaw-upstream/extensions/discord/index.ts",
+          source: "/tmp/bot-upstream/extensions/discord/index.ts",
           status: "loaded",
         }),
       ],
@@ -453,9 +453,9 @@ describe("plugins cli list", () => {
         {
           level: "warn",
           pluginId: "discord",
-          source: "/tmp/openclaw/npm/node_modules/@openclaw/discord/index.ts",
+          source: "/tmp/bot/npm/node_modules/@hanzo/bot-discord/index.ts",
           message:
-            "duplicate plugin id resolved by explicit config-selected plugin; global plugin will be overridden by config plugin (/tmp/openclaw-upstream/extensions/discord/index.ts)",
+            "duplicate plugin id resolved by explicit config-selected plugin; global plugin will be overridden by config plugin (/tmp/bot-upstream/extensions/discord/index.ts)",
         },
       ],
     });
@@ -487,7 +487,7 @@ describe("plugins cli list", () => {
     expect(runtimeLogs.join("\n")).toContain("State:");
     expect(runtimeLogs.join("\n")).toContain("stale");
     expect(runtimeLogs.join("\n")).toContain("Refresh reasons:");
-    expect(runtimeLogs.join("\n")).toContain("openclaw plugins registry --refresh");
+    expect(runtimeLogs.join("\n")).toContain("bot plugins registry --refresh");
   });
 
   it("refreshes the persisted plugin registry on request", async () => {
@@ -510,18 +510,18 @@ describe("plugins cli list", () => {
 
   it("keeps inspect on the static snapshot by default", async () => {
     setInstalledPluginIndexInstallRecords({
-      "openclaw-mem0": {
+      "bot-mem0": {
         source: "clawhub",
-        spec: "clawhub:openclaw-mem0",
-        installPath: "/plugins/openclaw-mem0",
+        spec: "clawhub:bot-mem0",
+        installPath: "/plugins/bot-mem0",
         version: "2026.5.1",
-        clawhubPackage: "openclaw-mem0",
+        clawhubPackage: "bot-mem0",
         clawhubChannel: "official",
         artifactKind: "npm-pack",
         artifactFormat: "tgz",
         npmIntegrity: "sha512-clawpack",
         npmShasum: "1".repeat(40),
-        npmTarballName: "openclaw-mem0-2026.5.1.tgz",
+        npmTarballName: "bot-mem0-2026.5.1.tgz",
         clawpackSha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         clawpackSpecVersion: 1,
         clawpackManifestSha256: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
@@ -529,12 +529,12 @@ describe("plugins cli list", () => {
       },
     });
     buildPluginSnapshotReport.mockReturnValue({
-      plugins: [createPluginRecord({ id: "openclaw-mem0", name: "Mem0" })],
+      plugins: [createPluginRecord({ id: "bot-mem0", name: "Mem0" })],
       diagnostics: [],
     });
     buildPluginInspectReport.mockReturnValue({
       workspaceDir: "/workspace",
-      plugin: createPluginRecord({ id: "openclaw-mem0", name: "Mem0" }),
+      plugin: createPluginRecord({ id: "bot-mem0", name: "Mem0" }),
       shape: "hook-only",
       capabilityMode: "plain",
       capabilityCount: 1,
@@ -560,12 +560,12 @@ describe("plugins cli list", () => {
       compatibility: [],
     });
 
-    await runPluginsCommand(["plugins", "inspect", "openclaw-mem0"]);
+    await runPluginsCommand(["plugins", "inspect", "bot-mem0"]);
 
     expect(buildPluginDiagnosticsReport).not.toHaveBeenCalled();
     expect(runtimeLogs.join("\n")).toContain("Policy");
     expect(runtimeLogs.join("\n")).toContain("allowConversationAccess: true");
-    expect(runtimeLogs.join("\n")).toContain("ClawHub package: openclaw-mem0");
+    expect(runtimeLogs.join("\n")).toContain("ClawHub package: bot-mem0");
     expect(runtimeLogs.join("\n")).toContain("Artifact kind: npm-pack");
     expect(runtimeLogs.join("\n")).toContain("Npm integrity: sha512-clawpack");
     expect(runtimeLogs.join("\n")).toContain(
@@ -577,12 +577,12 @@ describe("plugins cli list", () => {
 
   it("runtime-inspects without repairing deps", async () => {
     buildPluginSnapshotReport.mockReturnValue({
-      plugins: [createPluginRecord({ id: "openclaw-mem0", name: "Mem0" })],
+      plugins: [createPluginRecord({ id: "bot-mem0", name: "Mem0" })],
       diagnostics: [],
     });
     buildPluginInspectReport.mockReturnValue({
       workspaceDir: "/workspace",
-      plugin: createPluginRecord({ id: "openclaw-mem0", name: "Mem0" }),
+      plugin: createPluginRecord({ id: "bot-mem0", name: "Mem0" }),
       shape: "hook-only",
       capabilityMode: "plain",
       capabilityCount: 1,
@@ -607,11 +607,11 @@ describe("plugins cli list", () => {
       compatibility: [],
     });
 
-    await runPluginsCommand(["plugins", "inspect", "openclaw-mem0", "--runtime"]);
+    await runPluginsCommand(["plugins", "inspect", "bot-mem0", "--runtime"]);
 
     expect(buildPluginDiagnosticsReport).toHaveBeenCalledWith({
       config: {},
-      onlyPluginIds: ["openclaw-mem0"],
+      onlyPluginIds: ["bot-mem0"],
     });
   });
 
@@ -631,7 +631,7 @@ describe("plugins cli list", () => {
   });
 
   it("explains a policy-hidden built-in Skill Workshop at the legacy inspect surface", async () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       tools: { profile: "messaging" },
     };
     loadConfig.mockReturnValue(config);
@@ -653,7 +653,7 @@ describe("plugins cli list", () => {
     );
 
     expect(runtimeErrors.at(-1)).toContain(
-      "Skill Workshop is built into OpenClaw, not a plugin; configure it under skills.workshop.",
+      "Skill Workshop is built into Bot, not a plugin; configure it under skills.workshop.",
     );
     expect(workshopMocks.detectToolPolicyDiagnostic).toHaveBeenCalledWith({
       config,

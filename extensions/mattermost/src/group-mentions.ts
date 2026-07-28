@@ -2,7 +2,7 @@
 import {
   buildChannelGroupsScopeTree,
   resolveScopeRequireMention,
-} from "openclaw/plugin-sdk/channel-policy";
+} from "bot/plugin-sdk/channel-policy";
 import { resolveMattermostAccount } from "./mattermost/accounts.js";
 import type { ChannelGroupContext } from "./runtime-api.js";
 

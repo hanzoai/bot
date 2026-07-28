@@ -50,7 +50,7 @@ function createContext() {
       protocol: 1,
       auth: { role: "operator", scopes: ["operator.read", "operator.admin"] },
       features: {
-        methods: ["openclaw.setup.detect", "openclaw.setup.verify", "openclaw.setup.prepare.start"],
+        methods: ["bot.setup.detect", "bot.setup.verify", "bot.setup.prepare.start"],
       },
     },
     assistantAgentId: "main",
@@ -80,7 +80,7 @@ function createContext() {
     request,
     context: {
       gateway,
-      basePath: "/openclaw",
+      basePath: "/bot",
       navigate: vi.fn(),
     } as unknown as ApplicationContext,
   };
@@ -91,7 +91,7 @@ async function mountPage(
   routeData: ModelSetupRouteData,
 ): Promise<{ page: TestModelSetupPage; provider: ApplicationContextProvider }> {
   const provider = createApplicationContextProvider(context);
-  const page = document.createElement("openclaw-model-setup-page") as TestModelSetupPage;
+  const page = document.createElement("bot-model-setup-page") as TestModelSetupPage;
   page.routeData = routeData;
   provider.append(page);
   document.body.append(provider);
@@ -175,7 +175,7 @@ describe("ModelSetupPage catalog icons", () => {
       ).toBe("blob:acme-icon");
     });
     expect(fetchMock).toHaveBeenCalledWith(
-      `/openclaw/__openclaw__/catalog-icon/${encodeURIComponent(customIconUrl)}`,
+      `/bot/__bot__/catalog-icon/${encodeURIComponent(customIconUrl)}`,
       expect.objectContaining({ credentials: "same-origin" }),
     );
     expect(page.innerHTML).not.toContain(customIconUrl);
@@ -223,7 +223,7 @@ describe("ModelSetupPage catalog icons", () => {
       ).toBe("blob:legacy-ollama");
     });
     expect(fetchMock).toHaveBeenCalledWith(
-      `/openclaw/__openclaw__/catalog-icon/${encodeURIComponent(recommendedIconUrl)}`,
+      `/bot/__bot__/catalog-icon/${encodeURIComponent(recommendedIconUrl)}`,
       expect.objectContaining({ credentials: "same-origin" }),
     );
     expect(page.querySelector(".model-setup__recommendation [data-provider-icon]")).toBeNull();
@@ -232,7 +232,7 @@ describe("ModelSetupPage catalog icons", () => {
   it("starts a prepare wizard from the download affordance", async () => {
     const { context, client, request } = createContext();
     request.mockImplementation(async (method: string) => {
-      if (method === "openclaw.setup.prepare.start") {
+      if (method === "bot.setup.prepare.start") {
         return { sessionId: "prepare-session", done: false, status: "running" };
       }
       if (method === "wizard.next") {
@@ -258,11 +258,11 @@ describe("ModelSetupPage catalog icons", () => {
 
     await vi.waitFor(() => {
       expect(request).toHaveBeenCalledWith(
-        "openclaw.setup.prepare.start",
+        "bot.setup.prepare.start",
         { sessionId: expect.any(String), authChoice: "llama-cpp" },
         expect.objectContaining({ signal: expect.any(AbortSignal) }),
       );
-      expect(page.querySelector("openclaw-modal-dialog")).not.toBeNull();
+      expect(page.querySelector("bot-modal-dialog")).not.toBeNull();
       expect(page.textContent).toContain("Downloading model: 25%");
     });
   });

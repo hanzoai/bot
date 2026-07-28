@@ -1,13 +1,13 @@
-import { resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
+import { resolveHumanDelayConfig } from "bot/plugin-sdk/agent-runtime";
 import {
   createChannelInboundEnvelopeBuilder,
   hasFinalInboundReplyDispatch,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { resolveChannelContextVisibilityMode } from "openclaw/plugin-sdk/context-visibility-runtime";
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
-import { resolveInboundLastRouteSessionKey } from "openclaw/plugin-sdk/routing";
-import { resolvePinnedMainDmOwnerFromAllowlist } from "openclaw/plugin-sdk/security-runtime";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "bot/plugin-sdk/channel-inbound";
+import { resolveChannelContextVisibilityMode } from "bot/plugin-sdk/context-visibility-runtime";
+import { KeyedAsyncQueue } from "bot/plugin-sdk/keyed-async-queue";
+import { resolveInboundLastRouteSessionKey } from "bot/plugin-sdk/routing";
+import { resolvePinnedMainDmOwnerFromAllowlist } from "bot/plugin-sdk/security-runtime";
+import { resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
 import { isPollEventType } from "../poll-types.js";
 import type { LocationMessageEventContent } from "../sdk.js";
 import { normalizeMatrixUserId } from "./allowlist.js";
@@ -116,7 +116,7 @@ export function createMatrixRoomMessageHandler(params: MatrixMonitorHandlerParam
   return async (roomId: string, event: MatrixRawEvent) => {
     const eventId = typeof event.event_id === "string" ? event.event_id.trim() : "";
     let inboundReplayClaim:
-      | import("openclaw/plugin-sdk/persistent-dedupe").ChannelReplayClaimHandle
+      | import("bot/plugin-sdk/persistent-dedupe").ChannelReplayClaimHandle
       | undefined;
     let draftControllerRef: Awaited<ReturnType<typeof createMatrixDraftController>> | undefined;
     try {

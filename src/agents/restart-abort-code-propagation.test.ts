@@ -1,4 +1,4 @@
-import { failTransportStream, finalizeTransportStream } from "@openclaw/ai/transports";
+import { failTransportStream, finalizeTransportStream } from "@hanzo/bot-ai/transports";
 import { describe, expect, it, vi } from "vitest";
 import { resolveMainSessionResumePolicy } from "./main-session-restart-recovery-resume-policy.js";
 import {
@@ -47,7 +47,7 @@ describe("restart abort code propagation", () => {
     controller.abort(createAgentRunRestartAbortError());
 
     const message = runTerminalTransportTurn(controller.signal);
-    expect(message.errorCode).toBe("OPENCLAW_RESTART_ABORT");
+    expect(message.errorCode).toBe("BOT_RESTART_ABORT");
 
     // The transcript tail is the transport's own output, not a fixture.
     const policy = resolveMainSessionResumePolicy([
@@ -61,12 +61,12 @@ describe("restart abort code propagation", () => {
     const controller = new AbortController();
     const timeout = Object.assign(new Error("First stream event timed out"), {
       name: "TimeoutError",
-      code: "OPENCLAW_FIRST_EVENT_TIMEOUT",
+      code: "BOT_FIRST_EVENT_TIMEOUT",
     });
     controller.abort(timeout);
 
     const message = runTerminalTransportTurn(controller.signal);
-    expect(message.errorCode).toBe("OPENCLAW_FIRST_EVENT_TIMEOUT");
+    expect(message.errorCode).toBe("BOT_FIRST_EVENT_TIMEOUT");
 
     // stopReason is "aborted" here because the signal itself aborted, which
     // stays resumable by design: the run was still interrupted mid-flight.

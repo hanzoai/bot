@@ -9,7 +9,7 @@ import type {
   CodexAppServerRuntimeOptions,
   CodexAppServerSandboxMode,
   CodexAppServerTransportMode,
-  OpenClawExecMode,
+  BotExecMode,
   ResolvedCodexAppServerNetworkProxyConfig,
 } from "./config-contracts.js";
 import { selectGuardianSandbox } from "./config-exec-policy.js";
@@ -258,8 +258,8 @@ export function resolveDefaultCodexAppServerPolicy(params: {
   transport: CodexAppServerTransportMode;
   forceGuardian?: boolean;
   forceUserReviewer?: boolean;
-  execModeRequiringPromptingApprovals?: Extract<OpenClawExecMode, "auto" | "ask">;
-  execModeRequiringUserReviewer?: OpenClawExecMode;
+  execModeRequiringPromptingApprovals?: Extract<BotExecMode, "auto" | "ask">;
+  execModeRequiringUserReviewer?: BotExecMode;
   env?: NodeJS.ProcessEnv;
   requirementsToml?: string | null;
   requirementsPath?: string;

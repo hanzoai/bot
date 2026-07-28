@@ -1,10 +1,10 @@
-// OpenClaw operation tests cover rescue operation planning and execution.
+// Bot operation tests cover rescue operation planning and execution.
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { listAgentEntries } from "../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resetPluginStateStoreForTests } from "../plugin-state/plugin-state-store.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { SystemAgentInferenceUnavailableError } from "./inference-error.js";
@@ -22,7 +22,7 @@ type TestConfig = Record<string, unknown>;
 const mockConfig = vi.hoisted(() => {
   const initial = { agents: { entries: { main: { default: true } } } };
   const state = {
-    path: "/tmp/openclaw.json",
+    path: "/tmp/bot.json",
     exists: true,
     config: initial as TestConfig,
     hash: "mock-hash-0" as string | undefined,
@@ -48,7 +48,7 @@ const mockConfig = vi.hoisted(() => {
   };
   return {
     reset() {
-      state.path = "/tmp/openclaw.json";
+      state.path = "/tmp/bot.json";
       state.exists = true;
       state.config = { agents: { entries: { main: { default: true } } } };
       state.hash = "mock-hash-0";
@@ -114,7 +114,7 @@ vi.mock("./overview.js", () => ({
       { id: "main", isDefault: true },
       { id: "work", isDefault: false, model: "openai/gpt-5.2" },
     ],
-    config: { path: "/tmp/openclaw.json", exists: true, valid: true, issues: [], hash: null },
+    config: { path: "/tmp/bot.json", exists: true, valid: true, issues: [], hash: null },
     tools: {
       codex: { command: "codex", found: false, error: "not found" },
       claude: { command: "claude", found: false, error: "not found" },
@@ -128,8 +128,8 @@ vi.mock("./overview.js", () => ({
       error: "offline",
     },
     references: {
-      docsUrl: "https://docs.openclaw.ai",
-      sourceUrl: "https://github.com/openclaw/openclaw",
+      docsUrl: "https://docs.bot.ai",
+      sourceUrl: "https://github.com/hanzoai/bot",
     },
   })),
 }));
@@ -145,8 +145,8 @@ describe("parseSystemAgentOperation", () => {
 
   beforeEach(() => {
     mockConfig.reset();
-    stateDirSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    stateDirSnapshot = captureEnv(["BOT_STATE_DIR"]);
+    vi.stubEnv("BOT_TEST_FAST", "1");
   });
 
   afterEach(() => {
@@ -156,8 +156,8 @@ describe("parseSystemAgentOperation", () => {
   });
 
   it("runs setup bootstrap only after approval and audits it", async () => {
-    const tempDir = opTempDirs.make("openclaw-setup-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-setup-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     const { runtime, lines } = createSystemAgentTestRuntime();
     mockConfig.setConfig({
       agents: {
@@ -166,7 +166,7 @@ describe("parseSystemAgentOperation", () => {
       },
     });
     const applySetup = vi.fn(async () => ({
-      configPath: path.join(tempDir, "openclaw.json"),
+      configPath: path.join(tempDir, "bot.json"),
       configHashBefore: "mock-hash-0",
       configHashAfter: "mock-hash-1",
       bootstrapPending: true,
@@ -205,7 +205,7 @@ describe("parseSystemAgentOperation", () => {
     expect(result.applied).toBe(true);
     expect(result.bootstrapPending).toBe(true);
 
-    expect(lines.join("\n")).toContain("[openclaw] done: openclaw.setup");
+    expect(lines.join("\n")).toContain("[bot] done: bot.setup");
     expect(applySetup).toHaveBeenCalledWith(
       {
         workspace: "/tmp/work",
@@ -220,7 +220,7 @@ describe("parseSystemAgentOperation", () => {
     expectAuditRecord(
       audit,
       {
-        operation: "openclaw.setup",
+        operation: "bot.setup",
         summary: "Bootstrapped setup workspace",
       },
       {
@@ -234,8 +234,8 @@ describe("parseSystemAgentOperation", () => {
   });
 
   it("rejects setup without a default model before any workspace or Gateway write", async () => {
-    const tempDir = opTempDirs.make("openclaw-no-inference-setup-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-no-inference-setup-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     const { runtime, lines } = createSystemAgentTestRuntime();
     const applySetup = vi.fn();
     const deps = {
@@ -252,13 +252,13 @@ describe("parseSystemAgentOperation", () => {
     ).rejects.toThrow("requires working inference first");
 
     expect(applySetup).not.toHaveBeenCalled();
-    expect(lines.join("\n")).not.toContain("[openclaw] running: openclaw.setup");
+    expect(lines.join("\n")).not.toContain("[bot] running: bot.setup");
     await expect(fs.access(path.join(tempDir, "audit", "system-agent.jsonl"))).rejects.toThrow();
   });
 
   it("rejects setup when the current route fails its live inference check", async () => {
-    const tempDir = opTempDirs.make("openclaw-failed-inference-setup-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-failed-inference-setup-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     mockConfig.setConfig({
       agents: {
         defaults: { model: { primary: "openai/gpt-5.5" } },
@@ -284,7 +284,7 @@ describe("parseSystemAgentOperation", () => {
     ).rejects.toThrow("failed a live check");
 
     expect(applySetup).not.toHaveBeenCalled();
-    expect(lines.join("\n")).not.toContain("[openclaw] running: openclaw.setup");
+    expect(lines.join("\n")).not.toContain("[bot] running: bot.setup");
     await expect(fs.access(path.join(tempDir, "audit", "system-agent.jsonl"))).rejects.toThrow();
   });
 
@@ -335,7 +335,7 @@ describe("parseSystemAgentOperation", () => {
     });
     const { runtime } = createSystemAgentTestRuntime();
     const applySetup = vi.fn(async () => ({
-      configPath: "/tmp/openclaw.json",
+      configPath: "/tmp/bot.json",
       configHashBefore: "mock-hash-0",
       configHashAfter: "mock-hash-1",
       bootstrapPending: false,
@@ -373,8 +373,8 @@ describe("parseSystemAgentOperation", () => {
   });
 
   it("rejects a setup model switch before writing", async () => {
-    const tempDir = opTempDirs.make("openclaw-model-switch-setup-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-model-switch-setup-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     const { runtime } = createSystemAgentTestRuntime();
     const applySetup = vi.fn();
 
@@ -390,14 +390,14 @@ describe("parseSystemAgentOperation", () => {
           },
         },
       ),
-    ).rejects.toThrow("Exit OpenClaw and run `openclaw onboard`");
+    ).rejects.toThrow("Exit Bot and run `bot onboard`");
 
     expect(applySetup).not.toHaveBeenCalled();
   });
 
   it("allows the same requested model while preserving it without a model write", async () => {
-    const tempDir = opTempDirs.make("openclaw-same-model-setup-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-same-model-setup-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     const { runtime } = createSystemAgentTestRuntime();
     mockConfig.setConfig({
       agents: {
@@ -406,7 +406,7 @@ describe("parseSystemAgentOperation", () => {
       },
     });
     const applySetup = vi.fn(async () => ({
-      configPath: path.join(tempDir, "openclaw.json"),
+      configPath: path.join(tempDir, "bot.json"),
       configHashBefore: "mock-hash-0",
       configHashAfter: "mock-hash-1",
       bootstrapPending: false,
@@ -443,8 +443,8 @@ describe("parseSystemAgentOperation", () => {
   });
 
   it("live-verifies a staged default model before writing and preserves concurrent edits", async () => {
-    const tempDir = opTempDirs.make("openclaw-verified-model-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-verified-model-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     mockConfig.setConfig({
       agents: {
         defaults: {
@@ -506,7 +506,7 @@ describe("parseSystemAgentOperation", () => {
             ...requireRecord(current.agents, "agents"),
             defaults: {
               ...requireRecord(requireRecord(current.agents, "agents").defaults, "defaults"),
-              models: { "google/unrelated": { agentRuntime: { id: "openclaw" } } },
+              models: { "google/unrelated": { agentRuntime: { id: "bot" } } },
             },
             entries: {
               main: { default: true, workspace: "/tmp/main" },
@@ -641,7 +641,7 @@ describe("parseSystemAgentOperation", () => {
         const next = structuredClone(config);
         const defaults = requireRecord(requireRecord(next.agents, "agents").defaults, "defaults");
         defaults.models = {
-          "anthropic/claude-sonnet-4-6": { agentRuntime: { id: "openclaw" } },
+          "anthropic/claude-sonnet-4-6": { agentRuntime: { id: "bot" } },
         };
         return next;
       },
@@ -706,8 +706,8 @@ describe("parseSystemAgentOperation", () => {
   ])(
     "aborts when concurrent $field changes invalidate the verified route",
     async ({ initial, change }) => {
-      const tempDir = opTempDirs.make("openclaw-route-conflict-");
-      setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+      const tempDir = opTempDirs.make("bot-route-conflict-");
+      setTestEnvValue("BOT_STATE_DIR", tempDir);
       mockConfig.setConfig(initial);
       mockConfig.mutateConfigFile.mockClear();
       const { runtime, lines } = createSystemAgentTestRuntime();
@@ -728,14 +728,14 @@ describe("parseSystemAgentOperation", () => {
       ).rejects.toThrow("inference route changed during verification");
 
       expect(mockConfig.mutateConfigFile).toHaveBeenCalledOnce();
-      expect(lines.join("\n")).not.toContain("[openclaw] done: config.setDefaultModel");
+      expect(lines.join("\n")).not.toContain("[bot] done: config.setDefaultModel");
       await expect(fs.access(path.join(tempDir, "audit", "system-agent.jsonl"))).rejects.toThrow();
     },
   );
 
   it("keeps the working model and writes no audit when live inference fails", async () => {
-    const tempDir = opTempDirs.make("openclaw-rejected-model-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-rejected-model-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     const originalConfig = {
       agents: {
         defaults: { model: { primary: "anthropic/claude-sonnet-4-6" } },
@@ -763,13 +763,13 @@ describe("parseSystemAgentOperation", () => {
 
     expect(mockConfig.currentConfig()).toEqual(originalConfig);
     expect(mockConfig.mutateConfigFile).not.toHaveBeenCalled();
-    expect(lines.join("\n")).not.toContain("[openclaw] done: config.setDefaultModel");
+    expect(lines.join("\n")).not.toContain("[bot] done: config.setDefaultModel");
     await expect(fs.access(path.join(tempDir, "audit", "system-agent.jsonl"))).rejects.toThrow();
   });
 
   it("writes nothing when the exact latest route fails its locked recheck", async () => {
-    const tempDir = opTempDirs.make("openclaw-latest-route-rejected-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-latest-route-rejected-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     const originalConfig = {
       agents: {
         defaults: { model: { primary: "anthropic/claude-sonnet-4-6" } },
@@ -793,13 +793,13 @@ describe("parseSystemAgentOperation", () => {
 
     expect(verifyInferenceConfig).toHaveBeenCalledTimes(2);
     expect(mockConfig.currentConfig()).toEqual(originalConfig);
-    expect(lines.join("\n")).not.toContain("[openclaw] done: config.setDefaultModel");
+    expect(lines.join("\n")).not.toContain("[bot] done: config.setDefaultModel");
     await expect(fs.access(path.join(tempDir, "audit", "system-agent.jsonl"))).rejects.toThrow();
   });
 
   it("rejects a live result from a different model before opening the write boundary", async () => {
-    const tempDir = opTempDirs.make("openclaw-mismatched-model-result-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-mismatched-model-result-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     const originalConfig = {
       agents: {
         defaults: { model: { primary: "anthropic/claude-sonnet-4-6" } },
@@ -825,13 +825,13 @@ describe("parseSystemAgentOperation", () => {
     expect(verifyInferenceConfig).toHaveBeenCalledOnce();
     expect(mockConfig.mutateConfigFile).not.toHaveBeenCalled();
     expect(mockConfig.currentConfig()).toEqual(originalConfig);
-    expect(lines.join("\n")).not.toContain("[openclaw] done: config.setDefaultModel");
+    expect(lines.join("\n")).not.toContain("[bot] done: config.setDefaultModel");
     await expect(fs.access(path.join(tempDir, "audit", "system-agent.jsonl"))).rejects.toThrow();
   });
 
   it("rejects a different model result from the final commit-boundary probe", async () => {
-    const tempDir = opTempDirs.make("openclaw-final-mismatched-model-result-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-final-mismatched-model-result-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     const originalConfig = {
       agents: {
         defaults: { model: { primary: "anthropic/claude-sonnet-4-6" } },
@@ -855,13 +855,13 @@ describe("parseSystemAgentOperation", () => {
 
     expect(verifyInferenceConfig).toHaveBeenCalledTimes(2);
     expect(mockConfig.currentConfig()).toEqual(originalConfig);
-    expect(lines.join("\n")).not.toContain("[openclaw] done: config.setDefaultModel");
+    expect(lines.join("\n")).not.toContain("[bot] done: config.setDefaultModel");
     await expect(fs.access(path.join(tempDir, "audit", "system-agent.jsonl"))).rejects.toThrow();
   });
 
   it("rechecks the existing inference binding inside the locked model transform", async () => {
-    const tempDir = opTempDirs.make("openclaw-model-binding-rotated-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-model-binding-rotated-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     const originalConfig = {
       agents: {
         defaults: { model: { primary: "anthropic/claude-sonnet-4-6" } },
@@ -897,13 +897,13 @@ describe("parseSystemAgentOperation", () => {
     expect(verifyInferenceConfig).toHaveBeenCalledOnce();
     expect(beforePersistentApply).toHaveBeenCalledOnce();
     expect(mockConfig.currentConfig()).toEqual(originalConfig);
-    expect(lines.join("\n")).not.toContain("[openclaw] done: config.setDefaultModel");
+    expect(lines.join("\n")).not.toContain("[bot] done: config.setDefaultModel");
     await expect(fs.access(path.join(tempDir, "audit", "system-agent.jsonl"))).rejects.toThrow();
   });
 
   it("rechecks the existing inference binding after the candidate's final live probe", async () => {
-    const tempDir = opTempDirs.make("openclaw-model-binding-final-probe-rotated-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-model-binding-final-probe-rotated-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     const originalConfig = {
       agents: {
         defaults: { model: { primary: "anthropic/claude-sonnet-4-6" } },
@@ -943,13 +943,13 @@ describe("parseSystemAgentOperation", () => {
     expect(verifyInferenceConfig).toHaveBeenCalledTimes(2);
     expect(beforePersistentApply).toHaveBeenCalledTimes(2);
     expect(mockConfig.currentConfig()).toEqual(originalConfig);
-    expect(lines.join("\n")).not.toContain("[openclaw] done: config.setDefaultModel");
+    expect(lines.join("\n")).not.toContain("[bot] done: config.setDefaultModel");
     await expect(fs.access(path.join(tempDir, "audit", "system-agent.jsonl"))).rejects.toThrow();
   });
 
   it("stages and persists model changes at the effective default-agent owner", async () => {
-    const tempDir = opTempDirs.make("openclaw-default-agent-model-");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    const tempDir = opTempDirs.make("bot-default-agent-model-");
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     mockConfig.setConfig({
       agents: {
         defaults: { model: { primary: "anthropic/global-default" } },
@@ -967,7 +967,7 @@ describe("parseSystemAgentOperation", () => {
       expect(requireRecord(agents.defaults, "defaults").model).toEqual({
         primary: "anthropic/global-default",
       });
-      const work = listAgentEntries(config as OpenClawConfig).find((entry) => entry.id === "work");
+      const work = listAgentEntries(config as BotConfig).find((entry) => entry.id === "work");
       expect(work?.model).toEqual({
         primary: "openai/gpt-5.5",
       });
@@ -984,7 +984,7 @@ describe("parseSystemAgentOperation", () => {
     expect(requireRecord(agents.defaults, "defaults").model).toEqual({
       primary: "anthropic/global-default",
     });
-    const work = listAgentEntries(mockConfig.currentConfig() as OpenClawConfig).find(
+    const work = listAgentEntries(mockConfig.currentConfig() as BotConfig).find(
       (entry) => entry.id === "work",
     );
     expect(work?.model).toEqual({

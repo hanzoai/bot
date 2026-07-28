@@ -1,5 +1,5 @@
 // Meta tests cover plugin registration and catalog shape.
-import { capturePluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { capturePluginRegistration } from "bot/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it } from "vitest";
 import { buildMetaProvider } from "./api.js";
 import plugin from "./index.js";

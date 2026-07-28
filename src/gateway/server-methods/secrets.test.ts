@@ -2,7 +2,7 @@
  * Tests for gateway secret resolution and redacted secret method responses.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it, vi } from "vitest";
 
 // Handler tests only need the registry verdicts they exercise. Dedicated

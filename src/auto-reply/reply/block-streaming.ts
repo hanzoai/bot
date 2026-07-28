@@ -2,7 +2,7 @@
 import { getChannelPlugin, normalizeChannelId } from "../../channels/plugins/index.js";
 import { resolveChannelStreamingBlockCoalesce } from "../../channels/streaming.js";
 import type { BlockStreamingCoalesceConfig } from "../../config/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { resolveAccountEntry } from "../../routing/account-lookup.js";
 import { normalizeAccountId } from "../../routing/session-key.js";
 import { normalizeMessageChannel } from "../../utils/message-channel.js";
@@ -13,7 +13,7 @@ const DEFAULT_BLOCK_STREAM_MAX = 1200;
 const DEFAULT_BLOCK_STREAM_COALESCE_IDLE_MS = 1000;
 
 function resolveProviderChunkContext(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   provider?: string,
   accountId?: string | null,
 ) {
@@ -42,7 +42,7 @@ function resolveScopedBlockStreamingCoalesce(
 }
 
 function resolveProviderBlockStreamingCoalesce(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   providerKey?: TextChunkProvider;
   accountId?: string | null;
 }): BlockStreamingCoalesceConfig | undefined {
@@ -102,7 +102,7 @@ function clampPositiveInteger(
 }
 
 export function resolveEffectiveBlockStreamingConfig(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider?: string;
   accountId?: string | null;
   chunking?: BlockStreamingChunking;
@@ -160,7 +160,7 @@ export function resolveEffectiveBlockStreamingConfig(params: {
 }
 
 export function resolveBlockStreamingChunking(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   provider?: string,
   accountId?: string | null,
 ): BlockStreamingChunking {
@@ -190,7 +190,7 @@ export function resolveBlockStreamingChunking(
 }
 
 function resolveBlockStreamingCoalescing(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   provider?: string,
   accountId?: string | null,
   chunking?: {

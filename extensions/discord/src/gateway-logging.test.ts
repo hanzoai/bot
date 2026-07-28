@@ -2,12 +2,12 @@
 import { EventEmitter } from "node:events";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("openclaw/plugin-sdk/runtime-env", () => ({
+vi.mock("bot/plugin-sdk/runtime-env", () => ({
   logVerbose: vi.fn(),
   warn: (message: string) => `warn:${message}`,
 }));
 
-let logVerbose: typeof import("openclaw/plugin-sdk/runtime-env").logVerbose;
+let logVerbose: typeof import("bot/plugin-sdk/runtime-env").logVerbose;
 let attachDiscordGatewayLogging: typeof import("./gateway-logging.js").attachDiscordGatewayLogging;
 
 const makeRuntime = () => ({
@@ -18,7 +18,7 @@ const makeRuntime = () => ({
 
 describe("attachDiscordGatewayLogging", () => {
   beforeAll(async () => {
-    const { logVerbose: loadedLogVerbose } = await import("openclaw/plugin-sdk/runtime-env");
+    const { logVerbose: loadedLogVerbose } = await import("bot/plugin-sdk/runtime-env");
     logVerbose = loadedLogVerbose;
     ({ attachDiscordGatewayLogging } = await import("./gateway-logging.js"));
   });

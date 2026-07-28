@@ -95,8 +95,8 @@ const loadGatewayPluginsHttpModule = async () => await import("./server/plugins-
 
 /** Creates the HTTP/WebSocket runtime state and pinned plugin registries for one gateway start. */
 export async function createGatewayRuntimeState(params: {
-  cfg: import("../config/config.js").OpenClawConfig;
-  getRuntimeConfig?: () => import("../config/config.js").OpenClawConfig;
+  cfg: import("../config/config.js").BotConfig;
+  getRuntimeConfig?: () => import("../config/config.js").BotConfig;
   bindHost: string;
   port: number;
   controlUiEnabled: boolean;

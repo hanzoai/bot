@@ -1,5 +1,5 @@
 // Tests lifecycle/work admission ordering across canonical keys and backing ids.
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "bot/plugin-sdk/test-fixtures";
 import { expect, it } from "vitest";
 import { runExclusiveSessionStoreWrite } from "../config/sessions/store-writer.js";
 import {

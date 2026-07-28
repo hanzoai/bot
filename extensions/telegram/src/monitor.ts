@@ -1,18 +1,18 @@
 // Telegram plugin module implements monitor behavior.
 import type { RunOptions } from "@grammyjs/runner";
-import { CHANNEL_APPROVAL_NATIVE_RUNTIME_CONTEXT_CAPABILITY } from "openclaw/plugin-sdk/approval-handler-adapter-runtime";
-import { registerChannelRuntimeContext } from "openclaw/plugin-sdk/channel-runtime-context";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { resolveAgentMaxConcurrent } from "openclaw/plugin-sdk/model-session-runtime";
-import { getRuntimeConfig } from "openclaw/plugin-sdk/runtime-config-snapshot";
+import { CHANNEL_APPROVAL_NATIVE_RUNTIME_CONTEXT_CAPABILITY } from "bot/plugin-sdk/approval-handler-adapter-runtime";
+import { registerChannelRuntimeContext } from "bot/plugin-sdk/channel-runtime-context";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { resolveAgentMaxConcurrent } from "bot/plugin-sdk/model-session-runtime";
+import { getRuntimeConfig } from "bot/plugin-sdk/runtime-config-snapshot";
 import {
   registerUncaughtExceptionHandler,
   registerUnhandledRejectionHandler,
   waitForAbortSignal,
-} from "openclaw/plugin-sdk/runtime-env";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/runtime-env";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "bot/plugin-sdk/ssrf-runtime";
 import { resolveTelegramAccount } from "./accounts.js";
 import { resolveTelegramAllowedUpdates } from "./allowed-updates.js";
 import { isTelegramExecApprovalHandlerConfigured } from "./exec-approvals.js";
@@ -29,7 +29,7 @@ import type {
   TelegramUpdateOffsetRotationInfo,
 } from "./update-offset-store.js";
 
-function createTelegramRunnerOptions(cfg: OpenClawConfig): RunOptions<unknown> {
+function createTelegramRunnerOptions(cfg: BotConfig): RunOptions<unknown> {
   return {
     sink: {
       concurrency: resolveAgentMaxConcurrent(cfg),

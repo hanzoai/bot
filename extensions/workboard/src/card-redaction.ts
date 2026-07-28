@@ -1,4 +1,4 @@
-import type { WorkboardCard } from "@openclaw/workboard-contract";
+import type { WorkboardCard } from "@hanzo/bot-workboard-contract";
 
 export function redactClaimToken(card: WorkboardCard): WorkboardCard {
   const claim = card.metadata?.claim;

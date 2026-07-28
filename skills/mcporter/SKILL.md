@@ -4,7 +4,7 @@ description: "List, configure, authenticate, call, and inspect MCP servers/tools
 homepage: http://mcporter.dev
 metadata:
   {
-    "openclaw":
+    "bot":
       {
         "emoji": "📦",
         "requires": { "bins": ["mcporter"] },

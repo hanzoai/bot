@@ -1,10 +1,10 @@
 // Covers agent harness selection, fallback behavior, and compaction routing.
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { Model } from "bot/plugin-sdk/llm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
+import type { BotConfig } from "../../config/config.js";
+import { BOT_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../context-engine/host-compat.js";
 import type { ContextEngine } from "../../context-engine/types.js";
-import { createOpenClawCodingTools } from "../../plugin-sdk/agent-harness.js";
+import { createBotCodingTools } from "../../plugin-sdk/agent-harness.js";
 import { mintSecretSentinel } from "../../secrets/sentinel.js";
 import { isHostScopedAgentToolActive } from "../agent-tools.ring-zero-context.js";
 import { testing as cliBackendsTesting } from "../cli-backends.test-support.js";
@@ -16,8 +16,8 @@ import type { SystemAgentToolOptions } from "../tools/system-agent-tool.js";
 import { maybeCompactAgentHarnessSession } from "./compaction.js";
 import { clearAgentHarnesses, registerAgentHarness } from "./registry.js";
 import {
-  agentHarnessBuildsOpenClawTools,
-  agentHarnessExposesOpenClawTools,
+  agentHarnessBuildsBotTools,
+  agentHarnessExposesBotTools,
   resolveAgentHarnessPolicy,
   resolveAvailableAgentHarnessPolicy,
   resolvePluginHarnessPolicyToolsAllow,
@@ -38,7 +38,7 @@ import type {
 } from "./types.js";
 
 const agentRunAttempt = vi.fn<AgentHarness["runAttempt"]>(async () =>
-  createAttemptResult("openclaw"),
+  createAttemptResult("bot"),
 );
 const compactAuthMocks = vi.hoisted(() => ({
   ensureAuthProfileStore: vi.fn(),
@@ -51,22 +51,22 @@ const providerOwnerMocks = vi.hoisted(() => ({
   resolveProviderRefOwnership: vi.fn(),
 }));
 
-it("identifies harnesses that expose OpenClaw tools", () => {
-  expect(agentHarnessBuildsOpenClawTools("openclaw")).toBe(false);
-  expect(agentHarnessBuildsOpenClawTools("codex")).toBe(true);
-  expect(agentHarnessBuildsOpenClawTools("copilot")).toBe(true);
-  expect(agentHarnessBuildsOpenClawTools("custom")).toBe(false);
-  expect(agentHarnessExposesOpenClawTools("openclaw")).toBe(true);
-  expect(agentHarnessExposesOpenClawTools("codex")).toBe(true);
-  expect(agentHarnessExposesOpenClawTools("copilot")).toBe(true);
-  expect(agentHarnessExposesOpenClawTools("custom")).toBe(false);
+it("identifies harnesses that expose Bot tools", () => {
+  expect(agentHarnessBuildsBotTools("bot")).toBe(false);
+  expect(agentHarnessBuildsBotTools("codex")).toBe(true);
+  expect(agentHarnessBuildsBotTools("copilot")).toBe(true);
+  expect(agentHarnessBuildsBotTools("custom")).toBe(false);
+  expect(agentHarnessExposesBotTools("bot")).toBe(true);
+  expect(agentHarnessExposesBotTools("codex")).toBe(true);
+  expect(agentHarnessExposesBotTools("copilot")).toBe(true);
+  expect(agentHarnessExposesBotTools("custom")).toBe(false);
 });
 
-vi.mock("./builtin-openclaw.js", () => ({
-  createOpenClawAgentHarness: (): AgentHarness => ({
-    id: "openclaw",
-    label: "OpenClaw embedded agent",
-    contextEngineHostCapabilities: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST.capabilities,
+vi.mock("./builtin-bot.js", () => ({
+  createBotAgentHarness: (): AgentHarness => ({
+    id: "bot",
+    label: "Bot embedded agent",
+    contextEngineHostCapabilities: BOT_EMBEDDED_CONTEXT_ENGINE_HOST.capabilities,
     supports: () => ({ supported: true, priority: 0 }),
     runAttempt: agentRunAttempt,
   }),
@@ -94,7 +94,7 @@ vi.mock("../../plugins/providers.js", () => ({
   resolveProviderRefOwnership: providerOwnerMocks.resolveProviderRefOwnership,
 }));
 
-const originalRuntime = process.env.OPENCLAW_AGENT_RUNTIME;
+const originalRuntime = process.env.BOT_AGENT_RUNTIME;
 
 beforeEach(() => {
   clearAgentHarnesses();
@@ -145,13 +145,13 @@ afterEach(() => {
   compactAuthMocks.ensureAuthProfileStoreWithoutExternalProfiles.mockReset();
   providerOwnerMocks.resolveProviderRefOwnership.mockReset();
   if (originalRuntime == null) {
-    delete process.env.OPENCLAW_AGENT_RUNTIME;
+    delete process.env.BOT_AGENT_RUNTIME;
   } else {
-    process.env.OPENCLAW_AGENT_RUNTIME = originalRuntime;
+    process.env.BOT_AGENT_RUNTIME = originalRuntime;
   }
 });
 
-function createAttemptParams(config?: OpenClawConfig): EmbeddedRunAttemptParams {
+function createAttemptParams(config?: BotConfig): EmbeddedRunAttemptParams {
   return {
     prompt: "hello",
     sessionId: "session-1",
@@ -265,7 +265,7 @@ function registerSuccessfulCodexHarness(): void {
   );
 }
 
-function groupSenderDenyAllConfig(): OpenClawConfig {
+function groupSenderDenyAllConfig(): BotConfig {
   // Mirrors Telegram sender policy shape used when selection must preserve
   // channel/group sender tool constraints across fallback attempts.
   return {
@@ -280,10 +280,10 @@ function groupSenderDenyAllConfig(): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
-function groupDenyAllConfig(): OpenClawConfig {
+function groupDenyAllConfig(): BotConfig {
   return {
     channels: {
       telegram: {
@@ -294,10 +294,10 @@ function groupDenyAllConfig(): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
-function providerRuntimeConfig(provider: string, runtime: string): OpenClawConfig {
+function providerRuntimeConfig(provider: string, runtime: string): BotConfig {
   return {
     models: {
       providers: {
@@ -308,14 +308,14 @@ function providerRuntimeConfig(provider: string, runtime: string): OpenClawConfi
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function agentModelRuntimeConfig(
   modelRef: string,
   runtime: string,
   agentId?: string,
-): OpenClawConfig {
+): BotConfig {
   if (agentId) {
     return {
       agents: {
@@ -324,7 +324,7 @@ function agentModelRuntimeConfig(
           { id: agentId, models: { [modelRef]: { agentRuntime: { id: runtime } } } },
         ],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
   }
   return {
     agents: {
@@ -334,7 +334,7 @@ function agentModelRuntimeConfig(
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 type CompactSessionParams = Parameters<typeof maybeCompactAgentHarnessSession>[0];
@@ -408,7 +408,7 @@ describe("runAgentHarnessAttempt", () => {
     let hostAuthorityActive = true;
     const finalizeSettledTurn = vi.fn<NonNullable<AgentHarness["finalizeSettledTurn"]>>(
       async ({ attempt, settledAttempt: _settledAttempt }) => {
-        hostAuthorityActive = isHostScopedAgentToolActive("openclaw");
+        hostAuthorityActive = isHostScopedAgentToolActive("bot");
         expect(attempt.operation).toBe("settled-tool-finalization");
         return {
           assistant: createFinalAssistant(),
@@ -460,7 +460,7 @@ describe("runAgentHarnessAttempt", () => {
   });
 
   it.each(["codex", "copilot"] as const)(
-    "binds the host OpenClaw tool to the %s SDK construction path without leaking authority",
+    "binds the host Bot tool to the %s SDK construction path without leaking authority",
     async (harnessId) => {
       let receivedPrivateAuthority = true;
       let hostScopeActive = false;
@@ -468,15 +468,15 @@ describe("runAgentHarnessAttempt", () => {
       const pluginRunAttempt = vi.fn<AgentHarness["runAttempt"]>(async (attemptParams) => {
         receivedPrivateAuthority = "systemAgentTool" in attemptParams;
         await Promise.resolve();
-        hostScopeActive = isHostScopedAgentToolActive("openclaw");
-        toolNames = createOpenClawCodingTools({
-          config: { tools: { allow: ["read"], deny: ["openclaw"], toolSearch: true } },
-          runtimeToolAllowlist: ["openclaw"],
+        hostScopeActive = isHostScopedAgentToolActive("bot");
+        toolNames = createBotCodingTools({
+          config: { tools: { allow: ["read"], deny: ["bot"], toolSearch: true } },
+          runtimeToolAllowlist: ["bot"],
           toolConstructionPlan: {
             includeBaseCodingTools: false,
             includeShellTools: false,
             includeChannelTools: false,
-            includeOpenClawTools: true,
+            includeBotTools: true,
             includePluginTools: false,
           },
         }).map((tool) => tool.name);
@@ -494,7 +494,7 @@ describe("runAgentHarnessAttempt", () => {
       const params = createAttemptParams(
         providerRuntimeConfig("codex", harnessId),
       ) as EmbeddedRunAttemptParams & { systemAgentTool?: SystemAgentToolOptions };
-      params.toolsAllow = ["openclaw"];
+      params.toolsAllow = ["bot"];
       params.systemAgentTool = { surface: "cli", proposalRef: {}, directiveRef: {} };
 
       await runAgentHarnessAttempt(params);
@@ -502,15 +502,15 @@ describe("runAgentHarnessAttempt", () => {
       expect(pluginRunAttempt).toHaveBeenCalledTimes(1);
       expect(receivedPrivateAuthority).toBe(false);
       expect(hostScopeActive).toBe(true);
-      expect(toolNames).toEqual(["openclaw"]);
-      expect(isHostScopedAgentToolActive("openclaw")).toBe(false);
+      expect(toolNames).toEqual(["bot"]);
+      expect(isHostScopedAgentToolActive("bot")).toBe(false);
     },
   );
 
   it.each([
     { name: "missing", toolsAllow: undefined },
-    { name: "broad", toolsAllow: ["openclaw", "read"] },
-  ])("rejects $name allowlists for private OpenClaw authority", async ({ toolsAllow }) => {
+    { name: "broad", toolsAllow: ["bot", "read"] },
+  ])("rejects $name allowlists for private Bot authority", async ({ toolsAllow }) => {
     const pluginRunAttempt = vi.fn<AgentHarness["runAttempt"]>(async () =>
       createAttemptResult("codex"),
     );
@@ -530,13 +530,13 @@ describe("runAgentHarnessAttempt", () => {
     params.systemAgentTool = { surface: "cli", proposalRef: {}, directiveRef: {} };
 
     await expect(runAgentHarnessAttempt(params)).rejects.toThrow(
-      'OpenClaw host authority requires toolsAllow: ["openclaw"]',
+      'Bot host authority requires toolsAllow: ["bot"]',
     );
     expect(pluginRunAttempt).not.toHaveBeenCalled();
-    expect(isHostScopedAgentToolActive("openclaw")).toBe(false);
+    expect(isHostScopedAgentToolActive("bot")).toBe(false);
   });
 
-  it("keeps the host OpenClaw allowlist across global, agent, and sandbox deny-all policy", async () => {
+  it("keeps the host Bot allowlist across global, agent, and sandbox deny-all policy", async () => {
     const received: Array<{
       toolsAllow: string[] | undefined;
       extraSystemPrompt: string | undefined;
@@ -546,7 +546,7 @@ describe("runAgentHarnessAttempt", () => {
       received.push({
         toolsAllow: attemptParams.toolsAllow,
         extraSystemPrompt: attemptParams.extraSystemPrompt,
-        hostScopeActive: isHostScopedAgentToolActive("openclaw"),
+        hostScopeActive: isHostScopedAgentToolActive("bot"),
       });
       return createAttemptResult("codex");
     });
@@ -560,22 +560,22 @@ describe("runAgentHarnessAttempt", () => {
       { ownerPluginId: "codex" },
     );
     const cases: Array<{
-      config: OpenClawConfig;
+      config: BotConfig;
       agentId?: string;
       sessionKey?: string;
     }> = [
-      { config: { tools: { deny: ["*"] } } as OpenClawConfig },
+      { config: { tools: { deny: ["*"] } } as BotConfig },
       {
         config: {
           agents: { list: [{ id: "worker", tools: { deny: ["*"] } }] },
-        } as OpenClawConfig,
+        } as BotConfig,
         agentId: "worker",
       },
       {
         config: {
           agents: { defaults: { sandbox: { mode: "all" } } },
           tools: { sandbox: { tools: { deny: ["*"] } } },
-        } as OpenClawConfig,
+        } as BotConfig,
         sessionKey: "agent:main:session-1",
       },
     ];
@@ -588,47 +588,47 @@ describe("runAgentHarnessAttempt", () => {
       params.agentHarnessRuntimeOverride = "codex";
       params.agentId = testCase.agentId;
       params.sessionKey = testCase.sessionKey;
-      params.toolsAllow = ["openclaw"];
+      params.toolsAllow = ["bot"];
       params.systemAgentTool = { surface: "cli", proposalRef: {}, directiveRef: {} };
       await runAgentHarnessAttempt(params);
     }
 
     expect(received).toEqual([
-      { toolsAllow: ["openclaw"], extraSystemPrompt: undefined, hostScopeActive: true },
-      { toolsAllow: ["openclaw"], extraSystemPrompt: undefined, hostScopeActive: true },
-      { toolsAllow: ["openclaw"], extraSystemPrompt: undefined, hostScopeActive: true },
+      { toolsAllow: ["bot"], extraSystemPrompt: undefined, hostScopeActive: true },
+      { toolsAllow: ["bot"], extraSystemPrompt: undefined, hostScopeActive: true },
+      { toolsAllow: ["bot"], extraSystemPrompt: undefined, hostScopeActive: true },
     ]);
-    expect(isHostScopedAgentToolActive("openclaw")).toBe(false);
+    expect(isHostScopedAgentToolActive("bot")).toBe(false);
   });
 
-  it("binds the same host OpenClaw scope to the built-in OpenClaw harness", async () => {
+  it("binds the same host Bot scope to the built-in Bot harness", async () => {
     let toolNames: string[] = [];
     agentRunAttempt.mockImplementationOnce(async () => {
       await Promise.resolve();
-      toolNames = createOpenClawCodingTools({
-        config: { tools: { allow: ["read"], deny: ["openclaw"], toolSearch: true } },
-        runtimeToolAllowlist: ["openclaw"],
+      toolNames = createBotCodingTools({
+        config: { tools: { allow: ["read"], deny: ["bot"], toolSearch: true } },
+        runtimeToolAllowlist: ["bot"],
         toolConstructionPlan: {
           includeBaseCodingTools: false,
           includeShellTools: false,
           includeChannelTools: false,
-          includeOpenClawTools: true,
+          includeBotTools: true,
           includePluginTools: false,
         },
       }).map((tool) => tool.name);
-      return createAttemptResult("openclaw");
+      return createAttemptResult("bot");
     });
     const params = createAttemptParams(
-      providerRuntimeConfig("codex", "openclaw"),
+      providerRuntimeConfig("codex", "bot"),
     ) as EmbeddedRunAttemptParams & { systemAgentTool?: SystemAgentToolOptions };
-    params.toolsAllow = ["openclaw"];
+    params.toolsAllow = ["bot"];
     params.systemAgentTool = { surface: "gateway", proposalRef: {}, directiveRef: {} };
 
     const result = await runAgentHarnessAttempt(params);
 
-    expect(result.sessionIdUsed).toBe("openclaw");
-    expect(toolNames).toEqual(["openclaw"]);
-    expect(isHostScopedAgentToolActive("openclaw")).toBe(false);
+    expect(result.sessionIdUsed).toBe("bot");
+    expect(toolNames).toEqual(["bot"]);
+    expect(isHostScopedAgentToolActive("bot")).toBe(false);
   });
 
   it("unwraps sentinels only at the plugin harness handoff", async () => {
@@ -663,7 +663,7 @@ describe("runAgentHarnessAttempt", () => {
   });
 
   it("fails when a forced plugin harness is unavailable and fallback is omitted", async () => {
-    process.env.OPENCLAW_AGENT_RUNTIME = "codex";
+    process.env.BOT_AGENT_RUNTIME = "codex";
 
     await expect(
       runAgentHarnessAttempt(createAttemptParams(providerRuntimeConfig("codex", "codex"))),
@@ -671,24 +671,24 @@ describe("runAgentHarnessAttempt", () => {
     expect(agentRunAttempt).not.toHaveBeenCalled();
   });
 
-  it("falls back to the OpenClaw harness in auto mode when no plugin harness matches", async () => {
+  it("falls back to the Bot harness in auto mode when no plugin harness matches", async () => {
     const result = await runAgentHarnessAttempt(createAttemptParams());
 
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("bot");
     expect(agentRunAttempt).toHaveBeenCalledTimes(1);
   });
 
-  it("allows the selected OpenClaw harness to satisfy context-engine pre-prompt assembly", async () => {
+  it("allows the selected Bot harness to satisfy context-engine pre-prompt assembly", async () => {
     const result = await runAgentHarnessAttempt({
-      ...createAttemptParams(providerRuntimeConfig("codex", "openclaw")),
+      ...createAttemptParams(providerRuntimeConfig("codex", "bot")),
       contextEngine: createContextEngineRequiringAssembly(),
     });
 
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("bot");
     expect(agentRunAttempt).toHaveBeenCalledTimes(1);
   });
 
-  it("surfaces an auto-selected plugin harness failure instead of replaying through OpenClaw", async () => {
+  it("surfaces an auto-selected plugin harness failure instead of replaying through Bot", async () => {
     registerFailingCodexHarness();
 
     await expect(runAgentHarnessAttempt(createAttemptParams())).rejects.toThrow(
@@ -740,7 +740,7 @@ describe("runAgentHarnessAttempt", () => {
         harnessAuthProvider: "openai",
         deferredRouteSupport: {
           requestTransportOverrides: "none",
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["bot", "codex"] },
         },
       },
     } as never;
@@ -752,14 +752,14 @@ describe("runAgentHarnessAttempt", () => {
       expect.objectContaining({
         modelProvider: expect.objectContaining({
           requestTransportOverrides: "none",
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["bot", "codex"] },
           preparedAuth: { source: "harness" },
         }),
       }),
     );
   });
 
-  it("surfaces a forced plugin harness failure instead of replaying through OpenClaw", async () => {
+  it("surfaces a forced plugin harness failure instead of replaying through Bot", async () => {
     registerFailingCodexHarness();
 
     await expect(
@@ -843,13 +843,13 @@ describe("runAgentHarnessAttempt", () => {
     expect(agentRunAttempt).not.toHaveBeenCalled();
   });
 
-  it("falls back to OpenClaw when the implicit OpenAI Codex harness is unavailable", async () => {
+  it("falls back to Bot when the implicit OpenAI Codex harness is unavailable", async () => {
     expect(resolveAgentHarnessPolicy({ provider: "openai", modelId: "gpt-5.4" })).toEqual({
       runtime: "codex",
       runtimeSource: "implicit",
     });
     expect(resolveAvailableAgentHarnessPolicy({ provider: "openai", modelId: "gpt-5.4" })).toEqual({
-      runtime: "openclaw",
+      runtime: "bot",
       runtimeSource: "implicit",
     });
 
@@ -859,29 +859,29 @@ describe("runAgentHarnessAttempt", () => {
       modelId: "gpt-5.4",
     });
 
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("bot");
     expect(agentRunAttempt).toHaveBeenCalledTimes(1);
   });
 
-  it("honors explicit OpenClaw runtime for OpenAI agent model runs", async () => {
+  it("honors explicit Bot runtime for OpenAI agent model runs", async () => {
     const result = await runAgentHarnessAttempt({
-      ...createAttemptParams(providerRuntimeConfig("openai", "openclaw")),
+      ...createAttemptParams(providerRuntimeConfig("openai", "bot")),
       provider: "openai",
       modelId: "gpt-5.4",
     });
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("bot");
     expect(agentRunAttempt).toHaveBeenCalledTimes(1);
   });
 
-  it("honors provider wildcard OpenClaw runtime policy for OpenAI agent model runs", async () => {
+  it("honors provider wildcard Bot runtime policy for OpenAI agent model runs", async () => {
     registerSuccessfulCodexHarness();
 
     const result = await runAgentHarnessAttempt({
-      ...createAttemptParams(agentModelRuntimeConfig("openai/*", "openclaw")),
+      ...createAttemptParams(agentModelRuntimeConfig("openai/*", "bot")),
       provider: "openai",
       modelId: "gpt-5.4",
     });
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("bot");
     expect(agentRunAttempt).toHaveBeenCalledTimes(1);
   });
 
@@ -968,23 +968,23 @@ describe("runAgentHarnessAttempt", () => {
   it.each([
     {
       name: "narrow allowlist",
-      config: { tools: { allow: ["message"] } } as OpenClawConfig,
+      config: { tools: { allow: ["message"] } } as BotConfig,
     },
     {
       name: "specific denylist",
-      config: { tools: { deny: ["exec"] } } as OpenClawConfig,
+      config: { tools: { deny: ["exec"] } } as BotConfig,
     },
     {
       name: "narrow profile",
-      config: { tools: { profile: "coding" } } as OpenClawConfig,
+      config: { tools: { profile: "coding" } } as BotConfig,
     },
   ])("marks plugin side questions restricted for a $name", ({ config }) => {
     expect(resolvePluginHarnessPolicyToolsAllow(createAttemptParams(config))).toEqual([]);
   });
 
   it.each([
-    { name: "full tool profile", config: { tools: { profile: "full" } } as OpenClawConfig },
-    { name: "explicit empty allowlist", config: { tools: { allow: [] } } as OpenClawConfig },
+    { name: "full tool profile", config: { tools: { profile: "full" } } as BotConfig },
+    { name: "explicit empty allowlist", config: { tools: { allow: [] } } as BotConfig },
   ])("leaves plugin side questions unrestricted for an $name", ({ config }) => {
     expect(resolvePluginHarnessPolicyToolsAllow(createAttemptParams(config))).toBeUndefined();
   });
@@ -996,7 +996,7 @@ describe("runAgentHarnessAttempt", () => {
           "*": { deny: ["*"] },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolvePluginHarnessPolicyToolsAllow({
@@ -1014,7 +1014,7 @@ describe("runAgentHarnessAttempt", () => {
           "*": { deny: ["*"] },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolvePluginHarnessPolicyToolsAllow({
@@ -1025,7 +1025,7 @@ describe("runAgentHarnessAttempt", () => {
     ).toEqual([]);
   });
 
-  it("leaves OpenClaw harness params unchanged for channel group sender deny-all policy", async () => {
+  it("leaves Bot harness params unchanged for channel group sender deny-all policy", async () => {
     await runAgentHarnessAttempt({
       ...createAttemptParams(groupSenderDenyAllConfig()),
       sessionKey: "agent:main:telegram:group:test-deny-room",
@@ -1045,7 +1045,7 @@ describe("runAgentHarnessAttempt", () => {
     expect(agentRunAttempt).not.toHaveBeenCalled();
   });
 
-  it("does not let a strict agent model plugin runtime fall back to OpenClaw", async () => {
+  it("does not let a strict agent model plugin runtime fall back to Bot", async () => {
     await expect(
       runAgentHarnessAttempt({
         ...createAttemptParams(agentModelRuntimeConfig("codex/gpt-5.4", "codex", "strict")),
@@ -1065,7 +1065,7 @@ describe("selectAgentHarness", () => {
       runtimeSource: "implicit",
     });
     expect(selectAgentHarness({ provider: "custom", modelId: "gpt-5.4-codex" }).id).toBe(
-      "openclaw",
+      "bot",
     );
   });
 
@@ -1098,7 +1098,7 @@ describe("selectAgentHarness", () => {
     });
 
     expect(selectAgentHarness({ provider: "deepseek", modelId: "deepseek-v4-pro" }).id).toBe(
-      "openclaw",
+      "bot",
     );
     expect(supports).not.toHaveBeenCalled();
     expect(providerOwnerMocks.resolveProviderRefOwnership).not.toHaveBeenCalled();
@@ -1158,7 +1158,7 @@ describe("selectAgentHarness", () => {
     expect(unsupportedSupports).toHaveBeenCalledTimes(1);
   });
 
-  it("honors session-level OpenClaw pins when selecting a harness", () => {
+  it("honors session-level Bot pins when selecting a harness", () => {
     const supports = vi.fn(() => ({ supported: true as const, priority: 100 }));
     registerAgentHarness({
       id: "codex",
@@ -1170,10 +1170,10 @@ describe("selectAgentHarness", () => {
     const harness = selectAgentHarness({
       provider: "codex",
       modelId: "gpt-5.4",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "bot",
     });
 
-    expect(harness.id).toBe("openclaw");
+    expect(harness.id).toBe("bot");
     expect(supports).not.toHaveBeenCalled();
   });
 
@@ -1282,7 +1282,7 @@ describe("selectAgentHarness", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     registerAgentHarness({
       id: "copilot",
       label: "Copilot",
@@ -1339,7 +1339,7 @@ describe("selectAgentHarness", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     registerAgentHarness({
       id: "copilot",
       label: "Copilot",
@@ -1391,7 +1391,7 @@ describe("selectAgentHarness", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     expect(
       buildAgentHarnessSupportContext({
@@ -1403,7 +1403,7 @@ describe("selectAgentHarness", () => {
     ).toMatchObject({
       api: "openai-completions",
       requestTransportOverrides: "present",
-      runtimePolicy: { compatibleIds: ["openclaw"] },
+      runtimePolicy: { compatibleIds: ["bot"] },
     });
   });
 
@@ -1423,7 +1423,7 @@ describe("selectAgentHarness", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     expect(
       buildAgentHarnessSupportContext({
@@ -1436,7 +1436,7 @@ describe("selectAgentHarness", () => {
       api: "openai-completions",
       baseUrl: "https://api.openai.com/v1",
       requestTransportOverrides: "present",
-      runtimePolicy: { compatibleIds: ["openclaw"] },
+      runtimePolicy: { compatibleIds: ["bot"] },
     });
   });
 
@@ -1452,7 +1452,7 @@ describe("selectAgentHarness", () => {
         requestedRuntime: "codex",
       }).modelProvider,
     ).toMatchObject({
-      runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+      runtimePolicy: { compatibleIds: ["bot", "codex"] },
     });
   });
 
@@ -1493,12 +1493,12 @@ describe("selectAgentHarness", () => {
             requestTransportOverrides: "none",
           },
           requestedRuntime: "codex",
-          config: config as OpenClawConfig,
+          config: config as BotConfig,
           ...identity,
         }).modelProvider,
       ).toMatchObject({
         requestTransportOverrides: "present",
-        runtimePolicy: { compatibleIds: ["openclaw"] },
+        runtimePolicy: { compatibleIds: ["bot"] },
       });
     },
   );
@@ -1524,11 +1524,11 @@ describe("selectAgentHarness", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
       }).modelProvider,
     ).toMatchObject({
       requestTransportOverrides: "none",
-      runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+      runtimePolicy: { compatibleIds: ["bot", "codex"] },
     });
   });
 
@@ -1553,7 +1553,7 @@ describe("selectAgentHarness", () => {
           api: "openai-responses",
           baseUrl: "https://api.openai.com/v1",
           requestTransportOverrides: "none",
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["bot", "codex"] },
         },
         config: { agents: { defaults: { params: { store: false } } } },
         agentHarnessRuntimeOverride: "codex",
@@ -1566,7 +1566,7 @@ describe("selectAgentHarness", () => {
     );
   });
 
-  it("keeps request-scoped transport overrides on the implicit OpenClaw runtime", () => {
+  it("keeps request-scoped transport overrides on the implicit Bot runtime", () => {
     registerAgentHarness({
       id: "codex",
       label: "Codex",
@@ -1583,7 +1583,7 @@ describe("selectAgentHarness", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const modelProvider = {
       api: "openai-responses",
       baseUrl: "https://api.openai.com/v1",
@@ -1597,7 +1597,7 @@ describe("selectAgentHarness", () => {
         modelProvider,
         config,
       }),
-    ).toEqual({ runtime: "openclaw", runtimeSource: "implicit" });
+    ).toEqual({ runtime: "bot", runtimeSource: "implicit" });
     expect(
       selectAgentHarness({
         provider: "openai",
@@ -1605,7 +1605,7 @@ describe("selectAgentHarness", () => {
         modelProvider,
         config,
       }).id,
-    ).toBe("openclaw");
+    ).toBe("bot");
     expect(
       selectAgentHarness({
         provider: "openai",
@@ -1645,13 +1645,13 @@ describe("selectAgentHarness", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveAvailableAgentHarnessPolicy({ provider: "openai", modelId: "gpt-5.5", config }),
-    ).toEqual({ runtime: "openclaw", runtimeSource: "implicit" });
+    ).toEqual({ runtime: "bot", runtimeSource: "implicit" });
     expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.5", config }).id).toBe(
-      "openclaw",
+      "bot",
     );
     expect(() =>
       selectAgentHarness({
@@ -1679,11 +1679,11 @@ describe("selectAgentHarness", () => {
       api: "openai-completions",
       baseUrl: "https://api.openai.com/v1",
       requestTransportOverrides: "none" as const,
-      runtimePolicy: { compatibleIds: ["openclaw"] },
+      runtimePolicy: { compatibleIds: ["bot"] },
     };
 
     expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.5", modelProvider }).id).toBe(
-      "openclaw",
+      "bot",
     );
     expect(() =>
       selectAgentHarness({
@@ -1708,7 +1708,7 @@ describe("selectAgentHarness", () => {
       runAttempt: vi.fn(async () => createAttemptResult("codex")),
     });
 
-    expect(selectAgentHarness({ provider: "openai", modelId: "gpt-future" }).id).toBe("openclaw");
+    expect(selectAgentHarness({ provider: "openai", modelId: "gpt-future" }).id).toBe("bot");
     expect(supports).toHaveBeenCalledWith(
       expect.objectContaining({
         modelProvider: expect.objectContaining({ runtimePolicy: undefined }),
@@ -1719,7 +1719,7 @@ describe("selectAgentHarness", () => {
   it("projects a harness-owned auth plan as a closed harness source", () => {
     const deferredRouteSupport = {
       requestTransportOverrides: "none" as const,
-      runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+      runtimePolicy: { compatibleIds: ["bot", "codex"] },
     };
     expect(
       resolveAgentHarnessPreparedAuthSupport({
@@ -1778,7 +1778,7 @@ describe("selectAgentHarness", () => {
         modelId: "gpt-future",
         modelProvider: {
           requestTransportOverrides: "none",
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["bot", "codex"] },
           preparedAuth: { source: "harness" },
         },
         agentHarnessRuntimeOverride: "codex",
@@ -1788,7 +1788,7 @@ describe("selectAgentHarness", () => {
       expect.objectContaining({
         modelProvider: expect.objectContaining({
           preparedAuth: { source: "harness" },
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["bot", "codex"] },
         }),
       }),
     );
@@ -1808,14 +1808,14 @@ describe("selectAgentHarness", () => {
       api: "openai-responses",
       baseUrl: "https://api.openai.com/v1",
       requestTransportOverrides: "none" as const,
-      runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+      runtimePolicy: { compatibleIds: ["bot", "codex"] },
       preparedAuth: { source: "direct" as const, mode: "api-key", requirement: "api-key" as const },
     };
     const incompatible = {
       api: "openai-completions",
       baseUrl: "https://api.openai.com/v1",
       requestTransportOverrides: "none" as const,
-      runtimePolicy: { compatibleIds: ["openclaw"] },
+      runtimePolicy: { compatibleIds: ["bot"] },
       preparedAuth: { source: "direct" as const, mode: "api-key", requirement: "api-key" as const },
     };
     const base = { provider: "openai", modelId: "gpt-5.5" };
@@ -1831,7 +1831,7 @@ describe("selectAgentHarness", () => {
         ...base,
         modelProviders: [compatible, incompatible],
       }).id,
-    ).toBe("openclaw");
+    ).toBe("bot");
   });
 
   it.each([
@@ -1857,13 +1857,13 @@ describe("selectAgentHarness", () => {
             api: "openai-responses",
             baseUrl: "https://api.openai.com/v1",
             requestTransportOverrides: "none",
-            runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+            runtimePolicy: { compatibleIds: ["bot", "codex"] },
           },
           {
             api: "openai-completions",
             baseUrl: "https://api.openai.com/v1",
             requestTransportOverrides: "none",
-            runtimePolicy: { compatibleIds: ["openclaw"] },
+            runtimePolicy: { compatibleIds: ["bot"] },
           },
         ],
         ...pin,
@@ -1926,28 +1926,28 @@ describe("selectAgentHarness", () => {
     },
   );
 
-  it("honors explicit OpenClaw runtime overrides when selecting a harness", async () => {
+  it("honors explicit Bot runtime overrides when selecting a harness", async () => {
     registerSuccessfulCodexHarness();
 
     const harness = selectAgentHarness({
       provider: "openai",
       modelId: "gpt-5.4",
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessRuntimeOverride: "bot",
     });
 
-    expect(harness.id).toBe("openclaw");
+    expect(harness.id).toBe("bot");
     expect(providerOwnerMocks.resolveProviderRefOwnership).not.toHaveBeenCalled();
 
     const result = await runAgentHarnessAttempt({
       ...createAttemptParams(),
       provider: "openai",
       modelId: "gpt-5.4",
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessRuntimeOverride: "bot",
     });
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("bot");
   });
 
-  it("treats legacy PI runtime overrides as the built-in OpenClaw harness", async () => {
+  it("treats legacy PI runtime overrides as the built-in Bot harness", async () => {
     registerSuccessfulCodexHarness();
 
     const harness = selectAgentHarness({
@@ -1956,7 +1956,7 @@ describe("selectAgentHarness", () => {
       agentHarnessRuntimeOverride: "pi",
     });
 
-    expect(harness.id).toBe("openclaw");
+    expect(harness.id).toBe("bot");
 
     const result = await runAgentHarnessAttempt({
       ...createAttemptParams(),
@@ -1964,7 +1964,7 @@ describe("selectAgentHarness", () => {
       modelId: "gpt-5.4",
       agentHarnessRuntimeOverride: "pi",
     });
-    expect(result.sessionIdUsed).toBe("openclaw");
+    expect(result.sessionIdUsed).toBe("bot");
   });
 
   it("allows per-agent model runtime policy overrides", () => {
@@ -1979,23 +1979,23 @@ describe("selectAgentHarness", () => {
       }),
     ).toThrow('Requested agent harness "codex" is not registered');
     expect(selectAgentHarness({ provider: "anthropic", modelId: "sonnet-4.6", config }).id).toBe(
-      "openclaw",
+      "bot",
     );
   });
 
-  it("selects OpenClaw when the implicit OpenAI Codex harness is unavailable", () => {
-    expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.4" }).id).toBe("openclaw");
+  it("selects Bot when the implicit OpenAI Codex harness is unavailable", () => {
+    expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.4" }).id).toBe("bot");
   });
 
   it.each(["default", "auto"] as const)(
-    "falls back from configured %s to OpenClaw when implicit Codex is unavailable or unsupported",
+    "falls back from configured %s to Bot when implicit Codex is unavailable or unsupported",
     (runtime) => {
       const config = providerRuntimeConfig("openai", runtime);
       expect(resolveAgentHarnessPolicy({ provider: "openai", modelId: "gpt-5.4", config })).toEqual(
         { runtime: "codex", runtimeSource: "implicit" },
       );
       expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.4", config }).id).toBe(
-        "openclaw",
+        "bot",
       );
 
       const supports = vi.fn(() => ({ supported: false as const, reason: "unsupported route" }));
@@ -2009,14 +2009,14 @@ describe("selectAgentHarness", () => {
         { ownerPluginId: "codex" },
       );
       expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.4", config }).id).toBe(
-        "openclaw",
+        "bot",
       );
       expect(supports).toHaveBeenCalledOnce();
     },
   );
 
   it.each(["default", "auto"] as const)(
-    "keeps a custom OpenAI route on implicit OpenClaw with configured %s",
+    "keeps a custom OpenAI route on implicit Bot with configured %s",
     (runtime) => {
       const supports = vi.fn(() => ({ supported: true as const, priority: 100 }));
       registerAgentHarness(
@@ -2039,13 +2039,13 @@ describe("selectAgentHarness", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
 
       expect(resolveAgentHarnessPolicy({ provider: "openai", modelId: "gpt-5.4", config })).toEqual(
-        { runtime: "openclaw", runtimeSource: "implicit" },
+        { runtime: "bot", runtimeSource: "implicit" },
       );
       expect(selectAgentHarness({ provider: "openai", modelId: "gpt-5.4", config }).id).toBe(
-        "openclaw",
+        "bot",
       );
       expect(supports).not.toHaveBeenCalled();
     },
@@ -2058,7 +2058,7 @@ describe("selectAgentHarness", () => {
           agentRuntime: { id: "codex" },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       selectAgentHarness({
@@ -2066,12 +2066,12 @@ describe("selectAgentHarness", () => {
         modelId: "sonnet-4.6",
         config,
       }).id,
-    ).toBe("openclaw");
+    ).toBe("bot");
   });
 
   it("ignores legacy agent CLI runtime aliases for OpenAI agent model runs", async () => {
     registerSuccessfulCodexHarness();
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       agents: {
         defaults: {
           agentRuntime: { id: "claude-cli" },
@@ -2090,21 +2090,21 @@ describe("selectAgentHarness", () => {
     expect(agentRunAttempt).not.toHaveBeenCalled();
   });
 
-  it("keeps an existing session OpenClaw pin when provider policy forces a plugin harness", () => {
+  it("keeps an existing session Bot pin when provider policy forces a plugin harness", () => {
     registerFailingCodexHarness();
 
     expect(
       selectAgentHarness({
         provider: "codex",
         modelId: "gpt-5.4",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "bot",
         config: providerRuntimeConfig("codex", "codex"),
       }).id,
-    ).toBe("openclaw");
+    ).toBe("bot");
   });
 
-  it("ignores env-forced OpenClaw for OpenAI default runtime selection", () => {
-    process.env.OPENCLAW_AGENT_RUNTIME = "openclaw";
+  it("ignores env-forced Bot for OpenAI default runtime selection", () => {
+    process.env.BOT_AGENT_RUNTIME = "bot";
     registerFailingCodexHarness();
 
     expect(
@@ -2144,11 +2144,11 @@ describe("selectAgentHarness", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("keeps host auth on the built-in OpenClaw compaction fallback", async () => {
+  it("keeps host auth on the built-in Bot compaction fallback", async () => {
     await expect(
       maybeCompactAgentHarnessSession(
         createCompactionParams({
-          agentHarnessId: "openclaw",
+          agentHarnessId: "bot",
           authProfileId: "openai:work",
           authProfileIdSource: "user",
           runtimeAuthPlan: {
@@ -2328,11 +2328,11 @@ describe("selectAgentHarness", () => {
             list: [{ id: "main", default: true, agentDir: "/tmp/main-agent" }],
             defaults: {
               models: {
-                "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+                "openai/gpt-5.5": { agentRuntime: { id: "bot" } },
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
       }),
     ).resolves.toEqual({ ok: true, compacted: false });
     expect(compact).toHaveBeenCalledTimes(1);
@@ -2468,7 +2468,7 @@ describe("selectAgentHarness", () => {
         model: "gpt-5.5",
         authProfileId: "deleted-profile",
         agentHarnessId: "codex",
-        config: agentModelRuntimeConfig("openai/gpt-5.5", "openclaw"),
+        config: agentModelRuntimeConfig("openai/gpt-5.5", "bot"),
       }),
     ).resolves.toEqual({ ok: true, compacted: false });
     expect(compact).toHaveBeenCalledTimes(1);
@@ -2650,7 +2650,7 @@ describe("selectAgentHarness", () => {
     );
   });
 
-  it("does not compact a selected plugin harness through OpenClaw when the plugin has no compactor", async () => {
+  it("does not compact a selected plugin harness through Bot when the plugin has no compactor", async () => {
     registerFailingCodexHarness();
 
     await expect(
@@ -2774,7 +2774,7 @@ describe("selectAgentHarness", () => {
     { provider: "anthropic", modelId: "sonnet-4.6", alias: "claude-cli" },
     { provider: "google", modelId: "gemini-3-pro-preview", alias: "google-gemini-cli" },
   ])(
-    "returns OpenClaw for explicit CLI runtime alias $alias on $provider instead of throwing MissingAgentHarnessError",
+    "returns Bot for explicit CLI runtime alias $alias on $provider instead of throwing MissingAgentHarnessError",
     ({ provider, modelId, alias }) => {
       expect(
         selectAgentHarness({
@@ -2782,7 +2782,7 @@ describe("selectAgentHarness", () => {
           modelId,
           agentHarnessRuntimeOverride: alias,
         }).id,
-      ).toBe("openclaw");
+      ).toBe("bot");
     },
   );
 

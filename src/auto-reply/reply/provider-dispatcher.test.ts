@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type {
   ReplyDispatcherOptions,
   ReplyDispatcherWithTypingOptions,
@@ -43,7 +43,7 @@ describe("provider dispatcher wrappers", () => {
 
     await dispatchReplyWithBufferedBlockDispatcher({
       ctx: { Body: "hello" },
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions,
       toolsAllow: ["message"],
     });
@@ -64,7 +64,7 @@ describe("provider dispatcher wrappers", () => {
 
     await dispatchReplyWithDispatcher({
       ctx: { Body: "hello" },
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions,
       toolsAllow: ["message"],
     });

@@ -1,9 +1,9 @@
-import { resolveChannelTtsVoiceDelivery } from "openclaw/plugin-sdk/channel-targets";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { transcodeAudioBuffer } from "openclaw/plugin-sdk/media-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { tempWorkspaceSync, resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/sandbox";
-import { scheduleCleanup, type TtsDirectiveOverrides } from "openclaw/plugin-sdk/speech-core";
+import { resolveChannelTtsVoiceDelivery } from "bot/plugin-sdk/channel-targets";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { transcodeAudioBuffer } from "bot/plugin-sdk/media-runtime";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
+import { tempWorkspaceSync, resolvePreferredBotTmpDir } from "bot/plugin-sdk/sandbox";
+import { scheduleCleanup, type TtsDirectiveOverrides } from "bot/plugin-sdk/speech-core";
 import { assertSpeechRuntimeAvailable } from "./runtime-availability.js";
 import { normalizeSpeechText } from "./speech-text.js";
 import { executeTtsProviderAttempts, resolveTtsRequestSetup } from "./tts-synthesis-support.js";
@@ -70,7 +70,7 @@ export function shouldDeliverTtsAsVoice(params: {
 
 export async function textToSpeech(params: {
   text: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prefsPath?: string;
   channel?: string;
   overrides?: TtsDirectiveOverrides;
@@ -107,7 +107,7 @@ export async function textToSpeech(params: {
   }
 
   const temp = tempWorkspaceSync({
-    rootDir: resolvePreferredOpenClawTmpDir(),
+    rootDir: resolvePreferredBotTmpDir(),
     prefix: "tts-",
   });
   const audioPath = temp.write(`voice-${Date.now()}${fileExtension}`, audioBuffer);
@@ -178,7 +178,7 @@ async function maybePreTranscodeForVoiceDelivery(params: {
 
 export async function synthesizeSpeech(params: {
   text: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prefsPath?: string;
   channel?: string;
   overrides?: TtsDirectiveOverrides;

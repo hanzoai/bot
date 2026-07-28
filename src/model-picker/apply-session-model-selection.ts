@@ -22,7 +22,7 @@ import {
   sessionModelOverrideChangesApplied,
 } from "../config/sessions/session-snapshot-merge.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { triggerSessionPatchHook } from "../gateway/session-patch-hooks.js";
 import { enqueueSystemEvent } from "../infra/system-events.js";
 import {
@@ -41,7 +41,7 @@ export type SessionModelSelectionRequest = {
 };
 
 export type ApplySessionModelSelectionParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   sessionKey: string;
   storePath?: string;
@@ -119,7 +119,7 @@ export function applySessionModelSelectionToEntry(params: {
 }
 
 function resolveRuntimeDirective(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: SessionEntry;
   provider: string;
   request: SessionModelSelectionRequest["runtime"];

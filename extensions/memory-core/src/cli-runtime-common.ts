@@ -1,9 +1,9 @@
 import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { isUsageCountedSessionTranscriptFileName } from "openclaw/plugin-sdk/memory-core-host-engine-qmd";
-import type { PluginStateLeaseRunner } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { buildAgentSessionKey } from "openclaw/plugin-sdk/routing";
+import { isUsageCountedSessionTranscriptFileName } from "bot/plugin-sdk/memory-core-host-engine-qmd";
+import type { PluginStateLeaseRunner } from "bot/plugin-sdk/plugin-state-runtime";
+import { buildAgentSessionKey } from "bot/plugin-sdk/routing";
 import {
   defaultRuntime,
   formatErrorMessage,
@@ -16,7 +16,7 @@ import {
   resolveSessionTranscriptsDirForAgent,
   shortenHomePath,
   theme,
-  type OpenClawConfig,
+  type BotConfig,
   withManager,
 } from "./cli.host.runtime.js";
 import { asRecord } from "./dreaming-shared.js";
@@ -58,7 +58,7 @@ export function emitMemorySecretResolveDiagnostics(
     }
   }
 }
-export function resolveMemoryPluginConfig(cfg: OpenClawConfig): Record<string, unknown> {
+export function resolveMemoryPluginConfig(cfg: BotConfig): Record<string, unknown> {
   const entry = asRecord(cfg.plugins?.entries?.["memory-core"]);
   return asRecord(entry?.config) ?? {};
 }
@@ -84,7 +84,7 @@ export function formatAuditCounts(audit: ShortTermAuditSummary): string {
   const suffix = scriptCoverage ? ` · scripts=${scriptCoverage}` : "";
   return `${audit.entryCount} entries · ${audit.promotedCount} promoted · ${audit.conceptTaggedEntryCount} concept-tagged · ${audit.spacedEntryCount} spaced${suffix}`;
 }
-export function resolveAgent(cfg: OpenClawConfig, agent?: string) {
+export function resolveAgent(cfg: BotConfig, agent?: string) {
   const trimmed = agent?.trim();
   if (trimmed) {
     return trimmed;
@@ -99,7 +99,7 @@ export function buildCliMemorySearchSessionKey(agentId: string): string {
     dmScope: "per-channel-peer",
   });
 }
-export function resolveAgentIds(cfg: OpenClawConfig, agent?: string): string[] {
+export function resolveAgentIds(cfg: BotConfig, agent?: string): string[] {
   const trimmed = agent?.trim();
   if (trimmed) {
     return [trimmed];
@@ -114,7 +114,7 @@ export function formatExtraPaths(workspaceDir: string, extraPaths: string[]): st
   return normalizeExtraMemoryPaths(workspaceDir, extraPaths).map((entry) => shortenHomePath(entry));
 }
 export async function withMemoryManagerForAgent(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   purpose?: MemoryManagerPurpose;
   acquireLocalService?: MemoryCoreAcquireLocalService;

@@ -14,7 +14,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 const artifactDir = path.resolve(
   process.cwd(),
@@ -69,7 +69,7 @@ function observerDigest(params: {
 }
 
 async function waitForToastUpdate(page: Page): Promise<void> {
-  await page.locator("openclaw-toast-host").evaluate(async (element) => {
+  await page.locator("bot-toast-host").evaluate(async (element) => {
     await (element as HTMLElement & { updateComplete: Promise<unknown> }).updateComplete;
   });
 }
@@ -81,21 +81,21 @@ async function emitObserverAndReadToast(
 ): Promise<{ actionable: boolean | null; message: string; visible: boolean }> {
   // Toasts auto-dismiss after 6000ms. Keep emit, read, and any action in one browser
   // step, including the shell's lazy runtime load and the toast host's Lit update.
-  return await page.locator("openclaw-toast-host").evaluate(
+  return await page.locator("bot-toast-host").evaluate(
     async (element, params) => {
       const host = element as HTMLElement & { updateComplete: Promise<unknown> };
-      const app = document.querySelector("openclaw-app-shell") as
+      const app = document.querySelector("bot-app-shell") as
         | (HTMLElement & {
             criticalNoticeRuntime?: Promise<unknown> | null;
           })
         | null;
       const gateway = (
         window as Window & {
-          openclawControlUiE2eGateway?: {
+          botControlUiE2eGateway?: {
             emit: (event: string, payload?: unknown) => void;
           };
         }
-      ).openclawControlUiE2eGateway;
+      ).botControlUiE2eGateway;
       if (!app || !gateway) {
         throw new Error("Critical observer notice owner is unavailable");
       }
@@ -161,7 +161,7 @@ describeControlUiE2e("Control UI critical observer notice mocked Gateway E2E", (
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(
-        `Playwright Chromium is not installed at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+        `Playwright Chromium is not installed at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install chromium\`, or set BOT_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
       );
     }
     browser = await chromium.launch({ executablePath: chromiumExecutablePath });

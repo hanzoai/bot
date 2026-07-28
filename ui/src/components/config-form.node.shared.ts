@@ -129,7 +129,7 @@ export function renderSensitiveToggleButton(params: {
       : t("configForm.revealValue")
     : t("configForm.disableStreamToReveal");
   return html`
-    <openclaw-tooltip .content=${label}>
+    <bot-tooltip .content=${label}>
       <button
         type="button"
         class="settings-secret__toggle"
@@ -140,7 +140,7 @@ export function renderSensitiveToggleButton(params: {
       >
         ${state.isRevealed ? icons.eye : icons.eyeOff}
       </button>
-    </openclaw-tooltip>
+    </bot-tooltip>
   `;
 }
 

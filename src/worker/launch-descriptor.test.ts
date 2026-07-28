@@ -11,7 +11,7 @@ import { buildWorkerConnectParams, parseWorkerLaunchDescriptor } from "./launch-
 function launchDescriptor(): WorkerLaunchDescriptor {
   return {
     version: 2,
-    socketPath: "/tmp/openclaw-worker/gateway.sock",
+    socketPath: "/tmp/bot-worker/gateway.sock",
     admission: {
       environmentId: "environment-1",
       credential: ["worker", "fixture", "value"].join("-"),
@@ -20,7 +20,7 @@ function launchDescriptor(): WorkerLaunchDescriptor {
       rpcSetVersion: WORKER_RPC_SET_VERSION,
       handshake: {
         bundleHash: "a".repeat(64),
-        openclawVersion: "2026.7.12",
+        botVersion: "2026.7.12",
         protocolFeatures: [...WORKER_PROTOCOL_FEATURES],
       },
     },
@@ -29,7 +29,7 @@ function launchDescriptor(): WorkerLaunchDescriptor {
       turnId: "turn-1",
       prompt: "Inspect the workspace.",
       suppressPromptTranscript: false,
-      workspaceDir: "/tmp/openclaw-worker/workspace",
+      workspaceDir: "/tmp/bot-worker/workspace",
       modelRef: { provider: "provider-1", model: "model-1" },
       inferenceOptions: { reasoning: "medium", maxTokens: 512 },
       initialMessages: [
@@ -53,7 +53,7 @@ describe("worker launch descriptor", () => {
     expect(parseWorkerLaunchDescriptor(structuredClone(descriptor))).toEqual(descriptor);
     expect(buildWorkerConnectParams(descriptor)).toMatchObject({
       role: "worker",
-      client: { id: "openclaw-worker", mode: "worker", version: "2026.7.12" },
+      client: { id: "bot-worker", mode: "worker", version: "2026.7.12" },
       admission: { ...descriptor.admission, runId: descriptor.assignment.runId },
     });
   });

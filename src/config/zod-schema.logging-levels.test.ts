@@ -1,10 +1,10 @@
 // Verifies logging-level schema parsing and defaults.
 import { describe, expect, it } from "vitest";
-import { OpenClawSchema } from "./zod-schema.js";
+import { BotSchema } from "./zod-schema.js";
 
-describe("OpenClawSchema logging levels", () => {
+describe("BotSchema logging levels", () => {
   it("accepts valid logging level values for level and consoleLevel", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       logging: {
         level: "debug",
         consoleLevel: "warn",
@@ -15,12 +15,12 @@ describe("OpenClawSchema logging levels", () => {
   });
 
   it("rejects invalid logging level values", () => {
-    const invalidLevel = OpenClawSchema.safeParse({
+    const invalidLevel = BotSchema.safeParse({
       logging: {
         level: "loud",
       },
     });
-    const invalidConsoleLevel = OpenClawSchema.safeParse({
+    const invalidConsoleLevel = BotSchema.safeParse({
       logging: {
         consoleLevel: "verbose",
       },

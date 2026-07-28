@@ -9,7 +9,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { saveExecApprovals, type ExecApprovalsFile } from "../infra/exec-approvals.js";
 import type { ExecAutoReviewer } from "../infra/exec-auto-review.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
 import { resetProcessRegistryForTests } from "./bash-process-registry.test-support.js";
 import { createExecTool as createExecToolImpl } from "./bash-tools.exec-run.js";
@@ -67,15 +67,15 @@ describe("exec security floor", () => {
       "USERPROFILE",
       "HOMEDRIVE",
       "HOMEPATH",
-      "OPENCLAW_HOME",
-      "OPENCLAW_STATE_DIR",
+      "BOT_HOME",
+      "BOT_STATE_DIR",
       "SHELL",
     ]);
-    tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-exec-security-floor-"));
+    tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-exec-security-floor-"));
     setTestEnvValue("HOME", tempRoot);
     setTestEnvValue("USERPROFILE", tempRoot);
-    setTestEnvValue("OPENCLAW_HOME", tempRoot);
-    setTestEnvValue("OPENCLAW_STATE_DIR", path.join(tempRoot, "state"));
+    setTestEnvValue("BOT_HOME", tempRoot);
+    setTestEnvValue("BOT_STATE_DIR", path.join(tempRoot, "state"));
     if (process.platform === "win32") {
       const parsed = path.parse(tempRoot);
       setTestEnvValue("HOMEDRIVE", parsed.root.slice(0, 2));
@@ -91,7 +91,7 @@ describe("exec security floor", () => {
   afterEach(() => {
     const dir = tempRoot;
     tempRoot = undefined;
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     envSnapshot.restore();
     if (dir) {
       fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 20 });

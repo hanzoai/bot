@@ -1,8 +1,8 @@
 import type {
   AgentMessage,
   EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { attachCodexMirrorIdentity, attachUpstreamUserText } from "./upstream-prompt-provenance.js";
 
 type MirroredUserMessage = Extract<AgentMessage, { role: "user" }>;

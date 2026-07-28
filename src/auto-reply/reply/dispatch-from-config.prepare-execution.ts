@@ -1,14 +1,14 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import {
   isFastModeAutoProgressPayload,
   resolveSendableOutboundReplyParts,
-} from "openclaw/plugin-sdk/reply-payload";
+} from "bot/plugin-sdk/reply-payload";
 import { shouldSuppressLocalExecApprovalPrompt } from "../../channels/plugins/exec-approval-local.js";
 import { type AgentPlanStep, formatPlanChecklistLines } from "../../channels/streaming.js";
 import { getRuntimeConfigSnapshot } from "../../config/config.js";
 import { applyMergePatch } from "../../config/merge-patch.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { logVerbose } from "../../globals.js";
 import { createTtsDirectiveTextStreamCleaner } from "../../tts/directives.js";
 import { shouldCleanTtsDirectiveText } from "../../tts/tts-config.js";
@@ -478,7 +478,7 @@ export async function prepareDispatchExecution(state: ChooseDispatchRouteReadySt
   const runtimeReplyConfig = getRuntimeConfigSnapshot() ?? cfg;
   const replyConfig = withFullRuntimeReplyConfig(
     params.configOverride
-      ? (applyMergePatch(runtimeReplyConfig, params.configOverride) as OpenClawConfig)
+      ? (applyMergePatch(runtimeReplyConfig, params.configOverride) as BotConfig)
       : runtimeReplyConfig,
   );
   recordAgentDispatchStarted();

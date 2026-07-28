@@ -80,7 +80,7 @@ describe("question chat items", () => {
         role: "user",
         content: "First prompt",
         timestamp: 900,
-        __openclaw: { idempotencyKey: "run-question:user" },
+        __bot: { idempotencyKey: "run-question:user" },
       },
       { role: "assistant", content: "First reply", timestamp: 1_300 },
       { role: "user", content: "Next prompt", timestamp: 2_000 },

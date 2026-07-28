@@ -188,7 +188,7 @@ describe("session message cache", () => {
     const cache: ChatMessageCache = new Map();
     const retained = Array.from({ length: 140 }, (_, index) => ({
       content: `retained-${index + 1}`,
-      __openclaw: { seq: index + 1 },
+      __bot: { seq: index + 1 },
     }));
     cacheChatSessionSnapshot(
       cache,
@@ -202,7 +202,7 @@ describe("session message cache", () => {
     );
     const refreshedTail = Array.from({ length: 40 }, (_, index) => ({
       content: `fresh-${index + 101}`,
-      __openclaw: { seq: index + 101 },
+      __bot: { seq: index + 101 },
     }));
 
     cacheChatSessionSnapshot(
@@ -228,7 +228,7 @@ describe("session message cache", () => {
     const cache: ChatMessageCache = new Map();
     const current = [1, 2, 3].map((seq) => ({
       content: `current-${seq}`,
-      __openclaw: { seq },
+      __bot: { seq },
     }));
     cacheChatSessionSnapshot(
       cache,
@@ -267,12 +267,12 @@ describe("session message cache", () => {
       host,
       { sessionKey: "home" },
       {
-        messages: [{ content: "old", __openclaw: { seq: 1 } }],
+        messages: [{ content: "old", __bot: { seq: 1 } }],
         pagination: { hasMore: false, totalMessages: 1 },
         sessionId: "session-1",
       },
     );
-    const replacement = [{ content: "new", __openclaw: { seq: 1 } }];
+    const replacement = [{ content: "new", __bot: { seq: 1 } }];
 
     cacheChatSessionSnapshot(
       cache,
@@ -349,9 +349,9 @@ describe("session message cache", () => {
       { sessionKey: "home" },
       {
         messages: [
-          { content, __openclaw: { seq: 1 } },
-          { content, projection: "sibling", __openclaw: { seq: 1 } },
-          { content, __openclaw: { seq: 2 } },
+          { content, __bot: { seq: 1 } },
+          { content, projection: "sibling", __bot: { seq: 1 } },
+          { content, __bot: { seq: 2 } },
         ],
         pagination: { hasMore: false, totalMessages: 2 },
         sessionId: "session-1",
@@ -377,7 +377,7 @@ describe("session message cache", () => {
         host,
         { sessionKey },
         {
-          messages: [{ content, __openclaw: { seq: 1 } }],
+          messages: [{ content, __bot: { seq: 1 } }],
           pagination: { hasMore: false, totalMessages: 1 },
           sessionId: sessionKey,
         },

@@ -1,12 +1,12 @@
 // Feishu helper module supports config schema behavior.
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
+import { normalizeAccountId } from "bot/plugin-sdk/account-id";
 import {
   DmPolicySchema,
   GroupPolicySchema,
   buildChannelConfigSchema,
   buildGroupEntrySchema,
   buildMultiAccountChannelSchema,
-} from "openclaw/plugin-sdk/channel-config-schema";
+} from "bot/plugin-sdk/channel-config-schema";
 import { z } from "zod";
 export { z };
 import { buildSecretInputSchema, hasConfiguredSecretInput } from "./secret-input.js";
@@ -89,7 +89,7 @@ const BlockStreamingCoalesceSchema = z
 // ("partial" = streaming cards, default; "off" = single final message);
 // `chunkMode`/`block` are the shared delivery controls. Legacy boolean
 // `streaming` and flat chunkMode/blockStreaming/blockStreamingCoalesce keys
-// migrate via `openclaw doctor --fix`.
+// migrate via `bot doctor --fix`.
 const FeishuStreamingSchema = z
   .object({
     mode: z.enum(["off", "partial"]).optional(),

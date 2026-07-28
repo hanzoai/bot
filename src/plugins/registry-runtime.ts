@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { normalizeOptionalAgentRuntimeId } from "../agents/agent-runtime-id.js";
 import { createChannelIngressDrain } from "../channels/message/ingress-drain.js";
 import { createChannelIngressQueue } from "../channels/message/ingress-queue.js";

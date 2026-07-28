@@ -1,6 +1,6 @@
 // Covers managed task-flow creation, lookup, ownership, and state transitions.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withBotTestState } from "../test-utils/bot-test-state.js";
 import {
   createTaskFlowForTask as createTaskFlowForTaskOrNull,
   createManagedTaskFlow as createManagedTaskFlowOrNull,
@@ -59,8 +59,8 @@ function syncFlowFromTaskForTest(
 }
 
 async function withFlowRegistryTempDir<T>(run: () => Promise<T>): Promise<T> {
-  return await withOpenClawTestState(
-    { layout: "state-only", prefix: "openclaw-task-flow-registry-" },
+  return await withBotTestState(
+    { layout: "state-only", prefix: "bot-task-flow-registry-" },
     async () => {
       resetTaskFlowRegistryForTests();
       try {

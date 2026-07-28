@@ -1,13 +1,13 @@
-# SMS OpenClaw channel
+# SMS Bot channel
 
-Official OpenClaw channel plugin for SMS.
+Official Bot channel plugin for SMS.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/sms
+bot plugins install @hanzo/bot-sms
 ```
 
 ## Docs
 
-See `docs/channels/sms.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/channels/sms`.
+See `docs/channels/sms.md` in the Bot repository, or the published docs at `https://docs.bot.ai/channels/sms`.

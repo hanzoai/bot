@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# Installs an OpenClaw package candidate in Docker, performs Telegram
+# Installs an Bot package candidate in Docker, performs Telegram
 # onboarding/doctor recovery, then runs the Telegram QA live harness.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
 
-IMAGE_NAME="$(docker_e2e_resolve_image "openclaw-npm-telegram-live-e2e" OPENCLAW_NPM_TELEGRAM_LIVE_E2E_IMAGE)"
-DOCKER_TARGET="${OPENCLAW_NPM_TELEGRAM_DOCKER_TARGET:-build}"
-PACKAGE_SPEC="${OPENCLAW_NPM_TELEGRAM_PACKAGE_SPEC:-openclaw@beta}"
-PACKAGE_TGZ="${OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ:-${OPENCLAW_CURRENT_PACKAGE_TGZ:-}}"
-PACKAGE_DIR="${OPENCLAW_NPM_TELEGRAM_PACKAGE_DIR:-}"
-PACKAGE_LABEL="${OPENCLAW_NPM_TELEGRAM_PACKAGE_LABEL:-}"
-RUN_ID="${OPENCLAW_NPM_TELEGRAM_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)-$$}"
-OUTPUT_DIR="${OPENCLAW_NPM_TELEGRAM_OUTPUT_DIR:-.artifacts/qa-e2e/npm-telegram-live/$RUN_ID}"
+IMAGE_NAME="$(docker_e2e_resolve_image "bot-npm-telegram-live-e2e" BOT_NPM_TELEGRAM_LIVE_E2E_IMAGE)"
+DOCKER_TARGET="${BOT_NPM_TELEGRAM_DOCKER_TARGET:-build}"
+PACKAGE_SPEC="${BOT_NPM_TELEGRAM_PACKAGE_SPEC:-bot@beta}"
+PACKAGE_TGZ="${BOT_NPM_TELEGRAM_PACKAGE_TGZ:-${BOT_CURRENT_PACKAGE_TGZ:-}}"
+PACKAGE_DIR="${BOT_NPM_TELEGRAM_PACKAGE_DIR:-}"
+PACKAGE_LABEL="${BOT_NPM_TELEGRAM_PACKAGE_LABEL:-}"
+RUN_ID="${BOT_NPM_TELEGRAM_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)-$$}"
+OUTPUT_DIR="${BOT_NPM_TELEGRAM_OUTPUT_DIR:-.artifacts/qa-e2e/npm-telegram-live/$RUN_ID}"
 case "$OUTPUT_DIR" in
   /*) OUTPUT_DIR_HOST="$OUTPUT_DIR" ;;
   *) OUTPUT_DIR_HOST="$ROOT_DIR/$OUTPUT_DIR" ;;
@@ -22,37 +22,37 @@ OUTPUT_DIR_CONTAINER_RELATIVE=".artifacts/qa-e2e/npm-telegram-live-output"
 OUTPUT_DIR_CONTAINER="/app/$OUTPUT_DIR_CONTAINER_RELATIVE"
 
 resolve_credential_source() {
-  if [ -n "${OPENCLAW_NPM_TELEGRAM_CREDENTIAL_SOURCE:-}" ]; then
-    printf "%s" "$OPENCLAW_NPM_TELEGRAM_CREDENTIAL_SOURCE"
+  if [ -n "${BOT_NPM_TELEGRAM_CREDENTIAL_SOURCE:-}" ]; then
+    printf "%s" "$BOT_NPM_TELEGRAM_CREDENTIAL_SOURCE"
     return 0
   fi
-  if [ -n "${OPENCLAW_QA_CREDENTIAL_SOURCE:-}" ]; then
-    printf "%s" "$OPENCLAW_QA_CREDENTIAL_SOURCE"
+  if [ -n "${BOT_QA_CREDENTIAL_SOURCE:-}" ]; then
+    printf "%s" "$BOT_QA_CREDENTIAL_SOURCE"
     return 0
   fi
-  if [ -n "${CI:-}" ] && [ -n "${OPENCLAW_QA_CONVEX_SITE_URL:-}" ]; then
-    if [ -n "${OPENCLAW_QA_CONVEX_SECRET_CI:-}" ] || [ -n "${OPENCLAW_QA_CONVEX_SECRET_MAINTAINER:-}" ]; then
+  if [ -n "${CI:-}" ] && [ -n "${BOT_QA_CONVEX_SITE_URL:-}" ]; then
+    if [ -n "${BOT_QA_CONVEX_SECRET_CI:-}" ] || [ -n "${BOT_QA_CONVEX_SECRET_MAINTAINER:-}" ]; then
       printf "convex"
     fi
   fi
 }
 
 resolve_credential_role() {
-  if [ -n "${OPENCLAW_NPM_TELEGRAM_CREDENTIAL_ROLE:-}" ]; then
-    printf "%s" "$OPENCLAW_NPM_TELEGRAM_CREDENTIAL_ROLE"
+  if [ -n "${BOT_NPM_TELEGRAM_CREDENTIAL_ROLE:-}" ]; then
+    printf "%s" "$BOT_NPM_TELEGRAM_CREDENTIAL_ROLE"
     return 0
   fi
-  if [ -n "${OPENCLAW_QA_CREDENTIAL_ROLE:-}" ]; then
-    printf "%s" "$OPENCLAW_QA_CREDENTIAL_ROLE"
+  if [ -n "${BOT_QA_CREDENTIAL_ROLE:-}" ]; then
+    printf "%s" "$BOT_QA_CREDENTIAL_ROLE"
   fi
 }
 
-validate_openclaw_package_spec() {
+validate_bot_package_spec() {
   local spec="$1"
-  if [[ "$spec" =~ ^openclaw@(alpha|beta|latest|[0-9]{4}\.[1-9][0-9]*\.[1-9][0-9]*(-[1-9][0-9]*|-(alpha|beta)\.[1-9][0-9]*)?)$ ]]; then
+  if [[ "$spec" =~ ^bot@(alpha|beta|latest|[0-9]{4}\.[1-9][0-9]*\.[1-9][0-9]*(-[1-9][0-9]*|-(alpha|beta)\.[1-9][0-9]*)?)$ ]]; then
     return 0
   fi
-  echo "OPENCLAW_NPM_TELEGRAM_PACKAGE_SPEC must be openclaw@alpha, openclaw@beta, openclaw@latest, or an exact OpenClaw release version; got: $spec" >&2
+  echo "BOT_NPM_TELEGRAM_PACKAGE_SPEC must be bot@alpha, bot@beta, bot@latest, or an exact Bot release version; got: $spec" >&2
   exit 1
 }
 
@@ -62,13 +62,13 @@ resolve_package_tgz() {
     return 0
   fi
   if [ ! -f "$candidate" ]; then
-    echo "OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ must point to an existing .tgz file; got: $candidate" >&2
+    echo "BOT_NPM_TELEGRAM_PACKAGE_TGZ must point to an existing .tgz file; got: $candidate" >&2
     exit 1
   fi
   case "$candidate" in
     *.tgz) ;;
     *)
-      echo "OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ must point to a .tgz file; got: $candidate" >&2
+      echo "BOT_NPM_TELEGRAM_PACKAGE_TGZ must point to a .tgz file; got: $candidate" >&2
       exit 1
       ;;
   esac
@@ -85,7 +85,7 @@ resolve_package_dir() {
     return 0
   fi
   if [ ! -d "$candidate" ]; then
-    echo "OPENCLAW_NPM_TELEGRAM_PACKAGE_DIR must point to an existing directory; got: $candidate" >&2
+    echo "BOT_NPM_TELEGRAM_PACKAGE_DIR must point to an existing directory; got: $candidate" >&2
     exit 1
   fi
   (cd "$candidate" && pwd)
@@ -114,29 +114,29 @@ resolved_package_tgz="$(resolve_package_tgz "$PACKAGE_TGZ")"
 resolved_package_dir="$(resolve_package_dir "$PACKAGE_DIR")"
 if [ -n "$resolved_package_dir" ]; then
   if [ -z "$resolved_package_tgz" ]; then
-    echo "OPENCLAW_NPM_TELEGRAM_PACKAGE_DIR requires OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ" >&2
+    echo "BOT_NPM_TELEGRAM_PACKAGE_DIR requires BOT_NPM_TELEGRAM_PACKAGE_TGZ" >&2
     exit 1
   fi
   case "$resolved_package_tgz" in
     "$resolved_package_dir"/*) ;;
     *)
-      echo "OPENCLAW_NPM_TELEGRAM_PACKAGE_TGZ must be inside OPENCLAW_NPM_TELEGRAM_PACKAGE_DIR" >&2
+      echo "BOT_NPM_TELEGRAM_PACKAGE_TGZ must be inside BOT_NPM_TELEGRAM_PACKAGE_DIR" >&2
       exit 1
       ;;
   esac
-  package_install_source="openclaw@$(read_package_version "$resolved_package_tgz")"
+  package_install_source="bot@$(read_package_version "$resolved_package_tgz")"
   package_source_kind="prepared-package-set"
   package_mount_args=(-v "$resolved_package_dir:/package-under-test:ro")
   registry_helper_mount_args=(
-    -v "$ROOT_DIR/scripts/e2e/lib/bounded-response-text.mjs:/tmp/openclaw-e2e/lib/bounded-response-text.mjs:ro"
-    -v "$ROOT_DIR/scripts/e2e/lib/plugins/npm-registry-server.mjs:/tmp/openclaw-e2e/lib/plugins/npm-registry-server.mjs:ro"
+    -v "$ROOT_DIR/scripts/e2e/lib/bounded-response-text.mjs:/tmp/bot-e2e/lib/bounded-response-text.mjs:ro"
+    -v "$ROOT_DIR/scripts/e2e/lib/plugins/npm-registry-server.mjs:/tmp/bot-e2e/lib/plugins/npm-registry-server.mjs:ro"
   )
 elif [ -n "$resolved_package_tgz" ]; then
   package_install_source="/package-under-test/$(basename "$resolved_package_tgz")"
   package_source_kind="packed-tarball"
   package_mount_args=(-v "$resolved_package_tgz:$package_install_source:ro")
 else
-  validate_openclaw_package_spec "$PACKAGE_SPEC"
+  validate_bot_package_spec "$PACKAGE_SPEC"
 fi
 if [ -z "$PACKAGE_LABEL" ]; then
   if [ -n "$resolved_package_tgz" ]; then
@@ -157,30 +157,30 @@ if [ -z "$credential_role" ] && [ "$credential_source" = "convex" ]; then
 fi
 
 validate_credential_preflight() {
-  if [ "${OPENCLAW_NPM_TELEGRAM_SKIP_CREDENTIAL_PREFLIGHT:-0}" = "1" ]; then
+  if [ "${BOT_NPM_TELEGRAM_SKIP_CREDENTIAL_PREFLIGHT:-0}" = "1" ]; then
     return 0
   fi
   if [ "$credential_source" = "convex" ]; then
-    if [ -z "${OPENCLAW_QA_CONVEX_SITE_URL:-}" ]; then
-      echo "Missing required env for Convex credential mode: OPENCLAW_QA_CONVEX_SITE_URL" >&2
+    if [ -z "${BOT_QA_CONVEX_SITE_URL:-}" ]; then
+      echo "Missing required env for Convex credential mode: BOT_QA_CONVEX_SITE_URL" >&2
       exit 1
     fi
     if [ "$credential_role" = "ci" ]; then
-      if [ -z "${OPENCLAW_QA_CONVEX_SECRET_CI:-}" ]; then
-        echo "Missing required env for Convex ci credential mode: OPENCLAW_QA_CONVEX_SECRET_CI" >&2
+      if [ -z "${BOT_QA_CONVEX_SECRET_CI:-}" ]; then
+        echo "Missing required env for Convex ci credential mode: BOT_QA_CONVEX_SECRET_CI" >&2
         exit 1
       fi
       return 0
     fi
     if [ "$credential_role" = "maintainer" ]; then
-      if [ -z "${OPENCLAW_QA_CONVEX_SECRET_MAINTAINER:-}" ]; then
-        echo "Missing required env for Convex maintainer credential mode: OPENCLAW_QA_CONVEX_SECRET_MAINTAINER" >&2
+      if [ -z "${BOT_QA_CONVEX_SECRET_MAINTAINER:-}" ]; then
+        echo "Missing required env for Convex maintainer credential mode: BOT_QA_CONVEX_SECRET_MAINTAINER" >&2
         exit 1
       fi
       return 0
     fi
-    if [ -z "${OPENCLAW_QA_CONVEX_SECRET_CI:-}" ] && [ -z "${OPENCLAW_QA_CONVEX_SECRET_MAINTAINER:-}" ]; then
-      echo "Missing required env for Convex credential mode: OPENCLAW_QA_CONVEX_SECRET_CI or OPENCLAW_QA_CONVEX_SECRET_MAINTAINER" >&2
+    if [ -z "${BOT_QA_CONVEX_SECRET_CI:-}" ] && [ -z "${BOT_QA_CONVEX_SECRET_MAINTAINER:-}" ]; then
+      echo "Missing required env for Convex credential mode: BOT_QA_CONVEX_SECRET_CI or BOT_QA_CONVEX_SECRET_MAINTAINER" >&2
       exit 1
     fi
     return 0
@@ -188,9 +188,9 @@ validate_credential_preflight() {
 
   local missing=()
   for key in \
-    OPENCLAW_QA_TELEGRAM_GROUP_ID \
-    OPENCLAW_QA_TELEGRAM_DRIVER_BOT_TOKEN \
-    OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN; do
+    BOT_QA_TELEGRAM_GROUP_ID \
+    BOT_QA_TELEGRAM_DRIVER_BOT_TOKEN \
+    BOT_QA_TELEGRAM_SUT_BOT_TOKEN; do
     if [ -z "${!key:-}" ]; then
       missing+=("$key")
     fi
@@ -199,8 +199,8 @@ validate_credential_preflight() {
     {
       echo "Missing required Telegram QA credential env before Docker work: ${missing[*]}"
       echo "Use one of:"
-      echo "  direct Telegram env: OPENCLAW_QA_TELEGRAM_GROUP_ID, OPENCLAW_QA_TELEGRAM_DRIVER_BOT_TOKEN, OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN"
-      echo "  Convex env: OPENCLAW_NPM_TELEGRAM_CREDENTIAL_SOURCE=convex plus OPENCLAW_QA_CONVEX_SITE_URL and a role secret"
+      echo "  direct Telegram env: BOT_QA_TELEGRAM_GROUP_ID, BOT_QA_TELEGRAM_DRIVER_BOT_TOKEN, BOT_QA_TELEGRAM_SUT_BOT_TOKEN"
+      echo "  Convex env: BOT_NPM_TELEGRAM_CREDENTIAL_SOURCE=convex plus BOT_QA_CONVEX_SITE_URL and a role secret"
     } >&2
     exit 1
   fi
@@ -224,15 +224,15 @@ trap cleanup EXIT
 
 docker_env=(
   -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-  -e OPENCLAW_E2E_COMMAND_TIMEOUT="${OPENCLAW_E2E_COMMAND_TIMEOUT:-300s}"
+  -e BOT_E2E_COMMAND_TIMEOUT="${BOT_E2E_COMMAND_TIMEOUT:-300s}"
   -e TMPDIR=/tmp
-  -e OPENCLAW_NPM_TELEGRAM_PACKAGE_SPEC="$PACKAGE_SPEC"
-  -e OPENCLAW_NPM_TELEGRAM_PACKAGE_LABEL="$PACKAGE_LABEL"
-  -e OPENCLAW_NPM_TELEGRAM_OUTPUT_DIR="$OUTPUT_DIR_CONTAINER_RELATIVE"
-  -e OPENCLAW_QA_PACKAGE_SOURCE="$package_install_source"
-  -e OPENCLAW_QA_PACKAGE_SOURCE_KIND="$package_source_kind"
-  -e OPENCLAW_QA_RUNNER="${OPENCLAW_QA_RUNNER:-docker}"
-  -e OPENCLAW_NPM_TELEGRAM_FAST="${OPENCLAW_NPM_TELEGRAM_FAST:-1}"
+  -e BOT_NPM_TELEGRAM_PACKAGE_SPEC="$PACKAGE_SPEC"
+  -e BOT_NPM_TELEGRAM_PACKAGE_LABEL="$PACKAGE_LABEL"
+  -e BOT_NPM_TELEGRAM_OUTPUT_DIR="$OUTPUT_DIR_CONTAINER_RELATIVE"
+  -e BOT_QA_PACKAGE_SOURCE="$package_install_source"
+  -e BOT_QA_PACKAGE_SOURCE_KIND="$package_source_kind"
+  -e BOT_QA_RUNNER="${BOT_QA_RUNNER:-docker}"
+  -e BOT_NPM_TELEGRAM_FAST="${BOT_NPM_TELEGRAM_FAST:-1}"
 )
 
 forward_env_if_set() {
@@ -243,10 +243,10 @@ forward_env_if_set() {
 }
 
 if [ -n "$credential_source" ]; then
-  docker_env+=(-e OPENCLAW_QA_CREDENTIAL_SOURCE="$credential_source")
+  docker_env+=(-e BOT_QA_CREDENTIAL_SOURCE="$credential_source")
 fi
 if [ -n "$credential_role" ]; then
-  docker_env+=(-e OPENCLAW_QA_CREDENTIAL_ROLE="$credential_role")
+  docker_env+=(-e BOT_QA_CREDENTIAL_ROLE="$credential_role")
 fi
 
 for key in \
@@ -254,60 +254,60 @@ for key in \
   ANTHROPIC_API_KEY \
   GEMINI_API_KEY \
   GOOGLE_API_KEY \
-  OPENCLAW_LIVE_OPENAI_KEY \
-  OPENCLAW_LIVE_ANTHROPIC_KEY \
-  OPENCLAW_LIVE_GEMINI_KEY \
-  OPENCLAW_QA_TELEGRAM_GROUP_ID \
-  OPENCLAW_QA_TELEGRAM_DRIVER_BOT_TOKEN \
-  OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN \
-  OPENCLAW_QA_CONVEX_SITE_URL \
-  OPENCLAW_QA_CONVEX_SECRET_CI \
-  OPENCLAW_QA_CONVEX_SECRET_MAINTAINER \
-  OPENCLAW_QA_CREDENTIAL_LEASE_TTL_MS \
-  OPENCLAW_QA_CREDENTIAL_HEARTBEAT_INTERVAL_MS \
-  OPENCLAW_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS \
-  OPENCLAW_QA_CREDENTIAL_HTTP_TIMEOUT_MS \
-  OPENCLAW_QA_CONVEX_ENDPOINT_PREFIX \
-  OPENCLAW_QA_CREDENTIAL_OWNER_ID \
-  OPENCLAW_QA_ALLOW_INSECURE_HTTP \
-  OPENCLAW_QA_REDACT_PUBLIC_METADATA \
-  OPENCLAW_QA_PACKAGE_SOURCE_SHA \
-  OPENCLAW_QA_TELEGRAM_CANARY_TIMEOUT_MS \
-  OPENCLAW_QA_TELEGRAM_SCENARIO_TIMEOUT_MS \
-  OPENCLAW_QA_SUITE_PROGRESS \
-  OPENCLAW_NPM_TELEGRAM_PROVIDER_MODE \
-  OPENCLAW_NPM_TELEGRAM_MODEL \
-  OPENCLAW_NPM_TELEGRAM_ALT_MODEL \
-  OPENCLAW_NPM_TELEGRAM_SCENARIOS \
-  OPENCLAW_NPM_TELEGRAM_RTT_SAMPLES \
-  OPENCLAW_NPM_TELEGRAM_RTT_CHECKS \
-  OPENCLAW_NPM_TELEGRAM_RTT_TIMEOUT_MS \
-  OPENCLAW_NPM_TELEGRAM_RTT_MAX_FAILURES \
-  OPENCLAW_NPM_TELEGRAM_SKIP_HOTPATH \
-  OPENCLAW_NPM_TELEGRAM_SUT_ACCOUNT \
-  OPENCLAW_NPM_TELEGRAM_ALLOW_FAILURES; do
+  BOT_LIVE_OPENAI_KEY \
+  BOT_LIVE_ANTHROPIC_KEY \
+  BOT_LIVE_GEMINI_KEY \
+  BOT_QA_TELEGRAM_GROUP_ID \
+  BOT_QA_TELEGRAM_DRIVER_BOT_TOKEN \
+  BOT_QA_TELEGRAM_SUT_BOT_TOKEN \
+  BOT_QA_CONVEX_SITE_URL \
+  BOT_QA_CONVEX_SECRET_CI \
+  BOT_QA_CONVEX_SECRET_MAINTAINER \
+  BOT_QA_CREDENTIAL_LEASE_TTL_MS \
+  BOT_QA_CREDENTIAL_HEARTBEAT_INTERVAL_MS \
+  BOT_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS \
+  BOT_QA_CREDENTIAL_HTTP_TIMEOUT_MS \
+  BOT_QA_CONVEX_ENDPOINT_PREFIX \
+  BOT_QA_CREDENTIAL_OWNER_ID \
+  BOT_QA_ALLOW_INSECURE_HTTP \
+  BOT_QA_REDACT_PUBLIC_METADATA \
+  BOT_QA_PACKAGE_SOURCE_SHA \
+  BOT_QA_TELEGRAM_CANARY_TIMEOUT_MS \
+  BOT_QA_TELEGRAM_SCENARIO_TIMEOUT_MS \
+  BOT_QA_SUITE_PROGRESS \
+  BOT_NPM_TELEGRAM_PROVIDER_MODE \
+  BOT_NPM_TELEGRAM_MODEL \
+  BOT_NPM_TELEGRAM_ALT_MODEL \
+  BOT_NPM_TELEGRAM_SCENARIOS \
+  BOT_NPM_TELEGRAM_RTT_SAMPLES \
+  BOT_NPM_TELEGRAM_RTT_CHECKS \
+  BOT_NPM_TELEGRAM_RTT_TIMEOUT_MS \
+  BOT_NPM_TELEGRAM_RTT_MAX_FAILURES \
+  BOT_NPM_TELEGRAM_SKIP_HOTPATH \
+  BOT_NPM_TELEGRAM_SUT_ACCOUNT \
+  BOT_NPM_TELEGRAM_ALLOW_FAILURES; do
   forward_env_if_set "$key"
 done
 
 echo "Running package Telegram live Docker E2E ($PACKAGE_LABEL)..."
 run_logged_print_heartbeat "npm-telegram-package-install" 60 docker_e2e_docker_run_cmd run --rm \
   -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
-  -e OPENCLAW_E2E_NPM_INSTALL_TIMEOUT="${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}" \
-  -e OPENCLAW_NPM_TELEGRAM_INSTALL_SOURCE="$package_install_source" \
-  -e OPENCLAW_NPM_TELEGRAM_PACKAGE_LABEL="$PACKAGE_LABEL" \
-  -e OPENCLAW_NPM_TELEGRAM_PACKAGE_SET="$([ -n "$resolved_package_dir" ] && printf 1 || printf 0)" \
+  -e BOT_E2E_NPM_INSTALL_TIMEOUT="${BOT_E2E_NPM_INSTALL_TIMEOUT:-600s}" \
+  -e BOT_NPM_TELEGRAM_INSTALL_SOURCE="$package_install_source" \
+  -e BOT_NPM_TELEGRAM_PACKAGE_LABEL="$PACKAGE_LABEL" \
+  -e BOT_NPM_TELEGRAM_PACKAGE_SET="$([ -n "$resolved_package_dir" ] && printf 1 || printf 0)" \
   ${package_mount_args[@]+"${package_mount_args[@]}"} \
   ${registry_helper_mount_args[@]+"${registry_helper_mount_args[@]}"} \
   -v "$npm_prefix_host:/npm-global" \
   -i "$IMAGE_NAME" bash -s <<'EOF'
 set -euo pipefail
 
-export HOME="$(mktemp -d "/tmp/openclaw-npm-telegram-install.XXXXXX")"
+export HOME="$(mktemp -d "/tmp/bot-npm-telegram-install.XXXXXX")"
 export NPM_CONFIG_PREFIX="/npm-global"
 export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
 
-install_source="${OPENCLAW_NPM_TELEGRAM_INSTALL_SOURCE:?missing OPENCLAW_NPM_TELEGRAM_INSTALL_SOURCE}"
-package_label="${OPENCLAW_NPM_TELEGRAM_PACKAGE_LABEL:-$install_source}"
+install_source="${BOT_NPM_TELEGRAM_INSTALL_SOURCE:?missing BOT_NPM_TELEGRAM_INSTALL_SOURCE}"
+package_label="${BOT_NPM_TELEGRAM_PACKAGE_LABEL:-$install_source}"
 echo "Installing ${package_label} from ${install_source}..."
 
 registry_pid=""
@@ -323,7 +323,7 @@ cleanup_registry() {
 }
 trap cleanup_registry EXIT
 
-if [ "${OPENCLAW_NPM_TELEGRAM_PACKAGE_SET:-0}" = "1" ]; then
+if [ "${BOT_NPM_TELEGRAM_PACKAGE_SET:-0}" = "1" ]; then
   shopt -s nullglob
   package_tgzs=(/package-under-test/*.tgz)
   shopt -u nullglob
@@ -352,8 +352,8 @@ process.stdin.on("end", () => {
   done
   registry_port_file="$(mktemp)"
   registry_log="$(mktemp)"
-  OPENCLAW_NPM_REGISTRY_UPSTREAM=https://registry.npmjs.org \
-    node /tmp/openclaw-e2e/lib/plugins/npm-registry-server.mjs \
+  BOT_NPM_REGISTRY_UPSTREAM=https://registry.npmjs.org \
+    node /tmp/bot-e2e/lib/plugins/npm-registry-server.mjs \
     "$registry_port_file" \
     "${registry_args[@]}" >"$registry_log" 2>&1 &
   registry_pid=$!
@@ -378,7 +378,7 @@ process.stdin.on("end", () => {
   export npm_config_registry="$registry_url"
 fi
 
-npm_install_timeout="${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-600s}"
+npm_install_timeout="${BOT_E2E_NPM_INSTALL_TIMEOUT:-600s}"
 run_npm_install() {
   if [ -z "$npm_install_timeout" ] || [ "$npm_install_timeout" = "0" ]; then
     npm install -g "$install_source" --no-fund --no-audit
@@ -392,7 +392,7 @@ run_npm_install() {
     timeout_bin="gtimeout"
   fi
   if [ -z "$timeout_bin" ]; then
-    echo "timeout or gtimeout is required for OPENCLAW_E2E_NPM_INSTALL_TIMEOUT=$npm_install_timeout" >&2
+    echo "timeout or gtimeout is required for BOT_E2E_NPM_INSTALL_TIMEOUT=$npm_install_timeout" >&2
     return 127
   fi
 
@@ -404,8 +404,8 @@ run_npm_install() {
 }
 run_npm_install
 
-command -v openclaw
-openclaw --version
+command -v bot
+bot --version
 EOF
 
 # Mount only QA harness source; the SUT itself, including bundled plugin runtime,
@@ -419,51 +419,51 @@ run_logged_print_heartbeat "npm-telegram-live-suite" 60 docker_e2e_run_with_harn
   -v "$npm_prefix_host:/npm-global" \
   -i "$IMAGE_NAME" bash -s <<'EOF'
 set -euo pipefail
-source scripts/lib/openclaw-e2e-instance.sh
+source scripts/lib/bot-e2e-instance.sh
 
-runtime_home="$(mktemp -d "/tmp/openclaw-npm-telegram-runtime.XXXXXX")"
+runtime_home="$(mktemp -d "/tmp/bot-npm-telegram-runtime.XXXXXX")"
 export HOME="$runtime_home"
 export NPM_CONFIG_PREFIX="/npm-global"
 export PATH="$NPM_CONFIG_PREFIX/bin:$PATH"
-export OPENCLAW_NPM_TELEGRAM_REPO_ROOT="/app"
+export BOT_NPM_TELEGRAM_REPO_ROOT="/app"
 
 dump_hotpath_logs() {
   local status="$1"
   echo "installed-package onboarding recovery hot path failed with exit code $status" >&2
   for file in \
-    /tmp/openclaw-npm-telegram-onboard.json \
-    /tmp/openclaw-npm-telegram-channel-add.log \
-    /tmp/openclaw-npm-telegram-doctor-fix.log \
-    /tmp/openclaw-npm-telegram-doctor-check.log; do
+    /tmp/bot-npm-telegram-onboard.json \
+    /tmp/bot-npm-telegram-channel-add.log \
+    /tmp/bot-npm-telegram-doctor-fix.log \
+    /tmp/bot-npm-telegram-doctor-check.log; do
     if [ -f "$file" ]; then
       echo "--- $file ---" >&2
-      openclaw_e2e_print_log "$file" >&2
+      bot_e2e_print_log "$file" >&2
     fi
   done
 }
 trap 'status=$?; dump_hotpath_logs "$status"; exit "$status"' ERR
 
-command -v openclaw
-openclaw_e2e_run_command openclaw --version
+command -v bot
+bot_e2e_run_command bot --version
 mkdir -p /app/node_modules
-openclaw_package_dir="/npm-global/lib/node_modules/openclaw"
-# The mounted QA harness imports openclaw/plugin-sdk and package dependencies;
+bot_package_dir="/npm-global/lib/node_modules/bot"
+# The mounted QA harness imports bot/plugin-sdk and package dependencies;
 # point those imports at the installed package without copying source plugins into the test image.
-rm -rf /app/node_modules/openclaw
-ln -sfnT "$openclaw_package_dir" /app/node_modules/openclaw
+rm -rf /app/node_modules/bot
+ln -sfnT "$bot_package_dir" /app/node_modules/bot
 rm -rf /app/dist
-ln -sfnT "$openclaw_package_dir/dist" /app/dist
-cp "$openclaw_package_dir/package.json" /app/package.json
+ln -sfnT "$bot_package_dir/dist" /app/dist
+cp "$bot_package_dir/package.json" /app/package.json
 node scripts/e2e/lib/npm-telegram-live/prepare-package.mjs \
   /app/package.json \
-  /app/node_modules/openclaw/package.json
-for deps_dir in "$openclaw_package_dir/node_modules" /npm-global/lib/node_modules; do
+  /app/node_modules/bot/package.json
+for deps_dir in "$bot_package_dir/node_modules" /npm-global/lib/node_modules; do
   [ -d "$deps_dir" ] || continue
   for dependency_dir in "$deps_dir"/*; do
     [ -e "$dependency_dir" ] || continue
     dependency_name="$(basename "$dependency_dir")"
     case "$dependency_name" in
-      .bin | openclaw)
+      .bin | bot)
         continue
         ;;
       @*)
@@ -486,7 +486,7 @@ done
 
 link_installed_package_dependency() {
   local name="$1"
-  local source="/npm-global/lib/node_modules/openclaw/node_modules/$name"
+  local source="/npm-global/lib/node_modules/bot/node_modules/$name"
   local target="/app/node_modules/$name"
   if [ ! -e "$source" ]; then
     echo "Installed package dependency is missing: $name" >&2
@@ -505,17 +505,17 @@ for dependency in \
   link_installed_package_dependency "$dependency"
 done
 
-if [ "${OPENCLAW_NPM_TELEGRAM_SKIP_HOTPATH:-0}" != "1" ]; then
-  hotpath_home="$(mktemp -d "/tmp/openclaw-npm-telegram-hotpath.XXXXXX")"
+if [ "${BOT_NPM_TELEGRAM_SKIP_HOTPATH:-0}" != "1" ]; then
+  hotpath_home="$(mktemp -d "/tmp/bot-npm-telegram-hotpath.XXXXXX")"
   export HOME="$hotpath_home"
   echo "Running installed-package onboarding recovery hot path..."
-  hotpath_placeholder="openclaw-npm-telegram-hotpath"
+  hotpath_placeholder="bot-npm-telegram-hotpath"
   hotpath_model_value="$(printf '%s%s' s "k-$hotpath_placeholder")"
   if [ -n "${OPENAI_API_KEY:-}" ]; then
     hotpath_model_value="$OPENAI_API_KEY"
   fi
   hotpath_channel_value="$(printf '%s:%s' 123456 "$hotpath_placeholder")"
-  OPENAI_API_KEY="$hotpath_model_value" openclaw_e2e_run_command openclaw onboard \
+  OPENAI_API_KEY="$hotpath_model_value" bot_e2e_run_command bot onboard \
     --non-interactive --accept-risk \
     --mode local \
     --auth-choice openai-api-key \
@@ -526,15 +526,15 @@ if [ "${OPENCLAW_NPM_TELEGRAM_SKIP_HOTPATH:-0}" != "1" ]; then
     --skip-ui \
     --skip-skills \
     --skip-health \
-    --json >/tmp/openclaw-npm-telegram-onboard.json </dev/null
+    --json >/tmp/bot-npm-telegram-onboard.json </dev/null
 
-  openclaw_e2e_run_command openclaw channels add --channel telegram --token "$hotpath_channel_value" >/tmp/openclaw-npm-telegram-channel-add.log 2>&1 </dev/null
-  openclaw_e2e_run_command openclaw doctor --fix --non-interactive >/tmp/openclaw-npm-telegram-doctor-fix.log 2>&1 </dev/null
-  openclaw_e2e_run_command openclaw doctor --non-interactive >/tmp/openclaw-npm-telegram-doctor-check.log 2>&1 </dev/null
+  bot_e2e_run_command bot channels add --channel telegram --token "$hotpath_channel_value" >/tmp/bot-npm-telegram-channel-add.log 2>&1 </dev/null
+  bot_e2e_run_command bot doctor --fix --non-interactive >/tmp/bot-npm-telegram-doctor-fix.log 2>&1 </dev/null
+  bot_e2e_run_command bot doctor --non-interactive >/tmp/bot-npm-telegram-doctor-check.log 2>&1 </dev/null
   export HOME="$runtime_home"
 fi
 
-export OPENCLAW_NPM_TELEGRAM_SUT_COMMAND="$(command -v openclaw)"
+export BOT_NPM_TELEGRAM_SUT_COMMAND="$(command -v bot)"
 trap - ERR
 tsx scripts/e2e/npm-telegram-live-runner.ts
 EOF

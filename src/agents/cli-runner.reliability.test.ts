@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createSolidPngBuffer } from "../../test/helpers/image-fixtures.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
@@ -12,7 +12,7 @@ import { testing as replyRunTesting } from "../auto-reply/reply/reply-run-regist
 import { SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
 import { loadTranscriptEvents, upsertSessionEntry } from "../config/sessions/session-accessor.js";
 import { CURRENT_SESSION_VERSION } from "../config/sessions/version.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   markMcpLoopbackRequestClassified,
   markMcpLoopbackRequestFinished,
@@ -97,7 +97,7 @@ vi.mock("../tts/tts-settings.js", () => ({
 
 const mockGetGlobalHookRunner = vi.mocked(getGlobalHookRunner);
 const mockAutoCapture = vi.mocked(runSkillResearchAutoCapture);
-const hookRunnerGlobalStateKey = Symbol.for("openclaw.plugins.hook-runner-global-state");
+const hookRunnerGlobalStateKey = Symbol.for("bot.plugins.hook-runner-global-state");
 const autoCleanupTempDirs = useAutoCleanupTempDirTracker(afterEach);
 let sessionFileEnvSnapshot: ReturnType<typeof captureEnv> | undefined;
 
@@ -124,9 +124,9 @@ function setHookRunnerForTest(hookRunner: unknown): void {
 function createSessionFile(params?: { history?: Array<{ role: "user"; content: string }> }) {
   // Session files use the real JSONL shape so transcript/history readers stay
   // covered without spinning up a full CLI process.
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cli-hooks-"));
-  sessionFileEnvSnapshot ??= captureEnv(["OPENCLAW_STATE_DIR"]);
-  setTestEnvValue("OPENCLAW_STATE_DIR", dir);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-cli-hooks-"));
+  sessionFileEnvSnapshot ??= captureEnv(["BOT_STATE_DIR"]);
+  setTestEnvValue("BOT_STATE_DIR", dir);
   const sessionFile = path.join(dir, "agents", "main", "sessions", "s1.jsonl");
   const storePath = path.join(path.dirname(sessionFile), "sessions.json");
   fs.mkdirSync(path.dirname(sessionFile), { recursive: true });
@@ -177,7 +177,7 @@ function buildPreparedContext(params?: {
   cliSessionId?: string;
   runId?: string;
   lane?: string;
-  openClawHistoryPrompt?: string;
+  botHistoryPrompt?: string;
   provider?: string;
   model?: string;
   executionMode?: PreparedCliRunContext["params"]["executionMode"];
@@ -238,8 +238,8 @@ function buildPreparedContext(params?: {
     systemPrompt: "You are a helpful assistant.",
     systemPromptReport: {} as PreparedCliRunContext["systemPromptReport"],
     bootstrapPromptWarningLines: [],
-    ...(params?.openClawHistoryPrompt
-      ? { openClawHistoryPrompt: params.openClawHistoryPrompt }
+    ...(params?.botHistoryPrompt
+      ? { botHistoryPrompt: params.botHistoryPrompt }
       : {}),
     authEpochVersion: 2,
   };
@@ -352,7 +352,7 @@ function createCliUserTurnRecorder(params: {
 }
 
 const CLI_RESEED_PROMPT =
-  "Continue this conversation using the OpenClaw transcript below as prior session history.\n\n<conversation_history>\nUser: earlier context\n</conversation_history>\n\n<next_user_message>\nhi\n</next_user_message>";
+  "Continue this conversation using the Bot transcript below as prior session history.\n\n<conversation_history>\nUser: earlier context\n</conversation_history>\n\n<next_user_message>\nhi\n</next_user_message>";
 
 describe("runCliAgent reliability", () => {
   beforeEach(() => {
@@ -659,7 +659,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "legacy-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.preparedBackend.backend = {
       ...context.preparedBackend.backend,
@@ -741,7 +741,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "old-claude-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.preparedBackend.backend = {
       ...context.preparedBackend.backend,
@@ -814,7 +814,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "downgraded-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.preparedBackend.backend = {
       ...context.preparedBackend.backend,
@@ -883,7 +883,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.preparedBackend.backend = {
       ...context.preparedBackend.backend,
@@ -891,7 +891,7 @@ describe("runCliAgent reliability", () => {
       imageArg: "--image",
       imageMode: "repeat",
     };
-    const stateDir = autoCleanupTempDirs.make("openclaw-cli-retry-images-");
+    const stateDir = autoCleanupTempDirs.make("bot-cli-retry-images-");
     const workspaceDir = path.join(stateDir, "workspace");
     const inboundDir = path.join(stateDir, "media", "inbound");
     const mediaId = "offloaded.png";
@@ -900,7 +900,7 @@ describe("runCliAgent reliability", () => {
     fs.mkdirSync(workspaceDir, { recursive: true });
     fs.mkdirSync(inboundDir, { recursive: true });
     fs.writeFileSync(path.join(inboundDir, mediaId), offloadedImage);
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    vi.stubEnv("BOT_STATE_DIR", stateDir);
     const currentTurn = `compare these\n[media attached: media://inbound/${mediaId}]`;
     context.workspaceDir = workspaceDir;
     context.params = {
@@ -952,7 +952,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockClear();
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
-      const captureKey = input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "";
+      const captureKey = input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "";
       const captureHandle = markMcpLoopbackToolCallStarted({
         captureKey,
         toolName: "message",
@@ -1000,7 +1000,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.mcpDeliveryCapture = true;
 
@@ -1024,7 +1024,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackToolCallStarted({
-        captureKey: input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        captureKey: input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
         toolName: "message",
         args: {
           action: "send",
@@ -1066,7 +1066,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "soft-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.reusableCliSession = {
       mode: "reuse-with-drift",
@@ -1089,7 +1089,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackToolCallStarted({
-        captureKey: input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        captureKey: input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
         toolName: "message",
         args: {
           action: "send",
@@ -1131,7 +1131,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.mcpDeliveryCapture = true;
 
@@ -1145,12 +1145,12 @@ describe("runCliAgent reliability", () => {
     expect(supervisorSpawnMock).toHaveBeenCalledTimes(1);
   });
 
-  it("preserves first-turn delivery through cleanup without binding the OpenClaw session id", async () => {
+  it("preserves first-turn delivery through cleanup without binding the Bot session id", async () => {
     supervisorSpawnMock.mockClear();
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackToolCallStarted({
-        captureKey: input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        captureKey: input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
         toolName: "message",
         args: {
           action: "send",
@@ -1263,7 +1263,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackToolCallStarted({
-        captureKey: input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        captureKey: input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
         toolName: "message",
         args: {
           action: "send",
@@ -1337,7 +1337,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackToolCallStarted({
-        captureKey: input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        captureKey: input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
         toolName: "message",
         args: {
           action: "send",
@@ -1415,7 +1415,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackToolCallStarted({
-        captureKey: input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        captureKey: input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
         toolName: "message",
         args: {
           action: "send",
@@ -1520,7 +1520,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackToolCallStarted({
-        captureKey: input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        captureKey: input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
         toolName: "message",
         args: {
           action: "send",
@@ -1579,7 +1579,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackToolCallStarted({
-        captureKey: input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        captureKey: input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
         toolName: "message",
         args: {
           action: "send",
@@ -1662,7 +1662,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackToolCallStarted({
-        captureKey: input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        captureKey: input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
         toolName: "message",
         args: {
           action: "react",
@@ -1700,7 +1700,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.mcpDeliveryCapture = true;
 
@@ -1724,7 +1724,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackRequestStarted(
-        input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
       );
       if (!captureHandle) {
         throw new Error("Expected request delivery capture");
@@ -1747,7 +1747,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.mcpDeliveryCapture = true;
 
@@ -1771,7 +1771,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const requestCaptureHandle = markMcpLoopbackRequestStarted(
-        input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
       );
       if (!requestCaptureHandle) {
         throw new Error("Expected request delivery capture");
@@ -1800,7 +1800,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.mcpDeliveryCapture = true;
 
@@ -1823,7 +1823,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackToolCallStarted({
-        captureKey: input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        captureKey: input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
         toolName: "message",
         args: {
           action: "send",
@@ -1860,7 +1860,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.mcpDeliveryCapture = true;
 
@@ -1894,7 +1894,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
 
     await expect(
@@ -1932,7 +1932,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     const expiredBudgetContext = {
       ...context,
@@ -1974,7 +1974,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     const expiredBudgetContext = {
       ...context,
@@ -2000,7 +2000,7 @@ describe("runCliAgent reliability", () => {
     supervisorSpawnMock.mockClear();
     const transcriptProbe = vi.fn(async () => false);
     setCliRunnerTestDeps({ claudeCliSessionTranscriptHasContent: transcriptProbe });
-    const artifactDir = autoCleanupTempDirs.make("openclaw-live-retry-artifacts-");
+    const artifactDir = autoCleanupTempDirs.make("bot-live-retry-artifacts-");
     const mcpConfigPath = path.join(artifactDir, "mcp.json");
     const skillsDir = path.join(artifactDir, "skills-plugin");
     fs.writeFileSync(mcpConfigPath, "{}\n", "utf-8");
@@ -2171,7 +2171,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-live",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.preparedBackend.backend = liveBackend;
     context.preparedBackend.cleanup = cleanup;
@@ -2338,7 +2338,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stalled-source",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.preparedBackend.backend = backend;
     context.backendResolved.config = backend;
@@ -2485,7 +2485,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "initial-fork-parent",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     context.preparedBackend.backend = backend;
     context.backendResolved.config = backend;
@@ -2561,7 +2561,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
 
     await expect(
@@ -2600,7 +2600,7 @@ describe("runCliAgent reliability", () => {
       cliSessionId: "stale-cli-session",
       provider: "claude-cli",
       model: "opus",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
 
     await expect(
@@ -2714,7 +2714,7 @@ describe("runCliAgent reliability", () => {
           cliSessionId: "stale-cli-session",
           provider: "claude-cli",
           model: "opus",
-          openClawHistoryPrompt: CLI_RESEED_PROMPT,
+          botHistoryPrompt: CLI_RESEED_PROMPT,
         });
         const result = await runPreparedCliAgent({
           ...context,
@@ -2809,7 +2809,7 @@ describe("runCliAgent reliability", () => {
       sessionKey: "agent:main:subagent:retry",
       runId: "run-retry-failure",
       cliSessionId: "thread-123",
-      openClawHistoryPrompt: CLI_RESEED_PROMPT,
+      botHistoryPrompt: CLI_RESEED_PROMPT,
     });
     const clearBeforeRetry = vi.fn(async () => true);
 
@@ -2911,7 +2911,7 @@ describe("runCliAgent reliability", () => {
   it("marks CLI runs as paused after sessions_yield", async () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
-      const captureHandle = markMcpLoopbackRequestStarted(input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY);
+      const captureHandle = markMcpLoopbackRequestStarted(input.env?.BOT_MCP_CLI_CAPTURE_KEY);
       await resolveMcpLoopbackYieldContext(captureHandle)?.onYield("waiting on subagents");
       markMcpLoopbackRequestFinished(captureHandle);
       input.onStdout?.("yield acknowledged");
@@ -2943,7 +2943,7 @@ describe("runCliAgent reliability", () => {
     });
   });
 
-  it("seeds fresh CLI sessions from the OpenClaw transcript", async () => {
+  it("seeds fresh CLI sessions from the Bot transcript", async () => {
     supervisorSpawnMock.mockResolvedValueOnce(
       createManagedRun({
         reason: "exit",
@@ -2959,8 +2959,8 @@ describe("runCliAgent reliability", () => {
 
     const result = await runPreparedCliAgent(
       buildPreparedContext({
-        openClawHistoryPrompt:
-          "Continue this conversation using the OpenClaw transcript below.\n\nUser: earlier ask\n\nAssistant: earlier answer\n\n<next_user_message>\nhi\n</next_user_message>",
+        botHistoryPrompt:
+          "Continue this conversation using the Bot transcript below.\n\nUser: earlier ask\n\nAssistant: earlier answer\n\n<next_user_message>\nhi\n</next_user_message>",
       }),
     );
 
@@ -2985,7 +2985,7 @@ describe("runCliAgent reliability", () => {
     const result = await runPreparedCliAgent(
       buildPreparedContext({
         cliSessionId: "cli-session",
-        openClawHistoryPrompt: "User: earlier ask",
+        botHistoryPrompt: "User: earlier ask",
       }),
     );
 
@@ -3620,7 +3620,7 @@ describe("runCliAgent reliability", () => {
     );
     const { dir, sessionFile } = createSessionFile();
     const historyPrompt = [
-      "Continue this conversation using the OpenClaw transcript below as prior session history.",
+      "Continue this conversation using the Bot transcript below as prior session history.",
       "Treat it as authoritative context for this fresh CLI session.",
       "",
       "<conversation_history>",
@@ -3639,7 +3639,7 @@ describe("runCliAgent reliability", () => {
       const context = buildPreparedContext({
         provider: "claude-cli",
         model: "claude-opus-4-6",
-        openClawHistoryPrompt: historyPrompt,
+        botHistoryPrompt: historyPrompt,
       });
       context.preparedBackend.backend.sessionMode = "always";
       context.backendResolved.textTransforms = {
@@ -3694,7 +3694,7 @@ describe("runCliAgent reliability", () => {
       const context = buildPreparedContext({
         provider: "claude-cli",
         model: "claude-opus-4-6",
-        openClawHistoryPrompt: CLI_RESEED_PROMPT,
+        botHistoryPrompt: CLI_RESEED_PROMPT,
       });
       context.preparedBackend.backend.sessionMode = "always";
       context.params = {
@@ -3749,7 +3749,7 @@ describe("runCliAgent reliability", () => {
       const context = buildPreparedContext({
         provider: "claude-cli",
         model: "claude-opus-4-6",
-        openClawHistoryPrompt: CLI_RESEED_PROMPT,
+        botHistoryPrompt: CLI_RESEED_PROMPT,
       });
       context.preparedBackend.backend.sessionMode = "always";
       context.params = {
@@ -3805,7 +3805,7 @@ describe("runCliAgent reliability", () => {
       const context = buildPreparedContext({
         provider: "claude-cli",
         model: "claude-opus-4-6",
-        openClawHistoryPrompt: CLI_RESEED_PROMPT,
+        botHistoryPrompt: CLI_RESEED_PROMPT,
       });
       context.preparedBackend.backend.sessionMode = "always";
       const onUserMessagePersisted = vi.fn();
@@ -3866,7 +3866,7 @@ describe("runCliAgent reliability", () => {
       const context = buildPreparedContext({
         provider: "claude-cli",
         model: "claude-opus-4-6",
-        openClawHistoryPrompt: CLI_RESEED_PROMPT,
+        botHistoryPrompt: CLI_RESEED_PROMPT,
       });
       context.preparedBackend.backend.sessionMode = "always";
       context.params = {
@@ -4111,7 +4111,7 @@ describe("runCliAgent reliability", () => {
       }),
     );
     const { dir, sessionFile } = createSessionFile();
-    const taskDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cli-persist-cwd-"));
+    const taskDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-cli-persist-cwd-"));
     let capturedCwd: unknown;
     const recorder = {
       message: undefined,
@@ -4220,7 +4220,7 @@ describe("runCliAgent reliability", () => {
         expect.objectContaining({
           role: "user",
           content: "recorder display prompt",
-          __openclaw: {
+          __bot: {
             media: [expect.objectContaining({ path: "/tmp/image.png", contentType: "image/png" })],
           },
           timestamp: 123,
@@ -4340,7 +4340,7 @@ describe("runCliAgent reliability", () => {
 
   it("does not execute the CLI when approved user turn persistence fails", async () => {
     supervisorSpawnMock.mockClear();
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cli-persist-fail-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-cli-persist-fail-"));
     const onUserMessagePersisted = vi.fn();
     // SQLite-backed persistence no longer fails via blocked transcript
     // directories; a rejecting recorder models the same persistence failure.
@@ -4508,11 +4508,11 @@ describe("runCliAgent reliability", () => {
       );
       expect(JSON.stringify(blockedLine)).not.toContain("secret prompt");
       expect(JSON.stringify(blockedLine)).not.toContain("matched secret prompt");
-      expect(blockedLine.message["__openclaw"].beforeAgentRunBlocked.blockedBy).toBe(
+      expect(blockedLine.message["__bot"].beforeAgentRunBlocked.blockedBy).toBe(
         "policy-plugin",
       );
-      expect(blockedLine.message["__openclaw"].beforeAgentRunBlocked).not.toHaveProperty("reason");
-      expect(Object.hasOwn(blockedLine.message["__openclaw"], "beforeAgentRunBlocked")).toBe(true);
+      expect(blockedLine.message["__bot"].beforeAgentRunBlocked).not.toHaveProperty("reason");
+      expect(Object.hasOwn(blockedLine.message["__bot"], "beforeAgentRunBlocked")).toBe(true);
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }
@@ -4846,8 +4846,8 @@ describe("runCliAgent reliability", () => {
       sessionKey: "agent:main:main",
       runId: "run-retry-success",
       cliSessionId: "thread-123",
-      openClawHistoryPrompt:
-        "Continue this conversation using the OpenClaw transcript below.\n\nUser: recovered history\n\n<next_user_message>\nhi\n</next_user_message>",
+      botHistoryPrompt:
+        "Continue this conversation using the Bot transcript below.\n\nUser: recovered history\n\n<next_user_message>\nhi\n</next_user_message>",
     });
     const clearBeforeRetry = vi.fn(async () => true);
 
@@ -4942,7 +4942,7 @@ describe("runCliAgent reliability", () => {
       })}\n`,
       "utf-8",
     );
-    const config: OpenClawConfig = { agents: { defaults: { workspace: dir } } };
+    const config: BotConfig = { agents: { defaults: { workspace: dir } } };
     cliBackendsTesting.setDepsForTest({
       resolvePluginSetupCliBackend: () => undefined,
       resolveRuntimeCliBackends: () => [
@@ -4979,9 +4979,9 @@ describe("runCliAgent reliability", () => {
       });
 
       expect(context.params.prompt).toBe("hook context\n\ncurrent ask");
-      expect(context.openClawHistoryPrompt).toContain("Compaction summary: compacted earlier ask");
-      expect(context.openClawHistoryPrompt).toContain("hook context");
-      expect(context.openClawHistoryPrompt).toContain("current ask");
+      expect(context.botHistoryPrompt).toContain("Compaction summary: compacted earlier ask");
+      expect(context.botHistoryPrompt).toContain("hook context");
+      expect(context.botHistoryPrompt).toContain("current ask");
     } finally {
       fs.rmSync(dir, { recursive: true, force: true });
     }

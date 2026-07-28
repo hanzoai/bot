@@ -6,13 +6,13 @@ import type {
   RuntimeConfigSnapshotRefreshOptions,
   RuntimeConfigWriteNotification,
 } from "./runtime-snapshot.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "./types.js";
+import type { ConfigFileSnapshot, BotConfig } from "./types.js";
 
 export type ParseConfigJson5Result = { ok: true; parsed: unknown } | { ok: false; error: string };
 
 export type ConfigWriteResult = {
   persistedHash: string;
-  persistedConfig: OpenClawConfig;
+  persistedConfig: BotConfig;
 };
 
 export const configWritePostCommitRollback = Symbol("configWritePostCommitRollback");
@@ -44,7 +44,7 @@ export type ConfigWriteOptions = {
   /** Caller-authored paths that stay persisted even when equal to defaults. */
   explicitSetPaths?: readonly (readonly string[])[];
   /** Source-shaped values paired with explicitSetPaths. */
-  explicitSetValueSource?: OpenClawConfig;
+  explicitSetValueSource?: BotConfig;
   /** Agent ids that this write intentionally removes from the canonical roster. */
   allowedAgentRosterRemovals?: readonly string[];
   /** Permit explicit local overrides below an ancestor $include without flattening it. */
@@ -72,7 +72,7 @@ export type ConfigWriteOptions = {
   /** Preserve an older writer version during update handoff writes. */
   lastTouchedVersionOverride?: string;
   /** Final async authority gate after runtime preflight and before commit. */
-  preCommitRuntimePreflight?: (sourceConfig: OpenClawConfig) => Promise<unknown>;
+  preCommitRuntimePreflight?: (sourceConfig: BotConfig) => Promise<unknown>;
   /** Snapshot-time hashes for include files that mutation writers may update. */
   includeFileHashesForWrite?: Record<string, string>;
   /** Snapshot-time canonical include targets that writers may update. */
@@ -122,8 +122,8 @@ export type ConfigSnapshotReadOptions = {
   lowerPrecedenceEnv?: Readonly<Record<string, string>>;
   recoverSuspicious?: boolean;
   allowSuspiciousRecovery?: (
-    candidate: OpenClawConfig,
-    current: OpenClawConfig,
+    candidate: BotConfig,
+    current: BotConfig,
   ) => boolean | Promise<boolean>;
   skipPluginValidation?: boolean;
   preservedLegacyRootKeys?: readonly string[];
@@ -144,6 +144,6 @@ export type ReadConfigFileSnapshotWithPluginMetadataResult = {
 };
 
 export type BestEffortConfigSnapshot = {
-  config: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+  config: BotConfig;
+  sourceConfig: BotConfig;
 };

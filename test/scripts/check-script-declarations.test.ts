@@ -9,7 +9,7 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 describe("script declaration contracts", () => {
   it("fails deliberate export drift and passes after regenerating the declaration", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.mkdirSync(path.join(root, "test"), { recursive: true });
     fs.writeFileSync(
@@ -40,7 +40,7 @@ describe("script declaration contracts", () => {
   });
 
   it("requires declarations for scripts imported by typed sources", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.mkdirSync(path.join(root, "test"), { recursive: true });
     fs.writeFileSync(path.join(root, "scripts", "missing.mjs"), "export const value = 1;\n");
@@ -61,7 +61,7 @@ describe("script declaration contracts", () => {
   });
 
   it("rejects declaration sidecars whose runtime script is missing", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.mkdirSync(path.join(root, "test"), { recursive: true });
     fs.writeFileSync(path.join(root, "scripts", "orphan.d.mts"), "export const value: 1;\n");
@@ -82,7 +82,7 @@ describe("script declaration contracts", () => {
   });
 
   it("ignores tracked declaration pairs deleted from the working tree", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     execFileSync("git", ["init", "-q"], { cwd: root });
     const runtimePath = path.join(root, "scripts", "removed.mjs");
@@ -97,7 +97,7 @@ describe("script declaration contracts", () => {
   });
 
   it("applies ESM default and ambiguity rules to star re-exports", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(
       path.join(root, "scripts", "left.mjs"),
@@ -132,7 +132,7 @@ describe("script declaration contracts", () => {
   });
 
   it("propagates ambiguity through nested star re-exports", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(path.join(root, "scripts", "left.mjs"), "export const shared = 1;\n");
     fs.writeFileSync(path.join(root, "scripts", "right.mjs"), "export const shared = 2;\n");
@@ -161,7 +161,7 @@ describe("script declaration contracts", () => {
   });
 
   it("fails closed on cyclic star graphs", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(path.join(root, "scripts", "a.mjs"), 'export * from "./b.mjs";\n');
     fs.writeFileSync(
@@ -181,7 +181,7 @@ describe("script declaration contracts", () => {
   });
 
   it("fails closed on explicit re-exports of ambiguous bindings", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(path.join(root, "scripts", "left.mjs"), "export const shared = 1;\n");
     fs.writeFileSync(path.join(root, "scripts", "right.mjs"), "export const shared = 2;\n");
@@ -213,7 +213,7 @@ describe("script declaration contracts", () => {
   });
 
   it("fails closed when a star re-export cannot be resolved", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(path.join(root, "scripts", "barrel.mjs"), 'export * from "package";\n');
     fs.writeFileSync(path.join(root, "scripts", "barrel.d.mts"), "export {};\n");
@@ -230,7 +230,7 @@ describe("script declaration contracts", () => {
   });
 
   it("resolves declaration stars to declarations before runtime modules", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.mkdirSync(path.join(root, "lib"), { recursive: true });
     fs.writeFileSync(
@@ -259,7 +259,7 @@ describe("script declaration contracts", () => {
   });
 
   it("does not count type-only named or default declaration exports", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(
       path.join(root, "scripts", "types.mjs"),
@@ -282,7 +282,7 @@ describe("script declaration contracts", () => {
   });
 
   it("preserves local binding identity through renamed star paths", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(
       path.join(root, "scripts", "origin.mjs"),
@@ -317,7 +317,7 @@ describe("script declaration contracts", () => {
   });
 
   it("preserves statically named exports from external modules", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(
       path.join(root, "scripts", "external.mjs"),
@@ -337,7 +337,7 @@ describe("script declaration contracts", () => {
   });
 
   it("fails closed on external declaration re-exports with unknown value provenance", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(path.join(root, "scripts", "external.mjs"), "export const Foo = 1;\n");
     fs.writeFileSync(
@@ -359,7 +359,7 @@ describe("script declaration contracts", () => {
   });
 
   it("fails closed on re-exported external declaration imports", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(path.join(root, "scripts", "external.mjs"), "export const Foo = 1;\n");
     fs.writeFileSync(
@@ -381,7 +381,7 @@ describe("script declaration contracts", () => {
   });
 
   it("accepts statically value-bearing external namespace declaration imports", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(
       path.join(root, "scripts", "external.mjs"),
@@ -401,7 +401,7 @@ describe("script declaration contracts", () => {
   });
 
   it("retains runtime exports imported from opaque local modules", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(path.join(root, "scripts", "config.json"), '{"enabled":true}\n');
     fs.writeFileSync(
@@ -422,7 +422,7 @@ describe("script declaration contracts", () => {
   });
 
   it("fails closed on missing exports from analyzable local modules", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(path.join(root, "scripts", "origin.mjs"), "export const value = 1;\n");
     fs.writeFileSync(
@@ -443,7 +443,7 @@ describe("script declaration contracts", () => {
   });
 
   it("fails closed on named JSON imports", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(path.join(root, "scripts", "config.json"), '{"enabled":true}\n');
     fs.writeFileSync(
@@ -467,7 +467,7 @@ describe("script declaration contracts", () => {
   });
 
   it("resolves CommonJS imports to adjacent declaration sidecars", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(path.join(root, "scripts", "helper.cjs"), "exports.value = 1;\n");
     fs.writeFileSync(path.join(root, "scripts", "helper.d.cts"), "export const value: 1;\n");
@@ -494,7 +494,7 @@ describe("script declaration contracts", () => {
   });
 
   it("distinguishes namespace objects from named external bindings", () => {
-    const root = tempDirs.make("openclaw-script-declarations-");
+    const root = tempDirs.make("bot-script-declarations-");
     fs.mkdirSync(path.join(root, "scripts"), { recursive: true });
     fs.writeFileSync(
       path.join(root, "scripts", "namespace.mjs"),

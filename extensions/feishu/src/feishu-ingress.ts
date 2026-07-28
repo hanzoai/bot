@@ -1,15 +1,15 @@
 // Feishu plugin owns raw Lark event admission, replay, and turn adoption.
 import * as Lark from "@larksuiteoapi/node-sdk";
-import { fanInChannelIngressLifecycles } from "openclaw/plugin-sdk/channel-ingress-runtime";
+import { fanInChannelIngressLifecycles } from "bot/plugin-sdk/channel-ingress-runtime";
 import {
   createChannelIngressMonitor,
   DEFAULT_INGRESS_ADOPTION_STALL_MS,
   type ChannelIngressMonitorDeliveryResult,
   type ChannelIngressMonitorLifecycle,
   type ChannelIngressQueue,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { collectErrorGraphCandidates, formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { ChannelReplayClaimHandle } from "openclaw/plugin-sdk/persistent-dedupe";
+} from "bot/plugin-sdk/channel-outbound";
+import { collectErrorGraphCandidates, formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import type { ChannelReplayClaimHandle } from "bot/plugin-sdk/persistent-dedupe";
 import { getFeishuRuntime } from "./runtime.js";
 
 const FEISHU_INGRESS_PAYLOAD_VERSION = 1;

@@ -8,13 +8,13 @@ import {
 import { runGatewayUpdate, type UpdateRunResult } from "../../infra/update-runner.js";
 import { defaultRuntime } from "../../runtime.js";
 import {
-  OPENCLAW_DATABASE_SCHEMA_DOCS_URL,
-  preflightOpenClawDatabaseSchemas,
-  type IncompatibleOpenClawDatabase,
-  type IndeterminateOpenClawDatabase,
-  type OpenClawDatabaseSchemaPreflight,
-} from "../../state/openclaw-database-preflight.js";
-import type { OpenClawSchemaVersions } from "../../state/openclaw-schema-versions.js";
+  BOT_DATABASE_SCHEMA_DOCS_URL,
+  preflightBotDatabaseSchemas,
+  type IncompatibleBotDatabase,
+  type IndeterminateBotDatabase,
+  type BotDatabaseSchemaPreflight,
+} from "../../state/bot-database-preflight.js";
+import type { BotSchemaVersions } from "../../state/bot-schema-versions.js";
 import { createUpdateProgress, printResult } from "./progress.js";
 import {
   createGlobalCommandRunner,
@@ -29,7 +29,7 @@ import { UpdateCommandAbort, type PreManagedServiceStop } from "./update-command
 const DEFAULT_UPDATE_STEP_TIMEOUT_MS = 30 * 60_000;
 
 type BeforeGitMutation = (target: {
-  schemaVersions?: OpenClawSchemaVersions;
+  schemaVersions?: BotSchemaVersions;
   metadataUnreadable?: string;
 }) => Promise<{
   allowGatewayServiceRepair?: boolean;
@@ -38,8 +38,8 @@ type BeforeGitMutation = (target: {
 
 export function formatSchemaRefusalLines(
   schemas: {
-    incompatible: readonly IncompatibleOpenClawDatabase[];
-    indeterminate: readonly IndeterminateOpenClawDatabase[];
+    incompatible: readonly IncompatibleBotDatabase[];
+    indeterminate: readonly IndeterminateBotDatabase[];
   },
   dryRun = false,
 ): string[] {
@@ -53,21 +53,21 @@ export function formatSchemaRefusalLines(
       (database) =>
         `${prefix}: could not inspect ${database.kind} database ${database.path}: ${database.reason}; retry once the gateway releases it.`,
     ),
-    OPENCLAW_DATABASE_SCHEMA_DOCS_URL,
+    BOT_DATABASE_SCHEMA_DOCS_URL,
     "Installing manually via npm bypasses this guard; back up first and verify compatibility.",
   ];
 }
 
 export function checkTargetDatabaseSchemas(
-  supportedVersions: OpenClawSchemaVersions | undefined,
+  supportedVersions: BotSchemaVersions | undefined,
   env: NodeJS.ProcessEnv = process.env,
-): OpenClawDatabaseSchemaPreflight {
+): BotDatabaseSchemaPreflight {
   return supportedVersions
-    ? preflightOpenClawDatabaseSchemas({ env, supportedVersions })
+    ? preflightBotDatabaseSchemas({ env, supportedVersions })
     : { incompatible: [], indeterminate: [] };
 }
 
-export function hasSchemaRefusal(schemas: OpenClawDatabaseSchemaPreflight): boolean {
+export function hasSchemaRefusal(schemas: BotDatabaseSchemaPreflight): boolean {
   return schemas.incompatible.length > 0 || schemas.indeterminate.length > 0;
 }
 
@@ -81,7 +81,7 @@ export function createBeforeGitMutation(params: {
   return async (target) => {
     if (target?.metadataUnreadable) {
       defaultRuntime.error(
-        `Update refused: could not inspect the target's schema support (${target.metadataUnreadable}). Retry, or see ${OPENCLAW_DATABASE_SCHEMA_DOCS_URL}.`,
+        `Update refused: could not inspect the target's schema support (${target.metadataUnreadable}). Retry, or see ${BOT_DATABASE_SCHEMA_DOCS_URL}.`,
       );
       defaultRuntime.exit(1);
       throw new UpdateCommandAbort();

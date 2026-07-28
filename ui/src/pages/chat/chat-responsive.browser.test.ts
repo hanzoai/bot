@@ -305,7 +305,7 @@ function chatHtml(opts: ChatFixtureOptions = {}, mobileNavLayout = false) {
               </div>
               ${
                 opts.sessionRailBody !== undefined
-                  ? `<openclaw-chat-session-rail>
+                  ? `<bot-chat-session-rail>
                     <section class="chat-session-rail chat-session-rail--expanded" role="region" aria-label="Session companion">
                       <header class="chat-session-rail__header">
                         <div class="chat-session-rail__header-copy">
@@ -325,7 +325,7 @@ function chatHtml(opts: ChatFixtureOptions = {}, mobileNavLayout = false) {
                         <button class="btn btn--ghost btn--icon chat-icon-btn chat-session-rail__submit">${iconSvg()}</button>
                       </footer>
                     </section>
-                  </openclaw-chat-session-rail>`
+                  </bot-chat-session-rail>`
                   : ""
               }
               <div class="agent-chat__composer-shell">
@@ -1090,7 +1090,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
             },
             {
               content: "Encoded transcript video",
-              __openclaw: { media: [{ url: videoUrl, contentType: "video/mp4" }] },
+              __bot: { media: [{ url: videoUrl, contentType: "video/mp4" }] },
               role: "user",
               timestamp: Date.UTC(2026, 6, 9, 10, 1),
             },
@@ -1411,7 +1411,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
                 <div class="chat-group-messages">
                   <div class="chat-bubble">
                     <div class="chat-text">
-                      <p><code>openclaw_message_send_channel_webchat_target_example_com_thread_very_long_identifier_without_spaces_1234567890abcdefghijklmnopqrstuvwxyz</code></p>
+                      <p><code>bot_message_send_channel_webchat_target_example_com_thread_very_long_identifier_without_spaces_1234567890abcdefghijklmnopqrstuvwxyz</code></p>
                     </div>
                   </div>
                 </div>
@@ -2003,7 +2003,7 @@ describeBrowserLayout.concurrent("chat responsive browser layout", () => {
                   <strong>Workspace</strong>
                 </div>
               </div>
-              <div class="chat-workspace-rail__path">/Users/steipete/.openclaw/workspace</div>
+              <div class="chat-workspace-rail__path">/Users/steipete/.bot/workspace</div>
               <div class="chat-workspace-rail__summary">
                 <span>0 changed</span><span>0 read</span><span>0 artifacts</span><span>15 shown</span>
               </div>

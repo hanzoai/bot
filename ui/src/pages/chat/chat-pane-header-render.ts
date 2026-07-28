@@ -127,14 +127,14 @@ export abstract class ChatPaneHeaderRender extends ChatPaneHeader {
           this.context.gateway.snapshot.client?.instanceId,
           this.state?.sessionKey ?? "",
         )
-          ? html`<openclaw-viewer-facepile
+          ? html`<bot-viewer-facepile
               class="chat-pane__presence"
               .presencePayload=${this.presencePayload}
               .selfInstanceId=${this.context.gateway.snapshot.client?.instanceId}
               .sessionKey=${this.state?.sessionKey}
               .maxVisible=${4}
               variant="session"
-            ></openclaw-viewer-facepile>`
+            ></bot-viewer-facepile>`
           : nothing,
       faceControl: renderBoardFaceToggle(board.hasBoard, board.face, (face) => {
         this.syncChatSidebarForDock(face === "dashboard" ? board.dock : "hidden");

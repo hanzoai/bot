@@ -2,11 +2,11 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { AgentMessage, StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { ExtensionAPI, ExtensionContext } from "openclaw/plugin-sdk/agent-sessions";
-import { createAssistantMessageEventStream, type Model } from "openclaw/plugin-sdk/llm";
+import type { AgentMessage, StreamFn } from "bot/plugin-sdk/agent-core";
+import type { ExtensionAPI, ExtensionContext } from "bot/plugin-sdk/agent-sessions";
+import { createAssistantMessageEventStream, type Model } from "bot/plugin-sdk/llm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import {
   clearCompactionProviders,
   registerCompactionProvider,
@@ -766,7 +766,7 @@ describe("compaction-safeguard runtime registry", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     buildEmbeddedExtensionFactories({
       cfg,
@@ -1856,7 +1856,7 @@ describe("compaction-safeguard recent-turn preservation", () => {
           { role: "user", content: "older context", timestamp: 1 },
           {
             role: "custom",
-            customType: "openclaw.runtime-context",
+            customType: "bot.runtime-context",
             content: "secret runtime context",
             display: false,
             timestamp: 1.5,
@@ -2418,7 +2418,7 @@ describe("compaction-safeguard recent-turn preservation", () => {
       identifierInstructions: "Preserve ticket IDs exactly.",
     });
     const providerMessages = providerInput.messages ?? [];
-    expect(JSON.stringify(providerMessages)).not.toContain("openclaw.runtime-context");
+    expect(JSON.stringify(providerMessages)).not.toContain("bot.runtime-context");
     expect(JSON.stringify(providerMessages)).not.toContain("secret runtime context");
     expect(compaction.summary).toContain("provider summary body");
     expect(compaction.summary).toContain("**Turn Context (split turn):**");
@@ -3312,7 +3312,7 @@ describe("compaction-safeguard double-compaction guard", () => {
 async function expectWorkspaceSummaryEmptyForAgentsAlias(
   createAlias: (outsidePath: string, agentsPath: string) => void,
 ) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-compaction-summary-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-compaction-summary-"));
   const cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(root);
   try {
     const outside = path.join(root, "outside-secret.txt");
@@ -3332,7 +3332,7 @@ describe("readWorkspaceContextForSummary", () => {
     content: string,
     sectionNames: string[] | undefined,
   ): Promise<string> {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-compaction-summary-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-compaction-summary-"));
     const cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(root);
     try {
       fs.writeFileSync(path.join(root, "AGENTS.md"), content);
@@ -3398,8 +3398,8 @@ describe("readWorkspaceContextForSummary", () => {
   });
 
   it("reads workspace context from the configured workspace instead of process cwd", async () => {
-    const processRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-compaction-cwd-"));
-    const workspaceRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-compaction-workspace-"));
+    const processRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-compaction-cwd-"));
+    const workspaceRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-compaction-workspace-"));
     const cwdSpy = vi.spyOn(process, "cwd").mockReturnValue(processRoot);
     try {
       fs.writeFileSync(

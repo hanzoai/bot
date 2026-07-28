@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { buildChannelAccountSnapshotFromAccount } from "./status.js";
 import type { ChannelPlugin } from "./types.plugin.js";
 
@@ -33,7 +33,7 @@ describe("buildChannelAccountSnapshotFromAccount", () => {
 
     const snapshot = await buildChannelAccountSnapshotFromAccount({
       plugin,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "default",
       account,
     });

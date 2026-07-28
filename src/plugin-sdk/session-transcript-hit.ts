@@ -1,12 +1,12 @@
 // Session transcript hit helpers describe and load matched transcript snippets for plugins.
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { normalizeOptionalString } from "../../packages/normalization-core/src/string-coerce.js";
 import { uniqueStrings } from "../../packages/normalization-core/src/string-normalization.js";
 import { parseUsageCountedSessionIdFromFileName } from "../config/sessions/artifacts.js";
 import { loadCombinedSessionStoreForGateway as loadGatewaySessionStore } from "../config/sessions/combined-store-gateway.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isIncognitoSessionKey, normalizeAgentId } from "../routing/session-key.js";
 export {
   formatSessionTranscriptMemoryHitKey,
@@ -24,7 +24,7 @@ export type {
 
 /** Loads the cross-session plugin view without process-only incognito rows. */
 export function loadCombinedSessionStoreForGateway(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   opts: { agentId?: string; configuredAgentsOnly?: boolean } = {},
 ) {
   const result = loadGatewaySessionStore(cfg, { ...opts, includeIncognito: false });

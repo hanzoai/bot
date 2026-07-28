@@ -32,7 +32,7 @@ import {
   type SkillOperation,
   type SkillMessageMap,
 } from "../../lib/skills/index.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { renderSkills, type SkillDetailTab, type SkillsStatusFilter } from "./view.ts";
 
@@ -46,7 +46,7 @@ export type SkillsRouteData = {
   error: string | null;
 };
 
-class SkillsPage extends OpenClawLightDomElement {
+class SkillsPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -421,6 +421,6 @@ class SkillsPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-skills-page")) {
-  customElements.define("openclaw-skills-page", SkillsPage);
+if (!customElements.get("bot-skills-page")) {
+  customElements.define("bot-skills-page", SkillsPage);
 }

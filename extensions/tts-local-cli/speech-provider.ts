@@ -1,21 +1,21 @@
 // Tts Local Cli provider module implements model/runtime integration.
 import { readdirSync } from "node:fs";
 import path from "node:path";
-import { runFfmpeg } from "openclaw/plugin-sdk/media-runtime";
-import { runCommandBuffered } from "openclaw/plugin-sdk/process-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
+import { runFfmpeg } from "bot/plugin-sdk/media-runtime";
+import { runCommandBuffered } from "bot/plugin-sdk/process-runtime";
+import { createSubsystemLogger } from "bot/plugin-sdk/runtime-env";
 import {
   readRegularFileSync,
   writeExternalFileWithinRoot,
-} from "openclaw/plugin-sdk/security-runtime";
+} from "bot/plugin-sdk/security-runtime";
 import type {
   SpeechProviderConfig,
   SpeechProviderPlugin,
   SpeechSynthesisRequest,
   SpeechTelephonySynthesisRequest,
-} from "openclaw/plugin-sdk/speech-core";
-import { tempWorkspace, resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/speech-core";
+import { tempWorkspace, resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 
 const log = createSubsystemLogger("tts-local-cli");
 
@@ -344,8 +344,8 @@ export function buildCliSpeechProvider(): SpeechProviderPlugin {
       log.debug(`synthesize: text=${truncateUtf16Safe(req.text, 50)}...`);
 
       const temp = await tempWorkspace({
-        rootDir: resolvePreferredOpenClawTmpDir(),
-        prefix: "openclaw-cli-tts-",
+        rootDir: resolvePreferredBotTmpDir(),
+        prefix: "bot-cli-tts-",
       });
       const tempDir = temp.dir;
 
@@ -417,8 +417,8 @@ export function buildCliSpeechProvider(): SpeechProviderPlugin {
       log.debug(`synthesizeTelephony: text=${truncateUtf16Safe(req.text, 50)}...`);
 
       const temp = await tempWorkspace({
-        rootDir: resolvePreferredOpenClawTmpDir(),
-        prefix: "openclaw-cli-tts-",
+        rootDir: resolvePreferredBotTmpDir(),
+        prefix: "bot-cli-tts-",
       });
       const tempDir = temp.dir;
 

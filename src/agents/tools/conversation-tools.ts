@@ -10,7 +10,7 @@ import {
   type ConversationSendResult,
   type ConversationTurnResult,
 } from "../../../packages/gateway-protocol/src/schema/agent.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { callGateway } from "../../gateway/call.js";
 import { resolveAgentIdFromSessionKey } from "../../routing/session-key.js";
 import { optionalPositiveIntegerSchema } from "../schema/typebox.js";
@@ -55,7 +55,7 @@ type ConversationToolOptions = {
   agentId?: string;
   agentSessionId?: string;
   agentSessionKey?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   senderIsOwner?: boolean;
 };
 

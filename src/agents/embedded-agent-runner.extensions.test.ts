@@ -1,8 +1,8 @@
-import { wrapToolWithBeforeToolCallHook } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { wrapToolWithBeforeToolCallHook } from "bot/plugin-sdk/agent-harness-runtime";
 import {
   createTerminalPresentationContractTool,
   textToolResult,
-} from "openclaw/plugin-sdk/agent-runtime-test-contracts";
+} from "bot/plugin-sdk/agent-runtime-test-contracts";
 // Covers embedded runner extension factories and tool-result middleware bridge.
 import {
   AuthStorage,
@@ -12,7 +12,7 @@ import {
   loadExtensionFromFactory,
   ModelRegistry,
   SessionManager,
-} from "openclaw/plugin-sdk/agent-sessions";
+} from "bot/plugin-sdk/agent-sessions";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createEmptyPluginRegistry } from "../plugins/registry.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
@@ -25,7 +25,7 @@ import { consumeEmbeddedToolSendReceipt } from "./embedded-agent-runner/tool-sen
 import { cleanupTempPluginTestEnvironment } from "./test-helpers/temp-plugin-extension-fixtures.js";
 import { jsonResult } from "./tools/common.js";
 
-const originalBundledPluginsDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+const originalBundledPluginsDir = process.env.BOT_BUNDLED_PLUGINS_DIR;
 const tempDirs: string[] = [];
 
 afterEach(() => {
@@ -47,7 +47,7 @@ describe("buildEmbeddedExtensionFactories", () => {
         event.result.content = [{ type: "text", text: `compacted ${seenToolCallIds.length}` }];
         return undefined;
       },
-      runtimes: ["openclaw"],
+      runtimes: ["bot"],
       source: "test",
     });
     setActivePluginRegistry(registry);
@@ -87,8 +87,8 @@ describe("buildEmbeddedExtensionFactories", () => {
       details: {},
     });
     expect(seenToolCallIds).toHaveLength(2);
-    expect(seenToolCallIds[0]).toMatch(/^openclaw-/);
-    expect(seenToolCallIds[1]).toMatch(/^openclaw-/);
+    expect(seenToolCallIds[0]).toMatch(/^bot-/);
+    expect(seenToolCallIds[1]).toMatch(/^bot-/);
     expect(seenToolCallIds[0]).not.toBe(seenToolCallIds[1]);
   });
 
@@ -109,7 +109,7 @@ describe("buildEmbeddedExtensionFactories", () => {
           }),
         };
       },
-      runtimes: ["openclaw"],
+      runtimes: ["bot"],
       source: "test",
     });
     setActivePluginRegistry(registry);
@@ -194,7 +194,7 @@ describe("buildEmbeddedExtensionFactories", () => {
           reason: "policy denied",
         }),
       }),
-      runtimes: ["openclaw"],
+      runtimes: ["bot"],
       source: "test",
     });
     setActivePluginRegistry(registry);
@@ -311,7 +311,7 @@ describe("buildEmbeddedExtensionFactories", () => {
         event.result.details = { redacted: true };
         return undefined;
       },
-      runtimes: ["openclaw"],
+      runtimes: ["bot"],
       source: "test",
     });
     setActivePluginRegistry(registry);
@@ -362,7 +362,7 @@ describe("buildEmbeddedExtensionFactories", () => {
           details: { redacted: true },
         },
       }),
-      runtimes: ["openclaw"],
+      runtimes: ["bot"],
       source: "test",
     });
     setActivePluginRegistry(registry);
@@ -421,7 +421,7 @@ describe("buildEmbeddedExtensionFactories", () => {
       handler: () => {
         throw new Error("redaction failed");
       },
-      runtimes: ["openclaw"],
+      runtimes: ["bot"],
       source: "test",
     });
     setActivePluginRegistry(registry);

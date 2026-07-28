@@ -2,17 +2,17 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolveDefaultAgentId } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { readJsonFileWithFallback } from "openclaw/plugin-sdk/json-store";
-import { resolveAgentIdFromSessionKey } from "openclaw/plugin-sdk/session-key-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { resolveDefaultAgentId } from "bot/plugin-sdk/agent-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { readJsonFileWithFallback } from "bot/plugin-sdk/json-store";
+import { resolveAgentIdFromSessionKey } from "bot/plugin-sdk/session-key-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   registerSessionBindingAdapter,
   resolveThreadBindingFarewellText,
   type SessionBindingAdapter,
   unregisterSessionBindingAdapter,
-} from "openclaw/plugin-sdk/thread-bindings-session-runtime";
+} from "bot/plugin-sdk/thread-bindings-session-runtime";
 import { getMatrixRuntime } from "../runtime.js";
 import { claimCurrentTokenStorageState, resolveMatrixStateFilePath } from "./client/storage.js";
 import type { MatrixAuth } from "./client/types.js";
@@ -232,7 +232,7 @@ function buildMatrixBindingIntroText(params: {
 }
 
 async function sendBindingMessage(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   client: MatrixClient;
   accountId: string;
   roomId: string;
@@ -253,7 +253,7 @@ async function sendBindingMessage(params: {
 }
 
 async function sendFarewellMessage(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   client: MatrixClient;
   accountId: string;
   record: MatrixThreadBindingRecord;
@@ -288,7 +288,7 @@ async function sendFarewellMessage(params: {
 }
 
 export async function createMatrixThreadBindingManager(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   auth: MatrixAuth;
   client: MatrixClient;

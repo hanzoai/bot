@@ -5,15 +5,15 @@ import {
   invokeNativeHookRelay,
   nativeHookRelayTesting,
   type NativeHookRelayRegistrationHandle,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   onInternalDiagnosticEvent,
   type DiagnosticEventPayload,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
+} from "bot/plugin-sdk/diagnostic-runtime";
 import {
   createEmptyPluginRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as approvalBridge from "./approval-bridge.js";
 import { readAttemptTerminal } from "./attempt-terminal.test-helper.js";

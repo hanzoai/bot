@@ -1,5 +1,5 @@
 // Routes Gateway and embedded events to the exact selected TUI conversation.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { agentSessionKeysMatchByRequestKey, parseAgentSessionKey } from "../routing/session-key.js";
 import type { TuiStateAccess } from "./tui-types.js";
 

@@ -1,7 +1,7 @@
 // Sessions tool tests cover list/send helpers, announce-target resolution,
 // and assistant-visible text sanitization.
-import { expectDefined } from "@openclaw/normalization-core";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { MAX_TIMER_TIMEOUT_MS } from "@hanzo/bot-normalization-core/number-coercion";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelMessagingAdapter } from "../../channels/plugins/types.public.js";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../../config/io.js";
@@ -1273,7 +1273,7 @@ describe("sessions_send agent-main materialization provenance", () => {
       }
       return {};
     });
-    // Mirror production assembly (openclaw-tools.ts): no callGateway override, so
+    // Mirror production assembly (bot-tools.ts): no callGateway override, so
     // ensureConfiguredAgentMainSession takes the trusted in-process branch.
     const tool = createSessionsSendTool({
       agentSessionKey: "agent:main:dashboard:req-provenance",

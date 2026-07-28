@@ -120,7 +120,7 @@ export async function autoMigrateLegacyStateDir(params: {
   const warnings: string[] = [];
   const changes: string[] = [];
   const notices: string[] = [];
-  const hasCustomStateDir = Boolean(env.OPENCLAW_STATE_DIR?.trim());
+  const hasCustomStateDir = Boolean(env.BOT_STATE_DIR?.trim());
   const targetDir = hasCustomStateDir ? resolveStateDir(env, homedir) : resolveNewStateDir(homedir);
   const migratePluginInstallIndex = async () => {
     const result = await migrateLegacyInstalledPluginIndex({ stateDir: targetDir });
@@ -284,7 +284,7 @@ export async function autoMigrateLegacyStateDir(params: {
           `State dir moved but failed to link legacy path (${legacyDir ?? "unknown"} → ${targetDir}): ${String(fallbackErr)}`,
         );
         warnings.push(
-          `Rollback failed; set OPENCLAW_STATE_DIR=${targetDir} to avoid split state: ${String(rollbackErr)}`,
+          `Rollback failed; set BOT_STATE_DIR=${targetDir} to avoid split state: ${String(rollbackErr)}`,
         );
         changes.push(`State dir: ${legacyDir ?? "unknown"} → ${targetDir}`);
       }

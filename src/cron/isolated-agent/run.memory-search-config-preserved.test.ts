@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { resolveMemorySearchConfig } from "../../agents/memory-search.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { MemorySearchConfig } from "../../config/types.tools.js";
 import { buildCronAgentDefaultsConfig } from "./run-config.js";
 
@@ -22,7 +22,7 @@ describe("buildCronAgentDefaultsConfig memory search preservation", () => {
       defaults: {},
       agentConfigOverride: { memory: { search: agentMemorySearch } },
     });
-    const runCfg: OpenClawConfig = {
+    const runCfg: BotConfig = {
       plugins: { enabled: false },
       agents: {
         defaults: agentDefaults,

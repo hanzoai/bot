@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, BotConfig } from "../config/types.bot.js";
 import { SystemAgentChatEngine } from "./chat-engine.js";
 import { createSystemAgentVerifiedInferenceTestFixture } from "./system-agent.test-helpers.js";
 import type {
@@ -19,7 +19,7 @@ const verifiedInferenceConfig = {
       },
     },
   },
-} satisfies OpenClawConfig;
+} satisfies BotConfig;
 
 let verifiedInference: SystemAgentVerifiedInferenceBinding;
 let verifiedInferenceDeps: SystemAgentVerifiedInferenceDeps;
@@ -29,7 +29,7 @@ function verifiedConfigSnapshot(): ConfigFileSnapshot {
   return {
     exists: true,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/bot.json",
     hash: "hash",
     raw: null,
     parsed: config,
@@ -86,7 +86,7 @@ vi.mock("../config/config.js", async (importOriginal) => ({
   readConfigFileSnapshot: vi.fn(async () => ({
     exists: true,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/bot.json",
     hash: "hash",
     config: {},
     sourceConfig: {},
@@ -100,7 +100,7 @@ beforeAll(async () => {
   verifiedInferenceDeps = fixture.deps;
 });
 
-describe("OpenClaw chat channel setup", () => {
+describe("Bot chat channel setup", () => {
   it("runs collected channel hooks after writing config", async () => {
     const engine = new SystemAgentChatEngine({
       verifiedInference,
@@ -112,7 +112,7 @@ describe("OpenClaw chat channel setup", () => {
         loadOverview: async () =>
           ({
             config: {
-              path: "/tmp/openclaw.json",
+              path: "/tmp/bot.json",
               exists: true,
               valid: true,
               issues: [],
@@ -128,8 +128,8 @@ describe("OpenClaw chat channel setup", () => {
             },
             gateway: { url: "ws://127.0.0.1:18789", source: "local", reachable: false },
             references: {
-              docsUrl: "https://docs.openclaw.ai",
-              sourceUrl: "https://github.com/openclaw/openclaw",
+              docsUrl: "https://docs.bot.ai",
+              sourceUrl: "https://github.com/hanzoai/bot",
             },
           }) as never,
       },

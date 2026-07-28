@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import {
   assignNativeI18nIds,
@@ -59,7 +59,7 @@ describe("native app i18n inventory", () => {
     );
     const onboardingPath = "apps/ios/Sources/Onboarding/OnboardingWizardConnectionSections.swift";
     const sendingPath =
-      "apps/shared/OpenClawKit/Sources/OpenClawChatUI/ChatViewModel+Sending.swift";
+      "apps/shared/BotKit/Sources/BotChatUI/ChatViewModel+Sending.swift";
     const movedEntries = [
       { id: "native.apple.95e2c98254da2aba", path: onboardingPath, source: "Home Network" },
       {
@@ -281,16 +281,16 @@ describe("native app i18n inventory", () => {
       "apps/ios/Fixture/Info.plist",
       `<plist><dict>
         <key>CFBundleDisplayName</key>
-        <string>OpenClaw Fixture</string>
+        <string>Bot Fixture</string>
         <key>NSCameraUsageDescription</key>
-        <string>OpenClaw uses the camera to scan setup codes &amp; documents.</string>
-        <key>OpenClawFixtureValue</key>
+        <string>Bot uses the camera to scan setup codes &amp; documents.</string>
+        <key>BotFixtureValue</key>
         <string>Runtime configuration value</string>
       </dict></plist>`,
     );
 
     expect(entries.map((entry) => entry.source)).toEqual([
-      "OpenClaw uses the camera to scan setup codes & documents.",
+      "Bot uses the camera to scan setup codes & documents.",
     ]);
   });
 
@@ -301,7 +301,7 @@ describe("native app i18n inventory", () => {
       `<resources>
         <string-array name="capabilities" translatable="false">
           <item>@string/native_capability</item>
-          <item>openclaw_wear_companion_v1</item>
+          <item>bot_wear_companion_v1</item>
           <item>Visible choice</item>
         </string-array>
         <string-array name="modes">
@@ -338,7 +338,7 @@ describe("native app i18n inventory", () => {
       entries
         .filter((entry) => entry.surface === "apple")
         .every((entry) =>
-          /^(?:apps\/ios|apps\/macos\/Sources|apps\/shared\/OpenClawKit\/Sources)\//u.test(
+          /^(?:apps\/ios|apps\/macos\/Sources|apps\/shared\/BotKit\/Sources)\//u.test(
             entry.path,
           ),
         ),
@@ -365,7 +365,7 @@ describe("native app i18n inventory", () => {
       entries.some(
         (entry) =>
           entry.path.endsWith(
-            "/thirdParty/java/ai/openclaw/app/ui/SensitivePhoneCapabilitiesSettings.kt",
+            "/thirdParty/java/ai/bot/app/ui/SensitivePhoneCapabilitiesSettings.kt",
           ) && entry.source === "Control other apps",
       ),
     ).toBe(true);
@@ -425,7 +425,7 @@ describe("native app i18n inventory", () => {
     expect(entries.some((entry) => entry.source === "Run now")).toBe(true);
     expect(entries.some((entry) => entry.source === "Loading chat")).toBe(true);
     expect(
-      entries.some((entry) => entry.surface === "android" && entry.source === "Search OpenClaw"),
+      entries.some((entry) => entry.surface === "android" && entry.source === "Search Bot"),
     ).toBe(true);
     expect(
       entries.some(
@@ -445,14 +445,14 @@ describe("native app i18n inventory", () => {
       ),
     ).toBe(true);
     expect(entries.some((entry) => entry.source === "What would you like to work on?")).toBe(true);
-    expect(entries.some((entry) => entry.source === "Check OpenClaw status")).toBe(true);
+    expect(entries.some((entry) => entry.source === "Check Bot status")).toBe(true);
     expect(entries.some((entry) => entry.source === "What can I control here?")).toBe(true);
     expect(entries.some((entry) => entry.source === "Help me start voice chat")).toBe(true);
     expect(
       entries.some(
         (entry) =>
           entry.source ===
-          "Summarize the current OpenClaw status and tell me what needs attention.",
+          "Summarize the current Bot status and tell me what needs attention.",
       ),
     ).toBe(true);
     expect(
@@ -468,8 +468,8 @@ describe("native app i18n inventory", () => {
       ),
     ).toBe(true);
     expect(entries.some((entry) => entry.source === "DIARY")).toBe(true);
-    expect(entries.some((entry) => entry.source === "ask OpenClaw $prompt")).toBe(true);
-    expect(entries.some((entry) => entry.source === "OpenClaw is paused")).toBe(true);
+    expect(entries.some((entry) => entry.source === "ask Bot $prompt")).toBe(true);
+    expect(entries.some((entry) => entry.source === "Bot is paused")).toBe(true);
     expect(
       entries.some((entry) => entry.source === "Choose system, light, or dark appearance"),
     ).toBe(true);
@@ -506,7 +506,7 @@ describe("native app i18n inventory", () => {
     expect(
       entries.some(
         (entry) =>
-          entry.source === 'OpenClaw needs ${labels.joinToString(", ")} permissions to continue.',
+          entry.source === 'Bot needs ${labels.joinToString(", ")} permissions to continue.',
       ),
     ).toBe(true);
     expect(
@@ -530,14 +530,14 @@ describe("native app i18n inventory", () => {
       entries.some(
         (entry) =>
           entry.source ===
-          "Writes a rotating, local-only log under ~/Library/Logs/OpenClaw/. Enable only while actively debugging.",
+          "Writes a rotating, local-only log under ~/Library/Logs/Bot/. Enable only while actively debugging.",
       ),
     ).toBe(true);
     expect(
       entries.some(
         (entry) =>
           entry.source ===
-          "Paste the token configured on the gateway host. On the gateway host, run `openclaw config get gateway.auth.token`. If the gateway uses an environment variable instead, use `OPENCLAW_GATEWAY_TOKEN`.",
+          "Paste the token configured on the gateway host. On the gateway host, run `bot config get gateway.auth.token`. If the gateway uses an environment variable instead, use `BOT_GATEWAY_TOKEN`.",
       ),
     ).toBe(true);
     expect(
@@ -545,7 +545,7 @@ describe("native app i18n inventory", () => {
         [
           "Your AI-powered setup helper. It can check status, fix config, ",
           "Cron changes require operator.admin. Setup codes intentionally do not grant it. ",
-          "Writes a rotating, local-only log under ~/Library/Logs/OpenClaw/. ",
+          "Writes a rotating, local-only log under ~/Library/Logs/Bot/. ",
           "Paste the token configured on the gateway host. ",
         ].includes(entry.source),
       ),
@@ -566,7 +566,7 @@ describe("native app i18n inventory", () => {
       entries.some(
         (entry) =>
           entry.source ===
-          "Approve this device on the gateway.\n1) `%1$@`\n2) `/pair approve` in your OpenClaw chat\n%2$@\nOpenClaw will also retry automatically when you return to this app.",
+          "Approve this device on the gateway.\n1) `%1$@`\n2) `/pair approve` in your Bot chat\n%2$@\nBot will also retry automatically when you return to this app.",
       ),
     ).toBe(true);
     expect(
@@ -593,12 +593,12 @@ describe("native app i18n inventory", () => {
     expect(
       entries.some((entry) =>
         entry.source.startsWith(
-          "Exec approvals can only be reviewed while OpenClaw is open and connected.",
+          "Exec approvals can only be reviewed while Bot is open and connected.",
         ),
       ),
     ).toBe(true);
     expect(entries.some((entry) => entry.source === "$(PRODUCT_BUNDLE_IDENTIFIER)")).toBe(false);
-    expect(entries.some((entry) => entry.source === "ai.openclaw.screenRecord.writer")).toBe(false);
+    expect(entries.some((entry) => entry.source === "ai.bot.screenRecord.writer")).toBe(false);
     expect(
       entries.some(
         (entry) =>
@@ -651,7 +651,7 @@ describe("native app i18n inventory", () => {
 
   it("creates a first-run locale artifact and leaves a complete artifact unchanged", async () => {
     const tempDirs: string[] = [];
-    const translationsDir = makeTempDir(tempDirs, "openclaw-native-i18n-");
+    const translationsDir = makeTempDir(tempDirs, "bot-native-i18n-");
     const entries: NativeI18nEntry[] = [
       {
         id: "native.android.hello",
@@ -959,7 +959,7 @@ describe("native app i18n inventory", () => {
 
   it("rejects native printf placeholder drift", async () => {
     const tempDirs: string[] = [];
-    const translationsDir = makeTempDir(tempDirs, "openclaw-native-i18n-");
+    const translationsDir = makeTempDir(tempDirs, "bot-native-i18n-");
     const cases = [
       {
         entry: {
@@ -1148,8 +1148,8 @@ describe("native app i18n inventory", () => {
         id: "native.android.language-picker",
         kind: "conditional-branch",
         line: 89,
-        path: "apps/android/app/src/main/java/ai/openclaw/app/AppLanguage.kt",
-        source: "OpenClaw translations · $languageTag",
+        path: "apps/android/app/src/main/java/ai/bot/app/AppLanguage.kt",
+        source: "Bot translations · $languageTag",
         surface: "android",
       },
       {

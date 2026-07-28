@@ -30,7 +30,7 @@ type SessionPlacementAdmissionState = {
 // Runtime chunks share one provider. The identity guard keeps an older gateway
 // shutdown from clearing a newer lifecycle's admission gate.
 const state = resolveGlobalSingleton(
-  Symbol.for("openclaw.sessionPlacementAdmissionState"),
+  Symbol.for("bot.sessionPlacementAdmissionState"),
   (): SessionPlacementAdmissionState => ({}),
 );
 

@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { buildContextReply } from "./commands-context-report.js";
 import { buildCommandContext } from "./commands-context.js";
@@ -99,7 +99,7 @@ async function withTranscript(
   messages: unknown[],
   run: (sessionFile: string, dir: string) => Promise<void>,
 ): Promise<void> {
-  const dir = await mkdtemp(join(tmpdir(), "openclaw-context-report-"));
+  const dir = await mkdtemp(join(tmpdir(), "bot-context-report-"));
   try {
     const sessionFile = join(dir, "session.jsonl");
     const lines = messages.map((message, index) =>
@@ -436,7 +436,7 @@ describe("buildCommandContext", () => {
 
     const result = buildCommandContext({
       ctx,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       isGroup: false,
       triggerBodyNormalized: "/id",
       commandAuthorized: true,
@@ -459,7 +459,7 @@ describe("buildCommandContext", () => {
 
     const result = buildCommandContext({
       ctx,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       isGroup: false,
       triggerBodyNormalized: stripStructuralPrefixes("/reset soft\nre-read persona files"),
       commandAuthorized: true,
@@ -483,7 +483,7 @@ describe("buildCommandContext", () => {
 
     const result = buildCommandContext({
       ctx,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       isGroup: false,
       triggerBodyNormalized: stripStructuralPrefixes(body),
       commandAuthorized: true,
@@ -509,7 +509,7 @@ describe("buildCommandContext", () => {
 
     const result = buildCommandContext({
       ctx,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       isGroup: false,
       triggerBodyNormalized: "/codex bind",
       commandAuthorized: true,

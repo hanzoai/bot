@@ -6,7 +6,7 @@ import { cleanupTempDirs, makeTempDir } from "../helpers/temp-dir.js";
 const tempRoots: string[] = [];
 
 function makeTempRoot() {
-  return makeTempDir(tempRoots, "openclaw-parallels-phase-runner-");
+  return makeTempDir(tempRoots, "bot-parallels-phase-runner-");
 }
 
 afterEach(() => {

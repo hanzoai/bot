@@ -10,7 +10,7 @@ import { icons } from "../../../components/icons.ts";
 import "../../../components/tooltip.ts";
 import { t } from "../../../i18n/index.ts";
 import { parseSessionDiffPatch, type ParsedFilePatch } from "../../../lib/chat/session-diff.ts";
-import { OpenClawLightDomElement } from "../../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../../lit/bot-element.ts";
 import { renderDiffBlock, renderDiffStatChips } from "./chat-diff-render.ts";
 
 export type SessionDiffLoader = () => Promise<SessionsDiffResult>;
@@ -33,7 +33,7 @@ function statusLabel(file: SessionDiffFile): string {
   }
 }
 
-class SessionDiffPanel extends OpenClawLightDomElement {
+class SessionDiffPanel extends BotLightDomElement {
   @property({ attribute: false }) loader: SessionDiffLoader | null = null;
 
   @state() private result: SessionsDiffResult | null = null;
@@ -109,7 +109,7 @@ class SessionDiffPanel extends OpenClawLightDomElement {
           <span class="session-diff__branch-label">${branchLabel}</span>
         </span>
         ${renderDiffStatChips({ added: result.additions, removed: result.deletions })}
-        <openclaw-tooltip .content=${t("chat.sessionDiff.refresh")}>
+        <bot-tooltip .content=${t("chat.sessionDiff.refresh")}>
           <button
             class="btn btn--ghost btn--icon session-diff__refresh"
             type="button"
@@ -119,7 +119,7 @@ class SessionDiffPanel extends OpenClawLightDomElement {
           >
             ${icons.refresh}
           </button>
-        </openclaw-tooltip>
+        </bot-tooltip>
       </div>
     `;
   }
@@ -205,12 +205,12 @@ class SessionDiffPanel extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-session-diff")) {
-  customElements.define("openclaw-session-diff", SessionDiffPanel);
+if (!customElements.get("bot-session-diff")) {
+  customElements.define("bot-session-diff", SessionDiffPanel);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-session-diff": SessionDiffPanel;
+    "bot-session-diff": SessionDiffPanel;
   }
 }

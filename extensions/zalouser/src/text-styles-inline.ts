@@ -1,5 +1,5 @@
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { renderMarkdownWithAttributedRanges } from "openclaw/plugin-sdk/text-chunking";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import { renderMarkdownWithAttributedRanges } from "bot/plugin-sdk/text-chunking";
 import {
   LOCAL_TAG_PATTERN,
   TAG_STYLE_MAP,

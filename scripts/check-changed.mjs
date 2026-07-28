@@ -38,7 +38,7 @@ const PROMPT_SNAPSHOT_OWNER_TEST_PATH_RE =
 const RUNTIME_SIDECAR_BASELINE_PATH_RE =
   /^(?:scripts\/generate-runtime-sidecar-paths-baseline\.ts|scripts\/lib\/bundled-runtime-sidecar-paths\.json|src\/plugins\/runtime-sidecar-paths(?:-baseline)?\.ts)$/u;
 const SQLITE_SESSION_SCHEMA_BASELINE_PATH_RE =
-  /^(?:src\/state\/openclaw-agent-schema\.sql|scripts\/(?:generate-sqlite-session-schema-baseline\.ts|lib\/sqlite-session-schema-baseline\.ts)|test\/scripts\/sqlite-session-schema-baseline\.test\.ts|docs\/\.generated\/sqlite-session-transcript-schema-baseline\.sha256)$/u;
+  /^(?:src\/state\/bot-agent-schema\.sql|scripts\/(?:generate-sqlite-session-schema-baseline\.ts|lib\/sqlite-session-schema-baseline\.ts)|test\/scripts\/sqlite-session-schema-baseline\.test\.ts|docs\/\.generated\/sqlite-session-transcript-schema-baseline\.sha256)$/u;
 const PLUGIN_SDK_API_BASELINE_PATH_RE =
   /^(?:src\/|packages\/|extensions\/|pnpm-lock\.yaml$|tsconfig\.json$|scripts\/(?:generate-plugin-sdk-api-baseline\.ts|lib\/plugin-sdk-(?:doc-metadata\.ts|entries\.mjs|entrypoints\.json|private-local-only-subpaths\.json))|docs\/\.generated\/plugin-sdk-api-baseline\.sha256$)/u;
 const PLUGIN_SDK_SURFACE_PATH_RE =
@@ -46,7 +46,7 @@ const PLUGIN_SDK_SURFACE_PATH_RE =
 const DEPRECATION_HYGIENE_PATH_RE =
   /^(?:package\.json$|src\/|extensions\/|packages\/|scripts\/(?:check-deprecated-api-usage\.mjs$|plugin-boundary-report\.ts$|lib\/plugin-sdk))/u;
 const CANVAS_A2UI_NATIVE_RESOURCE_PATH_RE =
-  /^(?:pnpm-lock\.yaml$|apps\/shared\/OpenClawKit\/Sources\/OpenClawKit\/Resources\/CanvasA2UI\/|extensions\/canvas\/(?:package\.json$|scripts\/bundle-a2ui\.mjs$|src\/host\/a2ui(?:\/(?:index\.html|a2ui\.bundle\.js|\.bundle\.hash)$|-app\/))|scripts\/(?:bundle-a2ui|sync-native-a2ui)\.mjs$)/u;
+  /^(?:pnpm-lock\.yaml$|apps\/shared\/BotKit\/Sources\/BotKit\/Resources\/CanvasA2UI\/|extensions\/canvas\/(?:package\.json$|scripts\/bundle-a2ui\.mjs$|src\/host\/a2ui(?:\/(?:index\.html|a2ui\.bundle\.js|\.bundle\.hash)$|-app\/))|scripts\/(?:bundle-a2ui|sync-native-a2ui)\.mjs$)/u;
 const CONTROL_UI_I18N_VERIFY_PATH_RE =
   /^(?:package\.json$|ui\/src\/|scripts\/(?:control-ui-i18n(?:-(?:report|verify))?\.ts|lib\/control-ui-i18n-[^/]+\.ts)$|test\/scripts\/control-ui-i18n[^/]*\.test\.ts$)/u;
 const CORE_OXLINT_TS_CONFIG = "config/tsconfig/oxlint.core.json";
@@ -92,9 +92,9 @@ export function createChangedCheckChildEnv(baseEnv = process.env) {
   const resolvedBaseEnv = resolveLocalHeavyCheckEnv(baseEnv);
   return {
     ...resolvedBaseEnv,
-    OPENCLAW_OXLINT_SKIP_LOCK: "1",
-    OPENCLAW_TEST_HEAVY_CHECK_LOCK_HELD: "1",
-    OPENCLAW_TSGO_HEAVY_CHECK_LOCK_HELD: "1",
+    BOT_OXLINT_SKIP_LOCK: "1",
+    BOT_TEST_HEAVY_CHECK_LOCK_HELD: "1",
+    BOT_TSGO_HEAVY_CHECK_LOCK_HELD: "1",
   };
 }
 
@@ -170,7 +170,7 @@ export function changedCheckRequiresRemote(result) {
 }
 
 export function shouldDelegateChangedCheckToCrabbox(argv = [], env = process.env, options = {}) {
-  if (isTruthyEnvFlag(env.OPENCLAW_CHECK_CHANGED_REMOTE_CHILD)) {
+  if (isTruthyEnvFlag(env.BOT_CHECK_CHANGED_REMOTE_CHILD)) {
     return false;
   }
   if (isTruthyEnvFlag(env.CI) || isTruthyEnvFlag(env.GITHUB_ACTIONS)) {
@@ -186,7 +186,7 @@ export function shouldDelegateChangedCheckToCrabbox(argv = [], env = process.env
   if (result.paths.length === 0) {
     return false;
   }
-  if (isTruthyEnvFlag(env.OPENCLAW_TESTBOX)) {
+  if (isTruthyEnvFlag(env.BOT_TESTBOX)) {
     return true;
   }
   // Release metadata plans diff the supplied commits after classification. A missing
@@ -222,7 +222,7 @@ export function buildChangedCheckCrabboxArgs(argv = [], options = {}) {
     "--provider",
     "blacksmith-testbox",
     "--blacksmith-org",
-    "openclaw",
+    "bot",
     "--blacksmith-workflow",
     ".github/workflows/ci-check-testbox.yml",
     "--blacksmith-job",
@@ -236,8 +236,8 @@ export function buildChangedCheckCrabboxArgs(argv = [], options = {}) {
     "--timing-json",
     "--",
     "env",
-    "OPENCLAW_CHECK_CHANGED_REMOTE_CHILD=1",
-    "OPENCLAW_CHANGED_LANES_RAW_SYNC=1",
+    "BOT_CHECK_CHANGED_REMOTE_CHILD=1",
+    "BOT_CHANGED_LANES_RAW_SYNC=1",
     "CI=1",
     "PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN=false",
     "corepack",
@@ -720,8 +720,8 @@ export function createChangedCheckPlan(result, options = {}) {
     addCommand("live Docker shell syntax", "bash", ["-n", ...LIVE_DOCKER_AUTH_SHELL_TARGETS]);
     addCommand("live Docker scheduler dry run", "node", ["scripts/test-docker-all.mjs"], {
       ...baseEnv,
-      OPENCLAW_DOCKER_ALL_DRY_RUN: "1",
-      OPENCLAW_DOCKER_ALL_LIVE_MODE: "only",
+      BOT_DOCKER_ALL_DRY_RUN: "1",
+      BOT_DOCKER_ALL_LIVE_MODE: "only",
     });
   }
 
@@ -915,7 +915,7 @@ function ensureCorepackPnpmShimDir() {
   if (corepackPnpmShimDir) {
     return corepackPnpmShimDir;
   }
-  const dir = mkdtempSync(path.join(tmpdir(), "openclaw-corepack-pnpm-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "bot-corepack-pnpm-"));
   const pnpmPath = path.join(dir, "pnpm");
   writeFileSync(pnpmPath, '#!/bin/sh\nexec corepack pnpm "$@"\n', "utf8");
   chmodSync(pnpmPath, 0o755);

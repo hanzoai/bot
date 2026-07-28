@@ -3,7 +3,7 @@ import {
   claimPendingAgentQuestionAnswer,
   embeddedAgentLog,
   setActiveEmbeddedRun,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import type { AttemptParamsLike } from "./attempt-types.js";
 import type { attachEventBridge } from "./event-bridge.js";
 import type { CopilotUserInputBridge } from "./user-input-bridge.js";

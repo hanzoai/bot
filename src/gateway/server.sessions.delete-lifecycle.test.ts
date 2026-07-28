@@ -21,8 +21,8 @@ import {
   beginSessionWorkAdmission,
   runExclusiveSessionLifecycleMutation,
 } from "../sessions/session-lifecycle-admission.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
+import { createBotTestState } from "../test-utils/bot-test-state.js";
 import { embeddedRunMock, rpcReq, testState, writeSessionStore } from "./test-helpers.js";
 import {
   setupGatewaySessionsTestHarness,
@@ -52,13 +52,13 @@ async function initializeRemoteBackedGitWorkspace(root: string): Promise<string>
   const remote = path.join(root, "remote.git");
   await fs.mkdir(workspace, { recursive: true });
   await execFileAsync("git", ["-C", workspace, "init", "-b", "main"]);
-  await execFileAsync("git", ["-C", workspace, "config", "user.name", "OpenClaw Test"]);
+  await execFileAsync("git", ["-C", workspace, "config", "user.name", "Bot Test"]);
   await execFileAsync("git", [
     "-C",
     workspace,
     "config",
     "user.email",
-    "openclaw-test@example.invalid",
+    "bot-test@example.invalid",
   ]);
   await fs.writeFile(path.join(workspace, "README.md"), "base\n");
   await execFileAsync("git", ["-C", workspace, "add", "README.md"]);
@@ -70,7 +70,7 @@ async function initializeRemoteBackedGitWorkspace(root: string): Promise<string>
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
 });
 
 function expectObject(value: unknown) {
@@ -119,13 +119,13 @@ function expectThreadBindingsUnbound(targetSessionKey: string) {
 }
 
 test("sessions.delete snapshots and removes session worktrees", async () => {
-  const openClawState = await createOpenClawTestState({
+  const botState = await createBotTestState({
     layout: "state-only",
-    prefix: "openclaw-delete-worktree-",
+    prefix: "bot-delete-worktree-",
   });
-  const root = openClawState.root;
+  const root = botState.root;
   const workspace = await initializeRemoteBackedGitWorkspace(root);
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   testState.agentConfig = { workspace };
   await createSessionStoreDir();
   let dirtyWorktreeId: string | undefined;
@@ -149,7 +149,7 @@ test("sessions.delete snapshots and removes session worktrees", async () => {
     await expect(fs.access(cleanWorktree!.path)).rejects.toThrow();
     expect(getRegistryWorktree(process.env, cleanWorktree!.id)).toMatchObject({
       removedAt: expect.any(Number),
-      snapshotRef: expect.stringMatching(/^refs\/openclaw\/snapshots\//),
+      snapshotRef: expect.stringMatching(/^refs\/bot\/snapshots\//),
     });
     const registered = await execFileAsync("git", [
       "-C",
@@ -183,7 +183,7 @@ test("sessions.delete snapshots and removes session worktrees", async () => {
     await expect(fs.access(dirtyWorktree!.path)).rejects.toThrow();
     expect(getRegistryWorktree(process.env, dirtyWorktree!.id)).toMatchObject({
       removedAt: expect.any(Number),
-      snapshotRef: expect.stringMatching(/^refs\/openclaw\/snapshots\//),
+      snapshotRef: expect.stringMatching(/^refs\/bot\/snapshots\//),
     });
     dirtyWorktreeId = undefined;
   } finally {
@@ -193,9 +193,9 @@ test("sessions.delete snapshots and removes session worktrees", async () => {
     ) {
       await managedWorktrees.remove({ id: dirtyWorktreeId, reason: "test-cleanup", force: true });
     }
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     testState.agentConfig = undefined;
-    await openClawState.cleanup();
+    await botState.cleanup();
   }
 });
 

@@ -6,7 +6,7 @@ type SessionsTailTestApi = {
 
 function getTestApi(): SessionsTailTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.sessionsTailTestApi")
+    Symbol.for("bot.sessionsTailTestApi")
   ] as SessionsTailTestApi;
 }
 

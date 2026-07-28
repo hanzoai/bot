@@ -6,7 +6,7 @@ import {
   resolveThreadBindingIdleTimeoutMsForChannel,
   resolveThreadBindingMaxAgeMsForChannel,
 } from "../../channels/thread-bindings-policy.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { normalizeAccountId, resolveAgentIdFromSessionKey } from "../../routing/session-key.js";
 import {
   registerSessionBindingAdapter,
@@ -123,7 +123,7 @@ function toSessionBindingRecord<TKind extends string>(params: {
 /** Creates a channel/account binding manager and registers it as a session-binding adapter. */
 export function createAccountScopedConversationBindingManager<TKind extends string>(params: {
   channel: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   stateKey: symbol;
   accountId?: string | null;
   toStoredTargetKind: (raw: BindingTargetKind) => TKind;

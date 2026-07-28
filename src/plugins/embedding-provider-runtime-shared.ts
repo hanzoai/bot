@@ -1,6 +1,6 @@
 /** Shared runtime helpers for embedding provider lookup across core and plugin capabilities. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   resolvePluginCapabilityProvider,
   resolvePluginCapabilityProviders,
@@ -14,8 +14,8 @@ type RegisteredAdapterEntry<TAdapter> = {
 /** Builds lookup ids for embedding providers, including configured API aliases. */
 export function resolveRuntimeEmbeddingProviderLookupIds(params: {
   id: string;
-  cfg?: OpenClawConfig;
-  resolveConfiguredProviderId: (id: string, cfg?: OpenClawConfig) => string | undefined;
+  cfg?: BotConfig;
+  resolveConfiguredProviderId: (id: string, cfg?: BotConfig) => string | undefined;
 }): string[] {
   const ids = [params.id];
   const configuredProviderId = params.resolveConfiguredProviderId(params.id, params.cfg);
@@ -31,7 +31,7 @@ export function resolveRuntimeEmbeddingProviderLookupIds(params: {
 /** Lists registered and plugin-contributed embedding provider adapters for a capability key. */
 export function listRuntimeEmbeddingProviderAdapters<TAdapter extends { id: string }>(params: {
   key: EmbeddingProviderCapabilityKey;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   registered: TAdapter[];
 }): TAdapter[] {
   const merged = new Map(params.registered.map((adapter) => [adapter.id, adapter]));
@@ -50,7 +50,7 @@ export function listRuntimeEmbeddingProviderAdapters<TAdapter extends { id: stri
 /** Resolves one embedding provider adapter from registered providers before plugin capabilities. */
 export function getRuntimeEmbeddingProviderAdapter<TAdapter extends { id: string }>(params: {
   key: EmbeddingProviderCapabilityKey;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   lookupIds: string[];
   getRegisteredProvider: (id: string) => RegisteredAdapterEntry<TAdapter> | undefined;
 }): TAdapter | undefined {

@@ -1,12 +1,12 @@
 ---
-summary: "Use OpenCode Zen and Go catalogs with OpenClaw"
+summary: "Use OpenCode Zen and Go catalogs with Bot"
 read_when:
   - You want OpenCode-hosted model access
   - You want to pick between the Zen and Go catalogs
 title: "OpenCode"
 ---
 
-OpenCode exposes two hosted catalogs in OpenClaw:
+OpenCode exposes two hosted catalogs in Bot:
 
 | Catalog | Prefix            | Runtime provider |
 | ------- | ----------------- | ---------------- |
@@ -14,7 +14,7 @@ OpenCode exposes two hosted catalogs in OpenClaw:
 | **Go**  | `opencode-go/...` | `opencode-go`    |
 
 Both catalogs share one OpenCode API key (`OPENCODE_API_KEY`, alias
-`OPENCODE_ZEN_API_KEY`). OpenClaw keeps the runtime provider ids split so
+`OPENCODE_ZEN_API_KEY`). Bot keeps the runtime provider ids split so
 upstream per-model routing stays correct, but onboarding and docs treat them as
 one OpenCode setup.
 
@@ -28,23 +28,23 @@ one OpenCode setup.
     <Steps>
       <Step title="Run onboarding">
         ```bash
-        openclaw onboard --auth-choice opencode-zen
+        bot onboard --auth-choice opencode-zen
         ```
 
         Or pass the key directly:
 
         ```bash
-        openclaw onboard --opencode-zen-api-key "$OPENCODE_API_KEY"
+        bot onboard --opencode-zen-api-key "$OPENCODE_API_KEY"
         ```
       </Step>
       <Step title="Set a Zen model as the default">
         ```bash
-        openclaw config set agents.defaults.model.primary "opencode/gpt-5.6-sol"
+        bot config set agents.defaults.model.primary "opencode/gpt-5.6-sol"
         ```
       </Step>
       <Step title="Verify models are available">
         ```bash
-        openclaw models list --provider opencode
+        bot models list --provider opencode
         ```
       </Step>
     </Steps>
@@ -57,23 +57,23 @@ one OpenCode setup.
     <Steps>
       <Step title="Run onboarding">
         ```bash
-        openclaw onboard --auth-choice opencode-go
+        bot onboard --auth-choice opencode-go
         ```
 
         Or pass the key directly:
 
         ```bash
-        openclaw onboard --opencode-go-api-key "$OPENCODE_API_KEY"
+        bot onboard --opencode-go-api-key "$OPENCODE_API_KEY"
         ```
       </Step>
       <Step title="Set a Go model as the default">
         ```bash
-        openclaw config set agents.defaults.model.primary "opencode-go/kimi-k2.6"
+        bot config set agents.defaults.model.primary "opencode-go/kimi-k2.6"
         ```
       </Step>
       <Step title="Verify models are available">
         ```bash
-        openclaw models list --provider opencode-go
+        bot models list --provider opencode-go
         ```
       </Step>
     </Steps>
@@ -99,7 +99,7 @@ one OpenCode setup.
 | Runtime provider | `opencode`                                                                                        |
 | Example models   | `opencode/gpt-5.6-sol`, `opencode/gemini-3.6-flash`, `opencode/minimax-m3`, `opencode/big-pickle` |
 
-Run `openclaw models list --provider opencode` for the full current list, which
+Run `bot models list --provider opencode` for the full current list, which
 also includes the currently promoted free-tier rows `opencode/big-pickle`,
 `opencode/deepseek-v4-flash-free`, `opencode/laguna-s-2.1-free`,
 `opencode/ling-3.0-flash-free`, `opencode/mimo-v2.5-free`,
@@ -133,7 +133,7 @@ See [OpenCode Go](/providers/opencode-go) for the full Go model table.
   </Accordion>
 
   <Accordion title="Gemini replay behavior">
-    Gemini-backed OpenCode refs stay on the proxy-Gemini path, so OpenClaw keeps
+    Gemini-backed OpenCode refs stay on the proxy-Gemini path, so Bot keeps
     Gemini thought-signature sanitation there without enabling native Gemini
     replay validation or bootstrap rewrites.
   </Accordion>

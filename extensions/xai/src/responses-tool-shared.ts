@@ -2,7 +2,7 @@
 import {
   normalizeOptionalString as trimString,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import type { XaiWebSearchResponse } from "./web-search-response.types.js";
 
 function isRecord(value: unknown): value is Record<string, unknown> {

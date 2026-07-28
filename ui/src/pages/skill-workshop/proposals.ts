@@ -1,5 +1,5 @@
 // Control UI controller manages skill workshop gateway state.
-import { formatByteSize } from "@openclaw/normalization-core";
+import { formatByteSize } from "@hanzo/bot-normalization-core";
 import type { AgentSelectionCapability } from "../../app/agent-selection.ts";
 import type { ApplicationGateway } from "../../app/context.ts";
 import {
@@ -40,7 +40,7 @@ type SkillProposalManifestEntry = {
 };
 
 type SkillProposalManifest = {
-  schema: "openclaw.skill-workshop.proposals-manifest.v1";
+  schema: "bot.skill-workshop.proposals-manifest.v1";
   updatedAt: string;
   proposals: SkillProposalManifestEntry[];
 };

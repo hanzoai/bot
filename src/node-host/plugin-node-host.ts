@@ -1,13 +1,13 @@
 /** Plugin node-host bridge for loading plugin registry commands and dispatching node capabilities. */
 import type { NodePluginToolDescriptor } from "../../packages/gateway-protocol/src/schema/nodes.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginNodeHostCommandRegistration } from "../plugins/registry-types.js";
 import { getActivePluginRegistry } from "../plugins/runtime.js";
 import type {
-  OpenClawPluginNodeHostCommandAvailabilityContext,
-  OpenClawPluginNodeHostCommandIo,
+  BotPluginNodeHostCommandAvailabilityContext,
+  BotPluginNodeHostCommandIo,
 } from "../plugins/types.js";
-import type { OpenClawPluginNodeHostCommandContext } from "../plugins/types.node-host.js";
+import type { BotPluginNodeHostCommandContext } from "../plugins/types.node-host.js";
 import { createLazyRuntimeModule } from "../shared/lazy-runtime.js";
 
 /**
@@ -23,7 +23,7 @@ const loadPluginRegistryLoaderModule = createLazyRuntimeModule(
 
 /** Ensure plugin registry data is loaded before node-host command dispatch. */
 export async function ensureNodeHostPluginRegistry(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<void> {
   (await loadPluginRegistryLoaderModule()).ensurePluginRegistryLoaded({
@@ -36,7 +36,7 @@ export async function ensureNodeHostPluginRegistry(params: {
 
 /** List registered node-host capabilities and command ids in deterministic order. */
 export function listRegisteredNodeHostCapsAndCommands(
-  context: OpenClawPluginNodeHostCommandAvailabilityContext,
+  context: BotPluginNodeHostCommandAvailabilityContext,
   options: { includeDuplex?: boolean } = {},
 ): {
   caps: string[];
@@ -77,7 +77,7 @@ export function listRegisteredNodeHostCapsAndCommands(
 
 /** Watch plugin-owned availability inputs that can change during this process. */
 export function watchRegisteredNodeHostCommandAvailability(
-  context: OpenClawPluginNodeHostCommandAvailabilityContext,
+  context: BotPluginNodeHostCommandAvailabilityContext,
   onChange: () => void,
 ): () => void {
   const registry = getActivePluginRegistry();
@@ -141,8 +141,8 @@ function buildNodePluginToolDescriptor(
 export async function invokeRegisteredNodeHostCommand(
   command: string,
   paramsJSON?: string | null,
-  io?: OpenClawPluginNodeHostCommandIo,
-  context?: OpenClawPluginNodeHostCommandContext,
+  io?: BotPluginNodeHostCommandIo,
+  context?: BotPluginNodeHostCommandContext,
 ): Promise<string | null> {
   const registry = getActivePluginRegistry();
   const match = (registry?.nodeHostCommands ?? []).find(

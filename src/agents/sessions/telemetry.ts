@@ -15,7 +15,7 @@ function isTruthyEnvFlag(value: string | undefined): boolean {
 /** Resolves whether install telemetry is enabled from env override or settings. */
 export function isInstallTelemetryEnabled(
   settingsManager: SettingsManager,
-  telemetryEnv: string | undefined = process.env.OPENCLAW_TELEMETRY,
+  telemetryEnv: string | undefined = process.env.BOT_TELEMETRY,
 ): boolean {
   return telemetryEnv !== undefined
     ? isTruthyEnvFlag(telemetryEnv)

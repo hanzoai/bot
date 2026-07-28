@@ -1,6 +1,6 @@
 // Lmstudio tests cover stream plugin behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import { createAssistantMessageEventStream } from "openclaw/plugin-sdk/llm";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
+import { createAssistantMessageEventStream } from "bot/plugin-sdk/llm";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 let wrapLmstudioInferencePreload: typeof import("./stream.js").wrapLmstudioInferencePreload;

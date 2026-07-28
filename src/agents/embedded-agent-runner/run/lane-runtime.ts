@@ -1,7 +1,7 @@
 import {
   addTimerTimeoutGraceMs,
   MAX_TIMER_TIMEOUT_MS,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@hanzo/bot-normalization-core/number-coercion";
 import type { CommandQueueEnqueueOptions } from "../../../process/command-queue.types.js";
 import { isMainSessionRestartRecoveryInputProvenance } from "../../../sessions/input-provenance.js";
 import { DEFAULT_AGENT_TIMEOUT_MS } from "../../timeout.js";

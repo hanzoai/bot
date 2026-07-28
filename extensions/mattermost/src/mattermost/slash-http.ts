@@ -6,15 +6,15 @@
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
+import { resolveHumanDelayConfig } from "bot/plugin-sdk/agent-runtime";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { finalizeInboundContext } from "openclaw/plugin-sdk/reply-runtime";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
-import { isPrivateNetworkOptInEnabled } from "openclaw/plugin-sdk/ssrf-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/number-runtime";
+import { finalizeInboundContext } from "bot/plugin-sdk/reply-runtime";
+import { safeEqualSecret } from "bot/plugin-sdk/security-runtime";
+import { isPrivateNetworkOptInEnabled } from "bot/plugin-sdk/ssrf-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { ResolvedMattermostAccount } from "../mattermost/accounts.js";
 import { getMattermostRuntime } from "../runtime.js";
 import {
@@ -44,7 +44,7 @@ import {
   isRequestBodyLimitError,
   logTypingFailure,
   readRequestBodyWithLimit,
-  type OpenClawConfig,
+  type BotConfig,
   type RuntimeEnv,
 } from "./runtime-api.js";
 import { sendMessageMattermost } from "./send.js";
@@ -63,7 +63,7 @@ import {
 
 type SlashHttpHandlerParams = {
   account: ResolvedMattermostAccount;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runtime: RuntimeEnv;
   /** Commands registered or reconciled during monitor startup. */
   registeredCommands: readonly MattermostRegisteredCommand[];
@@ -462,7 +462,7 @@ type SlashInvocationAuth = {
 
 async function authorizeSlashInvocation(params: {
   account: ResolvedMattermostAccount;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   client: ReturnType<typeof createMattermostClient>;
   commandText: string;
   channelId: string;
@@ -730,7 +730,7 @@ export function createSlashCommandHttpHandler(params: SlashHttpHandlerParams) {
 
 async function handleSlashCommandAsync(params: {
   account: ResolvedMattermostAccount;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runtime: RuntimeEnv;
   client: ReturnType<typeof createMattermostClient>;
   commandText: string;

@@ -1,18 +1,18 @@
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { loadSessionEntry, upsertSessionEntry } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { beginSessionWorkAdmission } from "../../sessions/session-lifecycle-admission.js";
 import { withTempDir } from "../../test-helpers/temp-dir.js";
 import { createSessionsTool } from "./sessions-tool.js";
 
 describe("sessions tool self-archive", () => {
   it("defers self-archiving until the current agent turn has completed", async () => {
-    await withTempDir({ prefix: "openclaw-sessions-tool-self-archive-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-sessions-tool-self-archive-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionKey = "agent:main:self-archive";
       const sessionId = "session-self-archive";
-      const config: OpenClawConfig = { session: { store: storePath } };
+      const config: BotConfig = { session: { store: storePath } };
       await upsertSessionEntry(
         { agentId: "main", sessionKey, storePath },
         { sessionId, updatedAt: 1 },
@@ -61,11 +61,11 @@ describe("sessions tool self-archive", () => {
   });
 
   it("applies other self-patch settings before the deferred archive", async () => {
-    await withTempDir({ prefix: "openclaw-sessions-tool-archive-patch-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-sessions-tool-archive-patch-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionKey = "agent:main:archive-patch";
       const sessionId = "session-archive-patch";
-      const config: OpenClawConfig = { session: { store: storePath } };
+      const config: BotConfig = { session: { store: storePath } };
       await upsertSessionEntry(
         { agentId: "main", sessionKey, storePath },
         { sessionId, updatedAt: 1 },
@@ -113,11 +113,11 @@ describe("sessions tool self-archive", () => {
   });
 
   it("does not apply a deferred archive to a replacement session", async () => {
-    await withTempDir({ prefix: "openclaw-sessions-tool-archive-replacement-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-sessions-tool-archive-replacement-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionKey = "agent:main:archive-replacement";
       const sessionId = "session-before-reset";
-      const config: OpenClawConfig = { session: { store: storePath } };
+      const config: BotConfig = { session: { store: storePath } };
       await upsertSessionEntry(
         { agentId: "main", sessionKey, storePath },
         { sessionId, updatedAt: 1 },
@@ -170,11 +170,11 @@ describe("sessions tool self-archive", () => {
   });
 
   it("waits for a competing turn before applying a scheduled archive", async () => {
-    await withTempDir({ prefix: "openclaw-sessions-tool-archive-competing-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-sessions-tool-archive-competing-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionKey = "agent:main:archive-competing";
       const sessionId = "session-archive-competing";
-      const config: OpenClawConfig = { session: { store: storePath } };
+      const config: BotConfig = { session: { store: storePath } };
       await upsertSessionEntry(
         { agentId: "main", sessionKey, storePath },
         { sessionId, updatedAt: 1 },
@@ -226,11 +226,11 @@ describe("sessions tool self-archive", () => {
   });
 
   it("retries a scheduled archive when a turn races the gateway mutation", async () => {
-    await withTempDir({ prefix: "openclaw-sessions-tool-archive-retry-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-sessions-tool-archive-retry-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionKey = "agent:main:archive-retry";
       const sessionId = "session-archive-retry";
-      const config: OpenClawConfig = { session: { store: storePath } };
+      const config: BotConfig = { session: { store: storePath } };
       await upsertSessionEntry(
         { agentId: "main", sessionKey, storePath },
         { sessionId, updatedAt: 1 },
@@ -289,11 +289,11 @@ describe("sessions tool self-archive", () => {
   });
 
   it("retries when a competing turn releases before its archive rejection settles", async () => {
-    await withTempDir({ prefix: "openclaw-sessions-tool-archive-release-race-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-sessions-tool-archive-release-race-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionKey = "agent:main:archive-release-race";
       const sessionId = "session-archive-release-race";
-      const config: OpenClawConfig = { session: { store: storePath } };
+      const config: BotConfig = { session: { store: storePath } };
       await upsertSessionEntry(
         { agentId: "main", sessionKey, storePath },
         { sessionId, updatedAt: 1 },
@@ -347,7 +347,7 @@ describe("sessions tool self-archive", () => {
   });
 
   it("retries a scheduled archive after a transient gateway failure", async () => {
-    await withTempDir({ prefix: "openclaw-sessions-tool-archive-transport-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-sessions-tool-archive-transport-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionKey = "agent:main:archive-transport";
       const sessionId = "session-archive-transport";
@@ -396,11 +396,11 @@ describe("sessions tool self-archive", () => {
   it("keeps retrying a projected active run without abandoning its archive", async () => {
     vi.useFakeTimers();
     try {
-      await withTempDir({ prefix: "openclaw-sessions-tool-archive-projected-" }, async (dir) => {
+      await withTempDir({ prefix: "bot-sessions-tool-archive-projected-" }, async (dir) => {
         const storePath = path.join(dir, "sessions.json");
         const sessionKey = "agent:main:archive-projected";
         const sessionId = "session-archive-projected";
-        const config: OpenClawConfig = { session: { store: storePath } };
+        const config: BotConfig = { session: { store: storePath } };
         await upsertSessionEntry(
           { agentId: "main", sessionKey, storePath },
           { sessionId, updatedAt: 1 },
@@ -450,11 +450,11 @@ describe("sessions tool self-archive", () => {
   });
 
   it("keeps main-session archive validation on the gateway", async () => {
-    await withTempDir({ prefix: "openclaw-sessions-tool-archive-main-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-sessions-tool-archive-main-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionKey = "agent:main:main";
       const sessionId = "session-main-archive";
-      const config: OpenClawConfig = { session: { store: storePath } };
+      const config: BotConfig = { session: { store: storePath } };
       await upsertSessionEntry(
         { agentId: "main", sessionKey, storePath },
         { sessionId, updatedAt: 1 },

@@ -14,14 +14,14 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 let browser: Browser;
 let server: ControlUiE2eServer;
 
 function resolveArtifactDir(): string | undefined {
-  return process.env.OPENCLAW_CONTROL_UI_E2E_ARTIFACT_DIR?.trim() || undefined;
+  return process.env.BOT_CONTROL_UI_E2E_ARTIFACT_DIR?.trim() || undefined;
 }
 
 async function captureProof(page: Page, name: string) {
@@ -75,7 +75,7 @@ describeControlUiE2e("Control UI attributed chat identity", () => {
           role: "user",
           content: "Can we keep one clear avatar and show who wrote each message?",
           timestamp: now - 120_000,
-          __openclaw: {
+          __bot: {
             id: "riley-message",
             senderId: "profile-riley",
             senderName: "Riley",
@@ -91,7 +91,7 @@ describeControlUiE2e("Control UI attributed chat identity", () => {
           role: "user",
           content: "This is much easier to scan in a team conversation.",
           timestamp: now - 30_000,
-          __openclaw: {
+          __bot: {
             id: "colin-message",
             senderId: "profile-colin",
             senderName: "Colin",
@@ -108,7 +108,7 @@ describeControlUiE2e("Control UI attributed chat identity", () => {
     await expect(userGroups).toHaveCount(2);
     await expect(page.locator(".chat-avatar.user")).toHaveCount(2);
     await expect(page.locator(".chat-avatar.user")).toHaveText(["R", "C"]);
-    await expect(page.locator(".sidebar-identity-card openclaw-viewer-avatar")).toContainText("R");
+    await expect(page.locator(".sidebar-identity-card bot-viewer-avatar")).toContainText("R");
 
     await expect(
       page.locator(".chat-group-footer--persistent-identity .chat-sender-name"),

@@ -63,7 +63,7 @@ describe("agent exec prompt sources", () => {
   });
 
   it("reads a UTF-8 prompt file", async () => {
-    const root = await makeTempRoot("openclaw-agent-exec-prompt-");
+    const root = await makeTempRoot("bot-agent-exec-prompt-");
     const promptPath = path.join(root, "prompt.md");
     await fs.writeFile(promptPath, "\uFEFFline one\nline two", "utf8");
 
@@ -200,7 +200,7 @@ describe("agent exec command composition", () => {
       {
         cwd: path.resolve(import.meta.dirname, "../.."),
         encoding: "utf8",
-        env: { ...process.env, OPENCLAW_TEST_RUNTIME_LOG: "1" },
+        env: { ...process.env, BOT_TEST_RUNTIME_LOG: "1" },
       },
     );
 
@@ -243,9 +243,9 @@ describe("agent exec command composition", () => {
     let observedConfig: unknown;
     const result = await agentExecCommand("inspect", {}, runtime, {
       runAgent: vi.fn(async () => {
-        observedStateDir = process.env.OPENCLAW_STATE_DIR ?? "";
+        observedStateDir = process.env.BOT_STATE_DIR ?? "";
         observedConfig = JSON.parse(
-          await fs.readFile(process.env.OPENCLAW_CONFIG_PATH ?? "", "utf8"),
+          await fs.readFile(process.env.BOT_CONFIG_PATH ?? "", "utf8"),
         );
         await expect(fs.stat(observedStateDir)).resolves.toBeDefined();
         return successResult();
@@ -271,7 +271,7 @@ describe("agent exec command composition", () => {
 
     const result = await agentExecCommand("inspect", { json: true }, runtime, {
       runAgent: vi.fn(async () => {
-        observedStateDir = process.env.OPENCLAW_STATE_DIR ?? "";
+        observedStateDir = process.env.BOT_STATE_DIR ?? "";
         return successResult();
       }),
     });
@@ -294,7 +294,7 @@ describe("agent exec command composition", () => {
   });
 
   it("threads --cwd to both workspace and tool cwd", async () => {
-    const root = await makeTempRoot("openclaw-agent-exec-cwd-");
+    const root = await makeTempRoot("bot-agent-exec-cwd-");
     const { runtime } = createRuntime();
     const runAgent = vi.fn(async () => successResult());
 
@@ -351,7 +351,7 @@ describe("agent exec command composition", () => {
   });
 
   it("keeps an explicit state directory and deletes only its temporary config", async () => {
-    const stateDir = await makeTempRoot("openclaw-agent-exec-state-");
+    const stateDir = await makeTempRoot("bot-agent-exec-state-");
     const marker = path.join(stateDir, "keep.txt");
     await fs.writeFile(marker, "keep", "utf8");
     const { runtime } = createRuntime();
@@ -359,8 +359,8 @@ describe("agent exec command composition", () => {
 
     await agentExecCommand("inspect", { stateDir }, runtime, {
       runAgent: vi.fn(async () => {
-        configPath = process.env.OPENCLAW_CONFIG_PATH ?? "";
-        expect(process.env.OPENCLAW_STATE_DIR).toBe(stateDir);
+        configPath = process.env.BOT_CONFIG_PATH ?? "";
+        expect(process.env.BOT_STATE_DIR).toBe(stateDir);
         return successResult();
       }),
     });
@@ -370,7 +370,7 @@ describe("agent exec command composition", () => {
   });
 
   it("skips external Codex CLI credentials in default auth-env-only mode", async () => {
-    const codexHome = await makeTempRoot("openclaw-agent-exec-codex-home-");
+    const codexHome = await makeTempRoot("bot-agent-exec-codex-home-");
     await fs.writeFile(
       path.join(codexHome, "auth.json"),
       JSON.stringify({
@@ -440,10 +440,10 @@ describe("agent exec command composition", () => {
   });
 
   it("blocks direct persisted credential reads in default auth-env-only mode", async () => {
-    const normalStateDir = await makeTempRoot("openclaw-agent-exec-hidden-auth-");
+    const normalStateDir = await makeTempRoot("bot-agent-exec-hidden-auth-");
     const normalAgentDir = path.join(normalStateDir, "agents", "main", "agent");
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = normalStateDir;
+    const previousStateDir = process.env.BOT_STATE_DIR;
+    process.env.BOT_STATE_DIR = normalStateDir;
     const { saveAuthProfileStore } = await import("../agents/auth-profiles.js");
     saveAuthProfileStore(
       {
@@ -473,9 +473,9 @@ describe("agent exec command composition", () => {
       });
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.BOT_STATE_DIR = previousStateDir;
       }
     }
 
@@ -484,10 +484,10 @@ describe("agent exec command composition", () => {
   });
 
   it("uses the normal stored auth profile when auth-env-only is disabled", async () => {
-    const normalStateDir = await makeTempRoot("openclaw-agent-exec-normal-state-");
+    const normalStateDir = await makeTempRoot("bot-agent-exec-normal-state-");
     const normalAgentDir = path.join(normalStateDir, "agents", "main", "agent");
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = normalStateDir;
+    const previousStateDir = process.env.BOT_STATE_DIR;
+    process.env.BOT_STATE_DIR = normalStateDir;
     const { saveAuthProfileStore } = await import("../agents/auth-profiles.js");
     saveAuthProfileStore(
       {
@@ -503,7 +503,7 @@ describe("agent exec command composition", () => {
     try {
       await agentExecCommand("inspect", { authEnvOnly: false }, runtime, {
         runAgent: vi.fn(async () => {
-          expect(process.env.OPENCLAW_STATE_DIR).not.toBe(normalStateDir);
+          expect(process.env.BOT_STATE_DIR).not.toBe(normalStateDir);
           profileIds = Object.keys(
             ensureAuthProfileStore(undefined, {
               allowKeychainPrompt: false,
@@ -515,9 +515,9 @@ describe("agent exec command composition", () => {
       });
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.BOT_STATE_DIR = previousStateDir;
       }
     }
 

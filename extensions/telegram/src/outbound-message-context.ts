@@ -1,9 +1,9 @@
 // Telegram plugin module implements outbound message context behavior.
 import type { Message } from "grammy/types";
-import { resolveDefaultAgentId } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+import { resolveDefaultAgentId } from "bot/plugin-sdk/agent-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
+import { resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
 import { TELEGRAM_GENERAL_TOPIC_ID, type TelegramThreadSpec } from "./bot/helpers.js";
 import { buildTelegramSelfSenderName } from "./group-history-window.js";
 import { createTelegramMessageCache, resolveTelegramMessageCacheScope } from "./message-cache.js";
@@ -24,7 +24,7 @@ export type TelegramOutboundPromptContextMessage = {
   from?: TelegramOutboundPromptContextUser;
   sender_chat?: { id?: number; title?: string; username?: string };
   sender_business_bot?: TelegramOutboundPromptContextUser;
-  openclaw_prompt_context_timestamp_ms?: number;
+  bot_prompt_context_timestamp_ms?: number;
   text?: string;
   caption?: string;
   message_thread_id?: number;
@@ -64,10 +64,10 @@ function resolveOutboundCacheMessageTimestamp(
   msg: TelegramOutboundPromptContextMessage,
 ): number | undefined {
   if (
-    typeof msg.openclaw_prompt_context_timestamp_ms === "number" &&
-    Number.isFinite(msg.openclaw_prompt_context_timestamp_ms)
+    typeof msg.bot_prompt_context_timestamp_ms === "number" &&
+    Number.isFinite(msg.bot_prompt_context_timestamp_ms)
   ) {
-    return msg.openclaw_prompt_context_timestamp_ms;
+    return msg.bot_prompt_context_timestamp_ms;
   }
   return typeof msg.date === "number" && Number.isFinite(msg.date) ? msg.date * 1000 : undefined;
 }
@@ -98,7 +98,7 @@ function buildOutboundCacheMessage(params: {
     ...params.message,
     message_id: params.messageId,
     ...(params.promptContextTimestampMs !== undefined
-      ? { openclaw_prompt_context_timestamp_ms: params.promptContextTimestampMs }
+      ? { bot_prompt_context_timestamp_ms: params.promptContextTimestampMs }
       : {}),
     date:
       typeof params.message.date === "number" && Number.isFinite(params.message.date)
@@ -124,7 +124,7 @@ function buildOutboundCacheMessage(params: {
 }
 
 export async function recordOutboundMessageForPromptContext(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   account: TelegramOutboundPromptContextAccount;
   chatId: string | number;
   message: TelegramOutboundPromptContextMessage;

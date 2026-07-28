@@ -1,11 +1,11 @@
 // Telegram plugin module implements status reaction variants behavior.
 import type { ReactionTypeEmoji } from "grammy/types";
-import { DEFAULT_EMOJIS, type StatusReactionEmojis } from "openclaw/plugin-sdk/channel-feedback";
+import { DEFAULT_EMOJIS, type StatusReactionEmojis } from "bot/plugin-sdk/channel-feedback";
 import {
   normalizeOptionalString,
   normalizeStringEntries,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import type { TelegramChatDetails, TelegramGetChat } from "./bot/types.js";
 
 type StatusReactionEmojiKey = keyof Required<StatusReactionEmojis>;

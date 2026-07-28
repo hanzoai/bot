@@ -11,7 +11,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 const ONE_PIXEL_PNG_B64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/woAAn8B9FD5fHAAAAAASUVORK5CYII=";
@@ -148,7 +148,7 @@ describeControlUiE2e("Control UI chat attachment read lifecycle", () => {
         .poll(() => page.getByRole("button", { name: "Send message" }).isDisabled())
         .toBe(true);
 
-      await page.locator("openclaw-chat-pane").evaluate((pane, sessionKey) => {
+      await page.locator("bot-chat-pane").evaluate((pane, sessionKey) => {
         (pane as HTMLElement & { sessionKey: string }).sessionKey = sessionKey;
       }, secondSession);
 

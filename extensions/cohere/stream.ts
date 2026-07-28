@@ -1,5 +1,5 @@
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
-import { createPayloadPatchStreamWrapper } from "openclaw/plugin-sdk/provider-stream-shared";
+import type { ProviderWrapStreamFnContext } from "bot/plugin-sdk/plugin-entry";
+import { createPayloadPatchStreamWrapper } from "bot/plugin-sdk/provider-stream-shared";
 
 function patchCoherePayload(payload: Record<string, unknown>): void {
   // Cohere's Compatibility API uses developer, not system, for instructions.

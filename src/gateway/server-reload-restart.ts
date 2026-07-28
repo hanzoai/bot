@@ -2,7 +2,7 @@ import { isDeepStrictEqual } from "node:util";
 import { isRestartEnabled } from "../config/commands.flags.js";
 import { getConfigValueAtPath } from "../config/config-paths.js";
 import { setRuntimeConfigAppliedHash } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { GatewayRestartIntent } from "../infra/restart-intent.js";
 import {
   deferGatewayRestartUntilIdle,
@@ -38,7 +38,7 @@ type GatewayActiveCounts = {
 
 type RestartRequestDetails = {
   plan: GatewayReloadPlan;
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   restartOwnedPaths: string[];
   retainDebtAcrossConfigChanges: boolean;
 };
@@ -158,13 +158,13 @@ class GatewayRestartTransaction {
 
   deferDebt(
     plan: GatewayReloadPlan,
-    nextConfig: OpenClawConfig,
+    nextConfig: BotConfig,
     options?: GatewayRestartRequestOptions,
   ): void {
     this.preserveDebt(this.createRequestDetails(plan, nextConfig, options));
   }
 
-  acceptConfig(acceptedConfig?: OpenClawConfig) {
+  acceptConfig(acceptedConfig?: BotConfig) {
     if (this.operation.kind === "idle" || this.operation.transaction.state !== "rejected") {
       return { retireRejectedRestart: false };
     }
@@ -244,7 +244,7 @@ class GatewayRestartTransaction {
 
   request(
     plan: GatewayReloadPlan,
-    nextConfig: OpenClawConfig,
+    nextConfig: BotConfig,
     options?: GatewayRestartRequestOptions,
   ): GatewayRestartTransactionResult {
     if (this.retryStopped) {
@@ -281,7 +281,7 @@ class GatewayRestartTransaction {
 
   private createRequestDetails(
     plan: GatewayReloadPlan,
-    nextConfig: OpenClawConfig,
+    nextConfig: BotConfig,
     options?: GatewayRestartRequestOptions,
   ): RestartRequestDetails {
     const explicitRestartPaths = plan.restartReasons.filter((path) =>
@@ -385,7 +385,7 @@ class GatewayRestartTransaction {
 
   private requestForGeneration(
     plan: GatewayReloadPlan,
-    nextConfig: OpenClawConfig,
+    nextConfig: BotConfig,
     requestGeneration: number,
     options?: GatewayRestartRequestOptions,
   ): boolean {
@@ -555,7 +555,7 @@ class GatewayRestartTransaction {
 export function createGatewayRestartCoordinator(options: GatewayRestartCoordinatorOptions) {
   const transaction = new GatewayRestartTransaction(options);
   return {
-    acceptRestartConfig: (config?: OpenClawConfig) => transaction.acceptConfig(config),
+    acceptRestartConfig: (config?: BotConfig) => transaction.acceptConfig(config),
     ...transaction.appliedConfigHashPublisher,
     beginGatewayRestartLifecycle: () => transaction.beginLifecycle(),
     pauseGatewayRestartForConfigCandidate: () => transaction.pauseForConfigCandidate(),
@@ -565,7 +565,7 @@ export function createGatewayRestartCoordinator(options: GatewayRestartCoordinat
       transaction.recordAcceptedTarget(target),
     requestGatewayRestart: (
       plan: GatewayReloadPlan,
-      nextConfig: OpenClawConfig,
+      nextConfig: BotConfig,
       requestOptions?: GatewayRestartRequestOptions,
     ) => transaction.request(plan, nextConfig, requestOptions),
     restoreConservativeRestartDebt: (debt: RestartRequestDetails) =>
@@ -574,7 +574,7 @@ export function createGatewayRestartCoordinator(options: GatewayRestartCoordinat
     stopRestartRetries: () => transaction.stop(),
     deferGatewayRestartDebt: (
       plan: GatewayReloadPlan,
-      nextConfig: OpenClawConfig,
+      nextConfig: BotConfig,
       requestOptions?: GatewayRestartRequestOptions,
     ) => transaction.deferDebt(plan, nextConfig, requestOptions),
     getLatestAcceptedRestartTarget: transaction.getAcceptedTarget,

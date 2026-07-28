@@ -1,5 +1,5 @@
 // Qa Lab plugin module implements reply failure behavior.
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 
 const FAILURE_REPLY_PREFIXES = [
   "⚠️ something went wrong while processing your request.",

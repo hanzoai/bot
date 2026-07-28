@@ -17,9 +17,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const proofDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const proofDir = process.env.BOT_UI_E2E_ARTIFACT_DIR?.trim();
 
 let browser: Browser;
 let server: ControlUiE2eServer;
@@ -63,9 +63,9 @@ async function selectGatewayOnNextLoad(
   appBaseUrl: string,
   gatewayUrl: string,
 ): Promise<void> {
-  const settingsKey = `openclaw.control.settings.v1:${normalizeGatewayTokenScope(gatewayUrl)}`;
+  const settingsKey = `bot.control.settings.v1:${normalizeGatewayTokenScope(gatewayUrl)}`;
   const selectionKey =
-    `openclaw.control.currentGateway.v1:` +
+    `bot.control.currentGateway.v1:` +
     normalizeGatewayTokenScope(browserPageGatewayUrl(appBaseUrl));
   await page.addInitScript(
     ({ nextGatewayUrl, nextSelectionKey, nextSettingsKey }) => {
@@ -101,7 +101,7 @@ async function openGatewayPage(params: {
   const response = await page.goto(`${params.appBaseUrl}${params.route ?? "chat"}${tokenFragment}`);
   expect(response?.status()).toBe(200);
   const connect = await gateway.waitForRequest("connect");
-  await page.locator("openclaw-app-shell").waitFor();
+  await page.locator("bot-app-shell").waitFor();
   return { connect, gateway, page };
 }
 
@@ -176,7 +176,7 @@ describeControlUiE2e("Control UI device-token reconnect E2E", () => {
       deviceToken: ROSITA_DEVICE_TOKEN,
       token: ROSITA_DEVICE_TOKEN,
     });
-    expect(await rositaReconnect.page.locator("openclaw-login-gate").count()).toBe(0);
+    expect(await rositaReconnect.page.locator("bot-login-gate").count()).toBe(0);
     await captureProof(rositaReconnect.page, "rosita-reconnected.png");
 
     const wilfredReconnect = await openGatewayPage({
@@ -189,10 +189,10 @@ describeControlUiE2e("Control UI device-token reconnect E2E", () => {
       deviceToken: WILFRED_DEVICE_TOKEN,
       token: WILFRED_DEVICE_TOKEN,
     });
-    expect(await wilfredReconnect.page.locator("openclaw-login-gate").count()).toBe(0);
+    expect(await wilfredReconnect.page.locator("bot-login-gate").count()).toBe(0);
 
     const identity = await wilfredSource.page.evaluate(() => {
-      const raw = localStorage.getItem("openclaw-device-identity-v1");
+      const raw = localStorage.getItem("bot-device-identity-v1");
       return raw ? JSON.parse(raw) : null;
     });
     const deviceId = requireRecord(identity).deviceId;
@@ -262,7 +262,7 @@ describeControlUiE2e("Control UI device-token reconnect E2E", () => {
     const revoke = await wilfredNodes.gateway.waitForRequest("device.token.revoke");
     expect(revoke.params).toEqual({ deviceId, role: "operator" });
     const wilfredStoreKey =
-      `openclaw.device.auth.v1:` + normalizeGatewayCredentialScope(WILFRED_GATEWAY_URL);
+      `bot.device.auth.v1:` + normalizeGatewayCredentialScope(WILFRED_GATEWAY_URL);
     await expect
       .poll(() =>
         wilfredNodes.page.evaluate((key) => {

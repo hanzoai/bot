@@ -1,8 +1,8 @@
 // Builds portable APNs payloads for alerts, wakes, and approval lifecycle events.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 
-const EXEC_APPROVAL_GENERIC_ALERT_BODY = "Open OpenClaw to review this request.";
+const EXEC_APPROVAL_GENERIC_ALERT_BODY = "Open Bot to review this request.";
 const PLUGIN_APPROVAL_ALERT_BODY_MAX_LENGTH = 256;
 
 function toPushMetadata(params: {
@@ -31,7 +31,7 @@ export function createApnsAlertPayload(params: {
       },
       sound: "default",
     },
-    openclaw: toPushMetadata({
+    bot: toPushMetadata({
       kind: "push.test",
       nodeId: params.nodeId,
     }),
@@ -46,7 +46,7 @@ export function createApnsBackgroundPayload(params: {
     aps: {
       "content-available": 1,
     },
-    openclaw: toPushMetadata({
+    bot: toPushMetadata({
       kind: "node.wake",
       reason: params.wakeReason ?? "node.invoke",
       nodeId: params.nodeId,
@@ -76,7 +76,7 @@ export function createApnsApprovalAlertPayload(params: {
       category: params.category,
       "content-available": 1,
     },
-    openclaw: {
+    bot: {
       kind: `${params.kind}.approval.requested`,
       approvalId: params.approvalId,
       gatewayDeviceId: params.gatewayDeviceId,
@@ -102,7 +102,7 @@ export function createApnsApprovalResolvedPayload(params: {
     aps: {
       "content-available": 1,
     },
-    openclaw: {
+    bot: {
       kind: `${params.kind}.approval.resolved`,
       approvalId: params.approvalId,
       gatewayDeviceId: params.gatewayDeviceId,

@@ -3,8 +3,8 @@
  * Keeps profile id construction and human metadata lookup centralized for auth
  * status, storage, and provider selection.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { AuthProfileStore } from "./types.js";
 
 // Metadata can be configured separately from stored credentials. Config wins so
@@ -34,7 +34,7 @@ export function buildAuthProfileId(params: {
 
 /** Resolves display metadata for an auth profile from config/store. */
 export function resolveAuthProfileMetadata(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   store?: AuthProfileStore;
   profileId: string;
 }): { displayName?: string; email?: string } {

@@ -20,7 +20,7 @@ type AuditCommandTestApi = {
 
 function getTestApi(): AuditCommandTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.auditCommandTestApi")
+    Symbol.for("bot.auditCommandTestApi")
   ] as AuditCommandTestApi;
 }
 

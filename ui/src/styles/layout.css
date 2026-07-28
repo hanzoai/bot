@@ -125,25 +125,25 @@
   display: none;
 }
 
-html.openclaw-native-macos .shell-chrome-controls {
+html.bot-native-macos .shell-chrome-controls {
   top: 52px;
 }
 
 /* Newer Mac apps host a native sidebar toggle in the titlebar next to
-   back/forward and add openclaw-native-nav; the in-page nav toggles would
+   back/forward and add bot-native-nav; the in-page nav toggles would
    duplicate it, so they disappear (⌘B and the accessible titlebar button
    cover keyboard/screen-reader use). Search stays: native-nav-only hosts
    provide native search/new-thread controls only while the rail is
    collapsed, so the expanded cluster keeps the pointer path to the palette.
-   Older apps only add openclaw-native-macos and keep all web controls. */
-html.openclaw-native-nav .shell-chrome-controls__nav-toggle,
-html.openclaw-native-nav .shell--nav-collapsed .shell-chrome-controls,
-html.openclaw-native-nav .topbar .topbar-nav-toggle {
+   Older apps only add bot-native-macos and keep all web controls. */
+html.bot-native-nav .shell-chrome-controls__nav-toggle,
+html.bot-native-nav .shell--nav-collapsed .shell-chrome-controls,
+html.bot-native-nav .topbar .topbar-nav-toggle {
   display: none;
 }
 
 /* Web-chrome hosts provide this entire cluster in the native titlebar. */
-html.openclaw-native-web-chrome .shell-chrome-controls {
+html.bot-native-web-chrome .shell-chrome-controls {
   display: none;
 }
 
@@ -159,7 +159,7 @@ html.openclaw-native-web-chrome .shell-chrome-controls {
   align-items: center;
   gap: 4px;
   width: 156px;
-  height: var(--openclaw-native-titlebar-height, 50px);
+  height: var(--bot-native-titlebar-height, 50px);
 }
 
 .macos-titlebar-controls__button.topbar-icon-btn {
@@ -1059,11 +1059,11 @@ html.openclaw-native-web-chrome .shell-chrome-controls {
 }
 
 /* Native dashboard actions must also clear AppKit's drag strip. */
-html.openclaw-native-macos
+html.bot-native-macos
   .shell:not(.shell--mobile-nav)
   .sidebar-update-card--floating
   .sidebar-update-card {
-  margin-top: calc(var(--openclaw-native-titlebar-height, 50px) + 2px);
+  margin-top: calc(var(--bot-native-titlebar-height, 50px) + 2px);
 }
 
 .sidebar-update-card__action {
@@ -1924,7 +1924,7 @@ html.openclaw-native-macos
   letter-spacing: -0.02em;
 }
 
-.viewer-facepile > openclaw-tooltip:not(:first-child) .viewer-avatar {
+.viewer-facepile > bot-tooltip:not(:first-child) .viewer-avatar {
   margin-left: -5px;
 }
 
@@ -1934,7 +1934,7 @@ html.openclaw-native-macos
   display: inline-flex;
 }
 
-.viewer-facepile > openclaw-viewer-avatar:not(:first-child) .viewer-avatar,
+.viewer-facepile > bot-viewer-avatar:not(:first-child) .viewer-avatar,
 .viewer-facepile > .viewer-avatar:not(:first-child) {
   margin-left: -5px;
 }
@@ -2346,9 +2346,9 @@ wa-dropdown.session-menu::part(menu) {
 /* Popover hosts live in the top layer so menus escape in-page stacking
    contexts (e.g. the sidebar resizer above the nav); the host itself must
    stay a zero-size shell around its fixed-position menu. */
-openclaw-menu-surface[popover],
-openclaw-native-link-menu[popover],
-openclaw-session-menu[popover] {
+bot-menu-surface[popover],
+bot-native-link-menu[popover],
+bot-session-menu[popover] {
   width: 0;
   height: 0;
   margin: 0;
@@ -3149,8 +3149,8 @@ wa-dropdown.sidebar-session-sort-menu::part(menu) {
   stroke-linejoin: round;
 }
 
-openclaw-tooltip.sidebar-hover-tooltip {
-  --openclaw-tooltip-max-width: min(340px, calc(100vw - 24px));
+bot-tooltip.sidebar-hover-tooltip {
+  --bot-tooltip-max-width: min(340px, calc(100vw - 24px));
 }
 
 .sidebar-hover-card {
@@ -3591,7 +3591,7 @@ wa-dropdown.sidebar-identity-menu::part(menu) {
   margin-top: 0;
 }
 
-.content--chat > openclaw-router-outlet {
+.content--chat > bot-router-outlet {
   display: flex;
   flex: 1 1 0;
   min-width: 0;
@@ -3609,15 +3609,15 @@ wa-dropdown.sidebar-identity-menu::part(menu) {
   margin-top: 14px;
 }
 
-.content--workboard > openclaw-router-outlet,
-.content--workboard openclaw-workboard-page {
+.content--workboard > bot-router-outlet,
+.content--workboard bot-workboard-page {
   display: flex;
   flex: 1 1 0;
   flex-direction: column;
   min-height: 0;
 }
 
-.content--workboard openclaw-workboard-page {
+.content--workboard bot-workboard-page {
   gap: 14px;
 }
 
@@ -3644,14 +3644,14 @@ wa-dropdown.sidebar-identity-menu::part(menu) {
 
 /* The fixed web chrome sits over the top-left of ordinary page headers too.
    Settings, mobile drawers, and native hosts own different chrome. */
-html:not(.openclaw-native-macos):not(.openclaw-native-nav):not(.openclaw-native-web-chrome)
+html:not(.bot-native-macos):not(.bot-native-nav):not(.bot-native-web-chrome)
   .shell:not(.shell--nav-collapsed):not(.shell--mobile-nav):not(.shell--settings)
   .content:not(.content--chat)
   .content-header {
   padding-left: 88px;
 }
 
-html:not(.openclaw-native-macos):not(.openclaw-native-nav):not(.openclaw-native-web-chrome)
+html:not(.bot-native-macos):not(.bot-native-nav):not(.bot-native-web-chrome)
   .shell--nav-collapsed:not(.shell--mobile-nav):not(.shell--settings)
   .content:not(.content--chat)
   .content-header {

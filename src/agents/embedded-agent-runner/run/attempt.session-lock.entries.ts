@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 import type { OwnedSessionTranscriptPublishedEntry } from "../../../config/sessions/transcript-write-context.js";
-import { isTranscriptOnlyOpenClawAssistantMessage } from "../../../shared/transcript-only-openclaw-assistant.js";
+import { isTranscriptOnlyBotAssistantMessage } from "../../../shared/transcript-only-bot-assistant.js";
 import type {
   CustomEntry,
   LabelEntry,
@@ -36,10 +36,10 @@ function parsePromptReleasedMessageLine(
     if (!isJsonRecord(message)) {
       return undefined;
     }
-    const isOpenClawTranscriptOnlyAssistant = isTranscriptOnlyOpenClawAssistantMessage(message);
+    const isBotTranscriptOnlyAssistant = isTranscriptOnlyBotAssistantMessage(message);
     if (
       typeof message.role !== "string" ||
-      (!options?.allowAnyMessage && !isOpenClawTranscriptOnlyAssistant)
+      (!options?.allowAnyMessage && !isBotTranscriptOnlyAssistant)
     ) {
       return undefined;
     }

@@ -1,8 +1,8 @@
 import type {
   AgentHarness,
   AgentHarnessSettledTurnFinalizationResult,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { isSilentReplyText } from "openclaw/plugin-sdk/reply-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { isSilentReplyText } from "bot/plugin-sdk/reply-runtime";
 import { runBoundedCodexAppServerTurn, type CodexBoundedTurnOptions } from "./bounded-turn.js";
 import { createAssistantMessage } from "./event-projector-assistant-message.js";
 import { projectSettledCodexMessages } from "./settled-turn-projection.js";
@@ -29,7 +29,7 @@ export async function runCodexSettledTurnFinalization(
 ): Promise<AgentHarnessSettledTurnFinalizationResult> {
   const { attempt, settledAttempt } = operation;
   const finalizationContext = settledAttempt.settledTurnFinalizationContext;
-  if (finalizationContext?.source !== "openclaw-transcript") {
+  if (finalizationContext?.source !== "bot-transcript") {
     throw new Error("Codex settled-turn finalization context is unavailable");
   }
   const historyItems = projectSettledCodexMessages(finalizationContext.messages);

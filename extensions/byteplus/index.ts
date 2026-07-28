@@ -1,11 +1,11 @@
 /**
  * BytePlus provider plugin entrypoint for model and video generation providers.
  */
-import { buildOpenAICompatibleLiveModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { readManifestProviderDefaultModelRef } from "openclaw/plugin-sdk/provider-catalog-shared";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { ensureModelAllowlistEntry } from "openclaw/plugin-sdk/provider-onboard";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import { buildOpenAICompatibleLiveModelProviderConfig } from "bot/plugin-sdk/provider-catalog-live-runtime";
+import { readManifestProviderDefaultModelRef } from "bot/plugin-sdk/provider-catalog-shared";
+import { defineSingleProviderPluginEntry } from "bot/plugin-sdk/provider-entry";
+import { ensureModelAllowlistEntry } from "bot/plugin-sdk/provider-onboard";
+import manifest from "./bot.plugin.json" with { type: "json" };
 import { BYTEPLUS_PROVIDER_CATALOG_ENTRIES } from "./provider-catalog.js";
 import { buildBytePlusVideoGenerationProvider } from "./video-generation-provider.js";
 

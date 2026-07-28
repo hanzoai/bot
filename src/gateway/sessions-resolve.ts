@@ -1,7 +1,7 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 // Gateway sessions.resolve implementation helper.
 // Resolves key/sessionId/label selectors into one canonical session key.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   ErrorCodes,
   type ErrorShape,
@@ -9,7 +9,7 @@ import {
   type SessionsResolveParams,
 } from "../../packages/gateway-protocol/src/index.js";
 import { canonicalizeSessionEntryAliases, type SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveSessionIdMatchSelection } from "../sessions/session-id-resolution.js";
 import { parseSessionLabel } from "../sessions/session-label.js";
 import {
@@ -46,7 +46,7 @@ function noSessionFoundResult(params: { p: SessionsResolveParams; message: strin
 
 /** Rejects sessions whose owning agent no longer exists in config (#65524). */
 function validateSessionAgentExists(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   key: string,
   entry?: SessionEntry | null,
   options?: { acpMetadataSessionKey?: string | null },
@@ -65,7 +65,7 @@ function validateSessionAgentExists(
 }
 
 function isResolvedSessionKeyVisible(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   p: SessionsResolveParams;
   store: Record<string, SessionEntry>;
   key: string;
@@ -82,7 +82,7 @@ function isResolvedSessionKeyVisible(params: {
 }
 
 function findVisibleSessionIdMatches(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   store: Record<string, SessionEntry>;
   p: SessionsResolveParams;
   sessionId: string;
@@ -100,7 +100,7 @@ function findVisibleSessionIdMatches(params: {
 }
 
 export async function resolveSessionKeyFromResolveParams(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   p: SessionsResolveParams;
 }): Promise<SessionsResolveResult> {
   const { cfg, p } = params;

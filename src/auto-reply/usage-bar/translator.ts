@@ -2,7 +2,7 @@ import {
   asSafeIntegerInRange,
   expectDefined,
   parseStrictInteger,
-} from "@openclaw/normalization-core";
+} from "@hanzo/bot-normalization-core";
 export type UsageBarTemplate = Record<string, unknown>;
 export type UsageContract = Record<string, unknown>;
 type Vocab = Record<string, unknown>;

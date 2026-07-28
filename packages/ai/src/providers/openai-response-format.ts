@@ -1,6 +1,6 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 
-const JSON_SCHEMA_RESPONSE_FORMAT_NAME = "openclaw_response";
+const JSON_SCHEMA_RESPONSE_FORMAT_NAME = "bot_response";
 const OLLAMA_CLOUD_ORIGIN = "https://ollama.com";
 
 export function isKnownOpenAIJsonSchemaModelId(modelId: string | undefined): boolean {

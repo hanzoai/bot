@@ -53,8 +53,8 @@ const SLACK_QA_SCENARIOS: SlackQaScenarioDefinition[] = [
     title: "Slack non-allowlisted sender does not trigger",
     timeoutMs: 8_000,
     configOverrides: {
-      allowFrom: ["U_OPENCLAW_QA_NEVER_ALLOWED"],
-      users: ["U_OPENCLAW_QA_NEVER_ALLOWED"],
+      allowFrom: ["U_BOT_QA_NEVER_ALLOWED"],
+      users: ["U_BOT_QA_NEVER_ALLOWED"],
     },
     buildRun: (sutUserId) => {
       const token = `SLACK_QA_BLOCK_${randomUUID().slice(0, 8).toUpperCase()}`;

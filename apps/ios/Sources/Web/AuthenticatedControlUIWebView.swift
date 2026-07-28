@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import BotKit
 import SwiftUI
 import WebKit
 
@@ -67,7 +67,7 @@ enum AuthenticatedControlUI {
         (() => {
           try {
             if (location.origin !== \(allowedOrigin)) return;
-            Object.defineProperty(window, "__OPENCLAW_NATIVE_CONTROL_AUTH__", {
+            Object.defineProperty(window, "__BOT_NATIVE_CONTROL_AUTH__", {
               value: \(json),
               configurable: true,
             });

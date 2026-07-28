@@ -1,4 +1,4 @@
-import type { PluginStateKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginStateKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
 import { describe, expect, it } from "vitest";
 import {
   configureSystemProfileImportStateStore,
@@ -60,13 +60,13 @@ describe("system profile import state", () => {
   });
 
   it("reuses only the recorded target and otherwise avoids collisions", () => {
-    expect(resolveSuggestedImportTarget({ profileNames: ["openclaw"] })).toBe("imported");
-    expect(resolveSuggestedImportTarget({ profileNames: ["openclaw", "imported"] })).toBe(
+    expect(resolveSuggestedImportTarget({ profileNames: ["bot"] })).toBe("imported");
+    expect(resolveSuggestedImportTarget({ profileNames: ["bot", "imported"] })).toBe(
       "imported-2",
     );
     expect(
       resolveSuggestedImportTarget({
-        profileNames: ["openclaw", "imported", "imported-2"],
+        profileNames: ["bot", "imported", "imported-2"],
         state: {
           version: 1,
           status: "imported",

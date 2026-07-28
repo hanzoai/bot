@@ -1,20 +1,20 @@
 import {
   resolveExecApprovalsFromFile,
   type ExecApprovalsFile,
-} from "openclaw/plugin-sdk/exec-approvals-runtime";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+} from "bot/plugin-sdk/exec-approvals-runtime";
+import { normalizeAgentId } from "bot/plugin-sdk/routing";
 import type {
   CodexAppServerApprovalPolicy,
   CodexAppServerApprovalsReviewer,
   CodexAppServerDefaultPolicy,
   CodexAppServerPolicyMode,
   CodexAppServerSandboxMode,
-  OpenClawExecApprovalFloorsForCodexAppServer,
-  OpenClawExecAsk,
-  OpenClawExecMode,
-  OpenClawExecPolicy,
-  OpenClawExecPolicyForCodexAppServer,
-  OpenClawExecSecurity,
+  BotExecApprovalFloorsForCodexAppServer,
+  BotExecAsk,
+  BotExecMode,
+  BotExecPolicy,
+  BotExecPolicyForCodexAppServer,
+  BotExecSecurity,
 } from "./config-contracts.js";
 import { readExecAsk, readExecSecurity, readRecord } from "./config-utils.js";
 
@@ -31,13 +31,13 @@ export function selectForcedPromptingSandbox(params: {
 export function selectForcedDangerFullAccessSandbox(params: {
   configuredSandbox?: CodexAppServerSandboxMode;
   defaultPolicy: CodexAppServerDefaultPolicy | undefined;
-  openClawSandboxActive: boolean;
+  botSandboxActive: boolean;
 }): CodexAppServerSandboxMode {
   if (params.configuredSandbox === "read-only") {
     return "read-only";
   }
   if (params.defaultPolicy?.dangerFullAccessAllowed === false) {
-    if (params.openClawSandboxActive) {
+    if (params.botSandboxActive) {
       return params.defaultPolicy.sandbox ?? "workspace-write";
     }
     throw new Error(
@@ -83,13 +83,13 @@ export function resolveApprovalsReviewer(
     : undefined;
 }
 
-function resolveOpenClawExecPolicyFromConfig(params: {
+function resolveBotExecPolicyFromConfig(params: {
   config?: unknown;
   agentId?: string;
-}): OpenClawExecPolicy {
+}): BotExecPolicy {
   const root = readRecord(params.config);
   const globalExec = readRecord(readRecord(root?.tools)?.exec);
-  const globalPolicy = applyOpenClawExecPolicyLayer(createDefaultOpenClawExecPolicy(), globalExec);
+  const globalPolicy = applyBotExecPolicyLayer(createDefaultBotExecPolicy(), globalExec);
   const agentId = params.agentId?.trim();
   if (!agentId) {
     return globalPolicy;
@@ -102,10 +102,10 @@ function resolveOpenClawExecPolicyFromConfig(params: {
     return typeof id === "string" && normalizeAgentId(id) === normalizedAgentId;
   });
   const agentExec = readRecord(readRecord(readRecord(agentEntry)?.tools)?.exec);
-  return applyOpenClawExecPolicyLayer(globalPolicy, agentExec);
+  return applyBotExecPolicyLayer(globalPolicy, agentExec);
 }
 
-export function resolveOpenClawExecPolicyForCodexAppServer(params: {
+export function resolveBotExecPolicyForCodexAppServer(params: {
   execOverrides?: {
     security?: unknown;
     ask?: unknown;
@@ -113,32 +113,32 @@ export function resolveOpenClawExecPolicyForCodexAppServer(params: {
   approvals?: ExecApprovalsFile;
   config?: unknown;
   agentId?: string;
-}): OpenClawExecPolicyForCodexAppServer {
-  const basePolicy = resolveOpenClawExecPolicyFromConfig({
+}): BotExecPolicyForCodexAppServer {
+  const basePolicy = resolveBotExecPolicyFromConfig({
     config: params.config,
     agentId: params.agentId,
   });
-  const overridePolicy = applyOpenClawExecPolicyLayer(basePolicy, params.execOverrides);
-  const approvalFloors = resolveOpenClawExecApprovalFloorsForCodexAppServer({
+  const overridePolicy = applyBotExecPolicyLayer(basePolicy, params.execOverrides);
+  const approvalFloors = resolveBotExecApprovalFloorsForCodexAppServer({
     approvals: params.approvals,
     agentId: params.agentId,
     policy: overridePolicy,
   });
-  return applyOpenClawExecApprovalFloors(overridePolicy, approvalFloors);
+  return applyBotExecApprovalFloors(overridePolicy, approvalFloors);
 }
 
-export function resolveEffectiveOpenClawExecModeForCodexAppServer(params: {
-  execMode?: OpenClawExecMode;
-  execPolicy?: OpenClawExecPolicyForCodexAppServer;
-}): OpenClawExecMode | undefined {
+export function resolveEffectiveBotExecModeForCodexAppServer(params: {
+  execMode?: BotExecMode;
+  execPolicy?: BotExecPolicyForCodexAppServer;
+}): BotExecMode | undefined {
   if (params.execPolicy?.touched === true) {
     return params.execPolicy.mode;
   }
   return params.execMode;
 }
 
-export function resolveCodexPolicyModeForOpenClawExecMode(
-  mode: OpenClawExecMode | undefined,
+export function resolveCodexPolicyModeForBotExecMode(
+  mode: BotExecMode | undefined,
 ): CodexAppServerPolicyMode | undefined {
   if (!mode || mode === "full") {
     return undefined;
@@ -146,8 +146,8 @@ export function resolveCodexPolicyModeForOpenClawExecMode(
   return "guardian";
 }
 
-export function assertCodexAppServerAllowedForOpenClawExecMode(
-  mode: OpenClawExecMode | undefined,
+export function assertCodexAppServerAllowedForBotExecMode(
+  mode: BotExecMode | undefined,
 ): void {
   if (mode === "deny" || mode === "allowlist") {
     throw new Error(
@@ -156,7 +156,7 @@ export function assertCodexAppServerAllowedForOpenClawExecMode(
   }
 }
 
-function createDefaultOpenClawExecPolicy(): OpenClawExecPolicy {
+function createDefaultBotExecPolicy(): BotExecPolicy {
   return {
     security: "full",
     ask: "off",
@@ -164,17 +164,17 @@ function createDefaultOpenClawExecPolicy(): OpenClawExecPolicy {
   };
 }
 
-function applyOpenClawExecPolicyLayer(
-  base: OpenClawExecPolicy,
+function applyBotExecPolicyLayer(
+  base: BotExecPolicy,
   exec?: { mode?: unknown; security?: unknown; ask?: unknown },
-): OpenClawExecPolicy {
+): BotExecPolicy {
   if (!exec) {
     return base;
   }
   const mode = readExecMode(exec.mode);
   if (mode !== undefined) {
     return {
-      ...resolveOpenClawExecPolicyForMode(mode),
+      ...resolveBotExecPolicyForMode(mode),
       touched: true,
     };
   }
@@ -186,18 +186,18 @@ function applyOpenClawExecPolicyLayer(
   const nextSecurity = security ?? base.security;
   const nextAsk = ask ?? base.ask;
   return {
-    mode: resolveOpenClawExecModeFromPolicy({ security: nextSecurity, ask: nextAsk }),
+    mode: resolveBotExecModeFromPolicy({ security: nextSecurity, ask: nextAsk }),
     security: nextSecurity,
     ask: nextAsk,
     touched: true,
   };
 }
 
-function resolveOpenClawExecApprovalFloorsForCodexAppServer(params: {
+function resolveBotExecApprovalFloorsForCodexAppServer(params: {
   approvals?: ExecApprovalsFile;
   agentId?: string;
-  policy: OpenClawExecPolicy;
-}): OpenClawExecApprovalFloorsForCodexAppServer | undefined {
+  policy: BotExecPolicy;
+}): BotExecApprovalFloorsForCodexAppServer | undefined {
   if (!params.approvals) {
     return undefined;
   }
@@ -211,31 +211,31 @@ function resolveOpenClawExecApprovalFloorsForCodexAppServer(params: {
   }).agent;
 }
 
-function applyOpenClawExecApprovalFloors(
-  base: OpenClawExecPolicy,
-  approvalFloors?: OpenClawExecApprovalFloorsForCodexAppServer,
-): OpenClawExecPolicy {
+function applyBotExecApprovalFloors(
+  base: BotExecPolicy,
+  approvalFloors?: BotExecApprovalFloorsForCodexAppServer,
+): BotExecPolicy {
   if (!approvalFloors) {
     return base;
   }
   const nextSecurity = approvalFloors.security
-    ? minOpenClawExecSecurity(base.security, approvalFloors.security)
+    ? minBotExecSecurity(base.security, approvalFloors.security)
     : base.security;
-  const nextAsk = approvalFloors.ask ? maxOpenClawExecAsk(base.ask, approvalFloors.ask) : base.ask;
+  const nextAsk = approvalFloors.ask ? maxBotExecAsk(base.ask, approvalFloors.ask) : base.ask;
   if (nextSecurity === base.security && nextAsk === base.ask) {
     return base;
   }
   return {
-    mode: resolveOpenClawExecModeFromPolicy({ security: nextSecurity, ask: nextAsk }),
+    mode: resolveBotExecModeFromPolicy({ security: nextSecurity, ask: nextAsk }),
     security: nextSecurity,
     ask: nextAsk,
     touched: true,
   };
 }
 
-function resolveOpenClawExecPolicyForMode(
-  mode: OpenClawExecMode,
-): Omit<OpenClawExecPolicy, "touched"> {
+function resolveBotExecPolicyForMode(
+  mode: BotExecMode,
+): Omit<BotExecPolicy, "touched"> {
   switch (mode) {
     case "deny":
       return { mode, security: "deny", ask: "off" };
@@ -251,10 +251,10 @@ function resolveOpenClawExecPolicyForMode(
   return exhaustiveMode;
 }
 
-function resolveOpenClawExecModeFromPolicy(params: {
-  security: OpenClawExecSecurity;
-  ask: OpenClawExecAsk;
-}): OpenClawExecMode {
+function resolveBotExecModeFromPolicy(params: {
+  security: BotExecSecurity;
+  ask: BotExecAsk;
+}): BotExecMode {
   if (params.security === "deny") {
     return "deny";
   }
@@ -267,20 +267,20 @@ function resolveOpenClawExecModeFromPolicy(params: {
   return "ask";
 }
 
-function minOpenClawExecSecurity(
-  left: OpenClawExecSecurity,
-  right: OpenClawExecSecurity,
-): OpenClawExecSecurity {
-  const order: Record<OpenClawExecSecurity, number> = { deny: 0, allowlist: 1, full: 2 };
+function minBotExecSecurity(
+  left: BotExecSecurity,
+  right: BotExecSecurity,
+): BotExecSecurity {
+  const order: Record<BotExecSecurity, number> = { deny: 0, allowlist: 1, full: 2 };
   return order[left] <= order[right] ? left : right;
 }
 
-function maxOpenClawExecAsk(left: OpenClawExecAsk, right: OpenClawExecAsk): OpenClawExecAsk {
-  const order: Record<OpenClawExecAsk, number> = { off: 0, "on-miss": 1, always: 2 };
+function maxBotExecAsk(left: BotExecAsk, right: BotExecAsk): BotExecAsk {
+  const order: Record<BotExecAsk, number> = { off: 0, "on-miss": 1, always: 2 };
   return order[left] >= order[right] ? left : right;
 }
 
-function readExecMode(value: unknown): OpenClawExecMode | undefined {
+function readExecMode(value: unknown): BotExecMode | undefined {
   return value === "deny" ||
     value === "allowlist" ||
     value === "ask" ||

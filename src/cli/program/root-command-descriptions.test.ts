@@ -10,7 +10,7 @@ import { getSubCliEntries } from "./subcli-descriptors.js";
 
 describe("root command descriptions", () => {
   beforeEach(() => {
-    vi.stubEnv("OPENCLAW_ENABLE_PRIVATE_QA_CLI", "");
+    vi.stubEnv("BOT_ENABLE_PRIVATE_QA_CLI", "");
   });
 
   afterEach(() => {
@@ -18,9 +18,9 @@ describe("root command descriptions", () => {
   });
 
   it("keeps catalog placeholders and registered commands in sync", async () => {
-    const program = new Command().name("openclaw");
+    const program = new Command().name("bot");
     const ctx = createProgramContext();
-    const argv = ["node", "openclaw", "completion"];
+    const argv = ["node", "bot", "completion"];
 
     for (const name of getCoreCliCommandNames()) {
       await registerCoreCliByName(program, ctx, name, argv);

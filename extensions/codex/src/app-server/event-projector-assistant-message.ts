@@ -1,8 +1,8 @@
 import {
   formatErrorMessage,
   type EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { AssistantMessage, Usage } from "openclaw/plugin-sdk/llm";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import type { AssistantMessage, Usage } from "bot/plugin-sdk/llm";
 import { resolveCodexLocalRuntimeAttribution } from "./local-runtime-attribution.js";
 
 export type AssistantMessageOptions = {
@@ -90,7 +90,7 @@ export function createAssistantCommentaryMessage(
     timestamp,
     // Keep this unphased: gateway history hides commentary-phase assistant rows.
     // The keyed fallback persists Control UI narration without channel delivery.
-    openclawStreamFallback: {
+    botStreamFallback: {
       replacementText: text,
       source: "segment",
       itemId,

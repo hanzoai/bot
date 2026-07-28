@@ -1,5 +1,5 @@
-// Microsoft plugin entrypoint registers its OpenClaw integration.
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+// Microsoft plugin entrypoint registers its Bot integration.
+import { definePluginEntry } from "bot/plugin-sdk/plugin-entry";
 import { buildMicrosoftSpeechProvider } from "./speech-provider.js";
 
 export default definePluginEntry({

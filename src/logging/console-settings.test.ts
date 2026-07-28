@@ -39,8 +39,8 @@ beforeEach(() => {
   shouldSkipMutatingLoggingConfigReadMock.mockReturnValue(false);
   snapshot = captureConsoleSnapshot();
   originalIsTty = process.stdout.isTTY;
-  envSnapshot = captureEnv(["OPENCLAW_TEST_CONSOLE"]);
-  process.env.OPENCLAW_TEST_CONSOLE = "1";
+  envSnapshot = captureEnv(["BOT_TEST_CONSOLE"]);
+  process.env.BOT_TEST_CONSOLE = "1";
   Object.defineProperty(process.stdout, "isTTY", { value: false, configurable: true });
 });
 

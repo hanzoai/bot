@@ -1,18 +1,18 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 struct PushBuildConfigTests {
     @Test func `app store mode derives production relay contract`() {
         let config = PushBuildConfig(infoDictionary: [
-            "OpenClawPushMode": "appStore",
-            "OpenClawPushRelayBaseURL": "https://wrong.example.com",
+            "BotPushMode": "appStore",
+            "BotPushRelayBaseURL": "https://wrong.example.com",
         ])
 
         #expect(config.mode == .appStore)
         #expect(config.transport == .relay)
         #expect(config.distribution == .official)
-        #expect(config.relayBaseURL?.absoluteString == "https://ios-push-relay.openclaw.ai")
+        #expect(config.relayBaseURL?.absoluteString == "https://ios-push-relay.bot.ai")
         #expect(config.apnsEnvironment == .production)
         #expect(config.relayProfile == .production)
         #expect(config.proofPolicy == .appleStrict)
@@ -20,8 +20,8 @@ struct PushBuildConfigTests {
 
     @Test func `simulator sandbox mode derives internal proof contract`() {
         let config = PushBuildConfig(infoDictionary: [
-            "OpenClawPushMode": "simulatorSandbox",
-            "OpenClawPushRelayBaseURL": "https://staging-relay.example.com",
+            "BotPushMode": "simulatorSandbox",
+            "BotPushRelayBaseURL": "https://staging-relay.example.com",
         ])
 
         #expect(config.mode == .simulatorSandbox)
@@ -35,8 +35,8 @@ struct PushBuildConfigTests {
 
     @Test func `local release mode remains direct production push`() {
         let config = PushBuildConfig(infoDictionary: [
-            "OpenClawPushMode": "localProduction",
-            "OpenClawPushRelayBaseURL": "https://ios-push-relay.openclaw.ai",
+            "BotPushMode": "localProduction",
+            "BotPushRelayBaseURL": "https://ios-push-relay.bot.ai",
         ])
 
         #expect(config.mode == .localProduction)

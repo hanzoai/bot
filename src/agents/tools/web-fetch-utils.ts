@@ -3,7 +3,7 @@
  *
  * Converts lightweight HTML into bounded markdown/text without pulling in a full renderer.
  */
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { decodeHtmlEntities } from "../../shared/html-entities.js";
 import { sanitizeHtml, stripInvisibleUnicode } from "./web-fetch-visibility.js";
 

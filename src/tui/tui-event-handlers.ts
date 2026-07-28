@@ -1,5 +1,5 @@
 // Handles TUI keyboard, paste, backend, and command events.
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import {
   asString,
   extractTextFromMessage,

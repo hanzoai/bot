@@ -9,28 +9,28 @@ import {
   normalizeSessionDeliveryState,
   type SessionEntry,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
+} from "bot/plugin-sdk/session-store-runtime";
 import {
   appendSessionTranscriptMessageByIdentity,
   readSessionTranscriptEvents,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "bot/plugin-sdk/session-transcript-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import { feishuDoctor } from "./doctor.js";
 
 const runFeishuDoctorSequence = feishuDoctor.runConfigSequence!;
 
 type EnvSnapshot = {
   HOME?: string;
-  OPENCLAW_HOME?: string;
-  OPENCLAW_STATE_DIR?: string;
+  BOT_HOME?: string;
+  BOT_STATE_DIR?: string;
 };
 
 function captureEnv(): EnvSnapshot {
   return {
     HOME: process.env.HOME,
-    OPENCLAW_HOME: process.env.OPENCLAW_HOME,
-    OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
+    BOT_HOME: process.env.BOT_HOME,
+    BOT_STATE_DIR: process.env.BOT_STATE_DIR,
   };
 }
 
@@ -45,7 +45,7 @@ function restoreEnv(snapshot: EnvSnapshot) {
   }
 }
 
-function feishuConfig(): OpenClawConfig {
+function feishuConfig(): BotConfig {
   return {
     channels: {
       feishu: {
@@ -53,13 +53,13 @@ function feishuConfig(): OpenClawConfig {
         appSecret: "secret_xxx",
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function stateDir(): string {
-  const dir = process.env.OPENCLAW_STATE_DIR;
+  const dir = process.env.BOT_STATE_DIR;
   if (!dir) {
-    throw new Error("OPENCLAW_STATE_DIR is not set");
+    throw new Error("BOT_STATE_DIR is not set");
   }
   return dir;
 }
@@ -73,7 +73,7 @@ function storePath(agentId = "main"): string {
 }
 
 function sqliteStorePath(agentId = "main"): string {
-  return path.join(stateDir(), "agents", agentId, "agent", "openclaw-agent.sqlite");
+  return path.join(stateDir(), "agents", agentId, "agent", "bot-agent.sqlite");
 }
 
 function corruptTranscriptEventJson(agentId: string, sessionId: string): void {
@@ -146,11 +146,11 @@ describe("Feishu doctor state repair", () => {
 
   beforeEach(() => {
     envSnapshot = captureEnv();
-    tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-feishu-doctor-"));
+    tempHome = fs.mkdtempSync(path.join(os.tmpdir(), "bot-feishu-doctor-"));
     process.env.HOME = tempHome;
-    process.env.OPENCLAW_HOME = tempHome;
-    process.env.OPENCLAW_STATE_DIR = path.join(tempHome, ".openclaw");
-    fs.mkdirSync(process.env.OPENCLAW_STATE_DIR, { recursive: true, mode: 0o700 });
+    process.env.BOT_HOME = tempHome;
+    process.env.BOT_STATE_DIR = path.join(tempHome, ".bot");
+    fs.mkdirSync(process.env.BOT_STATE_DIR, { recursive: true, mode: 0o700 });
   });
 
   afterEach(() => {
@@ -202,7 +202,7 @@ describe("Feishu doctor state repair", () => {
       cfg: {
         ...feishuConfig(),
         session: { store: customStorePath },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: process.env,
       shouldRepair: false,
     });
@@ -353,7 +353,7 @@ describe("Feishu doctor state repair", () => {
     expect(result.changeNotes).toEqual([]);
     expect(result.warningNotes.join("\n")).toContain("Feishu local channel state may need repair");
     expect(result.warningNotes.join("\n")).toContain("preserving Feishu App ID/secret config");
-    expect(result.warningNotes.join("\n")).toContain("openclaw doctor --fix");
+    expect(result.warningNotes.join("\n")).toContain("bot doctor --fix");
   });
 
   it("rebuilds corrupt Feishu state without deleting healthy Feishu sessions", async () => {
@@ -463,7 +463,7 @@ describe("Feishu doctor state repair", () => {
       true,
     );
     expect(
-      fs.existsSync(path.join(backupDir, "session-stores", "main", "openclaw-agent.sqlite")),
+      fs.existsSync(path.join(backupDir, "session-stores", "main", "bot-agent.sqlite")),
     ).toBe(true);
 
     const store = readStoreEntries(targetStorePath);
@@ -556,7 +556,7 @@ describe("Feishu doctor state repair", () => {
       false,
     );
     expect(
-      fs.existsSync(path.join(backupDir, "session-stores", "main", "openclaw-agent.sqlite")),
+      fs.existsSync(path.join(backupDir, "session-stores", "main", "bot-agent.sqlite")),
     ).toBe(true);
 
     expect(readStoreEntries(targetStorePath)[sessionKey]).toBeUndefined();
@@ -566,7 +566,7 @@ describe("Feishu doctor state repair", () => {
     const customStorePath = path.join(stateDir(), "custom-sessions", "sessions.json");
     const customSqlitePath = path.join(
       path.dirname(customStorePath),
-      "openclaw-agent.support.sqlite",
+      "bot-agent.support.sqlite",
     );
     const sessionKey = "agent:support:feishu:direct:ou_migrated";
     await upsertSessionEntry({
@@ -594,7 +594,7 @@ describe("Feishu doctor state repair", () => {
         ...feishuConfig(),
         agents: { list: [{ id: "support", default: true }] },
         session: { store: customStorePath },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: process.env,
       shouldRepair: true,
     });
@@ -610,7 +610,7 @@ describe("Feishu doctor state repair", () => {
     );
     expect(
       fs.existsSync(
-        path.join(backupDir, "session-stores", "support", "openclaw-agent.support.sqlite"),
+        path.join(backupDir, "session-stores", "support", "bot-agent.support.sqlite"),
       ),
     ).toBe(true);
 

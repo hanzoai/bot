@@ -13,9 +13,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.BOT_CAPTURE_UI_PROOF === "1";
 const uiProofArtifactDir = path.join(process.cwd(), ".artifacts", "control-ui-e2e", "drafts-ux");
 
 let browser: Browser;
@@ -90,11 +90,11 @@ async function openSidebarSortMenu(targetPage: Page) {
 
 async function replaceGatewayClient(targetPage: Page) {
   await targetPage.evaluate(() => {
-    const app = document.querySelector("openclaw-app") as HTMLElement & {
+    const app = document.querySelector("bot-app") as HTMLElement & {
       runtime?: { context: { gateway: { connect: () => void } } };
     };
     if (!app.runtime) {
-      throw new Error("OpenClaw application runtime is unavailable");
+      throw new Error("Bot application runtime is unavailable");
     }
     app.runtime.context.gateway.connect();
   });
@@ -139,7 +139,7 @@ describeControlUiE2e("Control UI session ownership", () => {
     await currentPage.getByText("Bob operations", { exact: true }).first().waitFor();
     await currentPage.locator('[data-session-key="agent:main:ada"] a').click();
     await currentPage.getByText("Ready.", { exact: true }).waitFor();
-    await expect.poll(() => currentPage.locator("openclaw-session-owner-chip").count()).toBe(3);
+    await expect.poll(() => currentPage.locator("bot-session-owner-chip").count()).toBe(3);
 
     const creatorMenu = await openSidebarSortMenu(currentPage);
     await creatorMenu.locator('[value="creator:profile-ada"]').waitFor();
@@ -189,7 +189,7 @@ describeControlUiE2e("Control UI session ownership", () => {
       await creatorMenu.locator(".sidebar-session-sort-menu__title", { hasText: "People" }).count(),
     ).toBe(0);
     expect(await creatorMenu.locator('[value^="creator:"]').count()).toBe(0);
-    expect(await currentPage.locator("openclaw-session-owner-chip").count()).toBe(0);
+    expect(await currentPage.locator("bot-session-owner-chip").count()).toBe(0);
   });
 
   it("keeps grouped single-creator thread actions accessible to keyboard users", async () => {

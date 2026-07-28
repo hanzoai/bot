@@ -1,12 +1,12 @@
-# OpenClaw Kimi Coding Provider
+# Bot Kimi Coding Provider
 
-Official OpenClaw provider plugin for Kimi Coding.
+Official Bot provider plugin for Kimi Coding.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/kimi-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-kimi-provider
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/moonshot> for setup and configuration.
+See <https://docs.bot.ai/providers/moonshot> for setup and configuration.

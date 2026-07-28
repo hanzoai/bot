@@ -12,7 +12,7 @@ import {
   type TransformConfigFileWithRetryParams,
 } from "../config/config.js";
 import type { ConfigWriteOptions } from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { isPathInside } from "../infra/path-guards.js";
 import {
@@ -38,14 +38,14 @@ function mergeUnsetPaths(
 }
 
 /** Return whether config still contains legacy/transient plugin install records. */
-export function hasPendingPluginInstallRecords(config: OpenClawConfig): boolean {
+export function hasPendingPluginInstallRecords(config: BotConfig): boolean {
   return Object.keys(config.plugins?.installs ?? {}).length > 0;
 }
 
 /** Find pending install records that match the base config and can be stripped as unchanged. */
 export function unchangedPendingPluginInstallRecordIds(
-  config: OpenClawConfig,
-  baseConfig: OpenClawConfig,
+  config: BotConfig,
+  baseConfig: BotConfig,
 ): string[] {
   const pendingInstalls = config.plugins?.installs ?? {};
   return Object.entries(baseConfig.plugins?.installs ?? {})
@@ -55,9 +55,9 @@ export function unchangedPendingPluginInstallRecordIds(
 
 /** Remove pending plugin install records from config, optionally only for selected ids. */
 export function stripPendingPluginInstallRecords(
-  config: OpenClawConfig,
+  config: BotConfig,
   pluginIds?: Iterable<string>,
-): OpenClawConfig {
+): BotConfig {
   if (!pluginIds) {
     return withoutPluginInstallRecords(config);
   }
@@ -81,7 +81,7 @@ export function stripPendingPluginInstallRecords(
 }
 
 type ConfigCommit = (
-  config: OpenClawConfig,
+  config: BotConfig,
   writeOptions?: ConfigWriteOptions,
 ) => Promise<ConfigReplaceResult | void>;
 const PLUGIN_SOURCE_CHANGED_RESTART_REASON = "plugin source changed";
@@ -133,7 +133,7 @@ function resolveRetainedManagedNpmInstallMarkerTarget(params: {
           [params.pluginId]: params.previousRecord,
         },
       },
-    } as OpenClawConfig,
+    } as BotConfig,
     pluginId: params.pluginId,
     deleteFiles: true,
   });
@@ -274,7 +274,7 @@ async function restoreClearedRetainedManagedNpmInstallMarkers(
 async function commitPluginInstallRecordsWithWriter(params: {
   previousInstallRecords?: Record<string, PluginInstallRecord>;
   nextInstallRecords: Record<string, PluginInstallRecord>;
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   writeOptions?: ConfigWriteOptions;
   commit: ConfigCommit;
 }): Promise<ConfigReplaceResult | void> {
@@ -330,7 +330,7 @@ async function commitPluginInstallRecordsWithWriter(params: {
 export async function commitPluginInstallRecordsWithConfig(params: {
   previousInstallRecords?: Record<string, PluginInstallRecord>;
   nextInstallRecords: Record<string, PluginInstallRecord>;
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   baseHash?: string;
   writeOptions?: ConfigWriteOptions;
 }): Promise<void> {
@@ -365,13 +365,13 @@ export async function commitPluginInstallRecordsOnly(params: {
 
 /** Commit config while migrating any pending install records into the install index. */
 export async function commitConfigWriteWithPendingPluginInstalls(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   /** Source snapshot whose transient records migrate below the canonical index. */
-  sourceConfig?: OpenClawConfig;
+  sourceConfig?: BotConfig;
   writeOptions?: ConfigWriteOptions;
   commit: ConfigCommit;
 }): Promise<{
-  config: OpenClawConfig;
+  config: BotConfig;
   installRecords: Record<string, PluginInstallRecord>;
   movedInstallRecords: boolean;
   persistedHash: string | null;
@@ -425,11 +425,11 @@ export async function commitConfigWriteWithPendingPluginInstalls(params: {
 
 /** Replace the config file after moving pending plugin install records into the install index. */
 export async function commitConfigWithPendingPluginInstalls(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   baseHash?: string;
   writeOptions?: ConfigWriteOptions;
 }): Promise<{
-  config: OpenClawConfig;
+  config: BotConfig;
   installRecords: Record<string, PluginInstallRecord>;
   movedInstallRecords: boolean;
   persistedHash: string | null;

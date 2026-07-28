@@ -1,25 +1,25 @@
 ---
-summary: "Synology Chat webhook setup and OpenClaw config"
+summary: "Synology Chat webhook setup and Bot config"
 read_when:
-  - Setting up Synology Chat with OpenClaw
+  - Setting up Synology Chat with Bot
   - Debugging Synology Chat webhook routing
 title: "Synology Chat"
 ---
 
-Synology Chat connects to OpenClaw through a webhook pair: a Synology Chat outgoing webhook posts inbound direct messages to the Gateway, and replies go back through a Synology Chat incoming webhook.
+Synology Chat connects to Bot through a webhook pair: a Synology Chat outgoing webhook posts inbound direct messages to the Gateway, and replies go back through a Synology Chat incoming webhook.
 
 Status: official plugin, installed separately. Direct messages only; text and URL-based file sends are supported.
 
 ## Install
 
 ```bash
-openclaw plugins install @openclaw/synology-chat
+bot plugins install @hanzo/bot-synology-chat
 ```
 
 Local checkout (when running from a git repo):
 
 ```bash
-openclaw plugins install ./path/to/local/synology-chat-plugin
+bot plugins install ./path/to/local/synology-chat-plugin
 ```
 
 Details: [Plugins](/tools/plugin)
@@ -30,29 +30,29 @@ Details: [Plugins](/tools/plugin)
 2. In Synology Chat integrations:
    - Create an incoming webhook and copy its URL.
    - Create an outgoing webhook with your secret token.
-3. Point the outgoing webhook URL to your OpenClaw Gateway:
+3. Point the outgoing webhook URL to your Bot Gateway:
    - `https://gateway-host/webhook/synology` by default.
    - Or your custom `channels.synology-chat.webhookPath`.
-4. Finish setup in OpenClaw. Synology Chat appears in the same channel setup list in both flows:
-   - Guided: `openclaw onboard` or `openclaw channels add`
-   - Direct: `openclaw channels add --channel synology-chat --token <token> --url <incoming-webhook-url>`
+4. Finish setup in Bot. Synology Chat appears in the same channel setup list in both flows:
+   - Guided: `bot onboard` or `bot channels add`
+   - Direct: `bot channels add --channel synology-chat --token <token> --url <incoming-webhook-url>`
 5. Restart the Gateway and send a DM to the Synology Chat bot.
 
 Webhook auth details:
 
-- OpenClaw accepts the outgoing webhook token from `body.token`, then
+- Bot accepts the outgoing webhook token from `body.token`, then
   `?token=...`, then headers.
 - Accepted header forms:
   - `x-synology-token`
   - `x-webhook-token`
-  - `x-openclaw-token`
+  - `x-bot-token`
   - `Authorization: Bearer <token>`
 - Empty or missing tokens fail closed.
 - Payloads may be `application/x-www-form-urlencoded` or `application/json`; `token`, `user_id`, and `text` are required.
 
 ## Inbound durability
 
-After token, sender-policy, and rate-limit checks pass, OpenClaw removes the webhook token from the stored envelope and durably queues the event before acknowledging it. The route returns `204` only after that append succeeds; a persistence failure returns `503` so Synology Chat can retry instead of silently losing the message.
+After token, sender-policy, and rate-limit checks pass, Bot removes the webhook token from the stored envelope and durably queues the event before acknowledging it. The route returns `204` only after that append succeeds; a persistence failure returns `503` so Synology Chat can retry instead of silently losing the message.
 
 Pending or retryable events survive a Gateway restart. Synology's stable `post_id` suppresses duplicate queue entries while the corresponding active or retained completion record exists. Delivery remains at least once across the queue-to-agent handoff, so a crash at that boundary can still replay a turn.
 
@@ -84,7 +84,7 @@ For the default account, you can use env vars:
 - `SYNOLOGY_NAS_HOST`
 - `SYNOLOGY_ALLOWED_USER_IDS` (comma-separated)
 - `SYNOLOGY_RATE_LIMIT`
-- `OPENCLAW_BOT_NAME`
+- `BOT_BOT_NAME`
 
 Config values override env vars.
 
@@ -106,12 +106,12 @@ Use numeric Synology Chat user IDs as targets. The `synology-chat:`, `synology_c
 Examples:
 
 ```bash
-openclaw message send --channel synology-chat --target 123456 --message "Hello from OpenClaw"
-openclaw message send --channel synology-chat --target synology-chat:123456 --message "Hello again"
-openclaw message send --channel synology-chat --target synology:123456 --message "Short prefix"
+bot message send --channel synology-chat --target 123456 --message "Hello from Bot"
+bot message send --channel synology-chat --target synology-chat:123456 --message "Hello again"
+bot message send --channel synology-chat --target synology:123456 --message "Short prefix"
 ```
 
-Outbound text is chunked at 2000 characters. Media sends are supported by URL-based file delivery: the NAS downloads and attaches the file (max 32 MB). Outbound file URLs must use `http` or `https`, and private or otherwise blocked network targets are rejected before OpenClaw forwards the URL to the NAS webhook.
+Outbound text is chunked at 2000 characters. Media sends are supported by URL-based file delivery: the NAS downloads and attaches the file (max 32 MB). Outbound file URLs must use `http` or `https`, and private or otherwise blocked network targets are rejected before Bot forwards the URL to the NAS webhook.
 
 ## Multi-account
 
@@ -119,7 +119,7 @@ Multiple Synology Chat accounts are supported under `channels.synology-chat.acco
 Each account can override token, incoming URL, webhook path, DM policy, and limits.
 Direct-message sessions are isolated per account and user, so the same numeric `user_id`
 on two different Synology accounts does not share transcript state.
-Give each enabled account a distinct `webhookPath`. OpenClaw rejects duplicate exact paths
+Give each enabled account a distinct `webhookPath`. Bot rejects duplicate exact paths
 and refuses to start named accounts that only inherit a shared webhook path in multi-account setups.
 If you intentionally need legacy inheritance for a named account, set
 `dangerouslyAllowInheritedWebhookPath: true` on that account or at `channels.synology-chat`,
@@ -167,7 +167,7 @@ but duplicate exact paths are still rejected fail-closed. Prefer explicit per-ac
 - `Invalid token`:
   - the outgoing webhook secret does not match `channels.synology-chat.token`
   - the request is hitting the wrong account/webhook path
-  - a reverse proxy stripped the token header before the request reached OpenClaw
+  - a reverse proxy stripped the token header before the request reached Bot
 - `Rate limit exceeded`:
   - too many invalid token attempts from the same source can temporarily lock that source out
   - authenticated senders also have a separate per-user message rate limit

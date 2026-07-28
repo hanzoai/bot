@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { importSessionCatalogHistory } from "./session-catalog-history-import.js";
 
 const transcript = vi.hoisted(() => ({
@@ -70,7 +70,7 @@ function importHistory(
       sessionId: "session-1",
       sessionKey: "agent:main:catalog-adopt",
       agentId: "main",
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
     }),
   };
 }
@@ -123,7 +123,7 @@ describe("importSessionCatalogHistory", () => {
       "Tool call\n\nbash",
       "Other\n\ncheckpoint",
     ]);
-    expect(transcript.messages[0]?.["__openclaw"]).toEqual({
+    expect(transcript.messages[0]?.["__bot"]).toEqual({
       mirrorOrigin: "pi-catalog-import",
     });
     expect(transcript.messages[1]?.timestamp).toBe(-1_000);

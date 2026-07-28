@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { expectDefined, isRecord } from "@openclaw/normalization-core";
+import { expectDefined, isRecord } from "@hanzo/bot-normalization-core";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   buildFallbackSlashCommands,

@@ -1,6 +1,6 @@
 // Qqbot tests cover exec approvals plugin behavior.
-import { isImplicitSameChatApprovalAuthorization } from "openclaw/plugin-sdk/approval-auth-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { isImplicitSameChatApprovalAuthorization } from "bot/plugin-sdk/approval-auth-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerPlatformAdapter, type PlatformAdapter } from "./engine/adapter/index.js";
 import { authorizeQQBotApprovalAction } from "./exec-approvals.js";
@@ -34,7 +34,7 @@ describe("authorizeQQBotApprovalAction", () => {
             clientSecret: "secret",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       accountId: "default",
       senderId: "ATTACKER_OPENID",
       approvalKind: "exec",
@@ -57,7 +57,7 @@ describe("authorizeQQBotApprovalAction", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       accountId: "default",
       senderId: "OWNER_OPENID",
       approvalKind: "exec",

@@ -1,8 +1,8 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 // Discord tests cover runtime plugin behavior.
 import { ChannelType, PermissionFlagsBits } from "discord-api-types/v10";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { DiscordActionConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { DiscordActionConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { clearPresences, setPresence } from "../monitor/presence-cache.js";
 import { DiscordThreadInitialMessageError } from "../send.js";
@@ -138,9 +138,9 @@ const DISCORD_TEST_CFG = {
       groupPolicy: "open",
     },
   },
-} as OpenClawConfig;
+} as BotConfig;
 
-function discordAllowlistCfg(guilds: Record<string, unknown>): OpenClawConfig {
+function discordAllowlistCfg(guilds: Record<string, unknown>): BotConfig {
   return {
     channels: {
       discord: {
@@ -149,7 +149,7 @@ function discordAllowlistCfg(guilds: Record<string, unknown>): OpenClawConfig {
         guilds,
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 type MockCallSource = { mock: { calls: Array<Array<unknown>> } };
@@ -179,7 +179,7 @@ function handleMessagingAction(
   action: string,
   params: Record<string, unknown>,
   isActionEnabled: (key: keyof DiscordActionConfig) => boolean,
-  cfg: OpenClawConfig = DISCORD_TEST_CFG,
+  cfg: BotConfig = DISCORD_TEST_CFG,
   options?: {
     mediaAccess?: {
       localRoots?: readonly string[];
@@ -203,7 +203,7 @@ function handleGuildAction(
   action: string,
   params: Record<string, unknown>,
   isActionEnabled: (key: keyof DiscordActionConfig) => boolean,
-  cfg: OpenClawConfig = DISCORD_TEST_CFG,
+  cfg: BotConfig = DISCORD_TEST_CFG,
   options?: {
     mediaLocalRoots?: readonly string[];
     conversationReadOrigin?: "delegated" | "direct-operator";
@@ -216,7 +216,7 @@ function handleModerationAction(
   action: string,
   params: Record<string, unknown>,
   isActionEnabled: (key: keyof DiscordActionConfig, defaultValue?: boolean) => boolean,
-  cfg: OpenClawConfig = DISCORD_TEST_CFG,
+  cfg: BotConfig = DISCORD_TEST_CFG,
 ) {
   return handleDiscordModerationAction(action, params, isActionEnabled, cfg);
 }
@@ -285,7 +285,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await handleMessagingAction(
       "react",
@@ -654,7 +654,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleMessagingAction(
@@ -877,7 +877,7 @@ describe("handleDiscordMessagingAction", () => {
             groupPolicy: "disabled",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       channel: {
         id: "444",
         guild_id: "111",
@@ -924,7 +924,7 @@ describe("handleDiscordMessagingAction", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       channel: {
         id: "444",
         type: ChannelType.DM,
@@ -941,7 +941,7 @@ describe("handleDiscordMessagingAction", () => {
             dmPolicy: "pairing",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       channel: {
         id: "444",
         name: "qa-group",
@@ -963,7 +963,7 @@ describe("handleDiscordMessagingAction", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       channel: {
         id: "444",
         name: "blocked-group",
@@ -1005,7 +1005,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await handleMessagingAction(
       "reactions",
@@ -1033,7 +1033,7 @@ describe("handleDiscordMessagingAction", () => {
           dmPolicy: "pairing",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleMessagingAction(
@@ -1061,7 +1061,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleMessagingAction(
@@ -1093,7 +1093,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleMessagingAction(
@@ -1233,7 +1233,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleMessagingAction("permissions", { channelId: "444" }, enableAllActions, cfg),
@@ -1278,7 +1278,7 @@ describe("handleDiscordMessagingAction", () => {
           token: "token",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     await handleMessagingAction("readMessages", { channelId: "C1" }, enableAllActions, cfg);
     expect(readMessagesDiscord).toHaveBeenCalledWith(
       "C1",
@@ -1321,7 +1321,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await handleMessagingAction("readMessages", { channelId: "222" }, enableAllActions, cfg);
 
@@ -1517,7 +1517,7 @@ describe("handleDiscordMessagingAction", () => {
     });
     fetchGuildInfoDiscord.mockResolvedValueOnce({
       id: "111",
-      name: "Friends of OpenClaw",
+      name: "Friends of Bot",
     });
     const cfg = {
       channels: {
@@ -1525,7 +1525,7 @@ describe("handleDiscordMessagingAction", () => {
           token: "token",
           groupPolicy: "allowlist",
           guilds: {
-            "friends-of-openclaw": {
+            "friends-of-bot": {
               channels: {
                 "222": { enabled: true },
               },
@@ -1533,7 +1533,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await handleMessagingAction("readMessages", { channelId: "222" }, enableAllActions, cfg);
 
@@ -1560,7 +1560,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleMessagingAction("readMessages", { channelId: "333" }, enableAllActions, cfg),
@@ -1569,7 +1569,7 @@ describe("handleDiscordMessagingAction", () => {
   });
 
   it("fails closed for Discord message reads when provider config is missing", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
 
     await expect(
       handleMessagingAction("readMessages", { channelId: "C1" }, enableAllActions, cfg),
@@ -1612,7 +1612,7 @@ describe("handleDiscordMessagingAction", () => {
           token: "token",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     await handleMessagingAction(
       "fetchMessage",
       { guildId: "G1", channelId: "C1", messageId: "M1" },
@@ -1630,7 +1630,7 @@ describe("handleDiscordMessagingAction", () => {
     });
     fetchGuildInfoDiscord.mockResolvedValueOnce({
       id: "111",
-      name: "Friends of OpenClaw",
+      name: "Friends of Bot",
     });
     const cfg = {
       channels: {
@@ -1638,7 +1638,7 @@ describe("handleDiscordMessagingAction", () => {
           token: "token",
           groupPolicy: "allowlist",
           guilds: {
-            "friends-of-openclaw": {
+            "friends-of-bot": {
               channels: {
                 "222": { enabled: true },
               },
@@ -1646,7 +1646,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await handleMessagingAction(
       "fetchMessage",
@@ -1674,7 +1674,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleMessagingAction(
@@ -1722,7 +1722,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await handleMessagingAction(
       "fetchMessage",
@@ -1755,7 +1755,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleMessagingAction(
@@ -1794,7 +1794,7 @@ describe("handleDiscordMessagingAction", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
 
       await expect(
         handleMessagingAction(action, { channelId: "333" }, enableAllActions, cfg),
@@ -1832,7 +1832,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleMessagingAction("listPins", { channelId: "444" }, enableAllActions, cfg),
@@ -1877,7 +1877,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleMessagingAction(
@@ -1905,7 +1905,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleMessagingAction(
@@ -1944,7 +1944,7 @@ describe("handleDiscordMessagingAction", () => {
   });
 
   it("fails closed for Discord guild-wide searches when provider config is missing", async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
 
     await expect(
       handleMessagingAction(
@@ -1972,7 +1972,7 @@ describe("handleDiscordMessagingAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await handleMessagingAction(
       "searchMessages",
@@ -2476,7 +2476,7 @@ describe("handleDiscordGuildAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const result = await handleGuildAction(
       "memberInfo",
       {
@@ -3385,7 +3385,7 @@ describe("handleDiscordAction per-account gating", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await handleDiscordAction(
       { action: "timeout", guildId: "G1", userId: "U1", durationMinutes: 5, accountId: "ops" },
@@ -3410,7 +3410,7 @@ describe("handleDiscordAction per-account gating", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleDiscordAction(
@@ -3431,7 +3431,7 @@ describe("handleDiscordAction per-account gating", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await handleDiscordAction(
       { action: "kick", guildId: "G1", userId: "U1", accountId: "ops" },
@@ -3450,7 +3450,7 @@ describe("handleDiscordAction per-account gating", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleDiscordAction(
@@ -3473,7 +3473,7 @@ describe("handleDiscordAction per-account gating", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await handleDiscordAction(
       { action: "channelCreate", guildId: "G1", name: "alerts", accountId: "ops" },

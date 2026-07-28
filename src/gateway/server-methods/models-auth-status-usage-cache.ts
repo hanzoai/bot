@@ -6,7 +6,7 @@ import {
   fingerprintResolvedProviderAuth,
 } from "../../agents/execution-auth-binding.js";
 import { resolveUsableCustomProviderApiKey } from "../../agents/model-auth.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { loadProviderUsageSummary } from "../../infra/provider-usage.load.js";
 import type { ProviderUsageSnapshot, UsageProviderId } from "../../infra/provider-usage.types.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
@@ -45,7 +45,7 @@ function sortedRecordEntries<T>(value: Record<string, T> | undefined) {
 }
 
 export function fingerprintProviderUsageCredentials(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   directApiKeys: ReadonlyMap<string, { source: "config" | "env"; envVar?: string } | undefined>;
   store: AuthProfileStore;
 }): string {

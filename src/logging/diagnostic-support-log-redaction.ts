@@ -1,5 +1,5 @@
 // Support log redaction helpers scrub sensitive fields from diagnostic log payloads.
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";
 import {
   redactSupportString,

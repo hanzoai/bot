@@ -21,7 +21,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-const STORE_PATH = "/tmp/openclaw/cron/jobs.sqlite";
+const STORE_PATH = "/tmp/bot/cron/jobs.sqlite";
 
 function job(overrides: Record<string, unknown>): Record<string, unknown> {
   return { id: "job", schedule: "0 * * * *", ...overrides };

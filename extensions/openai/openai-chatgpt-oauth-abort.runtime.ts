@@ -3,4 +3,4 @@ export {
   createOAuthLoginCancelledError,
   throwIfOAuthLoginAborted,
   withOAuthLoginAbort,
-} from "openclaw/plugin-sdk/provider-oauth-runtime";
+} from "bot/plugin-sdk/provider-oauth-runtime";

@@ -2,7 +2,7 @@
  * Hook endpoint trust tests for agent dispatch and gateway network config.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   getActiveGatewayRootWorkCount,
   isGatewaySubordinateWorkAdmissionClosed,
@@ -14,7 +14,7 @@ const enqueueSystemEventMock = vi.fn();
 const requestHeartbeatMock = vi.fn();
 const runCronIsolatedAgentTurnMock = vi.fn();
 const resolveMainSessionKeyMock = vi.fn(() => "main-session");
-const mainRosterConfig = (): OpenClawConfig => ({
+const mainRosterConfig = (): BotConfig => ({
   agents: { entries: { main: { default: true } } },
 });
 const loadConfigMock = vi.fn(mainRosterConfig);

@@ -1,18 +1,18 @@
 // Vydra provider module implements model/runtime integration.
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
+import { resolveGeneratedMediaMaxBytes } from "bot/plugin-sdk/media-generation-runtime";
 import {
   assertOkOrThrowHttpError,
   postJsonRequest,
   readProviderJsonResponse,
   resolveProviderHttpRequestConfig,
-} from "openclaw/plugin-sdk/provider-http";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+} from "bot/plugin-sdk/provider-http";
+import { normalizeResolvedSecretInputString } from "bot/plugin-sdk/secret-input";
 import type {
   SpeechProviderConfig,
   SpeechProviderOverrides,
   SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech-core";
-import { asObject, resolveSpeechProviderApiKey } from "openclaw/plugin-sdk/speech-core";
+} from "bot/plugin-sdk/speech-core";
+import { asObject, resolveSpeechProviderApiKey } from "bot/plugin-sdk/speech-core";
 import {
   DEFAULT_VYDRA_BASE_URL,
   DEFAULT_VYDRA_SPEECH_MODEL,

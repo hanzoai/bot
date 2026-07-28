@@ -13,7 +13,7 @@ import {
 const tempRoots = new Set<string>();
 
 async function makeTempRoot() {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-setup-migration-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-setup-migration-"));
   tempRoots.add(root);
   return root;
 }
@@ -101,7 +101,7 @@ describe("setup migration import freshness", () => {
       "state agents/ exists",
     ]);
     expect(() => assertFreshSetupMigrationTarget(result)).toThrow(
-      "Migration import during onboarding requires a fresh OpenClaw setup.",
+      "Migration import during onboarding requires a fresh Bot setup.",
     );
   });
 });
@@ -127,8 +127,8 @@ describe("setup migration import options", () => {
   });
 
   it("offers official installable Codex when bundled plugins are unavailable", async () => {
-    const previousDisableBundled = process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS;
-    process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = "1";
+    const previousDisableBundled = process.env.BOT_DISABLE_BUNDLED_PLUGINS;
+    process.env.BOT_DISABLE_BUNDLED_PLUGINS = "1";
     try {
       const options = await listSetupMigrationOptions({
         baseConfig: {},
@@ -140,9 +140,9 @@ describe("setup migration import options", () => {
       );
     } finally {
       if (previousDisableBundled === undefined) {
-        delete process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS;
+        delete process.env.BOT_DISABLE_BUNDLED_PLUGINS;
       } else {
-        process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = previousDisableBundled;
+        process.env.BOT_DISABLE_BUNDLED_PLUGINS = previousDisableBundled;
       }
     }
   });

@@ -1,7 +1,7 @@
 import { expect } from "vitest";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { resolveCliBackendConfig } from "../agents/cli-backends.js";
-// OpenClaw test helpers build runtime environments for rescue tests.
+// Bot test helpers build runtime environments for rescue tests.
 import {
   fingerprintAuthProfileOwnerShape,
   fingerprintOpaqueRuntimeOwner,
@@ -10,7 +10,7 @@ import {
 } from "../agents/execution-auth-binding.js";
 import { resolveCliRuntimeExecutionProvider } from "../agents/model-runtime-aliases.js";
 import { resolveSimpleCompletionSelectionForAgent } from "../agents/simple-completion-runtime.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { listSystemAgentAuditEntriesForTests } from "./audit.test-support.js";
 import { resolveSystemAgentConfiguredRouteFromConfig } from "./inference-route.js";
@@ -57,7 +57,7 @@ export function expectSystemAgentAuditRecord(
 
 /** Build exact, revalidatable proof for a test config without reading host credentials. */
 export async function createSystemAgentVerifiedInferenceTestFixture(
-  config: OpenClawConfig,
+  config: BotConfig,
 ): Promise<SystemAgentVerifiedInferenceTestFixture> {
   const routeAgentId = resolveDefaultAgentId(config);
   const selection = resolveSimpleCompletionSelectionForAgent({
@@ -129,10 +129,10 @@ export async function createSystemAgentVerifiedInferenceTestFixture(
         pluginId,
         origin: "global",
         rootDir: `/plugins/${pluginId}`,
-        manifestPath: `/plugins/${pluginId}/openclaw.plugin.json`,
+        manifestPath: `/plugins/${pluginId}/bot.plugin.json`,
         manifestHash: `${pluginId}-manifest-v1`,
         source: `/plugins/${pluginId}/index.js`,
-        packageName: `@openclaw/${pluginId}`,
+        packageName: `@hanzo/bot-${pluginId}`,
         packageVersion: "1.0.0",
         installRecordHash: `${pluginId}-install-v1`,
         packageJson: {
@@ -150,9 +150,9 @@ export async function createSystemAgentVerifiedInferenceTestFixture(
     const authProfileOwnerFingerprint = profileId
       ? fingerprintAuthProfileOwnerShape({ profileId, credential })
       : undefined;
-    const resolveRuntimeOwnerFingerprint = (currentConfig: OpenClawConfig) => {
+    const resolveRuntimeOwnerFingerprint = (currentConfig: BotConfig) => {
       const backend = resolveCliBackendConfig(configuredRoute.provider, currentConfig, {
-        agentId: "openclaw",
+        agentId: "bot",
       });
       if (!backend || backend.id !== runtimeArtifactId) {
         return undefined;
@@ -203,10 +203,10 @@ export async function createSystemAgentVerifiedInferenceTestFixture(
 
   const agentHarnessId =
     configuredRoute.agentHarnessRuntimeOverride === "auto"
-      ? "openclaw"
+      ? "bot"
       : configuredRoute.agentHarnessRuntimeOverride;
   const authFingerprint =
-    profileId && agentHarnessId !== "openclaw"
+    profileId && agentHarnessId !== "bot"
       ? fingerprintResolvedAuthProfileCredential({ profileId, credential, resolvedAuth })
       : fingerprintResolvedProviderAuth(resolvedAuth);
   if (!authFingerprint) {
@@ -223,7 +223,7 @@ export async function createSystemAgentVerifiedInferenceTestFixture(
       modelId: configuredRoute.model,
       modelApi:
         configuredRoute.provider === "anthropic" ? "anthropic-messages" : "openai-responses",
-      ...(agentHarnessId === "openclaw"
+      ...(agentHarnessId === "bot"
         ? {}
         : {
             runtimeOwnerKind: "plugin-harness" as const,
@@ -238,7 +238,7 @@ export async function createSystemAgentVerifiedInferenceTestFixture(
 }
 
 /**
- * Test helpers for capturing OpenClaw runtime output.
+ * Test helpers for capturing Bot runtime output.
  *
  * Tests use this lightweight runtime instead of the real CLI runtime so exits
  * become thrown errors and logs are easy to assert.

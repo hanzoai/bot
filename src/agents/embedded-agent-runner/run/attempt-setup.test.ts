@@ -20,7 +20,7 @@ describe("prepareEmbeddedAttemptSetup", () => {
 
   it("reuses lifecycle metadata and the provider handle from the runtime plan", async () => {
     const metadataSnapshot = { plugins: [] } as never;
-    const workspaceDir = path.join(os.tmpdir(), "openclaw-attempt-setup-prepared");
+    const workspaceDir = path.join(os.tmpdir(), "bot-attempt-setup-prepared");
     const providerRuntimeHandle: ProviderRuntimePluginHandle & { prepared: true } = {
       provider: "openai",
       modelId: "gpt-5.4",
@@ -60,7 +60,7 @@ describe("prepareEmbeddedAttemptSetup", () => {
       sessionId: "session-partial",
       thinkLevel: "high",
       timeoutMs: 30_000,
-      workspaceDir: path.join(os.tmpdir(), "openclaw-attempt-setup-partial"),
+      workspaceDir: path.join(os.tmpdir(), "bot-attempt-setup-partial"),
       preparedModelRuntime: {
         metadataSnapshot: { pluginIds: ["other"] },
       } as never,

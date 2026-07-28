@@ -10,12 +10,12 @@ import {
   ensureMemoryPathFtsTriggers,
   loadSqliteVecExtension,
   MEMORY_INDEX_PATHS_FTS_TABLE,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
 import {
-  ensureOpenClawAgentDatabaseSchema,
+  ensureBotAgentDatabaseSchema,
   openNodeSqliteDatabase,
   runSqliteImmediateTransactionSync,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+} from "bot/plugin-sdk/sqlite-runtime";
 import {
   tryAcquireMemoryReindexLock,
   type MemoryReindexLockHandle,
@@ -329,7 +329,7 @@ export function openMemoryDatabaseAtPath(
       databasePath: dbPath,
     });
     if (agentId) {
-      ensureOpenClawAgentDatabaseSchema(db, { agentId, path: dbPath, register: true });
+      ensureBotAgentDatabaseSchema(db, { agentId, path: dbPath, register: true });
     }
     return db;
   } catch (err) {

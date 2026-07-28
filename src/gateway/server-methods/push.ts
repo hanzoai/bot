@@ -1,6 +1,6 @@
 // Push gateway methods send APNs/web-push test notifications and manage web
 // push subscriptions/VAPID public-key access for UI clients.
-import { normalizeStringifiedOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeStringifiedOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -46,7 +46,7 @@ export const pushHandlers: GatewayRequestHandlers = {
       return;
     }
 
-    const title = normalizeTrimmedString(params.title) ?? "OpenClaw";
+    const title = normalizeTrimmedString(params.title) ?? "Bot";
     const body = normalizeTrimmedString(params.body) ?? `Push test for node ${nodeId}`;
 
     await respondUnavailableOnThrow(respond, async () => {
@@ -187,7 +187,7 @@ export const pushHandlers: GatewayRequestHandlers = {
       return;
     }
 
-    const title = normalizeTrimmedString(params.title) ?? "OpenClaw";
+    const title = normalizeTrimmedString(params.title) ?? "Bot";
     const body = normalizeTrimmedString(params.body) ?? "Web push test notification";
 
     await respondUnavailableOnThrow(respond, async () => {

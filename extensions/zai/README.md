@@ -1,13 +1,13 @@
-# Z.AI OpenClaw provider
+# Z.AI Bot provider
 
-Official OpenClaw provider plugin for Z.AI.
+Official Bot provider plugin for Z.AI.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/zai-provider
+bot plugins install @hanzo/bot-zai-provider
 ```
 
 ## Docs
 
-See `docs/providers/zai.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/providers/zai`.
+See `docs/providers/zai.md` in the Bot repository, or the published docs at `https://docs.bot.ai/providers/zai`.

@@ -10,7 +10,7 @@ import { titleForRoute } from "../../app-navigation.ts";
 import { applicationContext, type ApplicationContext } from "../../app/context.ts";
 import { renderSettingsWorkspace } from "../../components/settings-workspace.ts";
 import { listSelectableAgents } from "../../lib/agents/display.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { renderMemoryImport } from "./view.ts";
 
@@ -41,7 +41,7 @@ function createIdempotencyKey(): string {
     .join("");
 }
 
-export class MemoryImportPage extends OpenClawLightDomElement {
+export class MemoryImportPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -357,6 +357,6 @@ export class MemoryImportPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-memory-import-page")) {
-  customElements.define("openclaw-memory-import-page", MemoryImportPage);
+if (!customElements.get("bot-memory-import-page")) {
+  customElements.define("bot-memory-import-page", MemoryImportPage);
 }

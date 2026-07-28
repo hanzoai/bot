@@ -1,7 +1,7 @@
 // Remote skill runtime helpers send skill refresh and snapshot state across remotes.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { listAgentWorkspaceDirs } from "../../agents/workspace-dirs.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { NodeRegistry, NodeSession } from "../../gateway/node-registry.js";
 import { listNodePairing, updatePairedNodeBins } from "../../infra/node-pairing.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
@@ -409,7 +409,7 @@ export async function refreshRemoteNodeBins(params: {
   platform?: string;
   deviceFamily?: string;
   commands?: string[];
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   timeoutMs?: number;
   readinessDelayMs?: number;
 }) {
@@ -447,7 +447,7 @@ async function refreshRemoteNodeBinsUncoalesced(params: {
   platform?: string;
   deviceFamily?: string;
   commands?: string[];
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   timeoutMs?: number;
   readinessDelayMs?: number;
 }) {
@@ -712,7 +712,7 @@ export function getRemoteSkillEligibility(options?: {
   };
 }
 
-export async function refreshRemoteBinsForConnectedNodes(cfg: OpenClawConfig) {
+export async function refreshRemoteBinsForConnectedNodes(cfg: BotConfig) {
   if (!remoteRegistry) {
     return;
   }

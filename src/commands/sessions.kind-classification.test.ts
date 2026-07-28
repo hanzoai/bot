@@ -128,7 +128,7 @@ describe("sessionsCommand kind classification (catalog #19)", () => {
     // RED today. The classifier ignores `spawnedBy` and `deliveryContext`,
     // so an ACP key with no `:group:` substring and no `chatType` falls
     // through to `"direct"`. Operators see this session in
-    // `openclaw sessions --json` as `kind: "direct"` even though it was
+    // `bot sessions --json` as `kind: "direct"` even though it was
     // plainly spawned from a group/topic. See `src/commands/sessions.ts:136-152`.
     const store = await writeStore(
       { [ACP_SPAWN_CHILD_KEY]: buildAcpSpawnChildEntry() },

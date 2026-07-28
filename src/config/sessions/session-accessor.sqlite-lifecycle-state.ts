@@ -1,9 +1,9 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
 } from "../../infra/kysely-sync.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { BotAgentDatabase } from "../../state/bot-agent-db.js";
 import type {
   MaterializedSqliteSessionStateDeletePlan,
   SqliteSessionStateDeletePlan,
@@ -75,7 +75,7 @@ function sessionKeySegmentStartsWith(sessionKey: string, prefix: string): boolea
 }
 
 function readSessionTranscriptUpdatedAt(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
 ): number | undefined {
   const db = getSessionKysely(database.db);
@@ -93,7 +93,7 @@ function readSessionTranscriptUpdatedAt(
 }
 
 function sqliteTranscriptStateIsReclaimable(params: {
-  database: OpenClawAgentDatabase;
+  database: BotAgentDatabase;
   sessionId: string;
   nowMs: number;
   orphanTranscriptMinAgeMs: number;
@@ -103,7 +103,7 @@ function sqliteTranscriptStateIsReclaimable(params: {
 }
 
 function sqliteTranscriptStateHasMarker(params: {
-  database: OpenClawAgentDatabase;
+  database: BotAgentDatabase;
   sessionId: string;
   transcriptContentMarker: string;
 }): boolean {
@@ -121,7 +121,7 @@ function sqliteTranscriptStateHasMarker(params: {
 
 /** Session ids protected by live node state. */
 export function readReferencedSqliteSessionIds(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   excludedSessionKeys: ReadonlySet<string> = new Set(),
 ): Set<string> {
   const db = getSessionKysely(database.db);
@@ -149,7 +149,7 @@ export function readReferencedSqliteSessionIds(
 // Projects references after a lifecycle mutation so reset/delete can archive
 // before removing entry rows while still preserving shared session ids.
 export function readReferencedSqliteSessionIdsAfterTargetMutation(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   target: { canonicalKey: string; storeKeys: string[] },
   nextEntry?: SessionEntry,
 ): Set<string> {
@@ -184,7 +184,7 @@ export function readReferencedSqliteSessionIdsAfterTargetMutation(
 }
 
 function readSqliteTranscriptArchiveLines(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
 ): string[] {
   const db = getSessionKysely(database.db);
@@ -201,7 +201,7 @@ function readSqliteTranscriptArchiveLines(
 export function planSqliteSessionStateDeleteIfUnreferenced(params: {
   archiveTranscript?: boolean;
   archiveDirectory: string;
-  database: OpenClawAgentDatabase;
+  database: BotAgentDatabase;
   reason?: "deleted" | "reset";
   referencedSessionIds: ReadonlySet<string>;
   sessionId: string;
@@ -222,7 +222,7 @@ export function planSqliteSessionStateDeleteIfUnreferenced(params: {
 }
 
 export function deleteMaterializedSqliteSessionStatePlans(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   plans: readonly MaterializedSqliteSessionStateDeletePlan[],
   protectedSessionIds?: ReadonlySet<string>,
   excludedSessionKeys?: ReadonlySet<string>,
@@ -257,7 +257,7 @@ export function deleteMaterializedSqliteSessionStatePlans(
 export function planSqliteSessionStateAfterEntryRemoval(params: {
   archiveDirectory: string;
   archiveTranscript?: boolean;
-  database: OpenClawAgentDatabase;
+  database: BotAgentDatabase;
   entry: SessionEntry;
   reason: "deleted" | "reset";
   referencedSessionIds?: ReadonlySet<string>;
@@ -283,7 +283,7 @@ export function planSqliteSessionStateAfterEntryRemoval(params: {
 
 /** Ids of every persisted generation owned by the given logical session keys. */
 export function readSqliteSessionGenerationIdsForKeys(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   keys: Iterable<string>,
 ): string[] {
   const sessionKeys = uniqueStrings([...keys].map((key) => key.trim()));
@@ -300,7 +300,7 @@ export function readSqliteSessionGenerationIdsForKeys(
 // Projects removals and upserts before archive materialization so same-call
 // upserts can keep a transcript live without producing a spurious archive.
 export async function projectSqliteSessionEntryLifecycleMutation(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   params: {
     archiveDirectory: string;
     removals: readonly SessionEntryLifecycleRemoval[];
@@ -426,7 +426,7 @@ function collectReferencedSqliteSessionIdsFromStore(
 // Projected deletes must preserve raw session_nodes.current_session_id references for
 // remaining rows whose entry_json cannot be parsed into a SessionEntry.
 export function collectProjectedReferencedSqliteSessionIds(params: {
-  database: OpenClawAgentDatabase;
+  database: BotAgentDatabase;
   excludedSessionKeys: Iterable<string>;
   projectedStore: Record<string, SessionEntry>;
 }): Set<string> {
@@ -458,7 +458,7 @@ export function collectProjectedReferencedSqliteSessionIds(params: {
 
 export { collectSqliteSessionStateIdsForEntry };
 
-function deleteSqliteSessionStateRows(database: OpenClawAgentDatabase, sessionId: string): void {
+function deleteSqliteSessionStateRows(database: BotAgentDatabase, sessionId: string): void {
   const db = getSessionKysely(database.db);
   // The window row cascades canonical transcript tables, but FTS is virtual;
   // clear its projection before dropping the owner row.
@@ -474,7 +474,7 @@ function deleteSqliteSessionStateRows(database: OpenClawAgentDatabase, sessionId
 function planSqliteOrphanLifecycleTranscriptStateDeletes(params: {
   archiveRemovedEntryTranscripts: boolean;
   archiveDirectory: string;
-  database: OpenClawAgentDatabase;
+  database: BotAgentDatabase;
   excludedSessionIds?: ReadonlySet<string>;
   referencedSessionIds: ReadonlySet<string>;
   transcriptContentMarker: string;
@@ -528,7 +528,7 @@ function planSqliteOrphanLifecycleTranscriptStateDeletes(params: {
 }
 
 export function planSqliteSessionLifecycleArtifactCleanup(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   params: {
     archiveRemovedEntryTranscripts: boolean;
     archiveDirectory: string;
@@ -611,7 +611,7 @@ export function planSqliteSessionLifecycleArtifactCleanup(
 }
 
 export function deletePlannedSqliteLifecycleArtifactEntries(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   entries: readonly SqliteSessionEntryRemovalPlan[],
 ): number {
   assertPlannedSqliteLifecycleArtifactEntriesUnchanged(database, entries);
@@ -624,7 +624,7 @@ export function deletePlannedSqliteLifecycleArtifactEntries(
 }
 
 export function assertPlannedSqliteLifecycleArtifactEntriesUnchanged(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   entries: readonly SqliteSessionEntryRemovalPlan[],
 ): void {
   for (const planned of entries) {

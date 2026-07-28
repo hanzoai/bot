@@ -1,5 +1,5 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   getActiveDiagnosticsTimelineSpan,
   measureDiagnosticsTimelineSpanSync,
@@ -31,14 +31,14 @@ import { normalizePluginIdScope, serializePluginIdScope } from "./plugin-scope.j
 const PLUGIN_METADATA_ENV_KEYS = [
   "APPDATA",
   "HOME",
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_COMPATIBILITY_HOST_VERSION",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
-  "OPENCLAW_DISABLE_BUNDLED_SOURCE_OVERLAYS",
-  "OPENCLAW_HOME",
-  "OPENCLAW_NIX_MODE",
-  "OPENCLAW_STATE_DIR",
+  "BOT_BUNDLED_PLUGINS_DIR",
+  "BOT_COMPATIBILITY_HOST_VERSION",
+  "BOT_CONFIG_PATH",
+  "BOT_DISABLE_BUNDLED_PLUGINS",
+  "BOT_DISABLE_BUNDLED_SOURCE_OVERLAYS",
+  "BOT_HOME",
+  "BOT_NIX_MODE",
+  "BOT_STATE_DIR",
   "USERPROFILE",
   "XDG_CONFIG_HOME",
 ] as const;
@@ -169,7 +169,7 @@ export function isPluginMetadataSnapshotCompatible(params: {
     PluginMetadataSnapshot,
     "configFingerprint" | "index" | "pluginIds" | "policyHash" | "workspaceDir"
   >;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   env?: NodeJS.ProcessEnv;
   allowScopedSnapshot?: boolean;
   pluginIds?: readonly string[];

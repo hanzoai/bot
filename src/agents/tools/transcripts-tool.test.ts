@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import type { TranscriptStopRequest } from "../../transcripts/provider-types.js";
 import { TranscriptsStore } from "../../transcripts/store.js";
 import { createTranscriptsAutoStartService, createTranscriptsTool } from "./transcripts-tool.js";
@@ -22,7 +22,7 @@ vi.mock("../../transcripts/provider-registry.js", async (importOriginal) => {
 });
 
 async function makeStateDir(): Promise<string> {
-  return await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-transcripts-"));
+  return await fs.mkdtemp(path.join(os.tmpdir(), "bot-transcripts-"));
 }
 
 function currentDateDir(): string {
@@ -50,12 +50,12 @@ async function createHarness(
 
 function storeFor(stateDir: string): TranscriptsStore {
   return new TranscriptsStore(path.join(stateDir, "transcripts"), {
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, BOT_STATE_DIR: stateDir },
   });
 }
 
 describe("transcripts tool", () => {
-  afterEach(() => closeOpenClawStateDatabaseForTest());
+  afterEach(() => closeBotStateDatabaseForTest());
 
   beforeEach(() => {
     getTranscriptSourceProviderMock.mockReset();

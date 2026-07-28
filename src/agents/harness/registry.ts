@@ -10,7 +10,7 @@ import type { AgentHarness, AgentHarnessResetParams, RegisteredAgentHarness } fr
  * The registry is global-symbol backed so repeated imports, test module resets, and plugin lazy
  * loads share one harness table inside a running gateway process.
  */
-const AGENT_HARNESS_REGISTRY_STATE = Symbol.for("openclaw.agentHarnessRegistryState");
+const AGENT_HARNESS_REGISTRY_STATE = Symbol.for("bot.agentHarnessRegistryState");
 const log = createSubsystemLogger("agents/harness");
 
 type AgentHarnessRegistryState = {

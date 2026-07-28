@@ -1,5 +1,5 @@
 /**
- * Voice call response generator - uses the embedded OpenClaw agent for tool support.
+ * Voice call response generator - uses the embedded Bot agent for tool support.
  * Routes voice responses through the same agent infrastructure as messaging.
  */
 
@@ -8,12 +8,12 @@ import {
   applyModelOverrideToSessionEntry,
   ModelSelectionLockedError,
   resolvePersistedSessionRuntimeId,
-} from "openclaw/plugin-sdk/model-session-runtime";
+} from "bot/plugin-sdk/model-session-runtime";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeStringEntries,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveVoiceCallSessionKey, type VoiceCallConfig } from "./config.js";
 import type { CoreAgentDeps, CoreConfig } from "./core-bridge.js";
 import { resolveCallAgentId } from "./resolve-call-agent-id.js";
@@ -22,7 +22,7 @@ import { resolveVoiceResponseModel } from "./response-model.js";
 type VoiceResponseParams = {
   /** Voice call config */
   voiceConfig: VoiceCallConfig;
-  /** Core OpenClaw config */
+  /** Core Bot config */
   coreConfig: CoreConfig;
   /** Injected host agent runtime */
   agentRuntime: CoreAgentDeps;
@@ -234,7 +234,7 @@ function resolveVoiceSandboxSessionKey(agentId: string, sessionKey: string): str
 }
 
 /**
- * Generate a voice response using the embedded OpenClaw agent with full tool support.
+ * Generate a voice response using the embedded Bot agent with full tool support.
  * Uses the same agent infrastructure as messaging for consistent behavior.
  */
 export async function generateVoiceResponse(

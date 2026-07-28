@@ -1,5 +1,5 @@
 // Qqbot plugin module implements outbound types behavior.
-import type { MessageReceipt } from "openclaw/plugin-sdk/channel-outbound";
+import type { MessageReceipt } from "bot/plugin-sdk/channel-outbound";
 import type { GatewayAccount } from "../types.js";
 
 export type OutboundMediaAccessContext = {

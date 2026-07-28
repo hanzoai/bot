@@ -15,7 +15,7 @@ mod quickchat_widgets;
 mod tray;
 mod updater;
 
-use cli::{CliError, OpenClawCli};
+use cli::{CliError, BotCli};
 use gateway::{GatewayAction, GatewaySnapshot};
 use gateway_operation_queue::{GatewayOperation, GatewayOperationQueue};
 use installer::InstallChannel;
@@ -43,8 +43,8 @@ fn is_release_version(version: &str) -> bool {
     version != "0.1.0"
 }
 
-// The openclaw:// URL contract is deliberately tiny and handled entirely in
-// Rust: `openclaw://dashboard` opens/connects the dashboard; anything else
+// The bot:// URL contract is deliberately tiny and handled entirely in
+// Rust: `bot://dashboard` opens/connects the dashboard; anything else
 // just focuses the app. New routes are added to this enum — the renderer
 // (which is often navigated away to the remote dashboard) never sees URLs.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -54,7 +54,7 @@ enum DeepLinkRoute {
 }
 
 fn deep_link_route(url: &Url) -> DeepLinkRoute {
-    if url.scheme() == "openclaw" && url.host_str() == Some("dashboard") {
+    if url.scheme() == "bot" && url.host_str() == Some("dashboard") {
         DeepLinkRoute::Dashboard
     } else {
         DeepLinkRoute::FocusOnly
@@ -77,9 +77,9 @@ mod deep_link_tests {
     use super::{deep_link_route, DeepLinkRoute, Url};
 
     #[test]
-    fn dashboard_route_matches_only_the_openclaw_dashboard_host() {
-        let dashboard = Url::parse("openclaw://dashboard/ignored?source=test").unwrap();
-        let other = Url::parse("openclaw://settings/dashboard").unwrap();
+    fn dashboard_route_matches_only_the_bot_dashboard_host() {
+        let dashboard = Url::parse("bot://dashboard/ignored?source=test").unwrap();
+        let other = Url::parse("bot://settings/dashboard").unwrap();
         let other_scheme = Url::parse("https://dashboard/").unwrap();
 
         assert_eq!(deep_link_route(&dashboard), DeepLinkRoute::Dashboard);
@@ -149,7 +149,7 @@ impl NavigationState {
 }
 
 struct DesktopInner {
-    cli: Mutex<Option<OpenClawCli>>,
+    cli: Mutex<Option<BotCli>>,
     navigation: Mutex<NavigationState>,
     operation: Mutex<()>,
     pending_approvals: Mutex<pending_approvals::PendingApprovalState>,
@@ -238,7 +238,7 @@ impl DesktopState {
             .lock()
             .map_err(|_| "Dashboard navigation lock is unavailable.".to_string())?
             .mark_onboarding_pending();
-        let cli = OpenClawCli::discover().map_err(|error| error.to_string())?;
+        let cli = BotCli::discover().map_err(|error| error.to_string())?;
         *self.inner.cli.lock().expect("CLI mutex poisoned") = Some(cli.clone());
         let ready = gateway::ensure_ready(&cli)?;
         app.state::<gateway_ws::GatewayClient>()
@@ -306,11 +306,11 @@ impl DesktopState {
         self.inner.quitting.load(Ordering::SeqCst)
     }
 
-    pub(crate) fn resolve_cli(&self) -> Result<OpenClawCli, CliError> {
+    pub(crate) fn resolve_cli(&self) -> Result<BotCli, CliError> {
         if let Some(cli) = self.inner.cli.lock().expect("CLI mutex poisoned").clone() {
             return Ok(cli);
         }
-        let cli = OpenClawCli::discover()?;
+        let cli = BotCli::discover()?;
         *self.inner.cli.lock().expect("CLI mutex poisoned") = Some(cli.clone());
         Ok(cli)
     }
@@ -338,7 +338,7 @@ impl DesktopState {
         }
     }
 
-    fn poll_pending_approvals(&self, app: &AppHandle, cli: &OpenClawCli, generation: u64) {
+    fn poll_pending_approvals(&self, app: &AppHandle, cli: &BotCli, generation: u64) {
         let pending = match pending_approvals::fetch(cli) {
             Ok(pending) => pending,
             Err(error) => {
@@ -369,7 +369,7 @@ impl DesktopState {
         }
         // Notifications are a doorbell only; approval stays in the dashboard or CLI.
         for request in diff.new {
-            notify::notify(app, "OpenClaw", &request.notification_body());
+            notify::notify(app, "Bot", &request.notification_body());
         }
     }
 
@@ -870,7 +870,7 @@ fn main() {
             }
         })
         .build(tauri::generate_context!())
-        .expect("OpenClaw desktop app failed");
+        .expect("Bot desktop app failed");
     app.run(|app, event| {
         #[cfg(target_os = "linux")]
         if matches!(event, tauri::RunEvent::Exit) {

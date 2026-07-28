@@ -71,7 +71,7 @@ export function renderBoardMcpAppContent(options: BoardMcpAppContentOptions): Te
               .height=${height}
               .fixedHeight=${true}
               .title=${widget.title || widget.name}
-              @openclaw-mcp-app-view-expired=${options.expired}
+              @bot-mcp-app-view-expired=${options.expired}
             ></mcp-app-view>`
           : loading;
   return html`<div class="board-widget__mcp-app">${options.accessNotice}${view}</div>`;

@@ -1,5 +1,5 @@
 // Maps CLI send dependency sources into outbound send dependencies with legacy aliases.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { normalizeChannelId } from "../channels/registry.js";
 import {
   resolveLegacyOutboundSendDepKeys,
@@ -11,7 +11,7 @@ import {
  * Each value is a lazily-loaded send function for that channel.
  */
 export const CLI_OUTBOUND_SEND_FACTORY: unique symbol = Symbol.for(
-  "openclaw.cliOutboundSendFactory",
+  "bot.cliOutboundSendFactory",
 ) as never;
 
 type CliOutboundSendFactory = (channelId: string) => unknown;

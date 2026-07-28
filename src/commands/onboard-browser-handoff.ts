@@ -6,7 +6,7 @@ import {
   GATEWAY_CLIENT_NAMES,
 } from "../../packages/gateway-protocol/src/client-info.js";
 import { resolveGatewayPort } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveGatewayAuth } from "../gateway/auth-resolve.js";
 import { callGateway } from "../gateway/call.js";
 import { resolveGatewayCredentialsWithSecretInputs } from "../gateway/credentials-secret-inputs.js";
@@ -28,7 +28,7 @@ const HANDOFF_POLL_INTERVAL_MS = 1_000;
 const HANDOFF_PROBE_TIMEOUT_MS = 5_000;
 
 type BrowserHatchTarget = {
-  config: OpenClawConfig;
+  config: BotConfig;
   dashboardUrl: string;
   sshHint?: string;
   wsUrl: string;
@@ -56,7 +56,7 @@ type BrowserHatchHandoffDeps = {
   platform?: NodeJS.Platform;
   openBrowser?: (url: string) => Promise<boolean>;
   resolveTarget?: (
-    config: OpenClawConfig,
+    config: BotConfig,
     env: NodeJS.ProcessEnv,
     suppressTokenOutput: boolean,
   ) => Promise<BrowserHatchTarget>;
@@ -95,7 +95,7 @@ export function detectGraphicalSession(env: NodeJS.ProcessEnv, platform: NodeJS.
 }
 
 async function resolveBrowserHatchTarget(
-  config: OpenClawConfig,
+  config: BotConfig,
   env: NodeJS.ProcessEnv,
   suppressTokenOutput: boolean,
 ): Promise<BrowserHatchTarget> {
@@ -181,7 +181,7 @@ async function probeDashboardPresence(
   timeoutMs: number,
 ): Promise<DashboardPresenceProbeResult> {
   try {
-    // Read presence over the same trusted local CLI path every `openclaw`
+    // Read presence over the same trusted local CLI path every `bot`
     // command uses. A raw shared-auth call with a (possibly SecretRef-managed)
     // token is rejected as an unpaired Control UI client with "device identity
     // required"; the CLI-mode loopback client is granted operator.read instead.
@@ -189,7 +189,7 @@ async function probeDashboardPresence(
       config: target.config,
       method: "system-presence",
       timeoutMs,
-      // Connect as a CLI-mode loopback client (what every `openclaw` command
+      // Connect as a CLI-mode loopback client (what every `bot` command
       // does) so the gateway grants operator.read via trusted local auth.
       clientName: GATEWAY_CLIENT_NAMES.CLI,
       mode: GATEWAY_CLIENT_MODES.CLI,
@@ -249,7 +249,7 @@ async function waitForDashboardClient(params: {
 
 /** Lightweight reachability gate used before guided onboarding announces a handoff. */
 export async function probeBrowserHatchGateway(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<{ ok: boolean; detail?: string }> {
   // A disabled Control UI still answers the WS/presence RPC, so without this
@@ -275,7 +275,7 @@ export async function probeBrowserHatchGateway(params: {
 /** Opens or prints the dashboard and waits for its Control UI client connection. */
 export async function runBrowserHatchHandoff(
   params: {
-    config: OpenClawConfig;
+    config: BotConfig;
     prompter: WizardPrompter;
     suppressTokenOutput?: boolean;
   },

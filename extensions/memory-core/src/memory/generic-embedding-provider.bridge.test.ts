@@ -1,13 +1,13 @@
 // Memory Core tests cover generic embedding provider.bridge plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import type {
   EmbeddingInput,
   EmbeddingProviderCallOptions,
-} from "openclaw/plugin-sdk/embedding-providers";
+} from "bot/plugin-sdk/embedding-providers";
 import {
   createPluginRegistryFixture,
   registerVirtualTestPlugin,
-} from "openclaw/plugin-sdk/plugin-test-contracts";
+} from "bot/plugin-sdk/plugin-test-contracts";
 import {
   clearEmbeddingProviders,
   getRegisteredEmbeddingProvider,
@@ -18,7 +18,7 @@ import {
   listRegisteredMemoryEmbeddingProviders,
   type RegisteredMemoryEmbeddingProvider,
   restoreRegisteredMemoryEmbeddingProviders,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createEmbeddingProvider, resolveEmbeddingProviderIndexIdentity } from "./embeddings.js";
 
@@ -31,10 +31,10 @@ type CapturedCall = {
 let embeddingProvidersSnapshot: RegisteredEmbeddingProvider[];
 let memoryEmbeddingProvidersSnapshot: RegisteredMemoryEmbeddingProvider[];
 
-function createOptions(config: OpenClawConfig) {
+function createOptions(config: BotConfig) {
   return {
     config,
-    agentDir: "/tmp/openclaw-agent",
+    agentDir: "/tmp/bot-agent",
     provider: "virtual-generic",
     fallback: "none",
     model: "virtual-model",
@@ -61,7 +61,7 @@ describe("memory-core generic embedding provider bridge", () => {
       plugins: {
         enabled: false,
       },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     registerVirtualTestPlugin({
       registry,

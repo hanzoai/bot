@@ -2,12 +2,12 @@
 // Parses transcript JSONL files for messages, previews, counts, and usage metadata.
 import fs from "node:fs";
 import { StringDecoder } from "node:string_decoder";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import {
   resolveIntegerOption,
   resolveNonNegativeIntegerOption,
-} from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   deriveSessionTotalTokens,
   hasNonzeroUsage,
@@ -142,8 +142,8 @@ async function yieldTranscriptScan(): Promise<void> {
   });
 }
 
-/** Attach OpenClaw metadata to a transcript message without dropping existing metadata. */
-export function attachOpenClawTranscriptMeta(
+/** Attach Bot metadata to a transcript message without dropping existing metadata. */
+export function attachBotTranscriptMeta(
   message: unknown,
   meta: Record<string, unknown>,
 ): unknown {
@@ -152,14 +152,14 @@ export function attachOpenClawTranscriptMeta(
   }
   const record = message as Record<string, unknown>;
   const existing =
-    record["__openclaw"] &&
-    typeof record["__openclaw"] === "object" &&
-    !Array.isArray(record["__openclaw"])
-      ? (record["__openclaw"] as Record<string, unknown>)
+    record["__bot"] &&
+    typeof record["__bot"] === "object" &&
+    !Array.isArray(record["__bot"])
+      ? (record["__bot"] as Record<string, unknown>)
       : {};
   return {
     ...record,
-    __openclaw: {
+    __bot: {
       ...existing,
       ...meta,
     },
@@ -351,7 +351,7 @@ function buildOversizedTranscriptRecord(line: string): TailTranscriptRecord {
       role,
       ...(idempotencyKey ? { idempotencyKey } : {}),
       content: [{ type: "text", text: TRANSCRIPT_OVERSIZED_MESSAGE_PLACEHOLDER }],
-      __openclaw: { truncated: true, reason: "oversized" },
+      __bot: { truncated: true, reason: "oversized" },
     },
   };
   return { record };
@@ -723,7 +723,7 @@ export async function readRecentSessionMessagesWithStatsAsync(
   );
   const firstSeq = Math.max(1, totalMessages - snapshot.messages.length + 1);
   const messagesWithSeq = snapshot.messages.map((message, index) =>
-    attachOpenClawTranscriptMeta(message, { seq: firstSeq + index }),
+    attachBotTranscriptMeta(message, { seq: firstSeq + index }),
   );
   return {
     messages: messagesWithSeq,
@@ -786,7 +786,7 @@ function parsedSessionEntryToMessage(parsed: unknown, seq: number): unknown {
           ? entry.timestamp
           : Number.NaN;
     const idempotencyKey = readTranscriptMessageIdempotencyKey(entry.message);
-    return attachOpenClawTranscriptMeta(entry.message, {
+    return attachBotTranscriptMeta(entry.message, {
       ...(typeof entry.id === "string" ? { id: entry.id } : {}),
       ...(idempotencyKey ? { idempotencyKey } : {}),
       ...(Number.isFinite(recordTimestampMs) ? { recordTimestampMs } : {}),
@@ -803,7 +803,7 @@ function parsedSessionEntryToMessage(parsed: unknown, seq: number): unknown {
       role: "system",
       content: [{ type: "text", text: "Compaction" }],
       timestamp,
-      __openclaw: {
+      __bot: {
         kind: "compaction",
         id: typeof entry.id === "string" ? entry.id : undefined,
         seq,
@@ -1308,7 +1308,7 @@ function extractTranscriptTokenEstimateFromLine(line: string): {
           ? parsed.model.trim()
           : undefined;
     const isDeliveryMirror =
-      role === "assistant" && modelProvider === "openclaw" && model === "delivery-mirror";
+      role === "assistant" && modelProvider === "bot" && model === "delivery-mirror";
     if (isDeliveryMirror) {
       return null;
     }
@@ -1365,7 +1365,7 @@ function extractUsageSnapshotFromTranscriptLine(
         : typeof parsed.model === "string"
           ? parsed.model.trim()
           : undefined;
-    const isDeliveryMirror = modelProvider === "openclaw" && model === "delivery-mirror";
+    const isDeliveryMirror = modelProvider === "bot" && model === "delivery-mirror";
     const hasMeaningfulUsage =
       hasNonzeroUsage(usage) ||
       typeof totalTokens === "number" ||

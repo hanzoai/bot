@@ -11,7 +11,7 @@ import {
 } from "../sidebar-layout.ts";
 import "./chat-sidebar-region.runtime.ts";
 
-type Region = HTMLElementTagNameMap["openclaw-chat-sidebar-region"] & {
+type Region = HTMLElementTagNameMap["bot-chat-sidebar-region"] & {
   updateComplete: Promise<unknown>;
 };
 
@@ -23,7 +23,7 @@ async function createRegion(
 ) {
   const shell = document.createElement("div");
   shell.className = `sidebar-region ${narrow ? "sidebar-region--narrow" : ""}`;
-  const region = document.createElement("openclaw-chat-sidebar-region") as Region;
+  const region = document.createElement("bot-chat-sidebar-region") as Region;
   region.layout = openSlot(openSlot(openSlot({ columns: [] }, "discussion"), "chat"), "detail");
   region.panelTemplates = {
     chat: html`<div data-panel="chat">Chat panel</div>`,

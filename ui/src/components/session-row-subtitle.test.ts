@@ -8,7 +8,7 @@ function workSession(): SidebarRecentSession {
     hasActiveRun: false,
     label: "Backing session",
     status: "done",
-    subtitle: "~/Projects/openclaw",
+    subtitle: "~/Projects/bot",
     workSession: true,
   } as unknown as SidebarRecentSession;
 }
@@ -127,7 +127,7 @@ describe("resolveSidebarSessionSubtitle", () => {
       });
 
     expect(resolve(1_999).subtitle).toBe("Finished with warnings");
-    expect(resolve(2_000).subtitle).toBe("~/Projects/openclaw");
+    expect(resolve(2_000).subtitle).toBe("~/Projects/bot");
   });
 });
 

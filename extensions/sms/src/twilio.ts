@@ -5,10 +5,10 @@ import * as querystring from "node:querystring";
 import {
   readResponseTextPrefix,
   readResponseWithLimit,
-} from "openclaw/plugin-sdk/response-limit-runtime";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
-import { readRequestBodyWithLimit } from "openclaw/plugin-sdk/webhook-ingress";
+} from "bot/plugin-sdk/response-limit-runtime";
+import { safeEqualSecret } from "bot/plugin-sdk/security-runtime";
+import { fetchWithSsrFGuard } from "bot/plugin-sdk/ssrf-runtime";
+import { readRequestBodyWithLimit } from "bot/plugin-sdk/webhook-ingress";
 import { looksLikeSmsPhoneNumber, normalizeSmsPhoneNumber } from "./phone.js";
 import type { ResolvedSmsAccount, SmsInboundMessage, SmsSendResult } from "./types.js";
 

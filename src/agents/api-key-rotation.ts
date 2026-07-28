@@ -3,7 +3,7 @@
  * Runs provider calls across configured keys on rate-limit failures and keeps
  * same-key transient retries separate from key rotation.
  */
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeUniqueStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import { sleepWithAbort } from "../infra/backoff.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import {

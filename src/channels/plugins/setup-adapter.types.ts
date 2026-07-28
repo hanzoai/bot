@@ -1,39 +1,39 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { RuntimeEnv } from "../../runtime.js";
 import type { ChannelSetupInput } from "./setup-input.js";
 
 export type ChannelSetupAdapter<Input extends { name?: string } = ChannelSetupInput> = {
-  resolveAccountId?: (params: { cfg: OpenClawConfig; accountId?: string; input?: Input }) => string;
+  resolveAccountId?: (params: { cfg: BotConfig; accountId?: string; input?: Input }) => string;
   prepareAccountConfigInput?: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId: string;
     input: Input;
     runtime: RuntimeEnv;
   }) => Promise<Input> | Input;
   resolveBindingAccountId?: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     agentId: string;
     accountId?: string;
   }) => string | undefined;
   applyAccountName?: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId: string;
     name?: string;
-  }) => OpenClawConfig;
+  }) => BotConfig;
   applyAccountConfig: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId: string;
     input: Input;
-  }) => OpenClawConfig;
+  }) => BotConfig;
   afterAccountConfigWritten?: (params: {
-    previousCfg: OpenClawConfig;
-    cfg: OpenClawConfig;
+    previousCfg: BotConfig;
+    cfg: BotConfig;
     accountId: string;
     input: Input;
     runtime: RuntimeEnv;
   }) => Promise<void> | void;
   validateInput?: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId: string;
     input: Input;
   }) => string | null;

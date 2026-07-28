@@ -41,7 +41,7 @@ declare const chrome: {
   };
 };
 
-const runE2E = process.env.OPENCLAW_BROWSER_COPILOT_E2E === "1";
+const runE2E = process.env.BOT_BROWSER_COPILOT_E2E === "1";
 
 type RequestFrame = {
   id: string;
@@ -567,7 +567,7 @@ async function unshareTab(worker: Worker, tabId: number): Promise<void> {
 describe.runIf(runE2E)("browser copilot Chromium side panel", () => {
   it("returns one error response when a panel's tab disappears", async () => {
     const unpackedExtension = await copyCopilotSidepanelExtension(tempDirs);
-    const userDataDir = tempDirs.make("openclaw-copilot-missing-tab-profile-");
+    const userDataDir = tempDirs.make("bot-copilot-missing-tab-profile-");
     const executablePath = await resolveChromiumExecutable();
     const context = await chromium.launchPersistentContext(userDataDir, {
       ...(executablePath ? { executablePath } : { channel: "chromium" }),
@@ -628,7 +628,7 @@ describe.runIf(runE2E)("browser copilot Chromium side panel", () => {
     const fixture = await createFixtureServer();
     cleanups.push(fixture.close);
     const unpackedExtension = await copyCopilotSidepanelExtension(tempDirs);
-    const userDataDir = tempDirs.make("openclaw-copilot-profile-");
+    const userDataDir = tempDirs.make("bot-copilot-profile-");
     const executablePath = await resolveChromiumExecutable();
     const context = await chromium.launchPersistentContext(userDataDir, {
       ...(executablePath ? { executablePath } : { channel: "chromium" }),
@@ -662,8 +662,8 @@ describe.runIf(runE2E)("browser copilot Chromium side panel", () => {
     await expect.poll(() => relay.hellos.length, { timeout: 10_000 }).toBe(1);
 
     const artifactDir =
-      process.env.OPENCLAW_BROWSER_COPILOT_ARTIFACT_DIR ??
-      path.join(os.tmpdir(), "openclaw-browser-copilot-artifacts");
+      process.env.BOT_BROWSER_COPILOT_ARTIFACT_DIR ??
+      path.join(os.tmpdir(), "bot-browser-copilot-artifacts");
     await fs.mkdir(artifactDir, { recursive: true });
 
     const alphaPanel = await openTabPanel({ browserCdp, extensionId, page: alphaTab });
@@ -704,7 +704,7 @@ describe.runIf(runE2E)("browser copilot Chromium side panel", () => {
       )
       .toEqual({
         detail:
-          "Sharing adds this tab to the OpenClaw group. The copilot can act here, but nowhere else.",
+          "Sharing adds this tab to the Bot group. The copilot can act here, but nowhere else.",
         title: "Keep the boundary visible",
       });
     expect(await alphaPanel.disabled("#message-input")).toBe(true);

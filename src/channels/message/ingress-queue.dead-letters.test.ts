@@ -3,24 +3,24 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import {
   countFailedChannelIngressQueueEntries,
   createChannelIngressQueue,
 } from "./ingress-queue.js";
 
 async function withTempState<T>(run: (stateDir: string) => Promise<T>): Promise<T> {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ingress-dead-letters-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-ingress-dead-letters-"));
   try {
     return await run(stateDir);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
 
 describe("channel ingress dead letters", () => {
-  afterEach(() => closeOpenClawStateDatabaseForTest());
+  afterEach(() => closeBotStateDatabaseForTest());
 
   it("retains failed payload, metadata, and attempt history", async () => {
     await withTempState(async (stateDir) => {

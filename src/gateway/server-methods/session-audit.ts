@@ -1,10 +1,10 @@
 import { SessionManager } from "../../agents/sessions/session-manager.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { formatSqliteSessionFileMarker } from "../../config/sessions/sqlite-marker.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 
 export async function appendSessionAudit(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   target: {
     agentId: string;
     entry: Pick<SessionEntry, "sessionId">;
@@ -21,7 +21,7 @@ export async function appendSessionAudit(params: {
   SessionManager.open(sessionFile).appendMessage(
     {
       role: "custom",
-      customType: "openclaw.system-note",
+      customType: "bot.system-note",
       content: `System note: ${params.text}`,
       display: true,
       timestamp: params.now,

@@ -10,9 +10,9 @@
  * parameterized by `RetryPolicy` and optional `PersistentRetryPolicy`.
  */
 
-import { createChannelApiRetryRunner, resolveRetryConfig } from "openclaw/plugin-sdk/retry-runtime";
-import { sleep } from "openclaw/plugin-sdk/runtime-env";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { createChannelApiRetryRunner, resolveRetryConfig } from "bot/plugin-sdk/retry-runtime";
+import { sleep } from "bot/plugin-sdk/runtime-env";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { EngineLogger } from "../types.js";
 import { formatErrorMessage } from "../utils/format.js";
 

@@ -1,6 +1,6 @@
 // Agents provider tests cover provider status index construction for configured agents.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { OfficialExternalPluginRepairHint } from "../plugins/official-external-plugin-repair-hints.js";
 import {
   buildProviderStatusIndex,
@@ -84,7 +84,7 @@ describe("buildProviderStatusIndex", () => {
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([plugin]);
     mocks.getChannelPlugin.mockReturnValue(plugin);
 
-    const map = await buildProviderStatusIndex({} as OpenClawConfig);
+    const map = await buildProviderStatusIndex({} as BotConfig);
 
     expect(mocks.listReadOnlyChannelPluginsForConfig).toHaveBeenCalledWith(
       {},
@@ -117,7 +117,7 @@ describe("buildProviderStatusIndex", () => {
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([plugin]);
     mocks.getChannelPlugin.mockReturnValue(plugin);
 
-    await expect(buildProviderStatusIndex({} as OpenClawConfig)).resolves.toEqual(
+    await expect(buildProviderStatusIndex({} as BotConfig)).resolves.toEqual(
       new Map([
         [
           "quietchat:default",
@@ -148,7 +148,7 @@ describe("buildProviderStatusIndex", () => {
     mocks.listReadOnlyChannelPluginsForConfig.mockReturnValue([plugin]);
     mocks.getChannelPlugin.mockReturnValue(plugin);
 
-    await expect(buildProviderStatusIndex({} as OpenClawConfig)).rejects.toThrow("plugin crash");
+    await expect(buildProviderStatusIndex({} as BotConfig)).rejects.toThrow("plugin crash");
   });
 
   it("keeps configured missing external channels in provider metadata", () => {
@@ -158,11 +158,11 @@ describe("buildProviderStatusIndex", () => {
       channelId: "feishu",
       pluginId: "feishu",
       label: "Feishu",
-      installSpec: "@openclaw/feishu",
-      installCommand: "openclaw plugins install @openclaw/feishu",
-      doctorFixCommand: "openclaw doctor --fix",
+      installSpec: "@hanzo/bot-feishu",
+      installCommand: "bot plugins install @hanzo/bot-feishu",
+      doctorFixCommand: "bot doctor --fix",
       repairHint:
-        "Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+        "Install the official external plugin with: bot plugins install @hanzo/bot-feishu, or run: bot doctor --fix.",
     });
 
     expect(
@@ -176,7 +176,7 @@ describe("buildProviderStatusIndex", () => {
             defaultAccountId: "default",
             visibleInConfiguredLists: true,
             repairHint:
-              "Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+              "Install the official external plugin with: bot plugins install @hanzo/bot-feishu, or run: bot doctor --fix.",
           },
         ],
       ]),
@@ -197,14 +197,14 @@ describe("buildProviderStatusIndex", () => {
             defaultAccountId: "default",
             visibleInConfiguredLists: true,
             repairHint:
-              "Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+              "Install the official external plugin with: bot plugins install @hanzo/bot-feishu, or run: bot doctor --fix.",
           },
         ],
       ]),
     });
 
     expect(lines).toEqual([
-      "Feishu default: missing plugin - Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+      "Feishu default: missing plugin - Install the official external plugin with: bot plugins install @hanzo/bot-feishu, or run: bot doctor --fix.",
     ]);
   });
 
@@ -224,14 +224,14 @@ describe("buildProviderStatusIndex", () => {
             defaultAccountId: "default",
             visibleInConfiguredLists: true,
             repairHint:
-              "Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+              "Install the official external plugin with: bot plugins install @hanzo/bot-feishu, or run: bot doctor --fix.",
           },
         ],
       ]),
     });
 
     expect(lines).toEqual([
-      "Feishu default: missing plugin - Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+      "Feishu default: missing plugin - Install the official external plugin with: bot plugins install @hanzo/bot-feishu, or run: bot doctor --fix.",
     ]);
   });
 
@@ -249,14 +249,14 @@ describe("buildProviderStatusIndex", () => {
             defaultAccountId: "default",
             visibleInConfiguredLists: true,
             repairHint:
-              "Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+              "Install the official external plugin with: bot plugins install @hanzo/bot-feishu, or run: bot doctor --fix.",
           },
         ],
       ]),
     });
 
     expect(lines).toEqual([
-      "Feishu default: missing plugin - Install the official external plugin with: openclaw plugins install @openclaw/feishu, or run: openclaw doctor --fix.",
+      "Feishu default: missing plugin - Install the official external plugin with: bot plugins install @hanzo/bot-feishu, or run: bot doctor --fix.",
     ]);
   });
 

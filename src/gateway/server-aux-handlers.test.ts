@@ -6,7 +6,7 @@ import {
   getRuntimeAuthProfileStoreSnapshot,
   setRuntimeAuthProfileStoreSnapshot,
 } from "../agents/auth-profiles/runtime-snapshots.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   activateSecretsRuntimeSnapshot,
   clearSecretsRuntimeSnapshot,
@@ -30,8 +30,8 @@ function publishSharedGatewayGeneration(
   });
 }
 
-function asConfig(value: unknown): OpenClawConfig {
-  return value as OpenClawConfig;
+function asConfig(value: unknown): BotConfig {
+  return value as BotConfig;
 }
 
 function createReloadPlan(overrides?: Partial<GatewayReloadPlan>): GatewayReloadPlan {
@@ -53,7 +53,7 @@ function createReloadPlan(overrides?: Partial<GatewayReloadPlan>): GatewayReload
   };
 }
 
-function createSnapshot(config: OpenClawConfig): PreparedSecretsRuntimeSnapshot {
+function createSnapshot(config: BotConfig): PreparedSecretsRuntimeSnapshot {
   return {
     sourceConfig: asConfig({}),
     config,
@@ -68,7 +68,7 @@ function createSnapshot(config: OpenClawConfig): PreparedSecretsRuntimeSnapshot 
   };
 }
 
-function createSourceSnapshot(config: OpenClawConfig): PreparedSecretsRuntimeSnapshot {
+function createSourceSnapshot(config: BotConfig): PreparedSecretsRuntimeSnapshot {
   return { ...createSnapshot(config), sourceConfig: config };
 }
 
@@ -112,11 +112,11 @@ function gatewayTokenSlackConfig(token: string, signingSecret: string) {
   });
 }
 
-function activateSnapshot(config: OpenClawConfig) {
+function activateSnapshot(config: BotConfig) {
   activateSecretsRuntimeSnapshot(createSnapshot(config));
 }
 
-function mockResolvedSecrets(config: OpenClawConfig) {
+function mockResolvedSecrets(config: BotConfig) {
   return vi.fn().mockResolvedValue(createSnapshot(config));
 }
 
@@ -213,20 +213,20 @@ function createSecretsReloadHarnessWithChannelMocks(
 }
 
 // Other gateway test helpers (e.g. test-helpers.mocks.ts, test-helpers.server.ts)
-// set OPENCLAW_SKIP_CHANNELS / OPENCLAW_SKIP_PROVIDERS at module load. When a
+// set BOT_SKIP_CHANNELS / BOT_SKIP_PROVIDERS at module load. When a
 // shared vitest worker imports those helpers before this file's tests run,
 // the leaked env vars route the secrets.reload skip-mode branch and prevent
 // the channel restart loop from firing. Reset them before every test so this
 // suite is independent of worker import order.
 beforeEach(() => {
-  delete process.env.OPENCLAW_SKIP_CHANNELS;
-  delete process.env.OPENCLAW_SKIP_PROVIDERS;
+  delete process.env.BOT_SKIP_CHANNELS;
+  delete process.env.BOT_SKIP_PROVIDERS;
 });
 
 afterEach(() => {
   clearSecretsRuntimeSnapshot();
-  delete process.env.OPENCLAW_SKIP_CHANNELS;
-  delete process.env.OPENCLAW_SKIP_PROVIDERS;
+  delete process.env.BOT_SKIP_CHANNELS;
+  delete process.env.BOT_SKIP_PROVIDERS;
 });
 
 describe("gateway aux handlers", () => {
@@ -393,7 +393,7 @@ describe("gateway aux handlers", () => {
     const activateRuntimeSecrets = Object.assign(
       vi.fn(
         async (
-          config: OpenClawConfig,
+          config: BotConfig,
           _activationParams: Parameters<GatewayAuxHandlerParams["activateRuntimeSecrets"]>[1],
         ) => {
           if (activateRuntimeSecrets.mock.calls.length === 1) {
@@ -432,7 +432,7 @@ describe("gateway aux handlers", () => {
   });
 
   it("rolls back stopped channels when a later restart fails", async () => {
-    const authAgentDir = "/tmp/openclaw-secrets-reload-concurrent-oauth";
+    const authAgentDir = "/tmp/bot-secrets-reload-concurrent-oauth";
     const buildReloadPlan = buildRestartChannelsPlan("slack", "zalo");
     activateSnapshot(slackZaloConfig("old-slack-secret", "old-zalo-secret"));
     const activateRuntimeSecrets = mockResolvedSecrets(
@@ -522,7 +522,7 @@ describe("gateway aux handlers", () => {
     const concurrent = createSnapshot(slackConfig("concurrent-secret"));
     const activateRuntimeSecrets = vi.fn(
       async (
-        _config: OpenClawConfig,
+        _config: BotConfig,
         _activationParams: Parameters<GatewayAuxHandlerParams["activateRuntimeSecrets"]>[1],
       ) => {
         return prepared;
@@ -674,7 +674,7 @@ describe("gateway aux handlers", () => {
 
   it("fails reload when channel restarts are required but skip flags block them", async () => {
     const buildReloadPlan = buildRestartChannelsPlan("slack");
-    process.env.OPENCLAW_SKIP_CHANNELS = "1";
+    process.env.BOT_SKIP_CHANNELS = "1";
     activateSnapshot(slackConfig("old-slack-secret"));
     const activateRuntimeSecrets = mockResolvedSecrets(slackConfig("new-slack-secret"));
 

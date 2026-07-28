@@ -11,8 +11,8 @@ Adds agent-callable tools.
 
 ## Distribution
 
-- Package: `@openclaw/memory-core`
-- Install route: included in OpenClaw
+- Package: `@hanzo/bot-memory-core`
+- Install route: included in Bot
 
 ## Surface
 

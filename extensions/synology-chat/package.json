@@ -1,16 +1,16 @@
 {
-  "name": "@openclaw/synology-chat",
+  "name": "@hanzo/bot-synology-chat",
   "version": "2026.7.2",
-  "description": "Synology Chat channel plugin for OpenClaw channels and direct messages.",
+  "description": "Synology Chat channel plugin for Bot channels and direct messages.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -25,7 +25,7 @@
             "SYNOLOGY_NAS_HOST",
             "SYNOLOGY_ALLOWED_USER_IDS",
             "SYNOLOGY_RATE_LIMIT",
-            "OPENCLAW_BOT_NAME"
+            "BOT_BOT_NAME"
           ]
         }
       },
@@ -33,7 +33,7 @@
       "selectionLabel": "Synology Chat (Webhook)",
       "docsPath": "/channels/synology-chat",
       "docsLabel": "synology-chat",
-      "blurb": "Connect your Synology NAS Chat to OpenClaw with full agent capabilities.",
+      "blurb": "Connect your Synology NAS Chat to Bot with full agent capabilities.",
       "order": 90,
       "setup": { "fields": [
         { "key": "token", "kind": "string", "sensitive": true, "cli": { "flags": "--token <token>", "description": "Synology Chat token" } },
@@ -43,7 +43,7 @@
       ] }
     },
     "install": {
-      "npmSpec": "@openclaw/synology-chat",
+      "npmSpec": "@hanzo/bot-synology-chat",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.10"
     },
@@ -51,7 +51,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2"
+      "botVersion": "2026.7.2"
     },
     "release": {
       "publishToClawHub": true,

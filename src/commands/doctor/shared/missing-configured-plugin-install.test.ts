@@ -2,9 +2,9 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.js";
+import type { BotConfig } from "../../../config/types.js";
 import { resolveRegistryUpdateChannel } from "../../../infra/update-channels.js";
 import { CLAWHUB_INSTALL_ERROR_CODE } from "../../../plugins/clawhub-error-codes.js";
 import {
@@ -38,7 +38,7 @@ function expectedClawHubInstallSpec(spec: string): string {
   }).installSpec;
 }
 
-function currentOpenClawReleaseBase(): string {
+function currentBotReleaseBase(): string {
   return VERSION.replace(/-(?:alpha|beta)\.[1-9]\d*$/u, "");
 }
 
@@ -71,7 +71,7 @@ const mocks = vi.hoisted(() => ({
   loadInstalledPluginIndexInstallRecords: vi.fn(),
   loadPluginMetadataSnapshot: vi.fn(),
   getOfficialExternalPluginCatalogManifest: vi.fn(
-    (entry: { openclaw?: unknown }) => entry.openclaw,
+    (entry: { bot?: unknown }) => entry.bot,
   ),
   resolveOfficialExternalPluginId: vi.fn((entry: { id?: string }) => entry.id),
   resolveOfficialExternalPluginInstall: vi.fn(
@@ -97,7 +97,7 @@ const mocks = vi.hoisted(() => ({
                   baseUrl: "https://api.openai.com/v1",
                   authRequirement: "api-key",
                   requestTransportOverrides: requestTransportOverrides ?? "none",
-                  runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+                  runtimePolicy: { compatibleIds: ["bot", "codex"] },
                 },
               ],
               defaultRuntimeId: "codex",
@@ -105,15 +105,15 @@ const mocks = vi.hoisted(() => ({
           }
         : null,
   ),
-  resolveDefaultPluginExtensionsDir: vi.fn(() => "/tmp/openclaw-plugins"),
-  resolveDefaultPluginNpmDir: vi.fn(() => "/tmp/openclaw-npm"),
-  resolvePluginNpmProjectsDir: vi.fn((npmDir = "/tmp/openclaw-npm") =>
+  resolveDefaultPluginExtensionsDir: vi.fn(() => "/tmp/bot-plugins"),
+  resolveDefaultPluginNpmDir: vi.fn(() => "/tmp/bot-npm"),
+  resolvePluginNpmProjectsDir: vi.fn((npmDir = "/tmp/bot-npm") =>
     path.join(npmDir, "projects"),
   ),
   resolvePluginNpmPackageDir: vi.fn(
     ({ npmDir, packageName }: { npmDir?: string; packageName: string }) =>
       path.join(
-        npmDir ?? "/tmp/openclaw-npm",
+        npmDir ?? "/tmp/bot-npm",
         "projects",
         packageName.replace(/[^a-zA-Z0-9._-]+/g, "-"),
         "node_modules",
@@ -121,7 +121,7 @@ const mocks = vi.hoisted(() => ({
       ),
   ),
   resolvePluginInstallDir: vi.fn(
-    (pluginId: string, extensionsDir = "/tmp/openclaw-plugins") => `${extensionsDir}/${pluginId}`,
+    (pluginId: string, extensionsDir = "/tmp/bot-plugins") => `${extensionsDir}/${pluginId}`,
   ),
   validatePluginId: vi.fn(() => null),
   resolveProviderInstallCatalogEntries: vi.fn(),
@@ -132,7 +132,7 @@ const mocks = vi.hoisted(() => ({
 const tempDirs: string[] = [];
 
 function makeTempDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-stub-repair-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-plugin-stub-repair-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -144,7 +144,7 @@ function writeLegacyNpmDeclarationStub(params: {
 }): void {
   fs.mkdirSync(params.pluginDir, { recursive: true });
   fs.writeFileSync(
-    path.join(params.pluginDir, "openclaw.extension.json"),
+    path.join(params.pluginDir, "bot.extension.json"),
     JSON.stringify({
       name: params.pluginId,
       type: "npm",
@@ -155,7 +155,7 @@ function writeLegacyNpmDeclarationStub(params: {
 }
 
 async function repairConfiguredPlugins(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: Record<string, string | undefined> = {},
 ) {
   const { repairMissingConfiguredPluginInstalls } =
@@ -165,16 +165,16 @@ async function repairConfiguredPlugins(
 
 function useManifestCatalogResolvers(): void {
   mocks.resolveOfficialExternalPluginId.mockImplementation(
-    (entry: { id?: string; openclaw?: { plugin?: { id?: string } } }) =>
-      entry.openclaw?.plugin?.id ?? entry.id,
+    (entry: { id?: string; bot?: { plugin?: { id?: string } } }) =>
+      entry.bot?.plugin?.id ?? entry.id,
   );
   mocks.resolveOfficialExternalPluginInstall.mockImplementation(
-    (entry: { install?: unknown; openclaw?: { install?: unknown } }) =>
-      entry.openclaw?.install ?? entry.install ?? null,
+    (entry: { install?: unknown; bot?: { install?: unknown } }) =>
+      entry.bot?.install ?? entry.install ?? null,
   );
   mocks.resolveOfficialExternalPluginLabel.mockImplementation(
-    (entry: { label?: string; openclaw?: { plugin?: { label?: string } } }) =>
-      entry.openclaw?.plugin?.label ?? entry.label ?? "plugin",
+    (entry: { label?: string; bot?: { plugin?: { label?: string } } }) =>
+      entry.bot?.plugin?.label ?? entry.label ?? "plugin",
   );
 }
 
@@ -191,7 +191,7 @@ function mockBrokenBraveInstall(
   mocks.listOfficialExternalPluginCatalogEntries.mockReturnValue([
     officialWebSearchPluginEntry({
       id: "brave",
-      npmSpec: "@openclaw/brave-plugin",
+      npmSpec: "@hanzo/bot-brave-plugin",
       envVar: "BRAVE_API_KEY",
       label: "Brave",
       providerLabel: "Brave Search",
@@ -254,7 +254,7 @@ vi.mock("../../../plugins/doctor-contract-registry.js", async (importOriginal) =
   ...(await importOriginal<typeof import("../../../plugins/doctor-contract-registry.js")>()),
   // Plugin-owned compatibility is outside this install-repair suite. Avoid scanning
   // the real plugin registry when the legacy-config fixture reaches that follow-up pass.
-  applyPluginDoctorCompatibilityMigrations: (cfg: OpenClawConfig) => ({
+  applyPluginDoctorCompatibilityMigrations: (cfg: BotConfig) => ({
     config: cfg,
     changes: [],
   }),
@@ -294,7 +294,7 @@ vi.mock("../../../plugins/doctor-contract-registry.js", async (importOriginal) =
     ...actual,
     // Plugin-owned compatibility discovery has its own coverage. Keep this
     // install-repair suite focused and avoid scanning every source plugin.
-    applyPluginDoctorCompatibilityMigrations: (cfg: OpenClawConfig) => ({
+    applyPluginDoctorCompatibilityMigrations: (cfg: BotConfig) => ({
       config: cfg,
       changes: [],
     }),
@@ -330,8 +330,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.loadInstalledPluginIndexInstallRecords.mockResolvedValue({});
     mocks.listChannelPluginCatalogEntries.mockReturnValue([]);
     mocks.listOfficialExternalPluginCatalogEntries.mockReturnValue([]);
-    mocks.resolveDefaultPluginExtensionsDir.mockReturnValue("/tmp/openclaw-plugins");
-    mocks.resolveDefaultPluginNpmDir.mockReturnValue("/tmp/openclaw-npm");
+    mocks.resolveDefaultPluginExtensionsDir.mockReturnValue("/tmp/bot-plugins");
+    mocks.resolveDefaultPluginNpmDir.mockReturnValue("/tmp/bot-npm");
     mocks.resolveProviderInstallCatalogEntries.mockReturnValue([]);
     mocks.resolveOfficialExternalProviderPluginIdsForEnv.mockReturnValue([]);
     mocks.resolveOfficialExternalWebProviderContractPluginIdsForEnv.mockReturnValue([]);
@@ -350,13 +350,13 @@ describe("repairMissingConfiguredPluginInstalls", () => {
           }
           const candidate = entry as {
             id?: string;
-            openclaw?: {
+            bot?: {
               plugin?: { id?: string };
               contracts?: Record<string, unknown>;
             };
           };
-          const pluginId = candidate.openclaw?.plugin?.id ?? candidate.id;
-          const ownedProviderIds = candidate.openclaw?.contracts?.[contract];
+          const pluginId = candidate.bot?.plugin?.id ?? candidate.id;
+          const ownedProviderIds = candidate.bot?.contracts?.[contract];
           if (
             !pluginId ||
             !Array.isArray(ownedProviderIds) ||
@@ -387,13 +387,13 @@ describe("repairMissingConfiguredPluginInstalls", () => {
           }
           const candidate = entry as {
             id?: string;
-            openclaw?: {
+            bot?: {
               plugin?: { id?: string };
               providers?: Array<{ id?: string; aliases?: string[] }>;
             };
           };
-          const pluginId = candidate.openclaw?.plugin?.id ?? candidate.id;
-          const ownsConfiguredProvider = candidate.openclaw?.providers?.some((provider) =>
+          const pluginId = candidate.bot?.plugin?.id ?? candidate.id;
+          const ownsConfiguredProvider = candidate.bot?.providers?.some((provider) =>
             [provider.id, ...(provider.aliases ?? [])].some(
               (providerId) =>
                 typeof providerId === "string" &&
@@ -407,12 +407,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromClawHub.mockResolvedValue({
       ok: true,
       pluginId: "matrix",
-      targetDir: "/tmp/openclaw-plugins/matrix",
+      targetDir: "/tmp/bot-plugins/matrix",
       version: "1.2.3",
       clawhub: {
         source: "clawhub",
         clawhubUrl: "https://clawhub.ai",
-        clawhubPackage: "@openclaw/plugin-matrix",
+        clawhubPackage: "@hanzo/bot-plugin-matrix",
         clawhubFamily: "code-plugin",
         clawhubChannel: "official",
         version: "1.2.3",
@@ -427,12 +427,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValue({
       ok: true,
       pluginId: "matrix",
-      targetDir: "/tmp/openclaw-plugins/matrix",
+      targetDir: "/tmp/bot-plugins/matrix",
       version: "1.2.3",
       npmResolution: {
-        name: "@openclaw/plugin-matrix",
+        name: "@hanzo/bot-plugin-matrix",
         version: "1.2.3",
-        resolvedSpec: "@openclaw/plugin-matrix@1.2.3",
+        resolvedSpec: "@hanzo/bot-plugin-matrix@1.2.3",
         integrity: "sha512-test",
         resolvedAt: "2026-05-01T00:00:00.000Z",
       },
@@ -452,7 +452,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          npmSpec: "@openclaw/plugin-matrix@1.2.3",
+          npmSpec: "@hanzo/bot-plugin-matrix@1.2.3",
           expectedIntegrity: "sha512-test",
         },
         trustedSourceLinkedOfficialInstall: true,
@@ -479,7 +479,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     expect(issue).toEqual({
       kind: "missing-install-record",
       pluginId: "matrix",
-      installSpec: "@openclaw/plugin-matrix@1.2.3",
+      installSpec: "@hanzo/bot-plugin-matrix@1.2.3",
     });
     expect(
       configuredPluginInstallIssueToHealthFinding(expectDefined(issue, "issue test invariant")),
@@ -487,7 +487,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       checkId: "core/doctor/configured-plugin-installs",
       severity: "warning",
       target: "matrix",
-      fixHint: "Run `openclaw doctor --fix` to install @openclaw/plugin-matrix@1.2.3.",
+      fixHint: "Run `bot doctor --fix` to install @hanzo/bot-plugin-matrix@1.2.3.",
     });
     expect(
       configuredPluginInstallIssueToRepairEffect(expectDefined(issue, "issue test invariant")),
@@ -504,7 +504,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       discord: {
         source: "npm",
-        spec: "@openclaw/discord",
+        spec: "@hanzo/bot-discord",
         installPath: missingDiscordPath,
       },
     };
@@ -515,7 +515,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "discord",
         meta: { label: "Discord" },
         install: {
-          npmSpec: "@openclaw/discord",
+          npmSpec: "@hanzo/bot-discord",
         },
       },
     ]);
@@ -537,8 +537,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         },
       },
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
+        BOT_UPDATE_IN_PROGRESS: "1",
+        BOT_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
       },
     });
 
@@ -572,7 +572,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       discord: {
         source: "npm",
-        spec: "@openclaw/discord",
+        spec: "@hanzo/bot-discord",
         installPath: missingDiscordPath,
       },
     };
@@ -583,7 +583,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "discord",
         meta: { label: "Discord" },
         install: {
-          npmSpec: "@openclaw/discord",
+          npmSpec: "@hanzo/bot-discord",
         },
       },
     ]);
@@ -609,25 +609,25 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         kind: "missing-installed-payload",
         pluginId: "discord",
         installPath: missingDiscordPath,
-        installSpec: "@openclaw/discord",
+        installSpec: "@hanzo/bot-discord",
       },
     ]);
   });
 
-  it("installs a missing configured OpenClaw channel plugin from npm by default", async () => {
+  it("installs a missing configured Bot channel plugin from npm by default", async () => {
     const cfg = {
       security: { installPolicy: { enabled: true } },
       channels: {
         matrix: { enabled: true, homeserver: "https://matrix.example.org" },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     mocks.listChannelPluginCatalogEntries.mockReturnValue([
       {
         id: "matrix",
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          npmSpec: "@openclaw/plugin-matrix@1.2.3",
+          npmSpec: "@hanzo/bot-plugin-matrix@1.2.3",
           expectedIntegrity: "sha512-test",
         },
         trustedSourceLinkedOfficialInstall: true,
@@ -643,8 +643,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
     expect(mocks.installPluginFromClawHub).not.toHaveBeenCalled();
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: "@openclaw/plugin-matrix@1.2.3",
-      extensionsDir: "/tmp/openclaw-plugins",
+      spec: "@hanzo/bot-plugin-matrix@1.2.3",
+      extensionsDir: "/tmp/bot-plugins",
       expectedPluginId: "matrix",
       expectedIntegrity: "sha512-test",
       trustedSourceLinkedOfficialInstall: true,
@@ -653,15 +653,15 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords);
     expectRecordFields((records as Record<string, unknown>).matrix, {
       source: "npm",
-      spec: "@openclaw/plugin-matrix@1.2.3",
-      installPath: "/tmp/openclaw-plugins/matrix",
+      spec: "@hanzo/bot-plugin-matrix@1.2.3",
+      installPath: "/tmp/bot-plugins/matrix",
       version: "1.2.3",
     });
     expect(mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords, 0, 1)).toEqual({
       env: {},
     });
     expect(result.changes).toEqual([
-      'Installed missing configured plugin "matrix" from @openclaw/plugin-matrix@1.2.3.',
+      'Installed missing configured plugin "matrix" from @hanzo/bot-plugin-matrix@1.2.3.',
     ]);
     expect(result.warnings).toStrictEqual([]);
   });
@@ -672,7 +672,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       channels: {
         matrix: { enabled: true, homeserver: "https://matrix.example.org" },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const reviewNotice =
       "╭─ REVIEW RECOMMENDED - ClawHub has not completed a fresh clean check ─╮\n" +
       "│ • Status:            security scan is pending                         │\n" +
@@ -684,12 +684,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         return {
           ok: true,
           pluginId: "matrix",
-          targetDir: "/tmp/openclaw-plugins/matrix",
+          targetDir: "/tmp/bot-plugins/matrix",
           version: "1.2.3",
           clawhub: {
             source: "clawhub",
             clawhubUrl: "https://clawhub.ai",
-            clawhubPackage: "@openclaw/plugin-matrix",
+            clawhubPackage: "@hanzo/bot-plugin-matrix",
             clawhubFamily: "code-plugin",
             clawhubChannel: "official",
             version: "1.2.3",
@@ -709,8 +709,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          clawhubSpec: "clawhub:@openclaw/plugin-matrix@stable",
-          npmSpec: "@openclaw/plugin-matrix@1.2.3",
+          clawhubSpec: "clawhub:@hanzo/bot-plugin-matrix@stable",
+          npmSpec: "@hanzo/bot-plugin-matrix@1.2.3",
           expectedIntegrity: "sha512-test",
         },
       },
@@ -724,14 +724,14 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     const clawHubCall = expectRecordFields(mockCallArg(mocks.installPluginFromClawHub), {
-      spec: "clawhub:@openclaw/plugin-matrix@stable",
+      spec: "clawhub:@hanzo/bot-plugin-matrix@stable",
       expectedPluginId: "matrix",
       config: cfg,
     });
     expect(clawHubCall.logger).toEqual(expect.objectContaining({ terminalLinks: false }));
     expect(mocks.installPluginFromNpmSpec).not.toHaveBeenCalled();
     expect(result.changes).toEqual([
-      'Installed missing configured plugin "matrix" from clawhub:@openclaw/plugin-matrix@stable.',
+      'Installed missing configured plugin "matrix" from clawhub:@hanzo/bot-plugin-matrix@stable.',
     ]);
     expect(result.notices).toContain(reviewNotice);
     expect(result.notices?.[0]).not.toContain("\u001b");
@@ -743,7 +743,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       ok: false,
       code: "clawhub_risk_acknowledgement_required",
       error:
-        'ClawHub release "@openclaw/plugin-matrix@stable" has trust warnings. Review the package and rerun with --acknowledge-clawhub-risk to continue.',
+        'ClawHub release "@hanzo/bot-plugin-matrix@stable" has trust warnings. Review the package and rerun with --acknowledge-clawhub-risk to continue.',
     });
     mocks.listChannelPluginCatalogEntries.mockReturnValue([
       {
@@ -751,7 +751,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          clawhubSpec: "clawhub:@openclaw/plugin-matrix@stable",
+          clawhubSpec: "clawhub:@hanzo/bot-plugin-matrix@stable",
         },
       },
     ]);
@@ -768,7 +768,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expect(result.warnings[0]).toContain(
-      "openclaw plugins install clawhub:@openclaw/plugin-matrix@stable --acknowledge-clawhub-risk",
+      "bot plugins install clawhub:@hanzo/bot-plugin-matrix@stable --acknowledge-clawhub-risk",
     );
   });
 
@@ -776,8 +776,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       demo: {
         source: "clawhub",
-        spec: "clawhub:@openclaw/plugin-demo@stable",
-        clawhubPackage: "@openclaw/plugin-demo",
+        spec: "clawhub:@hanzo/bot-plugin-demo@stable",
+        clawhubPackage: "@hanzo/bot-plugin-demo",
         installPath: "/missing/demo",
       },
     };
@@ -795,7 +795,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
           status: "skipped",
           code: "clawhub_download_blocked",
           message:
-            'Skipped demo ClawHub update: ClawHub release "@openclaw/plugin-demo@1.2.4" cannot be installed because ClawHub flagged it as blocked or malicious. Review the security details above or choose a different version. Existing installed plugin left unchanged.',
+            'Skipped demo ClawHub update: ClawHub release "@hanzo/bot-plugin-demo@1.2.4" cannot be installed because ClawHub flagged it as blocked or malicious. Review the security details above or choose a different version. Existing installed plugin left unchanged.',
         },
       ],
     });
@@ -820,7 +820,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     );
     expect(result.changes).toStrictEqual([]);
     expect(result.warnings).toStrictEqual([
-      'Skipped demo ClawHub update: ClawHub release "@openclaw/plugin-demo@1.2.4" cannot be installed because ClawHub flagged it as blocked or malicious. Review the security details above or choose a different version. Existing installed plugin left unchanged.',
+      'Skipped demo ClawHub update: ClawHub release "@hanzo/bot-plugin-demo@1.2.4" cannot be installed because ClawHub flagged it as blocked or malicious. Review the security details above or choose a different version. Existing installed plugin left unchanged.',
     ]);
   });
 
@@ -829,7 +829,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       ok: false,
       code: "clawhub_risk_acknowledgement_required",
       error:
-        'ClawHub release "@openclaw/plugin-matrix@stable" has trust warnings. Review the package and rerun with --acknowledge-clawhub-risk to continue.',
+        'ClawHub release "@hanzo/bot-plugin-matrix@stable" has trust warnings. Review the package and rerun with --acknowledge-clawhub-risk to continue.',
     });
     mocks.listChannelPluginCatalogEntries.mockReturnValue([
       {
@@ -837,7 +837,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          clawhubSpec: "clawhub:@openclaw/plugin-matrix\n\u001b[31m@stable;$(touch /tmp/pwned)",
+          clawhubSpec: "clawhub:@hanzo/bot-plugin-matrix\n\u001b[31m@stable;$(touch /tmp/pwned)",
         },
       },
     ]);
@@ -855,10 +855,10 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
     const warning = result.warnings[0] ?? "";
     expect(warning).toContain(
-      "openclaw plugins install 'clawhub:@openclaw/plugin-matrix\\n@stable;$(touch /tmp/pwned)' --acknowledge-clawhub-risk",
+      "bot plugins install 'clawhub:@hanzo/bot-plugin-matrix\\n@stable;$(touch /tmp/pwned)' --acknowledge-clawhub-risk",
     );
     expect(warning).not.toContain(
-      "openclaw plugins install clawhub:@openclaw/plugin-matrix\\n@stable;$(touch /tmp/pwned) --acknowledge-clawhub-risk",
+      "bot plugins install clawhub:@hanzo/bot-plugin-matrix\\n@stable;$(touch /tmp/pwned) --acknowledge-clawhub-risk",
     );
     expect(warning).not.toContain("\u001b");
     expect(warning).not.toContain("plugin-matrix\n");
@@ -868,7 +868,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "matrix",
-        npmSpec: "@openclaw/plugin-matrix",
+        npmSpec: "@hanzo/bot-plugin-matrix",
         version: "1.2.3",
       }),
     );
@@ -878,7 +878,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          npmSpec: "@openclaw/plugin-matrix@1.2.3",
+          npmSpec: "@hanzo/bot-plugin-matrix@1.2.3",
         },
         trustedSourceLinkedOfficialInstall: true,
       },
@@ -893,27 +893,27 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
     expect(mocks.installPluginFromClawHub).not.toHaveBeenCalled();
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: "@openclaw/plugin-matrix@1.2.3",
-      extensionsDir: "/tmp/openclaw-plugins",
+      spec: "@hanzo/bot-plugin-matrix@1.2.3",
+      extensionsDir: "/tmp/bot-plugins",
       expectedPluginId: "matrix",
       trustedSourceLinkedOfficialInstall: true,
     });
     const records = mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords);
     expectRecordFields((records as Record<string, unknown>).matrix, {
       source: "npm",
-      spec: "@openclaw/plugin-matrix@1.2.3",
-      installPath: "/tmp/openclaw-plugins/matrix",
+      spec: "@hanzo/bot-plugin-matrix@1.2.3",
+      installPath: "/tmp/bot-plugins/matrix",
     });
     expect(mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords, 0, 1)).toEqual({
       env: { MATRIX_HOMESERVER: "https://matrix.example.org" },
     });
     expect(result.changes).toEqual([
-      'Installed missing configured plugin "matrix" from @openclaw/plugin-matrix@1.2.3.',
+      'Installed missing configured plugin "matrix" from @hanzo/bot-plugin-matrix@1.2.3.',
     ]);
     expect(result.warnings).toStrictEqual([]);
   });
 
-  it("falls back to npm when an OpenClaw channel plugin artifact is unavailable on ClawHub", async () => {
+  it("falls back to npm when an Bot channel plugin artifact is unavailable on ClawHub", async () => {
     mocks.installPluginFromClawHub.mockResolvedValueOnce({
       ok: false,
       code: "artifact_unavailable",
@@ -925,8 +925,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          clawhubSpec: "clawhub:@openclaw/plugin-matrix@stable",
-          npmSpec: "@openclaw/plugin-matrix@1.2.3",
+          clawhubSpec: "clawhub:@hanzo/bot-plugin-matrix@stable",
+          npmSpec: "@hanzo/bot-plugin-matrix@1.2.3",
         },
         trustedSourceLinkedOfficialInstall: true,
       },
@@ -942,18 +942,18 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: "@openclaw/plugin-matrix@1.2.3",
+      spec: "@hanzo/bot-plugin-matrix@1.2.3",
       expectedPluginId: "matrix",
       trustedSourceLinkedOfficialInstall: true,
     });
     expect(result.changes).toEqual([
-      'ClawHub clawhub:@openclaw/plugin-matrix@stable unavailable for "matrix"; falling back to npm @openclaw/plugin-matrix@1.2.3.',
-      'Installed missing configured plugin "matrix" from @openclaw/plugin-matrix@1.2.3.',
+      'ClawHub clawhub:@hanzo/bot-plugin-matrix@stable unavailable for "matrix"; falling back to npm @hanzo/bot-plugin-matrix@1.2.3.',
+      'Installed missing configured plugin "matrix" from @hanzo/bot-plugin-matrix@1.2.3.',
     ]);
     expect(result.warnings).toStrictEqual([]);
   });
 
-  it("does not fall back from ClawHub to non-OpenClaw npm packages", async () => {
+  it("does not fall back from ClawHub to non-Bot npm packages", async () => {
     mocks.installPluginFromClawHub.mockResolvedValueOnce({
       ok: false,
       code: "artifact_download_unavailable",
@@ -965,7 +965,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          clawhubSpec: "clawhub:@openclaw/plugin-matrix@stable",
+          clawhubSpec: "clawhub:@hanzo/bot-plugin-matrix@stable",
           npmSpec: "@someone-else/plugin-matrix@1.2.3",
         },
       },
@@ -983,15 +983,15 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     expect(mocks.installPluginFromNpmSpec).not.toHaveBeenCalled();
     expect(result.changes).toStrictEqual([]);
     expect(result.warnings).toEqual([
-      'Failed to install missing configured plugin "matrix" from clawhub:@openclaw/plugin-matrix@stable: ClawHub artifact download is not available yet.',
+      'Failed to install missing configured plugin "matrix" from clawhub:@hanzo/bot-plugin-matrix@stable: ClawHub artifact download is not available yet.',
     ]);
   });
 
-  it("honors npm-first catalog metadata for missing OpenClaw channel plugins", async () => {
+  it("honors npm-first catalog metadata for missing Bot channel plugins", async () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "twitch",
-        npmSpec: "@openclaw/twitch",
+        npmSpec: "@hanzo/bot-twitch",
         version: "2026.5.2",
       }),
     );
@@ -1001,7 +1001,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "twitch",
         meta: { label: "Twitch" },
         install: {
-          npmSpec: "@openclaw/twitch",
+          npmSpec: "@hanzo/bot-twitch",
           defaultChoice: "npm",
         },
         trustedSourceLinkedOfficialInstall: true,
@@ -1019,12 +1019,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
     expect(mocks.installPluginFromClawHub).not.toHaveBeenCalled();
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/twitch"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-twitch"),
       expectedPluginId: "twitch",
       trustedSourceLinkedOfficialInstall: true,
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "twitch" from ${expectedNpmInstallSpec("@openclaw/twitch")}.`,
+      `Installed missing configured plugin "twitch" from ${expectedNpmInstallSpec("@hanzo/bot-twitch")}.`,
     ]);
   });
 
@@ -1032,7 +1032,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "diagnostics-otel",
-        npmSpec: "@openclaw/diagnostics-otel",
+        npmSpec: "@hanzo/bot-diagnostics-otel",
         version: "2026.5.2",
         resolution: {
           integrity: "sha512-otel",
@@ -1044,8 +1044,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         id: "diagnostics-otel",
         label: "Diagnostics OpenTelemetry",
         install: {
-          clawhubSpec: "clawhub:@openclaw/diagnostics-otel",
-          npmSpec: "@openclaw/diagnostics-otel",
+          clawhubSpec: "clawhub:@hanzo/bot-diagnostics-otel",
+          npmSpec: "@hanzo/bot-diagnostics-otel",
           defaultChoice: "npm",
         },
       },
@@ -1066,11 +1066,11 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
     expect(mocks.installPluginFromClawHub).not.toHaveBeenCalled();
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/diagnostics-otel"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-diagnostics-otel"),
       expectedPluginId: "diagnostics-otel",
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "diagnostics-otel" from ${expectedNpmInstallSpec("@openclaw/diagnostics-otel")}.`,
+      `Installed missing configured plugin "diagnostics-otel" from ${expectedNpmInstallSpec("@hanzo/bot-diagnostics-otel")}.`,
     ]);
   });
 
@@ -1078,7 +1078,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "diagnostics-otel",
-        npmSpec: "@openclaw/diagnostics-otel",
+        npmSpec: "@hanzo/bot-diagnostics-otel",
         version: VERSION,
       }),
     );
@@ -1087,7 +1087,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         id: "diagnostics-otel",
         label: "Diagnostics OpenTelemetry",
         install: {
-          npmSpec: "@openclaw/diagnostics-otel",
+          npmSpec: "@hanzo/bot-diagnostics-otel",
           defaultChoice: "npm",
         },
       },
@@ -1104,7 +1104,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: `@openclaw/diagnostics-otel@${VERSION}`,
+      spec: `@hanzo/bot-diagnostics-otel@${VERSION}`,
       expectedPluginId: "diagnostics-otel",
       trustedSourceLinkedOfficialInstall: true,
     });
@@ -1112,8 +1112,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       mocks.writePersistedInstalledPluginIndexInstallRecords,
     ) as Record<string, unknown>;
     expectRecordFields(persistedRecords["diagnostics-otel"], {
-      spec: "@openclaw/diagnostics-otel",
-      resolvedSpec: `@openclaw/diagnostics-otel@${VERSION}`,
+      spec: "@hanzo/bot-diagnostics-otel",
+      resolvedSpec: `@hanzo/bot-diagnostics-otel@${VERSION}`,
     });
   });
 
@@ -1121,7 +1121,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "llama-cpp",
-        npmSpec: "@openclaw/llama-cpp-provider",
+        npmSpec: "@hanzo/bot-llama-cpp-provider",
         version: "2026.6.2",
         resolution: {
           resolvedAt: "2026-06-08T00:00:00.000Z",
@@ -1132,16 +1132,16 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       {
         id: "llama-cpp",
         label: "llama.cpp Provider",
-        openclaw: {
+        bot: {
           plugin: { id: "llama-cpp", label: "llama.cpp Provider" },
           contracts: { embeddingProviders: ["local"] },
           install: {
-            npmSpec: "@openclaw/llama-cpp-provider",
+            npmSpec: "@hanzo/bot-llama-cpp-provider",
             defaultChoice: "npm",
           },
         },
         install: {
-          npmSpec: "@openclaw/llama-cpp-provider",
+          npmSpec: "@hanzo/bot-llama-cpp-provider",
           defaultChoice: "npm",
         },
       },
@@ -1166,11 +1166,11 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
     expect(mocks.installPluginFromClawHub).not.toHaveBeenCalled();
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/llama-cpp-provider"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-llama-cpp-provider"),
       expectedPluginId: "llama-cpp",
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "llama-cpp" from ${expectedNpmInstallSpec("@openclaw/llama-cpp-provider")}.`,
+      `Installed missing configured plugin "llama-cpp" from ${expectedNpmInstallSpec("@hanzo/bot-llama-cpp-provider")}.`,
     ]);
   });
 
@@ -1178,7 +1178,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "acpx",
-        npmSpec: "@openclaw/acpx",
+        npmSpec: "@hanzo/bot-acpx",
         version: "2026.5.2-beta.2",
       }),
     );
@@ -1187,7 +1187,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         id: "acpx",
         label: "ACPX Runtime",
         install: {
-          npmSpec: "@openclaw/acpx",
+          npmSpec: "@hanzo/bot-acpx",
           defaultChoice: "npm",
         },
       },
@@ -1205,12 +1205,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/acpx"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-acpx"),
       expectedPluginId: "acpx",
       trustedSourceLinkedOfficialInstall: true,
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "acpx" from ${expectedNpmInstallSpec("@openclaw/acpx")}.`,
+      `Installed missing configured plugin "acpx" from ${expectedNpmInstallSpec("@hanzo/bot-acpx")}.`,
     ]);
   });
 
@@ -1220,7 +1220,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         id: "diagnostics-otel",
         label: "Diagnostics OpenTelemetry",
         install: {
-          npmSpec: "@openclaw/diagnostics-otel",
+          npmSpec: "@hanzo/bot-diagnostics-otel",
           defaultChoice: "npm",
         },
       },
@@ -1258,7 +1258,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          npmSpec: "@openclaw/plugin-matrix@1.2.3",
+          npmSpec: "@hanzo/bot-plugin-matrix@1.2.3",
         },
       },
     ]);
@@ -1283,7 +1283,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          npmSpec: "@openclaw/plugin-matrix@1.2.3",
+          npmSpec: "@hanzo/bot-plugin-matrix@1.2.3",
         },
       },
     ]);
@@ -1318,7 +1318,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         origin: "bundled",
         meta: { label: "Matrix" },
         install: {
-          npmSpec: "@openclaw/matrix",
+          npmSpec: "@hanzo/bot-matrix",
         },
       },
     ]);
@@ -1327,7 +1327,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         {
           id: "matrix",
           origin: "bundled",
-          packageName: "@openclaw/matrix",
+          packageName: "@hanzo/bot-matrix",
           channels: ["matrix"],
         },
       ],
@@ -1361,7 +1361,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       matrix: {
         source: "npm",
-        spec: "@openclaw/matrix",
+        spec: "@hanzo/bot-matrix",
         installPath: "/missing/matrix",
       },
     };
@@ -1373,7 +1373,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         origin: "bundled",
         meta: { label: "Matrix" },
         install: {
-          npmSpec: "@openclaw/matrix",
+          npmSpec: "@hanzo/bot-matrix",
         },
       },
     ]);
@@ -1382,7 +1382,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         {
           id: "matrix",
           origin: "bundled",
-          packageName: "@openclaw/matrix",
+          packageName: "@hanzo/bot-matrix",
           channels: ["matrix"],
         },
       ],
@@ -1430,8 +1430,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       "google-meet": {
         source: "npm",
-        spec: "@openclaw/google-meet",
-        resolvedName: "@openclaw/google-meet",
+        spec: "@hanzo/bot-google-meet",
+        resolvedName: "@hanzo/bot-google-meet",
         installPath: "/missing/google-meet",
       },
     };
@@ -1441,7 +1441,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         {
           id: "google-meet",
           origin: "npm",
-          packageName: "@openclaw/google-meet",
+          packageName: "@hanzo/bot-google-meet",
         },
       ],
       diagnostics: [],
@@ -1451,7 +1451,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         {
           pluginId: "google-meet",
           origin: "bundled",
-          packageName: "@openclaw/google-meet",
+          packageName: "@hanzo/bot-google-meet",
         },
       ],
       diagnostics: [],
@@ -1461,10 +1461,10 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       {
         id: "google-meet",
         label: "Google Meet",
-        install: { npmSpec: "@openclaw/google-meet" },
-        openclaw: {
+        install: { npmSpec: "@hanzo/bot-google-meet" },
+        bot: {
           id: "google-meet",
-          install: { npmSpec: "@openclaw/google-meet" },
+          install: { npmSpec: "@hanzo/bot-google-meet" },
         },
       },
     ]);
@@ -1500,8 +1500,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       "google-meet": {
         source: "npm",
-        spec: "@openclaw/google-meet",
-        resolvedName: "@openclaw/google-meet",
+        spec: "@hanzo/bot-google-meet",
+        resolvedName: "@hanzo/bot-google-meet",
         installPath: "/missing/google-meet",
       },
     };
@@ -1515,7 +1515,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         {
           pluginId: "google-meet",
           origin: "bundled",
-          packageName: "@openclaw/google-meet",
+          packageName: "@hanzo/bot-google-meet",
         },
       ],
       diagnostics: [],
@@ -1548,9 +1548,9 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       "npm",
       {
         source: "npm",
-        spec: "@openclaw/matrix-fork",
-        resolvedName: "@openclaw/matrix-fork",
-        resolvedSpec: "@openclaw/matrix-fork@1.2.3",
+        spec: "@hanzo/bot-matrix-fork",
+        resolvedName: "@hanzo/bot-matrix-fork",
+        resolvedSpec: "@hanzo/bot-matrix-fork@1.2.3",
         installPath: "/missing/matrix-fork",
       },
     ],
@@ -1558,8 +1558,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       "clawhub",
       {
         source: "clawhub",
-        spec: "clawhub:@openclaw/matrix-fork@stable",
-        clawhubPackage: "@openclaw/matrix-fork",
+        spec: "clawhub:@hanzo/bot-matrix-fork@stable",
+        clawhubPackage: "@hanzo/bot-matrix-fork",
         installPath: "/missing/matrix-fork",
       },
     ],
@@ -1575,7 +1575,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
           origin: "bundled",
           meta: { label: "Matrix" },
           install: {
-            npmSpec: "@openclaw/matrix",
+            npmSpec: "@hanzo/bot-matrix",
           },
         },
       ]);
@@ -1584,7 +1584,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
           {
             id: "matrix",
             origin: "bundled",
-            packageName: "@openclaw/matrix",
+            packageName: "@hanzo/bot-matrix",
             channels: ["matrix"],
           },
         ],
@@ -1624,7 +1624,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       discord: {
         source: "npm",
-        spec: "@openclaw/discord",
+        spec: "@hanzo/bot-discord",
         installPath: "/missing/discord",
       },
     };
@@ -1635,7 +1635,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "discord",
         meta: { label: "Discord" },
         install: {
-          npmSpec: "@openclaw/discord",
+          npmSpec: "@hanzo/bot-discord",
         },
       },
     ]);
@@ -1654,8 +1654,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         },
       },
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
+        BOT_UPDATE_IN_PROGRESS: "1",
+        BOT_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
       },
     });
 
@@ -1665,11 +1665,11 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     expect(mocks.writePersistedInstalledPluginIndexInstallRecords).not.toHaveBeenCalled();
     expect(result).toEqual({
       changes: [
-        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "openclaw doctor --fix" after the update completes.',
+        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "bot doctor --fix" after the update completes.',
       ],
       warnings: [],
       deferredRepairDetails: [
-        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "openclaw doctor --fix" after the update completes.',
+        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "bot doctor --fix" after the update completes.',
       ],
       records,
     });
@@ -1677,7 +1677,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
   it("updates an existing npm target when stale baseline records miss an installed package", async () => {
     const npmRoot = makeTempDir();
-    const packageDir = path.join(npmRoot, "node_modules", "@openclaw", "discord");
+    const packageDir = path.join(npmRoot, "node_modules", "@bot", "discord");
     fs.mkdirSync(packageDir, { recursive: true });
     mocks.resolveDefaultPluginNpmDir.mockReturnValue(npmRoot);
     mocks.listChannelPluginCatalogEntries.mockReturnValue([
@@ -1686,7 +1686,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "discord",
         meta: { label: "Discord" },
         install: {
-          npmSpec: "@openclaw/discord",
+          npmSpec: "@hanzo/bot-discord",
         },
       },
     ]);
@@ -1696,9 +1696,9 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       targetDir: packageDir,
       version: "1.2.3",
       npmResolution: {
-        name: "@openclaw/discord",
+        name: "@hanzo/bot-discord",
         version: "1.2.3",
-        resolvedSpec: "@openclaw/discord@1.2.3",
+        resolvedSpec: "@hanzo/bot-discord@1.2.3",
         integrity: "sha512-discord",
         resolvedAt: "2026-05-01T00:00:00.000Z",
       },
@@ -1718,19 +1718,19 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         },
       },
       env: {
-        OPENCLAW_UPDATE_POST_CORE_CONVERGENCE: "1",
+        BOT_UPDATE_POST_CORE_CONVERGENCE: "1",
       },
     });
 
     expect(mocks.installPluginFromClawHub).not.toHaveBeenCalled();
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/discord"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-discord"),
       expectedPluginId: "discord",
       npmDir: npmRoot,
       mode: "update",
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "discord" from ${expectedNpmInstallSpec("@openclaw/discord")}.`,
+      `Installed missing configured plugin "discord" from ${expectedNpmInstallSpec("@hanzo/bot-discord")}.`,
     ]);
     expect(result.warnings).toEqual([]);
     expect(result.records.discord?.installPath).toBe(packageDir);
@@ -1744,9 +1744,9 @@ describe("repairMissingConfiguredPluginInstalls", () => {
           discord: { enabled: true },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const npmRoot = makeTempDir();
-    const packageDir = path.join(npmRoot, "node_modules", "@openclaw", "discord");
+    const packageDir = path.join(npmRoot, "node_modules", "@bot", "discord");
     mocks.resolveDefaultPluginNpmDir.mockReturnValue(npmRoot);
     mocks.listChannelPluginCatalogEntries.mockReturnValue([
       {
@@ -1754,7 +1754,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "discord",
         meta: { label: "Discord" },
         install: {
-          npmSpec: "@openclaw/discord",
+          npmSpec: "@hanzo/bot-discord",
         },
       },
     ]);
@@ -1769,9 +1769,9 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         targetDir: packageDir,
         version: "1.2.3",
         npmResolution: {
-          name: "@openclaw/discord",
+          name: "@hanzo/bot-discord",
           version: "1.2.3",
-          resolvedSpec: "@openclaw/discord@1.2.3",
+          resolvedSpec: "@hanzo/bot-discord@1.2.3",
           integrity: "sha512-discord",
           resolvedAt: "2026-05-01T00:00:00.000Z",
         },
@@ -1782,19 +1782,19 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const result = await repairMissingConfiguredPluginInstalls({
       cfg,
       env: {
-        OPENCLAW_UPDATE_POST_CORE_CONVERGENCE: "1",
+        BOT_UPDATE_POST_CORE_CONVERGENCE: "1",
       },
     });
 
     expect(mocks.installPluginFromNpmSpec).toHaveBeenCalledTimes(2);
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec, 0), {
-      spec: expectedNpmInstallSpec("@openclaw/discord"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-discord"),
       npmDir: npmRoot,
       mode: "install",
       config: cfg,
     });
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec, 1), {
-      spec: expectedNpmInstallSpec("@openclaw/discord"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-discord"),
       npmDir: npmRoot,
       mode: "update",
       config: cfg,
@@ -1805,11 +1805,11 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
   it("prefers an existing npm payload over ClawHub during post-core repair", async () => {
     const npmRoot = makeTempDir();
-    const packageDir = path.join(npmRoot, "node_modules", "@openclaw", "matrix");
+    const packageDir = path.join(npmRoot, "node_modules", "@bot", "matrix");
     fs.mkdirSync(packageDir, { recursive: true });
     fs.writeFileSync(
       path.join(packageDir, "package.json"),
-      JSON.stringify({ name: "@openclaw/matrix", version: "1.2.3" }),
+      JSON.stringify({ name: "@hanzo/bot-matrix", version: "1.2.3" }),
     );
     mocks.resolveDefaultPluginNpmDir.mockReturnValue(npmRoot);
     mocks.listChannelPluginCatalogEntries.mockReturnValue([
@@ -1818,14 +1818,14 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          clawhubSpec: "clawhub:@openclaw/matrix",
-          npmSpec: "@openclaw/matrix",
+          clawhubSpec: "clawhub:@hanzo/bot-matrix",
+          npmSpec: "@hanzo/bot-matrix",
         },
       },
     ]);
     mocks.installPluginFromClawHub.mockResolvedValue({
       ok: false,
-      error: 'Plugin "@openclaw/matrix" requires plugin API >=2026.5.18.',
+      error: 'Plugin "@hanzo/bot-matrix" requires plugin API >=2026.5.18.',
     });
     mocks.installPluginFromNpmSpec.mockResolvedValue({
       ok: true,
@@ -1833,9 +1833,9 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       targetDir: packageDir,
       version: "1.2.3",
       npmResolution: {
-        name: "@openclaw/matrix",
+        name: "@hanzo/bot-matrix",
         version: "1.2.3",
-        resolvedSpec: "@openclaw/matrix@1.2.3",
+        resolvedSpec: "@hanzo/bot-matrix@1.2.3",
         integrity: "sha512-matrix",
         resolvedAt: "2026-05-01T00:00:00.000Z",
       },
@@ -1855,7 +1855,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         },
       },
       env: {
-        OPENCLAW_UPDATE_POST_CORE_CONVERGENCE: "1",
+        BOT_UPDATE_POST_CORE_CONVERGENCE: "1",
       },
     });
 
@@ -1864,12 +1864,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     expect(result.warnings).toEqual([]);
     expectRecordFields(result.records.matrix, {
       source: "npm",
-      spec: "@openclaw/matrix",
+      spec: "@hanzo/bot-matrix",
       installPath: packageDir,
       version: "1.2.3",
-      resolvedName: "@openclaw/matrix",
+      resolvedName: "@hanzo/bot-matrix",
       resolvedVersion: "1.2.3",
-      resolvedSpec: "@openclaw/matrix@1.2.3",
+      resolvedSpec: "@hanzo/bot-matrix@1.2.3",
     });
   });
 
@@ -1882,20 +1882,20 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "whatsapp",
         meta: { label: "WhatsApp" },
         install: {
-          clawhubSpec: "clawhub:@openclaw/whatsapp",
-          npmSpec: "@openclaw/whatsapp",
+          clawhubSpec: "clawhub:@hanzo/bot-whatsapp",
+          npmSpec: "@hanzo/bot-whatsapp",
         },
       },
     ]);
     mocks.installPluginFromClawHub.mockResolvedValue({
       ok: true,
       pluginId: "whatsapp",
-      targetDir: "/tmp/openclaw-plugins/whatsapp",
+      targetDir: "/tmp/bot-plugins/whatsapp",
       version: "1.2.3",
       clawhub: {
         source: "clawhub",
         clawhubUrl: "https://clawhub.ai",
-        clawhubPackage: "@openclaw/whatsapp",
+        clawhubPackage: "@hanzo/bot-whatsapp",
         clawhubFamily: "code-plugin",
         clawhubChannel: "official",
         version: "1.2.3",
@@ -1922,16 +1922,16 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         },
       },
       env: {
-        OPENCLAW_COMPATIBILITY_HOST_VERSION: "2026.5.19",
-        OPENCLAW_UPDATE_POST_CORE_CONVERGENCE: "1",
+        BOT_COMPATIBILITY_HOST_VERSION: "2026.5.19",
+        BOT_UPDATE_POST_CORE_CONVERGENCE: "1",
       },
     });
 
     expectRecordFields(mockCallArg(mocks.installPluginFromClawHub), {
-      spec: expectedClawHubInstallSpec("clawhub:@openclaw/whatsapp"),
+      spec: expectedClawHubInstallSpec("clawhub:@hanzo/bot-whatsapp"),
       env: {
-        OPENCLAW_COMPATIBILITY_HOST_VERSION: "2026.5.19",
-        OPENCLAW_UPDATE_POST_CORE_CONVERGENCE: "1",
+        BOT_COMPATIBILITY_HOST_VERSION: "2026.5.19",
+        BOT_UPDATE_POST_CORE_CONVERGENCE: "1",
       },
       mode: "install",
     });
@@ -1939,17 +1939,17 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     expect(result.warnings).toEqual([]);
     expectRecordFields(result.records.whatsapp, {
       source: "clawhub",
-      spec: "clawhub:@openclaw/whatsapp",
-      installPath: "/tmp/openclaw-plugins/whatsapp",
-      clawhubPackage: "@openclaw/whatsapp",
+      spec: "clawhub:@hanzo/bot-whatsapp",
+      installPath: "/tmp/bot-plugins/whatsapp",
+      clawhubPackage: "@hanzo/bot-whatsapp",
     });
   });
 
-  it("repairs missing external payload during post-core convergence even with OPENCLAW_UPDATE_IN_PROGRESS=1", async () => {
+  it("repairs missing external payload during post-core convergence even with BOT_UPDATE_IN_PROGRESS=1", async () => {
     const records = {
       discord: {
         source: "npm",
-        spec: "@openclaw/discord",
+        spec: "@hanzo/bot-discord",
         installPath: "/missing/discord",
       },
     };
@@ -1959,7 +1959,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         id: "discord",
         pluginId: "discord",
         meta: { label: "Discord" },
-        install: { npmSpec: "@openclaw/discord" },
+        install: { npmSpec: "@hanzo/bot-discord" },
       },
     ]);
     mocks.updateNpmInstalledPlugins.mockResolvedValue({
@@ -1984,8 +1984,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         },
       },
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_POST_CORE_CONVERGENCE: "1",
+        BOT_UPDATE_IN_PROGRESS: "1",
+        BOT_UPDATE_POST_CORE_CONVERGENCE: "1",
       },
     });
 
@@ -2002,7 +2002,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       discord: {
         source: "npm",
-        spec: "@openclaw/discord",
+        spec: "@hanzo/bot-discord",
         installPath: "/missing/discord",
       },
     };
@@ -2013,7 +2013,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "discord",
         meta: { label: "Discord" },
         install: {
-          npmSpec: "@openclaw/discord",
+          npmSpec: "@hanzo/bot-discord",
         },
       },
     ]);
@@ -2027,8 +2027,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         },
       },
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
+        BOT_UPDATE_IN_PROGRESS: "1",
+        BOT_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
       },
     });
 
@@ -2038,11 +2038,11 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     expect(mocks.writePersistedInstalledPluginIndexInstallRecords).not.toHaveBeenCalled();
     expect(result).toEqual({
       changes: [
-        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "openclaw doctor --fix" after the update completes.',
+        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "bot doctor --fix" after the update completes.',
       ],
       warnings: [],
       deferredRepairDetails: [
-        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "openclaw doctor --fix" after the update completes.',
+        'Skipped package-manager repair for configured plugin "discord" during package update; rerun "bot doctor --fix" after the update completes.',
       ],
       records,
     });
@@ -2055,7 +2055,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "discord",
         meta: { label: "Discord" },
         install: {
-          npmSpec: "@openclaw/discord",
+          npmSpec: "@hanzo/bot-discord",
         },
       },
     ]);
@@ -2069,8 +2069,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         },
       },
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
-        OPENCLAW_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
+        BOT_UPDATE_IN_PROGRESS: "1",
+        BOT_UPDATE_DEFER_CONFIGURED_PLUGIN_INSTALL_REPAIR: "1",
       },
     });
 
@@ -2085,7 +2085,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "discord",
-        npmSpec: "@openclaw/discord",
+        npmSpec: "@hanzo/bot-discord",
         version: "2026.5.17",
         resolution: {
           resolvedAt: "2026-05-17T00:00:00.000Z",
@@ -2098,7 +2098,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "discord",
         meta: { label: "Discord" },
         install: {
-          npmSpec: "@openclaw/discord",
+          npmSpec: "@hanzo/bot-discord",
         },
       },
     ]);
@@ -2112,17 +2112,17 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         },
       },
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
+        BOT_UPDATE_IN_PROGRESS: "1",
       },
     });
 
     expect(mocks.installPluginFromNpmSpec).toHaveBeenCalledTimes(1);
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "discord" from ${expectedNpmInstallSpec("@openclaw/discord")}.`,
+      `Installed missing configured plugin "discord" from ${expectedNpmInstallSpec("@hanzo/bot-discord")}.`,
     ]);
     expectRecordFields(result.records.discord, {
       source: "npm",
-      installPath: "/tmp/openclaw-plugins/discord",
+      installPath: "/tmp/bot-plugins/discord",
     });
   });
 
@@ -2130,7 +2130,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "whatsapp",
-        npmSpec: "@openclaw/whatsapp",
+        npmSpec: "@hanzo/bot-whatsapp",
         version: "2026.5.17",
         resolution: {
           resolvedAt: "2026-05-17T00:00:00.000Z",
@@ -2143,8 +2143,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "whatsapp",
         meta: { label: "WhatsApp" },
         install: {
-          clawhubSpec: "clawhub:@openclaw/whatsapp",
-          npmSpec: "@openclaw/whatsapp",
+          clawhubSpec: "clawhub:@hanzo/bot-whatsapp",
+          npmSpec: "@hanzo/bot-whatsapp",
           defaultChoice: "clawhub",
         },
       },
@@ -2159,21 +2159,21 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         },
       },
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
+        BOT_UPDATE_IN_PROGRESS: "1",
       },
     });
 
     expect(mocks.installPluginFromClawHub).not.toHaveBeenCalled();
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/whatsapp"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-whatsapp"),
       expectedPluginId: "whatsapp",
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "whatsapp" from ${expectedNpmInstallSpec("@openclaw/whatsapp")}.`,
+      `Installed missing configured plugin "whatsapp" from ${expectedNpmInstallSpec("@hanzo/bot-whatsapp")}.`,
     ]);
     expectRecordFields(result.records.whatsapp, {
       source: "npm",
-      installPath: "/tmp/openclaw-plugins/whatsapp",
+      installPath: "/tmp/bot-plugins/whatsapp",
     });
   });
 
@@ -2184,7 +2184,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          clawhubSpec: "clawhub:@openclaw/plugin-matrix@stable",
+          clawhubSpec: "clawhub:@hanzo/bot-plugin-matrix@stable",
           defaultChoice: "clawhub",
         },
       },
@@ -2199,17 +2199,17 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         },
       },
       env: {
-        OPENCLAW_UPDATE_IN_PROGRESS: "1",
+        BOT_UPDATE_IN_PROGRESS: "1",
       },
     });
 
     expectRecordFields(mockCallArg(mocks.installPluginFromClawHub), {
-      spec: "clawhub:@openclaw/plugin-matrix@stable",
+      spec: "clawhub:@hanzo/bot-plugin-matrix@stable",
       expectedPluginId: "matrix",
     });
     expect(mocks.installPluginFromNpmSpec).not.toHaveBeenCalled();
     expect(result.changes).toEqual([
-      'Installed missing configured plugin "matrix" from clawhub:@openclaw/plugin-matrix@stable.',
+      'Installed missing configured plugin "matrix" from clawhub:@hanzo/bot-plugin-matrix@stable.',
     ]);
   });
 
@@ -2220,7 +2220,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          npmSpec: "@openclaw/plugin-matrix@1.2.3",
+          npmSpec: "@hanzo/bot-plugin-matrix@1.2.3",
         },
       },
     ]);
@@ -2229,7 +2229,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         id: "codex",
         label: "Codex",
         install: {
-          npmSpec: "@openclaw/codex",
+          npmSpec: "@hanzo/bot-codex",
           defaultChoice: "npm",
         },
       },
@@ -2237,7 +2237,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         id: "diagnostics-otel",
         label: "Diagnostics OpenTelemetry",
         install: {
-          npmSpec: "@openclaw/diagnostics-otel",
+          npmSpec: "@hanzo/bot-diagnostics-otel",
           defaultChoice: "npm",
         },
       },
@@ -2292,7 +2292,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "wecom",
-        npmSpec: "@wecom/wecom-openclaw-plugin",
+        npmSpec: "@wecom/wecom-bot-plugin",
         version: "2026.4.23",
         resolution: {
           integrity: "sha512-third-party",
@@ -2305,7 +2305,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "wecom",
         meta: { label: "WeCom" },
         install: {
-          npmSpec: "@wecom/wecom-openclaw-plugin@2026.4.23",
+          npmSpec: "@wecom/wecom-bot-plugin@2026.4.23",
         },
       },
     ]);
@@ -2322,12 +2322,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     expect(mocks.installPluginFromClawHub).not.toHaveBeenCalled();
     const installArg = mockCallArg(mocks.installPluginFromNpmSpec);
     expectRecordFields(installArg, {
-      spec: "@wecom/wecom-openclaw-plugin@2026.4.23",
+      spec: "@wecom/wecom-bot-plugin@2026.4.23",
       expectedPluginId: "wecom",
     });
     expect(installArg).not.toHaveProperty("trustedSourceLinkedOfficialInstall", true);
     expect(result.changes).toEqual([
-      'Installed missing configured plugin "wecom" from @wecom/wecom-openclaw-plugin@2026.4.23.',
+      'Installed missing configured plugin "wecom" from @wecom/wecom-bot-plugin@2026.4.23.',
     ]);
   });
 
@@ -2347,7 +2347,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
                   transport: "stdio-proxy",
                   command: "codex",
                   args: ["app-server", "--listen", "stdio://"],
-                  cwd: "/tmp/openclaw",
+                  cwd: "/tmp/bot",
                 },
               ],
               allowRawTranscripts: true,
@@ -2359,7 +2359,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expect(migration.next).not.toBeNull();
-    const cfg = migration.next as OpenClawConfig;
+    const cfg = migration.next as BotConfig;
     expect(cfg.plugins?.allow).toEqual(["codex"]);
     expect(cfg.plugins?.entries?.codex).toEqual({
       enabled: true,
@@ -2373,7 +2373,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
               transport: "stdio-proxy",
               command: "codex",
               args: ["app-server", "--listen", "stdio://"],
-              cwd: "/tmp/openclaw",
+              cwd: "/tmp/bot",
             },
           ],
           allowRawTranscripts: true,
@@ -2392,7 +2392,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "codex",
-        npmSpec: "@openclaw/codex",
+        npmSpec: "@hanzo/bot-codex",
         version: "2026.7.2",
         resolution: {
           integrity: "sha512-codex-supervisor-upgrade",
@@ -2405,7 +2405,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         id: "codex",
         label: "Codex",
         install: {
-          npmSpec: "@openclaw/codex",
+          npmSpec: "@hanzo/bot-codex",
           defaultChoice: "npm",
         },
       },
@@ -2421,22 +2421,22 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/codex"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-codex"),
       expectedPluginId: "codex",
       trustedSourceLinkedOfficialInstall: true,
     });
     const records = mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords);
     expectRecordFields((records as Record<string, unknown>).codex, {
       source: "npm",
-      spec: "@openclaw/codex",
-      installPath: "/tmp/openclaw-plugins/codex",
+      spec: "@hanzo/bot-codex",
+      installPath: "/tmp/bot-plugins/codex",
       version: "2026.7.2",
-      resolvedName: "@openclaw/codex",
-      resolvedSpec: "@openclaw/codex@2026.7.2",
+      resolvedName: "@hanzo/bot-codex",
+      resolvedSpec: "@hanzo/bot-codex@2026.7.2",
       integrity: "sha512-codex-supervisor-upgrade",
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "codex" from ${expectedNpmInstallSpec("@openclaw/codex")}.`,
+      `Installed missing configured plugin "codex" from ${expectedNpmInstallSpec("@hanzo/bot-codex")}.`,
     ]);
     expect(result.warnings).toEqual([]);
     expect(result.repairedPluginIds).toEqual(["codex"]);
@@ -2447,7 +2447,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "codex",
-        npmSpec: "@openclaw/codex",
+        npmSpec: "@hanzo/bot-codex",
         version: "2026.5.2",
       }),
     );
@@ -2456,7 +2456,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         id: "codex",
         label: "Codex",
         install: {
-          npmSpec: "@openclaw/codex",
+          npmSpec: "@hanzo/bot-codex",
           defaultChoice: "npm",
         },
       },
@@ -2479,22 +2479,22 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
     expect(mocks.resolveProviderInstallCatalogEntries).toHaveBeenCalled();
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/codex"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-codex"),
       expectedPluginId: "codex",
       trustedSourceLinkedOfficialInstall: true,
     });
     const records = mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords);
     expectRecordFields((records as Record<string, unknown>).codex, {
       source: "npm",
-      spec: "@openclaw/codex",
-      installPath: "/tmp/openclaw-plugins/codex",
+      spec: "@hanzo/bot-codex",
+      installPath: "/tmp/bot-plugins/codex",
       version: "2026.5.2",
     });
     expect(mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords, 0, 1)).toEqual({
       env: {},
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "codex" from ${expectedNpmInstallSpec("@openclaw/codex")}.`,
+      `Installed missing configured plugin "codex" from ${expectedNpmInstallSpec("@hanzo/bot-codex")}.`,
     ]);
     expect(result.warnings).toStrictEqual([]);
   });
@@ -2503,14 +2503,14 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const installDir = makeTempDir();
     fs.writeFileSync(
       path.join(installDir, "package.json"),
-      JSON.stringify({ name: "@openclaw/codex", version: "2026.5.6" }),
+      JSON.stringify({ name: "@hanzo/bot-codex", version: "2026.5.6" }),
     );
     const records = {
       codex: {
         source: "npm",
-        spec: "@openclaw/codex",
-        resolvedName: "@openclaw/codex",
-        resolvedSpec: "@openclaw/codex@2026.5.6",
+        spec: "@hanzo/bot-codex",
+        resolvedName: "@hanzo/bot-codex",
+        resolvedSpec: "@hanzo/bot-codex@2026.5.6",
         resolvedVersion: "2026.5.6",
         version: "2026.5.6",
         integrity: "sha512-old-codex",
@@ -2541,7 +2541,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "codex",
-        npmSpec: "@openclaw/codex",
+        npmSpec: "@hanzo/bot-codex",
         version: VERSION,
         resolution: {
           integrity: "sha512-new-codex",
@@ -2553,7 +2553,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         id: "codex",
         label: "Codex",
         install: {
-          npmSpec: "@openclaw/codex",
+          npmSpec: "@hanzo/bot-codex",
           defaultChoice: "npm",
         },
       },
@@ -2575,38 +2575,38 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     expect(mocks.resolveDirectBundledProviderPolicySurface).toHaveBeenCalledWith("openai");
     expect(mocks.updateNpmInstalledPlugins).not.toHaveBeenCalled();
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/codex"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-codex"),
       expectedPluginId: "codex",
       trustedSourceLinkedOfficialInstall: true,
       mode: "update",
     });
     expect(result.changes).toEqual([
-      `Refreshed stale configured plugin "codex" from ${expectedNpmInstallSpec("@openclaw/codex")}.`,
+      `Refreshed stale configured plugin "codex" from ${expectedNpmInstallSpec("@hanzo/bot-codex")}.`,
     ]);
     expectRecordFields(result.records.codex, {
       source: "npm",
-      spec: "@openclaw/codex",
-      installPath: "/tmp/openclaw-plugins/codex",
+      spec: "@hanzo/bot-codex",
+      installPath: "/tmp/bot-plugins/codex",
       version: VERSION,
-      resolvedName: "@openclaw/codex",
+      resolvedName: "@hanzo/bot-codex",
       resolvedVersion: VERSION,
-      resolvedSpec: `@openclaw/codex@${VERSION}`,
+      resolvedSpec: `@hanzo/bot-codex@${VERSION}`,
     });
   });
 
   it("does not refresh a converged beta Codex runtime plugin on the second doctor pass", async () => {
-    const codexBetaVersion = `${currentOpenClawReleaseBase()}-beta.4`;
+    const codexBetaVersion = `${currentBotReleaseBase()}-beta.4`;
     const installDir = makeTempDir();
     fs.writeFileSync(
       path.join(installDir, "package.json"),
-      JSON.stringify({ name: "@openclaw/codex", version: "2026.5.6" }),
+      JSON.stringify({ name: "@hanzo/bot-codex", version: "2026.5.6" }),
     );
     const records = {
       codex: {
         source: "npm",
-        spec: "@openclaw/codex",
-        resolvedName: "@openclaw/codex",
-        resolvedSpec: "@openclaw/codex@2026.5.6",
+        spec: "@hanzo/bot-codex",
+        resolvedName: "@hanzo/bot-codex",
+        resolvedSpec: "@hanzo/bot-codex@2026.5.6",
         resolvedVersion: "2026.5.6",
         version: "2026.5.6",
         integrity: "sha512-old-codex",
@@ -2637,7 +2637,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "codex",
-        npmSpec: "@openclaw/codex",
+        npmSpec: "@hanzo/bot-codex",
         targetDir: installDir,
         version: codexBetaVersion,
         resolution: {
@@ -2650,7 +2650,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         id: "codex",
         label: "Codex",
         install: {
-          npmSpec: "@openclaw/codex",
+          npmSpec: "@hanzo/bot-codex",
           defaultChoice: "npm",
         },
       },
@@ -2672,22 +2672,22 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: "@openclaw/codex@beta",
+      spec: "@hanzo/bot-codex@beta",
       expectedPluginId: "codex",
       trustedSourceLinkedOfficialInstall: true,
       mode: "update",
     });
     expect(firstPass.changes).toEqual([
-      'Refreshed stale configured plugin "codex" from @openclaw/codex@beta.',
+      'Refreshed stale configured plugin "codex" from @hanzo/bot-codex@beta.',
     ]);
     expectRecordFields(firstPass.records.codex, {
       source: "npm",
-      spec: "@openclaw/codex",
+      spec: "@hanzo/bot-codex",
       installPath: installDir,
       version: codexBetaVersion,
-      resolvedName: "@openclaw/codex",
+      resolvedName: "@hanzo/bot-codex",
       resolvedVersion: codexBetaVersion,
-      resolvedSpec: `@openclaw/codex@${codexBetaVersion}`,
+      resolvedSpec: `@hanzo/bot-codex@${codexBetaVersion}`,
     });
 
     mocks.installPluginFromNpmSpec.mockClear();
@@ -2728,14 +2728,14 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const installDir = makeTempDir();
     fs.writeFileSync(
       path.join(installDir, "package.json"),
-      JSON.stringify({ name: "@openclaw/codex", version: "9999.1.1" }),
+      JSON.stringify({ name: "@hanzo/bot-codex", version: "9999.1.1" }),
     );
     const records = {
       codex: {
         source: "npm",
-        spec: "@openclaw/codex",
-        resolvedName: "@openclaw/codex",
-        resolvedSpec: "@openclaw/codex@9999.1.1",
+        spec: "@hanzo/bot-codex",
+        resolvedName: "@hanzo/bot-codex",
+        resolvedSpec: "@hanzo/bot-codex@9999.1.1",
         resolvedVersion: "9999.1.1",
         version: "9999.1.1",
         integrity: "sha512-newer-codex",
@@ -2857,7 +2857,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "codex",
-        npmSpec: "@openclaw/codex",
+        npmSpec: "@hanzo/bot-codex",
         version: "2026.5.2",
       }),
     );
@@ -2866,7 +2866,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         id: "codex",
         label: "Codex",
         install: {
-          npmSpec: "@openclaw/codex",
+          npmSpec: "@hanzo/bot-codex",
           defaultChoice: "npm",
         },
       },
@@ -2880,32 +2880,32 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/codex"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-codex"),
       expectedPluginId: "codex",
       trustedSourceLinkedOfficialInstall: true,
     });
     const records = mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords);
     expectRecordFields((records as Record<string, unknown>).codex, {
       source: "npm",
-      spec: "@openclaw/codex",
-      installPath: "/tmp/openclaw-plugins/codex",
+      spec: "@hanzo/bot-codex",
+      installPath: "/tmp/bot-plugins/codex",
       version: "2026.5.2",
     });
     expect(mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords, 0, 1)).toEqual({
       env,
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "codex" from ${expectedNpmInstallSpec("@openclaw/codex")}.`,
+      `Installed missing configured plugin "codex" from ${expectedNpmInstallSpec("@hanzo/bot-codex")}.`,
     ]);
     expect(result.warnings).toEqual([]);
     expect(Object.keys(result.records)).toEqual(["codex"]);
     expectRecordFields(result.records.codex, {
       source: "npm",
-      spec: "@openclaw/codex",
-      installPath: "/tmp/openclaw-plugins/codex",
+      spec: "@hanzo/bot-codex",
+      installPath: "/tmp/bot-plugins/codex",
       version: "2026.5.2",
-      resolvedName: "@openclaw/codex",
-      resolvedSpec: "@openclaw/codex@2026.5.2",
+      resolvedName: "@hanzo/bot-codex",
+      resolvedSpec: "@hanzo/bot-codex@2026.5.2",
       integrity: "sha512-codex",
       resolvedAt: "2026-05-01T00:00:00.000Z",
     });
@@ -2933,14 +2933,14 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       },
       {},
     ],
-    ["environment runtime override", {}, { OPENCLAW_AGENT_RUNTIME: "codex" }],
+    ["environment runtime override", {}, { BOT_AGENT_RUNTIME: "codex" }],
   ])("ignores legacy whole-agent Codex runtime selected by %s", async (_label, cfg, env) => {
     mocks.listOfficialExternalPluginCatalogEntries.mockReturnValue([
       {
         id: "codex",
         label: "Codex",
         install: {
-          npmSpec: "@openclaw/codex",
+          npmSpec: "@hanzo/bot-codex",
           defaultChoice: "npm",
         },
       },
@@ -2965,7 +2965,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "matrix",
         meta: { label: "Matrix" },
         install: {
-          npmSpec: "@openclaw/plugin-matrix@1.2.3",
+          npmSpec: "@hanzo/bot-plugin-matrix@1.2.3",
         },
       },
     ]);
@@ -2989,7 +2989,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.loadPluginMetadataSnapshot.mockReturnValue({
       plugins: [
         {
-          id: "openclaw-lark",
+          id: "bot-lark",
           origin: "config",
           channels: ["feishu"],
           channelConfigs: {
@@ -3009,7 +3009,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "feishu",
         meta: { label: "Feishu" },
         install: {
-          npmSpec: "@openclaw/feishu",
+          npmSpec: "@hanzo/bot-feishu",
         },
         trustedSourceLinkedOfficialInstall: true,
       },
@@ -3021,7 +3021,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       cfg: {
         plugins: {
           entries: {
-            "openclaw-lark": {
+            "bot-lark": {
               enabled: true,
             },
           },
@@ -3047,7 +3047,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.loadPluginMetadataSnapshot.mockReturnValue({
       plugins: [
         {
-          id: "openclaw-lark",
+          id: "bot-lark",
           origin: "config",
           channels: ["feishu"],
           channelConfigs: {
@@ -3067,7 +3067,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "feishu",
         meta: { label: "Feishu" },
         install: {
-          npmSpec: "@openclaw/feishu",
+          npmSpec: "@hanzo/bot-feishu",
         },
         trustedSourceLinkedOfficialInstall: true,
       },
@@ -3075,7 +3075,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "feishu",
-        npmSpec: "@openclaw/feishu",
+        npmSpec: "@hanzo/bot-feishu",
         version: "2026.5.2",
       }),
     );
@@ -3087,7 +3087,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         plugins: {
           allow: ["some-other-plugin"],
           entries: {
-            "openclaw-lark": {
+            "bot-lark": {
               enabled: true,
             },
           },
@@ -3104,12 +3104,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/feishu"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-feishu"),
       expectedPluginId: "feishu",
       trustedSourceLinkedOfficialInstall: true,
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "feishu" from ${expectedNpmInstallSpec("@openclaw/feishu")}.`,
+      `Installed missing configured plugin "feishu" from ${expectedNpmInstallSpec("@hanzo/bot-feishu")}.`,
     ]);
   });
 
@@ -3117,7 +3117,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.loadPluginMetadataSnapshot.mockReturnValue({
       plugins: [
         {
-          id: "openclaw-lark",
+          id: "bot-lark",
           origin: "config",
           channels: ["feishu"],
           channelConfigs: {
@@ -3137,7 +3137,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
         pluginId: "feishu",
         meta: { label: "Feishu" },
         install: {
-          npmSpec: "@openclaw/feishu",
+          npmSpec: "@hanzo/bot-feishu",
         },
         trustedSourceLinkedOfficialInstall: true,
       },
@@ -3145,7 +3145,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "feishu",
-        npmSpec: "@openclaw/feishu",
+        npmSpec: "@hanzo/bot-feishu",
         version: "2026.5.2",
       }),
     );
@@ -3159,7 +3159,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
             feishu: {
               enabled: true,
             },
-            "openclaw-lark": {
+            "bot-lark": {
               enabled: true,
             },
           },
@@ -3176,12 +3176,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/feishu"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-feishu"),
       expectedPluginId: "feishu",
       trustedSourceLinkedOfficialInstall: true,
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "feishu" from ${expectedNpmInstallSpec("@openclaw/feishu")}.`,
+      `Installed missing configured plugin "feishu" from ${expectedNpmInstallSpec("@hanzo/bot-feishu")}.`,
     ]);
   });
 
@@ -3189,7 +3189,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       demo: {
         source: "npm",
-        spec: "@openclaw/plugin-demo@1.0.0",
+        spec: "@hanzo/bot-plugin-demo@1.0.0",
         installPath: "/missing/demo",
       },
     };
@@ -3201,8 +3201,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
           installs: {
             demo: {
               source: "npm",
-              spec: "@openclaw/plugin-demo@1.0.0",
-              installPath: "/tmp/openclaw-plugins/demo",
+              spec: "@hanzo/bot-plugin-demo@1.0.0",
+              installPath: "/tmp/bot-plugins/demo",
             },
           },
         },
@@ -3236,7 +3236,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     expectRecordFields(updateConfig.plugins, { installs: records });
     const persistedRecords = mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords);
     expectRecordFields((persistedRecords as Record<string, unknown>).demo, {
-      installPath: "/tmp/openclaw-plugins/demo",
+      installPath: "/tmp/bot-plugins/demo",
     });
     expect(mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords, 0, 1)).toEqual({
       env: {},
@@ -3248,8 +3248,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       demo: {
         source: "clawhub",
-        spec: "clawhub:@openclaw/plugin-demo@1.0.0",
-        clawhubPackage: "@openclaw/plugin-demo",
+        spec: "clawhub:@hanzo/bot-plugin-demo@1.0.0",
+        clawhubPackage: "@hanzo/bot-plugin-demo",
         installPath: "/missing/demo",
       },
     };
@@ -3262,8 +3262,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
           installs: {
             demo: {
               source: "clawhub",
-              spec: "clawhub:@openclaw/plugin-demo@1.0.0",
-              installPath: "/tmp/openclaw-plugins/demo",
+              spec: "clawhub:@hanzo/bot-plugin-demo@1.0.0",
+              installPath: "/tmp/bot-plugins/demo",
             },
           },
         },
@@ -3306,12 +3306,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       demo: {
         source: "npm",
-        spec: "@openclaw/plugin-demo@1.0.0",
+        spec: "@hanzo/bot-plugin-demo@1.0.0",
         installPath: "/missing/demo",
       },
     };
     const repairWarning =
-      'Could not repair openclaw peer link for "demo" at /tmp/openclaw-plugins/demo: permission denied';
+      'Could not repair bot peer link for "demo" at /tmp/bot-plugins/demo: permission denied';
     mocks.loadInstalledPluginIndexInstallRecords.mockResolvedValue(records);
     mocks.updateNpmInstalledPlugins.mockImplementationOnce(
       async (params: {
@@ -3326,8 +3326,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
               installs: {
                 demo: {
                   source: "npm",
-                  spec: "@openclaw/plugin-demo@1.0.0",
-                  installPath: "/tmp/openclaw-plugins/demo",
+                  spec: "@hanzo/bot-plugin-demo@1.0.0",
+                  installPath: "/tmp/bot-plugins/demo",
                 },
               },
             },
@@ -3364,8 +3364,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       demo: {
         source: "clawhub",
-        spec: "clawhub:@openclaw/plugin-demo@1.0.0",
-        clawhubPackage: "@openclaw/plugin-demo",
+        spec: "clawhub:@hanzo/bot-plugin-demo@1.0.0",
+        clawhubPackage: "@hanzo/bot-plugin-demo",
         installPath: "/missing/demo",
       },
     };
@@ -3388,8 +3388,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
               installs: {
                 demo: {
                   source: "clawhub",
-                  spec: "clawhub:@openclaw/plugin-demo@1.0.0",
-                  installPath: "/tmp/openclaw-plugins/demo",
+                  spec: "clawhub:@hanzo/bot-plugin-demo@1.0.0",
+                  installPath: "/tmp/bot-plugins/demo",
                 },
               },
             },
@@ -3427,8 +3427,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       demo: {
         source: "clawhub",
-        spec: "clawhub:@openclaw/plugin-demo@1.0.0",
-        clawhubPackage: "@openclaw/plugin-demo",
+        spec: "clawhub:@hanzo/bot-plugin-demo@1.0.0",
+        clawhubPackage: "@hanzo/bot-plugin-demo",
         installPath: "/missing/demo",
       },
     };
@@ -3442,7 +3442,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
           status: "skipped",
           code: CLAWHUB_INSTALL_ERROR_CODE.CLAWHUB_RISK_ACKNOWLEDGEMENT_REQUIRED,
           message:
-            'Skipped demo ClawHub update: ClawHub release "@openclaw/plugin-demo@1.0.0" has trust warnings. Review the package and rerun with --acknowledge-clawhub-risk to continue. Existing installed plugin left unchanged.',
+            'Skipped demo ClawHub update: ClawHub release "@hanzo/bot-plugin-demo@1.0.0" has trust warnings. Review the package and rerun with --acknowledge-clawhub-risk to continue. Existing installed plugin left unchanged.',
         },
       ],
     });
@@ -3461,7 +3461,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expect(result.warnings[0]).toContain(
-      "openclaw plugins install clawhub:@openclaw/plugin-demo@1.0.0 --acknowledge-clawhub-risk",
+      "bot plugins install clawhub:@hanzo/bot-plugin-demo@1.0.0 --acknowledge-clawhub-risk",
     );
   });
 
@@ -3469,7 +3469,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       demo: {
         source: "clawhub",
-        clawhubPackage: "@openclaw/plugin-demo",
+        clawhubPackage: "@hanzo/bot-plugin-demo",
         installPath: "/missing/demo",
       },
     };
@@ -3483,7 +3483,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
           status: "skipped",
           code: CLAWHUB_INSTALL_ERROR_CODE.CLAWHUB_RISK_ACKNOWLEDGEMENT_REQUIRED,
           message:
-            'Skipped demo ClawHub update: ClawHub release "@openclaw/plugin-demo@latest" has trust warnings. Review the package and rerun with --acknowledge-clawhub-risk to continue. Existing installed plugin left unchanged.',
+            'Skipped demo ClawHub update: ClawHub release "@hanzo/bot-plugin-demo@latest" has trust warnings. Review the package and rerun with --acknowledge-clawhub-risk to continue. Existing installed plugin left unchanged.',
         },
       ],
     });
@@ -3502,7 +3502,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expect(result.warnings[0]).toContain(
-      "openclaw plugins install clawhub:@openclaw/plugin-demo --acknowledge-clawhub-risk",
+      "bot plugins install clawhub:@hanzo/bot-plugin-demo --acknowledge-clawhub-risk",
     );
   });
 
@@ -3510,12 +3510,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const records = {
       demo: {
         source: "npm",
-        spec: "@openclaw/plugin-demo@1.0.0",
-        resolvedName: "@openclaw/plugin-demo",
-        resolvedSpec: "@openclaw/plugin-demo@1.0.0",
+        spec: "@hanzo/bot-plugin-demo@1.0.0",
+        resolvedName: "@hanzo/bot-plugin-demo",
+        resolvedSpec: "@hanzo/bot-plugin-demo@1.0.0",
         resolvedVersion: "1.0.0",
         integrity: "sha512-demo",
-        installPath: "/tmp/openclaw-plugins/demo",
+        installPath: "/tmp/bot-plugins/demo",
       },
     };
     mocks.loadInstalledPluginIndexInstallRecords.mockResolvedValue(records);
@@ -3536,8 +3536,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
           installs: {
             demo: {
               source: "npm",
-              spec: "@openclaw/plugin-demo@1.0.0",
-              installPath: "/tmp/openclaw-plugins/demo",
+              spec: "@hanzo/bot-plugin-demo@1.0.0",
+              installPath: "/tmp/bot-plugins/demo",
             },
           },
         },
@@ -3564,9 +3564,9 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const updateConfig = updateArg.config as { plugins?: { installs?: Record<string, unknown> } };
     const updateRecord = expectRecordFields(updateConfig.plugins?.installs?.demo, {
       source: "npm",
-      spec: "@openclaw/plugin-demo@1.0.0",
+      spec: "@hanzo/bot-plugin-demo@1.0.0",
       integrity: "sha512-demo",
-      installPath: "/tmp/openclaw-plugins/demo",
+      installPath: "/tmp/bot-plugins/demo",
     });
     expect(updateRecord.resolvedSpec).toBeUndefined();
     expect(updateRecord.resolvedVersion).toBeUndefined();
@@ -3575,8 +3575,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
   it("reinstalls a known configured plugin from the catalog when its recorded install path is missing", async () => {
     const records = installedRecords("discord", {
-      spec: "@openclaw/discord",
-      installPath: "/tmp/openclaw-missing-discord-install-record",
+      spec: "@hanzo/bot-discord",
+      installPath: "/tmp/bot-missing-discord-install-record",
     });
     mocks.loadInstalledPluginIndexInstallRecords.mockResolvedValue(records);
     mocks.loadPluginMetadataSnapshot.mockReturnValue({
@@ -3591,7 +3591,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.listChannelPluginCatalogEntries.mockReturnValue([
       channelPluginEntry({
         id: "discord",
-        npmSpec: "@openclaw/discord",
+        npmSpec: "@hanzo/bot-discord",
         label: "Discord",
         trustedSourceLinkedOfficialInstall: true,
       }),
@@ -3599,7 +3599,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "discord",
-        npmSpec: "@openclaw/discord",
+        npmSpec: "@hanzo/bot-discord",
         version: "1.2.3",
       }),
     );
@@ -3636,26 +3636,26 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     const updateConfig = updateArg.config as Record<string, unknown>;
     expectRecordFields(updateConfig.plugins, { installs: records });
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/discord"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-discord"),
       expectedPluginId: "discord",
       trustedSourceLinkedOfficialInstall: true,
     });
     const persistedRecords = mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords);
     expectRecordFields((persistedRecords as Record<string, unknown>).discord, {
-      spec: "@openclaw/discord",
-      installPath: "/tmp/openclaw-plugins/discord",
+      spec: "@hanzo/bot-discord",
+      installPath: "/tmp/bot-plugins/discord",
     });
     expect(mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords, 0, 1)).toEqual({
       env: {},
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "discord" from ${expectedNpmInstallSpec("@openclaw/discord")}.`,
+      `Installed missing configured plugin "discord" from ${expectedNpmInstallSpec("@hanzo/bot-discord")}.`,
     ]);
   });
 
   it("updates a known configured plugin when its installed manifest path still exists", async () => {
     const records = installedRecords("discord", {
-      spec: "@openclaw/discord",
+      spec: "@hanzo/bot-discord",
       installPath: process.cwd(),
     });
     mocks.loadInstalledPluginIndexInstallRecords.mockResolvedValue(records);
@@ -3677,7 +3677,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       successfulUpdate(
         "discord",
         installedRecords("discord", {
-          spec: "@openclaw/discord",
+          spec: "@hanzo/bot-discord",
           installPath: process.cwd(),
         }),
       ),
@@ -3711,14 +3711,14 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
   it("updates a configured plugin when its installed manifest lacks channel config descriptors", async () => {
     const records = installedRecords("discord", {
-      spec: "@openclaw/discord",
-      installPath: "/tmp/openclaw-plugins/discord",
+      spec: "@hanzo/bot-discord",
+      installPath: "/tmp/bot-plugins/discord",
     });
     mocks.loadInstalledPluginIndexInstallRecords.mockResolvedValue(records);
     mocks.listChannelPluginCatalogEntries.mockReturnValue([
       channelPluginEntry({
         id: "discord",
-        npmSpec: "@openclaw/discord",
+        npmSpec: "@hanzo/bot-discord",
         label: "Discord",
       }),
     ]);
@@ -3734,7 +3734,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
           level: "warn",
           pluginId: "discord",
           message:
-            "channel plugin manifest declares discord without channelConfigs metadata; add openclaw.plugin.json#channelConfigs so config schema and setup surfaces work before runtime loads",
+            "channel plugin manifest declares discord without channelConfigs metadata; add bot.plugin.json#channelConfigs so config schema and setup surfaces work before runtime loads",
         },
       ],
     });
@@ -3742,7 +3742,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       successfulUpdate(
         "discord",
         installedRecords("discord", {
-          spec: "@openclaw/discord",
+          spec: "@hanzo/bot-discord",
           installPath: process.cwd(),
         }),
       ),
@@ -3778,7 +3778,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       warnings: [],
       repairedPluginIds: ["discord"],
       records: installedRecords("discord", {
-        spec: "@openclaw/discord",
+        spec: "@hanzo/bot-discord",
         installPath: process.cwd(),
       }),
     });
@@ -3786,14 +3786,14 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
   it("reinstalls a recorded external web search plugin from provider-only config", async () => {
     const records = installedRecords("brave", {
-      spec: "@openclaw/brave-plugin@beta",
+      spec: "@hanzo/bot-brave-plugin@beta",
       installPath: "/missing/brave",
     });
     mocks.loadInstalledPluginIndexInstallRecords.mockResolvedValue(records);
     mocks.listOfficialExternalPluginCatalogEntries.mockReturnValue([
       officialWebSearchPluginEntry({
         id: "brave",
-        npmSpec: "@openclaw/brave-plugin",
+        npmSpec: "@hanzo/bot-brave-plugin",
         envVar: "BRAVE_API_KEY",
         label: "Brave",
         providerLabel: "Brave Search",
@@ -3803,7 +3803,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       successfulUpdate(
         "brave",
         installedRecords("brave", {
-          spec: "@openclaw/brave-plugin@beta",
+          spec: "@hanzo/bot-brave-plugin@beta",
           installPath: process.cwd(),
         }),
       ),
@@ -3838,18 +3838,18 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     {
       name: "replaces a configured official web search plugin when its installed package is source-only",
       pluginId: "brave",
-      npmSpec: "@openclaw/brave-plugin",
-      priorSpec: "clawhub:@openclaw/brave-plugin@2026.5.1-beta.1",
-      targetDir: "/tmp/openclaw-plugins/brave",
-      cfg: { tools: { web: { search: { provider: "brave" } } } } satisfies OpenClawConfig,
+      npmSpec: "@hanzo/bot-brave-plugin",
+      priorSpec: "clawhub:@hanzo/bot-brave-plugin@2026.5.1-beta.1",
+      targetDir: "/tmp/bot-plugins/brave",
+      cfg: { tools: { web: { search: { provider: "brave" } } } } satisfies BotConfig,
       catalogKind: "provider" as const,
     },
     {
       name: "replaces a configured official channel plugin when only its channel is configured",
       pluginId: "slack",
-      npmSpec: "@openclaw/slack",
-      priorSpec: "clawhub:@openclaw/slack@2026.5.12-beta.1",
-      targetDir: "/tmp/openclaw-npm/node_modules/@openclaw/slack",
+      npmSpec: "@hanzo/bot-slack",
+      priorSpec: "clawhub:@hanzo/bot-slack@2026.5.12-beta.1",
+      targetDir: "/tmp/bot-npm/node_modules/@hanzo/bot-slack",
       cfg: { channels: { slack: { enabled: true, botToken: "xoxb-test" } } },
       catalogKind: "channel" as const,
     },
@@ -3927,15 +3927,15 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     fs.writeFileSync(path.join(installDir, "package.json"), JSON.stringify({ name: "brave" }));
     mockBrokenBraveInstall(installDir, {
       source: "clawhub",
-      spec: "clawhub:@openclaw/brave-plugin@2026.5.1-beta.1",
-      clawhubPackage: "@openclaw/brave-plugin",
+      spec: "clawhub:@hanzo/bot-brave-plugin@2026.5.1-beta.1",
+      clawhubPackage: "@hanzo/bot-brave-plugin",
       clawhubChannel: "official",
       clawhubUrl: "https://clawhub.ai",
     });
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "brave",
-        npmSpec: "@openclaw/brave-plugin",
+        npmSpec: "@hanzo/bot-brave-plugin",
         version: "2026.5.12",
       }),
     );
@@ -3962,8 +3962,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     fs.writeFileSync(path.join(installDir, "package.json"), JSON.stringify({ name: "brave" }));
     const records = mockBrokenBraveInstall(installDir, {
       source: "clawhub",
-      spec: "clawhub:@openclaw/brave-plugin@2026.5.1-beta.1",
-      clawhubPackage: "@openclaw/brave-plugin",
+      spec: "clawhub:@hanzo/bot-brave-plugin@2026.5.1-beta.1",
+      clawhubPackage: "@hanzo/bot-brave-plugin",
       clawhubChannel: "official",
       clawhubUrl: "https://clawhub.ai",
     });
@@ -3987,7 +3987,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     expect(result).toEqual({
       changes: [],
       warnings: [
-        `Failed to install missing configured plugin "brave" from ${expectedNpmInstallSpec("@openclaw/brave-plugin")}: network unavailable`,
+        `Failed to install missing configured plugin "brave" from ${expectedNpmInstallSpec("@hanzo/bot-brave-plugin")}: network unavailable`,
       ],
       failedPluginIds: ["brave"],
       records,
@@ -4027,9 +4027,9 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
   it("installs configured external speech and web-fetch plugins from selected providers", async () => {
     const packages = [
-      ["firecrawl", "@openclaw/firecrawl-plugin"],
-      ["gradium", "@openclaw/gradium-speech"],
-      ["inworld", "@openclaw/inworld-speech"],
+      ["firecrawl", "@hanzo/bot-firecrawl-plugin"],
+      ["gradium", "@hanzo/bot-gradium-speech"],
+      ["inworld", "@hanzo/bot-inworld-speech"],
     ] as const;
     mocks.listOfficialExternalPluginCatalogEntries.mockReturnValue(
       packages.map(([id, npmSpec]) =>
@@ -4089,11 +4089,11 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     {
       name: "installs a configured external web search plugin from provider-only config",
       pluginId: "brave",
-      npmSpec: "@openclaw/brave-plugin",
+      npmSpec: "@hanzo/bot-brave-plugin",
       version: "2026.5.2",
       entry: officialWebSearchPluginEntry({
         id: "brave",
-        npmSpec: "@openclaw/brave-plugin",
+        npmSpec: "@hanzo/bot-brave-plugin",
         envVar: "BRAVE_API_KEY",
         label: "Brave",
         providerLabel: "Brave Search",
@@ -4106,25 +4106,25 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     {
       name: "installs a configured external model provider without an auth choice",
       pluginId: "groq",
-      npmSpec: "@openclaw/groq-provider",
+      npmSpec: "@hanzo/bot-groq-provider",
       entry: officialPluginEntry({
         id: "groq",
-        npmSpec: "@openclaw/groq-provider",
+        npmSpec: "@hanzo/bot-groq-provider",
         label: "Groq",
         manifest: { providers: [{ id: "groq" }] },
       }),
       cfg: {
         agents: { defaults: { model: "groq/llama-3.3-70b-versatile" } },
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
       useManifestResolvers: false,
     },
     {
       name: "installs an external media-understanding provider selected only by media config",
       pluginId: "groq",
-      npmSpec: "@openclaw/groq-provider",
+      npmSpec: "@hanzo/bot-groq-provider",
       entry: officialPluginEntry({
         id: "groq",
-        npmSpec: "@openclaw/groq-provider",
+        npmSpec: "@hanzo/bot-groq-provider",
         label: "Groq",
         manifest: { contracts: { mediaUnderstandingProviders: ["groq"] } },
       }),
@@ -4140,22 +4140,22 @@ describe("repairMissingConfiguredPluginInstalls", () => {
             ],
           },
         },
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
       useManifestResolvers: false,
     },
     {
       name: "installs an external speech provider selected only by voiceModel",
       pluginId: "gradium",
-      npmSpec: "@openclaw/gradium-speech",
+      npmSpec: "@hanzo/bot-gradium-speech",
       entry: officialPluginEntry({
         id: "gradium",
-        npmSpec: "@openclaw/gradium-speech",
+        npmSpec: "@hanzo/bot-gradium-speech",
         label: "Gradium",
         manifest: { contracts: { speechProviders: ["gradium"] } },
       }),
       cfg: {
         agents: { defaults: { voiceModel: { primary: "gradium/tts-default" } } },
-      } satisfies OpenClawConfig,
+      } satisfies BotConfig,
       useManifestResolvers: false,
     },
   ])("$name", async ({ pluginId, npmSpec, version, entry, cfg, useManifestResolvers }) => {
@@ -4181,8 +4181,8 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
   it("installs env-only web provider plugins before auto-detection", async () => {
     const packages = [
-      ["exa", "@openclaw/exa-plugin", "EXA_API_KEY"],
-      ["firecrawl", "@openclaw/firecrawl-plugin", "FIRECRAWL_API_KEY"],
+      ["exa", "@hanzo/bot-exa-plugin", "EXA_API_KEY"],
+      ["firecrawl", "@hanzo/bot-firecrawl-plugin", "FIRECRAWL_API_KEY"],
     ] as const;
     mocks.listOfficialExternalPluginCatalogEntries.mockReturnValue(
       packages.map(([id, npmSpec, envVar]) =>
@@ -4226,7 +4226,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.listOfficialExternalPluginCatalogEntries.mockReturnValue([
       officialPluginEntry({
         id: "groq",
-        npmSpec: "@openclaw/groq-provider",
+        npmSpec: "@hanzo/bot-groq-provider",
         label: "Groq",
         manifest: {},
       }),
@@ -4234,7 +4234,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "groq",
-        npmSpec: "@openclaw/groq-provider",
+        npmSpec: "@hanzo/bot-groq-provider",
       }),
     );
 
@@ -4243,12 +4243,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
 
     expect(mocks.resolveOfficialExternalProviderPluginIdsForEnv).toHaveBeenCalledWith(env);
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/groq-provider"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-groq-provider"),
       expectedPluginId: "groq",
       trustedSourceLinkedOfficialInstall: true,
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "groq" from ${expectedNpmInstallSpec("@openclaw/groq-provider")}.`,
+      `Installed missing configured plugin "groq" from ${expectedNpmInstallSpec("@hanzo/bot-groq-provider")}.`,
     ]);
   });
 
@@ -4256,7 +4256,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.listOfficialExternalPluginCatalogEntries.mockReturnValue([
       officialWebSearchPluginEntry({
         id: "brave",
-        npmSpec: "@openclaw/brave-plugin",
+        npmSpec: "@hanzo/bot-brave-plugin",
         envVar: "BRAVE_API_KEY",
         label: "Brave",
         providerLabel: "Brave Search",
@@ -4268,7 +4268,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "brave",
-        npmSpec: "@openclaw/brave-plugin",
+        npmSpec: "@hanzo/bot-brave-plugin",
         version: "2026.5.4-beta.1",
       }),
     );
@@ -4285,7 +4285,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     });
 
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: "@openclaw/brave-plugin@beta",
+      spec: "@hanzo/bot-brave-plugin@beta",
       expectedPluginId: "brave",
       trustedSourceLinkedOfficialInstall: true,
     });
@@ -4293,13 +4293,13 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       mocks.writePersistedInstalledPluginIndexInstallRecords,
     ) as Record<string, unknown>;
     expectRecordFields(persistedRecords.brave, {
-      spec: "@openclaw/brave-plugin",
+      spec: "@hanzo/bot-brave-plugin",
     });
     expect(mockCallArg(mocks.writePersistedInstalledPluginIndexInstallRecords, 0, 1)).toEqual({
       env: {},
     });
     expect(result.changes).toEqual([
-      'Installed missing configured plugin "brave" from @openclaw/brave-plugin@beta.',
+      'Installed missing configured plugin "brave" from @hanzo/bot-brave-plugin@beta.',
     ]);
   });
 
@@ -4337,7 +4337,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
       spec: "@guardrail-bridge/guardrail-bridge@1.0.0",
       expectedPluginId: "guardrail-bridge",
-      extensionsDir: "/tmp/openclaw-plugins",
+      extensionsDir: "/tmp/bot-plugins",
     });
     expect(mockCallArg(mocks.installPluginFromNpmSpec).trustedSourceLinkedOfficialInstall).toBe(
       undefined,
@@ -4346,7 +4346,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     expectRecordFields((records as Record<string, unknown>)["guardrail-bridge"], {
       source: "npm",
       spec: "@guardrail-bridge/guardrail-bridge@1.0.0",
-      installPath: "/tmp/openclaw-plugins/guardrail-bridge",
+      installPath: "/tmp/bot-plugins/guardrail-bridge",
       version: "1.0.0",
       resolvedName: "@guardrail-bridge/guardrail-bridge",
     });
@@ -4361,7 +4361,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.listOfficialExternalPluginCatalogEntries.mockReturnValue([
       officialPluginEntry({
         id: "firecrawl",
-        npmSpec: "@openclaw/firecrawl-plugin",
+        npmSpec: "@hanzo/bot-firecrawl-plugin",
         label: "Firecrawl",
         manifest: {},
       }),
@@ -4369,7 +4369,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.installPluginFromNpmSpec.mockResolvedValueOnce(
       successfulInstall({
         pluginId: "firecrawl",
-        npmSpec: "@openclaw/firecrawl-plugin",
+        npmSpec: "@hanzo/bot-firecrawl-plugin",
       }),
     );
 
@@ -4392,12 +4392,12 @@ describe("repairMissingConfiguredPluginInstalls", () => {
       env,
     });
     expectRecordFields(mockCallArg(mocks.installPluginFromNpmSpec), {
-      spec: expectedNpmInstallSpec("@openclaw/firecrawl-plugin"),
+      spec: expectedNpmInstallSpec("@hanzo/bot-firecrawl-plugin"),
       expectedPluginId: "firecrawl",
       trustedSourceLinkedOfficialInstall: true,
     });
     expect(result.changes).toEqual([
-      `Installed missing configured plugin "firecrawl" from ${expectedNpmInstallSpec("@openclaw/firecrawl-plugin")}.`,
+      `Installed missing configured plugin "firecrawl" from ${expectedNpmInstallSpec("@hanzo/bot-firecrawl-plugin")}.`,
     ]);
   });
 
@@ -4405,7 +4405,7 @@ describe("repairMissingConfiguredPluginInstalls", () => {
     mocks.listOfficialExternalPluginCatalogEntries.mockReturnValue([
       officialWebSearchPluginEntry({
         id: "brave",
-        npmSpec: "@openclaw/brave-plugin",
+        npmSpec: "@hanzo/bot-brave-plugin",
         envVar: "BRAVE_API_KEY",
         label: "Brave",
         providerLabel: "Brave Search",

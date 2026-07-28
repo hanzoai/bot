@@ -1,19 +1,19 @@
 import { createHash } from "node:crypto";
-import { resolveDefaultAgentDir, resolveDefaultAgentId } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { resolveDefaultAgentDir, resolveDefaultAgentId } from "bot/plugin-sdk/agent-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicy,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+  BotPluginApi,
+  BotPluginNodeHostCommand,
+  BotPluginNodeInvokePolicy,
+} from "bot/plugin-sdk/plugin-entry";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
 import {
   listSessionCatalogEntries,
   type SessionCatalogEntrySnapshot,
   type SessionCatalogHost,
   type SessionCatalogProvider,
-} from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/session-catalog";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import { CODEX_CONTROL_METHODS } from "./app-server/capabilities.js";
 import { resolveCodexAppServerClientInstanceId } from "./app-server/client.js";
 import { resolveCodexSupervisionAppServerRuntimeOptions } from "./app-server/config.js";
@@ -174,7 +174,7 @@ function createCodexSessionCatalogControlFromRequests(params: {
             limit: remaining,
             modelProviders: [],
             // Match Codex's resume picker/latest-session ordering so a session
-            // created outside OpenClaw enters the first catalog page immediately.
+            // created outside Bot enters the first catalog page immediately.
             sortKey: "updated_at",
             sortDirection: "desc",
             ...(cwd ? { cwd } : {}),
@@ -234,7 +234,7 @@ function createCodexSessionCatalogControlFromRequests(params: {
 /** Builds the passive catalog over the Codex plugin's canonical shared client. */
 export function createCodexSessionCatalogControl(params: {
   getPluginConfig: () => unknown;
-  getRuntimeConfig: () => OpenClawConfig | undefined;
+  getRuntimeConfig: () => BotConfig | undefined;
   now?: () => number;
 }): CodexSessionCatalogControl {
   const now = params.now ?? Date.now;
@@ -370,7 +370,7 @@ export function createCodexSessionCatalogControl(params: {
 
 async function listGatewayHost(params: {
   bindingStore: CodexAppServerBindingStore;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   control: CodexSessionCatalogControl;
   query: CodexSessionCatalogParams;
   runtime: PluginRuntime;
@@ -418,7 +418,7 @@ async function listGatewayHost(params: {
 /** Lists Gateway-local and paired-node Codex sessions with per-host failures. */
 async function listCodexSessionCatalog(params: {
   bindingStore: CodexAppServerBindingStore;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   runtime: PluginRuntime;
   control: CodexSessionCatalogControl;
   query?: CodexSessionCatalogParams;
@@ -495,7 +495,7 @@ async function listCodexSessionCatalog(params: {
 /** Builds the node-local read-only Codex app-server catalog command. */
 export function createCodexSessionCatalogNodeHostCommands(
   control: CodexSessionCatalogControl,
-): OpenClawPluginNodeHostCommand[] {
+): BotPluginNodeHostCommand[] {
   return [
     {
       command: CODEX_APP_SERVER_THREADS_LIST_COMMAND,
@@ -678,7 +678,7 @@ type CodexSupervisionMarker = { sourceThreadId: string };
 
 async function listAdoptedSessionEntries(params: {
   bindingStore: CodexAppServerBindingStore;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   runtime: PluginRuntime;
   sessionEntries?: SessionCatalogEntrySnapshot;
 }): Promise<Map<string, AdoptedSessionEntry>> {
@@ -715,7 +715,7 @@ async function listAdoptedSessionEntries(params: {
       continue;
     }
     if (adopted.has(sourceThreadId)) {
-      throw new Error(`multiple OpenClaw sessions adopt Codex thread ${sourceThreadId}`);
+      throw new Error(`multiple Bot sessions adopt Codex thread ${sourceThreadId}`);
     }
     adopted.set(sourceThreadId, { key: sessionKey, sessionId, agentId, boundThreadId });
   }
@@ -724,7 +724,7 @@ async function listAdoptedSessionEntries(params: {
 
 async function findAdoptedSessionEntry(params: {
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: BotConfig;
   runtime: PluginRuntime;
   threadId: string;
 }): Promise<AdoptedSessionEntry | undefined> {
@@ -761,7 +761,7 @@ async function clearCreatedAdoptionBinding(params: {
   } catch (readError) {
     throw new CodexAdoptionBindingCleanupError(
       [params.cause, ...(clearError ? [clearError] : []), readError],
-      `OpenClaw session creation failed and the Codex binding could not be verified for ${params.sourceThreadId}`,
+      `Bot session creation failed and the Codex binding could not be verified for ${params.sourceThreadId}`,
     );
   }
   // Pending state is the cleanup CAS token. Once lifecycle work changes it,
@@ -771,7 +771,7 @@ async function clearCreatedAdoptionBinding(params: {
   }
   throw new CodexAdoptionBindingCleanupError(
     [params.cause, ...(clearError ? [clearError] : [])],
-    `OpenClaw session creation failed and the Codex binding could not be cleared for ${params.sourceThreadId}`,
+    `Bot session creation failed and the Codex binding could not be cleared for ${params.sourceThreadId}`,
   );
 }
 
@@ -822,7 +822,7 @@ function matchesPendingSupervisionOwner(
 
 async function ensurePendingAdoptionBinding(params: {
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: BotConfig;
   identity: ReturnType<typeof sessionBindingIdentity>;
   sourceThreadId: string;
   connectionFingerprint: string;
@@ -840,14 +840,14 @@ async function ensurePendingAdoptionBinding(params: {
     config: params.config,
   });
   if (!ownsGeneration) {
-    throw new Error(`failed to claim the OpenClaw session generation for ${params.sourceThreadId}`);
+    throw new Error(`failed to claim the Bot session generation for ${params.sourceThreadId}`);
   }
   const existing = await params.bindingStore.read(params.identity);
   if (existing) {
     if (matchesPendingAdoptionBinding(existing, params)) {
       return;
     }
-    throw new Error(`OpenClaw session is already bound to Codex thread ${existing.threadId}`);
+    throw new Error(`Bot session is already bound to Codex thread ${existing.threadId}`);
   }
   const binding = {
     threadId: params.sourceThreadId,
@@ -878,14 +878,14 @@ async function ensurePendingAdoptionBinding(params: {
   }
   const raced = await params.bindingStore.read(params.identity);
   if (!matchesPendingAdoptionBinding(raced, params)) {
-    throw new Error(`failed to bind OpenClaw session to Codex thread ${params.sourceThreadId}`);
+    throw new Error(`failed to bind Bot session to Codex thread ${params.sourceThreadId}`);
   }
 }
 
 async function createOrReuseAdoptedSession(params: {
-  api: OpenClawPluginApi;
+  api: BotPluginApi;
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: BotConfig;
   sourceThread: CodexThread;
   connectionFingerprint: string;
 }): Promise<AdoptedSessionEntry> {
@@ -995,9 +995,9 @@ async function createOrReuseAdoptedSession(params: {
 }
 
 async function continueLocalCodexSessionInner(params: {
-  api: OpenClawPluginApi;
+  api: BotPluginApi;
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: BotConfig;
   control: CodexSessionCatalogControl;
   threadId: string;
   onContinued?: (upstream: CodexUpstreamBaseline & { connectionFingerprint: string }) => void;
@@ -1018,7 +1018,7 @@ async function continueLocalCodexSessionInner(params: {
     // Catalog state can race archive/reset. Restore only the same locked generation
     // under the session-store write lock so a stale Open Chat cannot revive a replacement.
     const changedError = () =>
-      new CatalogParamsError("Codex OpenClaw session changed before it could be opened. Retry.");
+      new CatalogParamsError("Codex Bot session changed before it could be opened. Retry.");
     const restored = await params.api.runtime.agent.session.patchSessionEntry({
       sessionKey: existing.key,
       readConsistency: "latest",
@@ -1081,11 +1081,11 @@ async function continueLocalCodexSessionInner(params: {
   return { sessionKey: adopted.key, disposition: "forked" };
 }
 
-/** Creates one locked OpenClaw branch whose first harness run forks the Codex source. */
+/** Creates one locked Bot branch whose first harness run forks the Codex source. */
 async function continueLocalCodexSession(params: {
-  api: OpenClawPluginApi;
+  api: BotPluginApi;
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: BotConfig;
   control: CodexSessionCatalogControl;
   threadId: string;
   onContinued?: (upstream: CodexUpstreamBaseline & { connectionFingerprint: string }) => void;
@@ -1112,7 +1112,7 @@ async function continueLocalCodexSession(params: {
 
 async function assertNoPendingSupervisionBranch(params: {
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: BotConfig;
   runtime: PluginRuntime;
   threadId: string;
 }): Promise<void> {
@@ -1124,7 +1124,7 @@ async function assertNoPendingSupervisionBranch(params: {
   for (const adopted of adoptedEntries) {
     if (adopted.entry.initializationPending === true) {
       throw new CatalogParamsError(
-        "Codex session cannot be archived while its OpenClaw branch is initializing",
+        "Codex session cannot be archived while its Bot branch is initializing",
       );
     }
     const sessionId = adopted.entry.sessionId?.trim();
@@ -1144,7 +1144,7 @@ async function assertNoPendingSupervisionBranch(params: {
       binding.pendingSupervisionBranch?.sourceThreadId === params.threadId
     ) {
       throw new CatalogParamsError(
-        "Codex session cannot be archived until its OpenClaw branch starts",
+        "Codex session cannot be archived until its Bot branch starts",
       );
     }
   }
@@ -1153,7 +1153,7 @@ async function assertNoPendingSupervisionBranch(params: {
 /** Archives one inactive Gateway-local Codex thread after a fresh status read. */
 async function archiveLocalCodexSession(params: {
   bindingStore: CodexAppServerBindingStore;
-  config: OpenClawConfig;
+  config: BotConfig;
   control: CodexSessionCatalogControl;
   runtime: PluginRuntime;
   threadId: string;
@@ -1172,7 +1172,7 @@ async function archiveLocalCodexSession(params: {
           requireIdleThread(thread, "archive");
           if (await params.bindingStore.hasOtherThreadOwner(params.threadId)) {
             throw new CatalogParamsError(
-              "Codex session cannot be archived while it is attached to an OpenClaw session",
+              "Codex session cannot be archived while it is attached to an Bot session",
             );
           }
           await assertCodexArchiveDescendantsUnowned({
@@ -1196,7 +1196,7 @@ async function archiveLocalCodexSession(params: {
 }
 
 /** Allows read-only catalog and transcript commands on supported paired-node platforms. */
-export function createCodexSessionCatalogNodeInvokePolicies(): OpenClawPluginNodeInvokePolicy[] {
+export function createCodexSessionCatalogNodeInvokePolicies(): BotPluginNodeInvokePolicy[] {
   return [
     {
       commands: [
@@ -1259,17 +1259,17 @@ function toGenericCatalogHost(
 }
 
 function registerCodexSessionCatalog(params: {
-  api: OpenClawPluginApi;
+  api: BotPluginApi;
   bindingStore: CodexAppServerBindingStore;
   control: CodexSessionCatalogControl;
-  getRuntimeConfig: () => OpenClawConfig | undefined;
+  getRuntimeConfig: () => BotConfig | undefined;
 }): void {
   const provider: SessionCatalogProvider = {
     id: "codex",
     label: "Codex",
     resolveCreateSession: ({ agentId }) =>
       resolveCodexCatalogCreateSession(
-        params.getRuntimeConfig() ?? (params.api.config as OpenClawConfig),
+        params.getRuntimeConfig() ?? (params.api.config as BotConfig),
         agentId,
       ),
     list: async (query) => {
@@ -1304,7 +1304,7 @@ function registerCodexSessionCatalog(params: {
     continueSession: async (request) => {
       const config = params.getRuntimeConfig();
       if (!config) {
-        throw new Error("OpenClaw runtime config is unavailable");
+        throw new Error("Bot runtime config is unavailable");
       }
       if (request.hostId.startsWith("node:")) {
         return await continueNodeCodexSession({
@@ -1344,7 +1344,7 @@ function registerCodexSessionCatalog(params: {
       }
       const config = params.getRuntimeConfig();
       if (!config) {
-        throw new Error("OpenClaw runtime config is unavailable");
+        throw new Error("Bot runtime config is unavailable");
       }
       await archiveLocalCodexSession({
         bindingStore: params.bindingStore,

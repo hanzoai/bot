@@ -1,7 +1,7 @@
 // Memory Core tests cover tools.recall tracking plugin behavior.
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
+import type { MemorySearchResult } from "bot/plugin-sdk/memory-core-host-runtime-files";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../api.js";
+import type { BotConfig } from "../api.js";
 import {
   resetMemoryToolMockState,
   setMemoryBackend,
@@ -25,11 +25,11 @@ vi.mock("./short-term-promotion.js", () => ({
   recordShortTermRecalls: recallTrackingMock.recordShortTermRecalls,
 }));
 
-function asOpenClawConfig(config: Partial<OpenClawConfig>): OpenClawConfig {
+function asBotConfig(config: Partial<BotConfig>): BotConfig {
   return config;
 }
 
-function createSearchTool(config: OpenClawConfig) {
+function createSearchTool(config: BotConfig) {
   const tool = createMemorySearchTool({ config });
   if (!tool) {
     throw new Error("memory_search tool missing");
@@ -66,7 +66,7 @@ describe("memory_search recall tracking", () => {
     ]);
 
     const tool = createSearchTool(
-      asOpenClawConfig({
+      asBotConfig({
         agents: { list: [{ id: "main", default: true }] },
         plugins: {
           entries: {
@@ -113,7 +113,7 @@ describe("memory_search recall tracking", () => {
     );
 
     const tool = createSearchTool(
-      asOpenClawConfig({
+      asBotConfig({
         agents: { list: [{ id: "main", default: true }] },
         plugins: {
           entries: {
@@ -175,7 +175,7 @@ describe("memory_search recall tracking", () => {
     ]);
 
     const tool = createSearchTool(
-      asOpenClawConfig({
+      asBotConfig({
         agents: {
           defaults: {
             userTimezone: "America/Los_Angeles",
@@ -217,7 +217,7 @@ describe("memory_search recall tracking", () => {
     ]);
 
     const tool = createSearchTool(
-      asOpenClawConfig({
+      asBotConfig({
         agents: { list: [{ id: "main", default: true }] },
         plugins: {
           entries: {

@@ -6,7 +6,7 @@ type MediaGenerationDuplicateGuardTestApi = {
 
 function getTestApi(): MediaGenerationDuplicateGuardTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.mediaGenerationDuplicateGuardTestApi")
+    Symbol.for("bot.mediaGenerationDuplicateGuardTestApi")
   ] as MediaGenerationDuplicateGuardTestApi;
 }
 

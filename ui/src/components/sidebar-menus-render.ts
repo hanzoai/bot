@@ -158,7 +158,7 @@ export function renderSidebarSessionMenuForController(controller: SidebarMenusCo
   return keyed(
     menu,
     html`
-      <openclaw-session-menu
+      <bot-session-menu
         .session=${{
           label: session.label,
           icon: session.icon,
@@ -245,7 +245,7 @@ export function renderSidebarSessionMenuForController(controller: SidebarMenusCo
               break;
           }
         }}
-      ></openclaw-session-menu>
+      ></bot-session-menu>
     `,
   );
 }

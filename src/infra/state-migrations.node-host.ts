@@ -1,7 +1,7 @@
 // Doctor-only import for the retired node-host JSON config.
 import path from "node:path";
 import { root, type Root } from "@openclaw/fs-safe";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   LEGACY_NODE_HOST_CONFIG_CLAIM_SUFFIX,
   LEGACY_NODE_HOST_CONFIG_FILE,
@@ -9,8 +9,8 @@ import {
   type NodeHostConfig,
   type NodeHostGatewayConfig,
 } from "../node-host/config.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
+import { runBotStateWriteTransaction } from "../state/bot-state-db.js";
 import { formatErrorMessage } from "./errors.js";
 import { acquireGatewayLock, GatewayLockError } from "./gateway-lock.js";
 import {
@@ -34,7 +34,7 @@ const MIGRATION_LOCK_POLL_INTERVAL_MS = 25;
 const CONFIG_KEYS = new Set(["version", "nodeId", "token", "displayName", "gateway"]);
 const GATEWAY_KEYS = new Set(["host", "port", "tls", "tlsFingerprint", "contextPath"]);
 
-type NodeHostConfigDatabase = Pick<OpenClawStateKyselyDatabase, "node_host_config">;
+type NodeHostConfigDatabase = Pick<BotStateKyselyDatabase, "node_host_config">;
 
 type CanonicalNodeHostState = {
   config: NodeHostConfig;
@@ -286,7 +286,7 @@ function migrateIntoDatabase(params: { env: NodeJS.ProcessEnv; legacy: Canonical
 } {
   let imported = false;
   let preservedCanonical = false;
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       const stateDb = getNodeSqliteKysely<NodeHostConfigDatabase>(db);
       const row = executeSqliteQueryTakeFirstSync(
@@ -487,7 +487,7 @@ export async function migrateLegacyNodeHostConfig(params: {
   if (!params.detected.hasLegacy) {
     return { changes: [], warnings: [] };
   }
-  const env = { ...(params.env ?? process.env), OPENCLAW_STATE_DIR: params.stateDir };
+  const env = { ...(params.env ?? process.env), BOT_STATE_DIR: params.stateDir };
   let lock: Awaited<ReturnType<typeof acquireGatewayLock>>;
   try {
     lock = await acquireGatewayLock({
@@ -505,7 +505,7 @@ export async function migrateLegacyNodeHostConfig(params: {
     return {
       changes: [],
       warnings: [
-        `Failed migrating legacy node-host state: ${detail}. Stop the Gateway and node host, then run \`openclaw doctor --fix\` again.`,
+        `Failed migrating legacy node-host state: ${detail}. Stop the Gateway and node host, then run \`bot doctor --fix\` again.`,
       ],
     };
   }

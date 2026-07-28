@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-  type OpenClawConfig,
+  type BotConfig,
 } from "../../config/config.js";
 import * as skillsWorkspaceModule from "../loading/workspace.js";
 import type { SkillSnapshot } from "../types.js";
@@ -19,7 +19,7 @@ describe("resolveEmbeddedRunSkillEntries", () => {
   });
 
   it("loads skill entries with config when no resolved snapshot skills exist", () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       plugins: {
         entries: {
           diffs: { enabled: true },
@@ -69,7 +69,7 @@ describe("resolveEmbeddedRunSkillEntries", () => {
     };
 
     resolveEmbeddedRunSkillEntries({
-      workspaceDir: "/tmp/workspace/.openclaw/sandbox-skills",
+      workspaceDir: "/tmp/workspace/.bot/sandbox-skills",
       config: {},
       eligibility,
       skillsSnapshot: {
@@ -80,7 +80,7 @@ describe("resolveEmbeddedRunSkillEntries", () => {
     });
 
     expect(loadWorkspaceSkillEntriesSpy).toHaveBeenCalledWith(
-      "/tmp/workspace/.openclaw/sandbox-skills",
+      "/tmp/workspace/.bot/sandbox-skills",
       {
         config: {},
         eligibility,
@@ -90,7 +90,7 @@ describe("resolveEmbeddedRunSkillEntries", () => {
   });
 
   it("prefers the active runtime snapshot when caller config still contains SecretRefs", () => {
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: BotConfig = {
       skills: {
         entries: {
           diffs: {
@@ -103,7 +103,7 @@ describe("resolveEmbeddedRunSkillEntries", () => {
         },
       },
     };
-    const runtimeConfig: OpenClawConfig = {
+    const runtimeConfig: BotConfig = {
       skills: {
         entries: {
           diffs: {
@@ -129,7 +129,7 @@ describe("resolveEmbeddedRunSkillEntries", () => {
   });
 
   it("prefers caller config when the active runtime snapshot still contains raw skill SecretRefs", () => {
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: BotConfig = {
       skills: {
         entries: {
           diffs: {
@@ -142,8 +142,8 @@ describe("resolveEmbeddedRunSkillEntries", () => {
         },
       },
     };
-    const runtimeConfig: OpenClawConfig = structuredClone(sourceConfig);
-    const callerConfig: OpenClawConfig = {
+    const runtimeConfig: BotConfig = structuredClone(sourceConfig);
+    const callerConfig: BotConfig = {
       skills: {
         entries: {
           diffs: {

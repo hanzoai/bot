@@ -4,12 +4,12 @@ import {
   extractErrorCode,
   formatErrorMessage,
   readErrorName,
-} from "openclaw/plugin-sdk/error-runtime";
-import { parseStrictNonNegativeInteger } from "openclaw/plugin-sdk/number-runtime";
-import { classifyTransientNetworkErrorCode } from "openclaw/plugin-sdk/retry-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/error-runtime";
+import { parseStrictNonNegativeInteger } from "bot/plugin-sdk/number-runtime";
+import { classifyTransientNetworkErrorCode } from "bot/plugin-sdk/retry-runtime";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 
-const TELEGRAM_NETWORK_ORIGIN = Symbol("openclaw.telegram.network-origin");
+const TELEGRAM_NETWORK_ORIGIN = Symbol("bot.telegram.network-origin");
 
 const TELEGRAM_ADDITIONAL_TRANSIENT_ERROR_CODES = new Set([
   "ENETDOWN",

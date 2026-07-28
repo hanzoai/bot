@@ -3,12 +3,12 @@ import { existsSync } from "node:fs";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
-import { asNullableObjectRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@hanzo/bot-normalization-core/number-coercion";
+import { asNullableObjectRecord as readRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { logVerbose } from "../globals.js";
 import { runExec } from "../process/exec.js";
 import { isVitestRuntimeEnv } from "./env.js";
@@ -187,7 +187,7 @@ function getTestTailscaleBinaryOverride(env: NodeJS.ProcessEnv = process.env): s
   if (!isVitestRuntimeEnv(env)) {
     return null;
   }
-  const forcedBinary = env.OPENCLAW_TEST_TAILSCALE_BINARY?.trim();
+  const forcedBinary = env.BOT_TEST_TAILSCALE_BINARY?.trim();
   return forcedBinary || null;
 }
 

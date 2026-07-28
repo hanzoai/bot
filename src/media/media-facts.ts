@@ -1,6 +1,6 @@
-import type { MediaKind } from "@openclaw/media-core/constants";
-import { kindFromMime, mimeTypeFromFilePath } from "@openclaw/media-core/mime";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import type { MediaKind } from "@hanzo/bot-media-core/constants";
+import { kindFromMime, mimeTypeFromFilePath } from "@hanzo/bot-media-core/mime";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { PromptImageOrderEntry } from "./prompt-image-order.js";
 
 /** One ordered runtime attachment; array position is its alignment identity. */
@@ -24,7 +24,7 @@ export type MediaFactInput = {
   [Key in keyof MediaFact]?: MediaFact[Key] | null;
 };
 
-const RUNTIME_PROMPT_MEDIA_FACTS = Symbol.for("openclaw.runtimePromptMediaFacts");
+const RUNTIME_PROMPT_MEDIA_FACTS = Symbol.for("bot.runtimePromptMediaFacts");
 
 /** Attaches facts to a runtime prompt message without changing serialized/model-visible bytes. */
 export function attachRuntimePromptMediaFacts<T extends object>(
@@ -55,7 +55,7 @@ export function readPersistedMediaFacts(message: object): MediaFact[] | undefine
 }
 
 function readPersistedMediaFactInputs(message: object): MediaFactInput[] | undefined {
-  const metadata = (message as Record<string, unknown>)["__openclaw"];
+  const metadata = (message as Record<string, unknown>)["__bot"];
   const media =
     metadata && typeof metadata === "object" && !Array.isArray(metadata)
       ? (metadata as Record<string, unknown>).media
@@ -225,18 +225,18 @@ export function canonicalizePersistedUserMessageMedia<T extends object>(
   for (const key of PERSISTED_LEGACY_MEDIA_KEYS) {
     delete next[key];
   }
-  const metadata = record["__openclaw"];
-  const openclaw =
+  const metadata = record["__bot"];
+  const bot =
     metadata && typeof metadata === "object" && !Array.isArray(metadata)
       ? { ...(metadata as Record<string, unknown>) }
       : {};
   if (media.length > 0 || canonical !== undefined || topLevelMedia !== undefined) {
-    openclaw.media = media;
+    bot.media = media;
   }
-  if (Object.keys(openclaw).length > 0) {
-    next["__openclaw"] = openclaw;
+  if (Object.keys(bot).length > 0) {
+    next["__bot"] = bot;
   } else {
-    delete next["__openclaw"];
+    delete next["__bot"];
   }
   return {
     changed: JSON.stringify(next) !== JSON.stringify(record),

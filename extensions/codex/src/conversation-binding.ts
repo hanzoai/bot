@@ -2,17 +2,17 @@
 import {
   formatErrorMessage,
   resolveSandboxContext,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { resolveSessionAgentIds } from "openclaw/plugin-sdk/agent-runtime";
-import { loadExecApprovals } from "openclaw/plugin-sdk/exec-approvals-runtime";
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { resolveSessionAgentIds } from "bot/plugin-sdk/agent-runtime";
+import { loadExecApprovals } from "bot/plugin-sdk/exec-approvals-runtime";
+import { KeyedAsyncQueue } from "bot/plugin-sdk/keyed-async-queue";
 import type {
   PluginConversationBindingResolvedEvent,
   PluginHookInboundClaimContext,
   PluginHookInboundClaimEvent,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-payload";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "bot/plugin-sdk/plugin-entry";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-payload";
+import { getSessionEntry, resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
 import { resolveCodexAppServerForModelProvider } from "./app-server/app-server-policy.js";
 import {
   CODEX_APP_SERVER_UNSUBSCRIBE_TIMEOUT_MS,
@@ -23,11 +23,11 @@ import { CODEX_CONTROL_METHODS } from "./app-server/capabilities.js";
 import {
   canUseCodexModelBackedApprovalsReviewerForModel,
   codexSandboxPolicyForTurn,
-  resolveOpenClawExecPolicyForCodexAppServer,
+  resolveBotExecPolicyForCodexAppServer,
   resolveCodexAppServerRuntimeOptions,
   type CodexAppServerApprovalPolicy,
   type CodexAppServerSandboxMode,
-  type OpenClawExecPolicyForCodexAppServer,
+  type BotExecPolicyForCodexAppServer,
 } from "./app-server/config.js";
 import { assertCodexThreadStartResponse } from "./app-server/protocol-validators.js";
 import type {
@@ -85,7 +85,7 @@ const INVALID_AGENT_ID_CHARS_PATTERN = /[^a-z0-9_-]+/g;
 const LEADING_DASH_PATTERN = /^-+/;
 const TRAILING_DASH_PATTERN = /-+$/;
 const NATIVE_CONVERSATION_INTERACTIVE_APPROVALS_UNAVAILABLE =
-  "OpenClaw native Codex conversation binding cannot route interactive approvals yet; use the Codex harness or explicit /acp spawn codex for that workflow.";
+  "Bot native Codex conversation binding cannot route interactive approvals yet; use the Codex harness or explicit /acp spawn codex for that workflow.";
 
 type CodexConversationRunOptions = {
   bindingStore: CodexAppServerBindingStore;
@@ -140,7 +140,7 @@ async function resolveConversationAppServerRuntime(params: {
   modelProvider?: string;
   model?: string;
 }): Promise<{
-  execPolicy?: OpenClawExecPolicyForCodexAppServer;
+  execPolicy?: BotExecPolicyForCodexAppServer;
   runtime: ReturnType<typeof resolveCodexAppServerRuntimeOptions>;
 }> {
   const execPolicy = resolveConversationExecPolicy({
@@ -163,14 +163,14 @@ async function resolveConversationAppServerRuntime(params: {
     model: params.model,
     config: params.config,
     agentDir: params.agentDir,
-    openClawSandboxActive: Boolean(sandboxForPolicy?.enabled),
+    botSandboxActive: Boolean(sandboxForPolicy?.enabled),
   });
   return { execPolicy, runtime };
 }
 
-const CODEX_CONVERSATION_GLOBAL_STATE = Symbol.for("openclaw.codex.conversationBinding");
+const CODEX_CONVERSATION_GLOBAL_STATE = Symbol.for("bot.codex.conversationBinding");
 const CODEX_CONVERSATION_THREAD_DEVELOPER_INSTRUCTIONS =
-  "This Codex thread is bound to an OpenClaw conversation. Answer normally; OpenClaw will deliver your final response back to the conversation.";
+  "This Codex thread is bound to an Bot conversation. Answer normally; Bot will deliver your final response back to the conversation.";
 
 function getGlobalState(): CodexConversationGlobalState {
   const globalState = globalThis as typeof globalThis & {
@@ -831,7 +831,7 @@ async function runBoundTurn(params: {
           contentItems: [
             {
               type: "inputText",
-              text: "OpenClaw native Codex conversation binding does not expose dynamic OpenClaw tools yet.",
+              text: "Bot native Codex conversation binding does not expose dynamic Bot tools yet.",
             },
           ],
           success: false,
@@ -844,7 +844,7 @@ async function runBoundTurn(params: {
         return {
           decision: "decline",
           reason:
-            "OpenClaw native Codex conversation binding cannot route interactive approvals yet; use the Codex harness or explicit /acp spawn codex for that workflow.",
+            "Bot native Codex conversation binding cannot route interactive approvals yet; use the Codex harness or explicit /acp spawn codex for that workflow.",
         };
       }
       if (request.method === "item/permissions/requestApproval") {
@@ -854,7 +854,7 @@ async function runBoundTurn(params: {
         return {
           decision: "decline",
           reason:
-            "OpenClaw native Codex conversation binding cannot route interactive approvals yet; use the Codex harness or explicit /acp spawn codex for that workflow.",
+            "Bot native Codex conversation binding cannot route interactive approvals yet; use the Codex harness or explicit /acp spawn codex for that workflow.",
         };
       }
       return undefined;
@@ -922,7 +922,7 @@ async function runBoundTurn(params: {
 }
 
 function assertNativeConversationApprovalPolicySupported(params: {
-  execPolicy?: OpenClawExecPolicyForCodexAppServer;
+  execPolicy?: BotExecPolicyForCodexAppServer;
   approvalPolicy: ReturnType<typeof resolveCodexAppServerRuntimeOptions>["approvalPolicy"];
   approvalsReviewer: ReturnType<typeof resolveCodexAppServerRuntimeOptions>["approvalsReviewer"];
   modelBackedApprovalsReviewerUnavailable: boolean;
@@ -1067,7 +1067,7 @@ function resolveConversationExecPolicy(params: {
           config: params.config,
         }).sessionAgentId
       : undefined);
-  return resolveOpenClawExecPolicyForCodexAppServer({
+  return resolveBotExecPolicyForCodexAppServer({
     config: params.config,
     agentId,
     execOverrides: readSessionExecOverrides({

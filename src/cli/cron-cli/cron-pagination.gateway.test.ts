@@ -1,5 +1,5 @@
 // Cron CLI pagination exercises real Gateway handlers and canonical cron snapshots.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { Command } from "commander";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createMockCronStateForJobs } from "../../cron/service.test-harness.js";

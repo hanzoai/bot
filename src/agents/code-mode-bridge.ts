@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { emitSessionLifecycleEvent } from "../sessions/session-lifecycle-events.js";
 import { toCodeModeJsonSafe } from "./code-mode-json.js";
 import type { CodeModeNamespaceRuntime } from "./code-mode-namespaces.js";
@@ -141,7 +141,7 @@ async function runAgentSpawnBridge(params: {
   const agentId = readOptionalStringOption(options, "agentId");
   const spawnEntry = params.runtime
     .namespaceEntries()
-    .find((entry) => entry.source === "openclaw" && entry.name === "sessions_spawn");
+    .find((entry) => entry.source === "bot" && entry.name === "sessions_spawn");
   if (!spawnEntry) {
     throw new ToolInputError("agents.run requires the sessions_spawn tool.");
   }

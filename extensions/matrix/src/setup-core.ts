@@ -1,14 +1,14 @@
-import { createChannelDmPolicy } from "openclaw/plugin-sdk/channel-dm-policy";
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+import { createChannelDmPolicy } from "bot/plugin-sdk/channel-dm-policy";
+import { defineChannelSetupContract } from "bot/plugin-sdk/channel-setup";
 // Matrix plugin module implements setup core behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   DEFAULT_ACCOUNT_ID,
   normalizeAccountId,
   prepareScopedSetupConfig,
   type ChannelSetupAdapter,
   type ChannelSetupWizardAdapter,
-} from "openclaw/plugin-sdk/setup";
+} from "bot/plugin-sdk/setup";
 import { resolveDefaultMatrixAccountId, resolveMatrixAccountConfig } from "./matrix/accounts.js";
 import { resolveMatrixConfigFieldPath, updateMatrixAccountConfig } from "./matrix/config-update.js";
 import { applyMatrixSetupAccountConfig, validateMatrixSetupInput } from "./setup-config.js";
@@ -92,7 +92,7 @@ export function createMatrixSetupWizardProxy(
           cfg as CoreConfig,
           account.accountId,
           patch as Parameters<typeof updateMatrixAccountConfig>[2],
-        ) as OpenClawConfig,
+        ) as BotConfig,
       promptAllowFrom: async (params) => {
         const promptAllowFrom = (await loadWizard()).dmPolicy?.promptAllowFrom;
         return promptAllowFrom ? await promptAllowFrom(params) : params.cfg;

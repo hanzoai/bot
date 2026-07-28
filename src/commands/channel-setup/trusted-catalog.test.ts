@@ -440,7 +440,7 @@ describe("trusted-catalog load-path discovery", () => {
         )
           ? {
               id: "telegram",
-              pluginId: "@openclaw/telegram",
+              pluginId: "@hanzo/bot-telegram",
               origin: "bundled",
               meta: {
                 id: "telegram",
@@ -484,7 +484,7 @@ describe("trusted-catalog load-path discovery", () => {
       }),
     ).toMatchObject({
       id: "telegram",
-      pluginId: "@openclaw/telegram",
+      pluginId: "@hanzo/bot-telegram",
       origin: "bundled",
     });
   });
@@ -503,7 +503,7 @@ describe("trusted-catalog load-path discovery", () => {
         )
           ? {
               id: "telegram",
-              pluginId: "@openclaw/telegram",
+              pluginId: "@hanzo/bot-telegram",
               origin: "bundled",
               meta: {
                 id: "telegram",
@@ -540,7 +540,7 @@ describe("trusted-catalog load-path discovery", () => {
       }),
     ).toMatchObject({
       id: "telegram",
-      pluginId: "@openclaw/telegram",
+      pluginId: "@hanzo/bot-telegram",
       origin: "bundled",
     });
   });
@@ -559,7 +559,7 @@ describe("trusted-catalog load-path discovery", () => {
         )
           ? {
               id: "telegram",
-              pluginId: "@openclaw/telegram",
+              pluginId: "@hanzo/bot-telegram",
               origin: "bundled",
               meta: {
                 id: "telegram",
@@ -599,7 +599,7 @@ describe("trusted-catalog load-path discovery", () => {
       }),
     ).toMatchObject({
       id: "telegram",
-      pluginId: "@openclaw/telegram",
+      pluginId: "@hanzo/bot-telegram",
       origin: "bundled",
     });
   });
@@ -611,22 +611,22 @@ describe("trusted-catalog load-path discovery", () => {
       cfg: {
         plugins: {
           load: {
-            paths: ["$OPENCLAW_HOME/custom-plugin"],
+            paths: ["$BOT_HOME/custom-plugin"],
           },
         },
       },
       env: {
         ...process.env,
-        OPENCLAW_HOME: "/tmp/custom-home",
+        BOT_HOME: "/tmp/custom-home",
       },
       workspaceDir: "/tmp/workspace",
     });
 
     expect(getChannelPluginCatalogEntry).toHaveBeenCalledWith("e2e-load-paths", {
       env: expect.objectContaining({
-        OPENCLAW_HOME: "/tmp/custom-home",
+        BOT_HOME: "/tmp/custom-home",
       }),
-      extraPaths: ["$OPENCLAW_HOME/custom-plugin"],
+      extraPaths: ["$BOT_HOME/custom-plugin"],
       workspaceDir: "/tmp/workspace",
     });
   });

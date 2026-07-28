@@ -1,13 +1,13 @@
 /** Tests channel plugin id resolution from config, manifests, and installed state. */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
 import type { InstalledPluginIndex, InstalledPluginIndexRecord } from "./installed-plugin-index.js";
 import type { PluginManifestRecord, PluginManifestRegistry } from "./manifest-registry.js";
 
 const listPotentialConfiguredChannelIds = vi.hoisted(() => vi.fn());
 const listExplicitlyDisabledChannelIdsForConfig = vi.hoisted(() =>
-  vi.fn((config: OpenClawConfig) => {
+  vi.fn((config: BotConfig) => {
     return Object.entries(config.channels ?? {})
       .filter(([, value]) => {
         return (
@@ -87,7 +87,7 @@ function withManifestLoadPaths<T extends { id: string }>(
   return {
     rootDir: `/tmp/plugins/${plugin.id}`,
     source: `/tmp/plugins/${plugin.id}/index.ts`,
-    manifestPath: `/tmp/plugins/${plugin.id}/openclaw.plugin.json`,
+    manifestPath: `/tmp/plugins/${plugin.id}/bot.plugin.json`,
     skills: [],
     hooks: [],
     ...plugin,
@@ -390,8 +390,8 @@ function useManifestRegistryFixture(
 }
 
 function expectStartupPluginIds(params: {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: BotConfig;
+  activationSourceConfig?: BotConfig;
   env?: NodeJS.ProcessEnv;
   workerProviderIds?: readonly string[];
   expected: readonly string[];
@@ -414,7 +414,7 @@ function expectStartupPluginIds(params: {
 }
 
 function resolveConfiguredDeferredChannelPluginIdsForFixture(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env?: NodeJS.ProcessEnv;
 }): string[] {
   const manifestRegistry = loadPluginManifestRegistry() as PluginManifestRegistry;
@@ -501,12 +501,12 @@ function createStartupConfig(params: {
     };
   }
 
-  return config as OpenClawConfig;
+  return config as BotConfig;
 }
 
 describe("resolveGatewayStartupPluginIds", () => {
   beforeEach(() => {
-    listPotentialConfiguredChannelIds.mockReset().mockImplementation((config: OpenClawConfig) => {
+    listPotentialConfiguredChannelIds.mockReset().mockImplementation((config: BotConfig) => {
       if (Object.hasOwn(config, "channels")) {
         return Object.keys(config.channels ?? {});
       }
@@ -514,7 +514,7 @@ describe("resolveGatewayStartupPluginIds", () => {
     });
     listPotentialConfiguredChannelPresenceSignals
       .mockReset()
-      .mockImplementation((config: OpenClawConfig) => {
+      .mockImplementation((config: BotConfig) => {
         return listPotentialConfiguredChannelIds(config).map((channelId: string) => ({
           channelId,
           source: "config",
@@ -540,7 +540,7 @@ describe("resolveGatewayStartupPluginIds", () => {
     ],
     [
       "keeps bundled startup sidecars with enabledByDefault at idle startup",
-      {} as OpenClawConfig,
+      {} as BotConfig,
       ["demo-channel", "browser", "memory-core"],
     ],
     [
@@ -567,7 +567,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["demo-channel", "browser", "amazon-bedrock", "memory-core"],
     ],
     [
@@ -579,7 +579,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           },
         },
         plugins: { entries: { "amazon-bedrock": { enabled: false } } },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["demo-channel", "browser", "memory-core"],
     ],
     [
@@ -587,7 +587,7 @@ describe("resolveGatewayStartupPluginIds", () => {
       {
         channels: {},
         tts: { provider: "microsoft" },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "microsoft", "memory-core"],
     ],
     [
@@ -595,7 +595,7 @@ describe("resolveGatewayStartupPluginIds", () => {
       {
         channels: {},
         tts: { providers: { "tts-local-cli": { command: "say" } } },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "tts-local-cli", "memory-core"],
     ],
     [
@@ -603,7 +603,7 @@ describe("resolveGatewayStartupPluginIds", () => {
       {
         channels: {},
         tts: { provider: "edge" },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "microsoft", "memory-core"],
     ],
     [
@@ -612,7 +612,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         channels: {},
         tts: { provider: "gradium" },
         plugins: { entries: { gradium: { enabled: true } } },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "gradium", "memory-core"],
     ],
     [
@@ -628,7 +628,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "microsoft", "memory-core"],
     ],
     [
@@ -646,7 +646,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         agents: {
           list: [{ id: "reader", tts: { persona: "narrator" } }],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "microsoft", "memory-core"],
     ],
     [
@@ -663,7 +663,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["demo-channel", "browser", "microsoft", "memory-core"],
     ],
     [
@@ -684,7 +684,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["demo-channel", "browser", "microsoft", "memory-core"],
     ],
     [
@@ -695,7 +695,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           provider: "microsoft",
           providers: { microsoft: { enabled: false } },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -704,7 +704,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         channels: {},
         tts: { provider: "microsoft" },
         plugins: { entries: { microsoft: { enabled: false } } },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -723,7 +723,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "openai", "google", "memory-core"],
     ],
     [
@@ -738,7 +738,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           },
         },
         plugins: { entries: { google: { enabled: false } } },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -753,7 +753,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "openai", "google", "memory-core"],
     ],
     [
@@ -766,7 +766,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           },
         },
         plugins: { entries: { openai: { enabled: false } } },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -778,7 +778,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "openai", "memory-core"],
     ],
     [
@@ -790,7 +790,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "openai", "ollama", "memory-core"],
     ],
     [
@@ -800,7 +800,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         agents: {
           list: [{ id: "researcher", memory: { search: { provider: "openai" } } }],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "openai", "memory-core"],
     ],
     [
@@ -821,7 +821,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "ollama", "memory-core"],
     ],
     [
@@ -842,7 +842,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "openai", "ollama", "memory-core"],
     ],
     [
@@ -854,7 +854,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "generic-embedding", "memory-core"],
     ],
     [
@@ -866,7 +866,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -887,7 +887,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -902,7 +902,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         plugins: {
           slots: { memory: "none" },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser"],
     ],
     [
@@ -914,7 +914,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -926,7 +926,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "llama-cpp", "memory-core"],
     ],
     [
@@ -938,7 +938,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         agents: {
           defaults: {},
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -951,7 +951,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           defaults: {},
         },
         plugins: { entries: { openai: { enabled: false } } },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -964,7 +964,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           defaults: {},
         },
         plugins: { deny: ["openai"] },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -979,7 +979,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             { id: "researcher", memory: { search: { provider: "openai", fallback: "ollama" } } },
           ],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -992,7 +992,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           defaults: {},
           list: [{ id: "researcher", memory: { search: { enabled: true } } }],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "openai", "ollama", "memory-core"],
     ],
     [
@@ -1008,7 +1008,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             { id: "researcher", memory: { search: { provider: "ollama" } } },
           ],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "openai", "ollama", "memory-core"],
     ],
     [
@@ -1021,7 +1021,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           defaults: {},
           list: [{ id: "researcher" }],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "openai", "memory-core"],
     ],
     [
@@ -1044,7 +1044,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["brave"],
     ],
     [
@@ -1067,7 +1067,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       [],
     ],
     [
@@ -1090,7 +1090,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       [],
     ],
     [
@@ -1105,7 +1105,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           },
         },
         plugins: { allow: ["browser"] },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser"],
     ],
     [
@@ -1124,7 +1124,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             "external-env-channel-plugin": { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "external-env-channel-plugin", "memory-core"],
     ],
     [
@@ -1138,7 +1138,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             "external-env-channel-plugin": { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       ["browser", "memory-core"],
     ],
     [
@@ -1181,7 +1181,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             "external-env-channel-plugin": { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["browser", "memory-core"],
     });
   });
@@ -1195,7 +1195,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           secondary: { provider: "STATIC-SSH" },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expectStartupPluginIds({
       config: activationSourceConfig,
@@ -1209,7 +1209,7 @@ describe("resolveGatewayStartupPluginIds", () => {
       channels: {},
       cloudWorkers: { profiles: { development: { provider: "static-ssh" } } },
       plugins: { allow: ["browser"] },
-    } as OpenClawConfig;
+    } as BotConfig;
     const effectiveConfig = applyPluginAutoEnable({
       config: authoredConfig,
       env: createPluginPlanningTestEnv(),
@@ -1225,7 +1225,7 @@ describe("resolveGatewayStartupPluginIds", () => {
 
   it("loads bundled worker-provider owners required by durable environments", () => {
     expectStartupPluginIds({
-      config: { channels: {} } as OpenClawConfig,
+      config: { channels: {} } as BotConfig,
       workerProviderIds: [" Static-SSH ", "STATIC-SSH"],
       expected: ["browser", "memory-core", "qa-lab"],
     });
@@ -1233,7 +1233,7 @@ describe("resolveGatewayStartupPluginIds", () => {
 
   it("keeps durable external worker-provider owners behind explicit enablement", () => {
     expectStartupPluginIds({
-      config: { channels: {} } as OpenClawConfig,
+      config: { channels: {} } as BotConfig,
       workerProviderIds: ["external-ssh"],
       expected: ["browser", "memory-core"],
     });
@@ -1241,7 +1241,7 @@ describe("resolveGatewayStartupPluginIds", () => {
       config: {
         channels: {},
         plugins: { entries: { "external-worker-provider": { enabled: true } } },
-      } as OpenClawConfig,
+      } as BotConfig,
       workerProviderIds: ["external-ssh"],
       expected: ["browser", "memory-core", "external-worker-provider"],
     });
@@ -1256,7 +1256,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         },
       },
       plugins: { entries: { "qa-lab": { enabled: false } } },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expectStartupPluginIds({
       config,
@@ -1274,7 +1274,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         },
       },
       plugins: { allow: ["browser"] },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expectStartupPluginIds({
       config,
@@ -1285,7 +1285,7 @@ describe("resolveGatewayStartupPluginIds", () => {
 
   it("keeps durable worker-provider owners behind disable and allowlist gates", () => {
     expectStartupPluginIds({
-      config: { channels: {}, plugins: { enabled: false } } as OpenClawConfig,
+      config: { channels: {}, plugins: { enabled: false } } as BotConfig,
       workerProviderIds: ["static-ssh"],
       expected: [],
     });
@@ -1293,17 +1293,17 @@ describe("resolveGatewayStartupPluginIds", () => {
       config: {
         channels: {},
         plugins: { entries: { "qa-lab": { enabled: false } } },
-      } as OpenClawConfig,
+      } as BotConfig,
       workerProviderIds: ["static-ssh"],
       expected: ["browser", "memory-core"],
     });
     expectStartupPluginIds({
-      config: { channels: {}, plugins: { deny: ["qa-lab"] } } as OpenClawConfig,
+      config: { channels: {}, plugins: { deny: ["qa-lab"] } } as BotConfig,
       workerProviderIds: ["static-ssh"],
       expected: ["browser", "memory-core"],
     });
     expectStartupPluginIds({
-      config: { channels: {}, plugins: { allow: ["browser"] } } as OpenClawConfig,
+      config: { channels: {}, plugins: { allow: ["browser"] } } as BotConfig,
       workerProviderIds: ["static-ssh"],
       expected: ["browser"],
     });
@@ -1326,7 +1326,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expectStartupPluginIds({
       config: effectiveConfig,
@@ -1349,7 +1349,7 @@ describe("resolveGatewayStartupPluginIds", () => {
       plugins: {
         allow: ["browser"],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const effectiveConfig = {
       ...rawConfig,
       plugins: {
@@ -1360,7 +1360,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expectStartupPluginIds({
       config: effectiveConfig,
@@ -1380,7 +1380,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const runtimeConfig = {
       ...activationSourceConfig,
       plugins: {
@@ -1396,7 +1396,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expectStartupPluginIds({
       config: runtimeConfig,
@@ -1463,7 +1463,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["browser", "demo-config-startup"],
     });
   });
@@ -1481,7 +1481,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["browser", "external-config-startup"],
     });
 
@@ -1496,7 +1496,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["browser"],
     });
   });
@@ -1506,7 +1506,7 @@ describe("resolveGatewayStartupPluginIds", () => {
       enabled: true,
       config: { autoStart: { enabled: true } },
     };
-    const cases: Array<{ plugins: OpenClawConfig["plugins"]; expected: readonly string[] }> = [
+    const cases: Array<{ plugins: BotConfig["plugins"]; expected: readonly string[] }> = [
       {
         plugins: {
           slots: { memory: "none" },
@@ -1547,7 +1547,7 @@ describe("resolveGatewayStartupPluginIds", () => {
 
     for (const testCase of cases) {
       expectStartupPluginIds({
-        config: { channels: {}, plugins: testCase.plugins } as OpenClawConfig,
+        config: { channels: {}, plugins: testCase.plugins } as BotConfig,
         expected: testCase.expected,
       });
     }
@@ -1566,14 +1566,14 @@ describe("resolveGatewayStartupPluginIds", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const runtimeConfig = {
       ...activationSourceConfig,
       plugins: {
         ...activationSourceConfig.plugins,
         allow: ["browser", "external-config-startup"],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expectStartupPluginIds({
       config: runtimeConfig,
@@ -1723,7 +1723,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const runtimeConfig = {
       channels: {},
       plugins: {
@@ -1740,7 +1740,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expectStartupPluginIds({
       config: runtimeConfig,
@@ -1756,7 +1756,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         defaultProfile: "docker-cdp",
       },
       channels: {},
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const effectiveConfig = {
       ...rawConfig,
       plugins: {
@@ -1766,7 +1766,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     expectStartupPluginIds({
       config: effectiveConfig,
@@ -1812,7 +1812,7 @@ describe("resolveGatewayStartupPluginIds", () => {
       { channelId: "demo-channel", source: "env" },
     ]);
 
-    const config = {} as OpenClawConfig;
+    const config = {} as BotConfig;
 
     expectStartupPluginIds({
       config,
@@ -1844,7 +1844,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           plugins: {
             allow: ["workspace-demo-channel-plugin"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
       }),
     ).toEqual(["workspace-demo-channel-plugin"]);
@@ -1861,7 +1861,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         plugins: {
           allow: ["browser"],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: createPluginPlanningTestEnv(),
       expected: ["demo-channel", "browser"],
     });
@@ -1885,7 +1885,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -1909,7 +1909,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -1936,7 +1936,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -1962,7 +1962,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               memory: "memory-core",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -1978,7 +1978,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         config: {
           channels: {},
           plugins: { allow: ["browser"], slots: { memory: "none" } },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
         workerProviderIds: ["static-ssh"],
@@ -1996,7 +1996,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           channels: {},
           cloudWorkers: { profiles: { development: { provider: "static-ssh" } } },
           plugins: { allow: ["browser"], slots: { memory: "none" } },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2022,7 +2022,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2064,7 +2064,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2106,7 +2106,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           plugins: {
             allow: ["openai"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2124,7 +2124,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             allow: ["browser"],
             bundledDiscovery: "compat",
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2146,7 +2146,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           plugins: {
             allow: ["browser"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2179,7 +2179,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2207,7 +2207,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2233,7 +2233,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2261,7 +2261,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2286,7 +2286,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2312,7 +2312,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               memory: "none",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2327,7 +2327,7 @@ describe("resolveGatewayStartupPluginIds", () => {
       resolveConfigValidationMetadataPluginIds({
         config: {
           channels: {},
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2349,7 +2349,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           plugins: {
             enabled: false,
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2370,7 +2370,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               paths: ["/tmp/plugins/custom"],
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2386,7 +2386,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             token: "stale",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: createPluginPlanningTestEnv(),
       expected: ["browser", "memory-core"],
     });
@@ -2395,16 +2395,16 @@ describe("resolveGatewayStartupPluginIds", () => {
   it("does not treat persisted auth alone as gateway startup intent", () => {
     listPotentialConfiguredChannelIds.mockImplementation(
       (
-        configForTest: OpenClawConfig,
+        configForTest: BotConfig,
         _env: NodeJS.ProcessEnv,
         options?: { includePersistedAuthState?: boolean },
       ) => (options?.includePersistedAuthState === false ? [] : ["demo-channel"]),
     );
 
     expectStartupPluginIds({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       env: createPluginPlanningTestEnv({
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-with-persisted-demo-channel",
+        BOT_STATE_DIR: "/tmp/bot-with-persisted-demo-channel",
       }),
       expected: ["browser", "memory-core"],
     });
@@ -2414,7 +2414,7 @@ describe("resolveGatewayStartupPluginIds", () => {
     useManifestRegistryFixture(createManifestRegistryFixtureWithWorkspaceDemoChannel());
     listPotentialConfiguredChannelIds.mockImplementation(
       (
-        configForTest: OpenClawConfig,
+        configForTest: BotConfig,
         _env: NodeJS.ProcessEnv,
         options?: { includePersistedAuthState?: boolean },
       ) => (options?.includePersistedAuthState === false ? [] : ["demo-channel"]),
@@ -2426,9 +2426,9 @@ describe("resolveGatewayStartupPluginIds", () => {
           plugins: {
             allow: ["workspace-demo-channel-plugin"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv({
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-with-persisted-demo-channel",
+          BOT_STATE_DIR: "/tmp/bot-with-persisted-demo-channel",
         }),
       }),
     ).toStrictEqual([]);
@@ -2445,7 +2445,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             token: "configured",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: createPluginPlanningTestEnv(),
       index,
       manifestRegistry: registry,
@@ -2470,7 +2470,7 @@ describe("resolveGatewayStartupPluginIds", () => {
         plugins: {
           allow: ["workspace-demo-channel-plugin"],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: createPluginPlanningTestEnv(),
       index,
       manifestRegistry: registry,
@@ -2497,7 +2497,7 @@ describe("resolveGatewayStartupPluginIds", () => {
           plugins: {
             allow: ["workspace-demo-channel-plugin"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
       }),
     ).toStrictEqual([]);
@@ -2524,7 +2524,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             "memory-lancedb": { enabled: true, config: { dreaming: { enabled: true } } },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["browser", "memory-core", "memory-lancedb"],
     });
   });
@@ -2544,7 +2544,7 @@ describe("resolveGatewayStartupPluginIds", () => {
               "memory-lancedb": { enabled: true, config: { dreaming: { enabled: true } } },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         env: createPluginPlanningTestEnv(),
         index,
       }),
@@ -2563,7 +2563,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             "memory-lancedb": { enabled: true, config: { dreaming: { enabled: true } } },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["browser", "memory-lancedb"],
     });
   });
@@ -2580,7 +2580,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             "memory-lancedb": { enabled: true, config: { dreaming: { enabled: true } } },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["browser", "memory-lancedb"],
     });
   });
@@ -2677,7 +2677,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             codex: { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["demo-channel", "browser", "openai", "codex", "memory-core"],
     });
   });
@@ -2702,23 +2702,23 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["demo-channel", "browser", "anthropic", "openai", "codex", "memory-core"],
     });
   });
 
-  it("does not include Codex when an OpenAI model is manually pinned to OpenClaw", () => {
+  it("does not include Codex when an OpenAI model is manually pinned to Bot", () => {
     expectStartupPluginIds({
       config: {
         agents: {
           defaults: {
             model: { primary: "openai/gpt-5.5" },
             models: {
-              "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+              "openai/gpt-5.5": { agentRuntime: { id: "bot" } },
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["demo-channel", "browser", "openai", "memory-core"],
     });
   });
@@ -2738,7 +2738,7 @@ describe("resolveGatewayStartupPluginIds", () => {
       config: createStartupConfig({
         enabledPluginIds: ["codex"],
       }),
-      env: { OPENCLAW_AGENT_RUNTIME: "codex" },
+      env: { BOT_AGENT_RUNTIME: "codex" },
       expected: ["demo-channel", "browser", "memory-core"],
     });
   });
@@ -2770,7 +2770,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             "demo-provider-plugin": { enabled: true },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["demo-channel", "browser", "demo-provider-plugin", "memory-core"],
     });
   });
@@ -2785,7 +2785,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["demo-channel", "browser", "anthropic", "memory-core"],
     });
   });
@@ -2821,7 +2821,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["demo-channel", "browser", "memory-core"],
     });
   });
@@ -2843,7 +2843,7 @@ describe("resolveGatewayStartupPluginIds", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: ["demo-channel", "browser", "openai", "memory-core"],
     });
   });
@@ -2851,7 +2851,7 @@ describe("resolveGatewayStartupPluginIds", () => {
 
 describe("resolveConfiguredChannelPluginIds", () => {
   beforeEach(() => {
-    listPotentialConfiguredChannelIds.mockReset().mockImplementation((config: OpenClawConfig) => {
+    listPotentialConfiguredChannelIds.mockReset().mockImplementation((config: BotConfig) => {
       if (Object.hasOwn(config, "channels")) {
         return Object.keys(config.channels ?? {});
       }
@@ -2859,7 +2859,7 @@ describe("resolveConfiguredChannelPluginIds", () => {
     });
     listPotentialConfiguredChannelPresenceSignals
       .mockReset()
-      .mockImplementation((config: OpenClawConfig) => {
+      .mockImplementation((config: BotConfig) => {
         return listPotentialConfiguredChannelIds(config).map((channelId: string) => ({
           channelId,
           source: "config",
@@ -2887,7 +2887,7 @@ describe("resolveConfiguredChannelPluginIds", () => {
       config: {
         channels: { "demo-channel": { token: "configured" } },
         plugins: { allow: ["browser"] },
-      } as OpenClawConfig,
+      } as BotConfig,
       env: {},
       expected: ["demo-channel"],
     },
@@ -2896,7 +2896,7 @@ describe("resolveConfiguredChannelPluginIds", () => {
       config: {
         channels: { "activation-only-channel": { enabled: true } },
         plugins: { deny: ["activation-only-channel-plugin"] },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: [],
     },
     {
@@ -2904,7 +2904,7 @@ describe("resolveConfiguredChannelPluginIds", () => {
       config: {
         channels: { "activation-only-channel": { enabled: true } },
         plugins: { enabled: false },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: [],
     },
     {
@@ -2941,13 +2941,13 @@ describe("resolveConfiguredChannelPluginIds", () => {
       config: {
         channels: { "activation-only-channel": { enabled: true } },
         plugins: { entries: { "activation-only-channel-plugin": { enabled: false } } },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: [],
     },
   ] satisfies Array<{
     name: string;
-    config: OpenClawConfig;
-    activationSourceConfig?: OpenClawConfig;
+    config: BotConfig;
+    activationSourceConfig?: BotConfig;
     env?: NodeJS.ProcessEnv;
     expected: string[];
   }>)("$name", ({ config, activationSourceConfig, env, expected }) => {
@@ -2982,7 +2982,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["memory-core"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {
           DEMO_FAKE_TEST_TRIGGER: "present",
@@ -2997,7 +2997,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["memory-core"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {
           DEMO_FAKE_TEST_TRIGGER: "present",
@@ -3019,7 +3019,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["memory-core"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {
           DEMO_FAKE_TEST_TRIGGER: "present",
@@ -3060,11 +3060,11 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["external-env-channel-plugin"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {
           EXTERNAL_ENV_CHANNEL_HOST: "irc.example.com",
-          EXTERNAL_ENV_CHANNEL_NICK: "openclaw",
+          EXTERNAL_ENV_CHANNEL_NICK: "bot",
         } as NodeJS.ProcessEnv,
         includePersistedAuthState: false,
         ambientEnvTriggers: "suppress",
@@ -3083,7 +3083,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           channels: {
             "demo-channel": { enabled: true },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: { DEMO_FAKE_TEST_TRIGGER: "present" } as NodeJS.ProcessEnv,
         includePersistedAuthState: false,
@@ -3116,7 +3116,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {
           DEMO_FAKE_TEST_TRIGGER: "present",
@@ -3135,7 +3135,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
         includePersistedAuthState: false,
@@ -3158,7 +3158,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
         includePersistedAuthState: false,
@@ -3174,7 +3174,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           token: "stale-token",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(listExplicitConfiguredChannelIdsForConfig(config)).toStrictEqual([]);
     expect(
@@ -3215,7 +3215,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveConfiguredChannelPresencePolicy({
@@ -3260,7 +3260,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3279,7 +3279,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["external-env-channel-plugin"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {
           EXTERNAL_ENV_CHANNEL_TOKEN: "present",
@@ -3294,7 +3294,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
       plugins: {
         allow: ["external-env-channel-plugin"],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       listConfiguredChannelIdsForReadOnlyScope({
@@ -3312,7 +3312,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
         workspaceDir: "/tmp",
         env: {
           EXTERNAL_ENV_CHANNEL_HOST: "irc.example.com",
-          EXTERNAL_ENV_CHANNEL_NICK: "openclaw",
+          EXTERNAL_ENV_CHANNEL_NICK: "bot",
         } as NodeJS.ProcessEnv,
         includePersistedAuthState: false,
       }),
@@ -3329,7 +3329,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
       plugins: {
         allow: ["browser"],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveConfiguredChannelPresencePolicy({
@@ -3371,7 +3371,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               token: "configured",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
         includePersistedAuthState: false,
@@ -3396,7 +3396,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             enabled: false,
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
         includePersistedAuthState: false,
@@ -3414,7 +3414,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             deny: ["demo-channel"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
         includePersistedAuthState: false,
@@ -3436,7 +3436,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
             enabled: false,
           },
         },
-      } as OpenClawConfig),
+      } as BotConfig),
     ).toEqual(["demo-channel"]);
   });
 
@@ -3462,7 +3462,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {
           DEMO_FAKE_TEST_TRIGGER: "ambient",
@@ -3489,7 +3489,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["demo-other-channel"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {
           DEMO_FAKE_TEST_TRIGGER: "ambient",
@@ -3507,7 +3507,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               token: "configured",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3521,7 +3521,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           token: "configured",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       listConfiguredAnnounceChannelIdsForConfig({
@@ -3530,7 +3530,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             enabled: false,
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3543,7 +3543,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             deny: ["clickclack"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3560,7 +3560,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3573,7 +3573,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             allow: ["slack"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3587,7 +3587,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           token: "configured",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       listConfiguredAnnounceChannelIdsForConfig({
@@ -3596,7 +3596,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             enabled: false,
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3609,7 +3609,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
           plugins: {
             deny: ["demo-channel"],
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3626,7 +3626,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
       }),
@@ -3652,7 +3652,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {},
         manifestRecords: [
@@ -3693,7 +3693,7 @@ describe("listConfiguredChannelIdsForReadOnlyScope", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         workspaceDir: "/tmp",
         env: {
           ACTIVATION_ONLY_CHANNEL_TOKEN: "ambient",

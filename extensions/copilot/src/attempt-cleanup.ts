@@ -1,7 +1,7 @@
 import {
   awaitAgentEndSideEffects,
   runAgentEndSideEffects,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import { toError } from "./attempt-config.js";
 import {
   BACKGROUND_COMPACTION_CANCEL_TIMEOUT_MS,

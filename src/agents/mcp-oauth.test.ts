@@ -1,14 +1,14 @@
 // Covers MCP OAuth token persistence, isolation, and noninteractive behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome as withBaseTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome as withBaseTempHome } from "bot/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { vi } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 import { createMcpOAuthClientProvider } from "./mcp-oauth-provider.js";
 import {
   readMcpOAuthStore,
@@ -36,17 +36,17 @@ async function withTempHome<T>(
   options: Parameters<typeof withBaseTempHome>[1],
 ): Promise<T> {
   return withBaseTempHome(async (home) => {
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = path.join(home, ".openclaw");
-    closeOpenClawStateDatabaseForTest();
+    const previousStateDir = process.env.BOT_STATE_DIR;
+    process.env.BOT_STATE_DIR = path.join(home, ".bot");
+    closeBotStateDatabaseForTest();
     try {
       return await run(home);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeBotStateDatabaseForTest();
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.BOT_STATE_DIR = previousStateDir;
       }
     }
   }, options);
@@ -55,10 +55,10 @@ async function withTempHome<T>(
 describe("MCP OAuth provider", () => {
   beforeEach(() => {
     authMock.mockReset();
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
   });
 
-  afterEach(() => closeOpenClawStateDatabaseForTest());
+  afterEach(() => closeBotStateDatabaseForTest());
 
   it("preserves insufficient scope and forces the next login through authorization", async () => {
     await withTempHome(
@@ -84,7 +84,7 @@ describe("MCP OAuth provider", () => {
             scope: "docs.write",
           }),
         ).rejects.toThrow(
-          'MCP server "Remote Docs" requires additional OAuth authorization. Run openclaw mcp login Remote Docs.',
+          'MCP server "Remote Docs" requires additional OAuth authorization. Run bot mcp login Remote Docs.',
         );
         expect(authMock).not.toHaveBeenCalled();
         expect(provider.tokens()).toMatchObject({
@@ -176,9 +176,9 @@ describe("MCP OAuth provider", () => {
         expect(readMcpOAuthStore(storeKey).pendingAuthorizationChallenge).toBeUndefined();
       },
       {
-        prefix: "openclaw-mcp-oauth-insufficient-scope-",
+        prefix: "bot-mcp-oauth-insufficient-scope-",
         skipSessionCleanup: true,
-        env: { OPENCLAW_CONFIG_PATH: undefined, OPENCLAW_STATE_DIR: undefined },
+        env: { BOT_CONFIG_PATH: undefined, BOT_STATE_DIR: undefined },
       },
     );
   });
@@ -226,9 +226,9 @@ describe("MCP OAuth provider", () => {
         expect(provider.tokens()).toMatchObject({ access_token: "newer-token" });
       },
       {
-        prefix: "openclaw-mcp-oauth-terminal-rejection-",
+        prefix: "bot-mcp-oauth-terminal-rejection-",
         skipSessionCleanup: true,
-        env: { OPENCLAW_CONFIG_PATH: undefined, OPENCLAW_STATE_DIR: undefined },
+        env: { BOT_CONFIG_PATH: undefined, BOT_STATE_DIR: undefined },
       },
     );
   });
@@ -291,9 +291,9 @@ describe("MCP OAuth provider", () => {
         });
       },
       {
-        prefix: "openclaw-mcp-oauth-rejected-token-challenge-",
+        prefix: "bot-mcp-oauth-rejected-token-challenge-",
         skipSessionCleanup: true,
-        env: { OPENCLAW_CONFIG_PATH: undefined, OPENCLAW_STATE_DIR: undefined },
+        env: { BOT_CONFIG_PATH: undefined, BOT_STATE_DIR: undefined },
       },
     );
   });
@@ -339,9 +339,9 @@ describe("MCP OAuth provider", () => {
         expect(readMcpOAuthStore(storeKey).pendingAuthorizationChallenge).toBeUndefined();
       },
       {
-        prefix: "openclaw-mcp-oauth-doctor-challenge-",
+        prefix: "bot-mcp-oauth-doctor-challenge-",
         skipSessionCleanup: true,
-        env: { OPENCLAW_CONFIG_PATH: undefined, OPENCLAW_STATE_DIR: undefined },
+        env: { BOT_CONFIG_PATH: undefined, BOT_STATE_DIR: undefined },
       },
     );
   });
@@ -394,11 +394,11 @@ describe("MCP OAuth provider", () => {
         expect(authMock).toHaveBeenCalledOnce();
       },
       {
-        prefix: "openclaw-mcp-oauth-legacy-token-",
+        prefix: "bot-mcp-oauth-legacy-token-",
         skipSessionCleanup: true,
         env: {
-          OPENCLAW_CONFIG_PATH: undefined,
-          OPENCLAW_STATE_DIR: undefined,
+          BOT_CONFIG_PATH: undefined,
+          BOT_STATE_DIR: undefined,
         },
       },
     );
@@ -412,15 +412,15 @@ describe("MCP OAuth provider", () => {
             serverName: "Remote Docs",
             serverUrl: "https://mcp.example.com/mcp",
           }),
-        ).rejects.toThrow("Run openclaw mcp login Remote Docs.");
+        ).rejects.toThrow("Run bot mcp login Remote Docs.");
         expect(authMock).not.toHaveBeenCalled();
       },
       {
-        prefix: "openclaw-mcp-oauth-missing-token-",
+        prefix: "bot-mcp-oauth-missing-token-",
         skipSessionCleanup: true,
         env: {
-          OPENCLAW_CONFIG_PATH: undefined,
-          OPENCLAW_STATE_DIR: undefined,
+          BOT_CONFIG_PATH: undefined,
+          BOT_STATE_DIR: undefined,
         },
       },
     );
@@ -436,7 +436,7 @@ describe("MCP OAuth provider", () => {
             authorizationChallenge: true,
             scope: "docs.read",
           }),
-        ).rejects.toThrow("Run openclaw mcp login Remote Docs.");
+        ).rejects.toThrow("Run bot mcp login Remote Docs.");
         expect(
           readMcpOAuthStore(resolveMcpOAuthStoreKey("Remote Docs", "https://mcp.example.com/mcp")),
         ).toMatchObject({
@@ -445,9 +445,9 @@ describe("MCP OAuth provider", () => {
         });
       },
       {
-        prefix: "openclaw-mcp-oauth-challenge-provenance-",
+        prefix: "bot-mcp-oauth-challenge-provenance-",
         skipSessionCleanup: true,
-        env: { OPENCLAW_CONFIG_PATH: undefined, OPENCLAW_STATE_DIR: undefined },
+        env: { BOT_CONFIG_PATH: undefined, BOT_STATE_DIR: undefined },
       },
     );
   });
@@ -473,7 +473,7 @@ describe("MCP OAuth provider", () => {
             resourceMetadataUrl,
             scope: "docs.read",
           }),
-        ).rejects.toThrow("Run openclaw mcp login Remote Docs.");
+        ).rejects.toThrow("Run bot mcp login Remote Docs.");
         expect(authMock).not.toHaveBeenCalled();
         expect(
           readMcpOAuthStore(resolveMcpOAuthStoreKey("Remote Docs", "https://mcp.example.com/mcp")),
@@ -498,9 +498,9 @@ describe("MCP OAuth provider", () => {
         });
       },
       {
-        prefix: "openclaw-mcp-oauth-challenge-bootstrap-",
+        prefix: "bot-mcp-oauth-challenge-bootstrap-",
         skipSessionCleanup: true,
-        env: { OPENCLAW_CONFIG_PATH: undefined, OPENCLAW_STATE_DIR: undefined },
+        env: { BOT_CONFIG_PATH: undefined, BOT_STATE_DIR: undefined },
       },
     );
   });
@@ -519,25 +519,25 @@ describe("MCP OAuth provider", () => {
           token_type: "Bearer",
         });
 
-        const databasePath = resolveOpenClawStateSqlitePath();
-        const rows = openOpenClawStateDatabase()
+        const databasePath = resolveBotStateSqlitePath();
+        const rows = openBotStateDatabase()
           .db.prepare("SELECT store_key, format_version FROM mcp_oauth_stores")
           .all();
         expect(rows).toEqual([
           { store_key: expect.stringMatching(/^Remote-Docs-[a-f0-9]{16}$/), format_version: 1 },
         ]);
-        await expect(fs.readdir(`${home}/.openclaw/mcp-oauth`)).rejects.toMatchObject({
+        await expect(fs.readdir(`${home}/.bot/mcp-oauth`)).rejects.toMatchObject({
           code: "ENOENT",
         });
         const stat = await fs.stat(databasePath);
         expect(stat.mode & 0o777).toBe(0o600);
       },
       {
-        prefix: "openclaw-mcp-oauth-",
+        prefix: "bot-mcp-oauth-",
         skipSessionCleanup: true,
         env: {
-          OPENCLAW_CONFIG_PATH: undefined,
-          OPENCLAW_STATE_DIR: undefined,
+          BOT_CONFIG_PATH: undefined,
+          BOT_STATE_DIR: undefined,
         },
       },
     );
@@ -559,14 +559,14 @@ describe("MCP OAuth provider", () => {
           hasDiscoveryState: false,
           hasLastAuthorizationUrl: false,
         });
-        await expect(fs.stat(resolveOpenClawStateSqlitePath())).rejects.toMatchObject({
+        await expect(fs.stat(resolveBotStateSqlitePath())).rejects.toMatchObject({
           code: "ENOENT",
         });
       },
       {
-        prefix: "openclaw-mcp-oauth-status-",
+        prefix: "bot-mcp-oauth-status-",
         skipSessionCleanup: true,
-        env: { OPENCLAW_CONFIG_PATH: undefined, OPENCLAW_STATE_DIR: undefined },
+        env: { BOT_CONFIG_PATH: undefined, BOT_STATE_DIR: undefined },
       },
     );
   });
@@ -599,9 +599,9 @@ describe("MCP OAuth provider", () => {
         expect(store.credentialState).toBe("cleared");
       },
       {
-        prefix: "openclaw-mcp-oauth-atomic-fields-",
+        prefix: "bot-mcp-oauth-atomic-fields-",
         skipSessionCleanup: true,
-        env: { OPENCLAW_CONFIG_PATH: undefined, OPENCLAW_STATE_DIR: undefined },
+        env: { BOT_CONFIG_PATH: undefined, BOT_STATE_DIR: undefined },
       },
     );
   });
@@ -615,16 +615,16 @@ describe("MCP OAuth provider", () => {
         });
         await provider.saveTokens({ access_token: "access", token_type: "Bearer" });
         const storeKey = resolveMcpOAuthStoreKey("Remote Docs", "https://mcp.example.com/mcp");
-        openOpenClawStateDatabase()
+        openBotStateDatabase()
           .db.prepare("UPDATE mcp_oauth_stores SET store_json = ? WHERE store_key = ?")
           .run("{", storeKey);
 
         expect(() => provider.tokens()).toThrow("store_json is not valid JSON");
       },
       {
-        prefix: "openclaw-mcp-oauth-corrupt-row-",
+        prefix: "bot-mcp-oauth-corrupt-row-",
         skipSessionCleanup: true,
-        env: { OPENCLAW_CONFIG_PATH: undefined, OPENCLAW_STATE_DIR: undefined },
+        env: { BOT_CONFIG_PATH: undefined, BOT_STATE_DIR: undefined },
       },
     );
   });
@@ -638,16 +638,16 @@ describe("MCP OAuth provider", () => {
         });
         await provider.saveTokens({ access_token: "access", token_type: "Bearer" });
         const storeKey = resolveMcpOAuthStoreKey("Remote Docs", "https://mcp.example.com/mcp");
-        openOpenClawStateDatabase()
+        openBotStateDatabase()
           .db.prepare("UPDATE mcp_oauth_stores SET store_json = ? WHERE store_key = ?")
           .run(JSON.stringify({ tokenExpiresAt: 10_000 }), storeKey);
 
         expect(() => provider.tokens()).toThrow("tokenExpiresAt requires tokens");
       },
       {
-        prefix: "openclaw-mcp-oauth-orphan-expiry-",
+        prefix: "bot-mcp-oauth-orphan-expiry-",
         skipSessionCleanup: true,
-        env: { OPENCLAW_CONFIG_PATH: undefined, OPENCLAW_STATE_DIR: undefined },
+        env: { BOT_CONFIG_PATH: undefined, BOT_STATE_DIR: undefined },
       },
     );
   });
@@ -668,11 +668,11 @@ describe("MCP OAuth provider", () => {
         expect(second.tokens()).toBeUndefined();
       },
       {
-        prefix: "openclaw-mcp-oauth-url-",
+        prefix: "bot-mcp-oauth-url-",
         skipSessionCleanup: true,
         env: {
-          OPENCLAW_CONFIG_PATH: undefined,
-          OPENCLAW_STATE_DIR: undefined,
+          BOT_CONFIG_PATH: undefined,
+          BOT_STATE_DIR: undefined,
         },
       },
     );
@@ -741,11 +741,11 @@ describe("MCP OAuth provider", () => {
         expect(readMcpOAuthStore(storeKey)).toEqual({});
       },
       {
-        prefix: "openclaw-mcp-oauth-localhost-failure-",
+        prefix: "bot-mcp-oauth-localhost-failure-",
         skipSessionCleanup: true,
         env: {
-          OPENCLAW_CONFIG_PATH: undefined,
-          OPENCLAW_STATE_DIR: undefined,
+          BOT_CONFIG_PATH: undefined,
+          BOT_STATE_DIR: undefined,
         },
       },
     );
@@ -788,11 +788,11 @@ describe("MCP OAuth provider", () => {
         ]);
       },
       {
-        prefix: "openclaw-mcp-oauth-localhost-persist-",
+        prefix: "bot-mcp-oauth-localhost-persist-",
         skipSessionCleanup: true,
         env: {
-          OPENCLAW_CONFIG_PATH: undefined,
-          OPENCLAW_STATE_DIR: undefined,
+          BOT_CONFIG_PATH: undefined,
+          BOT_STATE_DIR: undefined,
         },
       },
     );
@@ -808,20 +808,20 @@ describe("MCP OAuth provider", () => {
           serverUrl: "https://mcp.example.com/mcp",
         });
 
-        expect(() => provider.state?.()).toThrow("Run openclaw mcp login Remote Docs.");
+        expect(() => provider.state?.()).toThrow("Run bot mcp login Remote Docs.");
         expect(() => provider.saveCodeVerifier?.("verifier")).toThrow(
-          "Run openclaw mcp login Remote Docs.",
+          "Run bot mcp login Remote Docs.",
         );
         await expect(
           provider.redirectToAuthorization?.(new URL("https://auth.example.com/authorize")),
-        ).rejects.toThrow("Run openclaw mcp login Remote Docs.");
+        ).rejects.toThrow("Run bot mcp login Remote Docs.");
       },
       {
-        prefix: "openclaw-mcp-oauth-noninteractive-",
+        prefix: "bot-mcp-oauth-noninteractive-",
         skipSessionCleanup: true,
         env: {
-          OPENCLAW_CONFIG_PATH: undefined,
-          OPENCLAW_STATE_DIR: undefined,
+          BOT_CONFIG_PATH: undefined,
+          BOT_STATE_DIR: undefined,
         },
       },
     );
@@ -848,11 +848,11 @@ describe("MCP OAuth provider", () => {
         ).toBe("cleared");
       },
       {
-        prefix: "openclaw-mcp-oauth-clear-",
+        prefix: "bot-mcp-oauth-clear-",
         skipSessionCleanup: true,
         env: {
-          OPENCLAW_CONFIG_PATH: undefined,
-          OPENCLAW_STATE_DIR: undefined,
+          BOT_CONFIG_PATH: undefined,
+          BOT_STATE_DIR: undefined,
         },
       },
     );

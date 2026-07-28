@@ -4,7 +4,7 @@
     {
       "identity" : "axorcist",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/openclaw/AXorcist.git",
+      "location" : "https://github.com/bot/AXorcist.git",
       "state" : {
         "revision" : "dba24f0a2dd4a0ccfb285d7e11cf899f8b603ef6",
         "version" : "0.1.6"

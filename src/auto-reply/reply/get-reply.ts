@@ -1,6 +1,6 @@
 // Main auto-reply pipeline: prepares context, runs commands, and dispatches agents.
 import fs from "node:fs/promises";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   hasLegacyAutoFallbackWithoutOrigin,
   resolveAutoFallbackPrimaryProbe,
@@ -14,7 +14,7 @@ import { resolveModelRefFromString } from "../../agents/model-selection.js";
 import { resolveAgentTimeoutMs } from "../../agents/timeout.js";
 import { DEFAULT_AGENT_WORKSPACE_DIR, ensureAgentWorkspace } from "../../agents/workspace.js";
 import { resolveChannelModelOverride } from "../../channels/model-overrides.js";
-import { type OpenClawConfig, getRuntimeConfig } from "../../config/config.js";
+import { type BotConfig, getRuntimeConfig } from "../../config/config.js";
 import { isSessionWorkStartInvalidatedError } from "../../config/sessions/lifecycle.js";
 import { logVerbose } from "../../globals.js";
 import { measureDiagnosticsTimelineSpan } from "../../infra/diagnostics-timeline.js";
@@ -101,7 +101,7 @@ function classifyHeartbeatPendingFinalDelivery(text: string, ackMaxChars: number
   };
 }
 
-function resolveHeartbeatAckMaxChars(_cfg: OpenClawConfig, _agentId: string): number {
+function resolveHeartbeatAckMaxChars(_cfg: BotConfig, _agentId: string): number {
   return DEFAULT_HEARTBEAT_ACK_MAX_CHARS;
 }
 
@@ -153,7 +153,7 @@ function hasLinkCandidate(ctx: MsgContext): boolean {
 
 async function applyMediaUnderstandingIfNeeded(params: {
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   agentDir?: string;
   workspaceDir?: string;
@@ -175,7 +175,7 @@ async function applyMediaUnderstandingIfNeeded(params: {
   }
 }
 
-function hasExplicitAudioUnderstandingConfig(cfg: OpenClawConfig): boolean {
+function hasExplicitAudioUnderstandingConfig(cfg: BotConfig): boolean {
   const audio = cfg.tools?.media?.audio;
   return audio !== undefined && audio.enabled !== false;
 }
@@ -195,7 +195,7 @@ function withExtractedFileImages(
 
 async function applyLinkUnderstandingIfNeeded(params: {
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): Promise<boolean> {
   if (!hasLinkCandidate(params.ctx)) {
     return false;
@@ -216,7 +216,7 @@ async function applyLinkUnderstandingIfNeeded(params: {
 export async function getReplyFromConfig(
   ctx: MsgContext,
   opts?: GetReplyOptions,
-  configOverride?: OpenClawConfig,
+  configOverride?: BotConfig,
 ): Promise<ReplyPayload | ReplyPayload[] | undefined> {
   const isFastTestEnv = isFastTestRuntimeEnv();
   const cfg = resolveGetReplyConfig({

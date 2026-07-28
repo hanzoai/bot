@@ -7,8 +7,8 @@
 import {
   parseStrictNonNegativeInteger,
   parseStrictPositiveInteger,
-} from "openclaw/plugin-sdk/number-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/number-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import type { ResolvedBrowserProfile } from "../config.js";
 import {
   DEFAULT_AI_SNAPSHOT_EFFICIENT_DEPTH,

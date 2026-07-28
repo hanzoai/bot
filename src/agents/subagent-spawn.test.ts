@@ -2,7 +2,7 @@
 // persistence, registry registration, and lifecycle event emission.
 import os from "node:os";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { resolveIncognitoOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.paths.js";
+import { resolveIncognitoBotAgentSqlitePath } from "../state/bot-agent-db.paths.js";
 import {
   createSubagentSpawnTestConfig,
   expectPersistedRuntimeModel,
@@ -284,7 +284,7 @@ describe("spawnSubagentDirect seam flow", () => {
     expect(result.childSessionKey).toMatch(/^agent:main:subagent:incognito-/u);
     expect(sessionPatches).toContainEqual(expect.objectContaining({ incognito: true }));
     expect(sessionStorePaths).toContain(
-      resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main" }),
+      resolveIncognitoBotAgentSqlitePath({ agentId: "main" }),
     );
   });
 
@@ -452,7 +452,7 @@ describe("spawnSubagentDirect seam flow", () => {
   });
 
   it("holds the collector slot until an accepted run is confirmed stopped", async () => {
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    vi.stubEnv("BOT_TEST_FAST", "1");
     hoisted.configOverride = createConfigOverride({
       tools: { swarm: { enabled: true, maxConcurrent: 1 } },
     });

@@ -5,7 +5,7 @@ import { styleMap } from "lit/directives/style-map.js";
 import { icons } from "../../../components/icons.ts";
 import "../../../components/web-awesome-tabs.ts";
 import { t } from "../../../i18n/index.ts";
-import { OpenClawLightDomElement } from "../../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../../lit/bot-element.ts";
 import {
   SIDEBAR_MIN_WIDTH_PX,
   isSidebarRegionCollapsed,
@@ -35,7 +35,7 @@ function panelsOf(layout: SidebarLayout): SidebarPanel[] {
   return layout.columns.flatMap((column) => column.panels);
 }
 
-class ChatSidebarRegion extends OpenClawLightDomElement {
+class ChatSidebarRegion extends BotLightDomElement {
   @property({ attribute: false }) layout: SidebarLayout = { columns: [] };
   @property({ attribute: false }) panelTemplates: SidebarPanelTemplates = {};
   @property({ attribute: false }) panelOpenUrls: Partial<Record<SidebarSlotId, string | null>> = {};
@@ -52,7 +52,7 @@ class ChatSidebarRegion extends OpenClawLightDomElement {
 
   private startDrag(event: DragEvent, panelId: string) {
     this.draggedPanelId = panelId;
-    event.dataTransfer?.setData("application/x-openclaw-sidebar-panel", panelId);
+    event.dataTransfer?.setData("application/x-bot-sidebar-panel", panelId);
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = "move";
     }
@@ -426,12 +426,12 @@ class ChatSidebarRegion extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-chat-sidebar-region")) {
-  customElements.define("openclaw-chat-sidebar-region", ChatSidebarRegion);
+if (!customElements.get("bot-chat-sidebar-region")) {
+  customElements.define("bot-chat-sidebar-region", ChatSidebarRegion);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-chat-sidebar-region": ChatSidebarRegion;
+    "bot-chat-sidebar-region": ChatSidebarRegion;
   }
 }

@@ -13,7 +13,7 @@ import { loadSettings } from "../../app/settings.ts";
 import { renderSettingsWorkspace } from "../../components/settings-workspace.ts";
 import { resolveSessionKey } from "../../lib/sessions/index.ts";
 import { uiSessionEventMatches } from "../../lib/sessions/session-key.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { StreamAutoFollowController } from "../../lit/stream-auto-follow-controller.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import {
@@ -26,7 +26,7 @@ import { renderActivity } from "./view.ts";
 
 let activityClearBoundary: EventLogEntry | undefined;
 
-class ActivityPage extends OpenClawLightDomElement {
+class ActivityPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -215,6 +215,6 @@ class ActivityPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-activity-page")) {
-  customElements.define("openclaw-activity-page", ActivityPage);
+if (!customElements.get("bot-activity-page")) {
+  customElements.define("bot-activity-page", ActivityPage);
 }

@@ -4,14 +4,14 @@
 import { expect, test, vi } from "vitest";
 import { loadCombinedSessionStoreForGateway } from "../config/sessions/combined-store-gateway.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { findDirectChildSessionsForParent } from "./session-child-sessions.js";
 
 vi.mock("../config/sessions/combined-store-gateway.js", () => ({
   loadCombinedSessionStoreForGateway: vi.fn(),
 }));
 
-const cfg = {} as unknown as OpenClawConfig;
+const cfg = {} as unknown as BotConfig;
 
 function entry(patch: Partial<SessionEntry>): SessionEntry {
   return {

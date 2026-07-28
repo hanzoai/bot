@@ -4,10 +4,10 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+  type BotStateDatabase,
+} from "../../state/bot-state-db.js";
 import {
   createDispatchEnvironmentFixtures,
   REQUEST,
@@ -18,15 +18,15 @@ import { createWorkerSessionPlacementStore } from "./placement-store.js";
 
 describe("forced worker environment abandonment", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: BotStateDatabase;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-force-worker-"));
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "bot-force-worker-"));
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -75,7 +75,7 @@ describe("forced worker environment abandonment", () => {
     store.markWorkspaceResultPending(claim);
     store.recordStagedWorkspaceResult(
       claim,
-      "refs/openclaw/worker-results/forced-missing-workspace-claim",
+      "refs/bot/worker-results/forced-missing-workspace-claim",
     );
 
     await forceAbandonWorkerEnvironment({

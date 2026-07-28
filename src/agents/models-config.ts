@@ -10,7 +10,7 @@ import {
   getRuntimeConfig,
   getRuntimeConfigSourceSnapshot,
   projectConfigOntoRuntimeSourceSnapshot,
-  type OpenClawConfig,
+  type BotConfig,
 } from "../config/config.js";
 import { createConfigRuntimeEnv } from "../config/env-vars.js";
 import { hashRuntimeConfigValue } from "../config/runtime-snapshot.js";
@@ -31,7 +31,7 @@ import {
   type ModelsJsonReadyResult,
   type ModelsJsonReadyState,
 } from "./models-config-state.js";
-import { planOpenClawModelsJson } from "./models-config.plan.js";
+import { planBotModelsJson } from "./models-config.plan.js";
 import {
   isGeneratedPluginModelCatalog,
   loadPersistedPluginModelCatalogs,
@@ -40,12 +40,12 @@ import {
 } from "./plugin-model-catalog.js";
 import { stableStringify } from "./stable-stringify.js";
 
-type PreparedOpenClawModelsJsonSource = ModelsJsonReadyResult & {
+type PreparedBotModelsJsonSource = ModelsJsonReadyResult & {
   fingerprint: string;
   workspaceDir?: string;
 };
 
-type EnsureOpenClawModelsJsonOptions = {
+type EnsureBotModelsJsonOptions = {
   env?: NodeJS.ProcessEnv;
   pluginMetadataSnapshot?: Pick<PluginMetadataSnapshot, "index" | "manifestRegistry" | "owners">;
   workspaceDir?: string;
@@ -58,7 +58,7 @@ function listPreparedPluginModelCatalogs(agentDir: string) {
   const { catalogs, warnings } = loadPersistedPluginModelCatalogs(agentDir);
   if (warnings.length > 0) {
     throw new Error(
-      `Cannot safely prepare provider models until legacy catalog migration succeeds: ${warnings.join("; ")}. Run openclaw doctor --fix.`,
+      `Cannot safely prepare provider models until legacy catalog migration succeeds: ${warnings.join("; ")}. Run bot doctor --fix.`,
     );
   }
   return catalogs;
@@ -74,8 +74,8 @@ async function readFileMtimeMs(pathname: string): Promise<number | null> {
 }
 
 async function buildModelsJsonFingerprint(params: {
-  config: OpenClawConfig;
-  sourceConfigForSecrets: OpenClawConfig;
+  config: BotConfig;
+  sourceConfigForSecrets: BotConfig;
   agentDir: string;
   workspaceDir?: string;
   pluginMetadataSnapshot?: Pick<PluginMetadataSnapshot, "index">;
@@ -157,7 +157,7 @@ async function writeModelsFileAtomicForModelsJson(
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.modelsConfigTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.modelsConfigTestApi")] = {
     ensureModelsFileModeForModelsJson,
     writeModelsFileAtomicForModelsJson,
   };
@@ -222,9 +222,9 @@ function writePluginCatalogsForModelsJson(params: {
   });
 }
 
-function resolveModelsConfigInput(config?: OpenClawConfig): {
-  config: OpenClawConfig;
-  sourceConfigForSecrets: OpenClawConfig;
+function resolveModelsConfigInput(config?: BotConfig): {
+  config: BotConfig;
+  sourceConfigForSecrets: BotConfig;
 } {
   const runtimeSource = getRuntimeConfigSourceSnapshot();
   if (!config) {
@@ -251,7 +251,7 @@ function resolveModelsConfigInput(config?: OpenClawConfig): {
 
 /** Builds the canonical source freshness fingerprint for generated model catalogs. */
 async function buildModelsJsonSourceFingerprint(
-  config?: OpenClawConfig,
+  config?: BotConfig,
   agentDirOverride?: string,
   options: {
     env?: NodeJS.ProcessEnv;
@@ -308,11 +308,11 @@ async function withModelsJsonWriteLock<T>(targetPath: string, run: () => Promise
 }
 
 /** Ensures models.json and the agent SQLite catalog cache are current. */
-async function prepareOpenClawModelsJsonSource(
-  config?: OpenClawConfig,
+async function prepareBotModelsJsonSource(
+  config?: BotConfig,
   agentDirOverride?: string,
-  options: EnsureOpenClawModelsJsonOptions = {},
-): Promise<PreparedOpenClawModelsJsonSource> {
+  options: EnsureBotModelsJsonOptions = {},
+): Promise<PreparedBotModelsJsonSource> {
   const resolved = resolveModelsConfigInput(config);
   const cfg = resolved.config;
   const sourceFingerprint = await buildModelsJsonSourceFingerprint(
@@ -354,7 +354,7 @@ async function prepareOpenClawModelsJsonSource(
       existingParsed: existingModelsFile.parsed,
       ...(pluginMetadataSnapshot ? { pluginMetadataSnapshot } : {}),
     });
-    const plan = await planOpenClawModelsJson({
+    const plan = await planBotModelsJson({
       cfg,
       sourceConfigForSecrets: resolved.sourceConfigForSecrets,
       agentDir,
@@ -446,11 +446,11 @@ async function prepareOpenClawModelsJsonSource(
 }
 
 /** Ensures models.json and the agent SQLite catalog cache are current. */
-export async function ensureOpenClawModelsJson(
-  config?: OpenClawConfig,
+export async function ensureBotModelsJson(
+  config?: BotConfig,
   agentDirOverride?: string,
-  options: EnsureOpenClawModelsJsonOptions = {},
+  options: EnsureBotModelsJsonOptions = {},
 ): Promise<ModelsJsonReadyResult> {
-  const prepared = await prepareOpenClawModelsJsonSource(config, agentDirOverride, options);
+  const prepared = await prepareBotModelsJsonSource(config, agentDirOverride, options);
   return { agentDir: prepared.agentDir, wrote: prepared.wrote };
 }

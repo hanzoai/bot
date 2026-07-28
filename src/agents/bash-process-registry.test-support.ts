@@ -6,7 +6,7 @@ type BashProcessRegistryTestApi = {
 
 function getTestApi(): BashProcessRegistryTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.bashProcessRegistryTestApi")
+    Symbol.for("bot.bashProcessRegistryTestApi")
   ] as BashProcessRegistryTestApi;
 }
 

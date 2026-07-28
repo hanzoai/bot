@@ -2,10 +2,10 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { Logger as TsLogger } from "tslog";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import {
   emitDiagnosticEvent,
   emitDiagnosticEventWithTrustedTraceContext,
@@ -21,8 +21,8 @@ import { expandHomePrefix } from "../infra/home-dir.js";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";
 import {
   DEFAULT_POSIX_TMP_ROOT,
-  resolvePreferredOpenClawTmpDir,
-} from "../infra/tmp-openclaw-dir.js";
+  resolvePreferredBotTmpDir,
+} from "../infra/tmp-bot-dir.js";
 import { readLoggingConfig, shouldSkipMutatingLoggingConfigRead } from "./config.js";
 import { resolveEnvLogLevelOverride } from "./env-log-level.js";
 import { type LogLevel, levelToMinLevel, normalizeLogLevel } from "./levels.js";
@@ -45,13 +45,13 @@ import type { LoggerSettings } from "./types.js";
 export type { LoggerSettings } from "./types.js";
 
 function resolveDefaultLogDir(): string {
-  return canUseNodeFs() ? resolvePreferredOpenClawTmpDir() : DEFAULT_POSIX_TMP_ROOT;
+  return canUseNodeFs() ? resolvePreferredBotTmpDir() : DEFAULT_POSIX_TMP_ROOT;
 }
 
 function resolveDefaultLogFile(defaultLogDir: string): string {
   return canUseNodeFs()
-    ? path.join(defaultLogDir, "openclaw.log")
-    : `${DEFAULT_POSIX_TMP_ROOT}/openclaw.log`;
+    ? path.join(defaultLogDir, "bot.log")
+    : `${DEFAULT_POSIX_TMP_ROOT}/bot.log`;
 }
 
 export const DEFAULT_LOG_DIR = resolveDefaultLogDir();
@@ -70,7 +70,7 @@ type ResolvedSettings = {
 type ResolvedRuntimeSettings = ResolvedSettings & { rolling: boolean };
 export type LoggerResolvedSettings = ResolvedSettings;
 type TsLogRecord = Record<string, unknown>;
-type LoggerConfigLoader = () => OpenClawConfig["logging"] | undefined;
+type LoggerConfigLoader = () => BotConfig["logging"] | undefined;
 type HostnameResolver = () => string;
 
 type DiagnosticLogCode = {
@@ -503,14 +503,14 @@ function attachDiagnosticEventTransport(logger: TsLogger<LogObj>): void {
 function canUseSilentVitestFileLogFastPath(envLevel: LogLevel | undefined): boolean {
   return (
     process.env.VITEST === "true" &&
-    process.env.OPENCLAW_TEST_FILE_LOG !== "1" &&
+    process.env.BOT_TEST_FILE_LOG !== "1" &&
     !envLevel &&
     !loggingState.overrideSettings
   );
 }
 
 function resolveDefaultActiveLogFile(): string {
-  if (process.env.VITEST === "true" && process.env.OPENCLAW_TEST_FILE_LOG === "1") {
+  if (process.env.VITEST === "true" && process.env.BOT_TEST_FILE_LOG === "1") {
     return path.join(
       process.cwd(),
       ".artifacts",
@@ -543,10 +543,10 @@ function resolveSettings(): ResolvedRuntimeSettings {
     };
   }
 
-  const cfg: OpenClawConfig["logging"] | LoggerSettings | undefined =
+  const cfg: BotConfig["logging"] | LoggerSettings | undefined =
     (loggingState.overrideSettings as LoggerSettings | null) ?? loadLoggerConfig();
   const defaultLevel =
-    process.env.VITEST === "true" && process.env.OPENCLAW_TEST_FILE_LOG !== "1" ? "silent" : "info";
+    process.env.VITEST === "true" && process.env.BOT_TEST_FILE_LOG !== "1" ? "silent" : "info";
   const fromConfig = normalizeLogLevel(cfg?.level, defaultLevel);
   const level = envLevel ?? fromConfig;
   const file = cfg?.file ?? resolveDefaultActiveLogFile();
@@ -590,7 +590,7 @@ export function isFileLogLevelEnabled(level: LogLevel): boolean {
 function buildLogger(settings: ResolvedRuntimeSettings): TsLogger<LogObj> {
   const silent = settings.level === "silent";
   const logger = new TsLogger<LogObj>({
-    name: "openclaw",
+    name: "bot",
     maskValuesOfKeys: [],
     // tslog reports Infinity as an out-of-range setting even though its runtime filter supports it.
     minLevel: levelToMinLevel(silent ? "fatal" : settings.level),

@@ -11,8 +11,8 @@ HashiCorp Vault SecretRef provider integration.
 
 ## Distribution
 
-- Package: `@openclaw/vault`
-- Install route: included in OpenClaw
+- Package: `@hanzo/bot-vault`
+- Install route: included in Bot
 
 ## Surface
 

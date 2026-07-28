@@ -1,14 +1,14 @@
 // Discord plugin module implements group policy behavior.
-import type { ChannelGroupContext } from "openclaw/plugin-sdk/channel-contract";
+import type { ChannelGroupContext } from "bot/plugin-sdk/channel-contract";
 import {
   resolveScopeRequireMention,
   resolveScopeToolsPolicy,
   scopeKey,
   type GroupToolPolicyConfig,
   type ScopeTree,
-} from "openclaw/plugin-sdk/channel-policy";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { normalizeAtHashSlug } from "openclaw/plugin-sdk/string-normalization-runtime";
+} from "bot/plugin-sdk/channel-policy";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
+import { normalizeAtHashSlug } from "bot/plugin-sdk/string-normalization-runtime";
 import type { DiscordConfig } from "./runtime-api.js";
 
 function normalizeDiscordSlug(value?: string | null) {

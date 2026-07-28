@@ -1,7 +1,7 @@
 import {
   createDefaultModelPresetAppliers,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/provider-onboard";
+  type BotConfig,
+} from "bot/plugin-sdk/provider-onboard";
 import {
   buildMistralModelDefinition,
   MISTRAL_BASE_URL,
@@ -11,7 +11,7 @@ import {
 
 const mistralPresetAppliers = createDefaultModelPresetAppliers({
   primaryModelRef: MISTRAL_DEFAULT_MODEL_REF,
-  resolveParams: (_cfg: OpenClawConfig) => ({
+  resolveParams: (_cfg: BotConfig) => ({
     providerId: "mistral",
     api: "openai-completions",
     baseUrl: MISTRAL_BASE_URL,
@@ -21,10 +21,10 @@ const mistralPresetAppliers = createDefaultModelPresetAppliers({
   }),
 });
 
-export function applyMistralProviderConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyMistralProviderConfig(cfg: BotConfig): BotConfig {
   return mistralPresetAppliers.applyProviderConfig(cfg);
 }
 
-export function applyMistralConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyMistralConfig(cfg: BotConfig): BotConfig {
   return mistralPresetAppliers.applyConfig(cfg);
 }

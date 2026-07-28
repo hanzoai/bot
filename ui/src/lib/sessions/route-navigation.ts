@@ -15,7 +15,7 @@ import {
   resolveUiDefaultAgentId,
 } from "./session-key.ts";
 
-export const SESSION_FACE_PREFERENCE_PARAM = "__openclawSessionFacePreference";
+export const SESSION_FACE_PREFERENCE_PARAM = "__botSessionFacePreference";
 
 type ContextSessionNavigationTargetParams<TRouteId extends string> = {
   context: ApplicationContext<TRouteId>;

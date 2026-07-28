@@ -1,17 +1,17 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { listAgentEntries } from "../../../agents/agent-scope-config.js";
 import type { AgentRouteBinding } from "../../../config/types.agents.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { normalizeRouteBindingChannelId } from "../../../routing/binding-scope.js";
 import { normalizeAgentId } from "../../../routing/session-key.js";
 import { isRecord } from "../../../utils.js";
 
 type DefaultAgentRoleMaterialization = {
-  config: OpenClawConfig;
+  config: BotConfig;
   changes: string[];
 };
 
-function resolveLegacyMultiAgentDefault(cfg: OpenClawConfig): string | undefined {
+function resolveLegacyMultiAgentDefault(cfg: BotConfig): string | undefined {
   const entries = listAgentEntries(cfg);
   if (entries.length < 2) {
     return undefined;
@@ -20,7 +20,7 @@ function resolveLegacyMultiAgentDefault(cfg: OpenClawConfig): string | undefined
   return defaults.length === 1 ? normalizeAgentId(defaults[0]!.id) : undefined;
 }
 
-function listAmbientConfiguredChannelIds(cfg: OpenClawConfig): string[] {
+function listAmbientConfiguredChannelIds(cfg: BotConfig): string[] {
   if (!isRecord(cfg.channels)) {
     return [];
   }
@@ -56,7 +56,7 @@ function isChannelWideBinding(binding: AgentRouteBinding, channelId: string): bo
  * Materialize only ambient roles that currently fall through to a multi-agent default.
  * The marker remains authoritative in H2-0; these explicit targets are preparation for H2-1.
  */
-export function materializeDefaultAgentRoles(cfg: OpenClawConfig): DefaultAgentRoleMaterialization {
+export function materializeDefaultAgentRoles(cfg: BotConfig): DefaultAgentRoleMaterialization {
   const defaultAgentId = resolveLegacyMultiAgentDefault(cfg);
   if (!defaultAgentId) {
     return { config: cfg, changes: [] };

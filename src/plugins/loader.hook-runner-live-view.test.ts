@@ -16,7 +16,7 @@
  */
 import { afterEach, describe, expect, it } from "vitest";
 import { getGlobalHookRunner, resetGlobalHookRunner } from "./hook-runner-global.js";
-import { loadOpenClawPlugins } from "./loader.js";
+import { loadBotPlugins } from "./loader.js";
 import {
   resetPluginLoaderTestStateForTest,
   useNoBundledPlugins,
@@ -72,7 +72,7 @@ describe("global hook runner live view (#91918)", () => {
     };
 
     // 1. Gateway boot: full gateway-bindable load, pinned like server.impl.ts.
-    const bootRegistry = loadOpenClawPlugins({
+    const bootRegistry = loadBotPlugins({
       workspaceDir: gate.dir,
       config,
       coreGatewayMethodNames: ["chat.send"],
@@ -84,7 +84,7 @@ describe("global hook runner live view (#91918)", () => {
     expect(getGlobalHookRunner()?.hasHooks("before_tool_call")).toBe(true);
 
     // 2. Harness ensure: scoped default-mode activating load.
-    loadOpenClawPlugins({
+    loadBotPlugins({
       workspaceDir: gate.dir,
       config,
       onlyPluginIds: ["harness-plugin"],
@@ -93,7 +93,7 @@ describe("global hook runner live view (#91918)", () => {
 
     // 3. Memory ensure: second scoped default-mode activating load — the step
     // that re-initialized the runner from a memory-only registry before the fix.
-    const memoryRegistry = loadOpenClawPlugins({
+    const memoryRegistry = loadBotPlugins({
       workspaceDir: gate.dir,
       config,
       onlyPluginIds: ["memory-plugin"],

@@ -1,5 +1,5 @@
 // Qa Lab plugin module implements agentic parity behavior.
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 
 const QA_AGENTIC_PARITY_PACK = "agentic";
 

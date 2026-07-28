@@ -1,12 +1,12 @@
 // Ollama tests cover index plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import {
   describeImageWithModel,
   describeImagesWithModel,
-} from "openclaw/plugin-sdk/media-understanding";
-import type { ProviderAuthMethod } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { clearLiveCatalogCacheForTests } from "openclaw/plugin-sdk/provider-catalog-shared";
+} from "bot/plugin-sdk/media-understanding";
+import type { ProviderAuthMethod } from "bot/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "bot/plugin-sdk/plugin-test-api";
+import { clearLiveCatalogCacheForTests } from "bot/plugin-sdk/provider-catalog-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
 import { OLLAMA_DEFAULT_API_KEY } from "./src/discovery-shared.js";
@@ -69,8 +69,8 @@ vi.mock("./api.js", () => ({
   buildOllamaModelDefinition: buildOllamaModelDefinitionMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/secret-input-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/secret-input-runtime")>();
+vi.mock("bot/plugin-sdk/secret-input-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/secret-input-runtime")>();
   return {
     ...actual,
     resolveConfiguredSecretInputString: resolveConfiguredSecretInputStringMock.mockImplementation(

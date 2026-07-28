@@ -3,7 +3,7 @@ import { appendFileSync } from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@hanzo/bot-normalization-core/number-coercion";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../../test/helpers/temp-dir.js";
 import { resolveSessionTranscriptPathInDir } from "../../../config/sessions/paths.js";
@@ -19,7 +19,7 @@ import {
 } from "../../../config/sessions/transcript-write-context.js";
 import { appendExactAssistantMessageToSessionTranscript } from "../../../config/sessions/transcript.js";
 import { createDeferred } from "../../../shared/deferred.js";
-import { OPENCLAW_TRANSCRIPT_ARTIFACT_API } from "../../../shared/transcript-only-openclaw-assistant.js";
+import { BOT_TRANSCRIPT_ARTIFACT_API } from "../../../shared/transcript-only-bot-assistant.js";
 import { normalizeSessionDeliveryState } from "../../../utils/delivery-context.shared.js";
 import { guardSessionManager } from "../../session-tool-result-guard-wrapper.js";
 import {
@@ -54,7 +54,7 @@ function appendTestAssistantMessage(
     role: "assistant",
     content: [{ type: "text", text }],
     api: "messages",
-    provider: model === "session-lock-test" ? "openclaw" : "anthropic",
+    provider: model === "session-lock-test" ? "bot" : "anthropic",
     model,
     usage: {
       input: 0,
@@ -97,7 +97,7 @@ afterEach(async () => {
 async function createTempSessionFile(): Promise<string> {
   // Use a real file so owner normalization can exercise realpath/symlink
   // behavior.
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-attempt-session-lock-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-attempt-session-lock-"));
   tempDirs.push(dir);
   const sessionFile = path.join(dir, "session.jsonl");
   await fs.writeFile(sessionFile, '{"type":"session"}\n', "utf8");
@@ -809,7 +809,7 @@ describe("embedded attempt session lock lifecycle", () => {
   });
 
   it("preserves an unflushed first user turn while merging global metadata", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-attempt-session-first-turn-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-attempt-session-first-turn-"));
     tempDirs.push(dir);
     const sessionFile = path.join(dir, "session.jsonl");
     await fs.writeFile(
@@ -900,7 +900,7 @@ describe("embedded attempt session lock lifecycle", () => {
   });
 
   it("persists the restored leaf before returning from a prompt-released merge", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-attempt-session-leaf-fence-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-attempt-session-leaf-fence-"));
     tempDirs.push(dir);
     const initialManager = SessionManager.create(dir, dir);
     initialManager.appendMessage({ role: "user", content: "question", timestamp: 1 });
@@ -928,7 +928,7 @@ describe("embedded attempt session lock lifecycle", () => {
         message: {
           role: "assistant",
           content: [{ type: "text", text: "side delivery" }],
-          provider: "openclaw",
+          provider: "bot",
           model: "delivery-mirror",
         },
       })}\n`,
@@ -965,7 +965,7 @@ describe("embedded attempt session lock lifecycle", () => {
   });
 
   it("publishes the restoring leaf for every active session fence", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-attempt-session-shared-leaf-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-attempt-session-shared-leaf-"));
     tempDirs.push(dir);
     const initialManager = SessionManager.create(dir, dir);
     initialManager.appendMessage({ role: "user", content: "question", timestamp: 1 });
@@ -1003,7 +1003,7 @@ describe("embedded attempt session lock lifecycle", () => {
         message: {
           role: "assistant",
           content: [{ type: "text", text: "side delivery" }],
-          provider: "openclaw",
+          provider: "bot",
           model: "delivery-mirror",
         },
       })}\n`,
@@ -1030,7 +1030,7 @@ describe("embedded attempt session lock lifecycle", () => {
 
   it("reloads a trusted first-turn rewrite for every active session fence", async () => {
     const dir = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-attempt-session-shared-rewrite-"),
+      path.join(os.tmpdir(), "bot-attempt-session-shared-rewrite-"),
     );
     tempDirs.push(dir);
     const sessionFile = path.join(dir, "session.jsonl");
@@ -1100,7 +1100,7 @@ describe("embedded attempt session lock lifecycle", () => {
   });
 
   it("preserves globally resolved metadata when a stale manager appends the reply branch", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-attempt-session-metadata-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-attempt-session-metadata-"));
     tempDirs.push(dir);
     const initialManager = SessionManager.create(dir, dir);
     initialManager.appendMessage({
@@ -1297,7 +1297,7 @@ describe("embedded attempt session lock lifecycle", () => {
       message: {
         role: "assistant",
         content: [{ type: "text", text: "mirrored media delivery" }],
-        provider: "openclaw",
+        provider: "bot",
         model: "delivery-mirror",
       },
     });
@@ -1338,7 +1338,7 @@ describe("embedded attempt session lock lifecycle", () => {
         role: "assistant",
         content: [{ type: "text", text: "image-1.jpg" }],
         api: "openai-responses",
-        provider: "openclaw",
+        provider: "bot",
         model: "delivery-mirror",
         stopReason: "stop",
         idempotencyKey: "run-message-tool:message-tool:fingerprint:call-1",
@@ -1363,7 +1363,7 @@ describe("embedded attempt session lock lifecycle", () => {
         role: "assistant",
         content: [{ type: "text", text: `image-${index}.jpg` }],
         api: "openai-responses",
-        provider: "openclaw",
+        provider: "bot",
         model: "delivery-mirror",
         stopReason: "stop",
         idempotencyKey: `run-message-tool:message-tool:fingerprint:call-${index}`,
@@ -1441,7 +1441,7 @@ describe("embedded attempt session lock lifecycle", () => {
           timestamp: new Date().toISOString(),
           message: {
             role: "assistant",
-            provider: "openclaw",
+            provider: "bot",
             model: "delivery-mirror",
           },
         }),
@@ -1502,7 +1502,7 @@ describe("embedded attempt session lock lifecycle", () => {
       message: {
         role: "assistant",
         content: [{ type: "text", text: "mirrored migrated media delivery" }],
-        provider: "openclaw",
+        provider: "bot",
         model: "delivery-mirror",
       },
     });
@@ -2061,10 +2061,10 @@ describe("embedded attempt session lock lifecycle", () => {
   });
 
   it("persists compaction through the SQLite transcript owner without a JSONL append fence", async () => {
-    const dir = autoTempDirs.make("openclaw-attempt-sqlite-compaction-");
+    const dir = autoTempDirs.make("bot-attempt-sqlite-compaction-");
     const sessionId = "sqlite-compaction-session";
     const sessionKey = "sqlite-compaction";
-    const storePath = path.join(dir, "openclaw-agent.sqlite");
+    const storePath = path.join(dir, "bot-agent.sqlite");
     await upsertSessionEntry(
       { agentId: "main", sessionKey, storePath },
       {
@@ -2243,7 +2243,7 @@ describe("embedded attempt session lock lifecycle", () => {
   });
 
   it("validates first-turn exact assistant appends through the production facade", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-attempt-session-facade-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-attempt-session-facade-"));
     tempDirs.push(dir);
     const sessionId = "facade-session";
     const sessionKey = "facade";
@@ -2282,8 +2282,8 @@ describe("embedded attempt session lock lifecycle", () => {
           message: {
             role: "assistant",
             content: [{ type: "text", text: "first-turn delivery" }],
-            api: OPENCLAW_TRANSCRIPT_ARTIFACT_API,
-            provider: "openclaw",
+            api: BOT_TRANSCRIPT_ARTIFACT_API,
+            provider: "bot",
             model: "delivery-mirror",
             usage: {
               input: 0,
@@ -3147,7 +3147,7 @@ describe("embedded attempt session lock lifecycle", () => {
       message: {
         role: "assistant",
         content: [{ type: "text", text: "delivery during prompt" }],
-        provider: "openclaw",
+        provider: "bot",
         model: "delivery-mirror",
       },
     });

@@ -2,7 +2,7 @@
  * Browser CLI navigation and viewport commands.
  */
 import type { Command } from "commander";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { ACT_MAX_VIEWPORT_DIMENSION } from "../../browser/act-policy.js";
 import { runBrowserResizeWithOutput } from "../browser-cli-resize.js";
 import {

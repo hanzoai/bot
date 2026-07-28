@@ -1,12 +1,12 @@
 // Xai tests cover stream plugin behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
 import {
   streamSimple,
   type Api,
   type Context,
   type Model,
   type ModelThinkingLevel,
-} from "openclaw/plugin-sdk/llm";
+} from "bot/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import { applyXaiRuntimeModelCompat } from "./runtime-model-compat.js";
 import { wrapXaiProviderStream } from "./stream.js";

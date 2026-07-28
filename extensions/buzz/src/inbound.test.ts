@@ -1,6 +1,6 @@
 // Buzz tests cover inbound room admission, mention gating, and reply delivery.
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { createPluginRuntimeMock } from "bot/plugin-sdk/channel-test-helpers";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BuzzBus } from "./buzz-bus.js";
 import { handleBuzzInbound } from "./inbound.js";
@@ -18,7 +18,7 @@ function createAccount(
 ): ResolvedBuzzAccount {
   return {
     accountId: "default",
-    name: "OpenClaw",
+    name: "Bot",
     enabled: true,
     configured: true,
     relayUrl: "ws://127.0.0.1:3000",
@@ -78,7 +78,7 @@ describe("handleBuzzInbound", () => {
 
     await handleBuzzInbound({
       account: createAccount(),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies BotConfig,
       bus: createBus(),
       message: createMessage({ mentionedPubkeys: [BOT_PUBLIC_KEY] }),
     });
@@ -94,14 +94,14 @@ describe("handleBuzzInbound", () => {
 
   it("accepts a configured text mention when no native p tag is present", async () => {
     const runtime = createPluginRuntimeMock();
-    vi.mocked(runtime.channel.mentions.buildMentionRegexes).mockReturnValue([/@openclaw/i]);
+    vi.mocked(runtime.channel.mentions.buildMentionRegexes).mockReturnValue([/@hanzo/bot-i]);
     setBuzzRuntime(runtime);
 
     await handleBuzzInbound({
       account: createAccount(),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies BotConfig,
       bus: createBus(),
-      message: createMessage({ text: "@openclaw status" }),
+      message: createMessage({ text: "@bot status" }),
     });
 
     expect(runtime.channel.inbound.dispatch).toHaveBeenCalledTimes(1);
@@ -114,7 +114,7 @@ describe("handleBuzzInbound", () => {
 
     await handleBuzzInbound({
       account: createAccount(),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies BotConfig,
       bus: createBus(),
       message: createMessage(),
     });
@@ -131,7 +131,7 @@ describe("handleBuzzInbound", () => {
         groupPolicy: "allowlist",
         groupAllowFrom: [OTHER_PUBLIC_KEY],
       }),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies BotConfig,
       bus: createBus(),
       message: createMessage({ mentionedPubkeys: [BOT_PUBLIC_KEY] }),
     });
@@ -150,7 +150,7 @@ describe("handleBuzzInbound", () => {
         groupPolicy: "allowlist",
         groupAllowFrom: [SENDER_PUBLIC_KEY],
       }),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies BotConfig,
       bus: createBus(),
       message: createMessage({
         text: "/status",
@@ -172,7 +172,7 @@ describe("handleBuzzInbound", () => {
 
     await handleBuzzInbound({
       account: createAccount(),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies BotConfig,
       bus: createBus(),
       message: createMessage({ text: "/status" }),
     });
@@ -187,7 +187,7 @@ describe("handleBuzzInbound", () => {
 
     await handleBuzzInbound({
       account: createAccount(),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies BotConfig,
       bus,
       message: createMessage({
         id: "event-reply",
@@ -222,7 +222,7 @@ describe("handleBuzzInbound", () => {
 
     await handleBuzzInbound({
       account: createAccount(),
-      cfg: {} satisfies OpenClawConfig,
+      cfg: {} satisfies BotConfig,
       bus: createBus(),
       message: createMessage({ mentionedPubkeys: [BOT_PUBLIC_KEY] }),
     });

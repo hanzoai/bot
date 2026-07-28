@@ -22,7 +22,7 @@ type ShellNavigationState = {
 type TestWebKitWindow = Window & {
   webkit?: {
     messageHandlers: {
-      openclawNav: { postMessage: (message: unknown) => void };
+      botNav: { postMessage: (message: unknown) => void };
     };
   };
 };
@@ -39,10 +39,10 @@ afterEach(() => {
   resetAppHostTestGlobals();
 });
 
-describe("OpenClaw native shell", () => {
+describe("Bot native shell", () => {
   it("opens Settings with Shift-Command-Comma", () => {
     const navigate = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellKeyboardState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellKeyboardState;
     shell.runtime = {
       context: {
         navigate,
@@ -64,7 +64,7 @@ describe("OpenClaw native shell", () => {
 
   it("opens Settings with Ctrl-Shift-Comma", () => {
     const navigate = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellKeyboardState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellKeyboardState;
     shell.runtime = {
       context: {
         navigate,
@@ -89,7 +89,7 @@ describe("OpenClaw native shell", () => {
     const update = vi.fn((next: { navCollapsed: boolean }) => {
       snapshot.navCollapsed = next.navCollapsed;
     });
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellNavigationState;
     shell.runtime = {
       context: {
         navigation: { snapshot, update },
@@ -107,7 +107,7 @@ describe("OpenClaw native shell", () => {
     const navigate = vi.fn();
     const openPalette = vi.fn();
     const togglePalette = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellNavigationState;
     Object.defineProperty(shell, "commandPalette", {
       configurable: true,
       value: { openPalette, togglePalette },
@@ -119,7 +119,7 @@ describe("OpenClaw native shell", () => {
       } as unknown as ApplicationContext,
     };
     shell.handleNativeOpenSearch();
-    const toggleEvent = new CustomEvent("openclaw:native-toggle-search", { cancelable: true });
+    const toggleEvent = new CustomEvent("bot:native-toggle-search", { cancelable: true });
     shell.handleNativeToggleSearch(toggleEvent);
     shell.handleNativeNewSession();
 
@@ -134,7 +134,7 @@ describe("OpenClaw native shell", () => {
     const onOpenPalette = vi.fn();
     const onOpenNewSession = vi.fn();
     const controls = document.createElement(
-      "openclaw-macos-titlebar-controls",
+      "bot-macos-titlebar-controls",
     ) as unknown as MacosTitlebarControlsState;
     controls.navCollapsed = false;
     controls.historyOnly = false;
@@ -157,7 +157,7 @@ describe("OpenClaw native shell", () => {
 
   it("retains a native new-session request until a context exists", () => {
     const navigate = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellNavigationState;
 
     shell.handleNativeNewSession();
 
@@ -174,7 +174,7 @@ describe("OpenClaw native shell", () => {
 
   it("does not start a native session during onboarding", () => {
     const navigate = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellNavigationState;
     shell.runtime = {
       context: {
         navigate,
@@ -189,9 +189,9 @@ describe("OpenClaw native shell", () => {
   });
 
   it("updates native history state from the host event", () => {
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellNavigationState;
     shell.handleNativeHistoryState(
-      new CustomEvent("openclaw:native-history-state", {
+      new CustomEvent("bot:native-history-state", {
         detail: { canGoBack: true, canGoForward: false },
       }),
     );
@@ -202,10 +202,10 @@ describe("OpenClaw native shell", () => {
   it("deduplicates native nav state reports", () => {
     const postMessage = vi.fn();
     (window as TestWebKitWindow).webkit = {
-      messageHandlers: { openclawNav: { postMessage } },
+      messageHandlers: { botNav: { postMessage } },
     };
     const snapshot = { navCollapsed: false, navWidth: 280 };
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellNavigationState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellNavigationState;
     shell.runtime = {
       context: {
         navigation: { snapshot },
@@ -225,7 +225,7 @@ describe("OpenClaw native shell", () => {
 
   it("leaves plain Command-Comma to the browser", () => {
     const navigate = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellKeyboardState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellKeyboardState;
     shell.runtime = {
       context: {
         navigate,
@@ -245,7 +245,7 @@ describe("OpenClaw native shell", () => {
   });
 });
 
-describe("OpenClaw shell update affordance", () => {
+describe("Bot shell update affordance", () => {
   it("renders a floating card only while desktop navigation is collapsed", () => {
     const container = document.createElement("div");
     const shared = {
@@ -264,7 +264,7 @@ describe("OpenClaw shell update affordance", () => {
       mobileNavLayout: false,
     });
     render(renderFloatingUpdateCard({ ...shared, navigationSurfaceHidden: collapsed }), container);
-    expect(container.querySelector("openclaw-sidebar-update-card")).not.toBeNull();
+    expect(container.querySelector("bot-sidebar-update-card")).not.toBeNull();
 
     const visible = navigationSurfaceIsHidden({
       navCollapsed: false,
@@ -272,7 +272,7 @@ describe("OpenClaw shell update affordance", () => {
       mobileNavLayout: false,
     });
     render(renderFloatingUpdateCard({ ...shared, navigationSurfaceHidden: visible }), container);
-    expect(container.querySelector("openclaw-sidebar-update-card")).toBeNull();
+    expect(container.querySelector("bot-sidebar-update-card")).toBeNull();
   });
 
   it("treats a closed mobile drawer as hidden navigation", () => {

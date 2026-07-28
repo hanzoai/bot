@@ -1,0 +1,68 @@
+# Combined bot + desktop image for cloud agents.
+# Layers the bot gateway on top of the operative (desktop) image so that
+# exec commands from the chatbot run in the same environment as the VNC
+# desktop — no namespace hacks or sidecar coordination needed.
+#
+# The operative image already has: Ubuntu 22.04, Xvfb, Firefox, Chromium,
+# Node.js 20, Python 3.14, Go, Rust, VS Code, and many more tools.
+
+ARG OPERATIVE_IMAGE=ghcr.io/hanzoai/operative:latest
+FROM ${OPERATIVE_IMAGE}
+
+# Switch to root for system-level installs
+USER root
+
+# Install Node.js 22 (bot requires >=22) — upgrade from the base image's Node 20
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g corepack && \
+    corepack enable && \
+    corepack prepare pnpm@10.8.0 --activate
+
+# Install Bun (used by bot build scripts)
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:${PATH}"
+
+# Install openbox (lightweight WM that works headless — mutter requires a session)
+# and nsenter for any remaining cross-process needs
+RUN apt-get update && apt-get install -y openbox util-linux && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Create bot app directory and fix all cache/store ownership
+RUN mkdir -p /app /home/operative/.cache/node/corepack/v1 \
+    /home/operative/.local/share/pnpm /home/operative/.npm \
+    /home/operative/.pnpm-store && \
+    chown -R operative:operative /app /home/operative/.cache \
+    /home/operative/.local /home/operative/.npm /home/operative/.pnpm-store
+WORKDIR /app
+
+# Copy bot source
+COPY --chown=operative:operative . /app/
+
+USER operative
+
+# Install dependencies and build with pnpm.
+# Use content-addressable store in /tmp to avoid overlay-fs tar bugs.
+RUN pnpm install --no-frozen-lockfile --store-dir /tmp/pnpm-store && \
+    pnpm build && \
+    rm -rf /tmp/pnpm-store
+
+# Build the control UI
+ENV BOT_PREFER_PNPM=1
+RUN pnpm canvas:a2ui:bundle 2>/dev/null || true
+
+# Desktop environment variables (inherited from operative base)
+ENV DISPLAY=:1
+ENV DISPLAY_NUM=1
+
+# Bot configuration for cloud mode
+ENV BOT_DEFAULT_PROVIDER=hanzo
+ENV BOT_DEFAULT_MODEL=enso
+ENV HANZO_NODE_ID=""
+
+# The entrypoint starts both the desktop environment and the bot.
+# The desktop (Xvfb + VNC + window manager) starts first, then the bot
+# connects to the gateway as a node.
+COPY --chown=operative:operative docker/cloud-entrypoint.sh /app/cloud-entrypoint.sh
+RUN chmod +x /app/cloud-entrypoint.sh
+
+ENTRYPOINT ["/app/cloud-entrypoint.sh"]

@@ -1,5 +1,5 @@
 // Image Generation Core API module exposes the plugin public contract.
-export type { AuthProfileStore } from "openclaw/plugin-sdk/image-generation-core";
+export type { AuthProfileStore } from "bot/plugin-sdk/image-generation-core";
 export {
   buildNoCapabilityModelConfiguredMessage,
   createSubsystemLogger,
@@ -16,7 +16,7 @@ export {
   resolveApiKeyForProvider,
   resolveCapabilityModelCandidates,
   throwCapabilityGenerationFailure,
-} from "openclaw/plugin-sdk/image-generation-core";
+} from "bot/plugin-sdk/image-generation-core";
 export type {
   FallbackAttempt,
   GeneratedImageAsset,
@@ -27,5 +27,5 @@ export type {
   ImageGenerationResolution,
   ImageGenerationResult,
   ImageGenerationSourceImage,
-  OpenClawConfig,
-} from "openclaw/plugin-sdk/image-generation-core";
+  BotConfig,
+} from "bot/plugin-sdk/image-generation-core";

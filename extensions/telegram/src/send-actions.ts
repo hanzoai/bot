@@ -1,7 +1,7 @@
 import type { ReactionType, ReactionTypeEmoji } from "grammy/types";
-import type { RetryConfig } from "openclaw/plugin-sdk/retry-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { RetryConfig } from "bot/plugin-sdk/retry-runtime";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "bot/plugin-sdk/ssrf-runtime";
 import { buildTypingThreadParams } from "./bot/helpers.js";
 import { isRecoverableTelegramNetworkError } from "./network-errors.js";
 import {
@@ -16,11 +16,11 @@ import {
   type TelegramApiOverride,
 } from "./send-context.js";
 import { prepareTelegramOutbound } from "./send-outbound.js";
-import type { OpenClawConfig } from "./send.runtime.js";
+import type { BotConfig } from "./send.runtime.js";
 import { parseTelegramTarget } from "./targets.js";
 
 type TelegramReactionOpts = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   token?: string;
   accountId?: string;
   api?: TelegramApiOverride;
@@ -31,7 +31,7 @@ type TelegramReactionOpts = {
 };
 
 type TelegramTypingOpts = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   token?: string;
   accountId?: string;
   verbose?: boolean;
@@ -144,7 +144,7 @@ async function reactMessageTelegramWithContext(
 }
 
 type TelegramDeleteOpts = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   token?: string;
   accountId?: string;
   notify?: boolean;

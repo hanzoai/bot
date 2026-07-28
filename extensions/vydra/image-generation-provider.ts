@@ -1,12 +1,12 @@
 // Vydra provider module implements model/runtime integration.
-import type { ImageGenerationProvider } from "openclaw/plugin-sdk/image-generation";
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
-import { isProviderApiKeyConfigured } from "openclaw/plugin-sdk/provider-auth";
+import type { ImageGenerationProvider } from "bot/plugin-sdk/image-generation";
+import { resolveGeneratedMediaMaxBytes } from "bot/plugin-sdk/media-generation-runtime";
+import { isProviderApiKeyConfigured } from "bot/plugin-sdk/provider-auth";
 import {
   assertOkOrThrowHttpError,
   postJsonRequest,
   readProviderJsonResponse,
-} from "openclaw/plugin-sdk/provider-http";
+} from "bot/plugin-sdk/provider-http";
 import {
   DEFAULT_VYDRA_IMAGE_MODEL,
   downloadVydraAsset,

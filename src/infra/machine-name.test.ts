@@ -1,12 +1,12 @@
 // Covers machine name resolution fallback behavior.
 import os from "node:os";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "bot/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const execFileMock = vi.hoisted(() => vi.fn());
 
 vi.mock("node:child_process", async () => {
-  const { mockNodeChildProcessExecFile } = await import("openclaw/plugin-sdk/test-node-mocks");
+  const { mockNodeChildProcessExecFile } = await import("bot/plugin-sdk/test-node-mocks");
   return mockNodeChildProcessExecFile(
     Object.assign(execFileMock, {
       [Symbol.for("nodejs.util.promisify.custom")]: vi.fn(),
@@ -55,7 +55,7 @@ describe("getMachineDisplayName", () => {
       name: "falls back to the default product name when hostname is blank",
       scope: "blank-hostname",
       hostname: "   ",
-      expected: "openclaw",
+      expected: "bot",
       expectedCalls: 1,
       repeatLookup: false,
     },

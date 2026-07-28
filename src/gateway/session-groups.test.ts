@@ -4,13 +4,13 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { SessionEntry } from "../config/sessions.js";
 import { loadSessionEntry, replaceSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
 import {
   deleteSessionGroup,
   ensureSessionGroupRegistered,
@@ -23,17 +23,17 @@ import {
 describe("session groups catalog", () => {
   let root: string;
   let env: NodeJS.ProcessEnv;
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as BotConfig;
 
   beforeEach(async () => {
     const tempRoot = await fs.realpath(os.tmpdir());
-    root = await fs.mkdtemp(path.join(tempRoot, "openclaw-session-groups-"));
-    env = { ...process.env, OPENCLAW_STATE_DIR: root };
+    root = await fs.mkdtemp(path.join(tempRoot, "bot-session-groups-"));
+    env = { ...process.env, BOT_STATE_DIR: root };
   });
 
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotAgentDatabasesForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -96,14 +96,14 @@ describe("session groups catalog", () => {
   });
 
   it("lazily adds sidebar_sections to a pre-existing current-schema database", () => {
-    const databasePath = openOpenClawStateDatabase({ env }).path;
-    closeOpenClawStateDatabaseForTest();
+    const databasePath = openBotStateDatabase({ env }).path;
+    closeBotStateDatabaseForTest();
     const { DatabaseSync } = requireNodeSqlite();
     const legacy = new DatabaseSync(databasePath);
     legacy.exec("DROP TABLE sidebar_sections;");
     legacy.close();
 
-    const reopened = openOpenClawStateDatabase({ env });
+    const reopened = openBotStateDatabase({ env });
     expect(
       reopened.db
         .prepare("SELECT name FROM sqlite_schema WHERE type = 'table' AND name = ?")

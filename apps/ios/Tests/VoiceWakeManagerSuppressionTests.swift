@@ -1,7 +1,7 @@
 import Foundation
 import SwabbleKit
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 @Suite("Voice Wake manager suppression", .serialized)
 struct VoiceWakeManagerSuppressionTests {
@@ -93,20 +93,20 @@ struct VoiceWakeManagerSuppressionTests {
     @Test
     @MainActor func `push to talk suppression rejects buffered Voice Wake results`() throws {
         let manager = VoiceWakeManager._test_withoutRestartDelays()
-        manager.triggerWords = ["openclaw"]
+        manager.triggerWords = ["bot"]
         manager.isEnabled = true
         manager.isListening = true
         let staleGeneration = manager._test_recognitionGeneration()
 
         manager.setSuppressedByPushToTalk(true)
 
-        let transcript = "openclaw hello"
-        let triggerRange = try #require(transcript.range(of: "openclaw"))
+        let transcript = "bot hello"
+        let triggerRange = try #require(transcript.range(of: "bot"))
         let commandRange = try #require(transcript.range(of: "hello"))
         manager._test_handleRecognitionCallback(
             transcript: transcript,
             segments: [
-                WakeWordSegment(text: "openclaw", start: 0, duration: 0.2, range: triggerRange),
+                WakeWordSegment(text: "bot", start: 0, duration: 0.2, range: triggerRange),
                 WakeWordSegment(text: "hello", start: 0.8, duration: 0.2, range: commandRange),
             ],
             errorText: nil,

@@ -1,5 +1,5 @@
 // Public channel registry facade for channel ids, metadata, and setup copy.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { normalizeChatChannelId, type ChatChannelId } from "./ids.js";
 import type { ChannelId } from "./plugins/channel-id.types.js";
 import type { ChannelMeta } from "./plugins/types.core.js";

@@ -238,7 +238,7 @@ describe("google generative ai helpers", () => {
       authorization: "Bearer oauth-token",
       "content-type": "application/json",
     });
-    expect(oauthHeaders["x-goog-api-client"]).toMatch(/^openclaw\//u);
+    expect(oauthHeaders["x-goog-api-client"]).toMatch(/^bot\//u);
 
     const apiKeyConfig = resolveGoogleGenerativeAiHttpRequestConfig({
       apiKey: "api-key-123",
@@ -252,7 +252,7 @@ describe("google generative ai helpers", () => {
       "content-type": "application/json",
       "x-goog-api-key": "api-key-123",
     });
-    expect(apiKeyHeaders["x-goog-api-client"]).toMatch(/^openclaw\//u);
+    expect(apiKeyHeaders["x-goog-api-client"]).toMatch(/^bot\//u);
   });
 
   it("preserves explicit OpenAI-compatible Google endpoints during provider normalization", () => {

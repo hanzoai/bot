@@ -3,26 +3,26 @@ import {
   buildChannelGroupsScopeTree,
   resolveChannelGroupPolicy,
   resolveScopeRequireMention,
-} from "openclaw/plugin-sdk/channel-policy";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-policy";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   resolveThreadBindingIdleTimeoutMsForChannel,
   resolveThreadBindingMaxAgeMsForChannel,
   resolveThreadBindingSpawnPolicy,
-} from "openclaw/plugin-sdk/conversation-runtime";
-import { formatErrorMessage, formatUncaughtError } from "openclaw/plugin-sdk/error-runtime";
-import { normalizeGroupActivation } from "openclaw/plugin-sdk/group-activation";
+} from "bot/plugin-sdk/conversation-runtime";
+import { formatErrorMessage, formatUncaughtError } from "bot/plugin-sdk/error-runtime";
+import { normalizeGroupActivation } from "bot/plugin-sdk/group-activation";
 import {
   isNativeCommandsExplicitlyDisabled,
   resolveNativeCommandsEnabled,
   resolveNativeSkillsEnabled,
-} from "openclaw/plugin-sdk/native-command-config-runtime";
-import type { HistoryEntry } from "openclaw/plugin-sdk/reply-history";
-import { danger, logVerbose, shouldLogVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { getChildLogger } from "openclaw/plugin-sdk/runtime-env";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { createNonExitingRuntime, type RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/native-command-config-runtime";
+import type { HistoryEntry } from "bot/plugin-sdk/reply-history";
+import { danger, logVerbose, shouldLogVerbose } from "bot/plugin-sdk/runtime-env";
+import { getChildLogger } from "bot/plugin-sdk/runtime-env";
+import { createSubsystemLogger } from "bot/plugin-sdk/runtime-env";
+import { createNonExitingRuntime, type RuntimeEnv } from "bot/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { getOrCreateAccountThrottler } from "./account-throttler.js";
 import { resolveTelegramAccount } from "./accounts.js";
 import { normalizeTelegramApiRoot } from "./api-root.js";
@@ -287,7 +287,7 @@ export function createTelegramBotCore(
   });
   const mediaMaxBytes = (opts.mediaMaxMb ?? telegramCfg.mediaMaxMb ?? 100) * 1024 * 1024;
   const logger = getChildLogger({ module: "telegram-auto-reply" });
-  const resolveGroupPolicy = (chatId: string | number, turnCfg: OpenClawConfig) =>
+  const resolveGroupPolicy = (chatId: string | number, turnCfg: BotConfig) =>
     resolveChannelGroupPolicy({
       cfg: turnCfg,
       channel: "telegram",
@@ -299,7 +299,7 @@ export function createTelegramBotCore(
     agentId?: string;
     messageThreadId?: number;
     sessionKey?: string;
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
   }) => {
     const agentId = params.agentId ?? resolveDefaultAgentId(params.cfg);
     const sessionKey =
@@ -327,7 +327,7 @@ export function createTelegramBotCore(
     }
     return undefined;
   };
-  const resolveGroupRequireMention = (chatId: string | number, turnCfg: OpenClawConfig) =>
+  const resolveGroupRequireMention = (chatId: string | number, turnCfg: BotConfig) =>
     resolveScopeRequireMention({
       tree: buildChannelGroupsScopeTree(turnCfg, "telegram", account.accountId),
       path: [String(chatId)],
@@ -337,7 +337,7 @@ export function createTelegramBotCore(
   const resolveTelegramGroupConfig = (
     chatId: string | number,
     messageThreadId: number | undefined,
-    turnCfg: OpenClawConfig,
+    turnCfg: BotConfig,
   ) => {
     const turnTelegramCfg = resolveTelegramAccount({
       cfg: turnCfg,

@@ -10,7 +10,7 @@ import {
   MAX_TIMER_TIMEOUT_MS,
   parseStrictInteger,
   resolveTimerTimeoutMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/number-runtime";
 import type { BrowserActRequest } from "./client-actions.types.js";
 import { DEFAULT_BROWSER_ACTION_TIMEOUT_MS } from "./constants.js";
 

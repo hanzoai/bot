@@ -283,7 +283,7 @@ describe("createPersistCronSessionEntry", () => {
   it("does not register cron sessions as resumable until the transcript exists", async () => {
     const missingTranscriptPath = path.join(
       os.tmpdir(),
-      `openclaw-missing-cron-${crypto.randomUUID()}.jsonl`,
+      `bot-missing-cron-${crypto.randomUUID()}.jsonl`,
     );
     const cronSession = makeCronSession(
       makeSessionEntry({
@@ -726,7 +726,7 @@ describe("createPersistCronSessionEntry", () => {
 const cronSessionTempDirs: string[] = [];
 
 async function createTranscriptFile(): Promise<string> {
-  const dir = makeTempDir(cronSessionTempDirs, "openclaw-cron-session-");
+  const dir = makeTempDir(cronSessionTempDirs, "bot-cron-session-");
   const file = path.join(dir, "session.jsonl");
   await fs.writeFile(file, `${JSON.stringify({ type: "session", sessionId: "run-session-id" })}\n`);
   return file;

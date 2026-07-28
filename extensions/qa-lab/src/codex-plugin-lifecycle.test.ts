@@ -79,7 +79,7 @@ describe("codex plugin lifecycle: OAuth-only with mixed profiles", () => {
   });
 });
 
-describe("codex plugin lifecycle: pinned-old codex plugin with new OpenClaw", () => {
+describe("codex plugin lifecycle: pinned-old codex plugin with new Bot", () => {
   it("blocks with a precise update remediation when the plugin is older than the host", async () => {
     const agentDir = await createAgentDir("qa-codex-plugin-old-");
     await seedCodexPluginAt("2026.5.19", agentDir);
@@ -93,7 +93,7 @@ describe("codex plugin lifecycle: pinned-old codex plugin with new OpenClaw", ()
 
     expect(result.status).toBe("blocked");
     expect(result.remediation).toBe(
-      'Codex plugin version 2026.5.19 is older than OpenClaw 2026.5.21. Run "openclaw plugins update codex" or unpin codex, then rerun "openclaw doctor --fix".',
+      'Codex plugin version 2026.5.19 is older than Bot 2026.5.21. Run "bot plugins update codex" or unpin codex, then rerun "bot doctor --fix".',
     );
   });
 
@@ -109,11 +109,11 @@ describe("codex plugin lifecycle: pinned-old codex plugin with new OpenClaw", ()
     });
 
     expect(result.status).toBe("blocked");
-    expect(result.remediation).toContain("is older than OpenClaw 2026.5.21");
+    expect(result.remediation).toContain("is older than Bot 2026.5.21");
   });
 });
 
-describe("codex plugin lifecycle: pinned-new codex plugin with old OpenClaw", () => {
+describe("codex plugin lifecycle: pinned-new codex plugin with old Bot", () => {
   it("blocks with a precise host-upgrade remediation when the plugin is newer than the host", async () => {
     const agentDir = await createAgentDir("qa-codex-plugin-new-");
     await seedCodexPluginAt("2026.5.22", agentDir);
@@ -127,7 +127,7 @@ describe("codex plugin lifecycle: pinned-new codex plugin with old OpenClaw", ()
 
     expect(result.status).toBe("blocked");
     expect(result.remediation).toBe(
-      "Codex plugin version 2026.5.22 requires a newer OpenClaw host than 2026.5.21. Upgrade OpenClaw or install a codex plugin version pinned to 2026.5.21.",
+      "Codex plugin version 2026.5.22 requires a newer Bot host than 2026.5.21. Upgrade Bot or install a codex plugin version pinned to 2026.5.21.",
     );
   });
 
@@ -143,7 +143,7 @@ describe("codex plugin lifecycle: pinned-new codex plugin with old OpenClaw", ()
     });
 
     expect(result.status).toBe("blocked");
-    expect(result.remediation).toContain("requires a newer OpenClaw host than 2026.5.21");
+    expect(result.remediation).toContain("requires a newer Bot host than 2026.5.21");
   });
 });
 
@@ -160,19 +160,19 @@ describe("codex plugin lifecycle: doctor migration safety matrix", () => {
       config: {},
     },
     {
-      name: "mixed profile with defaults OpenClaw pin",
+      name: "mixed profile with defaults Bot pin",
       profileShape: "mixed" as const,
-      config: { agents: { defaults: { agentRuntime: { id: "openclaw" } } } },
-      expectedRemovedRuntimePins: ["agentRuntime.id=openclaw"],
+      config: { agents: { defaults: { agentRuntime: { id: "bot" } } } },
+      expectedRemovedRuntimePins: ["agentRuntime.id=bot"],
     },
     {
-      name: "mixed profile with main-agent OpenClaw pin",
+      name: "mixed profile with main-agent Bot pin",
       profileShape: "mixed" as const,
-      config: { agents: { list: { main: { agentRuntime: { id: "openclaw" } } } } },
-      expectedRemovedRuntimePins: ["agentRuntime.id=openclaw"],
+      config: { agents: { list: { main: { agentRuntime: { id: "bot" } } } } },
+      expectedRemovedRuntimePins: ["agentRuntime.id=bot"],
     },
   ])(
-    "keeps codex auth and strips stale OpenClaw runtime pins for $name",
+    "keeps codex auth and strips stale Bot runtime pins for $name",
     async ({ profileShape, config, expectedRemovedRuntimePins = [] }) => {
       const agentDir = await createAgentDir("qa-codex-doctor-matrix-");
       await seedCodexPluginAt("current", agentDir);

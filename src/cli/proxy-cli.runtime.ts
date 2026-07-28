@@ -2,7 +2,7 @@
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import process from "node:process";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { colorize, isRich, theme } from "../../packages/terminal-core/src/theme.js";
 import { getRuntimeConfig } from "../config/config.js";
 import {
@@ -31,8 +31,8 @@ export async function runDebugProxyStartCommand(opts: { host?: string; port?: nu
     id: settings.sessionId,
     startedAt: Date.now(),
     mode: "proxy-start",
-    sourceScope: "openclaw",
-    sourceProcess: "openclaw",
+    sourceScope: "bot",
+    sourceProcess: "bot",
     proxyUrl: settings.proxyUrl,
   });
   initializeDebugProxyCapture("proxy-start", settings);
@@ -85,8 +85,8 @@ export async function runDebugProxyRunCommand(opts: {
     id: sessionId,
     startedAt: Date.now(),
     mode: "proxy-run",
-    sourceScope: "openclaw",
-    sourceProcess: "openclaw",
+    sourceScope: "bot",
+    sourceProcess: "bot",
     proxyUrl: undefined,
   });
   const server = await startDebugProxyServer({
@@ -195,7 +195,7 @@ function formatProxyValidationNextSteps(result: ProxyValidationResult): string[]
   }
   if (result.config.errors.length > 0) {
     return [
-      "Fix proxy.proxyUrl, OPENCLAW_PROXY_URL, or --proxy-url so it uses a reachable http:// or https:// proxy.",
+      "Fix proxy.proxyUrl, BOT_PROXY_URL, or --proxy-url so it uses a reachable http:// or https:// proxy.",
     ];
   }
   if (result.checks.some((check) => !check.ok && check.kind === "allowed")) {

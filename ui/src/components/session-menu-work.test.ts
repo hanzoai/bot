@@ -11,11 +11,11 @@ import {
 function pullRequest(overrides: Partial<ControlUiSessionPullRequest>): ControlUiSessionPullRequest {
   return {
     number: 1,
-    owner: "openclaw",
-    repo: "openclaw",
+    owner: "bot",
+    repo: "bot",
     branch: "feature/demo",
     title: "Demo",
-    url: "https://github.com/openclaw/openclaw/pull/1",
+    url: "https://github.com/hanzoai/bot/pull/1",
     state: "open",
     ...overrides,
   };

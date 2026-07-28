@@ -16,8 +16,8 @@ describe("normalizeBrowserUrlDraft", () => {
   });
   it("prefixes bare hosts with https", () => {
     expect(normalizeBrowserUrlDraft("example.com")).toBe("https://example.com/");
-    expect(normalizeBrowserUrlDraft("  github.com/openclaw/openclaw ")).toBe(
-      "https://github.com/openclaw/openclaw",
+    expect(normalizeBrowserUrlDraft("  github.com/hanzoai/bot ")).toBe(
+      "https://github.com/hanzoai/bot",
     );
   });
 
@@ -39,7 +39,7 @@ describe("normalizeBrowserUrlDraft", () => {
 
   it("restores persisted open state when a mounted tag upgrades lazily", async () => {
     localStorage.setItem(
-      "openclaw.browser.panel.v1",
+      "bot.browser.panel.v1",
       JSON.stringify({ open: true, dock: "right", height: 420, width: 560 }),
     );
     const tagName = `test-lazy-browser-panel-${crypto.randomUUID()}`;
@@ -47,7 +47,7 @@ describe("normalizeBrowserUrlDraft", () => {
     element.available = true;
     document.body.append(element);
 
-    const BrowserPanel = customElements.get("openclaw-browser-panel");
+    const BrowserPanel = customElements.get("bot-browser-panel");
     if (!BrowserPanel) {
       throw new Error("expected browser panel registration");
     }
@@ -63,10 +63,10 @@ describe("normalizeBrowserUrlDraft", () => {
 
   it("suppresses an open dock without overwriting its persisted preference", async () => {
     localStorage.setItem(
-      "openclaw.browser.panel.v1",
+      "bot.browser.panel.v1",
       JSON.stringify({ open: true, dock: "right", height: 420, width: 560 }),
     );
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("bot-browser-panel") as unknown as HTMLElement & {
       available: boolean;
       suppressed: boolean;
       renderRoot: ShadowRoot;
@@ -83,7 +83,7 @@ describe("normalizeBrowserUrlDraft", () => {
     expect(document.documentElement.style.getPropertyValue("--oc-browser-reserve-right")).toBe(
       "0px",
     );
-    expect(JSON.parse(localStorage.getItem("openclaw.browser.panel.v1") ?? "{}")).toMatchObject({
+    expect(JSON.parse(localStorage.getItem("bot.browser.panel.v1") ?? "{}")).toMatchObject({
       open: true,
     });
 
@@ -95,10 +95,10 @@ describe("normalizeBrowserUrlDraft", () => {
 
   it("waits for availability before restoring after suppression", async () => {
     localStorage.setItem(
-      "openclaw.browser.panel.v1",
+      "bot.browser.panel.v1",
       JSON.stringify({ open: true, dock: "right", height: 420, width: 560 }),
     );
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("bot-browser-panel") as unknown as HTMLElement & {
       available: boolean;
       suppressed: boolean;
       browserPanelIsOpen(): boolean;
@@ -118,7 +118,7 @@ describe("normalizeBrowserUrlDraft", () => {
 
   it("mounts closed inside a takeover instead of refreshing a hidden dock", async () => {
     localStorage.setItem(
-      "openclaw.browser.panel.v1",
+      "bot.browser.panel.v1",
       JSON.stringify({ open: true, dock: "right", height: 420, width: 560 }),
     );
     const requests: string[] = [];
@@ -128,7 +128,7 @@ describe("normalizeBrowserUrlDraft", () => {
         return {} as T;
       },
     } as GatewayBrowserClient;
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("bot-browser-panel") as unknown as HTMLElement & {
       client: GatewayBrowserClient | null;
       available: boolean;
       suppressed: boolean;
@@ -150,7 +150,7 @@ describe("normalizeBrowserUrlDraft", () => {
   });
 
   it("keeps an already closed panel closed for an explicit close request", () => {
-    const panel = document.createElement("openclaw-browser-panel") as unknown as HTMLElement & {
+    const panel = document.createElement("bot-browser-panel") as unknown as HTMLElement & {
       available: boolean;
       browserPanelIsOpen: () => boolean;
       handleToggleRequest: (event: Event) => void;
@@ -159,7 +159,7 @@ describe("normalizeBrowserUrlDraft", () => {
     document.body.append(panel);
 
     panel.handleToggleRequest(
-      new CustomEvent("openclaw:browser-toggle", { detail: { open: false } }),
+      new CustomEvent("bot:browser-toggle", { detail: { open: false } }),
     );
 
     expect(panel.browserPanelIsOpen()).toBe(false);

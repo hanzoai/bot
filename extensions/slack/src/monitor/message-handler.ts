@@ -2,9 +2,9 @@
 import {
   createChannelInboundDebouncer,
   shouldDebounceTextInbound,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { collectErrorGraphCandidates, formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+} from "bot/plugin-sdk/channel-inbound";
+import { collectErrorGraphCandidates, formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 import type { ResolvedSlackAccount } from "../accounts.js";
 import type { SlackSendIdentity } from "../send.js";
 import type { SlackMessageEvent } from "../types.js";

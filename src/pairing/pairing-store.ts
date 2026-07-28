@@ -5,11 +5,11 @@ import {
   normalizeNullableString,
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { getPairingAdapter } from "../channels/plugins/pairing.js";
 import type { ChannelPairingAdapter } from "../channels/plugins/pairing.types.js";
 import { DEFAULT_ACCOUNT_ID } from "../routing/session-key.js";
-import { runOpenClawStateWriteTransaction } from "../state/openclaw-state-db.js";
+import { runBotStateWriteTransaction } from "../state/bot-state-db.js";
 import { resolveAllowFromAccountId } from "./pairing-store-keys.js";
 import {
   readChannelPairingState,
@@ -188,7 +188,7 @@ async function updateAllowFromStoreEntry(params: {
   const env = params.env ?? process.env;
   const accountId = resolveAllowFromAccountId(params.accountId);
   const normalized = normalizeAllowFromInput(params.channel, params.entry, params.pairingAdapter);
-  return runOpenClawStateWriteTransaction((database) => {
+  return runBotStateWriteTransaction((database) => {
     const state = readChannelPairingStateFromDatabase(database, params.channel);
     const current = (state.allowFrom?.[accountId] ?? []).slice();
     if (!normalized) {
@@ -256,7 +256,7 @@ export async function listChannelPairingRequests(
   env: NodeJS.ProcessEnv = process.env,
   accountId?: string,
 ): Promise<PairingRequest[]> {
-  return runOpenClawStateWriteTransaction((database) => {
+  return runBotStateWriteTransaction((database) => {
     const state = readChannelPairingStateFromDatabase(database, channel);
     const expired = pruneExpiredRequests(state.requests, Date.now());
     const capped = pruneExcessRequestsByAccount(expired.requests, CHANNEL_PAIRING_PENDING_MAX);
@@ -290,7 +290,7 @@ export async function upsertChannelPairingRequest(params: {
   pairingAdapter?: ChannelPairingAdapter;
 }): Promise<{ code: string; created: boolean }> {
   const env = params.env ?? process.env;
-  return runOpenClawStateWriteTransaction((database) => {
+  return runBotStateWriteTransaction((database) => {
     const now = new Date().toISOString();
     const id = normalizeId(params.id);
     const accountId = normalizePairingAccountId(params.accountId) || DEFAULT_ACCOUNT_ID;
@@ -360,7 +360,7 @@ async function resolveChannelPairingRequest(
   params: ResolvePairingRequestParams,
 ): Promise<{ id: string; entry: PairingRequest } | null> {
   const env = params.env ?? process.env;
-  return runOpenClawStateWriteTransaction((database) => {
+  return runBotStateWriteTransaction((database) => {
     const state = readChannelPairingStateFromDatabase(database, params.channel);
     const pruned = pruneExpiredRequests(state.requests, Date.now());
     const accountId = normalizePairingAccountId(params.accountId);

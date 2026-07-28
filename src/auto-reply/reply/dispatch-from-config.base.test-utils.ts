@@ -1,8 +1,8 @@
 // Imported by dispatch-from-config.test.ts to keep its mocked suite in one Vitest module graph.
 import { AsyncResource } from "node:async_hooks";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
   interruptSessionWorkAdmissions,
@@ -253,7 +253,7 @@ describe("dispatchReplyFromConfig", () => {
         MessageThreadId: 3731,
         TransportThreadId: 3731,
         To: "telegram:-1003774691294:topic:3731",
-        BodyForAgent: "[OpenClaw heartbeat poll]",
+        BodyForAgent: "[Bot heartbeat poll]",
       }),
       cfg: automaticGroupReplyConfig,
       dispatcher,
@@ -294,7 +294,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       _opts?: GetReplyOptions,
-      _cfg?: OpenClawConfig,
+      _cfg?: BotConfig,
     ) => ({ text: "hi" }) satisfies ReplyPayload;
     await dispatchReplyFromConfig({ ctx, cfg, dispatcher, replyResolver });
 
@@ -610,7 +610,7 @@ describe("dispatchReplyFromConfig", () => {
       ChatType: "channel",
       SessionKey: "agent:main:slack:channel:C123",
     });
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
     const replyResolver = async (
       _ctx: MsgContext,
       opts?: GetReplyOptions,
@@ -1324,7 +1324,7 @@ describe("dispatchReplyFromConfig", () => {
         SessionKey: sessionKey,
         MessageSid: "visible-after-failure",
         To: "telegram:-1003774691294",
-        BodyForAgent: "@openclaw recover",
+        BodyForAgent: "@bot recover",
       }),
       cfg: automaticGroupReplyConfig,
       dispatcher,
@@ -1405,7 +1405,7 @@ describe("dispatchReplyFromConfig", () => {
           SessionKey: sessionKey,
           MessageSid: messageSid,
           To: "telegram:-1003774691295",
-          BodyForAgent: "@openclaw recover",
+          BodyForAgent: "@bot recover",
         });
 
       const firstTurn = dispatchReplyFromConfig({
@@ -1481,7 +1481,7 @@ describe("dispatchReplyFromConfig", () => {
         SessionKey: sessionKey,
         MessageSid: "heartbeat-after-failure",
         To: "telegram:-1003774691296",
-        BodyForAgent: "[OpenClaw heartbeat poll]",
+        BodyForAgent: "[Bot heartbeat poll]",
       }),
       cfg: automaticGroupReplyConfig,
       dispatcher,
@@ -1548,7 +1548,7 @@ describe("dispatchReplyFromConfig", () => {
         SessionKey: sessionKey,
         MessageSid: "visible-after-rotation",
         To: "telegram:-1003774691297",
-        BodyForAgent: "@openclaw recover",
+        BodyForAgent: "@bot recover",
       }),
       cfg: automaticGroupReplyConfig,
       dispatcher,
@@ -1605,7 +1605,7 @@ describe("dispatchReplyFromConfig", () => {
     const replyResolver = async (
       _ctx: MsgContext,
       _opts?: GetReplyOptions,
-      _cfg?: OpenClawConfig,
+      _cfg?: BotConfig,
     ) => ({ text: "hi" }) satisfies ReplyPayload;
     await dispatchReplyFromConfig({ ctx, cfg, dispatcher, replyResolver });
 

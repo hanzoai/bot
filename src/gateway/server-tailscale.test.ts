@@ -124,18 +124,18 @@ describe("startGatewayTailscaleExposure preserveFunnel", () => {
       tailscaleMode: "serve",
       port: 18789,
       resetOnExit: true,
-      serviceName: "svc:openclaw",
+      serviceName: "svc:bot",
       logTailscale,
     });
 
-    expect(mocks.enableTailscaleServe).toHaveBeenCalledWith(18789, undefined, "svc:openclaw");
+    expect(mocks.enableTailscaleServe).toHaveBeenCalledWith(18789, undefined, "svc:bot");
     expect(logTailscale.info).toHaveBeenCalledWith(
-      "serve enabled for svc:openclaw: https://openclaw.tailnet.ts.net/ (WS via wss://openclaw.tailnet.ts.net)",
+      "serve enabled for svc:bot: https://bot.tailnet.ts.net/ (WS via wss://bot.tailnet.ts.net)",
     );
 
     await cleanup?.();
 
-    expect(mocks.disableTailscaleServe).toHaveBeenCalledWith(undefined, "svc:openclaw");
+    expect(mocks.disableTailscaleServe).toHaveBeenCalledWith(undefined, "svc:bot");
   });
 
   it("does not use serviceName in funnel mode", async () => {
@@ -146,7 +146,7 @@ describe("startGatewayTailscaleExposure preserveFunnel", () => {
       tailscaleMode: "funnel",
       port: 18789,
       resetOnExit: true,
-      serviceName: "svc:openclaw",
+      serviceName: "svc:bot",
       logTailscale,
     });
 
@@ -212,11 +212,11 @@ describe("startGatewayTailscaleExposure preserveFunnel", () => {
     await startGatewayTailscaleExposure({
       tailscaleMode: "serve",
       port: 18789,
-      serviceName: "svc:openclaw",
+      serviceName: "svc:bot",
       logTailscale,
     });
 
-    expect(mocks.enableTailscaleServe).toHaveBeenCalledWith(18789, undefined, "svc:openclaw");
+    expect(mocks.enableTailscaleServe).toHaveBeenCalledWith(18789, undefined, "svc:bot");
     expect(logTailscale.info).toHaveBeenCalledWith("serve enabled");
   });
 

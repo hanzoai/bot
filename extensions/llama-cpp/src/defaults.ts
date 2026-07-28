@@ -3,7 +3,7 @@ import path from "node:path";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "bot/plugin-sdk/provider-model-shared";
 
 export const LLAMA_CPP_PROVIDER_ID = "llama-cpp";
 export const LLAMA_CPP_PROVIDER_LABEL = "Local model (llama.cpp)";

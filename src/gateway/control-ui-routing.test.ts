@@ -13,8 +13,8 @@ describe("isControlUiPluginManagerRequest", () => {
     { basePath: "", pathname: "/settings/plugins", method: "GET", expected: true },
     { basePath: "", pathname: "/settings/plugins/", method: "HEAD", expected: true },
     {
-      basePath: "/openclaw",
-      pathname: "/openclaw/settings/plugins",
+      basePath: "/bot",
+      pathname: "/bot/settings/plugins",
       method: "GET",
       expected: true,
     },
@@ -30,7 +30,7 @@ describe("isControlUiApprovalDocumentPath", () => {
     { basePath: "", pathname: "/approve" },
     { basePath: "", pathname: "/approve/" },
     { basePath: "", pathname: "/approve/plugin%3Arequest.json" },
-    { basePath: "/openclaw", pathname: "/openclaw/approve/exec%3Aa%2Fb" },
+    { basePath: "/bot", pathname: "/bot/approve/exec%3Aa%2Fb" },
   ])("reserves $pathname", ({ basePath, pathname }) => {
     expect(isControlUiApprovalDocumentPath({ basePath, pathname })).toBe(true);
   });
@@ -38,7 +38,7 @@ describe("isControlUiApprovalDocumentPath", () => {
   it.each([
     { basePath: "", pathname: "/approvals/id" },
     { basePath: "", pathname: "/approve/id/extra" },
-    { basePath: "/openclaw", pathname: "/approve/id" },
+    { basePath: "/bot", pathname: "/approve/id" },
   ])("does not reserve $pathname", ({ basePath, pathname }) => {
     expect(isControlUiApprovalDocumentPath({ basePath, pathname })).toBe(false);
   });
@@ -115,7 +115,7 @@ describe("classifyControlUiRequest", () => {
       },
       {
         name: "keeps OpenAI-compatible model details outside the SPA catch-all",
-        pathname: "/v1/models/openclaw",
+        pathname: "/v1/models/bot",
         method: "GET",
         expected: { kind: "not-control-ui" as const },
       },
@@ -165,14 +165,14 @@ describe("classifyControlUiRequest", () => {
     it.each([
       {
         name: "redirects the basePath entrypoint",
-        pathname: "/openclaw",
+        pathname: "/bot",
         search: "?foo=1",
         method: "GET",
-        expected: { kind: "redirect" as const, location: "/openclaw/?foo=1" },
+        expected: { kind: "redirect" as const, location: "/bot/?foo=1" },
       },
       {
         name: "serves nested read-only routes",
-        pathname: "/openclaw/chat",
+        pathname: "/bot/chat",
         search: "",
         method: "HEAD",
         expected: { kind: "serve" as const },
@@ -186,14 +186,14 @@ describe("classifyControlUiRequest", () => {
       },
       {
         name: "falls through write requests to the basePath entrypoint",
-        pathname: "/openclaw",
+        pathname: "/bot",
         search: "",
         method: "POST",
         expected: { kind: "not-control-ui" as const },
       },
       ...["PUT", "DELETE", "PATCH", "OPTIONS"].map((method) => ({
         name: `falls through ${method} subroute requests`,
-        pathname: "/openclaw/webhook",
+        pathname: "/bot/webhook",
         search: "",
         method,
         expected: { kind: "not-control-ui" as const },
@@ -201,7 +201,7 @@ describe("classifyControlUiRequest", () => {
     ])("$name", ({ pathname, search, method, expected }) => {
       expect(
         classifyControlUiRequest({
-          basePath: "/openclaw",
+          basePath: "/bot",
           pathname,
           search,
           method,

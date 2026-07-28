@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { resolveGatewayServiceDescription } from "./constants.js";
 import { formatLine, writeFormattedLines } from "./output.js";
 import {
@@ -48,9 +48,9 @@ import type {
 } from "./service-types.js";
 
 const CALLER_OWNED_SERVICE_IDENTITY_KEYS = [
-  "OPENCLAW_LAUNCHD_LABEL",
-  "OPENCLAW_SYSTEMD_UNIT",
-  "OPENCLAW_WINDOWS_TASK_NAME",
+  "BOT_LAUNCHD_LABEL",
+  "BOT_SYSTEMD_UNIT",
+  "BOT_WINDOWS_TASK_NAME",
 ] as const;
 
 function resolveScheduledTaskRenderEnv(
@@ -85,13 +85,13 @@ function resolveScheduledTaskScriptEnvironment(
 }
 
 const SCHEDULED_TASK_ACTIVATION_KEYS = [
-  "OPENCLAW_WINDOWS_TASK_HIDDEN_LAUNCHER",
-  "OPENCLAW_TASK_SCRIPT_NAME",
-  "OPENCLAW_TASK_SCRIPT",
-  "OPENCLAW_SERVICE_KIND",
-  "OPENCLAW_GATEWAY_PORT",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_PROFILE",
+  "BOT_WINDOWS_TASK_HIDDEN_LAUNCHER",
+  "BOT_TASK_SCRIPT_NAME",
+  "BOT_TASK_SCRIPT",
+  "BOT_SERVICE_KIND",
+  "BOT_GATEWAY_PORT",
+  "BOT_STATE_DIR",
+  "BOT_PROFILE",
 ] as const;
 
 function resolveScheduledTaskActivationEnv(
@@ -187,7 +187,7 @@ async function updateExistingScheduledTask(params: {
   // Best effort: failure keeps the prior settings rather than losing the task.
   const upgradeXmlPath = await writeTaskXmlTempFile(
     buildScheduledTaskXml({
-      taskDescription: params.description ?? "OpenClaw Gateway",
+      taskDescription: params.description ?? "Bot Gateway",
       taskUser: resolveTaskUser(params.env),
       launchPath: params.taskLaunchPath,
     }),
@@ -220,7 +220,7 @@ async function activateScheduledTask(params: {
   taskLaunchPath: string;
   description?: string;
 }): Promise<ScheduledTaskActivation | "startup-fallback"> {
-  const taskDescription = params.description ?? "OpenClaw Gateway";
+  const taskDescription = params.description ?? "Bot Gateway";
   const taskName = resolveTaskName(params.env);
   const quotedLaunchPath = quoteSchtasksArg(params.taskLaunchPath);
   const existingActivation = await updateExistingScheduledTask({

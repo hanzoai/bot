@@ -11,7 +11,7 @@ import {
 let tempDirs: string[] = [];
 
 async function createTempDir(): Promise<string> {
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-local-audio-"));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-local-audio-"));
   tempDirs.push(tempDir);
   return tempDir;
 }

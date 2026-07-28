@@ -1,5 +1,5 @@
 /** Applies exec-ref resolution policy for audit/apply modes. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { SecretRef } from "../config/types.secrets.js";
 import { formatExecSecretRefIdValidationMessage, isValidExecSecretRefId } from "./ref-contract.js";
 
@@ -28,7 +28,7 @@ export function selectRefsForExecPolicy(params: { refs: SecretRef[]; allowExec: 
  */
 export function getSkippedExecRefStaticError(params: {
   ref: SecretRef;
-  config: OpenClawConfig;
+  config: BotConfig;
 }): string | null {
   const id = params.ref.id.trim();
   const refLabel = `${params.ref.source}:${params.ref.provider}:${id}`;

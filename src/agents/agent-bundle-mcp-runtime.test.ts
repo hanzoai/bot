@@ -4,7 +4,7 @@ import http from "node:http";
 import os from "node:os";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { withTestTimeout } from "../../test/helpers/promise.js";
 import { cleanupTempDirs, makeTempDir } from "../../test/helpers/temp-dir.js";

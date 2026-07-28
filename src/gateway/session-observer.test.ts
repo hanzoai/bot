@@ -4,7 +4,7 @@ import {
   SessionObserverDigestSchema,
   type SessionObserverDigest,
 } from "../../packages/gateway-protocol/src/schema/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeSessionObserverModelOutput } from "./session-observer-model.js";
 import {
   createHarness,
@@ -157,7 +157,7 @@ describe("session observer", () => {
         defaults: { utilityModel: "openai/gpt-test" },
         list: [{ id: "main", default: true }, { id: "work" }],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const harness = createHarness({ subscribe: false, config });
     harness.subscribers.subscribe("conn-work", "agent:work:global")?.commit();
     declareObserverVisibility(harness.observer, "conn-work");
@@ -754,7 +754,7 @@ describe("session observer", () => {
     const runtimeCfg = {
       gateway: { controlUi: { sessionObserver: true as boolean } },
       agents: { defaults: { utilityModel: "openai/gpt-test" } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const harness = createHarness({ config: runtimeCfg });
     startAndAddToolNotes(harness.observer);
 

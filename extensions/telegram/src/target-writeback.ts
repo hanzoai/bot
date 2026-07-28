@@ -1,19 +1,19 @@
 // Telegram plugin module implements target writeback behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   readConfigFileSnapshotForWrite,
   replaceConfigFile,
-} from "openclaw/plugin-sdk/config-mutation";
+} from "bot/plugin-sdk/config-mutation";
 import {
   loadCronStore,
   resolveCronStorePath,
   saveCronStore,
-} from "openclaw/plugin-sdk/cron-store-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/cron-store-runtime";
+import { createSubsystemLogger } from "bot/plugin-sdk/runtime-env";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import {
   normalizeTelegramChatId,
   normalizeTelegramLookupTarget,
@@ -104,7 +104,7 @@ function rewriteTargetIfMatch(params: {
 }
 
 function replaceTelegramDefaultToTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   matchKey: string;
   resolvedTarget: string;
 }): boolean {
@@ -143,7 +143,7 @@ function replaceTelegramDefaultToTargets(params: {
 }
 
 export async function maybePersistResolvedTelegramTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   rawTarget: string;
   resolvedChatId: string;
   verbose?: boolean;

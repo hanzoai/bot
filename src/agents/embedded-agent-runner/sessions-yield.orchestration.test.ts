@@ -3,7 +3,7 @@
  * with no pending tool calls, so the parent session is idle when subagent
  * results arrive.
  */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
 import {

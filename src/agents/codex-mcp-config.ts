@@ -4,7 +4,7 @@
  * compatible with Codex's MCP config shape.
  */
 import crypto from "node:crypto";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   loadEnabledBundleMcpConfig,
   type BundleMcpConfig,
@@ -24,9 +24,9 @@ import type {
 import { shouldCreateBundleMcpRuntimeForAttempt } from "./embedded-agent-runner/run/attempt-tool-construction-plan.js";
 import { partitionMcpServersByConnectionScope } from "./mcp-connection-resolver.js";
 
-function isOpenClawLoopbackMcpServer(name: string, server: BundleMcpServerConfig): boolean {
+function isBotLoopbackMcpServer(name: string, server: BundleMcpServerConfig): boolean {
   return (
-    name === "openclaw" &&
+    name === "bot" &&
     typeof server.url === "string" &&
     /^https?:\/\/(?:127\.0\.0\.1|localhost):\d+\/mcp(?:[?#].*)?$/.test(server.url)
   );
@@ -116,8 +116,8 @@ export function normalizeCodexMcpServerConfig(
   const defaultToolsApprovalMode = resolveCodexDefaultToolsApprovalMode(server);
   if (defaultToolsApprovalMode) {
     next.default_tools_approval_mode = defaultToolsApprovalMode;
-  } else if (isOpenClawLoopbackMcpServer(name, server)) {
-    // OpenClaw's loopback MCP exposes local tools; Codex should ask for approval
+  } else if (isBotLoopbackMcpServer(name, server)) {
+    // Bot's loopback MCP exposes local tools; Codex should ask for approval
     // unless plugin metadata explicitly selected another approval mode.
     next.default_tools_approval_mode = "approve";
   }

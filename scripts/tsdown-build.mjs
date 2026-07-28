@@ -23,17 +23,17 @@ import {
   pruneBundledPluginSourceNodeModules,
 } from "./postinstall-bundled-plugins.mjs";
 
-const logLevel = process.env.OPENCLAW_BUILD_VERBOSE ? "info" : "warn";
+const logLevel = process.env.BOT_BUILD_VERBOSE ? "info" : "warn";
 const INEFFECTIVE_DYNAMIC_IMPORT_MARKER = "[INEFFECTIVE_DYNAMIC_IMPORT]";
 const UNRESOLVED_IMPORT_RE = /\[UNRESOLVED_IMPORT\]/;
 const ANSI_ESCAPE_RE = new RegExp(String.raw`\u001B\[[0-9;]*m`, "g");
-const DEPENDENCY_PATH_MARKERS = ["node_modules/", "openclaw-pnpm-node-modules/"];
+const DEPENDENCY_PATH_MARKERS = ["node_modules/", "bot-pnpm-node-modules/"];
 const HASHED_ROOT_JS_RE = /^(?<base>.+)-[A-Za-z0-9_-]+\.js$/u;
 const DEFAULT_CAPTURE_BYTES = 8 * 1024 * 1024;
 const DEFAULT_HEARTBEAT_MS = 30_000;
 const DEFAULT_TSDOWN_MAX_OLD_SPACE_MB = 12288;
 const DEFAULT_WINDOWS_TSDOWN_MAX_OLD_SPACE_MB = 8192;
-const TSDOWN_MAX_OLD_SPACE_MB_ENV = "OPENCLAW_TSDOWN_MAX_OLD_SPACE_MB";
+const TSDOWN_MAX_OLD_SPACE_MB_ENV = "BOT_TSDOWN_MAX_OLD_SPACE_MB";
 const MIN_TSDOWN_MAX_OLD_SPACE_MB = 2048;
 const TSDOWN_CGROUP_MEMORY_HEADROOM_MB = 768;
 const CGROUP_MEMORY_LIMIT_PATHS = [
@@ -47,11 +47,11 @@ const PROCESS_GROUP_EXIT_POLL_MS = 25;
 const POST_FORCE_KILL_WAIT_MS = 250;
 const ROOT_TSDOWN_OUTPUT_ROOTS = ["dist", "dist-runtime"];
 const PRESERVED_TSDOWN_OUTPUT_FILES = ["dist/cli-startup-metadata.json"];
-const PRESERVE_CLI_STARTUP_METADATA_ENV = "OPENCLAW_PRESERVE_CLI_STARTUP_METADATA";
+const PRESERVE_CLI_STARTUP_METADATA_ENV = "BOT_PRESERVE_CLI_STARTUP_METADATA";
 const GENERATED_SOURCE_DECLARATION_PATHSPEC = ":(glob)extensions/**/*.d.ts";
 const DECLARATION_EXTENSIONS = [".d.ts", ".d.mts", ".d.cts"];
 const SOURCE_DECLARATION_SOURCE_EXTENSIONS = [".ts", ".tsx", ".mts", ".cts", ".js", ".mjs", ".cjs"];
-const RUN_NODE_SKIP_DTS_BUILD_ENV = "OPENCLAW_RUN_NODE_SKIP_DTS_BUILD";
+const RUN_NODE_SKIP_DTS_BUILD_ENV = "BOT_RUN_NODE_SKIP_DTS_BUILD";
 
 function removeDistPluginNodeModulesSymlinks(rootDir) {
   const extensionsDir = path.join(rootDir, "extensions");
@@ -543,7 +543,7 @@ function tsdownBuildUsage() {
   return [
     "Usage: node scripts/tsdown-build.mjs [tsdown args...]",
     "",
-    "Builds OpenClaw with tsdown and validates emitted import diagnostics.",
+    "Builds Bot with tsdown and validates emitted import diagnostics.",
     "",
     "Options:",
     "  -h, --help  Show this help without starting tsdown.",
@@ -618,7 +618,7 @@ export function resolveTsdownBuildInvocation(params = {}) {
     "--no-clean",
     ...forwardedArgs,
   ];
-  if (env.OPENCLAW_BUILD_ALL_NO_PNPM === "1") {
+  if (env.BOT_BUILD_ALL_NO_PNPM === "1") {
     return {
       command: params.nodeExecPath ?? process.execPath,
       args: ["node_modules/tsdown/dist/run.mjs", ...tsdownArgs],
@@ -757,11 +757,11 @@ export async function runTsdownBuildInvocation(invocation, params = {}) {
   const env = params.env ?? process.env;
   const scanner = params.scanner ?? createTsdownOutputScanner();
   const timeoutMs = parsePositiveIntegerEnv(
-    env.OPENCLAW_TSDOWN_TIMEOUT_MS,
-    "OPENCLAW_TSDOWN_TIMEOUT_MS",
+    env.BOT_TSDOWN_TIMEOUT_MS,
+    "BOT_TSDOWN_TIMEOUT_MS",
   );
   const heartbeatMs =
-    parseNonNegativeIntegerEnv(env.OPENCLAW_TSDOWN_HEARTBEAT_MS, "OPENCLAW_TSDOWN_HEARTBEAT_MS") ??
+    parseNonNegativeIntegerEnv(env.BOT_TSDOWN_HEARTBEAT_MS, "BOT_TSDOWN_HEARTBEAT_MS") ??
     DEFAULT_HEARTBEAT_MS;
   let timedOut = false;
   let settled = false;

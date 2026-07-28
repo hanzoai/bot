@@ -1,17 +1,17 @@
 // Memory Core plugin module coordinates synchronization and shadow reindexing.
 import { randomUUID } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   createSubsystemLogger,
   resolveAgentDir,
   resolveUserPath,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+} from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import type {
   MemorySyncParams,
   MemorySyncProgressUpdate,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
+import { resolveTimerTimeoutMs } from "bot/plugin-sdk/number-runtime";
 import {
   createEmbeddingProvider,
   type EmbeddingProvider,

@@ -1,8 +1,8 @@
 // Doctor cleanup for per-agent OAuth profiles shadowing fresher main-agent credentials.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { resolveAgentDir, listAgentEntries } from "../../../agents/agent-scope.js";
 import {
   isLegacyOAuthRef,
@@ -18,7 +18,7 @@ import { resolveSharedMainAuthAgentDir } from "../../../agents/auth-profiles/sha
 import { updateAuthProfileStoreWithLock } from "../../../agents/auth-profiles/store.js";
 import type { AuthProfileStore, OAuthCredential } from "../../../agents/auth-profiles/types.js";
 import { resolveStateDir } from "../../../config/paths.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { shortenHomePath } from "../../../utils.js";
 import { resolveLegacyAuthProfilesPath as resolveAuthStorePath } from "../../doctor-auth-legacy-paths.js";
 
@@ -63,7 +63,7 @@ async function collectStateAgentDirs(env: NodeJS.ProcessEnv): Promise<string[]> 
 }
 
 async function collectCandidateAgentDirs(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv,
 ): Promise<string[]> {
   const dirs = new Set<string>();
@@ -107,7 +107,7 @@ function shouldRemoveLocalOAuthShadow(params: {
 
 /** Find local OAuth profiles that safely inherit fresher main-agent credentials instead. */
 export async function scanStaleOAuthProfileShadows(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   now?: number;
 }): Promise<StaleOAuthProfileShadow[]> {
@@ -278,7 +278,7 @@ export function collectStaleOAuthProfileShadowWarnings(params: {
 
 /** Remove stale per-agent OAuth profile shadows after rechecking each locked store. */
 export async function repairStaleOAuthProfileShadows(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   now?: number;
 }): Promise<{ changes: string[]; warnings: string[] }> {
@@ -331,6 +331,6 @@ const testing = {
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.staleOAuthProfileShadowsTestApi")
+    Symbol.for("bot.staleOAuthProfileShadowsTestApi")
   ] = testing;
 }

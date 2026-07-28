@@ -1,23 +1,23 @@
 import { vi } from "vitest";
 
-vi.mock("openclaw/plugin-sdk/exec-approvals-runtime", async () => {
+vi.mock("bot/plugin-sdk/exec-approvals-runtime", async () => {
   const nodeFs = await import("node:fs");
   const nodePath = await import("node:path");
   const displayPath = () => {
-    const stateDir = process.env.OPENCLAW_STATE_DIR?.trim();
+    const stateDir = process.env.BOT_STATE_DIR?.trim();
     return stateDir
-      ? nodePath.join(stateDir, "state", "openclaw.sqlite#exec_approvals_config")
-      : "~/.openclaw/state/openclaw.sqlite#exec_approvals_config";
+      ? nodePath.join(stateDir, "state", "bot.sqlite#exec_approvals_config")
+      : "~/.bot/state/bot.sqlite#exec_approvals_config";
   };
   return {
     resolveExecApprovalsDisplayPath: displayPath,
     readExecApprovalsSnapshot: () => {
       const fixtureRoot =
-        process.env.OPENCLAW_STATE_DIR?.trim() ?? process.env.OPENCLAW_HOME?.trim() ?? "";
+        process.env.BOT_STATE_DIR?.trim() ?? process.env.BOT_HOME?.trim() ?? "";
       const directFixturePath = nodePath.join(fixtureRoot, "exec-approvals.json");
       const fixturePath = nodeFs.existsSync(directFixturePath)
         ? directFixturePath
-        : nodePath.join(fixtureRoot, ".openclaw", "exec-approvals.json");
+        : nodePath.join(fixtureRoot, ".bot", "exec-approvals.json");
       try {
         const raw = nodeFs.readFileSync(fixturePath, "utf8");
         return {

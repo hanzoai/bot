@@ -1,6 +1,6 @@
 /** Request-isolated registry views forked from lifecycle-owned model generations. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
+import type { BotConfig } from "../config/types.bot.js";
 import type { Model } from "../llm/types.js";
 import { normalizeDiscoveredAgentModel } from "./agent-model-discovery.js";
 import {
@@ -35,7 +35,7 @@ function usesCredentialFreeRegistry(options: LoadPreparedAgentModelRegistryOptio
 function createRegistryView(params: {
   registry: ModelRegistry;
   agentDir: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   providerFilter?: string;
   normalizeModels?: boolean;
   workspaceDir?: string;
@@ -115,7 +115,7 @@ async function loadReadSnapshot(
 }
 
 function resolveInput(
-  config: OpenClawConfig,
+  config: BotConfig,
   options: LoadPreparedAgentModelRegistryOptions = {},
 ): PreparedModelRuntimeInput {
   const agentId = options.agentId ?? resolveDefaultAgentId(config);
@@ -133,9 +133,9 @@ function resolveInput(
 
 /** Loads and forks one registry from the owning command lifecycle generation. */
 export async function loadPreparedAgentModelRegistry(
-  config: OpenClawConfig,
+  config: BotConfig,
   options: LoadPreparedAgentModelRegistryOptions = {},
-): Promise<{ agentDir: string; config: OpenClawConfig; registry: ModelRegistry }> {
+): Promise<{ agentDir: string; config: BotConfig; registry: ModelRegistry }> {
   const input = resolveInput(config, options);
   const lease = await loadReadSnapshot(input, options.workspaceDir === undefined);
   try {

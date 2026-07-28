@@ -5,9 +5,9 @@ import path from "node:path";
 import {
   addTimerTimeoutGraceMs,
   resolveNonNegativeIntegerOption,
-} from "openclaw/plugin-sdk/number-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+} from "bot/plugin-sdk/number-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
+import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 import {
   CHROME_MCP_NAVIGATE_TIMEOUT_MS,
   rethrowChromeMcpDocumentError,
@@ -29,7 +29,7 @@ import {
 import type { ChromeMcpSnapshotNode } from "./chrome-mcp.snapshot.js";
 
 async function withTempFile<T>(fn: (filePath: string) => Promise<T>): Promise<T> {
-  const dir = await fs.mkdtemp(path.join(resolvePreferredOpenClawTmpDir(), "openclaw-chrome-mcp-"));
+  const dir = await fs.mkdtemp(path.join(resolvePreferredBotTmpDir(), "bot-chrome-mcp-"));
   const filePath = path.join(dir, randomUUID());
   try {
     return await fn(filePath);

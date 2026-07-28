@@ -21,7 +21,7 @@ async function waitForFile(filePath: string): Promise<void> {
 
 describe("runLocalCommandToFile", () => {
   it("force-kills a command that ignores abort termination", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-workspace-sync-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-workspace-sync-"));
     const outputPath = path.join(root, "output");
     const readyPath = path.join(root, "ready");
     const controller = new AbortController();
@@ -56,7 +56,7 @@ describe("runLocalCommandToFile", () => {
   });
 
   it("omits derived artifacts from outbound Git file lists", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-workspace-files-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-workspace-files-"));
     const files = [
       "src/keep.ts",
       "__pycache__/fizzbuzz.cpython-314.pyc",

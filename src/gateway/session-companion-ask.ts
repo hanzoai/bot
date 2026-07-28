@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import type { SessionCompanionExchange } from "../../packages/gateway-protocol/src/schema/sessions.js";
 import { resolveAgentWorkspaceDir, resolveSessionAgentId } from "../agents/agent-scope.js";
 import {
@@ -10,7 +10,7 @@ import { resolveSimpleCompletionSelectionForAgent } from "../agents/simple-compl
 import { extractAssistantText, stripToolMessages } from "../agents/tools/chat-history-text.js";
 import { resolveUtilityModelRefForAgent } from "../agents/utility-model.js";
 import { resolveStorePath } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { Message, Usage } from "../llm/types.js";
 import { redactToolPayloadText } from "../logging/redact.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
@@ -46,7 +46,7 @@ type SessionCompanionPromptMessage = {
 };
 
 type SessionCompanionRunParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   modelRef: string;
   sessionKey: string;
@@ -57,13 +57,13 @@ type SessionCompanionRunParams = {
 };
 
 export type SessionCompanionAskDeps = {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => BotConfig;
   sessionObserver: {
     getCompanionSnapshot: (sessionKey: string) => SessionObserverCompanionSnapshot;
   };
   resolveUtilityModelRef?: typeof resolveUtilityModelRefForAgent;
   readSeedMessages?: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     agentId: string;
     sessionKey: string;
   }) => Promise<SessionCompanionSeedMessage[]>;
@@ -177,7 +177,7 @@ function sanitizeSeedMessages(messages: unknown[]): SessionCompanionSeedMessage[
 }
 
 async function defaultReadSeedMessages(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   sessionKey: string;
 }): Promise<SessionCompanionSeedMessage[]> {
@@ -278,7 +278,7 @@ async function defaultRun(params: SessionCompanionRunParams): Promise<string> {
       provider: selection.runtimeProvider ?? selection.provider,
       model: selection.modelId,
       modelFallbacksOverride: [],
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessRuntimeOverride: "bot",
       authProfileId: selection.profileId,
       authProfileIdSource: selection.profileId ? "user" : undefined,
       timeoutMs: ASK_TIMEOUT_MS,

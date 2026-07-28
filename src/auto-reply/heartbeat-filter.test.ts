@@ -826,7 +826,7 @@ describe("filterHeartbeatTranscriptArtifacts", () => {
         { type: "text", text: "what model are you" },
       ],
     };
-    const assistantMessage = { role: "assistant", content: "I am OpenClaw." };
+    const assistantMessage = { role: "assistant", content: "I am Bot." };
     const messages = [
       { role: "user", content: HEARTBEAT_TRANSCRIPT_PROMPT },
       {

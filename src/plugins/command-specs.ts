@@ -1,18 +1,18 @@
 // Normalizes plugin command specs for CLI and slash command surfaces.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import { getLoadedChannelPlugin } from "../channels/plugins/index.js";
 import { resolveReadOnlyChannelCommandDefaults } from "../channels/plugins/read-only-command-defaults.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { pluginCommandSupportsChannel } from "./command-registration.js";
 import { pluginCommands } from "./command-registry-state.js";
 import type { PluginCommandRegistration } from "./registry-types.js";
-import type { OpenClawPluginCommandDefinition } from "./types.js";
+import type { BotPluginCommandDefinition } from "./types.js";
 
 type PluginCommandSpecOptions = {
   env?: NodeJS.ProcessEnv;
   stateDir?: string;
   workspaceDir?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 };
 
 type PluginCommandEntrySpec = {
@@ -23,7 +23,7 @@ type PluginCommandEntrySpec = {
 };
 
 function resolvePluginNativeName(
-  command: OpenClawPluginCommandDefinition,
+  command: BotPluginCommandDefinition,
   provider?: string,
 ): string {
   const providerName = normalizeOptionalLowercaseString(provider);
@@ -39,7 +39,7 @@ function resolvePluginNativeName(
   return fallbackName || command.name;
 }
 
-function resolvePluginTextName(command: OpenClawPluginCommandDefinition): string {
+function resolvePluginTextName(command: BotPluginCommandDefinition): string {
   const name = command.name.trim();
   return name || command.name;
 }
@@ -117,7 +117,7 @@ export function listProviderPluginCommandSpecs(provider?: string): Array<{
 }
 
 function serializePluginCommandSpec(
-  cmd: OpenClawPluginCommandDefinition,
+  cmd: BotPluginCommandDefinition,
   provider?: string,
 ): {
   name: string;
@@ -142,7 +142,7 @@ function serializePluginCommandSpec(
 }
 
 function serializePluginCommandEntrySpec(
-  cmd: OpenClawPluginCommandDefinition,
+  cmd: BotPluginCommandDefinition,
   provider: string | undefined,
   nativeCommandsEnabled: boolean,
 ): PluginCommandEntrySpec | null {

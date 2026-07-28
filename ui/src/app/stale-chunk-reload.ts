@@ -10,7 +10,7 @@
 // only recovery path there.
 import { CONTROL_UI_BUILD_INFO } from "../build-info.ts";
 
-const RELOAD_GUARD_STORAGE_KEY = "openclaw.controlUi.staleChunkReloadBuildId";
+const RELOAD_GUARD_STORAGE_KEY = "bot.controlUi.staleChunkReloadBuildId";
 // Bounds document probes across rapid re-renders of the same error state.
 const ATTEMPT_COOLDOWN_MS = 5_000;
 // Keep timeout below the cooldown so a timed-out retry re-render cannot start
@@ -250,7 +250,7 @@ export function installMissingStylesheetRecovery(
   const isCssApplied =
     deps.isCssApplied ??
     (() =>
-      getComputedStyle(document.documentElement).getPropertyValue("--openclaw-css-ok").trim() ===
+      getComputedStyle(document.documentElement).getPropertyValue("--bot-css-ok").trim() ===
       "1");
   const schedule = deps.schedule ?? scheduleStaleChunkReload;
   // Single-shot (timeoutMs: 0) keeps the stylesheet banner's existing

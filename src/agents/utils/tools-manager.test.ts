@@ -25,9 +25,9 @@ let originalAgentDir: string | undefined;
 let tempAgentDir: string | undefined;
 
 beforeEach(() => {
-  originalAgentDir = process.env.OPENCLAW_AGENT_DIR;
-  tempAgentDir = mkdtempSync(join(tmpdir(), "openclaw-tools-manager-"));
-  setTestEnvValue("OPENCLAW_AGENT_DIR", tempAgentDir);
+  originalAgentDir = process.env.BOT_AGENT_DIR;
+  tempAgentDir = mkdtempSync(join(tmpdir(), "bot-tools-manager-"));
+  setTestEnvValue("BOT_AGENT_DIR", tempAgentDir);
   fetchWithSsrFGuardMock.mockReset();
   extractArchiveMock.mockReset();
   spawnSyncMock.mockReturnValue({
@@ -42,9 +42,9 @@ afterEach(() => {
   vi.clearAllMocks();
   vi.resetModules();
   if (originalAgentDir === undefined) {
-    deleteTestEnvValue("OPENCLAW_AGENT_DIR");
+    deleteTestEnvValue("BOT_AGENT_DIR");
   } else {
-    setTestEnvValue("OPENCLAW_AGENT_DIR", originalAgentDir);
+    setTestEnvValue("BOT_AGENT_DIR", originalAgentDir);
   }
   if (tempAgentDir) {
     rmSync(tempAgentDir, { recursive: true, force: true });

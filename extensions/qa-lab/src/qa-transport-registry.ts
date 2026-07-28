@@ -1,4 +1,4 @@
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
+import type { QaRunnerCliRegistration } from "bot/plugin-sdk/qa-runner-runtime";
 // Qa Lab plugin module implements qa transport registry behavior.
 import type { QaBusState } from "./bus-state.js";
 import {
@@ -45,8 +45,8 @@ async function createBuiltInQaTransport(
     return createQaChannelTransport(context.state, context.adapterOptions?.transportPolicy);
   }
   if (context.driver === "crabline") {
-    const { resolveOpenClawCrablineChannelDriverSelection } = await import("@openclaw/crabline");
-    const selection = resolveOpenClawCrablineChannelDriverSelection({ channel: context.channelId });
+    const { resolveBotCrablineChannelDriverSelection } = await import("@openclaw/crabline");
+    const selection = resolveBotCrablineChannelDriverSelection({ channel: context.channelId });
     const { createQaCrablineTransportAdapter } = await import("./crabline-transport.js");
     return await createQaCrablineTransportAdapter({
       outputDir: context.outputDir,

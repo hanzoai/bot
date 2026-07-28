@@ -64,7 +64,7 @@ export function renderConfigAutoSaveStatus(props: {
         <button class="btn btn--sm" @click=${props.onRetry}>${t("configView.retry")}</button>
       `;
     case "conflict":
-      // Another writer changed openclaw.json; retrying this whole-form draft
+      // Another writer changed bot.json; retrying this whole-form draft
       // would clobber their edit, so the only offered recovery is a reload.
       return html`
         ${renderSettingsStatus({ kind: "danger", label: t("configView.autoSaveConflict") })}

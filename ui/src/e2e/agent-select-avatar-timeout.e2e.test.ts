@@ -13,9 +13,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.BOT_CAPTURE_UI_PROOF === "1";
 const proofDir = path.join(
   process.cwd(),
   ".artifacts",
@@ -90,7 +90,7 @@ describeControlUiE2e("Control UI agent picker avatar timeout", () => {
       expect(response?.status()).toBe(200);
       await gateway.waitForRequest("agent.identity.get");
       await expect.poll(() => avatarRequestCount).toBe(1);
-      const picker = page.locator("openclaw-agent-select");
+      const picker = page.locator("bot-agent-select");
       await expect
         .poll(() =>
           picker.locator(".agent-select__avatar--text").first().getAttribute("data-avatar"),

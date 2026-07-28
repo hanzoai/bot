@@ -338,7 +338,7 @@ export const nl: TranslationMap = {
     genericSubtitle: "Er is iets misgegaan bij het laden van dit paneel.",
     staleTitle: "Er is een nieuwe versie beschikbaar",
     staleSubtitle:
-      "OpenClaw is op de achtergrond bijgewerkt. Laad opnieuw om het nieuwste paneel te zien.",
+      "Bot is op de achtergrond bijgewerkt. Laad opnieuw om het nieuwste paneel te zien.",
     reloading: "Opnieuw laden…",
     retry: "Opnieuw proberen",
   },
@@ -346,7 +346,7 @@ export const nl: TranslationMap = {
     pairing: {
       button: "Mobiel apparaat koppelen",
       adminRequired: "Beheerderstoegang is vereist om installatiecodes te maken.",
-      title: "OpenClaw mobiel",
+      title: "Bot mobiel",
       subtitle: "Scan deze QR-code in de mobiele app om een nieuwe telefoon te verbinden.",
       noApp: "Heb je de app nog niet?",
       getApps: "Download de apps",
@@ -361,14 +361,14 @@ export const nl: TranslationMap = {
       transportLimitedHint:
         "Deze Gateway-URL gebruikt ws:// zonder versleuteling. Gebruik wss:// of Tailscale Serve en maak vervolgens een nieuwe code voor volledige toegang.",
       failed: "Kan geen installatiecode maken.",
-      qrAlt: "QR-code voor koppeling met OpenClaw mobiel",
+      qrAlt: "QR-code voor koppeling met Bot mobiel",
       qrUnavailable: "QR niet beschikbaar. Kopieer in plaats daarvan de installatiecode.",
       copySetupCode: "Installatiecode kopiëren",
       newCode: "Nieuwe code",
       showSetupCode: "Installatiecode weergeven",
       pending: "Apparaatverzoeken die wachten op beoordeling: {count}",
       review: "Beoordeling",
-      waiting: "Officiële mobiele OpenClaw-apps verbinden automatisch na het scannen.",
+      waiting: "Officiële mobiele Bot-apps verbinden automatisch na het scannen.",
       help: "Hulp bij koppelen",
       manageDevices: "Apparaten beheren",
     },
@@ -516,11 +516,11 @@ export const nl: TranslationMap = {
     ownerSession: "Sessie",
     ownerWorkboard: "Workboard",
     title: "Beheerde worktrees",
-    subtitle: "Geïsoleerde repository-checkouts beheerd door OpenClaw.",
+    subtitle: "Geïsoleerde repository-checkouts beheerd door Bot.",
     cleanNow: "Nu opschonen",
     cleanupTitle: "Opschonen",
     cleanupSubtitle:
-      "OpenClaw verwijdert periodiek oude worktrees om schijfruimte vrij te maken. Stel in hoe agressief de opschoning wordt uitgevoerd.",
+      "Bot verwijdert periodiek oude worktrees om schijfruimte vrij te maken. Stel in hoe agressief de opschoning wordt uitgevoerd.",
     cleanupMaxCount: "Maximaal aantal worktrees",
     cleanupMaxCountHelp:
       "Maximaal aantal beheerde worktrees dat in alle repository's samen wordt bewaard. Van oudere worktrees wordt eerst een snapshot gemaakt, waarna ze worden verwijderd. Stel in op 0 om de limiet voor het aantal uit te schakelen.",
@@ -571,8 +571,8 @@ export const nl: TranslationMap = {
     cloudWorker: "Cloud · {profile}",
     cloudWorkerProvider: "Cloudworkerprovider: {provider}",
     cloudRequiresWorktree: "Cloudworkers vereisen een beheerde worktree",
-    cloudRequiresOpenClawRuntime:
-      "Cloudworkers vereisen de OpenClaw-runtime; {runtime} is geselecteerd.",
+    cloudRequiresBotRuntime:
+      "Cloudworkers vereisen de Bot-runtime; {runtime} is geselecteerd.",
     cloudSecureContextRequired:
       "Cloudworkers hebben een beveiligde browsercontext nodig, zodat herstel je taak kan beschermen.",
     cloudStartFailed:
@@ -1365,7 +1365,7 @@ export const nl: TranslationMap = {
       title: "Pushmeldingen",
       nativeTitle: "Meldingen",
       hint: "Ontvang browser-pushmeldingen van je gateway.",
-      nativeHint: "Meldingen worden native weergegeven door de OpenClaw-app op deze Mac.",
+      nativeHint: "Meldingen worden native weergegeven door de Bot-app op deze Mac.",
       unavailableHint: "Niet beschikbaar in deze browser.",
       unavailable: "Niet beschikbaar",
       checking: "Controleren...",
@@ -1390,7 +1390,7 @@ export const nl: TranslationMap = {
       blockedHint:
         "Meldingen zijn geblokkeerd. Werk de siterechten van je browser bij om meldingen toe te staan.",
       nativeBlockedHint:
-        "Meldingen zijn uitgeschakeld voor OpenClaw in macOS. Sta ze toe in Systeeminstellingen > Meldingen.",
+        "Meldingen zijn uitgeschakeld voor Bot in macOS. Sta ze toe in Systeeminstellingen > Meldingen.",
     },
     appearance: {
       theme: "Thema",
@@ -1467,7 +1467,7 @@ export const nl: TranslationMap = {
     autoSaveFailed: "Opslaan mislukt",
     autoSaveConflict: "Instellingen elders gewijzigd",
     retry: "Opnieuw proberen",
-    applyBannerText: "Opgeslagen in openclaw.json — herstart de gateway om toe te passen.",
+    applyBannerText: "Opgeslagen in bot.json — herstart de gateway om toe te passen.",
     applyBannerAction: "Herstarten & toepassen",
     rawDiscard: "Verwerpen",
     rawDraftBlocksApply:
@@ -1530,7 +1530,7 @@ export const nl: TranslationMap = {
     },
   },
   approvalPage: {
-    brandName: "OpenClaw",
+    brandName: "Bot",
     eyebrow: "Operator approval",
     loadingTitle: "Loading approval",
     loadingDescription: "Checking the current approval state with the Gateway.",
@@ -1539,7 +1539,7 @@ export const nl: TranslationMap = {
       "This approval could not be found or this device is not authorized to review it.",
     connectionErrorTitle: "Connection interrupted",
     connectionErrorDescription:
-      "OpenClaw cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
+      "Bot cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
     retry: "Retry",
     execTitle: "Command approval",
     pending: "Waiting for your decision",
@@ -1717,7 +1717,7 @@ export const nl: TranslationMap = {
     chat: "Chat",
     settings: "Instellingen",
     settingsGeneral: "Algemeen",
-    askOpenClaw: "Vraag OpenClaw",
+    askBot: "Vraag Bot",
     settingsGroupConnections: "Verbindingen",
     settingsGroupAgents: "Agents en tools",
     settingsGroupSecurity: "Privacy & beveiliging",
@@ -1844,7 +1844,7 @@ export const nl: TranslationMap = {
     skillWorkshop: "Skill Workshop",
     nodes: "Nodes",
     chat: "Chat",
-    custodian: "OpenClaw",
+    custodian: "Bot",
     config: "Config",
     profile: "Profiel",
     communications: "Communicatie",
@@ -1881,7 +1881,7 @@ export const nl: TranslationMap = {
     nodes: "Gekoppelde apparaten en commando's.",
     chat: "Gateway-chat voor snelle interventies.",
     custodian: "Systeeminstellingen en onderhoud.",
-    config: "Bewerk openclaw.json.",
+    config: "Bewerk bot.json.",
     profile: "De statistieken, reeksen en het leven in het rif van je agent.",
     communications: "Kanalen, berichten en audio-instellingen.",
     appearance: "Thema, UI en instellingen voor de installatiewizard.",
@@ -1904,7 +1904,7 @@ export const nl: TranslationMap = {
   modelSetup: {
     heading: "Verbind je AI",
     intro:
-      "OpenClaw hergebruikt AI-toegang die je al hebt — een CLI-login, een API-sleutel of een aanmelding bij een provider.",
+      "Bot hergebruikt AI-toegang die je al hebt — een CLI-login, een API-sleutel of een aanmelding bij een provider.",
     loading: "Deze Gateway controleren op beschikbare AI-toegang…",
     retry: "Opnieuw proberen",
     checkAgain: "Opnieuw controleren",
@@ -1917,7 +1917,7 @@ export const nl: TranslationMap = {
     },
     access: {
       adminRequired: "Voor modelinstellingen is operator.admin-toegang vereist.",
-      gatewayTooOld: "De Gateway gebruikt een oudere versie van OpenClaw",
+      gatewayTooOld: "De Gateway gebruikt een oudere versie van Bot",
     },
     candidates: {
       title: "Gevonden op deze Gateway",
@@ -2033,12 +2033,12 @@ export const nl: TranslationMap = {
     confirmReplace:
       "Van bestaande doelbestanden wordt vóór vervanging een back-up gemaakt in het migratierapport.",
     confirmBackup:
-      "OpenClaw maakt een geverifieerde back-up vóór de import voordat het geheugen wordt gekopieerd.",
+      "Bot maakt een geverifieerde back-up vóór de import voordat het geheugen wordt gekopieerd.",
     confirmImport: "Geheugen importeren",
     disconnected: "Maak verbinding met de Gateway om geheugen te importeren.",
     title: "Assistentgeheugen importeren",
     subtitle:
-      "Controleer het geconsolideerde geheugen van Codex en het automatische geheugen van Claude Code voordat u het naar OpenClaw kopieert.",
+      "Controleer het geconsolideerde geheugen van Codex en het automatische geheugen van Claude Code voordat u het naar Bot kopieert.",
     agent: "Doelagent",
     replaceExisting: "Bestaande imports vervangen",
     replaceHint: "Bekijk conflicten opnieuw en bewaar back-ups van items vóór vervanging.",
@@ -2046,7 +2046,7 @@ export const nl: TranslationMap = {
   onboarding: {
     memoryImport: {
       title: "Neem het geheugen van je assistent mee",
-      body: "OpenClaw heeft geheugen van andere programmeerassistenten gevonden. Wil je dit importeren in de werkruimte van je agent?",
+      body: "Bot heeft geheugen van andere programmeerassistenten gevonden. Wil je dit importeren in de werkruimte van je agent?",
       plannedCount: "{count} klaar om te importeren",
       alreadyImported: "Al geïmporteerd: {count}",
       sourceUnavailable: "Bronpad niet beschikbaar",
@@ -2062,35 +2062,35 @@ export const nl: TranslationMap = {
       unknownError: "Verzoek mislukt",
       doneTitle: "Geheugenimport voltooid",
       doneBody:
-        "{migrated} gemigreerd, {skipped} overgeslagen. Je kunt doorgaan met het instellen van OpenClaw.",
+        "{migrated} gemigreerd, {skipped} overgeslagen. Je kunt doorgaan met het instellen van Bot.",
     },
   },
   custodian: {
-    title: "OpenClaw",
+    title: "Bot",
     subtitle: "Je gids voor systeeminstellingen",
     subtitleCaretaker: "Systeeminstellingen en onderhoud.",
     exitSetup: "Setup afsluiten",
     newAgent: "Nieuwe agent",
     hatchDraft: "Word wakker, mijn vriend!",
-    placeholder: "Bericht aan OpenClaw…",
+    placeholder: "Bericht aan Bot…",
     sensitivePlaceholder: "Voer gevoelige waarde in…",
     sensitiveReply: "Gevoelig antwoord verzonden",
     send: "Verzenden",
-    thinking: "OpenClaw denkt na",
+    thinking: "Bot denkt na",
     earlier: "Eerder",
-    requestFailed: "OpenClaw kon niet antwoorden. Probeer het opnieuw.",
+    requestFailed: "Bot kon niet antwoorden. Probeer het opnieuw.",
     connectionChanged:
       "De Gateway-verbinding is gewijzigd. Probeer opnieuw om deze setup voort te zetten.",
     sessionRestarted:
-      "{error} OpenClaw is een nieuwe sessie gestart; eerdere berichten blijven bewaard als context.",
-    unsupportedGateway: "Werk de Gateway bij om de setup met OpenClaw voort te zetten.",
+      "{error} Bot is een nieuwe sessie gestart; eerdere berichten blijven bewaard als context.",
+    unsupportedGateway: "Werk de Gateway bij om de setup met Bot voort te zetten.",
     history: {
       button: "Geschiedenis",
       title: "Recente wijzigingen",
       description: "Wat er op dit systeem is gewijzigd, nieuwste eerst.",
       loading: "Recente wijzigingen laden…",
       empty: "Nog geen geregistreerde wijzigingen.",
-      requestFailed: "OpenClaw kon de wijzigingsgeschiedenis niet laden.",
+      requestFailed: "Bot kon de wijzigingsgeschiedenis niet laden.",
       loadMore: "Meer laden",
       loadingMore: "Meer laden…",
       changedPaths: "Gewijzigde paden ({count})",
@@ -2231,7 +2231,7 @@ export const nl: TranslationMap = {
       notes: "Leg notities vast in Markdown, Obsidian, Notion of Bear.",
     },
     noInstalledTitle: "Geen optionele plugins geïnstalleerd",
-    noInstalledBody: "Ontdek een uitgelichte plugin of zoek in ClawHub om OpenClaw uit te breiden.",
+    noInstalledBody: "Ontdek een uitgelichte plugin of zoek in ClawHub om Bot uit te breiden.",
     noInstalledMatchTitle: "Geen geïnstalleerde plugins komen overeen",
     noMatchBody: "Probeer een andere zoekopdracht.",
     filterAll: "Alle",
@@ -2267,7 +2267,7 @@ export const nl: TranslationMap = {
     detailPluginId: "Plugin-ID",
     offlineTitle: "Gateway offline",
     offlineBody: "Maak verbinding om geïnstalleerde en aanbevolen plugins te bekijken.",
-    optionalCapability: "Optionele OpenClaw-mogelijkheid.",
+    optionalCapability: "Optionele Bot-mogelijkheid.",
     enabled: "Ingeschakeld",
     disabled: "Uitgeschakeld",
     available: "Beschikbaar",
@@ -2323,7 +2323,7 @@ export const nl: TranslationMap = {
     },
   },
   aboutPage: {
-    productName: "OpenClaw",
+    productName: "Bot",
     tagline: "Je persoonlijke AI-assistent, die op je eigen apparaten draait.",
     waveHello: "Zwaai naar Clawd",
     linksLabel: "Community en bronnen",
@@ -2333,7 +2333,7 @@ export const nl: TranslationMap = {
     linkDiscord: "Discord",
     linkX: "X (Twitter)",
     linkChangelog: "Wijzigingslogboek",
-    license: "© 2026 OpenClaw Foundation — MIT-licentie.",
+    license: "© 2026 Bot Foundation — MIT-licentie.",
     artifactTitle: "Control UI",
     artifactSubtitle: "Identiteit die is ingesloten toen dit browserartefact werd gebouwd.",
     artifactDetails: "Buildgegevens van Control UI",
@@ -2351,7 +2351,7 @@ export const nl: TranslationMap = {
       "Gerapporteerd door de actieve Gateway-verbinding; los van deze Control UI-build.",
   },
   appsPage: {
-    heroTitle: "Neem OpenClaw overal mee naartoe",
+    heroTitle: "Neem Bot overal mee naartoe",
     heroTagline:
       "Begeleidende apps voor je telefoon, horloge, desktop en browser — plus plug-ins om uit te breiden wat je agent kan doen.",
     sectionMobile: "Op je telefoon",
@@ -2375,11 +2375,11 @@ export const nl: TranslationMap = {
     cards: {
       ios: {
         title: "iPhone",
-        desc: "Chat, praat, keur acties goed en deel naar OpenClaw vanaf iOS.",
+        desc: "Chat, praat, keur acties goed en deel naar Bot vanaf iOS.",
       },
       android: {
         title: "Android",
-        desc: "Je Android-telefoon als volwaardige OpenClaw-node — chat, camera en Canvas.",
+        desc: "Je Android-telefoon als volwaardige Bot-node — chat, camera en Canvas.",
       },
       appleWatch: {
         title: "Apple Watch",
@@ -2387,7 +2387,7 @@ export const nl: TranslationMap = {
       },
       wearOs: {
         title: "Wear OS",
-        desc: "De Android-companion breidt OpenClaw uit naar je horloge.",
+        desc: "De Android-companion breidt Bot uit naar je horloge.",
       },
       macos: {
         title: "macOS",
@@ -2395,7 +2395,7 @@ export const nl: TranslationMap = {
       },
       windows: {
         title: "Windows",
-        desc: "De Windows-companion verbindt je pc als een OpenClaw-node.",
+        desc: "De Windows-companion verbindt je pc als een Bot-node.",
       },
       linux: {
         title: "Linux",
@@ -2403,11 +2403,11 @@ export const nl: TranslationMap = {
       },
       chrome: {
         title: "Chrome-extensie",
-        desc: "Laat OpenClaw je bestaande Chrome aansturen — tabbladen, pagina's en formulieren.",
+        desc: "Laat Bot je bestaande Chrome aansturen — tabbladen, pagina's en formulieren.",
       },
       plugins: {
         title: "Plugins & ClawHub",
-        desc: "Breid OpenClaw uit met kanalen, tools en skills van de community.",
+        desc: "Breid Bot uit met kanalen, tools en skills van de community.",
       },
     },
   },
@@ -2605,7 +2605,7 @@ export const nl: TranslationMap = {
     selfLearning: {
       pitchTitle: "Zelfleren inschakelen",
       pitchBody:
-        "OpenClaw beoordeelt correcties en omvangrijke voltooide runs en stelt vervolgens skillvoorstellen op voor dit bord. Het verbruikt extra tokens op de achtergrond en concepten verschijnen als openstaande voorstellen.",
+        "Bot beoordeelt correcties en omvangrijke voltooide runs en stelt vervolgens skillvoorstellen op voor dit bord. Het verbruikt extra tokens op de achtergrond en concepten verschijnen als openstaande voorstellen.",
       enable: "Zelfleren inschakelen",
       enabling: "Inschakelen…",
       updateError: "De instelling voor zelfleren kon niet worden bijgewerkt.",
@@ -3776,9 +3776,9 @@ export const nl: TranslationMap = {
         summary:
           "De Gateway is bereikbaar, maar heeft een overeenkomend token of wachtwoord nodig voordat deze browser kan verbinden.",
         stepPaste:
-          "Plak het token uit openclaw dashboard --no-open of voer het geconfigureerde wachtwoord in.",
+          "Plak het token uit bot dashboard --no-open of voer het geconfigureerde wachtwoord in.",
         stepGenerate:
-          "Als er geen token is geconfigureerd, voer dan openclaw doctor --generate-gateway-token uit op de Gateway-host.",
+          "Als er geen token is geconfigureerd, voer dan bot doctor --generate-gateway-token uit op de Gateway-host.",
         stepConnect: "Klik opnieuw op Connect nadat je de referentie hebt bijgewerkt.",
       },
       authFailed: {
@@ -3786,7 +3786,7 @@ export const nl: TranslationMap = {
         summary:
           "De opgegeven referentie is geweigerd. De meest voorkomende oorzaak is een verlopen token of een token dat van een andere Gateway-URL is gekopieerd.",
         stepDashboard:
-          "Voer openclaw dashboard --no-open uit en open de nieuwe URL of plak het token.",
+          "Voer bot dashboard --no-open uit en open de nieuwe URL of plak het token.",
         stepReplace:
           "Vervang verlopen token-/wachtwoordwaarden; hergebruik geen token van een andere Gateway-URL.",
         stepMode:
@@ -3810,8 +3810,8 @@ export const nl: TranslationMap = {
           "Deze browser heeft een eenmalige goedkeuring van de Gateway-host nodig voordat Control UI kan worden gebruikt.",
         upgradeSummary:
           "Deze browser is al bekend, maar de gevraagde toegang is gewijzigd en vereist nieuwe goedkeuring.",
-        stepList: "Voer openclaw devices list uit op de Gateway-host.",
-        stepApproveId: "Keur deze aanvraag goed: openclaw devices approve {requestId}.",
+        stepList: "Voer bot devices list uit op de Gateway-host.",
+        stepApproveId: "Keur deze aanvraag goed: bot devices approve {requestId}.",
         stepApprove: "Keur de openstaande browser-/apparaat aanvraag uit die lijst goed.",
         stepReconnect: "Verbind opnieuw nadat de goedkeuring is voltooid.",
       },
@@ -3841,21 +3841,21 @@ export const nl: TranslationMap = {
           "De geserveerde Control UI en de draaiende Gateway zijn het niet eens over het ondersteunde verbindingsprotocol.",
         refresh: "Pagina vernieuwen",
         stepDashboard:
-          "Open het geserveerde dashboard opnieuw met openclaw dashboard zodat UI en Gateway uit dezelfde installatie komen.",
+          "Open het geserveerde dashboard opnieuw met bot dashboard zodat UI en Gateway uit dezelfde installatie komen.",
         stepDevUi:
           "Als je pnpm ui:dev gebruikt, bouw of herstart de dev-UI tegen de huidige checkout.",
         stepRestart:
-          "Herstart de Gateway na het bijwerken van OpenClaw zodat het huidige protocol wordt geserveerd.",
+          "Herstart de Gateway na het bijwerken van Bot zodat het huidige protocol wordt geserveerd.",
       },
       network: {
         title: "Kan niet verbinden",
         summary:
           "De browser kon de Gateway-verbinding niet voltooien. Controleer doel en transport voordat je referenties opnieuw probeert.",
-        stepGateway: "Bevestig dat de Gateway draait met openclaw status of openclaw gateway run.",
+        stepGateway: "Bevestig dat de Gateway draait met bot status of bot gateway run.",
         stepUrl:
           "Controleer de WebSocket-URL en gebruik wss:// wanneer de Gateway achter HTTPS/Tailscale Serve staat.",
         stepDashboard:
-          "Open het dashboard opnieuw met openclaw dashboard --no-open om de huidige URL en authdetails opnieuw te kopiëren.",
+          "Open het dashboard opnieuw met bot dashboard --no-open om de huidige URL en authdetails opnieuw te kopiëren.",
       },
     },
   },
@@ -3953,7 +3953,7 @@ export const nl: TranslationMap = {
       remoteViewOnly: "Deze sessie bevindt zich op een gekoppeld knooppunt en is alleen-lezen.",
       unsupportedViewOnly: "Deze externe sessiebron is alleen-lezen.",
       sessionMenu: "External session actions",
-      openInOpenClaw: "Open in OpenClaw",
+      openInBot: "Open in Bot",
       openInTerminal: "Open in terminal",
       terminalUnavailable: "Terminal opening is unavailable for this session.",
     },
@@ -4008,7 +4008,7 @@ export const nl: TranslationMap = {
     followUpModeOverriding: "Serverstandaard overschrijven ({mode})",
     followUpModeReset: "Terugzetten naar serverstandaard",
     catalogOpenTarget: "Externe sessies openen in",
-    catalogOpenTargetViewer: "OpenClaw viewer",
+    catalogOpenTargetViewer: "Bot viewer",
     catalogOpenTargetTerminal: "Terminal",
     onboardingDisabled: "Uitgeschakeld tijdens configuratie",
     commandPaletteTitle: "Zoeken of springen naar… (⌘K)",
@@ -4026,7 +4026,7 @@ export const nl: TranslationMap = {
       titleOne: "1 conflict in cloudwerkruimte",
       titleMany: "{count} conflicten in cloudwerkruimte",
       description:
-        "OpenClaw heeft je lokale versies behouden en de andere cloudwijzigingen toegepast. Bekijk het voorbereide resultaat of neem de versie ervan over voor een conflicterend pad.",
+        "Bot heeft je lokale versies behouden en de andere cloudwijzigingen toegepast. Bekijk het voorbereide resultaat of neem de versie ervan over voor een conflicterend pad.",
       morePaths: "+{count} meer paden",
       stagedResult: "Voorbereid cloudresultaat",
       copyStagedResult: "Gestage resultaat-ref kopiëren",
@@ -4037,7 +4037,7 @@ export const nl: TranslationMap = {
       commandHelp:
         "Voer deze uit in Bash of zsh (Git Bash op Windows). Als inspect meldt dat het pad niet bestaat, heeft de cloud het verwijderd; controleer dit en verwijder het lokale pad handmatig. Als checkout een bestands-/mapconflict meldt, verplaats of verwijder het blokkerende lokale pad en probeer het opnieuw. Als de gestage ref ontbreekt, is de melding verouderd; wijzig het lokale pad niet.",
       commandsUnavailable:
-        "Deze bestandsnaam bevat terminalstuurtekens, dus OpenClaw bouwt er geen kopieerbaar shellcommando voor. Inspecteer de gestage ref rechtstreeks en voer het pad zorgvuldig handmatig in.",
+        "Deze bestandsnaam bevat terminalstuurtekens, dus Bot bouwt er geen kopieerbaar shellcommando voor. Inspecteer de gestage ref rechtstreeks en voer het pad zorgvuldig handmatig in.",
       dismiss: "Melding over werkruimteconflict sluiten",
       eventSender: "Cloudwerkruimte",
       eventTitleOne: "Cloudresultaat toegepast met 1 conflict",
@@ -4619,7 +4619,7 @@ export const nl: TranslationMap = {
       filters: "Filters",
       shownOf: "{shown} van {total}",
       emptyTitle: "Nog geen geplande taken",
-      emptyHint: "Beschrijf wat OpenClaw moet doen en wanneer — het draait volgens schema.",
+      emptyHint: "Beschrijf wat Bot moet doen en wanneer — het draait volgens schema.",
       noMatching: "Geen taken komen overeen met de huidige filters.",
       loadMore: "Meer laden",
       loading: "Laden...",
@@ -4686,7 +4686,7 @@ export const nl: TranslationMap = {
     detail: {
       tabsLabel: "Automatiseringsdetails",
       newTitle: "Nieuwe geplande taak",
-      newSubtitle: "Beschrijf wat OpenClaw moet doen en kies wanneer het wordt uitgevoerd.",
+      newSubtitle: "Beschrijf wat Bot moet doen en kies wanneer het wordt uitgevoerd.",
       back: "Alle automatiseringen",
       settingsTab: "Instellingen",
       historyTitle: "Uitvoeringsgeschiedenis",
@@ -4759,7 +4759,7 @@ export const nl: TranslationMap = {
       descriptionPlaceholder: "Optionele context voor deze taak",
       agentPlaceholder: "main of ops",
       agentHelp: "Begin met typen om een bekende agent te kiezen, of voer een aangepaste in.",
-      promptPlaceholder: "Beschrijf wat OpenClaw moet doen...",
+      promptPlaceholder: "Beschrijf wat Bot moet doen...",
       repeat: "Herhalen",
       repeatInterval: "Interval",
       repeatOnce: "Eén keer",

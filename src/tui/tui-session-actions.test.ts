@@ -355,7 +355,7 @@ describe("tui session actions", () => {
       resolved: {
         modelProvider: "openai",
         model: "gpt-5.6-luna",
-        agentRuntime: { id: "openclaw", source: "session-key" },
+        agentRuntime: { id: "bot", source: "session-key" },
         thinkingLevel: "ultra",
         thinkingLevels: [
           { id: "off", label: "off" },
@@ -368,7 +368,7 @@ describe("tui session actions", () => {
       expect.objectContaining({
         modelProvider: "openai",
         model: "gpt-5.6-luna",
-        agentRuntime: { id: "openclaw", source: "session-key" },
+        agentRuntime: { id: "bot", source: "session-key" },
         thinkingLevel: "ultra",
         thinkingLevels: [
           { id: "off", label: "off" },

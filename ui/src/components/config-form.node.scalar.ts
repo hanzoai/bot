@@ -1,5 +1,5 @@
 // Control UI renderers for scalar config form nodes.
-import { formatInternationalPhoneNumberForDisplay } from "@openclaw/normalization-core/phone-presentation";
+import { formatInternationalPhoneNumberForDisplay } from "@hanzo/bot-normalization-core/phone-presentation";
 import { html, nothing, type TemplateResult } from "lit";
 import { i18n, t } from "../i18n/index.ts";
 import { formatUnknownText } from "../lib/format.ts";
@@ -117,7 +117,7 @@ export function renderTextInput(
     ${presentedInput}
     ${schema.default !== undefined
       ? html`
-          <openclaw-tooltip .content=${t("configForm.resetToDefault")}>
+          <bot-tooltip .content=${t("configForm.resetToDefault")}>
             <button
               type="button"
               class="btn btn--icon"
@@ -128,7 +128,7 @@ export function renderTextInput(
             >
               ↺
             </button>
-          </openclaw-tooltip>
+          </bot-tooltip>
         `
       : nothing}
   `;

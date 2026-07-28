@@ -1,5 +1,5 @@
 // Extracts document extractor public artifacts from plugin manifests.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type {
   DocumentExtractorPlugin,
   PluginDocumentExtractorEntry,

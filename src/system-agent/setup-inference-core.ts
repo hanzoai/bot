@@ -258,7 +258,7 @@ export type ActivateSetupInferenceDeps = {
   clearLoadInstalledPluginIndexInstallRecordsCache?: typeof import("../plugins/installed-plugin-index-records.js").clearLoadInstalledPluginIndexInstallRecordsCache;
   clearPluginMetadataLifecycleCaches?: typeof import("../plugins/plugin-metadata-lifecycle.js").clearPluginMetadataLifecycleCaches;
   invalidatePluginRuntimeDiscoveryAfterConfigMutation?: typeof import("../plugins/registry-refresh.js").invalidatePluginRuntimeDiscoveryAfterConfigMutation;
-  disposeOpenClawAgentDatabaseByPath?: typeof import("../state/openclaw-agent-db.js").disposeOpenClawAgentDatabaseByPath;
+  disposeBotAgentDatabaseByPath?: typeof import("../state/bot-agent-db.js").disposeBotAgentDatabaseByPath;
   createTempDir?: () => Promise<string>;
   removeTempDir?: (dir: string) => Promise<void>;
   timeoutMs?: number;
@@ -297,7 +297,7 @@ export function invalidSetupConfigError(snapshot: {
 }): string {
   const issue = snapshot.issues?.[0];
   const detail = issue ? ` (${issue.path ? `${issue.path}: ` : ""}${issue.message})` : "";
-  return `OpenClaw config ${snapshot.path} is invalid${detail}. Fix it before running setup.`;
+  return `Bot config ${snapshot.path} is invalid${detail}. Fix it before running setup.`;
 }
 
 export function resolveCandidatePresentation(

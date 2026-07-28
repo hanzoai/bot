@@ -1,11 +1,11 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { AcpTurnAttachment } from "../acp/control-plane/manager.types.js";
 import {
   formatConversationTarget,
   routeFromBindingRecord,
   routeToDeliveryFields,
 } from "../channels/route-projection.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { SessionBindingRecord } from "../infra/outbound/session-binding-service.js";
 import type { AcpSpawnRequesterState } from "./acp-spawn-requester.js";
 import {
@@ -47,7 +47,7 @@ export type AcpSpawnBootstrapDeliveryPlan = {
 };
 
 export function resolveAcpSpawnBootstrapDeliveryPlan(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   spawnMode: "run" | "session";
   requestThreadBinding: boolean;
   effectiveStreamToParent: boolean;

@@ -2,7 +2,7 @@ import type WaDialog from "@awesome.me/webawesome/dist/components/dialog/dialog.
 // Control UI test helper supports modal dialog setup.
 import { expect } from "vitest";
 
-type OpenClawModalDialog = HTMLElement & { updateComplete: Promise<boolean> };
+type BotModalDialog = HTMLElement & { updateComplete: Promise<boolean> };
 
 type DialogMethodName = "showModal" | "close";
 type DialogDescriptorSnapshot = Record<DialogMethodName, PropertyDescriptor | undefined>;
@@ -45,10 +45,10 @@ export function installDialogPolyfill(): () => void {
 }
 
 export async function getRenderedModalDialog(container: HTMLElement) {
-  const modal = container.querySelector<OpenClawModalDialog>("openclaw-modal-dialog");
+  const modal = container.querySelector<BotModalDialog>("bot-modal-dialog");
   expect(modal).toBeInstanceOf(HTMLElement);
   if (!modal) {
-    throw new Error("Expected openclaw-modal-dialog");
+    throw new Error("Expected bot-modal-dialog");
   }
   await modal.updateComplete;
   await nextFrame();

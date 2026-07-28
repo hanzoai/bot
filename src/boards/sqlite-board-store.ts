@@ -11,16 +11,16 @@ import {
   runSqliteDeferredTransactionSync,
   runSqliteImmediateTransactionSync,
 } from "../infra/sqlite-transaction.js";
-import { ensureOpenClawAgentBoardSchemaInTransaction } from "../state/openclaw-agent-board-schema.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
+import { ensureBotAgentBoardSchemaInTransaction } from "../state/bot-agent-board-schema.js";
+import { withBotAgentDatabaseReadOnly } from "../state/bot-agent-db-readonly.js";
+import type { DB as BotAgentKyselyDatabase } from "../state/bot-agent-db.generated.js";
 import {
-  listOpenClawRegisteredAgentDatabases,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  listBotRegisteredAgentDatabases,
+  openBotAgentDatabase,
+  resolveBotAgentSqlitePath,
+  runBotAgentWriteTransaction,
+  type BotAgentDatabase,
+} from "../state/bot-agent-db.js";
 import { normalizeBoardWidgetDeclared } from "./board-capabilities.js";
 import { applyBoardOps, BoardValidationError, normalizeBoardLayout } from "./board-layout.js";
 import {
@@ -51,10 +51,10 @@ import {
 } from "./sqlite-board-codec.js";
 
 type BoardDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  BotAgentKyselyDatabase,
   "board_tabs" | "board_widgets" | "session_nodes"
 >;
-type BoardDatabaseHandle = Pick<OpenClawAgentDatabase, "db" | "path">;
+type BoardDatabaseHandle = Pick<BotAgentDatabase, "db" | "path">;
 
 type StoredBoard = {
   snapshot: BoardSnapshot;
@@ -69,7 +69,7 @@ const presentBoardDatabases = new WeakSet<DatabaseSync>();
 // Read-only connections cannot run the lazy DDL, and a pre-existing v13 DB has
 // no board tables until the first write. Reads must treat that as "no boards",
 // not "no such table".
-function boardTablesPresent(database: Pick<OpenClawAgentDatabase, "db">): boolean {
+function boardTablesPresent(database: Pick<BotAgentDatabase, "db">): boolean {
   if (ensuredBoardDatabases.has(database.db) || presentBoardDatabases.has(database.db)) {
     return true;
   }
@@ -83,7 +83,7 @@ function boardTablesPresent(database: Pick<OpenClawAgentDatabase, "db">): boolea
   return true;
 }
 
-function ensureBoardSchema(database: OpenClawAgentDatabase): void {
+function ensureBoardSchema(database: BotAgentDatabase): void {
   if (ensuredBoardDatabases.has(database.db)) {
     return;
   }
@@ -92,7 +92,7 @@ function ensureBoardSchema(database: OpenClawAgentDatabase): void {
   }
   runSqliteImmediateTransactionSync(
     database.db,
-    () => ensureOpenClawAgentBoardSchemaInTransaction(database.db),
+    () => ensureBotAgentBoardSchemaInTransaction(database.db),
     {
       databaseLabel: database.path,
       operationLabel: "board.ensure-schema",
@@ -364,7 +364,7 @@ export class SqliteBoardStore implements BoardStore {
     path?: string;
     sessionKey: string;
   }): void {
-    const result = withOpenClawAgentDatabaseReadOnly(
+    const result = withBotAgentDatabaseReadOnly(
       (database) => hasSession(database, resolved.sessionKey),
       {
         agentId: resolved.agentId,
@@ -381,12 +381,12 @@ export class SqliteBoardStore implements BoardStore {
   }
 
   private prepareWrite(sessionKey: string): {
-    database: OpenClawAgentDatabase;
+    database: BotAgentDatabase;
     resolved: { agentId: string; path?: string; sessionKey: string };
   } {
     const resolved = this.resolve(sessionKey);
     this.requireExistingSession(resolved);
-    const database = openOpenClawAgentDatabase({
+    const database = openBotAgentDatabase({
       agentId: resolved.agentId,
       ...(resolved.path ? { path: resolved.path } : {}),
       env: this.options.env,
@@ -397,7 +397,7 @@ export class SqliteBoardStore implements BoardStore {
 
   getSnapshot(sessionKey: string): BoardSnapshot {
     const resolved = this.resolve(sessionKey);
-    const result = withOpenClawAgentDatabaseReadOnly(
+    const result = withBotAgentDatabaseReadOnly(
       (database) =>
         hasSession(database, resolved.sessionKey) && boardTablesPresent(database)
           ? readStoredBoard(database, resolved.sessionKey).snapshot
@@ -415,7 +415,7 @@ export class SqliteBoardStore implements BoardStore {
 
   getSnapshotWithHtmlViewMetadata(sessionKey: string): BoardSnapshotWithHtmlViewMetadata {
     const resolved = this.resolve(sessionKey);
-    const result = withOpenClawAgentDatabaseReadOnly(
+    const result = withBotAgentDatabaseReadOnly(
       (database) =>
         hasSession(database, resolved.sessionKey) && boardTablesPresent(database)
           ? readStoredBoard(database, resolved.sessionKey)
@@ -438,7 +438,7 @@ export class SqliteBoardStore implements BoardStore {
       return this.getSnapshot(sessionKey);
     }
     const { database, resolved } = this.prepareWrite(sessionKey);
-    return runOpenClawAgentWriteTransaction(
+    return runBotAgentWriteTransaction(
       (transactionDatabase) => {
         if (!hasSession(transactionDatabase, resolved.sessionKey)) {
           throw new BoardValidationError(
@@ -479,7 +479,7 @@ export class SqliteBoardStore implements BoardStore {
       delete canonicalParams.declared;
     }
     const viewGeneration = randomBytes(16).toString("hex");
-    return runOpenClawAgentWriteTransaction(
+    return runBotAgentWriteTransaction(
       (transactionDatabase) => {
         if (!hasSession(transactionDatabase, resolved.sessionKey)) {
           throw new BoardValidationError(
@@ -562,7 +562,7 @@ export class SqliteBoardStore implements BoardStore {
     instanceId?: string,
   ): BoardSnapshot {
     const { database, resolved } = this.prepareWrite(sessionKey);
-    return runOpenClawAgentWriteTransaction(
+    return runBotAgentWriteTransaction(
       (transactionDatabase) => {
         if (!hasSession(transactionDatabase, resolved.sessionKey)) {
           throw new BoardValidationError(
@@ -618,7 +618,7 @@ export class SqliteBoardStore implements BoardStore {
 
   readWidgetHtml(sessionKey: string, name: string): BoardWidgetHtmlDocument | undefined {
     const resolved = this.resolve(sessionKey);
-    const result = withOpenClawAgentDatabaseReadOnly(
+    const result = withBotAgentDatabaseReadOnly(
       (database) => {
         if (!hasSession(database, resolved.sessionKey) || !boardTablesPresent(database)) {
           return undefined;
@@ -658,7 +658,7 @@ export class SqliteBoardStore implements BoardStore {
 
   readWidgetMcpApp(sessionKey: string, name: string): BoardWidgetMcpAppDocument | undefined {
     const resolved = this.resolve(sessionKey);
-    const result = withOpenClawAgentDatabaseReadOnly(
+    const result = withBotAgentDatabaseReadOnly(
       (database) => {
         if (!hasSession(database, resolved.sessionKey) || !boardTablesPresent(database)) {
           return undefined;
@@ -701,15 +701,15 @@ export class SqliteBoardStore implements BoardStore {
   listSessionsWithBoards(): string[] {
     const sessionKeys = new Set<string>();
     const agentIds = new Set(
-      listOpenClawRegisteredAgentDatabases({ env: this.options.env }).map(
+      listBotRegisteredAgentDatabases({ env: this.options.env }).map(
         (registered) => registered.agentId,
       ),
     );
     for (const agentId of agentIds) {
       const canonicalPath =
         this.resolve(`agent:${agentId}:main`).path ??
-        resolveOpenClawAgentSqlitePath({ agentId, env: this.options.env });
-      const result = withOpenClawAgentDatabaseReadOnly(
+        resolveBotAgentSqlitePath({ agentId, env: this.options.env });
+      const result = withBotAgentDatabaseReadOnly(
         (database) => {
           if (!boardTablesPresent(database)) {
             return [];

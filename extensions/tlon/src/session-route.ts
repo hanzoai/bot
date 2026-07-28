@@ -2,7 +2,7 @@
 import {
   buildChannelOutboundSessionRoute,
   type ChannelOutboundSessionRouteParams,
-} from "openclaw/plugin-sdk/core";
+} from "bot/plugin-sdk/core";
 import { parseTlonTarget } from "./targets.js";
 
 export function resolveTlonOutboundSessionRoute(params: ChannelOutboundSessionRouteParams) {

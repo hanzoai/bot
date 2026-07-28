@@ -132,7 +132,7 @@ export async function applyClawHubSkillUninstall(
   if (!current.ok) {
     return { ok: false, error: current.error };
   }
-  const stagedDir = `${plan.targetDir}.openclaw-skill-remove-${randomUUID()}`;
+  const stagedDir = `${plan.targetDir}.bot-skill-remove-${randomUUID()}`;
   let staged = false;
   let restoreTracking: (() => Promise<void>) | undefined;
   const rename = deps.rename ?? fs.rename;

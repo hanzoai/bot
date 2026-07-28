@@ -392,7 +392,7 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
     loadHandlers: loadLogsHandlers,
   }),
   ...createLazyCoreHandlers({
-    methods: ["openclaw.changes.list"],
+    methods: ["bot.changes.list"],
     loadHandlers: loadSystemChangesHandlers,
   }),
   ...createLazyCoreHandlers({
@@ -602,14 +602,14 @@ export const coreGatewayHandlers: GatewayRequestHandlers = {
   }),
   ...createLazyCoreHandlers({
     methods: [
-      "openclaw.chat",
-      "openclaw.chat.history",
-      "openclaw.approval.list",
-      "openclaw.setup.detect",
-      "openclaw.setup.verify",
-      "openclaw.setup.activate",
-      "openclaw.setup.auth.start",
-      "openclaw.setup.prepare.start",
+      "bot.chat",
+      "bot.chat.history",
+      "bot.approval.list",
+      "bot.setup.detect",
+      "bot.setup.verify",
+      "bot.setup.activate",
+      "bot.setup.auth.start",
+      "bot.setup.prepare.start",
     ],
     loadHandlers: loadSystemAgentHandlers,
   }),

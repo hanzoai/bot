@@ -2,9 +2,9 @@ import crypto from "node:crypto";
 import {
   isModelSelectionLocked,
   MODEL_SELECTION_LOCKED_MESSAGE,
-} from "openclaw/plugin-sdk/model-session-runtime";
-import type { PluginCommandContext, PluginCommandResult } from "openclaw/plugin-sdk/plugin-entry";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "bot/plugin-sdk/model-session-runtime";
+import type { PluginCommandContext, PluginCommandResult } from "bot/plugin-sdk/plugin-entry";
+import { getSessionEntry, resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
 import { resolveCodexAppServerAuthProfileIdForAgent } from "./app-server/auth-bridge.js";
 import { isCodexFastServiceTier } from "./app-server/config.js";
 import { assertCodexThreadResumeResponse } from "./app-server/protocol-validators.js";
@@ -257,7 +257,7 @@ export async function resumeThread(
     return MODEL_SELECTION_LOCKED_MESSAGE;
   }
   if (!ctx.sessionId) {
-    return "Cannot attach a Codex thread because this command did not include an OpenClaw session id.";
+    return "Cannot attach a Codex thread because this command did not include an Bot session id.";
   }
   const scope = resolveCodexConversationControlScope(ctx);
   const identity = sessionBindingIdentity({
@@ -331,7 +331,7 @@ export async function resumeThread(
     if (!committed) {
       throw new Error("Codex thread binding changed while attaching the resumed thread.");
     }
-    return `Attached this OpenClaw session to Codex thread ${formatCodexDisplayText(
+    return `Attached this Bot session to Codex thread ${formatCodexDisplayText(
       effectiveThreadId,
     )}.`;
   });

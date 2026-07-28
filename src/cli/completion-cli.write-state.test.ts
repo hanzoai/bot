@@ -54,11 +54,11 @@ async function withIsolatedCompletionState(
   run: () => Promise<void>,
   env: Record<string, string | undefined> = {},
 ): Promise<void> {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-completion-state-"));
-  const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-completion-home-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-completion-state-"));
+  const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-completion-home-"));
 
   try {
-    await withEnvAsync({ HOME: homeDir, OPENCLAW_STATE_DIR: stateDir, ...env }, run);
+    await withEnvAsync({ HOME: homeDir, BOT_STATE_DIR: stateDir, ...env }, run);
   } finally {
     await fs.rm(stateDir, { recursive: true, force: true });
     await fs.rm(homeDir, { recursive: true, force: true });
@@ -105,11 +105,11 @@ describe("completion-cli write-state", () => {
       const { registerCompletionCli } = await import("./completion-cli.js");
 
       await withIsolatedCompletionState(async () => {
-        const cachePath = resolveCompletionCachePath(shell, "openclaw");
+        const cachePath = resolveCompletionCachePath(shell, "bot");
         await fs.mkdir(path.dirname(cachePath), { recursive: true });
         await fs.writeFile(cachePath, "# cached completion\n", "utf8");
 
-        const program = new Command().name("openclaw");
+        const program = new Command().name("bot");
         registerCompletionCli(program);
         await program.parseAsync(["completion", "--shell", shell, "--install", "--yes"], {
           from: "user",
@@ -130,9 +130,9 @@ describe("completion-cli write-state", () => {
       const { registerCompletionCli } = await import("./completion-cli.js");
 
       await withIsolatedCompletionState(async () => {
-        const cachePath = resolveCompletionCachePath(shell, "openclaw");
+        const cachePath = resolveCompletionCachePath(shell, "bot");
         const profilePath = resolveCompletionProfilePath(shell);
-        const program = new Command().name("openclaw");
+        const program = new Command().name("bot");
         registerCompletionCli(program);
 
         await expect(
@@ -140,7 +140,7 @@ describe("completion-cli write-state", () => {
             from: "user",
           }),
         ).rejects.toThrow(
-          `Completion cache not found at ${cachePath}. Run \`openclaw completion --write-state\` first.`,
+          `Completion cache not found at ${cachePath}. Run \`bot completion --write-state\` first.`,
         );
 
         await expect(fs.access(profilePath)).rejects.toThrow();
@@ -154,11 +154,11 @@ describe("completion-cli write-state", () => {
 
     await withIsolatedCompletionState(
       async () => {
-        const cachePath = resolveCompletionCachePath("fish", "openclaw");
+        const cachePath = resolveCompletionCachePath("fish", "bot");
         await fs.mkdir(path.dirname(cachePath), { recursive: true });
         await fs.writeFile(cachePath, "# fish completion\n", "utf8");
 
-        const program = new Command().name("openclaw");
+        const program = new Command().name("bot");
         registerCompletionCli(program);
         await program.parseAsync(["completion", "--install", "--yes"], { from: "user" });
 
@@ -175,15 +175,15 @@ describe("completion-cli write-state", () => {
     const { registerCompletionCli } = await import("./completion-cli.js");
 
     await withIsolatedCompletionState(async () => {
-      const program = new Command().name("openclaw");
+      const program = new Command().name("bot");
       registerCompletionCli(program);
       await program.parseAsync(
         ["completion", "--shell", "zsh", "--write-state", "--install", "--yes"],
         { from: "user" },
       );
 
-      const cachePath = resolveCompletionCachePath("zsh", "openclaw");
-      await expect(fs.readFile(cachePath, "utf8")).resolves.toContain("#compdef openclaw");
+      const cachePath = resolveCompletionCachePath("zsh", "bot");
+      await expect(fs.readFile(cachePath, "utf8")).resolves.toContain("#compdef bot");
       await expect(fs.readFile(resolveCompletionProfilePath("zsh"), "utf8")).resolves.toContain(
         cachePath,
       );
@@ -201,23 +201,23 @@ describe("completion-cli write-state", () => {
 
   it("keeps completion cache generation alive when a subcli fails to register", async () => {
     const { registerCompletionCli } = await import("./completion-cli.js");
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-completion-state-"));
-    const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-completion-home-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-completion-state-"));
+    const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-completion-home-"));
 
     try {
-      await withEnvAsync({ HOME: homeDir, OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ HOME: homeDir, BOT_STATE_DIR: stateDir }, async () => {
         const program = new Command();
-        program.name("openclaw");
+        program.name("bot");
         registerCompletionCli(program);
 
         await program.parseAsync(["completion", "--write-state"], { from: "user" });
 
         const cacheDir = path.join(stateDir, "completions");
         expect((await fs.readdir(cacheDir)).toSorted()).toEqual([
-          "openclaw.bash",
-          "openclaw.fish",
-          "openclaw.ps1",
-          "openclaw.zsh",
+          "bot.bash",
+          "bot.fish",
+          "bot.ps1",
+          "bot.zsh",
         ]);
         expect(registerSubCliByNameMock.mock.calls).toEqual([
           [program, "qa", process.argv, { purpose: "completion" }],
@@ -240,14 +240,14 @@ describe("completion-cli write-state", () => {
       import("./completion-cli.js"),
       import("../logging.js"),
     ]);
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-completion-state-json-"));
-    const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-completion-home-json-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-completion-state-json-"));
+    const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-completion-home-json-"));
 
     try {
       logging.setLoggerOverride({ level: "silent", consoleLevel: "info", consoleStyle: "json" });
-      await withEnvAsync({ HOME: homeDir, OPENCLAW_STATE_DIR: stateDir }, async () => {
+      await withEnvAsync({ HOME: homeDir, BOT_STATE_DIR: stateDir }, async () => {
         const program = new Command();
-        program.name("openclaw");
+        program.name("bot");
         registerCompletionCli(program);
 
         await program.parseAsync(["completion", "--write-state"], { from: "user" });
@@ -270,19 +270,19 @@ describe("completion-cli write-state", () => {
       import("./completion-runtime.js"),
       import("./completion-cli.js"),
     ]);
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-completion-state-"));
-    const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-completion-home-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-completion-state-"));
+    const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-completion-home-"));
 
     try {
       await withEnvAsync(
         {
           HOME: homeDir,
-          OPENCLAW_STATE_DIR: stateDir,
+          BOT_STATE_DIR: stateDir,
           [COMPLETION_SKIP_PLUGIN_COMMANDS_ENV]: "1",
         },
         async () => {
           const program = new Command();
-          program.name("openclaw");
+          program.name("bot");
           registerCompletionCli(program);
 
           await program.parseAsync(["completion", "--write-state"], { from: "user" });
@@ -292,10 +292,10 @@ describe("completion-cli write-state", () => {
           ]);
           expect(registerPluginCliCommandsFromValidatedConfigMock).not.toHaveBeenCalled();
           expect((await fs.readdir(path.join(stateDir, "completions"))).toSorted()).toEqual([
-            "openclaw.bash",
-            "openclaw.fish",
-            "openclaw.ps1",
-            "openclaw.zsh",
+            "bot.bash",
+            "bot.fish",
+            "bot.ps1",
+            "bot.zsh",
           ]);
         },
       );

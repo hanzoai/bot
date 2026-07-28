@@ -4,7 +4,7 @@ import {
   type ChannelProgressDraftCompositorLine,
   type ChannelProgressDraftCompositorSnapshot,
   type ChannelProgressDraftLine,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "bot/plugin-sdk/channel-outbound";
 import {
   buildSlackProgressStreamStartChunks,
   buildSlackProgressStreamUpdateChunks,

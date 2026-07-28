@@ -265,7 +265,7 @@ function isImageLightboxEvent(event: Event): boolean {
   return event
     .composedPath()
     .some(
-      (target) => target instanceof HTMLElement && target.localName === "openclaw-image-lightbox",
+      (target) => target instanceof HTMLElement && target.localName === "bot-image-lightbox",
     );
 }
 
@@ -593,7 +593,7 @@ export function renderChat(props: ChatProps) {
               </div>
               ${props.sessionRailReady
                 ? html`
-                    <openclaw-chat-session-rail
+                    <bot-chat-session-rail
                       .sessionKey=${props.sessionKey}
                       .digest=${props.observerDigest ?? null}
                       .running=${Boolean(props.observerRunId)}
@@ -610,7 +610,7 @@ export function renderChat(props: ChatProps) {
                       .onClear=${props.onSessionRailClear}
                       .onModeChange=${props.onSessionRailModeChange}
                       .onVisibilityChange=${props.onObserverVisibilityChange}
-                    ></openclaw-chat-session-rail>
+                    ></bot-chat-session-rail>
                   `
                 : nothing}
             </div>

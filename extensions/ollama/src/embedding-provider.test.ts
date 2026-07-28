@@ -1,5 +1,5 @@
 // Ollama tests cover embedding provider plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/provider-auth";
+import type { BotConfig } from "bot/plugin-sdk/provider-auth";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createStreamingResponse } from "../../test-support/streaming-error-response.js";
 
@@ -12,7 +12,7 @@ const { fetchConfiguredLocalOriginWithSsrFGuardMock } = vi.hoisted(() => ({
   ),
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("bot/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: vi.fn(),
   formatErrorMessage: (error: unknown) => (error instanceof Error ? error.message : String(error)),
   ssrfPolicyFromHttpBaseUrlAllowedOrigin: (baseUrl: string) => {
@@ -22,7 +22,7 @@ vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
 }));
 
 // Import-resolution gating for this private helper is covered in sdk-alias.test.ts.
-vi.mock("openclaw/plugin-sdk/ssrf-runtime-internal", () => ({
+vi.mock("bot/plugin-sdk/ssrf-runtime-internal", () => ({
   fetchConfiguredLocalOriginWithSsrFGuard: fetchConfiguredLocalOriginWithSsrFGuardMock,
 }));
 
@@ -130,7 +130,7 @@ describe("ollama embedding provider", () => {
     const fetchMock = mockEmbeddingFetch([3, 4]);
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "unknown-embedder",
       fallback: "none",
@@ -152,7 +152,7 @@ describe("ollama embedding provider", () => {
     mockEmbeddingFetch([3, 4, 12]);
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "unknown-embedder",
       fallback: "none",
@@ -171,7 +171,7 @@ describe("ollama embedding provider", () => {
     const fetchMock = mockEmbeddingFetch([1, 0]);
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -193,7 +193,7 @@ describe("ollama embedding provider", () => {
     const fetchMock = mockEmbeddingFetch([1, 0]);
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -227,7 +227,7 @@ describe("ollama embedding provider", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "ollama",
       model: "",
       fallback: "none",
@@ -257,7 +257,7 @@ describe("ollama embedding provider", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -274,7 +274,7 @@ describe("ollama embedding provider", () => {
   it("fails fast when memory-search remote apiKey is an unresolved SecretRef", async () => {
     await expect(
       createOllamaEmbeddingProvider({
-        config: {} as OpenClawConfig,
+        config: {} as BotConfig,
         provider: "ollama",
         model: "nomic-embed-text",
         fallback: "none",
@@ -301,7 +301,7 @@ describe("ollama embedding provider", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -341,7 +341,7 @@ describe("ollama embedding provider", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -371,7 +371,7 @@ describe("ollama embedding provider", () => {
     );
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -405,7 +405,7 @@ describe("ollama embedding provider", () => {
     );
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -431,7 +431,7 @@ describe("ollama embedding provider", () => {
     );
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -460,7 +460,7 @@ describe("ollama embedding provider", () => {
     );
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -476,7 +476,7 @@ describe("ollama embedding provider", () => {
     const fetchMock = mockEmbeddingFetch([1, 0]);
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "qwen3-embedding:0.6b",
       fallback: "none",
@@ -494,7 +494,7 @@ describe("ollama embedding provider", () => {
     const fetchMock = mockEmbeddingFetch([1, 0]);
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -510,7 +510,7 @@ describe("ollama embedding provider", () => {
     const fetchMock = mockEmbeddingFetch([1, 0]);
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "mxbai-embed-large:latest",
       fallback: "none",
@@ -545,7 +545,7 @@ describe("ollama embedding provider", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "qwen3-embedding:0.6b",
       fallback: "none",
@@ -581,7 +581,7 @@ describe("ollama embedding provider", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "ollama-spark",
       model: "ollama-spark/qwen3-embedding:4b",
       fallback: "none",
@@ -631,7 +631,7 @@ describe("ollama embedding provider", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "ollama-spark",
       model: "nomic-embed-text",
       fallback: "none",
@@ -649,7 +649,7 @@ describe("ollama embedding provider", () => {
     vi.stubEnv("OLLAMA_API_KEY", "ollama-cloud-key");
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -668,7 +668,7 @@ describe("ollama embedding provider", () => {
     vi.stubEnv("OLLAMA_API_KEY", "ollama-cloud-key");
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -700,7 +700,7 @@ describe("ollama embedding provider", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -718,7 +718,7 @@ describe("ollama embedding provider", () => {
     const fetchMock = mockEmbeddingFetch([1, 0]);
 
     const { provider } = await createOllamaEmbeddingProvider({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -750,7 +750,7 @@ describe("ollama embedding provider", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -766,7 +766,7 @@ describe("ollama embedding provider", () => {
 
   it("preserves the legacy identity only for the default Ollama endpoint", async () => {
     const defaultEndpoint = await ollamaMemoryEmbeddingProviderAdapter.create({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -774,7 +774,7 @@ describe("ollama embedding provider", () => {
       outputDimensionality: 2,
     });
     const customEndpoint = await ollamaMemoryEmbeddingProviderAdapter.create({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",
@@ -813,7 +813,7 @@ describe("ollama embedding provider", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "ollama-cpu",
       model: "qwen3-embedding:4b",
       fallback: "none",
@@ -851,7 +851,7 @@ describe("ollama embedding provider", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "ollama-cpu",
       model: "qwen3-embedding:4b",
       fallback: "none",
@@ -870,7 +870,7 @@ describe("ollama embedding provider", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "ollama-spark",
       model: "ollama-spark/nomic-embed-text",
       fallback: "none",
@@ -884,7 +884,7 @@ describe("ollama embedding provider", () => {
 
   it("marks inline memory batches as local-server timeout work", async () => {
     const result = await ollamaMemoryEmbeddingProviderAdapter.create({
-      config: {} as OpenClawConfig,
+      config: {} as BotConfig,
       provider: "ollama",
       model: "nomic-embed-text",
       fallback: "none",

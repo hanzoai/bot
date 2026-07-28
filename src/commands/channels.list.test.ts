@@ -95,7 +95,7 @@ function createCatalogEntry(id: string, label: string): ChannelPluginCatalogEntr
   return {
     id,
     label,
-    pluginId: `@openclaw/${id}`,
+    pluginId: `@hanzo/bot-${id}`,
     origin: "official",
     meta: {
       id,
@@ -104,7 +104,7 @@ function createCatalogEntry(id: string, label: string): ChannelPluginCatalogEntr
       docsPath: `/channels/${id}`,
       blurb: label,
     },
-    install: { npmSpec: `@openclaw/${id}` },
+    install: { npmSpec: `@hanzo/bot-${id}` },
   } as unknown as ChannelPluginCatalogEntry;
 }
 
@@ -375,11 +375,11 @@ describe("channels list", () => {
       pluginId: "discord",
       channelId: "discord",
       label: "Discord",
-      installSpec: "@openclaw/discord",
-      installCommand: "openclaw plugins install @openclaw/discord",
-      doctorFixCommand: "openclaw doctor --fix",
+      installSpec: "@hanzo/bot-discord",
+      installCommand: "bot plugins install @hanzo/bot-discord",
+      doctorFixCommand: "bot doctor --fix",
       repairHint:
-        "Install the official external plugin with: openclaw plugins install @openclaw/discord, or run: openclaw doctor --fix.",
+        "Install the official external plugin with: bot plugins install @hanzo/bot-discord, or run: bot doctor --fix.",
     });
     mocks.readConfigFileSnapshot.mockResolvedValue({
       ...baseConfigSnapshot,
@@ -407,7 +407,7 @@ describe("channels list", () => {
     expect(output).toContain("configured");
     expect(output).toContain("disabled");
     expect(output).toContain(
-      "run openclaw plugins install @openclaw/discord or openclaw doctor --fix",
+      "run bot plugins install @hanzo/bot-discord or bot doctor --fix",
     );
     expect(output).not.toContain("no configured chat channels");
   });
@@ -423,11 +423,11 @@ describe("channels list", () => {
       pluginId: "discord",
       channelId: "discord",
       label: "Discord",
-      installSpec: "@openclaw/discord",
-      installCommand: "openclaw plugins install @openclaw/discord",
-      doctorFixCommand: "openclaw doctor --fix",
+      installSpec: "@hanzo/bot-discord",
+      installCommand: "bot plugins install @hanzo/bot-discord",
+      doctorFixCommand: "bot doctor --fix",
       repairHint:
-        "Install the official external plugin with: openclaw plugins install @openclaw/discord, or run: openclaw doctor --fix.",
+        "Install the official external plugin with: bot plugins install @hanzo/bot-discord, or run: bot doctor --fix.",
     });
     mocks.readConfigFileSnapshot.mockResolvedValue({
       ...baseConfigSnapshot,

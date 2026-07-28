@@ -1,6 +1,6 @@
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
-import type { RetryConfig } from "openclaw/plugin-sdk/retry-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import { recordChannelActivity } from "bot/plugin-sdk/channel-activity-runtime";
+import type { RetryConfig } from "bot/plugin-sdk/retry-runtime";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
 import {
   createTelegramNonIdempotentRequestWithDiag,
   createTelegramRequestWithDiag,
@@ -11,11 +11,11 @@ import {
   type TelegramApiContext,
   type TelegramApiOverride,
 } from "./send-context.js";
-import type { OpenClawConfig } from "./send.runtime.js";
+import type { BotConfig } from "./send.runtime.js";
 import { parseTelegramTarget } from "./targets.js";
 
 type TelegramDeleteOpts = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   token?: string;
   accountId?: string;
   notify?: boolean;
@@ -141,7 +141,7 @@ export async function renameForumTopicTelegram(
 // ---------------------------------------------------------------------------
 
 type TelegramCreateForumTopicOpts = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   token?: string;
   accountId?: string;
   api?: TelegramApiOverride;

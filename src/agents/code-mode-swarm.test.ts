@@ -285,7 +285,7 @@ describe("Code Mode swarm host bridge", () => {
     });
     const runtime = {
       namespaceEntries: () => [
-        { id: "openclaw:core:sessions_spawn", source: "openclaw", name: "sessions_spawn" },
+        { id: "bot:core:sessions_spawn", source: "bot", name: "sessions_spawn" },
       ],
       callExactId,
     };
@@ -382,7 +382,7 @@ describe("Code Mode swarm host bridge", () => {
     });
     const runtime = {
       namespaceEntries: () => [
-        { id: "openclaw:core:sessions_spawn", source: "openclaw", name: "sessions_spawn" },
+        { id: "bot:core:sessions_spawn", source: "bot", name: "sessions_spawn" },
       ],
       callExactId,
     };
@@ -434,7 +434,7 @@ describe("Code Mode swarm host bridge", () => {
     }));
     const runtime = {
       namespaceEntries: () => [
-        { id: "openclaw:core:sessions_spawn", source: "openclaw", name: "sessions_spawn" },
+        { id: "bot:core:sessions_spawn", source: "bot", name: "sessions_spawn" },
       ],
       callExactId,
     };
@@ -477,7 +477,7 @@ describe("Code Mode swarm host bridge", () => {
     }));
     const runtime = {
       namespaceEntries: () => [
-        { id: "openclaw:core:sessions_spawn", source: "openclaw", name: "sessions_spawn" },
+        { id: "bot:core:sessions_spawn", source: "bot", name: "sessions_spawn" },
       ],
       callExactId,
     };
@@ -539,7 +539,7 @@ describe("Code Mode swarm host bridge", () => {
     });
     const runtime = {
       namespaceEntries: () => [
-        { id: "openclaw:core:sessions_spawn", source: "openclaw", name: "sessions_spawn" },
+        { id: "bot:core:sessions_spawn", source: "bot", name: "sessions_spawn" },
       ],
       callExactId: vi.fn(),
     };

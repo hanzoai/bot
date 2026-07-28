@@ -7,23 +7,23 @@ describe("Google Meet CLI output mode", () => {
   it.each(["join", "status", "test-listen", "test-speech"])(
     "detects %s as default JSON output",
     (command) => {
-      expect(isMachineOutput({ argv: ["node", "openclaw", "googlemeet", command] })).toBe(true);
+      expect(isMachineOutput({ argv: ["node", "bot", "googlemeet", command] })).toBe(true);
     },
   );
 
   it("does not classify human setup output", () => {
-    expect(isMachineOutput({ argv: ["node", "openclaw", "googlemeet", "setup"] })).toBe(false);
+    expect(isMachineOutput({ argv: ["node", "bot", "googlemeet", "setup"] })).toBe(false);
   });
 
   it("accepts post-root options and detects dry-run exports", () => {
     expect(
       isMachineOutput({
-        argv: ["node", "openclaw", "googlemeet", "--log-level", "debug", "join"],
+        argv: ["node", "bot", "googlemeet", "--log-level", "debug", "join"],
       }),
     ).toBe(true);
     expect(
       isMachineOutput({
-        argv: ["node", "openclaw", "googlemeet", "export", "--dry-run"],
+        argv: ["node", "bot", "googlemeet", "export", "--dry-run"],
       }),
     ).toBe(true);
   });

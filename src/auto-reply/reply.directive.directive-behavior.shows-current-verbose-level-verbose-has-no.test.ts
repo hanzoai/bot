@@ -2,7 +2,7 @@
 import "./reply.directive.directive-behavior.e2e-mocks.js";
 import { describe, expect, it } from "vitest";
 import type { ModelAliasIndex } from "../agents/model-selection.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { migratePersistedImplicitMainRoster } from "../config/legacy.roster.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { installDirectiveBehaviorE2EHooks } from "./reply.directive.directive-behavior.e2e-harness.js";
@@ -30,10 +30,10 @@ async function runDirectiveStatus(
     agents: {
       defaults: {
         model: "anthropic/claude-opus-4-6",
-        workspace: "/tmp/openclaw",
+        workspace: "/tmp/bot",
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
   const effectiveSessionKey = overrides.sessionKey ?? sessionKey;
   const effectiveSessionEntry = overrides.sessionEntry ?? sessionEntry;
   const effectiveSessionStore = overrides.sessionStore ?? {
@@ -47,7 +47,7 @@ async function runDirectiveStatus(
     ...restOverrides
   } = overrides;
   const result = await handleDirectiveOnly({
-    cfg: migratePersistedImplicitMainRoster(overrideCfg ?? cfg).config as OpenClawConfig,
+    cfg: migratePersistedImplicitMainRoster(overrideCfg ?? cfg).config as BotConfig,
     directives: parseInlineDirectives(body),
     sessionEntry: effectiveSessionEntry,
     sessionStore: effectiveSessionStore,
@@ -80,7 +80,7 @@ describe("directive behavior", () => {
         agents: {
           defaults: {
             model: "anthropic/claude-opus-4-6",
-            workspace: "/tmp/openclaw",
+            workspace: "/tmp/bot",
             models: {
               "anthropic/claude-opus-4-6": {
                 params: { fastMode: "auto", fastAutoOnSeconds: 30 },
@@ -88,7 +88,7 @@ describe("directive behavior", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
     expect(fastText).toContain("Current fast mode: auto (30 sec) (default: model)");
     expect(fastText).toContain("Options: on, off, auto (30 sec), default, status.");
@@ -117,7 +117,7 @@ describe("directive behavior", () => {
         agents: {
           defaults: {
             model: "anthropic/claude-opus-4-6",
-            workspace: "/tmp/openclaw",
+            workspace: "/tmp/bot",
           },
         },
         tools: {
@@ -128,7 +128,7 @@ describe("directive behavior", () => {
             node: "mac-1",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
     expect(execText).toContain(
       "Current exec defaults: host=gateway, effective=gateway, security=allowlist, ask=always, node=mac-1.",
@@ -145,7 +145,7 @@ describe("directive behavior", () => {
         agents: {
           defaults: {
             model: "anthropic/claude-opus-4-6",
-            workspace: "/tmp/openclaw",
+            workspace: "/tmp/bot",
             models: {
               "anthropic/claude-opus-4-6": {
                 params: { fastMode: "auto", fastAutoOnSeconds: 30 },
@@ -153,7 +153,7 @@ describe("directive behavior", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
 
     expect(statusText).toContain("Current fast mode: auto (30 sec) (default: model)");

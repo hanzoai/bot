@@ -443,10 +443,10 @@ describe("buildTailscaleHttpsUrl", () => {
       buildTailscaleHttpsUrl({
         tailscaleMode: "serve",
         tailscaleDns: "node.tailnet.ts.net",
-        serviceName: "svc:openclaw",
+        serviceName: "svc:bot",
         controlUiBasePath: "/control",
       }),
-    ).toBe("https://openclaw.tailnet.ts.net/control");
+    ).toBe("https://bot.tailnet.ts.net/control");
   });
 
   it("does not advertise a node-IP URL for named Services", () => {
@@ -454,7 +454,7 @@ describe("buildTailscaleHttpsUrl", () => {
       buildTailscaleHttpsUrl({
         tailscaleMode: "serve",
         tailscaleDns: "100.64.0.8",
-        serviceName: "svc:openclaw",
+        serviceName: "svc:bot",
       }),
     ).toBeNull();
   });
@@ -487,7 +487,7 @@ describe("resolveSharedMemoryStatusSnapshot", () => {
       close: vi.fn(async () => {}),
     };
     const resolveMemoryConfig = vi.fn(() => ({
-      store: { databasePath: `/tmp/openclaw-missing-memory-${process.pid}.sqlite` },
+      store: { databasePath: `/tmp/bot-missing-memory-${process.pid}.sqlite` },
     }));
     const getMemorySearchManager = vi.fn(async () => ({ manager }));
 
@@ -498,7 +498,7 @@ describe("resolveSharedMemoryStatusSnapshot", () => {
       resolveMemoryConfig,
       getMemorySearchManager,
       requireDefaultDatabasePath: () =>
-        `/tmp/openclaw-missing-default-memory-${process.pid}.sqlite`,
+        `/tmp/bot-missing-default-memory-${process.pid}.sqlite`,
     });
 
     expect(resolveMemoryConfig).toHaveBeenCalledOnce();
@@ -523,7 +523,7 @@ describe("resolveSharedMemoryStatusSnapshot", () => {
     const resolveMemoryConfig = vi.fn(() => null);
     const getMemorySearchManager = vi.fn(async () => ({ manager }));
     const requireDefaultDatabasePath = vi.fn(
-      () => `/tmp/openclaw-missing-memory-${process.pid}.sqlite`,
+      () => `/tmp/bot-missing-memory-${process.pid}.sqlite`,
     );
 
     const result = await resolveSharedMemoryStatusSnapshot({
@@ -615,7 +615,7 @@ describe("resolveSharedMemoryStatusSnapshot", () => {
       memoryPlugin: { enabled: true, slot: "memory-core" },
       resolveMemoryConfig,
       getMemorySearchManager,
-      requireDefaultDatabasePath: () => `/tmp/openclaw-missing-memory-${process.pid}.sqlite`,
+      requireDefaultDatabasePath: () => `/tmp/bot-missing-memory-${process.pid}.sqlite`,
     });
 
     expect(result).toBeNull();
@@ -624,8 +624,8 @@ describe("resolveSharedMemoryStatusSnapshot", () => {
   });
 
   it("recognizes shipped memory tables before the manager migrates them", async () => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-status-memory-");
-    const databasePath = path.join(tempDir, "openclaw-agent.sqlite");
+    const tempDir = makeTempDir(tempDirs, "bot-status-memory-");
+    const databasePath = path.join(tempDir, "bot-agent.sqlite");
     const db = new DatabaseSync(databasePath);
     db.exec(`
       CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -680,8 +680,8 @@ describe("resolveSharedMemoryStatusSnapshot", () => {
   });
 
   it("does not initialize memory status for an agent database owned by another feature", async () => {
-    const tempDir = makeTempDir(tempDirs, "openclaw-status-memory-");
-    const databasePath = path.join(tempDir, "openclaw-agent.sqlite");
+    const tempDir = makeTempDir(tempDirs, "bot-status-memory-");
+    const databasePath = path.join(tempDir, "bot-agent.sqlite");
     const db = new DatabaseSync(databasePath);
     db.exec(`
       CREATE TABLE cache_entries (

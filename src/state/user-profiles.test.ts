@@ -2,11 +2,11 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { tableExists } from "./openclaw-state-db-schema-helpers.js";
+import { tableExists } from "./bot-state-db-schema-helpers.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "./openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "./bot-state-db.js";
 import {
   ensureProfileForEmail,
   formatUserProfileAvatarEtag,
@@ -21,26 +21,26 @@ import {
 const statePaths: string[] = [];
 
 function stateOptions() {
-  const directory = mkdtempSync(join(tmpdir(), "openclaw-user-profiles-"));
-  const path = join(directory, "openclaw.sqlite");
+  const directory = mkdtempSync(join(tmpdir(), "bot-user-profiles-"));
+  const path = join(directory, "bot.sqlite");
   statePaths.push(path);
   return { path };
 }
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
 });
 
 describe("user profiles", () => {
   it("lazily ensures and resolves lowercased email aliases idempotently", () => {
     const options = stateOptions();
-    expect(tableExists(openOpenClawStateDatabase(options).db, "user_profiles")).toBe(false);
+    expect(tableExists(openBotStateDatabase(options).db, "user_profiles")).toBe(false);
 
     const first = ensureProfileForEmail("  Ada@Example.COM ", options);
     const second = ensureProfileForEmail("ada@example.com", options);
 
-    expect(tableExists(openOpenClawStateDatabase(options).db, "user_profiles")).toBe(true);
+    expect(tableExists(openBotStateDatabase(options).db, "user_profiles")).toBe(true);
     expect(second).toEqual(first);
     expect(ensureProfileForEmail("ADA@example.com", options)).toEqual(first);
     expect(listProfiles(options)).toEqual([

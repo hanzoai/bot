@@ -4,8 +4,8 @@ import {
   type SessionCatalogContinueProviderResult,
   type SessionUpstreamActivity,
   type SessionUpstreamProbe,
-} from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/session-catalog";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import { OPENCODE_SESSION_ID_PATTERN } from "./session-catalog-shared.js";
 import { exportOpenCodeSession, queryOpenCodeDatabase } from "./session-catalog.js";
 

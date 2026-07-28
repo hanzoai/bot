@@ -2,7 +2,7 @@
 import {
   isSensitiveUrlConfigPath,
   SENSITIVE_URL_HINT_TAG,
-} from "@openclaw/net-policy/redact-sensitive-url";
+} from "@hanzo/bot-net-policy/redact-sensitive-url";
 import { z } from "zod";
 import type { ConfigUiHints } from "../shared/config-ui-hints-types.js";
 import { FIELD_HELP } from "./schema.help.js";
@@ -81,12 +81,12 @@ const FIELD_PLACEHOLDERS: Record<string, string> = {
   "gateway.remote.tlsFingerprint": "sha256:ab12cd34…",
   "gateway.remote.sshTarget": "user@host",
   "gateway.remote.sshHostKeyPolicy": "strict",
-  "gateway.controlUi.basePath": "/openclaw",
+  "gateway.controlUi.basePath": "/bot",
   "gateway.controlUi.root": "dist/control-ui",
   "gateway.controlUi.allowedOrigins": "https://control.example.com",
-  "gateway.push.apns.relay.baseUrl": "https://ios-push-relay.openclaw.ai",
+  "gateway.push.apns.relay.baseUrl": "https://ios-push-relay.bot.ai",
   "channels.mattermost.baseUrl": "https://chat.example.com",
-  "agents.entries.*.identity.avatar": "avatars/openclaw.png",
+  "agents.entries.*.identity.avatar": "avatars/bot.png",
 };
 
 const CHANNEL_NAMESPACE_PREFIX = "channels.";

@@ -56,14 +56,14 @@ describe("canvas CLI helpers", () => {
   it("rejects unsafe snapshot temp path parts", () => {
     expect(() =>
       canvasSnapshotTempPath({
-        tmpDir: "/tmp/openclaw-canvas-test",
+        tmpDir: "/tmp/bot-canvas-test",
         id: "snapshot",
         ext: "/../../target.sh",
       }),
     ).toThrow(/invalid canvas\.snapshot format/i);
     expect(() =>
       canvasSnapshotTempPath({
-        tmpDir: "/tmp/openclaw-canvas-test",
+        tmpDir: "/tmp/bot-canvas-test",
         id: "../../snapshot",
         ext: "png",
       }),

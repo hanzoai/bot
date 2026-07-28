@@ -3,7 +3,7 @@ import { buildLatestSubagentRunReadIndex } from "../agents/subagent-registry-rea
 import { getRuntimeConfig } from "../config/io.js";
 import { loadSessionEntryReadOnly } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";
 import { OPERATOR_APPROVAL_MAX_AUDIENCE_SESSION_KEYS } from "./operator-approval-store.js";
 import {
@@ -103,7 +103,7 @@ function resolveApprovalSessionAudienceFromSources(params: {
 }
 
 function createRuntimeApprovalSessionAudienceSources(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   sourceAgentId?: string | null,
 ): ApprovalSessionAudienceSources {
   const subagentRuns = buildLatestSubagentRunReadIndex();
@@ -153,7 +153,7 @@ function resolveApprovalSessionAudience(
 
 /** Canonicalize one source key against config: agent scoping, main-key aliases, global sentinel. */
 function canonicalizeApprovalSourceStreamKey(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   sessionKey: string,
   sourceAgentId?: string | null,
 ): string {

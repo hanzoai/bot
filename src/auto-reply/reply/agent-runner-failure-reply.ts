@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { formatAuthProfileFailureMessage } from "../../agents/auth-profiles/failure-copy.js";
 import {
   buildOAuthRefreshFailureLoginCommand,
@@ -26,7 +26,7 @@ import {
 import { isMissingProviderAuthError } from "../../agents/model-auth.js";
 import { isFallbackSummaryError } from "../../agents/model-fallback-attempt.js";
 import { resolveSilentReplyPolicy } from "../../config/silent-reply.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { markReplyPayloadForSourceSuppressionDelivery } from "../reply-payload.js";
 import type { TemplateContext } from "../templating.js";
@@ -204,7 +204,7 @@ export function resolveExternalRunFailureTextForConversation(params: {
   text: string;
   sessionCtx: ExternalFailureConversationContext;
   isGenericRunnerFailure: boolean;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }): string {
   if (!isNonDirectConversationContext(params.sessionCtx)) {
     return params.text;
@@ -239,10 +239,10 @@ function buildCodexAppServerFailureText(message: string): string | null {
     return "⚠️ This Codex session changed before your message could run. Please send it again.";
   }
   if (CODEX_APP_SERVER_CLIENT_CLOSED_BEFORE_REPLY_RE.test(normalizedMessage)) {
-    return "⚠️ Codex app-server connection closed before this turn finished. OpenClaw retried once when the stdio turn was still replay-safe; please try again if this keeps happening.";
+    return "⚠️ Codex app-server connection closed before this turn finished. Bot retried once when the stdio turn was still replay-safe; please try again if this keeps happening.";
   }
   if (CODEX_APP_SERVER_TURN_COMPLETION_IDLE_TIMEOUT_RE.test(normalizedMessage)) {
-    return "⚠️ Codex app-server stopped before confirming turn completion. OpenClaw did not replay the turn automatically because it may still be active; try again, or use /new if the session stays stuck.";
+    return "⚠️ Codex app-server stopped before confirming turn completion. Bot did not replay the turn automatically because it may still be active; try again, or use /new if the session stays stuck.";
   }
   return null;
 }
@@ -303,7 +303,7 @@ function buildCliBackendTimeoutFailureText(input: {
       " The CLI had already begun work, so effects may be partial; check before retrying.";
   }
   if (input.replayPrevented) {
-    workStatus += " OpenClaw did not replay this turn automatically.";
+    workStatus += " Bot did not replay this turn automatically.";
   }
   if (mode === "no-output") {
     const backendId = cliTimeoutError?.provider ?? "<id>";
@@ -316,7 +316,7 @@ function buildCliBackendTimeoutFailureText(input: {
   }
   return (
     `⚠️ CLI turn${routingSuffix}: timed out after ${seconds}s (overall turn limit). The gateway is unaffected.${workStatus} ` +
-    "For long work, use a detached OpenClaw sub-agent (no run timeout by default), or raise `agents.defaults.timeoutSeconds`."
+    "For long work, use a detached Bot sub-agent (no run timeout by default), or raise `agents.defaults.timeoutSeconds`."
   );
 }
 
@@ -335,7 +335,7 @@ function buildMissingApiKeyFailureText(input: { message: string; error?: unknown
     return "⚠️ Missing API key for OpenAI on the gateway. Use `openai/gpt-5.6-sol` with the OpenAI OAuth profile, or set `OPENAI_API_KEY` for direct OpenAI API-key runs.";
   }
   if (provider === "openai") {
-    return '⚠️ Missing API key for provider "openai". Run `openclaw doctor --fix` to repair stale OpenAI model/session routes, restart the gateway if doctor asks, then try again. If doctor has nothing to repair or the error persists, re-auth with `openclaw models auth login --provider openai` or run `openclaw configure`.';
+    return '⚠️ Missing API key for provider "openai". Run `bot doctor --fix` to repair stale OpenAI model/session routes, restart the gateway if doctor asks, then try again. If doctor has nothing to repair or the error persists, re-auth with `bot models auth login --provider openai` or run `bot configure`.';
   }
   if (SAFE_MISSING_API_KEY_PROVIDERS.has(provider)) {
     return `⚠️ Missing API key for provider "${provider}". Configure the gateway auth for that provider, then try again.`;
@@ -476,7 +476,7 @@ export function markAgentRunFailureReplyPayload<T extends ReplyPayload>(payload:
 export function buildTerminalAgentRunFailureReplyPayload(params: {
   isHeartbeat?: boolean;
   sessionCtx: ExternalFailureConversationContext;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }): ReplyPayload {
   return markAgentRunFailureReplyPayload({
     text: resolveExternalRunFailureTextForConversation({
@@ -500,7 +500,7 @@ export function buildEmptyInteractiveReplyPayload(params: {
   hasExplicitSilentReply: boolean;
   hasCommittedDelivery: boolean;
   sessionCtx: ExternalFailureConversationContext;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }): ReplyPayload | undefined {
   if (
     !params.isInteractive ||
@@ -529,7 +529,7 @@ export function buildKnownAgentRunFailureReplyPayload(params: {
   err: unknown;
   sessionCtx: TemplateContext;
   resolvedVerboseLevel: VerboseLevel | undefined;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }): ReplyPayload | undefined {
   const message = formatErrorMessage(params.err);
   const isFallbackSummary = isFallbackSummaryError(params.err);

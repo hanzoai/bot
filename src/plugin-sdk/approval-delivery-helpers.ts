@@ -2,7 +2,7 @@
 import type { ExecApprovalRequest } from "../infra/exec-approvals.js";
 import type { PluginApprovalRequest } from "../infra/plugin-approvals.js";
 import type { ChannelApprovalCapability } from "./channel-contract.js";
-import type { OpenClawConfig } from "./config-runtime.js";
+import type { BotConfig } from "./config-runtime.js";
 import { normalizeMessageChannel } from "./routing.js";
 
 type ApprovalKind = "exec" | "plugin";
@@ -17,7 +17,7 @@ type ChannelApprovalCapabilitySurfaces = Pick<
 
 type ApprovalAdapterParams = {
   /** Full config used to inspect channel approval settings. */
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   /** Optional channel account id for account-scoped approval settings. */
   accountId?: string | null;
   /** Actor attempting the approval action. */
@@ -26,7 +26,7 @@ type ApprovalAdapterParams = {
 
 type DeliverySuppressionParams = {
   /** Full config used to inspect native approval delivery settings. */
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   /** Approval kind being delivered. */
   approvalKind: ApprovalKind;
   /** Forwarding fallback target under consideration. */
@@ -41,7 +41,7 @@ type ApproverRestrictedNativeApprovalParams = {
   /** Human-readable channel label used in denial messages. */
   channelLabel: string;
   /** Lists configured account ids so DM-route availability can scan every account. */
-  listAccountIds: (cfg: OpenClawConfig) => string[];
+  listAccountIds: (cfg: BotConfig) => string[];
   /** Whether an account has approvers configured. */
   hasApprovers: (params: ApprovalAdapterParams) => boolean;
   /** Whether a sender can approve exec approvals for this account. */
@@ -49,10 +49,10 @@ type ApproverRestrictedNativeApprovalParams = {
   /** Optional plugin approval authorization hook; defaults to exec authorization. */
   isPluginAuthorizedSender?: (params: ApprovalAdapterParams) => boolean;
   /** Whether native approval delivery is enabled for an account. */
-  isNativeDeliveryEnabled: (params: { cfg: OpenClawConfig; accountId?: string | null }) => boolean;
+  isNativeDeliveryEnabled: (params: { cfg: BotConfig; accountId?: string | null }) => boolean;
   /** Native delivery target preference for an account. */
   resolveNativeDeliveryMode: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string | null;
   }) => NativeApprovalDeliveryMode;
   /** Requires the approval request's original turn channel to match this channel before suppression. */
@@ -61,14 +61,14 @@ type ApproverRestrictedNativeApprovalParams = {
   resolveSuppressionAccountId?: (params: DeliverySuppressionParams) => string | undefined;
   /** Resolves the original channel target for native approval delivery. */
   resolveOriginTarget?: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string | null;
     approvalKind: ApprovalKind;
     request: NativeApprovalRequest;
   }) => NativeApprovalTarget | null | Promise<NativeApprovalTarget | null>;
   /** Resolves approver DM targets for native approval delivery. */
   resolveApproverDmTargets?: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string | null;
     approvalKind: ApprovalKind;
     request: NativeApprovalRequest;
@@ -98,14 +98,14 @@ function buildApproverRestrictedNativeApprovalCapability(
     cfg,
     accountId,
   }: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string | null;
   }) => params.hasApprovers({ cfg, accountId });
   const isExecInitiatingSurfaceEnabled = ({
     cfg,
     accountId,
   }: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string | null;
   }) =>
     hasConfiguredApprovers({ cfg, accountId }) &&
@@ -114,7 +114,7 @@ function buildApproverRestrictedNativeApprovalCapability(
     cfg,
     accountId,
   }: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string | null;
     action: "approve";
   }) => availabilityState(isExecInitiatingSurfaceEnabled({ cfg, accountId }));
@@ -126,7 +126,7 @@ function buildApproverRestrictedNativeApprovalCapability(
       senderId,
       approvalKind,
     }: {
-      cfg: OpenClawConfig;
+      cfg: BotConfig;
       accountId?: string | null;
       senderId?: string | null;
       action: "approve";
@@ -147,7 +147,7 @@ function buildApproverRestrictedNativeApprovalCapability(
       cfg,
       accountId,
     }: {
-      cfg: OpenClawConfig;
+      cfg: BotConfig;
       accountId?: string | null;
       action: "approve";
       approvalKind?: ApprovalKind;
@@ -156,7 +156,7 @@ function buildApproverRestrictedNativeApprovalCapability(
     describeExecApprovalSetup: params.describeExecApprovalSetup,
     describePluginApprovalSetup: params.describePluginApprovalSetup,
     delivery: {
-      hasConfiguredDmRoute: ({ cfg }: { cfg: OpenClawConfig }) =>
+      hasConfiguredDmRoute: ({ cfg }: { cfg: BotConfig }) =>
         params.listAccountIds(cfg).some((accountId) => {
           if (!hasConfiguredApprovers({ cfg, accountId })) {
             return false;
@@ -197,7 +197,7 @@ function buildApproverRestrictedNativeApprovalCapability(
               cfg,
               accountId,
             }: {
-              cfg: OpenClawConfig;
+              cfg: BotConfig;
               accountId?: string | null;
               approvalKind: ApprovalKind;
               request: NativeApprovalRequest;

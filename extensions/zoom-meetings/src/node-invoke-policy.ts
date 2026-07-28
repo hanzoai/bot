@@ -1,4 +1,4 @@
-import { createMeetingBrowserNodeInvokePolicy } from "openclaw/plugin-sdk/meeting-runtime";
+import { createMeetingBrowserNodeInvokePolicy } from "bot/plugin-sdk/meeting-runtime";
 import type { ZoomMeetingsConfig } from "./config.js";
 import { ZOOM_MEETINGS_PLATFORM_ADAPTER } from "./transports/zoom-meetings-platform-adapter.js";
 import { ZOOM_MEETINGS_NODE_COMMAND } from "./transports/zoom-meetings-platform-constants.js";

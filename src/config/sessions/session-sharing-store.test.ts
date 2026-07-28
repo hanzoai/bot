@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+} from "../../state/bot-agent-db.js";
 import { withTempDir } from "../../test-helpers/temp-dir.js";
 import {
   deleteSessionEntryLifecycle,
@@ -17,12 +17,12 @@ import {
   removeSessionMember,
 } from "./session-sharing-store.js";
 
-afterEach(() => closeOpenClawAgentDatabasesForTest());
+afterEach(() => closeBotAgentDatabasesForTest());
 
 describe("session sharing store", () => {
   it("keeps deterministic membership rows", async () => {
-    await withTempDir({ prefix: "openclaw-session-sharing-" }, async (dir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: dir };
+    await withTempDir({ prefix: "bot-session-sharing-" }, async (dir) => {
+      const env = { ...process.env, BOT_STATE_DIR: dir };
       const scope = { agentId: "main", env, sessionKey: "agent:main:main" };
       await upsertSessionEntry(scope, {
         sessionId: "session-main",
@@ -61,11 +61,11 @@ describe("session sharing store", () => {
   });
 
   it("does not recreate a missing canonical membership table", async () => {
-    await withTempDir({ prefix: "openclaw-session-sharing-missing-" }, async (dir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: dir };
+    await withTempDir({ prefix: "bot-session-sharing-missing-" }, async (dir) => {
+      const env = { ...process.env, BOT_STATE_DIR: dir };
       const scope = { agentId: "main", env, sessionKey: "agent:main:main" };
       await upsertSessionEntry(scope, { sessionId: "session-main", updatedAt: 1 });
-      const database = openOpenClawAgentDatabase({ agentId: "main", env });
+      const database = openBotAgentDatabase({ agentId: "main", env });
       database.db.exec("DROP TABLE session_members;");
 
       expect(() => listSessionMembers(scope)).toThrow(/no such table: session_members/);
@@ -78,8 +78,8 @@ describe("session sharing store", () => {
   });
 
   it("refuses member writes whose expected session instance no longer matches", async () => {
-    await withTempDir({ prefix: "openclaw-session-sharing-instance-" }, async (dir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: dir };
+    await withTempDir({ prefix: "bot-session-sharing-instance-" }, async (dir) => {
+      const env = { ...process.env, BOT_STATE_DIR: dir };
       const scope = { agentId: "main", env, sessionKey: "agent:main:main" };
       await upsertSessionEntry(scope, { sessionId: "session-b", updatedAt: 1 });
 
@@ -110,8 +110,8 @@ describe("session sharing store", () => {
   });
 
   it("drops members when the session instance is replaced under the same key", async () => {
-    await withTempDir({ prefix: "openclaw-session-sharing-recreate-" }, async (dir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: dir };
+    await withTempDir({ prefix: "bot-session-sharing-recreate-" }, async (dir) => {
+      const env = { ...process.env, BOT_STATE_DIR: dir };
       const scope = { agentId: "main", env, sessionKey: "agent:main:main" };
       await upsertSessionEntry(scope, {
         sessionId: "session-a",
@@ -147,8 +147,8 @@ describe("session sharing store", () => {
   });
 
   it("rejects stale member writes after entry-only deletion leaves a placeholder", async () => {
-    await withTempDir({ prefix: "openclaw-session-sharing-placeholder-" }, async (dir) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: dir };
+    await withTempDir({ prefix: "bot-session-sharing-placeholder-" }, async (dir) => {
+      const env = { ...process.env, BOT_STATE_DIR: dir };
       const scope = { agentId: "main", env, sessionKey: "agent:main:main" };
       await upsertSessionEntry(scope, { sessionId: "session-a", updatedAt: 1 });
       expect(
@@ -158,7 +158,7 @@ describe("session sharing store", () => {
       await deleteSessionEntryLifecycle({
         agentId: "main",
         archiveTranscript: false,
-        storePath: openOpenClawAgentDatabase({ agentId: "main", env }).path,
+        storePath: openBotAgentDatabase({ agentId: "main", env }).path,
         target: { canonicalKey: scope.sessionKey, storeKeys: [scope.sessionKey] },
       });
 

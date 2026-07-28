@@ -39,19 +39,19 @@ type UpdatingHost = {
 };
 
 export const COMMAND_PALETTE_ELEMENT = {
-  tagName: "openclaw-command-palette",
+  tagName: "bot-command-palette",
   label: "command palette",
   loadModule: () => import("../components/command-palette.ts"),
 } satisfies OptionalCustomElement;
 
 export const TERMINAL_PANEL_ELEMENT = {
-  tagName: "openclaw-terminal-panel",
+  tagName: "bot-terminal-panel",
   label: "terminal panel",
   loadModule: () => import("../components/terminal/terminal-panel-registration.ts"),
 } satisfies OptionalCustomElement;
 
 export const BROWSER_PANEL_ELEMENT = {
-  tagName: "openclaw-browser-panel",
+  tagName: "bot-browser-panel",
   label: "browser panel",
   loadModule: () => import("../components/browser/browser-panel.ts"),
 } satisfies OptionalCustomElement;
@@ -59,14 +59,14 @@ export const BROWSER_PANEL_ELEMENT = {
 // Loaded only for approval document URLs: the approval page pulls the protocol
 // validators (typebox runtime) and must stay out of the normal startup graph.
 export const APPROVAL_PAGE_ELEMENT = {
-  tagName: "openclaw-approval-page",
+  tagName: "bot-approval-page",
   label: "approval page",
   loadModule: () => import("../pages/approval/approval-page-registration.ts"),
 } satisfies OptionalCustomElement;
 
 // The card is in the chat graph, but modal-only queue controls stay off the
 // startup path until an approval is actually pending.
-const EXEC_APPROVAL_TAG = "openclaw-exec-approval";
+const EXEC_APPROVAL_TAG = "bot-exec-approval";
 
 export const EXEC_APPROVAL_ELEMENT = {
   tagName: EXEC_APPROVAL_TAG,
@@ -103,7 +103,7 @@ export function ensureOptionalElementForHost(
       host.requestUpdate();
     })
     .catch((error: unknown) => {
-      console.error(`[openclaw] failed to load ${element.label}`, error);
+      console.error(`[bot] failed to load ${element.label}`, error);
       throw error;
     })
     .finally(() => {

@@ -17,9 +17,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.BOT_CAPTURE_UI_PROOF === "1";
 const uiProofArtifactDir = path.join(
   process.cwd(),
   ".artifacts",
@@ -33,12 +33,12 @@ const reconnectProofArtifactDir = path.join(
   "initial-prompt-reconnect",
 );
 
-const WORKSPACE = "/home/peter/openclaw";
-const PICKED = "/home/peter/openclaw/packages";
+const WORKSPACE = "/home/peter/bot";
+const PICKED = "/home/peter/bot/packages";
 const SOURCE_REPO = "/tmp/source-repo";
 const TARGET_REPO = "/tmp/target-repo";
 const REFRESHED_RESEARCH_WORKSPACE = "/home/peter/research-next";
-const MOVED_WORKSPACE = "/home/peter/openclaw-next";
+const MOVED_WORKSPACE = "/home/peter/bot-next";
 const NODE_HOME = "/Users/peter";
 const NODE_PICKED = "/Users/peter/Projects";
 const NODE_UNC = "\\\\server\\share\\repo";
@@ -104,11 +104,11 @@ async function pastePng(target: Locator, count = 1) {
 
 async function replaceGatewayClient(page: Page) {
   await page.evaluate(() => {
-    const app = document.querySelector("openclaw-app") as HTMLElement & {
+    const app = document.querySelector("bot-app") as HTMLElement & {
       runtime?: { context: { gateway: { connect: () => void } } };
     };
     if (!app.runtime) {
-      throw new Error("OpenClaw application runtime is unavailable");
+      throw new Error("Bot application runtime is unavailable");
     }
     app.runtime.context.gateway.connect();
   });
@@ -117,7 +117,7 @@ async function replaceGatewayClient(page: Page) {
 async function navigateInApp(page: Page, routeId: string, search = "") {
   await page.evaluate(
     ({ targetRouteId, targetSearch }) => {
-      const app = document.querySelector("openclaw-app") as HTMLElement & {
+      const app = document.querySelector("bot-app") as HTMLElement & {
         runtime?: {
           context: {
             navigate: (routeId: string, options?: { search?: string }) => void;
@@ -125,7 +125,7 @@ async function navigateInApp(page: Page, routeId: string, search = "") {
         };
       };
       if (!app.runtime) {
-        throw new Error("OpenClaw application runtime is unavailable");
+        throw new Error("Bot application runtime is unavailable");
       }
       app.runtime.context.navigate(targetRouteId, { search: targetSearch });
     },
@@ -143,7 +143,7 @@ async function waitForCommittedChatRoute(page: Page) {
   await expect
     .poll(() =>
       page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("bot-app") as HTMLElement & {
           runtime?: {
             router: {
               getState: () => {
@@ -322,7 +322,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
                 },
               ],
               timestamp: activeOutputTimestamp,
-              __openclaw: { id: "active-assistant", seq: 2 },
+              __bot: { id: "active-assistant", seq: 2 },
             },
             {
               role: "toolResult",
@@ -330,7 +330,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
               toolName: "read",
               content: [{ type: "text", text: "working" }],
               timestamp: activeOutputTimestamp + 1,
-              __openclaw: { id: "active-tool-result", seq: 3 },
+              __bot: { id: "active-tool-result", seq: 3 },
             },
           ],
           sessionId: "visible-initial-prompt",
@@ -401,7 +401,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       await expect
         .poll(() =>
           page.evaluate(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("bot-app") as HTMLElement & {
               runtime?: { context: { gateway: { snapshot: { phase: string } } } };
             };
             return app.runtime?.context.gateway.snapshot.phase;
@@ -409,7 +409,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
         )
         .toBe("connected");
       await page.evaluate((selectedSessionKey) => {
-        const pane = document.querySelector("openclaw-chat-pane") as unknown as HTMLElement & {
+        const pane = document.querySelector("bot-chat-pane") as unknown as HTMLElement & {
           state: { chatMessages: unknown[]; chatMessagesBySession: Map<string, unknown> };
           switchPaneSession: (sessionKey: string) => void;
         };
@@ -464,7 +464,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
                 { type: "text", text: message },
               ],
               timestamp: Date.now(),
-              __openclaw: {
+              __bot: {
                 id: "persisted-image-prompt",
                 idempotencyKey: "initial-image-send:user",
                 seq: 1,
@@ -607,7 +607,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
         .toBe(1);
 
       await page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("bot-app") as HTMLElement & {
           runtime?: { context: { navigate: (routeId: string) => void } };
         };
         app.runtime?.context.navigate("chat");
@@ -671,7 +671,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
     const navigate = (routeId: string, search = "") =>
       page.evaluate(
         ({ targetRouteId, targetSearch }) => {
-          const app = document.querySelector("openclaw-app") as HTMLElement & {
+          const app = document.querySelector("bot-app") as HTMLElement & {
             runtime?: {
               context: {
                 navigate: (routeId: string, options?: { search?: string }) => void;
@@ -679,7 +679,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
             };
           };
           if (!app.runtime) {
-            throw new Error("OpenClaw application runtime is unavailable");
+            throw new Error("Bot application runtime is unavailable");
           }
           app.runtime.context.navigate(targetRouteId, { search: targetSearch });
         },
@@ -905,7 +905,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       await page.evaluate((workspace) => {
         const key = Array.from({ length: localStorage.length }, (_, index) =>
           localStorage.key(index),
-        ).find((candidate) => candidate?.startsWith("openclaw.new-session.preferences.v1:"));
+        ).find((candidate) => candidate?.startsWith("bot.new-session.preferences.v1:"));
         if (!key) {
           throw new Error("missing new-session preference");
         }
@@ -939,7 +939,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       const storedWorktree = await page.evaluate(() => {
         const key = Array.from({ length: localStorage.length }, (_, index) =>
           localStorage.key(index),
-        ).find((candidate) => candidate?.startsWith("openclaw.new-session.preferences.v1:"));
+        ).find((candidate) => candidate?.startsWith("bot.new-session.preferences.v1:"));
         const value = key
           ? (JSON.parse(localStorage.getItem(key) ?? "null") as {
               agents?: Record<string, { worktree?: boolean }>;
@@ -1140,7 +1140,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       await navigateInApp(page, "new-session");
       await expect
         .poll(() => placeTrigger.locator(".new-session-page__trigger-label").textContent())
-        .toBe("openclaw-next");
+        .toBe("bot-next");
 
       const modelSelect = page.locator('[data-chat-model-select="true"]');
       await modelSelect.click();
@@ -1149,7 +1149,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       const storedPreference = await page.evaluate(() => {
         const key = Array.from({ length: localStorage.length }, (_, index) =>
           localStorage.key(index),
-        ).find((candidate) => candidate?.startsWith("openclaw.new-session.preferences.v1:"));
+        ).find((candidate) => candidate?.startsWith("bot.new-session.preferences.v1:"));
         if (!key) {
           return null;
         }
@@ -1239,7 +1239,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       const placeTrigger = page.locator("#new-session-place-trigger");
       await expect
         .poll(() => placeTrigger.locator(".new-session-page__trigger-label").textContent())
-        .toBe("openclaw");
+        .toBe("bot");
 
       const pickedListRequests = (await gateway.getRequests("fs.listDir")).filter(
         (request) =>
@@ -1253,7 +1253,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       await navigateInApp(page, "new-session");
       await expect
         .poll(() => placeTrigger.locator(".new-session-page__trigger-label").textContent())
-        .toBe("openclaw");
+        .toBe("bot");
       await expect.poll(() => placeTrigger.getAttribute("data-worktree")).toBe("false");
       await expect
         .poll(
@@ -1352,7 +1352,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       });
       await expect
         .poll(() => placeTrigger.locator(".new-session-page__trigger-label").textContent())
-        .toBe("openclaw");
+        .toBe("bot");
 
       await page.locator(".new-session-page__message").fill("keep the newer choice");
       await page.getByRole("button", { name: "Start thread" }).click();
@@ -1428,7 +1428,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       const storedPreference = await page.evaluate(() => {
         const key = Array.from({ length: localStorage.length }, (_, index) =>
           localStorage.key(index),
-        ).find((candidate) => candidate?.startsWith("openclaw.new-session.preferences.v1:"));
+        ).find((candidate) => candidate?.startsWith("bot.new-session.preferences.v1:"));
         if (!key) {
           return null;
         }
@@ -1560,7 +1560,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       const placeTrigger = page.locator("#new-session-place-trigger");
       await expect
         .poll(() => placeTrigger.locator(".new-session-page__trigger-label").textContent())
-        .toBe("openclaw");
+        .toBe("bot");
 
       // Browse from the workspace, descend one level, then adopt the folder.
       await placeTrigger.click();
@@ -1728,7 +1728,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       const trigger = page.locator("#new-session-place-trigger");
       await expect
         .poll(() => trigger.locator(".new-session-page__trigger-label").textContent())
-        .toBe("openclaw");
+        .toBe("bot");
       await trigger.click();
       const place = page.locator("wa-popover.new-session-page__place-popover");
       expect(await place.getByText("Places", { exact: true }).count()).toBe(0);
@@ -1771,7 +1771,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       const trigger = page.locator("#new-session-place-trigger");
       await expect
         .poll(() => trigger.locator(".new-session-page__trigger-label").textContent())
-        .toBe("openclaw · Gateway · Peters-Mac-Studio");
+        .toBe("bot · Gateway · Peters-Mac-Studio");
       await trigger.click();
       const place = page.locator("wa-popover.new-session-page__place-popover");
       await place.getByRole("button", { name: "Gateway · Peters-Mac-Studio" }).waitFor();
@@ -1790,7 +1790,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
         .toBeGreaterThan(nodeRequests);
       await expect
         .poll(() => trigger.locator(".new-session-page__trigger-label").textContent())
-        .toBe("openclaw");
+        .toBe("bot");
       await trigger.click();
       await place.getByText("Runs on Gateway · Peters-Mac-Studio", { exact: true }).waitFor();
     } finally {
@@ -1882,8 +1882,8 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
           defaults: SESSION_LIST_DEFAULTS,
           path: "",
           sessions: [
-            { key: "agent:main:a", kind: "direct", updatedAt: 2, execCwd: "/a/openclaw" },
-            { key: "agent:main:b", kind: "direct", updatedAt: 1, execCwd: "/b/openclaw" },
+            { key: "agent:main:a", kind: "direct", updatedAt: 2, execCwd: "/a/bot" },
+            { key: "agent:main:b", kind: "direct", updatedAt: 1, execCwd: "/b/bot" },
           ],
           ts: Date.now(),
         },
@@ -1896,8 +1896,8 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       await gateway.waitForRequest("node.list");
       const trigger = page.locator("#new-session-place-trigger");
       await trigger.click();
-      const first = page.locator('[data-value="recent::/a/openclaw"]');
-      const second = page.locator('[data-value="recent::/b/openclaw"]');
+      const first = page.locator('[data-value="recent::/a/bot"]');
+      const second = page.locator('[data-value="recent::/b/bot"]');
       await expect.poll(() => first.locator(".session-menu__sub").textContent()).toBe("a");
       await expect.poll(() => second.locator(".session-menu__sub").textContent()).toBe("b");
       await second.click();
@@ -1905,7 +1905,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       await page.getByRole("button", { name: "Start thread" }).click();
       const create = await gateway.waitForRequest("sessions.create");
       expect(create.params).toMatchObject({
-        cwd: "/b/openclaw",
+        cwd: "/b/bot",
         message: "continue in work checkout",
       });
     } finally {
@@ -2249,7 +2249,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
             kind: "direct",
             label: "Cloud session",
             updatedAt: Date.now(),
-            worktree: { id: "worktree-1", branch: "openclaw/cloud-e2e", repoRoot: WORKSPACE },
+            worktree: { id: "worktree-1", branch: "bot/cloud-e2e", repoRoot: WORKSPACE },
             placement: { state: "active" },
           },
           {
@@ -2288,7 +2288,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       await sessionRow.hover();
       await sessionRow.getByRole("button", { name: "Open thread menu" }).click();
       const stopWorker = page
-        .locator("openclaw-session-menu")
+        .locator("bot-session-menu")
         .getByRole("menuitem", { name: "Stop cloud worker…" });
       await stopWorker.waitFor();
       await captureUiProof(page, "02-active-cloud-worker-stop.png");
@@ -2376,7 +2376,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
         .toBe(true);
       await page.keyboard.press("Escape");
 
-      const agentPicker = page.locator(".new-session-page__select--agent openclaw-agent-select");
+      const agentPicker = page.locator(".new-session-page__select--agent bot-agent-select");
       await agentPicker.locator(".agent-select__trigger").click();
       await agentPicker
         .locator("wa-dropdown-item[data-agent-option]")
@@ -2466,8 +2466,8 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
         const originalSetItem = sessionStorage.setItem.bind(sessionStorage);
         Storage.prototype.setItem = function (key: string, value: string) {
           if (
-            key.startsWith("openclaw.new-session.cloud-recovery.v1:") ||
-            key.startsWith("openclaw.control-ui-e2e.")
+            key.startsWith("bot.new-session.cloud-recovery.v1:") ||
+            key.startsWith("bot.control-ui-e2e.")
           ) {
             originalSetItem(key, value);
             return;
@@ -2560,7 +2560,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       await page.goto(`${server.baseUrl}new`);
       await gateway.waitForRequest("environments.list");
       const recoveryIdentity = await page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("bot-app") as HTMLElement & {
           runtime?: {
             context: {
               gateway: {
@@ -2583,7 +2583,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       await expect
         .poll(() =>
           page.evaluate(() => {
-            const app = document.querySelector("openclaw-app") as HTMLElement & {
+            const app = document.querySelector("bot-app") as HTMLElement & {
               runtime?: { context: { gateway: { snapshot: { phase: string } } } };
             };
             return app.runtime?.context.gateway.snapshot.phase === "connected";
@@ -2592,7 +2592,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
         .toBe(false);
       await page.evaluate(({ gatewayUrl, recoveryScope }) => {
         sessionStorage.setItem(
-          `openclaw.new-session.cloud-recovery.v1:${gatewayUrl}:${recoveryScope}`,
+          `bot.new-session.cloud-recovery.v1:${gatewayUrl}:${recoveryScope}`,
           JSON.stringify({
             sessionKey: "agent:cloud:offline-recovery",
             messageId: "message-offline-recovery",
@@ -2624,7 +2624,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
         .poll(() => page.getByRole("button", { name: "Start thread" }).isDisabled())
         .toBe(false);
       await page.evaluate(() => {
-        const app = document.querySelector("openclaw-app") as HTMLElement & {
+        const app = document.querySelector("bot-app") as HTMLElement & {
           runtime?: {
             context: {
               gateway: {
@@ -2641,7 +2641,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
         }
         client.recoveryScopeTracker.ready = false;
         (
-          document.querySelector("openclaw-new-session-page") as
+          document.querySelector("bot-new-session-page") as
             | (HTMLElement & { requestUpdate: () => void })
             | null
         )?.requestUpdate();
@@ -2770,7 +2770,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
     const readRecovery = () =>
       page.evaluate(() => {
         const key = Object.keys(sessionStorage).find((candidate) =>
-          candidate.startsWith("openclaw.new-session.cloud-recovery.v1:"),
+          candidate.startsWith("bot.new-session.cloud-recovery.v1:"),
         );
         return key ? (JSON.parse(sessionStorage.getItem(key) ?? "null") as unknown) : null;
       });
@@ -2897,7 +2897,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       await page.evaluate(() => {
         const originalSetItem = sessionStorage.setItem.bind(sessionStorage);
         Storage.prototype.setItem = function (key: string, value: string) {
-          if (key.startsWith("openclaw.new-session.cloud-recovery.v1:")) {
+          if (key.startsWith("bot.new-session.cloud-recovery.v1:")) {
             originalSetItem(key, value);
             return;
           }
@@ -3262,7 +3262,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       await page.goto(`${server.baseUrl}new`);
       await page.getByRole("heading", { name: "Main" }).waitFor();
       await gateway.waitForRequest("worktrees.branches");
-      const agentPicker = page.locator(".new-session-page__select--agent openclaw-agent-select");
+      const agentPicker = page.locator(".new-session-page__select--agent bot-agent-select");
       await agentPicker.locator(".agent-select__trigger").click();
       await agentPicker
         .locator("wa-dropdown-item[data-agent-option]")
@@ -3476,7 +3476,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       const storedWorktree = await page.evaluate(() => {
         const key = Array.from({ length: localStorage.length }, (_, index) =>
           localStorage.key(index),
-        ).find((candidate) => candidate?.startsWith("openclaw.new-session.preferences.v1:"));
+        ).find((candidate) => candidate?.startsWith("bot.new-session.preferences.v1:"));
         const value = key
           ? (JSON.parse(localStorage.getItem(key) ?? "null") as {
               agents?: Record<string, { worktree?: boolean }>;
@@ -3996,7 +3996,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       await expect
         .poll(() => page.locator(".new-session-page__runtime").textContent())
         .toContain("Claude Code");
-      await expect.poll(() => folderLabel.textContent()).toBe("openclaw");
+      await expect.poll(() => folderLabel.textContent()).toBe("bot");
       await page.locator(".new-session-page__message").fill("retarget this draft");
       await page.getByRole("button", { name: "Start thread" }).click();
 
@@ -4222,7 +4222,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
       const setItem = Object.getOwnPropertyDescriptor(Storage.prototype, "setItem")
         ?.value as Storage["setItem"];
       Storage.prototype.setItem = function (key: string, value: string) {
-        if (key.startsWith("openclaw.control.chatComposer.v2:")) {
+        if (key.startsWith("bot.control.chatComposer.v2:")) {
           throw new DOMException("Quota exceeded", "QuotaExceededError");
         }
         return setItem.call(this, key, value);
@@ -4402,7 +4402,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
 
       // Destination selection stays in Places; browsing is fixed to the current target.
       await placeSelect.getByRole("button", { name: "Gateway · local" }).click();
-      await expect.poll(() => placeLabel.textContent()).toBe("openclaw · Gateway · local");
+      await expect.poll(() => placeLabel.textContent()).toBe("bot · Gateway · local");
       await placeTrigger.click();
       expect(await placeSelect.getByRole("button", { name: "Offline node" }).count()).toBe(0);
       await placeSelect.getByRole("button", { name: "MacBook" }).click();
@@ -4416,7 +4416,7 @@ describeControlUiE2e("Control UI new-session page mocked Gateway E2E", () => {
 
       // A node cwd belongs to the selected agent's draft and must not leak
       // across an agent change, even though the execution node stays selected.
-      const agentPicker = page.locator(".new-session-page__select--agent openclaw-agent-select");
+      const agentPicker = page.locator(".new-session-page__select--agent bot-agent-select");
       await agentPicker.locator(".agent-select__trigger").click();
       await agentPicker
         .locator("wa-dropdown-item[data-agent-option]")

@@ -1,5 +1,5 @@
 // Discord plugin module implements send harness behavior.
-import type { MockFn } from "openclaw/plugin-sdk/plugin-test-runtime";
+import type { MockFn } from "bot/plugin-sdk/plugin-test-runtime";
 import { vi } from "vitest";
 
 type DiscordWebMediaMockFactoryResult = {

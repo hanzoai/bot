@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   clearAutoFallbackPrimaryProbeSelection,
   entryMatchesAutoFallbackPrimaryProbe,

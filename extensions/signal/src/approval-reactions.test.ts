@@ -1,7 +1,7 @@
 import {
   buildExecApprovalPendingReplyPayload,
   buildPluginApprovalPendingReplyPayload,
-} from "openclaw/plugin-sdk/approval-reply-runtime";
+} from "bot/plugin-sdk/approval-reply-runtime";
 // Signal tests cover approval reactions plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {

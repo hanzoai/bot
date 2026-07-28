@@ -19,7 +19,7 @@ export type {
   VideoGenerationSourceAsset,
   VideoGenerationTransformCapabilities,
 } from "../video-generation/types.js";
-export type { OpenClawConfig } from "../config/types.openclaw.js";
+export type { BotConfig } from "../config/types.bot.js";
 
 export { describeFailoverError, isFailoverError } from "../agents/failover-error.js";
 export {

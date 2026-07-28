@@ -2,9 +2,9 @@ import fsSync from "node:fs";
 import {
   findNormalizedProviderValue,
   normalizeProviderId,
-} from "@openclaw/model-catalog-core/provider-id";
-import { formatByteSize } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-model-catalog-core/provider-id";
+import { formatByteSize } from "@hanzo/bot-normalization-core";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { note } from "../../packages/terminal-core/src/note.js";
 import {
   listAgentIds,
@@ -24,7 +24,7 @@ import {
   resolveUsableCustomProviderApiKey,
 } from "../agents/model-auth.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { DoctorMemoryEmbeddingRuntimePayload } from "../gateway/server-methods/doctor.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import {
@@ -66,7 +66,7 @@ type MemoryDoctorAgentScope = {
   workspaceDir: string;
 };
 
-function resolveMemoryDoctorAgentScopes(cfg: OpenClawConfig): MemoryDoctorAgentScope[] {
+function resolveMemoryDoctorAgentScopes(cfg: BotConfig): MemoryDoctorAgentScope[] {
   return listAgentIds(cfg).map((agentId) => ({
     agentId,
     agentDir: resolveAgentDir(cfg, agentId),
@@ -198,7 +198,7 @@ function resolveSuggestedRemoteMemoryProvider(): string | undefined {
   )?.providerId;
 }
 
-function hasConfiguredAwsSdkAuthForProvider(provider: string, cfg: OpenClawConfig): boolean {
+function hasConfiguredAwsSdkAuthForProvider(provider: string, cfg: BotConfig): boolean {
   const providerConfig = findNormalizedProviderValue(cfg.models?.providers, provider);
   if (providerConfig?.auth === "aws-sdk") {
     return true;
@@ -211,7 +211,7 @@ function hasConfiguredAwsSdkAuthForProvider(provider: string, cfg: OpenClawConfi
   );
 }
 
-function isOpenAICompatibleMemoryProvider(providerId: string, cfg: OpenClawConfig): boolean {
+function isOpenAICompatibleMemoryProvider(providerId: string, cfg: BotConfig): boolean {
   const normalizedProviderId = normalizeProviderId(providerId);
   if (normalizedProviderId === OPENAI_COMPATIBLE_MEMORY_EMBEDDING_PROVIDER) {
     return true;
@@ -239,7 +239,7 @@ function isOpenAICompatibleMemoryProvider(providerId: string, cfg: OpenClawConfi
 
 function resolveOpenAICompatibleMemoryBaseUrl(
   providerId: string,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   remoteBaseUrl: string | undefined,
 ): string | undefined {
   return (
@@ -248,7 +248,7 @@ function resolveOpenAICompatibleMemoryBaseUrl(
   );
 }
 
-function isKeyOptionalMemoryProvider(providerId: string, cfg: OpenClawConfig): boolean {
+function isKeyOptionalMemoryProvider(providerId: string, cfg: BotConfig): boolean {
   return (
     providerId === "local" ||
     providerId === "ollama" ||
@@ -258,7 +258,7 @@ function isKeyOptionalMemoryProvider(providerId: string, cfg: OpenClawConfig): b
 }
 
 async function resolveRuntimeMemoryAuditContext(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId: string,
 ): Promise<RuntimeMemoryAuditContext | null> {
   const result = await getActiveMemorySearchManager({
@@ -293,8 +293,8 @@ function buildMemoryRecallIssueNote(audit: ShortTermAuditSummary): string | null
   const issueLines = audit.issues.map((issue) => `- ${issue.message}`);
   const hasFixableIssue = audit.issues.some((issue) => issue.fixable);
   const guidance = hasFixableIssue
-    ? `Fix: ${formatCliCommand("openclaw doctor --fix")} or ${formatCliCommand("openclaw memory status --fix")}`
-    : `Verify: ${formatCliCommand("openclaw memory status --deep")}`;
+    ? `Fix: ${formatCliCommand("bot doctor --fix")} or ${formatCliCommand("bot memory status --fix")}`
+    : `Verify: ${formatCliCommand("bot memory status --deep")}`;
   return [
     "Memory recall artifacts need attention:",
     ...issueLines,
@@ -314,12 +314,12 @@ function buildDreamingArtifactIssueNote(audit: DreamingArtifactsAuditSummary): s
     ...issueLines,
     `Dream corpus: ${audit.sessionCorpusDir}`,
     hasFixableIssue
-      ? `Fix: ${formatCliCommand("openclaw doctor --fix")} or ${formatCliCommand("openclaw memory status --fix")}`
-      : `Verify: ${formatCliCommand("openclaw memory status --deep")}`,
+      ? `Fix: ${formatCliCommand("bot doctor --fix")} or ${formatCliCommand("bot memory status --fix")}`
+      : `Verify: ${formatCliCommand("bot memory status --deep")}`,
   ].join("\n");
 }
 
-export async function noteMemoryRecallHealth(cfg: OpenClawConfig): Promise<void> {
+export async function noteMemoryRecallHealth(cfg: BotConfig): Promise<void> {
   const scopes = resolveMemoryDoctorAgentScopes(cfg);
   const labelAgents = scopes.length > 1;
   for (const scope of scopes) {
@@ -362,7 +362,7 @@ export async function noteMemoryRecallHealth(cfg: OpenClawConfig): Promise<void>
 }
 
 export async function maybeRepairMemoryRecallHealth(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prompter: DoctorPrompter;
 }): Promise<void> {
   const scopes = resolveMemoryDoctorAgentScopes(params.cfg);
@@ -423,7 +423,7 @@ export async function maybeRepairMemoryRecallHealth(params: {
                 ? `- rewrote recall store${details ? ` (${details})` : ""}`
                 : null,
               repair.removedStaleLock ? "- removed stale promotion lock" : null,
-              `Verify: ${formatCliCommand("openclaw memory status --deep")}`,
+              `Verify: ${formatCliCommand("bot memory status --deep")}`,
             ].filter(Boolean);
             note(
               formatAgentMessage(scope.agentId, labelAgents, lines.join("\n")),
@@ -460,7 +460,7 @@ export async function maybeRepairMemoryRecallHealth(params: {
         dreamingRepair.archivedDreamsDiary ? "- archived dream diary" : null,
         dreamingRepair.archiveDir ? `- archive dir: ${dreamingRepair.archiveDir}` : null,
         ...dreamingRepair.warnings.map((warning) => `- warning: ${warning}`),
-        `Verify: ${formatCliCommand("openclaw memory status --deep")}`,
+        `Verify: ${formatCliCommand("bot memory status --deep")}`,
       ].filter(Boolean);
       note(formatAgentMessage(scope.agentId, labelAgents, lines.join("\n")), "Doctor changes");
     } catch (err) {
@@ -476,7 +476,7 @@ export async function maybeRepairMemoryRecallHealth(params: {
   }
 }
 
-function hasActiveAlternateMemoryPluginSlot(cfg: OpenClawConfig): boolean {
+function hasActiveAlternateMemoryPluginSlot(cfg: BotConfig): boolean {
   const plugins = normalizePluginsConfig(cfg.plugins);
   if (!plugins.enabled) {
     return false;
@@ -501,7 +501,7 @@ function hasActiveAlternateMemoryPluginSlot(cfg: OpenClawConfig): boolean {
   return entry.enabled === true || entry.config !== undefined;
 }
 
-function isActiveMemoryPluginAvailable(cfg: OpenClawConfig): boolean {
+function isActiveMemoryPluginAvailable(cfg: BotConfig): boolean {
   const plugins = normalizePluginsConfig(cfg.plugins);
   if (!plugins.enabled || plugins.deny.includes("active-memory")) {
     return false;
@@ -517,7 +517,7 @@ function isActiveMemoryPluginAvailable(cfg: OpenClawConfig): boolean {
   return pluginConfig?.enabled !== false;
 }
 
-function resolveActiveMemoryConversationRecallSupport(cfg: OpenClawConfig): {
+function resolveActiveMemoryConversationRecallSupport(cfg: BotConfig): {
   providerSupported: boolean;
   memorySearchAllowed: boolean;
 } {
@@ -538,7 +538,7 @@ function resolveActiveMemoryConversationRecallSupport(cfg: OpenClawConfig): {
 }
 
 function noteRememberAcrossConversationsHealth(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   noteFn: typeof note;
 }): { enabled: boolean } {
@@ -570,7 +570,7 @@ function noteRememberAcrossConversationsHealth(params: {
 
 /**
  * Check whether memory search has a usable embedding provider.
- * Runs as part of `openclaw doctor` — config-only checks where possible;
+ * Runs as part of `bot doctor` — config-only checks where possible;
  * may spawn a short-lived probe process when `memory.backend=qmd` to verify
  * the configured `qmd` binary is available.
  */
@@ -589,7 +589,7 @@ type MemorySearchHealthOptions = {
 };
 
 export async function noteMemorySearchHealth(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   opts?: MemorySearchHealthOptions,
 ): Promise<void> {
   const scopes = resolveMemoryDoctorAgentScopes(cfg);
@@ -616,7 +616,7 @@ export async function noteMemorySearchHealth(
 }
 
 async function noteMemorySearchHealthForAgent(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   scope: MemoryDoctorAgentScope,
   opts: MemorySearchHealthOptions,
 ): Promise<void> {
@@ -679,10 +679,10 @@ async function noteMemorySearchHealthForAgent(
               : "- Install the supported QMD package: npm install -g @tobilu/qmd (or bun install -g @tobilu/qmd)",
             workspaceProbeFailed
               ? "- Verify the resolved workspace path for the affected agent before retrying."
-              : `- Set an explicit binary path: ${formatCliCommand("openclaw config set memory.qmd.command /absolute/path/to/qmd")}`,
-            `- Or switch back to builtin memory: ${formatCliCommand("openclaw config set memory.backend builtin")}`,
+              : `- Set an explicit binary path: ${formatCliCommand("bot config set memory.qmd.command /absolute/path/to/qmd")}`,
+            `- Or switch back to builtin memory: ${formatCliCommand("bot config set memory.backend builtin")}`,
             "",
-            `Verify: ${formatCliCommand("openclaw memory status --deep")}`,
+            `Verify: ${formatCliCommand("bot memory status --deep")}`,
           ]
             .filter(Boolean)
             .join("\n"),
@@ -703,11 +703,11 @@ async function noteMemorySearchHealthForAgent(
           "",
           "Fix (pick one):",
           `- Enable QMD session export: ${formatCliCommand(
-            "openclaw config set memory.qmd.sessions.enabled true",
+            "bot config set memory.qmd.sessions.enabled true",
           )}`,
           "- Or remove sessions from the default agent's memory.search.sources if QMD session recall is not intended.",
           "",
-          `Verify: ${formatCliCommand("openclaw memory status --deep")}`,
+          `Verify: ${formatCliCommand("bot memory status --deep")}`,
         ].join("\n"),
         "Memory search",
       );
@@ -746,13 +746,13 @@ async function noteMemorySearchHealthForAgent(
         gatewayDetail ? `Gateway probe: ${gatewayDetail}` : null,
         "",
         "Fix (pick one):",
-        `- Install the llama.cpp provider plugin: ${formatCliCommand("openclaw plugins install @openclaw/llama-cpp-provider")}`,
+        `- Install the llama.cpp provider plugin: ${formatCliCommand("bot plugins install @hanzo/bot-llama-cpp-provider")}`,
         `- Set a local GGUF model path in config`,
         suggestedRemoteProvider
-          ? `- Switch to a remote provider: ${formatCliCommand(`openclaw config set memory.search.provider ${suggestedRemoteProvider}`)}`
+          ? `- Switch to a remote provider: ${formatCliCommand(`bot config set memory.search.provider ${suggestedRemoteProvider}`)}`
           : `- Switch to a remote embedding provider in config`,
         "",
-        `Verify: ${formatCliCommand("openclaw memory status --deep")}`,
+        `Verify: ${formatCliCommand("bot memory status --deep")}`,
       ]
         .filter(Boolean)
         .join("\n"),
@@ -771,9 +771,9 @@ async function noteMemorySearchHealthForAgent(
         "Set memory.search.remote.baseUrl to the /v1 endpoint for your embeddings server.",
         "",
         "Fix:",
-        `- ${formatCliCommand("openclaw config set memory.search.remote.baseUrl http://127.0.0.1:1234/v1")}`,
+        `- ${formatCliCommand("bot config set memory.search.remote.baseUrl http://127.0.0.1:1234/v1")}`,
         "",
-        `Verify: ${formatCliCommand("openclaw memory status --deep")}`,
+        `Verify: ${formatCliCommand("bot memory status --deep")}`,
       ].join("\n"),
       "Memory search",
     );
@@ -787,9 +787,9 @@ async function noteMemorySearchHealthForAgent(
         "Set memory.search.model to the embedding model id your server expects.",
         "",
         "Fix:",
-        `- ${formatCliCommand("openclaw config set memory.search.model text-embedding-bge-m3")}`,
+        `- ${formatCliCommand("bot config set memory.search.model text-embedding-bge-m3")}`,
         "",
-        `Verify: ${formatCliCommand("openclaw memory status --deep")}`,
+        `Verify: ${formatCliCommand("bot memory status --deep")}`,
       ].join("\n"),
       "Memory search",
     );
@@ -802,7 +802,7 @@ async function noteMemorySearchHealthForAgent(
     }
     // When the probe was intentionally skipped (skipped: true / checked: false
     // due to probe:false path), we have no embedding status information — do
-    // not warn. A skipped probe means the user ran `openclaw doctor` without
+    // not warn. A skipped probe means the user ran `bot doctor` without
     // --deep; it does not mean embeddings are unavailable.
     // NOTE: a transport timeout also sets checked: false, but skipped stays
     // false/absent — a timeout is a real diagnostic signal and should fall
@@ -817,7 +817,7 @@ async function noteMemorySearchHealthForAgent(
           ? `Memory search provider "${provider}" is configured, but the gateway reports embeddings are not ready.`
           : `Memory search provider "${provider}" is configured, but the gateway could not confirm embeddings are ready.`,
         gatewayProbeWarning,
-        `Verify: ${formatCliCommand("openclaw memory status --deep")}`,
+        `Verify: ${formatCliCommand("bot memory status --deep")}`,
       ]
         .filter(Boolean)
         .join("\n"),
@@ -841,7 +841,7 @@ async function noteMemorySearchHealthForAgent(
       [
         `Memory search provider is set to "${provider}" but the API key was not found in the CLI environment.`,
         "The running gateway reports memory embeddings are ready for the default agent.",
-        `Verify: ${formatCliCommand("openclaw memory status --deep")}`,
+        `Verify: ${formatCliCommand("bot memory status --deep")}`,
       ].join("\n"),
       "Memory search",
     );
@@ -858,10 +858,10 @@ async function noteMemorySearchHealthForAgent(
       "",
       "Fix (pick one):",
       `- Set ${envVar} in your environment`,
-      `- Configure credentials: ${formatCliCommand("openclaw configure --section model")}`,
-      `- To disable: ${formatCliCommand("openclaw config set memory.search.enabled false")}`,
+      `- Configure credentials: ${formatCliCommand("bot configure --section model")}`,
+      `- To disable: ${formatCliCommand("bot config set memory.search.enabled false")}`,
       "",
-      `Verify: ${formatCliCommand("openclaw memory status --deep")}`,
+      `Verify: ${formatCliCommand("bot memory status --deep")}`,
     ].join("\n"),
     "Memory search",
   );
@@ -892,7 +892,7 @@ function hasLocalEmbeddings(local: { modelPath?: string }): boolean {
 
 async function hasApiKeyForProvider(
   provider: string,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentDir: string,
   opts?: { skipProfileResolution?: boolean },
 ): Promise<boolean> {

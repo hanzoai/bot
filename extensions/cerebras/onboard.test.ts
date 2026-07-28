@@ -1,9 +1,9 @@
-import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { resolveAgentModelPrimaryValue } from "openclaw/plugin-sdk/provider-onboard";
+import { registerSingleProviderPlugin } from "bot/plugin-sdk/plugin-test-runtime";
+import { resolveAgentModelPrimaryValue } from "bot/plugin-sdk/provider-onboard";
 import { describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
 import { applyCerebrasConfig, CEREBRAS_DEFAULT_MODEL_REF } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 
 describe("Cerebras onboarding", () => {
   it("applies the manifest catalog, default, and alias", () => {

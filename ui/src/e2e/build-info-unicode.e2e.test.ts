@@ -13,9 +13,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.BOT_CAPTURE_UI_PROOF === "1";
 const uiProofArtifactDir = path.join(
   process.cwd(),
   ".artifacts",
@@ -47,7 +47,7 @@ function containsBrokenSurrogate(value: string): boolean {
 }
 
 async function openBuildDetails(page: Page) {
-  const sidebar = page.locator("openclaw-app-sidebar");
+  const sidebar = page.locator("bot-app-sidebar");
   await sidebar.getByRole("button", { name: /^Identity and app menu for / }).click();
   const buildLink = sidebar.getByRole("link", { name: "Control UI build details", exact: true });
   await buildLink.waitFor();
@@ -75,7 +75,7 @@ describeControlUiE2e("Control UI Unicode build identity mocked Gateway E2E", () 
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(
-        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set BOT_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
       );
     }
     server = await startControlUiE2eServer({

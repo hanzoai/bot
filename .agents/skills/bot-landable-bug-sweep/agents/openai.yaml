@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bot Landable Bug Sweep"
+  short_description: "Find five small non-SDK landable bugfix PRs"
+  default_prompt: "Use $bot-landable-bug-sweep to find or repair five small high-confidence non-SDK-boundary Bot bugfix PRs and get them landable."

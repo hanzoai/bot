@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import {
   ErrorCodes,
   type ErrorShape,
@@ -42,7 +42,7 @@ import {
   type SessionCreatedVia,
 } from "../config/sessions/session-entry-provenance.js";
 import { inheritSessionSelection } from "../config/sessions/session-entry-selection.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   createInternalHookEvent,
   hasInternalHookListeners,
@@ -93,7 +93,7 @@ type RequestedSessionAgentIdResolution =
   | { ok: false; error: ErrorShape };
 
 async function existingModelSelectionWouldChange(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   catalogModel?: string;
   defaultModel: string;
   defaultProvider: string;
@@ -181,7 +181,7 @@ async function existingModelSelectionWouldChange(params: {
 }
 
 export function resolveRequestedSessionAgentId(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   key: string,
   explicitAgentId?: string,
 ): RequestedSessionAgentIdResolution {
@@ -270,7 +270,7 @@ type CreateGatewaySessionResult =
   | { ok: false; error: ErrorShape };
 
 export async function createGatewaySession(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   key?: string;
   agentId?: string;
   label?: string;

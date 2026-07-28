@@ -28,7 +28,7 @@ describe("run-android-gradle", () => {
     expect(
       shouldSkipLinuxArmAndroidGradle({
         arch: "arm64",
-        env: { OPENCLAW_ANDROID_GRADLE_ALLOW_LINUX_ARM: "1" },
+        env: { BOT_ANDROID_GRADLE_ALLOW_LINUX_ARM: "1" },
         platform: "linux",
       }),
     ).toBe(false);
@@ -36,7 +36,7 @@ describe("run-android-gradle", () => {
 
   it("explains the skip with the override escape hatch", () => {
     expect(linuxArmAndroidGradleSkipMessage("linux", "arm64")).toContain(
-      "OPENCLAW_ANDROID_GRADLE_ALLOW_LINUX_ARM=1",
+      "BOT_ANDROID_GRADLE_ALLOW_LINUX_ARM=1",
     );
   });
 

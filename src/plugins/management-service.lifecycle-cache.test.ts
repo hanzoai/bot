@@ -34,16 +34,16 @@ describe("plugin management catalog lifecycle", () => {
         source: "hosted",
         entries: [
           {
-            id: "@openclaw/diffs",
+            id: "@hanzo/bot-diffs",
             title: "Diffs",
             state: "available",
             featured: true,
-            publisher: { id: "openclaw", trust: "official" },
+            publisher: { id: "bot", trust: "official" },
             install: {
               candidates: [
                 {
                   sourceRef: "public-clawhub",
-                  package: "@openclaw/diffs",
+                  package: "@hanzo/bot-diffs",
                   version: "2026.6.11",
                   integrity: `sha256:${"a".repeat(64)}`,
                 },

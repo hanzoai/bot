@@ -18,7 +18,7 @@ type ResetDeps = {
   state: () => BrowserServerState;
   runtime: ProfileRuntimeState;
   configRevision: number;
-  resolveOpenClawUserDataDir: (profileName: string) => string;
+  resolveBotUserDataDir: (profileName: string) => string;
 };
 
 type ResetOps = {
@@ -31,7 +31,7 @@ export function createProfileResetOps({
   state,
   runtime,
   configRevision,
-  resolveOpenClawUserDataDir,
+  resolveBotUserDataDir,
 }: ResetDeps): ResetOps {
   const capabilities = getBrowserProfileCapabilities(profile);
   const resetProfile = async () => {
@@ -41,7 +41,7 @@ export function createProfileResetOps({
       );
     }
 
-    const userDataDir = resolveOpenClawUserDataDir(profile.name);
+    const userDataDir = resolveBotUserDataDir(profile.name);
     assertProfileLifecycleContext({ state: state(), runtime, configRevision });
     runtime.managedLaunchFailure = undefined;
     let result: { moved: boolean; from: string; to?: string } = {

@@ -2,7 +2,7 @@
 // agent config, session keys, and environment fallback.
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { resolveRunWorkspaceDir } from "./workspace-run.js";
 
 vi.unmock("./agent-scope-config.js");
@@ -26,7 +26,7 @@ describe("resolveRunWorkspaceDir", () => {
     const workspaceDir = path.join(process.cwd(), "tmp", "workspace-run-canonical");
     const cfg = {
       agents: { defaults: { workspace: workspaceDir }, list: [{ id: "main", default: true }] },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const result = resolveRunWorkspaceDir({
       workspaceDir,
@@ -46,7 +46,7 @@ describe("resolveRunWorkspaceDir", () => {
         defaults: { workspace: defaultWorkspace },
         list: [{ id: "research", workspace: researchWorkspace, default: true }],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const result = resolveRunWorkspaceDir({
       workspaceDir: undefined,
@@ -68,7 +68,7 @@ describe("resolveRunWorkspaceDir", () => {
         defaults: { workspace: defaultWorkspace },
         list: [{ id: "main", default: true }],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const result = resolveRunWorkspaceDir({
       workspaceDir: "   ",
@@ -83,13 +83,13 @@ describe("resolveRunWorkspaceDir", () => {
   });
 
   it("refuses to invent an agent when config is unavailable", () => {
-    const workspaceDir = path.join(path.sep, "srv", "openclaw-workspace");
+    const workspaceDir = path.join(path.sep, "srv", "bot-workspace");
     expect(() =>
       resolveRunWorkspaceDir({
         workspaceDir: null,
         sessionKey: "custom-main-key",
         config: undefined,
-        env: { ...process.env, OPENCLAW_WORKSPACE_DIR: workspaceDir },
+        env: { ...process.env, BOT_WORKSPACE_DIR: workspaceDir },
       }),
     ).toThrow(expect.objectContaining({ code: "RUN_WORKSPACE_ROSTER_REQUIRED" }));
   });
@@ -108,8 +108,8 @@ describe("resolveRunWorkspaceDir", () => {
     const env = {
       ...process.env,
       HOME: "/home/runner",
-      OPENCLAW_HOME: undefined,
-      OPENCLAW_STATE_DIR: "/tmp/openclaw-state",
+      BOT_HOME: undefined,
+      BOT_STATE_DIR: "/tmp/bot-state",
     } satisfies NodeJS.ProcessEnv;
     expect(() =>
       resolveRunWorkspaceDir({
@@ -159,7 +159,7 @@ describe("resolveRunWorkspaceDir", () => {
           { id: "research", workspace: researchWorkspace, default: true },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     expect(() =>
       resolveRunWorkspaceDir({
@@ -177,7 +177,7 @@ describe("resolveRunWorkspaceDir", () => {
         defaults: { workspace: fallbackWorkspace },
         list: [{ id: "main", default: true }],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const result = resolveRunWorkspaceDir({
       workspaceDir: undefined,

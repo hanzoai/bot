@@ -1,6 +1,6 @@
 /** Installs attempt-local context engine, tool-result, image, and frame guards. */
-import { MAX_IMAGE_BYTES } from "@openclaw/media-core/constants";
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../../context-engine/host-compat.js";
+import { MAX_IMAGE_BYTES } from "@hanzo/bot-media-core/constants";
+import { BOT_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../../context-engine/host-compat.js";
 import { buildContextEngineRuntimeSettings } from "../../../context-engine/runtime-settings.js";
 import type { ContextEngine } from "../../../context-engine/types.js";
 import { isHeartbeatLifecycleRunKind } from "../../bootstrap-mode.js";
@@ -85,7 +85,7 @@ export function installEmbeddedAttemptContextGuards(input: {
   if (activeContextEngine?.info.ownsCompaction === true) {
     const selectedContextEngineId = activeContextEngine.info.id;
     const runtimeSettings = buildContextEngineRuntimeSettings({
-      contextEngineHost: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+      contextEngineHost: BOT_EMBEDDED_CONTEXT_ENGINE_HOST,
       provider: attempt.provider,
       requestedModel: attempt.requestedModelId,
       resolvedModel: attempt.modelId,

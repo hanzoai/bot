@@ -2,7 +2,7 @@ import { retireSessionMcpRuntime } from "../../agents/agent-bundle-mcp-tools.js"
 import { createAgentRunRestartAbortError } from "../../agents/run-termination.js";
 import { cleanupBrowserSessionsForLifecycleEnd } from "../../browser-lifecycle-cleanup.js";
 import type { CliDeps } from "../../cli/outbound-send-deps.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   assertAgentRunLifecycleGenerationCurrent,
   claimAgentRunContext,
@@ -77,7 +77,7 @@ async function disposeCronRunContext(params: {
 
 /** Runs one isolated cron agent turn, including setup, execution, delivery, and persistence. */
 export async function runCronIsolatedAgentTurn(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   deps: CliDeps;
   job: CronJob;
   message: string;

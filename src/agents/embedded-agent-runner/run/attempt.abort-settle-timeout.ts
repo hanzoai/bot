@@ -5,7 +5,7 @@ import { isFastTestRuntimeEnv } from "../../../infra/env.js";
 import { parseStrictPositiveInteger } from "../../../infra/parse-finite-number.js";
 
 type AbortSettleTimeoutEnv = Partial<
-  Pick<NodeJS.ProcessEnv, "OPENCLAW_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS" | "OPENCLAW_TEST_FAST">
+  Pick<NodeJS.ProcessEnv, "BOT_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS" | "BOT_TEST_FAST">
 >;
 
 /**
@@ -16,7 +16,7 @@ type AbortSettleTimeoutEnv = Partial<
 export function resolveEmbeddedAbortSettleTimeoutMs(
   env: AbortSettleTimeoutEnv = process.env,
 ): number {
-  const override = parseStrictPositiveInteger(env.OPENCLAW_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS);
+  const override = parseStrictPositiveInteger(env.BOT_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS);
   if (override !== undefined) {
     return override;
   }

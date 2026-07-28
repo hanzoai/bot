@@ -9,9 +9,9 @@ import { listCommitments } from "../commitments/store.js";
 import { readCommitmentsForTest, seedCommitmentsForTest } from "../commitments/store.test-utils.js";
 import type { CommitmentRecord } from "../commitments/types.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "./kysely-sync.js";
 import {
@@ -25,7 +25,7 @@ describe("legacy commitments doctor migration", () => {
 
   const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
     afterEach(() => {
-      closeOpenClawStateDatabaseForTest();
+      closeBotStateDatabaseForTest();
       vi.restoreAllMocks();
       envSnapshot?.restore();
       envSnapshot = undefined;
@@ -34,9 +34,9 @@ describe("legacy commitments doctor migration", () => {
   });
 
   async function useStateDir(): Promise<string> {
-    const stateDir = tempDirs.make("openclaw-commitments-migration-");
-    envSnapshot ??= captureEnv(["OPENCLAW_STATE_DIR"]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    const stateDir = tempDirs.make("bot-commitments-migration-");
+    envSnapshot ??= captureEnv(["BOT_STATE_DIR"]);
+    setTestEnvValue("BOT_STATE_DIR", stateDir);
     return stateDir;
   }
 
@@ -111,7 +111,7 @@ describe("legacy commitments doctor migration", () => {
     expect(records).toHaveLength(2);
     expect(records.find((entry) => entry.id === legacy.id)).toStrictEqual(record());
     expect(records.find((entry) => entry.id === unrelated.id)).toStrictEqual(unrelated);
-    const database = openOpenClawStateDatabase();
+    const database = openBotStateDatabase();
     const row = executeSqliteQuerySync(
       database.db,
       getNodeSqliteKysely<CommitmentsDatabase>(database.db)
@@ -283,7 +283,7 @@ describe("legacy commitments doctor migration", () => {
     await useStateDir();
     const canonical = record();
     const row = commitmentRecordToRow(canonical);
-    const database = openOpenClawStateDatabase();
+    const database = openBotStateDatabase();
     executeSqliteQuerySync(
       database.db,
       getNodeSqliteKysely<CommitmentsDatabase>(database.db)

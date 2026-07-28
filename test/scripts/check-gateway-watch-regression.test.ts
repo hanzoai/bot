@@ -133,7 +133,7 @@ describe("check-gateway-watch-regression", () => {
     const command = buildTimedWatchCommand(
       "watch.pid",
       "watch.time",
-      "/tmp/openclaw-watch",
+      "/tmp/bot-watch",
       19042,
       {
         existsSync: (candidate: string) =>
@@ -155,7 +155,7 @@ describe("check-gateway-watch-regression", () => {
     const command = buildTimedWatchCommand(
       "watch.pid",
       "watch.time",
-      "/tmp/openclaw-watch",
+      "/tmp/bot-watch",
       19042,
       {
         existsSync: (candidate: string) =>
@@ -297,7 +297,7 @@ describe("check-gateway-watch-regression", () => {
   });
 
   it("refreshes runtime postbuild stamps after build stamps", () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gateway-watch-stamps-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-gateway-watch-stamps-"));
     try {
       fs.mkdirSync(path.join(rootDir, ".git"), { recursive: true });
       writeBuildAndRuntimePostBuildStamps({ cwd: rootDir });
@@ -349,7 +349,7 @@ describe("check-gateway-watch-regression", () => {
   });
 
   it("removes the isolated watch home after spawn failures", async () => {
-    const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gateway-watch-output-"));
+    const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-gateway-watch-output-"));
     const child = new EventEmitter() as EventEmitter & {
       stderr: EventEmitter;
       stdout: EventEmitter;
@@ -397,7 +397,7 @@ describe("check-gateway-watch-regression", () => {
       expect(result.spawnError).toBe("spawn failed");
       expect(fs.existsSync(isolatedHomeDir)).toBe(false);
       expect(fs.existsSync(path.join(outputDir, "watch.home.txt"))).toBe(true);
-      expect(spawn.mock.calls[0]?.[2]?.env?.OPENCLAW_RUNTIME_POSTBUILD_STATIC_ASSETS).toBe("0");
+      expect(spawn.mock.calls[0]?.[2]?.env?.BOT_RUNTIME_POSTBUILD_STATIC_ASSETS).toBe("0");
       expect(waitForGatewayReady).not.toHaveBeenCalled();
       expect(stopChild).not.toHaveBeenCalled();
     } finally {
@@ -406,7 +406,7 @@ describe("check-gateway-watch-regression", () => {
   });
 
   it("stops waiting for readiness when the watch process exits early", async () => {
-    const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gateway-watch-output-"));
+    const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-gateway-watch-output-"));
     const child = new EventEmitter() as EventEmitter & {
       stderr: EventEmitter;
       stdout: EventEmitter;
@@ -461,7 +461,7 @@ describe("check-gateway-watch-regression", () => {
   });
 
   it("records a ready gateway watch exit during the settle window as unplanned", async () => {
-    const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gateway-watch-output-"));
+    const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-gateway-watch-output-"));
     const child = new EventEmitter() as EventEmitter & {
       stderr: EventEmitter;
       stdout: EventEmitter;
@@ -512,7 +512,7 @@ describe("check-gateway-watch-regression", () => {
   });
 
   it("records a ready gateway watch exit during the idle window as unplanned", async () => {
-    const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-gateway-watch-output-"));
+    const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-gateway-watch-output-"));
     const child = new EventEmitter() as EventEmitter & {
       stderr: EventEmitter;
       stdout: EventEmitter;

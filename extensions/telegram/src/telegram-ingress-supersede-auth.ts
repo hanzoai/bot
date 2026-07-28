@@ -1,5 +1,5 @@
 // Telegram plugin module owns supersede sender authorization policy.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { resolveTelegramDmAllow } from "./access-groups.js";
 import { mergeTelegramAccountConfig } from "./account-config.js";
 import {
@@ -108,7 +108,7 @@ export function isTelegramAmbientSpooledUpdate(update: unknown): boolean {
 }
 
 export type TelegramSupersedeAuthContext = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   /** Bot username for @bot command targeting (from getMe / botInfo). */
   botUsername?: string;

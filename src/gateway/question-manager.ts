@@ -1,7 +1,7 @@
 // Gateway question manager.
 // Tracks transient operator questions and short-lived terminal records in memory.
 import { randomUUID } from "node:crypto";
-import { resolveExpiresAtMsFromDurationMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveExpiresAtMsFromDurationMs } from "@hanzo/bot-normalization-core/number-coercion";
 import type {
   Question,
   QuestionAnswers,

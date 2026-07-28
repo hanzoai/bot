@@ -4,13 +4,13 @@
  * channel delivery can narrow tool access by sender identity.
  */
 import { resolveToolsBySender } from "../config/group-policy.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveAgentConfig } from "./agent-scope.js";
 import { pickSandboxToolPolicy } from "./sandbox-tool-policy.js";
 import type { SandboxToolPolicy } from "./sandbox/types.js";
 
 type SenderToolPolicyParams = {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   agentId?: string;
   messageProvider?: string | null;
   senderId?: string | null;

@@ -4,8 +4,8 @@ import {
   type GatewayPresenceUpdate,
   PresenceUpdateStatus,
 } from "discord-api-types/v10";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Client } from "../internal/discord.js";
 import { clearPresences } from "./presence-cache.js";
@@ -21,13 +21,13 @@ const mocks = vi.hoisted(() => ({
   })),
 }));
 
-vi.mock("openclaw/plugin-sdk/heartbeat-runtime", () => ({
+vi.mock("bot/plugin-sdk/heartbeat-runtime", () => ({
   requestHeartbeat: mocks.requestHeartbeat,
 }));
-vi.mock("openclaw/plugin-sdk/routing", () => ({
+vi.mock("bot/plugin-sdk/routing", () => ({
   resolveAgentRoute: mocks.resolveAgentRoute,
 }));
-vi.mock("openclaw/plugin-sdk/system-event-runtime", () => ({
+vi.mock("bot/plugin-sdk/system-event-runtime", () => ({
   enqueueSystemEvent: mocks.enqueueSystemEvent,
 }));
 vi.mock("../send.permissions.js", () => ({
@@ -92,7 +92,7 @@ describe("DiscordPresenceListener", () => {
   it("routes, queues, and wakes an offline-to-online transition", async () => {
     let nowMs = 0;
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       botUserId: "bot-1",
       guildEntries: {
@@ -151,7 +151,7 @@ describe("DiscordPresenceListener", () => {
     const store = cooldownStore();
     const registerIfAbsent = vi.spyOn(store, "registerIfAbsent");
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -183,7 +183,7 @@ describe("DiscordPresenceListener", () => {
     const store = cooldownStore();
     const registerIfAbsent = vi.spyOn(store, "registerIfAbsent");
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1", burstLimit: 1 } },
@@ -214,7 +214,7 @@ describe("DiscordPresenceListener", () => {
     });
     const warn = vi.fn();
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       logger: { warn } as never,
       accountId: "molty",
       guildEntries: {
@@ -236,7 +236,7 @@ describe("DiscordPresenceListener", () => {
 
   it("uses the guild snapshot to classify the first live presence update", async () => {
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -264,7 +264,7 @@ describe("DiscordPresenceListener", () => {
 
   it("requires an explicit offline update after an incomplete large-guild snapshot", async () => {
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -285,7 +285,7 @@ describe("DiscordPresenceListener", () => {
 
   it("disables snapshot-absence inference after bounded baseline eviction", async () => {
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -309,7 +309,7 @@ describe("DiscordPresenceListener", () => {
 
   it("keeps complete snapshot inference isolated per guild", async () => {
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -337,7 +337,7 @@ describe("DiscordPresenceListener", () => {
   it("ignores unavailable snapshots and invalidates in-flight work on replacement", async () => {
     for (const bot of [false, true]) {
       const listener = new DiscordPresenceListener({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: "molty",
         guildEntries: {
           "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -369,7 +369,7 @@ describe("DiscordPresenceListener", () => {
 
   it("detaches replacement-snapshot work from stale in-flight lookups", async () => {
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -404,7 +404,7 @@ describe("DiscordPresenceListener", () => {
 
   it("detaches replacement-session work from stale in-flight lookups", async () => {
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         // Disable the reconnect window; this test targets stale-lookup detachment.
@@ -441,7 +441,7 @@ describe("DiscordPresenceListener", () => {
 
   it("invalidates in-flight work when Discord deletes a guild", async () => {
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -471,7 +471,7 @@ describe("DiscordPresenceListener", () => {
 
   it("does not let excluded users consume bounded baseline state", async () => {
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": {
@@ -498,7 +498,7 @@ describe("DiscordPresenceListener", () => {
 
   it("protects explicit offline evidence from unrelated online churn", async () => {
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -527,7 +527,7 @@ describe("DiscordPresenceListener", () => {
     const store = cooldownStore();
     const registerIfAbsent = vi.spyOn(store, "registerIfAbsent");
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1", burstLimit: 1 } },
@@ -562,7 +562,7 @@ describe("DiscordPresenceListener", () => {
   it("does not let another guild's status suppress the configured guild", async () => {
     let nowMs = 0;
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -586,7 +586,7 @@ describe("DiscordPresenceListener", () => {
     let nowMs = 0;
     const info = vi.fn();
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       logger: { info } as never,
       accountId: "molty",
       guildEntries: {
@@ -628,7 +628,7 @@ describe("DiscordPresenceListener", () => {
   it("honors a configured reconnect suppression window, including disabling it", async () => {
     let nowMs = 0;
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": {
@@ -653,7 +653,7 @@ describe("DiscordPresenceListener", () => {
     let nowMs = 0;
     const info = vi.fn();
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       logger: { info } as never,
       accountId: "molty",
       guildEntries: {
@@ -697,7 +697,7 @@ describe("DiscordPresenceListener", () => {
       )
       .mockResolvedValueOnce(true);
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1", burstLimit: 1 } },
@@ -731,7 +731,7 @@ describe("DiscordPresenceListener", () => {
   it("keeps burst limits independent per guild", async () => {
     let nowMs = 30_000;
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1", burstLimit: 1 } },
@@ -775,7 +775,7 @@ describe("DiscordPresenceListener", () => {
         }),
     );
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": {
@@ -807,7 +807,7 @@ describe("DiscordPresenceListener", () => {
   it("drops offline baselines when the gateway session resets", async () => {
     let nowMs = 0;
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -831,7 +831,7 @@ describe("DiscordPresenceListener", () => {
   it("retries a partial-user transition after a transient lookup failure", async () => {
     let nowMs = 0;
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -861,7 +861,7 @@ describe("DiscordPresenceListener", () => {
   it("serializes rapid transitions while a partial-user lookup is pending", async () => {
     let nowMs = 0;
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -891,7 +891,7 @@ describe("DiscordPresenceListener", () => {
     const sharedCooldownStore = cooldownStore();
     const createListener = () =>
       new DiscordPresenceListener({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: "molty",
         guildEntries: {
           "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -930,7 +930,7 @@ describe("DiscordPresenceListener", () => {
     const sharedCooldownStore = cooldownStore();
     const createListener = () =>
       new DiscordPresenceListener({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: "molty",
         guildEntries: {
           "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -959,7 +959,7 @@ describe("DiscordPresenceListener", () => {
   it("deduplicates repeated offline-to-online flaps during the cooldown", async () => {
     let nowMs = 0;
     const listener = new DiscordPresenceListener({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: "molty",
       guildEntries: {
         "guild-1": { presenceEvents: { channelId: "channel-1" } },
@@ -986,7 +986,7 @@ describe("DiscordPresenceListener", () => {
     const sharedCooldownStore = cooldownStore();
     const createListener = (accountId: string) =>
       new DiscordPresenceListener({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId,
         guildEntries: {
           "guild-1": { presenceEvents: { channelId: "channel-1" } },

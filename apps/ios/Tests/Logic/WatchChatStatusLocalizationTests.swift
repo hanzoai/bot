@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import BotKit
 import Testing
 
 struct WatchChatStatusLocalizationTests {
@@ -153,13 +153,13 @@ struct WatchChatStatusLocalizationTests {
     }
 
     @Test func `gateway presentation localizes key and keeps backend override verbatim`() {
-        let localized = OpenClawWatchAppStatus(
+        let localized = BotWatchAppStatus(
             code: .gatewayProblem,
             localizationKey: "Gateway update required")
-        let backendOverride = OpenClawWatchAppStatus(
+        let backendOverride = BotWatchAppStatus(
             code: .gatewayProblem,
             verbatim: "Gateway says update channel beta")
-        let localizedTalkFailure = OpenClawWatchAppStatus(
+        let localizedTalkFailure = BotWatchAppStatus(
             code: .talkFailure,
             localizationKey: "Paused")
 
@@ -176,9 +176,9 @@ struct WatchChatStatusLocalizationTests {
 
     private static func semanticPayload() -> [String: Any] {
         [
-            "type": OpenClawWatchPayloadType.appSnapshot.rawValue,
+            "type": BotWatchPayloadType.appSnapshot.rawValue,
             "gatewayStatus": [
-                "code": OpenClawWatchAppStatusCode.gatewayProblem.rawValue,
+                "code": BotWatchAppStatusCode.gatewayProblem.rawValue,
                 "localizationKey": "Gateway update required",
             ],
             "gatewayConnected": false,
@@ -186,14 +186,14 @@ struct WatchChatStatusLocalizationTests {
             "agentAvatarUrl": "https://example.com/avatar.png",
             "sessionKey": "main",
             "talkStatus": [
-                "code": OpenClawWatchAppStatusCode.talkOff.rawValue,
+                "code": BotWatchAppStatusCode.talkOff.rawValue,
             ],
             "talkEnabled": false,
             "talkListening": false,
             "talkSpeaking": false,
             "pendingApprovalCount": 0,
             "chatStatus": [
-                "code": OpenClawWatchAppStatusCode.chatConnectIPhone.rawValue,
+                "code": BotWatchAppStatusCode.chatConnectIPhone.rawValue,
             ],
         ]
     }

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 // Signal tests cover retry behavior for reply session initialization conflicts.
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SignalEventHandlerDeps } from "./event-handler.types.js";
@@ -57,9 +57,9 @@ vi.mock("../send-reactions.js", () => ({
   removeReactionSignal: removeReactionSignalMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/reply-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/reply-runtime")>(
-    "openclaw/plugin-sdk/reply-runtime",
+vi.mock("bot/plugin-sdk/reply-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/reply-runtime")>(
+    "bot/plugin-sdk/reply-runtime",
   );
   return {
     ...actual,
@@ -69,9 +69,9 @@ vi.mock("openclaw/plugin-sdk/reply-runtime", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/channel-inbound")>(
-    "openclaw/plugin-sdk/channel-inbound",
+vi.mock("bot/plugin-sdk/channel-inbound", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/channel-inbound")>(
+    "bot/plugin-sdk/channel-inbound",
   );
   type RunParams = Parameters<typeof actual.runChannelInboundEvent>[0];
   return {
@@ -98,7 +98,7 @@ vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
         channel: resolved.channel,
         accountId: resolved.accountId,
         routeSessionKey: resolved.route.sessionKey,
-        storePath: "/tmp/openclaw/signal-sessions.json",
+        storePath: "/tmp/bot/signal-sessions.json",
         ctxPayload: resolved.ctxPayload,
         recordInboundSession: recordInboundSessionMock,
         afterRecord: resolved.afterRecord,
@@ -114,9 +114,9 @@ vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/conversation-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/conversation-runtime")>(
-    "openclaw/plugin-sdk/conversation-runtime",
+vi.mock("bot/plugin-sdk/conversation-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/conversation-runtime")>(
+    "bot/plugin-sdk/conversation-runtime",
   );
   return {
     ...actual,
@@ -360,7 +360,7 @@ describe("signal reply session init conflict retry", () => {
       createBaseSignalEventHandlerDeps({
         cfg: {
           messages: { inbound: { debounceMs: 10 } },
-        } as OpenClawConfig,
+        } as BotConfig,
       }),
     );
 

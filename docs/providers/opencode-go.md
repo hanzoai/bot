@@ -24,17 +24,17 @@ correct.
     <Steps>
       <Step title="Run onboarding">
         ```bash
-        openclaw onboard --auth-choice opencode-go
+        bot onboard --auth-choice opencode-go
         ```
       </Step>
       <Step title="Set a Go model as default">
         ```bash
-        openclaw config set agents.defaults.model.primary "opencode-go/kimi-k2.6"
+        bot config set agents.defaults.model.primary "opencode-go/kimi-k2.6"
         ```
       </Step>
       <Step title="Verify models are available">
         ```bash
-        openclaw models list --provider opencode-go
+        bot models list --provider opencode-go
         ```
       </Step>
     </Steps>
@@ -44,12 +44,12 @@ correct.
     <Steps>
       <Step title="Pass the key directly">
         ```bash
-        openclaw onboard --opencode-go-api-key "$OPENCODE_API_KEY"
+        bot onboard --opencode-go-api-key "$OPENCODE_API_KEY"
         ```
       </Step>
       <Step title="Verify models are available">
         ```bash
-        openclaw models list --provider opencode-go
+        bot models list --provider opencode-go
         ```
       </Step>
     </Steps>
@@ -67,7 +67,7 @@ correct.
 
 ## Built-in catalog
 
-Run `openclaw models list --provider opencode-go` for the current model list.
+Run `bot models list --provider opencode-go` for the current model list.
 Bundled rows:
 
 | Model ref                       | Name              | Context   | Max output | Image input |
@@ -95,7 +95,7 @@ Bundled rows:
 
 <AccordionGroup>
   <Accordion title="Routing behavior">
-    OpenClaw routes any `opencode-go/...` model ref automatically. No extra
+    Bot routes any `opencode-go/...` model ref automatically. No extra
     provider config is required.
   </Accordion>
 

@@ -1,4 +1,4 @@
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { BotPluginApi } from "bot/plugin-sdk/plugin-entry";
 import { createClaudeSessionNodeHostCommands } from "./session-catalog-node-commands.js";
 import { registerClaudeSessionCatalog } from "./session-catalog.js";
 
@@ -14,7 +14,7 @@ function isClaudeSessionCatalogEnabled(pluginConfig: unknown): boolean {
   );
 }
 
-export function registerClaudeSessionDiscovery(api: OpenClawPluginApi): void {
+export function registerClaudeSessionDiscovery(api: BotPluginApi): void {
   if (!isClaudeSessionCatalogEnabled(api.pluginConfig)) {
     return;
   }

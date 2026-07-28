@@ -9,7 +9,7 @@ import { resolveAgentMaxConcurrent, resolveSubagentMaxConcurrent } from "../conf
 import { resolveCronMaxConcurrentRuns } from "../config/cron-limits.js";
 import { patchSessionEntry } from "../config/sessions/session-accessor.js";
 import type { QuotaSuspension } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { setCommandLaneConcurrency } from "../process/command-queue.js";
 import { CommandLane } from "../process/lanes.js";
@@ -58,7 +58,7 @@ type SessionSuspensionRuntimeState = {
  * Keep timer shutdown state process-global so bundled gateway chunks cannot
  * leave one module copy scheduling lane resumes after another copy cleaned up.
  */
-const SESSION_SUSPENSION_STATE_KEY = Symbol.for("openclaw.sessionSuspensionRuntimeState");
+const SESSION_SUSPENSION_STATE_KEY = Symbol.for("bot.sessionSuspensionRuntimeState");
 
 function getSessionSuspensionState(): SessionSuspensionRuntimeState {
   const state = resolveGlobalSingleton<SessionSuspensionRuntimeState>(
@@ -110,7 +110,7 @@ type SessionSuspensionTarget =
   | { mode: "defer"; defer: (params: SessionSuspensionParams) => void }
   | { mode: "suspend" };
 export type SessionSuspensionParams = {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   agentDir?: string;
   sessionId: string;
   laneId?: string;
@@ -121,7 +121,7 @@ export type SessionSuspensionParams = {
   ttlMs?: number;
 };
 
-function resolveLaneResumeConcurrency(cfg: OpenClawConfig | undefined, laneId: string): number {
+function resolveLaneResumeConcurrency(cfg: BotConfig | undefined, laneId: string): number {
   switch (laneId) {
     case "main":
       return resolveAgentMaxConcurrent(cfg);
@@ -436,7 +436,7 @@ function seedClearedLaneResumeForTest(
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.sessionSuspensionTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.sessionSuspensionTestApi")] = {
     resetSessionSuspensionStateForTest,
     seedClearedLaneResumeForTest,
   };

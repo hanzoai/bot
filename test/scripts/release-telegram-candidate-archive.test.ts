@@ -29,7 +29,7 @@ afterEach(() => {
 });
 
 function makeTempDir(): string {
-  const directory = mkdtempSync(path.join(tmpdir(), "openclaw-archive-guard-"));
+  const directory = mkdtempSync(path.join(tmpdir(), "bot-archive-guard-"));
   tempDirs.push(directory);
   return directory;
 }
@@ -352,7 +352,7 @@ with tarfile.open(sys.argv[1], "w", format=tarfile.PAX_FORMAT) as archive:
     for index in range(member_count):
         member = tarfile.TarInfo(f"candidate/p{index:06d}")
         member.pax_headers = {
-            f"OPENCLAW.key{key:03d}": f"{index:06d}-{key:03d}"
+            f"BOT.key{key:03d}": f"{index:06d}-{key:03d}"
             for key in range(key_count)
         }
         archive.addfile(member)

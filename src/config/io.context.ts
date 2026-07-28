@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { collectManifestModelIdNormalizationPolicies } from "@openclaw/model-catalog-core/provider-model-id-normalization";
+import { collectManifestModelIdNormalizationPolicies } from "@hanzo/bot-model-catalog-core/provider-model-id-normalization";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agents/agent-scope-config.js";
 import { ensureOwnerDisplaySecret } from "../agents/owner-display.js";
 import {
@@ -30,11 +30,11 @@ import { migratePersistedImplicitMainRoster } from "./legacy.roster.js";
 import { materializeRuntimeConfig } from "./materialize.js";
 import { applyConfigOverrides } from "./runtime-overrides.js";
 import { resolveShellEnvExpectedKeys } from "./shell-env-expected-keys.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "./types.js";
+import type { ConfigFileSnapshot, BotConfig } from "./types.js";
 import { validateConfigObjectWithPlugins } from "./validation.js";
 
 type ValidationPluginMetadataSnapshotLoader = {
-  load: (config: OpenClawConfig) => PluginMetadataSnapshot;
+  load: (config: BotConfig) => PluginMetadataSnapshot;
   getSnapshot: () => PluginMetadataSnapshot | undefined;
 };
 
@@ -43,13 +43,13 @@ export type ConfigIoContext = {
   configPath: string;
   options: ConfigIoFactoryOptions;
   observeLoadConfigSnapshot: (snapshot: ConfigFileSnapshot) => ConfigFileSnapshot;
-  finalizeLoadedRuntimeConfig: (config: OpenClawConfig) => OpenClawConfig;
+  finalizeLoadedRuntimeConfig: (config: BotConfig) => BotConfig;
   createValidationPluginMetadataSnapshotLoader: (params: {
     effectiveConfigRaw: unknown;
     env: NodeJS.ProcessEnv;
   }) => ValidationPluginMetadataSnapshotLoader;
-  resolveRuntimePreflightSourceConfig: (candidate: OpenClawConfig) => OpenClawConfig;
-  resolveSuspiciousRecoveryBackupCandidate: (parsed: unknown) => OpenClawConfig | null;
+  resolveRuntimePreflightSourceConfig: (candidate: BotConfig) => BotConfig;
+  resolveSuspiciousRecoveryBackupCandidate: (parsed: unknown) => BotConfig | null;
 };
 
 export function createConfigIoContext(options: ConfigIoFactoryOptions = {}): ConfigIoContext {
@@ -63,7 +63,7 @@ export function createConfigIoContext(options: ConfigIoFactoryOptions = {}): Con
     return snapshot;
   }
 
-  function finalizeLoadedRuntimeConfig(cfg: OpenClawConfig): OpenClawConfig {
+  function finalizeLoadedRuntimeConfig(cfg: BotConfig): BotConfig {
     const duplicates = findDuplicateAgentDirs(cfg, { env: deps.env, homedir: deps.homedir });
     if (duplicates.length > 0) {
       throw new DuplicateAgentDirError(duplicates);
@@ -122,14 +122,14 @@ export function createConfigIoContext(options: ConfigIoFactoryOptions = {}): Con
     };
   }
 
-  function resolveRuntimePreflightSourceConfig(candidate: OpenClawConfig): OpenClawConfig {
+  function resolveRuntimePreflightSourceConfig(candidate: BotConfig): BotConfig {
     const env = { ...deps.env } as NodeJS.ProcessEnv;
     const resolvedIncludes = resolveConfigIncludesForRead(candidate, configPath, { ...deps, env });
     const resolution = resolveConfigForRead(resolvedIncludes, env, deps.lowerPrecedenceEnv);
     return coerceConfig(migratePersistedImplicitMainRoster(resolution.resolvedConfigRaw).config);
   }
 
-  function resolveSuspiciousRecoveryBackupCandidate(parsed: unknown): OpenClawConfig | null {
+  function resolveSuspiciousRecoveryBackupCandidate(parsed: unknown): BotConfig | null {
     try {
       const candidateEnv = cloneEnvWithPlatformSemantics(deps.env);
       const resolved = resolveConfigIncludesForRead(parsed, configPath, {
@@ -173,10 +173,10 @@ export function resolveModelIdNormalizationPolicies(snapshot: PluginMetadataSnap
 
 export function materializeConfigForLoad(
   _context: ConfigIoContext,
-  config: OpenClawConfig,
+  config: BotConfig,
   _effectiveConfigRaw: unknown,
   pluginMetadata: PluginMetadataSnapshot | undefined,
-): OpenClawConfig {
+): BotConfig {
   return materializeRuntimeConfig(config, "load", {
     manifestRegistry: pluginMetadata?.manifestRegistry,
   });

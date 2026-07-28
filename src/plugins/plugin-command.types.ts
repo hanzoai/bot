@@ -1,5 +1,5 @@
 import type { ReplyPayload } from "../auto-reply/reply-payload.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { OperatorScope } from "../gateway/operator-scopes.js";
 import type {
   PluginConversationBinding,
@@ -16,10 +16,10 @@ type ChannelId = import("../channels/plugins/types.core.js").ChannelId;
 export type PluginCommandDiagnosticsSession = {
   /** Stable host session key when available. */
   sessionKey?: string;
-  /** Ephemeral OpenClaw session id when available. */
+  /** Ephemeral Bot session id when available. */
   sessionId?: string;
   /**
-   * Deprecated transcript locator for this OpenClaw session when available.
+   * Deprecated transcript locator for this Bot session when available.
    *
    * SQLite-backed sessions use a `sqlite:<agentId>:<sessionId>:<storePath>`
    * marker, not a filesystem path. Use session id/key plus transcript-runtime
@@ -65,7 +65,7 @@ export type PluginCommandContext = {
   /** Ephemeral host session id for the active conversation when available. */
   sessionId?: string;
   /**
-   * Deprecated transcript locator for the active OpenClaw session when available.
+   * Deprecated transcript locator for the active Bot session when available.
    *
    * SQLite-backed sessions use a `sqlite:<agentId>:<sessionId>:<storePath>`
    * marker, not a filesystem path. Use session id/key plus transcript-runtime
@@ -78,8 +78,8 @@ export type PluginCommandContext = {
   args?: string;
   /** The full normalized command body */
   commandBody: string;
-  /** Current OpenClaw configuration */
-  config: OpenClawConfig;
+  /** Current Bot configuration */
+  config: BotConfig;
   /** Raw "From" value (channel-scoped id) */
   from?: string;
   /** Raw "To" value (channel-scoped id) */
@@ -130,8 +130,8 @@ type PluginCommandHandler = (
  * Definition for a plugin-registered command.
  */
 export const AGENT_PROMPT_SURFACE_KINDS = [
-  "openclaw_main",
-  /** @deprecated Use openclaw_main. */
+  "bot_main",
+  /** @deprecated Use bot_main. */
   "pi_main",
   "codex_app_server",
   "cli_backend",
@@ -148,7 +148,7 @@ export type AgentPromptGuidanceEntry = {
 
 export type AgentPromptGuidance = string | AgentPromptGuidanceEntry;
 
-export type OpenClawPluginCommandDefinition = {
+export type BotPluginCommandDefinition = {
   /** Command name without leading slash (e.g., "tts") */
   name: string;
   /**

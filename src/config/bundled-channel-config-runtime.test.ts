@@ -1,5 +1,5 @@
 // Verifies bundled channel config runtime loading stays lazy and bounded.
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "bot/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../plugins/bundled-plugin-metadata.js", () => ({

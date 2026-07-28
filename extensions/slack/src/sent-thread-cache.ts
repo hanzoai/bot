@@ -1,5 +1,5 @@
 // Slack plugin module implements sent thread cache behavior.
-import { createPersistentDedupeCache } from "openclaw/plugin-sdk/dedupe-runtime";
+import { createPersistentDedupeCache } from "bot/plugin-sdk/dedupe-runtime";
 import { getOptionalSlackRuntime } from "./runtime.js";
 
 /**
@@ -21,7 +21,7 @@ type SlackThreadParticipationRecord = {
  * Keep Slack thread participation shared across bundled chunks so thread
  * auto-reply gating does not diverge between prepare/dispatch call paths.
  */
-const SLACK_THREAD_PARTICIPATION_KEY = Symbol.for("openclaw.slackThreadParticipation");
+const SLACK_THREAD_PARTICIPATION_KEY = Symbol.for("bot.slackThreadParticipation");
 const threadParticipation = createPersistentDedupeCache<SlackThreadParticipationRecord>({
   globalKey: SLACK_THREAD_PARTICIPATION_KEY,
   ttlMs: TTL_MS,

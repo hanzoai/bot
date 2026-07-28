@@ -24,12 +24,12 @@ const {
   mockRuntimeResolveMarkdownTableMode: vi.fn(() => "preserve"),
 }));
 
-vi.mock("openclaw/plugin-sdk/markdown-table-runtime", () => ({
+vi.mock("bot/plugin-sdk/markdown-table-runtime", () => ({
   resolveMarkdownTableMode: mockResolveMarkdownTableMode,
 }));
 
-vi.mock("openclaw/plugin-sdk/text-chunking", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/text-chunking")>();
+vi.mock("bot/plugin-sdk/text-chunking", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/text-chunking")>();
   return {
     ...actual,
     convertMarkdownTables: mockConvertMarkdownTables,
@@ -78,8 +78,8 @@ describe("getMessageFeishu", () => {
   });
 
   afterAll(() => {
-    vi.doUnmock("openclaw/plugin-sdk/markdown-table-runtime");
-    vi.doUnmock("openclaw/plugin-sdk/text-chunking");
+    vi.doUnmock("bot/plugin-sdk/markdown-table-runtime");
+    vi.doUnmock("bot/plugin-sdk/text-chunking");
     vi.doUnmock("./client.js");
     vi.doUnmock("./accounts.js");
     vi.doUnmock("./runtime.js");

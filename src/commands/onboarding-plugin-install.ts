@@ -6,15 +6,15 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { resolveBundledInstallPlanForCatalogEntry } from "../cli/plugin-install-plan.js";
 import { assertConfigWriteAllowedInCurrentMode } from "../config/nix-mode-write-guard.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { parseClawHubPluginSpec } from "../infra/clawhub-spec.js";
-import { isOpenClawOrgNpmSpec, parseRegistryNpmSpec } from "../infra/npm-registry-spec.js";
+import { isBotOrgNpmSpec, parseRegistryNpmSpec } from "../infra/npm-registry-spec.js";
 import { normalizeUpdateChannel, resolveRegistryUpdateChannel } from "../infra/update-channels.js";
 import {
   findBundledPluginSourceInMap,
@@ -78,7 +78,7 @@ export type OnboardingPluginInstallStatus = "installed" | "skipped" | "failed" |
 
 /** Config and status returned after attempting an onboarding plugin install. */
 type OnboardingPluginInstallResult = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   installed: boolean;
   pluginId: string;
   status: OnboardingPluginInstallStatus;
@@ -106,10 +106,10 @@ function shouldFallbackClawHubToNpm(params: {
   result: { ok: false; code?: string };
   npmSpec?: string;
 }): boolean {
-  if (!isOpenClawOrgNpmSpec(params.npmSpec)) {
+  if (!isBotOrgNpmSpec(params.npmSpec)) {
     return false;
   }
-  // Only official OpenClaw npm packages are safe fallback targets for ClawHub
+  // Only official Bot npm packages are safe fallback targets for ClawHub
   // availability failures; arbitrary npm fallbacks would change trust source.
   return (
     params.result.code === CLAWHUB_INSTALL_ERROR_CODE.PACKAGE_NOT_FOUND ||
@@ -192,7 +192,7 @@ function hasGitWorkspace(workspaceDir?: string): boolean {
   return roots.some((root) => hasTrustedGitWorkspace(root));
 }
 
-function addPluginLoadPath(cfg: OpenClawConfig, pluginPath: string): OpenClawConfig {
+function addPluginLoadPath(cfg: BotConfig, pluginPath: string): BotConfig {
   const existing = cfg.plugins?.load?.paths ?? [];
   const merged = uniqueStrings([...existing, pluginPath]);
   return {
@@ -239,12 +239,12 @@ function formatPortableLocalPath(localPath: string, workspaceDir?: string): stri
 }
 
 async function recordLocalPluginInstall(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: OnboardingPluginInstallEntry;
   localPath: string;
   npmSpec?: string | null;
   workspaceDir?: string;
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   const sourcePath = formatPortableLocalPath(params.localPath, params.workspaceDir);
   const install = {
     pluginId: params.entry.pluginId,
@@ -351,7 +351,7 @@ function resolveClawHubSpecForOnboarding(install: PluginPackageInstall): string 
 }
 
 function resolveInstallDefaultChoice(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: OnboardingPluginInstallEntry;
   localPath?: string | null;
   bundledLocalPath?: string | null;
@@ -564,7 +564,7 @@ const testing = { formatInstallErrorDetail, summarizeInstallError };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.onboardingPluginInstallTestApi")
+    Symbol.for("bot.onboardingPluginInstallTestApi")
   ] = testing;
 }
 
@@ -573,7 +573,7 @@ function isTimeoutError(error: unknown): boolean {
 }
 
 async function applyPluginEnablement(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   pluginId: string;
   label: string;
   prompter: WizardPrompter;
@@ -742,7 +742,7 @@ function isClawHubTrustWarning(message: string): boolean {
 }
 
 async function installPluginFromNpmSpecWithProgress(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: OnboardingPluginInstallEntry;
   npmSpec: string;
   prompter: WizardPrompter;
@@ -819,7 +819,7 @@ async function installPluginFromNpmSpecWithProgress(params: {
 }
 
 async function installPluginFromNpmPackArchiveWithProgress(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: OnboardingPluginInstallEntry;
   archivePath: string;
   prompter: WizardPrompter;
@@ -881,7 +881,7 @@ async function installPluginFromNpmPackArchiveWithProgress(params: {
 }
 
 async function installPluginFromOverride(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: OnboardingPluginInstallEntry;
   override: PluginInstallOverride;
   prompter: WizardPrompter;
@@ -1011,7 +1011,7 @@ async function installPluginFromOverride(params: {
 }
 
 async function installPluginFromClawHubSpecWithProgress(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: OnboardingPluginInstallEntry;
   clawhubSpec: string;
   prompter: WizardPrompter;
@@ -1119,7 +1119,7 @@ async function installPluginFromClawHubSpecWithProgress(params: {
 
 /** Ensures an onboarding plugin is installed, enabled, and recorded in config. */
 export async function ensureOnboardingPluginInstalled(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: OnboardingPluginInstallEntry;
   prompter: WizardPrompter;
   runtime: RuntimeEnv;

@@ -1,7 +1,7 @@
 // Thread Ownership tests cover index plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawPluginApi } from "./api.js";
+import type { BotPluginApi } from "./api.js";
 import register from "./index.js";
 
 describe("thread-ownership plugin", () => {
@@ -84,7 +84,7 @@ describe("thread-ownership plugin", () => {
 
   describe("message_sending", () => {
     beforeEach(() => {
-      register.register(api as unknown as OpenClawPluginApi);
+      register.register(api as unknown as BotPluginApi);
     });
 
     async function sendSlackThreadMessage() {
@@ -228,7 +228,7 @@ describe("thread-ownership plugin", () => {
 
     it("canonicalizes configured ab-test channel allowlists before matching", async () => {
       api.pluginConfig = { abTestChannels: ["channel:c123"] };
-      register.register(api as unknown as OpenClawPluginApi);
+      register.register(api as unknown as BotPluginApi);
       vi.mocked(globalThis.fetch).mockResolvedValue(
         new Response(JSON.stringify({ owner: "test-agent" }), { status: 200 }),
       );
@@ -264,7 +264,7 @@ describe("thread-ownership plugin", () => {
           },
         },
       };
-      register.register(api as unknown as OpenClawPluginApi);
+      register.register(api as unknown as BotPluginApi);
 
       const result = await requireHook("message_sending")(
         {
@@ -281,7 +281,7 @@ describe("thread-ownership plugin", () => {
 
     it("does not fall back to startup allowlists when live plugin config is removed", async () => {
       api.pluginConfig = { abTestChannels: ["C999"] };
-      register.register(api as unknown as OpenClawPluginApi);
+      register.register(api as unknown as BotPluginApi);
       vi.mocked(globalThis.fetch).mockResolvedValue(
         new Response(JSON.stringify({ owner: "test-agent" }), { status: 200 }),
       );
@@ -364,7 +364,7 @@ describe("thread-ownership plugin", () => {
 
   describe("message_received @-mention tracking", () => {
     beforeEach(() => {
-      register.register(api as unknown as OpenClawPluginApi);
+      register.register(api as unknown as BotPluginApi);
     });
 
     it("tracks @-mentions and skips ownership check for mentioned threads", async () => {

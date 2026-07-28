@@ -1,5 +1,5 @@
 // Browser tests cover independently bounded delegated node-proxy requests.
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "bot/plugin-sdk/number-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type BrowserNodeRequest = {

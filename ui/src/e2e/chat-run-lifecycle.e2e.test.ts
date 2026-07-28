@@ -14,7 +14,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 // Home mirrors the sidebar leading-slot contract: an active run rings the Home
 // glyph instead of adding a trailing spinner (see app-sidebar-render.ts).
@@ -96,7 +96,7 @@ describeControlUiE2e("Control UI chat run lifecycle", () => {
         {
           role: "system",
           timestamp: Date.now() - 1_000,
-          __openclaw: {
+          __bot: {
             kind: "compaction",
             id: "compact-entry-1",
             tokensBefore: 900_000,

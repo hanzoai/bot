@@ -1,7 +1,7 @@
 /**
  * Selects and invokes native agent harnesses for embedded run attempts.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   createChildDiagnosticTraceContext,
   createDiagnosticTraceContext,
@@ -32,7 +32,7 @@ import { resolveSandboxRuntimeStatus } from "../sandbox/runtime-status.js";
 import { expandToolGroups, mergeAlsoAllowPolicy, normalizeToolName } from "../tool-policy.js";
 import type { SystemAgentToolOptions } from "../tools/system-agent-tool.js";
 import { resolveAgentHarnessAutoSelectionHint } from "./auto-selection.js";
-import { createOpenClawAgentHarness } from "./builtin-openclaw.js";
+import { createBotAgentHarness } from "./builtin-bot.js";
 import { MissingAgentHarnessError } from "./errors.js";
 import {
   runAgentHarnessLifecycleAttempt,
@@ -63,7 +63,7 @@ type AgentHarnessAvailabilityParams = {
   provider?: string;
   modelId?: string;
   modelProvider?: AgentHarnessSupportContext["modelProvider"];
-  config?: OpenClawConfig;
+  config?: BotConfig;
   agentId?: string;
   sessionKey?: string;
   env?: NodeJS.ProcessEnv;
@@ -74,7 +74,7 @@ type AgentHarnessSelectionParams = {
   provider: string;
   modelId?: string;
   modelProvider?: AgentHarnessSupportContext["modelProvider"];
-  config?: OpenClawConfig;
+  config?: BotConfig;
   agentId?: string;
   sessionKey?: string;
   agentHarnessId?: string;
@@ -116,18 +116,18 @@ type AgentHarnessSelectionDecision = {
   policy: AgentHarnessPolicy;
   selectedHarnessId: string;
   selectedReason:
-    | "forced_openclaw"
+    | "forced_bot"
     | "forced_plugin"
-    // Implicit Codex preference found no registered Codex harness, so OpenClaw handled the run.
-    | "implicit_plugin_unavailable_openclaw"
-    // Implicit Codex preference cannot reproduce the prepared transport, so OpenClaw handled it.
-    | "implicit_plugin_unsupported_openclaw"
+    // Implicit Codex preference found no registered Codex harness, so Bot handled the run.
+    | "implicit_plugin_unavailable_bot"
+    // Implicit Codex preference cannot reproduce the prepared transport, so Bot handled it.
+    | "implicit_plugin_unsupported_bot"
     // Provider-owned CLI runtime aliases have no agent harness plugin counterpart.
-    | "cli_runtime_passthrough_openclaw"
+    | "cli_runtime_passthrough_bot"
     // Auto mode chose a registered plugin harness that supports the provider/model.
     | "auto_plugin"
-    // Auto mode found no supporting plugin harness, so OpenClaw handled the run.
-    | "auto_openclaw";
+    // Auto mode found no supporting plugin harness, so Bot handled the run.
+    | "auto_bot";
   candidates: AgentHarnessSelectionCandidate[];
 };
 
@@ -191,7 +191,7 @@ function resolveAgentHarnessAvailabilityDecision(
   if (!codexHarness) {
     return {
       kind: "implicit-unavailable",
-      policy: { ...policy, runtime: "openclaw" },
+      policy: { ...policy, runtime: "bot" },
     };
   }
   const provider = params.provider?.trim();
@@ -215,7 +215,7 @@ function resolveAgentHarnessAvailabilityDecision(
   }
   return {
     kind: "implicit-unsupported",
-    policy: { ...policy, runtime: "openclaw" },
+    policy: { ...policy, runtime: "bot" },
   };
 }
 
@@ -250,19 +250,19 @@ export function selectAgentHarnessForPreparedModelProviders(
   // Only implicit/auto selection can produce different supported harnesses. One embedded
   // runtime owns the complete retry set; explicit and pinned plugins fail during probing above.
   return (
-    decisions.find((decision) => decision.selectedHarnessId === "openclaw")?.harness ??
-    createOpenClawAgentHarness()
+    decisions.find((decision) => decision.selectedHarnessId === "bot")?.harness ??
+    createBotAgentHarness()
   );
 }
 
-/** Returns whether a plugin harness constructs OpenClaw tools inside its runtime. */
-export function agentHarnessBuildsOpenClawTools(harnessId: string): boolean {
+/** Returns whether a plugin harness constructs Bot tools inside its runtime. */
+export function agentHarnessBuildsBotTools(harnessId: string): boolean {
   return harnessId === "codex" || harnessId === "copilot";
 }
 
-/** Returns whether the selected harness exposes OpenClaw's agent-tool surface. */
-export function agentHarnessExposesOpenClawTools(harnessId: string): boolean {
-  return harnessId === "openclaw" || agentHarnessBuildsOpenClawTools(harnessId);
+/** Returns whether the selected harness exposes Bot's agent-tool surface. */
+export function agentHarnessExposesBotTools(harnessId: string): boolean {
+  return harnessId === "bot" || agentHarnessBuildsBotTools(harnessId);
 }
 
 function selectAgentHarnessDecision(
@@ -296,21 +296,21 @@ function selectAgentHarnessDecision(
         runtimeSource: "model",
       } as AgentHarnessPolicy)
     : resolvedPolicy;
-  // OpenClaw's built-in harness is intentionally not part of the plugin candidate list. Explicit plugin
-  // runtimes fail closed; only `auto` may route an unmatched turn to OpenClaw.
+  // Bot's built-in harness is intentionally not part of the plugin candidate list. Explicit plugin
+  // runtimes fail closed; only `auto` may route an unmatched turn to Bot.
   const pluginHarnesses = listPluginAgentHarnesses();
-  const openClawHarness = createOpenClawAgentHarness();
+  const botHarness = createBotAgentHarness();
   const runtime = policy.runtime;
-  if (runtime === "openclaw") {
+  if (runtime === "bot") {
     const selectedReason = selectedRuntimeOverride
-      ? "forced_openclaw"
+      ? "forced_bot"
       : availability.kind === "implicit-unavailable"
-        ? "implicit_plugin_unavailable_openclaw"
+        ? "implicit_plugin_unavailable_bot"
         : availability.kind === "implicit-unsupported"
-          ? "implicit_plugin_unsupported_openclaw"
-          : "forced_openclaw";
+          ? "implicit_plugin_unsupported_bot"
+          : "forced_bot";
     return buildSelectionDecision({
-      harness: openClawHarness,
+      harness: botHarness,
       policy,
       selectedReason,
       candidates: listHarnessCandidates(pluginHarnesses),
@@ -354,12 +354,12 @@ function selectAgentHarnessDecision(
       }
       if (isCliRuntimeAliasForProvider({ runtime, provider: params.provider })) {
         return buildSelectionDecision({
-          harness: openClawHarness,
+          harness: botHarness,
           policy: {
             ...policy,
-            runtime: "openclaw",
+            runtime: "bot",
           },
-          selectedReason: "cli_runtime_passthrough_openclaw",
+          selectedReason: "cli_runtime_passthrough_bot",
           candidates: listHarnessCandidates(pluginHarnesses),
         });
       }
@@ -371,12 +371,12 @@ function selectAgentHarnessDecision(
     }
     if (runtime === "codex" && policy.runtimeSource === "implicit") {
       return buildSelectionDecision({
-        harness: openClawHarness,
+        harness: botHarness,
         policy: {
           ...policy,
-          runtime: "openclaw",
+          runtime: "bot",
         },
-        selectedReason: "implicit_plugin_unavailable_openclaw",
+        selectedReason: "implicit_plugin_unavailable_bot",
         candidates: listHarnessCandidates(pluginHarnesses),
       });
     }
@@ -388,12 +388,12 @@ function selectAgentHarnessDecision(
       })
     ) {
       return buildSelectionDecision({
-        harness: openClawHarness,
+        harness: botHarness,
         policy: {
           ...policy,
-          runtime: "openclaw",
+          runtime: "bot",
         },
-        selectedReason: "cli_runtime_passthrough_openclaw",
+        selectedReason: "cli_runtime_passthrough_bot",
         candidates: listHarnessCandidates(pluginHarnesses),
       });
     }
@@ -450,9 +450,9 @@ function selectAgentHarnessDecision(
     });
   }
   return buildSelectionDecision({
-    harness: openClawHarness,
+    harness: botHarness,
     policy,
-    selectedReason: "auto_openclaw",
+    selectedReason: "auto_bot",
     candidates: candidates.map(toSelectionCandidate),
   });
 }
@@ -477,14 +477,14 @@ export async function runAgentHarnessSettledTurnFinalization(
     throw new Error(`Agent harness ${harness.id} cannot safely finalize a settled tool turn.`);
   }
   if (internalParams.systemAgentTool && !isSystemAgentOnlyAllowlist(internalParams.toolsAllow)) {
-    throw new Error('OpenClaw host authority requires toolsAllow: ["openclaw"]');
+    throw new Error('Bot host authority requires toolsAllow: ["bot"]');
   }
   const pluginParams = withoutInternalHarnessAuthority({
     ...internalParams,
     operation: "settled-tool-finalization",
   });
   const attemptParams =
-    harness.id === "openclaw" ? pluginParams : preparePluginHarnessParams(pluginParams);
+    harness.id === "bot" ? pluginParams : preparePluginHarnessParams(pluginParams);
   return runAgentHarnessOperation(harness, params, () =>
     runWithAgentRingZeroTools([], () =>
       runAgentHarnessLifecycleFinalization(harness, attemptParams, () =>
@@ -503,7 +503,7 @@ async function runSelectedAgentHarnessAttempt(
   const selection = selectPreparedAgentHarness(params);
   const harness = selection.harness;
   if (internalParams.systemAgentTool && !isSystemAgentOnlyAllowlist(internalParams.toolsAllow)) {
-    throw new Error('OpenClaw host authority requires toolsAllow: ["openclaw"]');
+    throw new Error('Bot host authority requires toolsAllow: ["bot"]');
   }
   const ringZeroTools = internalParams.systemAgentTool
     ? [
@@ -524,7 +524,7 @@ async function runSelectedAgentHarnessAttempt(
       // Resolve plugin policy after entering the host scope. Ring-zero tools are
       // trusted setup authority and must survive ordinary deny-all policy.
       const attemptParams =
-        harness.id === "openclaw" ? pluginParams : preparePluginHarnessParams(pluginParams);
+        harness.id === "bot" ? pluginParams : preparePluginHarnessParams(pluginParams);
       return runAgentHarnessLifecycleAttempt(harness, attemptParams);
     }),
   );
@@ -560,14 +560,14 @@ async function runAgentHarnessOperation<T>(
   const harnessTrace = freezeDiagnosticTraceContext(
     activeTrace ? createChildDiagnosticTraceContext(activeTrace) : createDiagnosticTraceContext(),
   );
-  if (harness.id === "openclaw") {
+  if (harness.id === "bot") {
     return await runWithDiagnosticTraceContext(harnessTrace, execute);
   }
 
   try {
     return await runWithDiagnosticTraceContext(harnessTrace, execute);
   } catch (error) {
-    log.warn(`${harness.label} failed; not falling back to embedded OpenClaw backend`, {
+    log.warn(`${harness.label} failed; not falling back to embedded Bot backend`, {
       harnessId: harness.id,
       provider: params.provider,
       modelId: params.modelId,
@@ -578,7 +578,7 @@ async function runAgentHarnessOperation<T>(
 }
 
 function isSystemAgentOnlyAllowlist(toolsAllow: readonly string[] | undefined): boolean {
-  return toolsAllow?.length === 1 && normalizeToolName(toolsAllow[0] ?? "") === "openclaw";
+  return toolsAllow?.length === 1 && normalizeToolName(toolsAllow[0] ?? "") === "bot";
 }
 
 function withoutInternalHarnessAuthority(
@@ -611,9 +611,9 @@ function applyPluginHarnessDenyAllToolPolicy(
   params: EmbeddedRunAttemptParams,
 ): EmbeddedRunAttemptParams {
   if (
-    isHostScopedAgentToolActive("openclaw") &&
+    isHostScopedAgentToolActive("bot") &&
     params.toolsAllow?.length === 1 &&
-    normalizeToolName(params.toolsAllow[0] ?? "") === "openclaw"
+    normalizeToolName(params.toolsAllow[0] ?? "") === "bot"
   ) {
     return params;
   }

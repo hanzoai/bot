@@ -1,13 +1,13 @@
 // Discord tests cover send.webhook.proxy plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DiscordError, RateLimitError } from "./internal/rest-errors.js";
 import { sendWebhookMessageDiscord } from "./send.webhook.js";
 
 const makeProxyFetchMock = vi.hoisted(() => vi.fn());
-vi.mock("openclaw/plugin-sdk/fetch-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/fetch-runtime")>(
-    "openclaw/plugin-sdk/fetch-runtime",
+vi.mock("bot/plugin-sdk/fetch-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/fetch-runtime")>(
+    "bot/plugin-sdk/fetch-runtime",
   );
   return {
     ...actual,
@@ -63,7 +63,7 @@ describe("sendWebhookMessageDiscord proxy support", () => {
           proxy: "bad-proxy",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await sendWebhookMessageDiscord("hello", {
       cfg,
@@ -91,7 +91,7 @@ describe("sendWebhookMessageDiscord proxy support", () => {
           proxy: "http://127.0.0.1:8080",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await sendWebhookMessageDiscord("hello", {
       cfg,
@@ -118,7 +118,7 @@ describe("sendWebhookMessageDiscord proxy support", () => {
           proxy: "http://mitm-proxy:8080",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await sendWebhookMessageDiscord("hello", {
       cfg,
@@ -145,7 +145,7 @@ describe("sendWebhookMessageDiscord proxy support", () => {
           proxy: "http://proxy.test:8080",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await sendWebhookMessageDiscord("hello", {
       cfg,
@@ -172,7 +172,7 @@ describe("sendWebhookMessageDiscord proxy support", () => {
           proxy: "http://10.0.0.10:8080",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await sendWebhookMessageDiscord("hello", {
       cfg,
@@ -198,7 +198,7 @@ describe("sendWebhookMessageDiscord proxy support", () => {
           token: "Bot test-token",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await sendWebhookMessageDiscord("hello", {
       cfg,
@@ -218,7 +218,7 @@ describe("sendWebhookMessageDiscord proxy support", () => {
     const globalFetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(response);
 
     const result = await sendWebhookMessageDiscord("hello", {
-      cfg: { channels: { discord: { token: "Bot test-token" } } } as OpenClawConfig,
+      cfg: { channels: { discord: { token: "Bot test-token" } } } as BotConfig,
       accountId: "default",
       webhookId: "123",
       webhookToken: "abc",
@@ -238,7 +238,7 @@ describe("sendWebhookMessageDiscord proxy support", () => {
     const globalFetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(tracked.response);
 
     const result = await sendWebhookMessageDiscord("hello", {
-      cfg: { channels: { discord: { token: "Bot test-token" } } } as OpenClawConfig,
+      cfg: { channels: { discord: { token: "Bot test-token" } } } as BotConfig,
       accountId: "default",
       webhookId: "123",
       webhookToken: "abc",
@@ -256,7 +256,7 @@ describe("sendWebhookMessageDiscord proxy support", () => {
       .mockResolvedValue(new Response("not json", { status: 200 }));
 
     const result = await sendWebhookMessageDiscord("hello", {
-      cfg: { channels: { discord: { token: "Bot test-token" } } } as OpenClawConfig,
+      cfg: { channels: { discord: { token: "Bot test-token" } } } as BotConfig,
       accountId: "default",
       webhookId: "123",
       webhookToken: "abc",
@@ -280,7 +280,7 @@ describe("sendWebhookMessageDiscord proxy support", () => {
           token: "Bot test-token",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const thrown = await sendWebhookMessageDiscord("hello", {
       cfg,
@@ -321,7 +321,7 @@ describe("sendWebhookMessageDiscord proxy support", () => {
           token: "Bot test-token",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const thrown = await sendWebhookMessageDiscord("hello", {
       cfg,
@@ -358,7 +358,7 @@ describe("sendWebhookMessageDiscord proxy support", () => {
           token: "Bot test-token",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const thrown = await sendWebhookMessageDiscord("hello", {
       cfg,

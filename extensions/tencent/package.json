@@ -1,19 +1,19 @@
 {
-  "name": "@openclaw/tencent-provider",
+  "name": "@hanzo/bot-tencent-provider",
   "version": "2026.7.2",
-  "description": "OpenClaw Tencent Cloud provider plugin (TokenHub + Token Plan)",
+  "description": "Bot Tencent Cloud provider plugin (TokenHub + Token Plan)",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
     "setupEntry": "./setup-api.ts",
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/tencent-provider",
-      "npmSpec": "@openclaw/tencent-provider",
+      "clawhubSpec": "clawhub:@hanzo/bot-tencent-provider",
+      "npmSpec": "@hanzo/bot-tencent-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.9"
     },
@@ -21,7 +21,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {
@@ -31,6 +31,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   }
 }

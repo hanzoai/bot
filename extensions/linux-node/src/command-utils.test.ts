@@ -1,4 +1,4 @@
-import type { SpawnResult } from "openclaw/plugin-sdk/process-runtime";
+import type { SpawnResult } from "bot/plugin-sdk/process-runtime";
 import { describe, expect, it } from "vitest";
 import { assertToolResult, formatToolError } from "./command-utils.js";
 

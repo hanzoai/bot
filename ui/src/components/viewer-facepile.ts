@@ -3,7 +3,7 @@ import { property } from "lit/decorators.js";
 import type { PresenceEntry } from "../api/types.ts";
 import { CONTROL_UI_BUILD_INFO, type ControlUiBuildInfo } from "../build-info.ts";
 import { t } from "../i18n/index.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { BotLightDomContentsElement } from "../lit/bot-element.ts";
 import {
   identityAvatarClass,
   renderIdentityAvatarImage,
@@ -129,7 +129,7 @@ function renderViewerAvatar(view: IdentityAvatarView) {
 
 export type ViewerAvatarVariant = "session" | "footer" | "profile";
 
-class ViewerAvatar extends OpenClawLightDomContentsElement {
+class ViewerAvatar extends BotLightDomContentsElement {
   @property({ attribute: false }) user: PresenceViewer | null = null;
   @property() variant: ViewerAvatarVariant = "session";
 
@@ -161,7 +161,7 @@ function renderPresenceCardRow(user: PresenceViewer, isSelf: boolean) {
   // as a subtitle would just echo the same line.
   const subtitle = user.email && user.email !== label ? user.email : undefined;
   return html`<div class="sidebar-hover-card__person" data-viewer-id=${user.id}>
-    <openclaw-viewer-avatar .user=${user} variant="footer"></openclaw-viewer-avatar>
+    <bot-viewer-avatar .user=${user} variant="footer"></bot-viewer-avatar>
     <span class="sidebar-hover-card__person-text">
       <span class="sidebar-hover-card__person-name"
         >${label}${isSelf
@@ -175,7 +175,7 @@ function renderPresenceCardRow(user: PresenceViewer, isSelf: boolean) {
   </div>`;
 }
 
-class ViewerFacepile extends OpenClawLightDomContentsElement {
+class ViewerFacepile extends BotLightDomContentsElement {
   @property({ attribute: false }) presencePayload: unknown;
   @property({ attribute: false }) selfInstanceId?: string;
   @property({ attribute: false }) sessionKey?: string;
@@ -206,12 +206,12 @@ class ViewerFacepile extends OpenClawLightDomContentsElement {
     >
       ${visible.map((user) =>
         this.variant === "footer"
-          ? html`<openclaw-viewer-avatar .user=${user} variant="footer"></openclaw-viewer-avatar>`
-          : html`<openclaw-tooltip .content=${presenceViewerLabel(user)}>
+          ? html`<bot-viewer-avatar .user=${user} variant="footer"></bot-viewer-avatar>`
+          : html`<bot-tooltip .content=${presenceViewerLabel(user)}>
               <span class="viewer-facepile__tooltip-anchor">
-                <openclaw-viewer-avatar .user=${user} variant="session"></openclaw-viewer-avatar>
+                <bot-viewer-avatar .user=${user} variant="session"></bot-viewer-avatar>
               </span>
-            </openclaw-tooltip>`,
+            </bot-tooltip>`,
       )}
       ${overflow.length > 0
         ? this.variant === "footer"
@@ -220,13 +220,13 @@ class ViewerFacepile extends OpenClawLightDomContentsElement {
               aria-label=${overflow.map(presenceViewerLabel).join(", ")}
               >+${overflow.length}</span
             >`
-          : html`<openclaw-tooltip .content=${overflow.map(presenceViewerLabel).join("\n")}>
+          : html`<bot-tooltip .content=${overflow.map(presenceViewerLabel).join("\n")}>
               <span
                 class="viewer-avatar viewer-avatar--overflow"
                 aria-label=${overflow.map(presenceViewerLabel).join(", ")}
                 >+${overflow.length}</span
               >
-            </openclaw-tooltip>`
+            </bot-tooltip>`
         : nothing}
     </span>`;
     if (this.variant !== "footer") {
@@ -237,7 +237,7 @@ class ViewerFacepile extends OpenClawLightDomContentsElement {
       a.id === projection.selfUserId ? -1 : b.id === projection.selfUserId ? 1 : 0,
     );
     return html`
-      <openclaw-tooltip class="sidebar-hover-tooltip">
+      <bot-tooltip class="sidebar-hover-tooltip">
         <span
           class="viewer-facepile-trigger"
           role="group"
@@ -267,23 +267,23 @@ class ViewerFacepile extends OpenClawLightDomContentsElement {
             ${renderSidebarServerDetails(this.buildInfo, this.gatewayVersion)}
           </section>
         </div>
-      </openclaw-tooltip>
+      </bot-tooltip>
     `;
   }
 }
 
 if (globalThis.customElements) {
-  if (!customElements.get("openclaw-viewer-avatar")) {
-    customElements.define("openclaw-viewer-avatar", ViewerAvatar);
+  if (!customElements.get("bot-viewer-avatar")) {
+    customElements.define("bot-viewer-avatar", ViewerAvatar);
   }
-  if (!customElements.get("openclaw-viewer-facepile")) {
-    customElements.define("openclaw-viewer-facepile", ViewerFacepile);
+  if (!customElements.get("bot-viewer-facepile")) {
+    customElements.define("bot-viewer-facepile", ViewerFacepile);
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-viewer-avatar": ViewerAvatar;
-    "openclaw-viewer-facepile": ViewerFacepile;
+    "bot-viewer-avatar": ViewerAvatar;
+    "bot-viewer-facepile": ViewerFacepile;
   }
 }

@@ -30,24 +30,24 @@ type SidebarNativeGatewayTestSnapshot = {
 };
 
 type SidebarNativeGatewayTestWindow = Window & {
-  __OPENCLAW_NATIVE_WEB_CHROME__?: boolean;
-  __OPENCLAW_NATIVE_GATEWAYS__?: SidebarNativeGatewayTestSnapshot;
+  __BOT_NATIVE_WEB_CHROME__?: boolean;
+  __BOT_NATIVE_GATEWAYS__?: SidebarNativeGatewayTestSnapshot;
 };
 
 function setNativeGatewayTestState(snapshot: SidebarNativeGatewayTestSnapshot): void {
   const nativeWindow = window as SidebarNativeGatewayTestWindow;
-  nativeWindow["__OPENCLAW_NATIVE_WEB_CHROME__"] = true;
-  nativeWindow["__OPENCLAW_NATIVE_GATEWAYS__"] = snapshot;
+  nativeWindow["__BOT_NATIVE_WEB_CHROME__"] = true;
+  nativeWindow["__BOT_NATIVE_GATEWAYS__"] = snapshot;
 }
 
 afterEach(() => {
   const nativeWindow = window as SidebarNativeGatewayTestWindow;
-  Reflect.deleteProperty(nativeWindow, "__OPENCLAW_NATIVE_WEB_CHROME__");
-  Reflect.deleteProperty(nativeWindow, "__OPENCLAW_NATIVE_GATEWAYS__");
+  Reflect.deleteProperty(nativeWindow, "__BOT_NATIVE_WEB_CHROME__");
+  Reflect.deleteProperty(nativeWindow, "__BOT_NATIVE_GATEWAYS__");
 });
 
 describe("AppSidebar update card wiring", () => {
-  it("keeps OpenClaw out of the workspace sidebar", async () => {
+  it("keeps Bot out of the workspace sidebar", async () => {
     const gateway = createGateway({} as GatewayBrowserClient);
     const { sidebar } = await mountSidebar(gateway, createSessions("main", ["agent:main:main"]));
 
@@ -68,8 +68,8 @@ describe("AppSidebar update card wiring", () => {
 
     const footer = sidebar.querySelector(".sidebar-shell__footer");
     // Attention chips (when present) stack above the update card.
-    expect(footer?.firstElementChild?.localName).toBe("openclaw-sidebar-attention");
-    const card = footer?.querySelector("openclaw-sidebar-update-card");
+    expect(footer?.firstElementChild?.localName).toBe("bot-sidebar-attention");
+    const card = footer?.querySelector("bot-sidebar-update-card");
     expect(card).not.toBeNull();
     card?.querySelector<HTMLButtonElement>(".sidebar-update-card__action")?.click();
     expect(onUpdate).toHaveBeenCalledOnce();
@@ -106,7 +106,7 @@ describe("AppSidebar viewer presence", () => {
 
     await vi.waitFor(() => {
       const avatar = sidebar.querySelector<HTMLImageElement>(
-        ".sidebar-identity-card openclaw-viewer-avatar img",
+        ".sidebar-identity-card bot-viewer-avatar img",
       );
       expect(avatar?.getAttribute("src")).toBe("/api/users/00-self/avatar?v=7");
     });
@@ -176,7 +176,7 @@ describe("AppSidebar viewer presence", () => {
     await sidebar.updateComplete;
 
     const sessionFacepile = sidebar.querySelector<HTMLElement>(
-      '[data-session-key="agent:main:work"] openclaw-viewer-facepile',
+      '[data-session-key="agent:main:work"] bot-viewer-facepile',
     );
     await (sessionFacepile as { updateComplete?: Promise<unknown> } | null)?.updateComplete;
     expect(
@@ -190,7 +190,7 @@ describe("AppSidebar viewer presence", () => {
     expect(sessionFacepile?.querySelector(".viewer-avatar--overflow")?.textContent).toContain("+3");
     expect(sessionFacepile?.querySelector('[data-viewer-id="alice"] img')).not.toBeNull();
     expect(
-      [...(sessionFacepile?.querySelectorAll("openclaw-tooltip") ?? [])].map(
+      [...(sessionFacepile?.querySelectorAll("bot-tooltip") ?? [])].map(
         (tooltip) => (tooltip as HTMLElement & { content?: string }).content,
       ),
     ).toEqual(["Alice", "bob@example.test", "Carol", "Dave\nErin\nFrank"]);
@@ -201,14 +201,14 @@ describe("AppSidebar viewer presence", () => {
     );
     expect(identityCard?.querySelector('[data-viewer-id="00-self"]')).not.toBeNull();
 
-    const avatar = identityCard?.querySelector<HTMLImageElement>("openclaw-viewer-avatar img");
+    const avatar = identityCard?.querySelector<HTMLImageElement>("bot-viewer-avatar img");
     expect(avatar?.getAttribute("src")).toBe("/api/users/00-self/avatar?v=1");
     const footer = sidebar.querySelector(".sidebar-footer-bar");
-    expect(footer?.querySelector("openclaw-viewer-facepile")).toBeNull();
-    expect(footer?.querySelector("openclaw-sidebar-build-chip")).toBeNull();
+    expect(footer?.querySelector("bot-viewer-facepile")).toBeNull();
+    expect(footer?.querySelector("bot-sidebar-build-chip")).toBeNull();
     expect(footer?.querySelector(".sidebar-brand__logo-slot")).toBeNull();
     expect([...(footer?.children ?? [])].map((element) => element.localName)).toEqual([
-      "openclaw-tooltip",
+      "bot-tooltip",
       "span",
     ]);
     gatewayHarness.gateway.updateSelfUser?.({
@@ -263,7 +263,7 @@ describe("AppSidebar gateway footer subtitle", () => {
 
   it("stays hidden outside native chrome", async () => {
     const nativeWindow = window as SidebarNativeGatewayTestWindow;
-    nativeWindow["__OPENCLAW_NATIVE_GATEWAYS__"] = twoGateways;
+    nativeWindow["__BOT_NATIVE_GATEWAYS__"] = twoGateways;
     const gateway = createGateway({} as GatewayBrowserClient);
     const { sidebar } = await mountSidebar(gateway, createSessions("main", ["agent:main:main"]));
 
@@ -321,7 +321,7 @@ describe("AppSidebar gateway footer subtitle", () => {
       ],
       currentId: "remote",
     });
-    window.dispatchEvent(new CustomEvent("openclaw:native-gateways-changed"));
+    window.dispatchEvent(new CustomEvent("bot:native-gateways-changed"));
     await sidebar.updateComplete;
 
     expect(sidebar.querySelector(".sidebar-identity-card__gateway-name")?.textContent).toBe(
@@ -569,7 +569,7 @@ describe("AppSidebar agent chip", () => {
     expect(sidebar.querySelector(".nav-item--home .nav-item__state")).toBeNull();
     expect(ring?.hasAttribute("title")).toBe(false);
     expect(
-      (ring?.closest("openclaw-tooltip") as (HTMLElement & { content?: string }) | null)?.content,
+      (ring?.closest("bot-tooltip") as (HTMLElement & { content?: string }) | null)?.content,
     ).toBe("Active run");
   });
 
@@ -587,7 +587,7 @@ describe("AppSidebar agent chip", () => {
       expect(glyph?.getAttribute("aria-label")).toBe("Dashboard available");
       expect(glyph?.hasAttribute("title")).toBe(false);
       expect(
-        (glyph?.closest("openclaw-tooltip") as (HTMLElement & { content?: string }) | null)
+        (glyph?.closest("bot-tooltip") as (HTMLElement & { content?: string }) | null)
           ?.content,
       ).toBe("Dashboard available");
     } finally {

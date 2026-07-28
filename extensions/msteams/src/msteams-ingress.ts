@@ -4,8 +4,8 @@ import {
   type ChannelIngressQueue,
   type ChannelIngressMonitorDeliveryResult,
   type ChannelIngressMonitorLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/channel-outbound";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
 import { classifyMSTeamsSendError } from "./errors.js";
 import { MSTEAMS_REQUEST_TIMEOUT_MS } from "./request-timeout.js";
 import { getMSTeamsRuntime } from "./runtime.js";

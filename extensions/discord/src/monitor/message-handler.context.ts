@@ -5,20 +5,20 @@ import {
   resolveEnvelopeFormatOptions,
   toHistoryMediaEntries,
   toInboundMediaFacts,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { resolveChannelContextVisibilityMode } from "openclaw/plugin-sdk/context-visibility-runtime";
-import { resolvePinnedMainDmOwnerFromAllowlist } from "openclaw/plugin-sdk/conversation-runtime";
-import { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
+} from "bot/plugin-sdk/channel-inbound";
+import { resolveChannelContextVisibilityMode } from "bot/plugin-sdk/context-visibility-runtime";
+import { resolvePinnedMainDmOwnerFromAllowlist } from "bot/plugin-sdk/conversation-runtime";
+import { isDangerousNameMatchingEnabled } from "bot/plugin-sdk/dangerous-name-runtime";
 import {
   buildHistoryContextFromEntries,
   buildInboundHistoryFromEntries,
   createChannelHistoryWindow,
-} from "openclaw/plugin-sdk/reply-history";
-import { buildAgentSessionKey, resolveThreadSessionKeys } from "openclaw/plugin-sdk/routing";
-import { danger, logVerbose, shouldLogVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { evaluateSupplementalContextVisibility } from "openclaw/plugin-sdk/security-runtime";
-import { readSessionUpdatedAt, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/reply-history";
+import { buildAgentSessionKey, resolveThreadSessionKeys } from "bot/plugin-sdk/routing";
+import { danger, logVerbose, shouldLogVerbose } from "bot/plugin-sdk/runtime-env";
+import { evaluateSupplementalContextVisibility } from "bot/plugin-sdk/security-runtime";
+import { readSessionUpdatedAt, resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { resolveDiscordConversationIdentity } from "../conversation-identity.js";
 import { ChannelType } from "../internal/discord.js";
 import { normalizeDiscordAllowList, normalizeDiscordSlug } from "./allow-list.js";

@@ -1,5 +1,5 @@
 import type { ChannelLegacyStateMigrationPlan } from "../channels/plugins/legacy-state-migration.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginModuleLoaderFactory } from "../plugins/plugin-module-loader-cache.js";
 
 /** Legacy session helpers used while bundled channels migrate old session key formats. */
@@ -13,7 +13,7 @@ export type BundledChannelLegacySessionSurface = {
 
 /** Detects channel-owned state migrations needed before a bundled channel starts. */
 export type BundledChannelLegacyStateMigrationDetector = (params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   stateDir: string;
   oauthDir: string;

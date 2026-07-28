@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { QaRunnerCliRegistration } from "bot/plugin-sdk/qa-runner-runtime";
 import {
   acquireQaCredentialLease,
   startQaCredentialLeaseHeartbeat,
@@ -118,7 +118,7 @@ export async function createDiscordQaTransportAdapter(
       heartbeat.throwIfFailed();
     },
     async sendInbound(input) {
-      const text = input.text.replaceAll("@openclaw", `<@${runtimeEnv.sutApplicationId}>`);
+      const text = input.text.replaceAll("@bot", `<@${runtimeEnv.sutApplicationId}>`);
       const sent = await discordQaScenarioSupport.testing.sendChannelMessage(
         runtimeEnv.driverBotToken,
         runtimeEnv.channelId,
@@ -133,7 +133,7 @@ export async function createDiscordQaTransportAdapter(
     },
     resetTransport: () => undefined,
     createGatewayConfig: () =>
-      discordQaScenarioSupport.testing.buildDiscordQaConfig({} as OpenClawConfig, {
+      discordQaScenarioSupport.testing.buildDiscordQaConfig({} as BotConfig, {
         guildId: runtimeEnv.guildId,
         channelId: runtimeEnv.channelId,
         driverBotId: driverIdentity.id,

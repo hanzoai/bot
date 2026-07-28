@@ -1,7 +1,7 @@
 /**
  * Ensures runtime plugins required by selected native harnesses are installed.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { ProviderRouteOverridePresence } from "../../plugin-sdk/provider-model-types.js";
 import { withActivatedPluginIds } from "../../plugins/activation-context.js";
 import { resolveManifestActivationPlan } from "../../plugins/activation-planner.js";
@@ -20,7 +20,7 @@ import {
   pluginInstallPathMatchesRoot,
   type PluginVerificationFailureReason,
 } from "../../plugins/runtime-degraded-state.js";
-import { isDefaultAgentRuntimeId, OPENCLAW_AGENT_RUNTIME_ID } from "../agent-runtime-id.js";
+import { isDefaultAgentRuntimeId, BOT_AGENT_RUNTIME_ID } from "../agent-runtime-id.js";
 import { normalizeOptionalAgentRuntimeId } from "../agent-runtime-id.js";
 import { isCliRuntimeAliasForProvider } from "../model-runtime-aliases.js";
 import { resolveAgentHarnessPolicy } from "./policy.js";
@@ -39,13 +39,13 @@ function dedupePluginIds(values: readonly string[]): string[] {
   return result;
 }
 
-function restrictiveAllowlistOmitsPlugin(config: OpenClawConfig | undefined, pluginId: string) {
+function restrictiveAllowlistOmitsPlugin(config: BotConfig | undefined, pluginId: string) {
   const allow = config?.plugins?.allow ?? [];
   return allow.length > 0 && !allow.includes(pluginId);
 }
 
 function resolveSelectedMemoryPluginIds(params: {
-  config: OpenClawConfig | undefined;
+  config: BotConfig | undefined;
   workspaceDir: string;
 }): string[] {
   const registry = loadPluginRegistrySnapshot({
@@ -79,7 +79,7 @@ function resolveSelectedMemoryPluginIds(params: {
 export function resolveAgentHarnessOwnerPluginIds(params: {
   runtime: string;
   provider: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   workspaceDir: string;
 }): string[] {
   const activationPlan = resolveManifestActivationPlan({
@@ -159,7 +159,7 @@ export type AgentHarnessRuntimePayloadFailure = {
 export function resolveAgentHarnessRuntimeAvailability(params: {
   runtime: string;
   provider: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   workspaceDir: string;
   payloadFailures: readonly AgentHarnessRuntimePayloadFailure[];
   payloadCheckedPluginIds: readonly string[];
@@ -211,10 +211,10 @@ export function resolveAgentHarnessRuntimeAvailability(params: {
 }
 
 function withRuntimePluginIdsAllowed(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   requiredPluginId: string;
   pluginIds: readonly string[];
-}): OpenClawConfig | undefined {
+}): BotConfig | undefined {
   if (params.pluginIds.length === 0) {
     return params.config;
   }
@@ -235,7 +235,7 @@ function withRuntimePluginIdsAllowed(params: {
 export async function ensureSelectedAgentHarnessPlugin(params: {
   provider: string;
   modelId: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   agentId?: string;
   sessionKey?: string;
   agentHarnessId?: string;
@@ -260,7 +260,7 @@ export async function ensureSelectedAgentHarnessPlugin(params: {
       : policy.runtime;
   if (
     isDefaultAgentRuntimeId(runtime) ||
-    runtime === OPENCLAW_AGENT_RUNTIME_ID ||
+    runtime === BOT_AGENT_RUNTIME_ID ||
     isCliRuntimeAliasForProvider({
       runtime,
       provider: params.provider,

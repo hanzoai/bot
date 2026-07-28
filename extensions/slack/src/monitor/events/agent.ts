@@ -1,6 +1,6 @@
 // Slack plugin module handles Agent View lifecycle events.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { danger } from "openclaw/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { danger } from "bot/plugin-sdk/runtime-env";
 import type { SlackMonitorContext } from "../context.js";
 import type { SlackAppContextChangedEvent } from "../types.js";
 

@@ -227,7 +227,7 @@ describe("sessionsCleanupCommand", () => {
     expect(logs).toHaveLength(1);
     expect(JSON.parse(logs[0] ?? "{}")).toEqual({
       agentId: "main",
-      storePath: "/resolved/openclaw-agent.sqlite",
+      storePath: "/resolved/bot-agent.sqlite",
       mode: "enforce",
       dryRun: false,
       beforeCount: 3,
@@ -262,7 +262,7 @@ describe("sessionsCleanupCommand", () => {
   });
 
   it("delegates non-store enforcing cleanup through the Gateway writer when reachable", async () => {
-    const remoteStorePath = "C:\\Users\\gateway\\.openclaw\\agents\\main\\sessions\\sessions.json";
+    const remoteStorePath = "C:\\Users\\gateway\\.bot\\agents\\main\\sessions\\sessions.json";
     mocks.callGateway.mockResolvedValue({
       agentId: "main",
       storePath: remoteStorePath,
@@ -317,7 +317,7 @@ describe("sessionsCleanupCommand", () => {
   });
 
   it("preserves a Gateway-owned store path in human output", async () => {
-    const remoteStorePath = "C:\\Users\\gateway\\.openclaw\\openclaw-agent.sqlite";
+    const remoteStorePath = "C:\\Users\\gateway\\.bot\\bot-agent.sqlite";
     mocks.callGateway.mockResolvedValue({
       agentId: "main",
       storePath: remoteStorePath,
@@ -395,7 +395,7 @@ describe("sessionsCleanupCommand", () => {
     expect(logs).toHaveLength(1);
     expect(JSON.parse(logs[0] ?? "{}")).toEqual({
       agentId: "main",
-      storePath: "/resolved/openclaw-agent.sqlite",
+      storePath: "/resolved/bot-agent.sqlite",
       mode: "warn",
       dryRun: true,
       beforeCount: 2,
@@ -467,7 +467,7 @@ describe("sessionsCleanupCommand", () => {
     expect(logs).toHaveLength(1);
     expect(JSON.parse(logs[0] ?? "{}")).toEqual({
       agentId: "main",
-      storePath: "/resolved/openclaw-agent.sqlite",
+      storePath: "/resolved/bot-agent.sqlite",
       mode: "warn",
       dryRun: true,
       beforeCount: 1,
@@ -532,7 +532,7 @@ describe("sessionsCleanupCommand", () => {
       runtime,
     );
 
-    expectLogsToInclude(logs, "Session store: /resolved/openclaw-agent.sqlite");
+    expectLogsToInclude(logs, "Session store: /resolved/bot-agent.sqlite");
     expectLogsToInclude(logs, "Planned session actions:");
     expectLogsToInclude(logs, "Would prune unreferenced artifacts: 2");
     const tableHeaderLines = logs.filter((line) => line.includes("Action") && line.includes("Key"));

@@ -2,7 +2,7 @@
 import crypto from "node:crypto";
 import { stableStringify } from "../../agents/stable-stringify.js";
 import { redactConfigObject } from "../../config/redact-snapshot.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { matchesSkillFilter } from "../discovery/filter.js";
 import { buildWorkspaceSkillSnapshot } from "../loading/workspace.js";
 import { WORKSPACE_SKILLS_PROMPT_FORMAT_VERSION } from "../types.js";
@@ -17,7 +17,7 @@ const RESOLVED_SKILLS_CACHE_MAX = 10;
 /** Inputs that make a resolved skill snapshot reusable within a process. */
 type ReusableSkillSnapshotParams = {
   workspaceDir: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   agentId?: string;
   skillFilter?: string[];
   eligibility?: SkillEligibilityContext;
@@ -33,7 +33,7 @@ type ReusableSkillSnapshotResult = {
   snapshotVersion: number;
 };
 
-function fingerprintSkillSnapshotConfig(config: OpenClawConfig): string {
+function fingerprintSkillSnapshotConfig(config: BotConfig): string {
   return crypto
     .createHash("sha256")
     .update(stableStringify(redactConfigObject(config)))

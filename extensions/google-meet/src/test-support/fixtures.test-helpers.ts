@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
 import { PassThrough } from "node:stream";
-import type { MeetingRealtimeAudioEngineHealth } from "openclaw/plugin-sdk/meeting-runtime";
+import type { MeetingRealtimeAudioEngineHealth } from "bot/plugin-sdk/meeting-runtime";
 import { vi } from "vitest";
 import { resolveGoogleMeetConfig } from "../config.js";
 import { GoogleMeetRuntime } from "../runtime.js";

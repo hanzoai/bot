@@ -60,11 +60,11 @@ describe("resolveGatewayService", () => {
     );
   });
 
-  it("guards mutating service adapters when config was written by a newer OpenClaw", async () => {
-    const tempHome = await makeTempWorkspace("openclaw-service-future-config-");
-    const stateDir = path.join(tempHome, ".openclaw");
-    const configPath = path.join(stateDir, "openclaw.json");
-    const envSnapshot = captureEnv(["HOME", "OPENCLAW_STATE_DIR", "OPENCLAW_CONFIG_PATH"]);
+  it("guards mutating service adapters when config was written by a newer Bot", async () => {
+    const tempHome = await makeTempWorkspace("bot-service-future-config-");
+    const stateDir = path.join(tempHome, ".bot");
+    const configPath = path.join(stateDir, "bot.json");
+    const envSnapshot = captureEnv(["HOME", "BOT_STATE_DIR", "BOT_CONFIG_PATH"]);
     try {
       await fs.mkdir(stateDir, { recursive: true });
       await fs.writeFile(
@@ -80,8 +80,8 @@ describe("resolveGatewayService", () => {
         ),
       );
       process.env.HOME = tempHome;
-      process.env.OPENCLAW_STATE_DIR = stateDir;
-      process.env.OPENCLAW_CONFIG_PATH = configPath;
+      process.env.BOT_STATE_DIR = stateDir;
+      process.env.BOT_CONFIG_PATH = configPath;
       clearConfigCache();
       clearRuntimeConfigSnapshot();
 
@@ -101,11 +101,11 @@ describe("resolveGatewayService", () => {
   it("guards every native service mutation when an external supervisor owns lifecycle", async () => {
     setPlatform("darwin");
     const service = resolveGatewayService();
-    const env = { OPENCLAW_SUPERVISOR_MODE: "external" };
+    const env = { BOT_SUPERVISOR_MODE: "external" };
     const installArgs = {
       env,
       stdout: process.stdout,
-      programArguments: ["openclaw", "gateway", "run"],
+      programArguments: ["bot", "gateway", "run"],
     };
     const mutations = [
       () => service.stage(installArgs),
@@ -138,20 +138,20 @@ describe("readGatewayServiceState", () => {
     const service = createService({
       isLoaded: vi.fn(async () => true),
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
-        environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+        programArguments: ["bot", "gateway", "run"],
+        environment: { BOT_GATEWAY_PORT: "18789" },
       })),
       readRuntime: vi.fn(async () => ({ status: "running" })),
     });
 
     const state = await readGatewayServiceState(service, {
-      env: { OPENCLAW_GATEWAY_PORT: "1" },
+      env: { BOT_GATEWAY_PORT: "1" },
     });
 
     expect(state.installed).toBe(true);
     expect(state.loaded).toBe(true);
     expect(state.running).toBe(true);
-    expect(state.env.OPENCLAW_GATEWAY_PORT).toBe("18789");
+    expect(state.env.BOT_GATEWAY_PORT).toBe("18789");
   });
 
   it("keeps the caller-selected service identity when merging persisted env", async () => {
@@ -159,23 +159,23 @@ describe("readGatewayServiceState", () => {
     const service = createService({
       isLoaded: vi.fn(async () => true),
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
+        programArguments: ["bot", "gateway", "run"],
         environment: {
-          OPENCLAW_GATEWAY_PORT: "18789",
-          OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway.service",
+          BOT_GATEWAY_PORT: "18789",
+          BOT_SYSTEMD_UNIT: "bot-gateway.service",
         },
       })),
       readRuntime,
     });
 
     const state = await readGatewayServiceState(service, {
-      env: { OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-maintenance.service" },
+      env: { BOT_SYSTEMD_UNIT: "bot-gateway-maintenance.service" },
     });
 
-    expect(state.env.OPENCLAW_SYSTEMD_UNIT).toBe("openclaw-gateway-maintenance.service");
+    expect(state.env.BOT_SYSTEMD_UNIT).toBe("bot-gateway-maintenance.service");
     expect(readRuntime).toHaveBeenCalledWith(
       expect.objectContaining({
-        OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-maintenance.service",
+        BOT_SYSTEMD_UNIT: "bot-gateway-maintenance.service",
       }),
       { timeoutMs: undefined },
     );
@@ -197,8 +197,8 @@ describe("startGatewayService", () => {
 
   it("starts stopped installed services and returns post-start state", async () => {
     const readCommand = vi.fn(async () => ({
-      programArguments: ["openclaw", "gateway", "run"],
-      environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+      programArguments: ["bot", "gateway", "run"],
+      environment: { BOT_GATEWAY_PORT: "18789" },
     }));
     const isLoaded = vi
       .fn<GatewayService["isLoaded"]>()
@@ -230,7 +230,7 @@ describe("startGatewayService", () => {
   it("returns already-running without starting a loaded running service", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
+        programArguments: ["bot", "gateway", "run"],
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi.fn(async () => ({ status: "running", pid: 4242 })),
@@ -251,8 +251,8 @@ describe("startGatewayService", () => {
   it("returns repair drift with an already-running service", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
-        environment: { OPENCLAW_SERVICE_VERSION: "2026.4.24" },
+        programArguments: ["bot", "gateway", "run"],
+        environment: { BOT_SERVICE_VERSION: "2026.4.24" },
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi.fn(async () => ({ status: "running", pid: 4242 })),
@@ -273,8 +273,8 @@ describe("startGatewayService", () => {
   it("requests repair before start when the loaded service version is stale", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "run"],
-        environment: { OPENCLAW_SERVICE_VERSION: "2026.4.24" },
+        programArguments: ["bot", "gateway", "run"],
+        environment: { BOT_SERVICE_VERSION: "2026.4.24" },
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi.fn(async () => ({ status: "stopped" })),
@@ -288,7 +288,7 @@ describe("startGatewayService", () => {
     expect(result.outcome).toBe("repair-required");
     if (result.outcome === "repair-required") {
       expect(formatGatewayServiceStartRepairIssues(result.issues)).toContain(
-        "service was installed by OpenClaw 2026.4.24",
+        "service was installed by Bot 2026.4.24",
       );
     }
     expect(service.start).not.toHaveBeenCalled();
@@ -297,8 +297,8 @@ describe("startGatewayService", () => {
   it("requests repair before start when the managed port differs from config", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "--port", "18789"],
-        environment: { OPENCLAW_GATEWAY_PORT: "19001" },
+        programArguments: ["bot", "gateway", "--port", "18789"],
+        environment: { BOT_GATEWAY_PORT: "19001" },
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi.fn(async () => ({ status: "stopped" })),
@@ -326,8 +326,8 @@ describe("startGatewayService", () => {
   it("uses the command-line port before a stale managed environment port", async () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
-        programArguments: ["openclaw", "gateway", "--port", "19001"],
-        environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+        programArguments: ["bot", "gateway", "--port", "19001"],
+        environment: { BOT_GATEWAY_PORT: "18789" },
       })),
       isLoaded: vi.fn(async () => true),
       readRuntime: vi.fn(async () => ({ status: "stopped" })),
@@ -350,8 +350,8 @@ describe("startGatewayService", () => {
     const service = createService({
       readCommand: vi.fn(async () => ({
         programArguments: [
-          "/private/tmp/openclaw-ai-install-cli-pr118/tools/node/bin/node",
-          "/tmp/openclaw-ai-install-cli-pr118/lib/node_modules/openclaw/dist/index.js",
+          "/private/tmp/bot-ai-install-cli-pr118/tools/node/bin/node",
+          "/tmp/bot-ai-install-cli-pr118/lib/node_modules/bot/dist/index.js",
           "gateway",
         ],
         environment: {},
@@ -375,7 +375,7 @@ describe("startGatewayService", () => {
     const readCommand = vi
       .fn<GatewayService["readCommand"]>()
       .mockResolvedValueOnce({
-        programArguments: ["openclaw", "gateway", "run"],
+        programArguments: ["bot", "gateway", "run"],
       })
       .mockResolvedValueOnce(null);
     const service = createService({

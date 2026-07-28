@@ -5,7 +5,7 @@ import {
   mergeTransportHeaders,
   sanitizeNonEmptyTransportPayloadText,
   sanitizeTransportPayloadText,
-} from "@openclaw/ai/transports";
+} from "@hanzo/bot-ai/transports";
 import OpenAI from "openai";
 // Transport stream shared tests cover payload sanitization, header merging, and
 // final/error stream termination helpers used by provider transports.
@@ -85,7 +85,7 @@ describe("transport stream shared helpers", () => {
     const controller = new AbortController();
     const reason = Object.assign(new Error("agent run aborted for restart"), {
       name: "AbortError",
-      code: "OPENCLAW_RESTART_ABORT",
+      code: "BOT_RESTART_ABORT",
     });
     controller.abort(reason);
     const output: { stopReason: string; errorMessage?: string; errorCode?: string } = {
@@ -107,7 +107,7 @@ describe("transport stream shared helpers", () => {
       error: reason,
     });
     expect(output.stopReason).toBe("aborted");
-    expect(output.errorCode).toBe("OPENCLAW_RESTART_ABORT");
+    expect(output.errorCode).toBe("BOT_RESTART_ABORT");
   });
 
   it.each([

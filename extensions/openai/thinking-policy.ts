@@ -2,7 +2,7 @@
 import type {
   ProviderDefaultThinkingPolicyContext,
   ProviderThinkingProfile,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "bot/plugin-sdk/plugin-entry";
 
 type OpenAIThinkingCompat = ProviderDefaultThinkingPolicyContext["compat"];
 type OpenAIThinkingApi = ProviderDefaultThinkingPolicyContext["api"];
@@ -103,11 +103,11 @@ function buildOpenAIThinkingProfile(params: {
   const codexSupportsUltra = authoritativeCodexEfforts
     ? authoritativeCodexEfforts.includes("ultra")
     : fallbackCodexUltra;
-  // OpenClaw owns its logical Ultra orchestration. Native Codex capabilities
+  // Bot owns its logical Ultra orchestration. Native Codex capabilities
   // come only from the selected ChatGPT route's catalog metadata.
   const supportsUltra =
     (isBare || isSol || isTerra || isLuna) &&
-    (agentRuntime === "openclaw" ||
+    (agentRuntime === "bot" ||
       agentRuntime === "auto" ||
       (agentRuntime === "codex" && codexSupportsUltra));
   const defaultLevel = isSol || isTerra || isLuna ? "medium" : undefined;

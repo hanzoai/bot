@@ -8,12 +8,12 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { normalizeSqliteNumber } from "../infra/sqlite-number.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+  type BotStateDatabaseOptions,
+} from "../state/bot-state-db.js";
 import {
   AUDIT_EVENT_SCHEMA_VERSION,
   AUDIT_INBOUND_MESSAGE_COMPLETED_REASONS,
@@ -35,8 +35,8 @@ import {
   pseudonymizeAuditIdentity,
 } from "./audit-identity.js";
 
-type AuditEventsTable = OpenClawStateKyselyDatabase["audit_events"];
-type AuditDatabase = Pick<OpenClawStateKyselyDatabase, "audit_events">;
+type AuditEventsTable = BotStateKyselyDatabase["audit_events"];
+type AuditDatabase = Pick<BotStateKyselyDatabase, "audit_events">;
 type AuditEventRow = Selectable<AuditEventsTable>;
 
 const AUDIT_EVENT_RETENTION_MS = 30 * 24 * 60 * 60_000;
@@ -577,11 +577,11 @@ function pruneAuditEventsAfterInsert(
 /** Persist one projected event idempotently and prune fixed retention bounds. */
 export function recordAuditEvent(
   input: AuditEventInput,
-  options: OpenClawStateDatabaseOptions = {},
+  options: BotStateDatabaseOptions = {},
 ): AuditEventRecord | undefined {
   let countCacheDatabase: DatabaseSync | undefined;
   try {
-    return runOpenClawStateWriteTransaction(({ db }) => {
+    return runBotStateWriteTransaction(({ db }) => {
       countCacheDatabase = db;
       const insert = executeSqliteQuerySync(
         db,
@@ -622,9 +622,9 @@ export function listAuditEvents(params: {
   cursor?: number;
   limit: number;
   now?: number;
-  database?: OpenClawStateDatabaseOptions;
+  database?: BotStateDatabaseOptions;
 }): AuditEventListPage {
-  const { db } = openOpenClawStateDatabase(params.database);
+  const { db } = openBotStateDatabase(params.database);
   const filters = params.filters ?? {};
   const retainedAfter = (params.now ?? Date.now()) - AUDIT_EVENT_RETENTION_MS;
   let query = getAuditKysely(db)
@@ -680,10 +680,10 @@ export function listAuditEvents(params: {
 export function pruneExpiredAuditEvents(
   params: {
     now?: number;
-    database?: OpenClawStateDatabaseOptions;
+    database?: BotStateDatabaseOptions;
   } = {},
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runBotStateWriteTransaction(({ db }) => {
     executeSqliteQuerySync(
       db,
       getAuditKysely(db)

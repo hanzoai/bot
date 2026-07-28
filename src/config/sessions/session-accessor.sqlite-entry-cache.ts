@@ -1,14 +1,14 @@
 import type { DatabaseSync } from "node:sqlite";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import {
-  deferOpenClawAgentPostCommitPublication,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  deferBotAgentPostCommitPublication,
+  type BotAgentDatabase,
+} from "../../state/bot-agent-db.js";
 import { getSessionKysely } from "./session-accessor.sqlite-scope.js";
 import { parseSqliteSessionEntryJson } from "./session-accessor.sqlite-status.js";
 import type { SessionEntry } from "./types.js";
 
-type SessionEntryCacheDatabase = Pick<OpenClawAgentDatabase, "agentId" | "db" | "path">;
+type SessionEntryCacheDatabase = Pick<BotAgentDatabase, "agentId" | "db" | "path">;
 
 export type SqliteSessionEntryCacheSnapshot = {
   entries: Map<string, SessionEntry>;
@@ -135,24 +135,24 @@ export function readSqliteSessionEntryCache(
   return next;
 }
 
-function invalidateTrackedCache(database: OpenClawAgentDatabase): void {
+function invalidateTrackedCache(database: BotAgentDatabase): void {
   const invalidate = () => {
     const cached = sessionEntryCaches.get(database.path);
     if (cached?.connection === database.db) {
       sessionEntryCaches.delete(database.path);
     }
   };
-  if (deferOpenClawAgentPostCommitPublication(database, invalidate)) {
+  if (deferBotAgentPostCommitPublication(database, invalidate)) {
     return;
   }
   if (database.db.isTransaction) {
     throw new Error(
-      "SQLite session entry writes must use runOpenClawAgentWriteTransaction for cache publication",
+      "SQLite session entry writes must use runBotAgentWriteTransaction for cache publication",
     );
   }
   invalidate();
 }
 
-export function publishSqliteSessionEntryCacheInvalidation(database: OpenClawAgentDatabase): void {
+export function publishSqliteSessionEntryCacheInvalidation(database: BotAgentDatabase): void {
   invalidateTrackedCache(database);
 }

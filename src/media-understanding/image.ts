@@ -1,7 +1,7 @@
 // Model-backed image understanding runtime for providers without a native media
 // provider hook.
-import { clampPositiveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { clampPositiveTimerTimeoutMs } from "@hanzo/bot-normalization-core/number-coercion";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { isMinimaxVlmModel, minimaxUnderstandImage } from "../agents/minimax-vlm.js";
 import { requireApiKey, resolveApiKeyForProvider } from "../agents/model-auth.js";
 import { resolveProviderRequestCapabilities } from "../agents/provider-attribution.js";

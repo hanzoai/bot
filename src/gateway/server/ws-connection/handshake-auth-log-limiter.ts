@@ -1,5 +1,5 @@
 // Rate limiter for noisy websocket handshake auth logs.
-import { resolveIntegerOption } from "@openclaw/normalization-core/number-coercion";
+import { resolveIntegerOption } from "@hanzo/bot-normalization-core/number-coercion";
 
 /** Decision returned for a handshake auth log attempt. */
 type HandshakeAuthLogDecision = {

@@ -87,10 +87,10 @@ describe("AppSidebar session ownership", () => {
 
     await waitForFast(() => {
       expect(
-        sidebar.querySelector('[data-session-key="agent:main:ada"] openclaw-viewer-avatar img'),
+        sidebar.querySelector('[data-session-key="agent:main:ada"] bot-viewer-avatar img'),
       ).not.toBeNull();
       expect(
-        sidebar.querySelector('[data-session-key="agent:main:bob"] openclaw-viewer-avatar img'),
+        sidebar.querySelector('[data-session-key="agent:main:bob"] bot-viewer-avatar img'),
       ).not.toBeNull();
     });
 
@@ -106,7 +106,7 @@ describe("AppSidebar session ownership", () => {
     const carolChip = sidebar.querySelector(
       '[data-session-key="agent:main:carol"] .session-owner-chip',
     );
-    expect(carolChip?.querySelector("openclaw-viewer-avatar")).toBeNull();
+    expect(carolChip?.querySelector("bot-viewer-avatar")).toBeNull();
     expect(carolChip?.textContent?.trim()).toBe("C");
   });
 
@@ -133,7 +133,7 @@ describe("AppSidebar session ownership", () => {
 
     expect(sidebar.sessionData.sessionsResult?.creators).toHaveLength(2);
     expect(sidebar.querySelector('[data-session-key="agent:main:ada"]')).not.toBeNull();
-    expect(sidebar.querySelectorAll("openclaw-session-owner-chip")).toHaveLength(1);
+    expect(sidebar.querySelectorAll("bot-session-owner-chip")).toHaveLength(1);
     const menu = await openCreatorMenu(sidebar);
     expect(menu.textContent).toContain("People");
     expect(menu.querySelector('[value="creator:"]')).not.toBeNull();
@@ -187,7 +187,7 @@ describe("AppSidebar session ownership", () => {
       ),
     ).toBe(false);
     expect(menu.querySelector('[value^="creator:"]')).toBeNull();
-    expect(sidebar.querySelector("openclaw-session-owner-chip")).toBeNull();
+    expect(sidebar.querySelector("bot-session-owner-chip")).toBeNull();
   });
 
   it("shows archive attribution only in collaborative archived-session lists", async () => {
@@ -221,7 +221,7 @@ describe("AppSidebar session ownership", () => {
     await sidebar.updateComplete;
 
     expect(
-      sidebar.querySelector('openclaw-session-owner-chip span[title="Archived by Bob"]'),
+      sidebar.querySelector('bot-session-owner-chip span[title="Archived by Bob"]'),
     ).not.toBeNull();
     expect(sidebar.querySelector('span[title="Created by Ada"]')).toBeNull();
 
@@ -230,7 +230,7 @@ describe("AppSidebar session ownership", () => {
     harness.publishList({ result, agentId: "main" });
     await sidebar.updateComplete;
 
-    expect(sidebar.querySelector("openclaw-session-owner-chip")).toBeNull();
+    expect(sidebar.querySelector("bot-session-owner-chip")).toBeNull();
   });
 
   it("filters by creator and hides custom groups without matching sessions", async () => {
@@ -258,7 +258,7 @@ describe("AppSidebar session ownership", () => {
     harness.publishList({ result, agentId: "main" });
     await sidebar.updateComplete;
 
-    expect(sidebar.querySelectorAll("openclaw-session-owner-chip")).toHaveLength(2);
+    expect(sidebar.querySelectorAll("bot-session-owner-chip")).toHaveLength(2);
 
     await selectCreator(sidebar, "profile-ada");
 
@@ -439,7 +439,7 @@ describe("AppSidebar session ownership", () => {
     await sidebar.updateComplete;
 
     const row = sidebar.querySelector(`[data-session-key="${key}"]`);
-    expect(row?.querySelector(".session-glyph openclaw-session-owner-chip")).not.toBeNull();
+    expect(row?.querySelector(".session-glyph bot-session-owner-chip")).not.toBeNull();
     expect(row?.querySelector('.session-glyph__badge[aria-label="Unread"]')).not.toBeNull();
     expect(row?.querySelector(".sidebar-recent-session__unread")).toBeNull();
     expect(row?.querySelector(".sidebar-session-indicator__dot")).toBeNull();
@@ -497,10 +497,10 @@ describe("AppSidebar session ownership", () => {
     );
 
     expect(
-      sidebar.querySelector(`[data-session-key="${parentKey}"] openclaw-session-owner-chip`),
+      sidebar.querySelector(`[data-session-key="${parentKey}"] bot-session-owner-chip`),
     ).not.toBeNull();
     expect(
-      sidebar.querySelector(`[data-session-key="${childKey}"] openclaw-session-owner-chip`),
+      sidebar.querySelector(`[data-session-key="${childKey}"] bot-session-owner-chip`),
     ).toBeNull();
     expect(
       sidebar.querySelector(`[data-session-key="${childKey}"] [aria-label="Done"]`),

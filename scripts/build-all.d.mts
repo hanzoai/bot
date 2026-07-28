@@ -53,7 +53,7 @@ export function resolveBuildAllEnvironment(
   env?: NodeJS.ProcessEnv,
   now?: () => Date,
   readGitCommit?: () => string | null,
-): { [key: string]: string | undefined; OPENCLAW_BUILD_TIMESTAMP: string };
+): { [key: string]: string | undefined; BOT_BUILD_TIMESTAMP: string };
 export function resolveBuildAllStep(
   step: BuildAllStep,
   params?: {

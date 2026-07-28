@@ -1,4 +1,4 @@
-import type { OpenClawPluginNodeInvokePolicyContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { BotPluginNodeInvokePolicyContext } from "bot/plugin-sdk/plugin-entry";
 import { describe, expect, it, vi } from "vitest";
 import { resolveZoomMeetingsConfig } from "./config.js";
 import { createZoomMeetingsNodeInvokePolicy } from "./node-invoke-policy.js";
@@ -25,7 +25,7 @@ describe("Zoom meetings node invoke policy", () => {
         audioInputCommand: ["untrusted-input"],
         audioOutputCommand: ["untrusted-output"],
       },
-    } as OpenClawPluginNodeInvokePolicyContext);
+    } as BotPluginNodeInvokePolicyContext);
 
     expect(invokeNode).toHaveBeenCalledWith({
       params: {

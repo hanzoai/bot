@@ -1,22 +1,22 @@
 // Memory Core plugin module implements manager search behavior.
 import type { DatabaseSync } from "node:sqlite";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import { truncateUtf16Safe } from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import {
   cosineSimilarity,
   parseEmbedding,
   type MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
 import {
   normalizeStringEntries,
   normalizeStringEntriesLower,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { vectorToBlob } from "./vector-blob.js";
 
 const FTS_QUERY_TOKEN_RE = /[\p{L}\p{N}_]+/gu;
 const SHORT_CJK_TRIGRAM_RE = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\u3131-\u3163]/u;
-const EXACT_PATH_SPECIFICITY_SQL_FUNCTION = "openclaw_memory_exact_path_specificity";
-const NORMALIZED_PATH_CONTAINS_SQL_FUNCTION = "openclaw_memory_normalized_path_contains";
+const EXACT_PATH_SPECIFICITY_SQL_FUNCTION = "bot_memory_exact_path_specificity";
+const NORMALIZED_PATH_CONTAINS_SQL_FUNCTION = "bot_memory_normalized_path_contains";
 const VECTOR_KNN_OVERSAMPLE_FACTOR = 8;
 // sqlite-vec v0.1.9 rejects KNN queries with k above 4096.
 const MAX_VECTOR_KNN_K = 4096;

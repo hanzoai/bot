@@ -3,8 +3,8 @@
  *
  * Combines plugin status hooks, account inspection, and safe account field projection.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../../config/types.bot.js";
 import { inspectChannelAccount } from "../account-inspection.js";
 import {
   projectSafeChannelAccountSnapshotFields,
@@ -15,7 +15,7 @@ import type { ChannelAccountSnapshot } from "./types.public.js";
 
 export async function buildChannelAccountSnapshotFromAccount<ResolvedAccount>(params: {
   plugin: ChannelPlugin<ResolvedAccount>;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   account: ResolvedAccount;
   runtime?: ChannelAccountSnapshot;
@@ -65,7 +65,7 @@ export async function buildChannelAccountSnapshotFromAccount<ResolvedAccount>(pa
 
 export async function buildReadOnlySourceChannelAccountSnapshot<ResolvedAccount>(params: {
   plugin: ChannelPlugin<ResolvedAccount>;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   runtime?: ChannelAccountSnapshot;
   probe?: unknown;
@@ -83,7 +83,7 @@ export async function buildReadOnlySourceChannelAccountSnapshot<ResolvedAccount>
 
 export async function buildChannelAccountSnapshot<ResolvedAccount>(params: {
   plugin: ChannelPlugin<ResolvedAccount>;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   runtime?: ChannelAccountSnapshot;
   probe?: unknown;

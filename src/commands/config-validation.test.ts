@@ -86,7 +86,7 @@ describe("requireValidConfigSnapshot", () => {
       [
         "Plugin compatibility: 1 notice.",
         "- legacy-plugin is hook-only. This remains a supported compatibility path, but it has not migrated to explicit capability registration yet.",
-        "Review: openclaw doctor",
+        "Review: bot doctor",
       ].join("\n"),
     );
   });
@@ -139,7 +139,7 @@ describe("requireValidConfigSnapshot", () => {
     expect(runtime.error).toHaveBeenCalledWith(
       "Fix: This is a plugin packaging issue, not a local config problem.\nUpdate or reinstall the plugin after the publisher ships compiled JavaScript, or disable/uninstall the plugin until then.",
     );
-    expect(runtime.error).not.toHaveBeenCalledWith("Fix: openclaw doctor --fix");
+    expect(runtime.error).not.toHaveBeenCalledWith("Fix: bot doctor --fix");
     expect(runtime.exit).toHaveBeenCalledWith(1);
   });
 
@@ -156,7 +156,7 @@ describe("requireValidConfigSnapshot", () => {
     const config = await requireValidConfigSnapshot(runtime);
 
     expect(config).toBeNull();
-    expect(runtime.error).toHaveBeenCalledWith("Fix: openclaw doctor --fix");
+    expect(runtime.error).toHaveBeenCalledWith("Fix: bot doctor --fix");
     expect(runtime.exit).toHaveBeenCalledWith(1);
   });
 });

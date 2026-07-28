@@ -7,7 +7,7 @@ import {
 import type { buildWorkspaceSkillStatus } from "../discovery/status.js";
 
 /** ClawHub verdict item shape projected into local security scan verdicts. */
-type OpenClawSkillSecurityVerdictItem = Omit<
+type BotSkillSecurityVerdictItem = Omit<
   ClawHubSkillSecurityVerdictItem,
   "decision" | "error" | "security"
 > & {
@@ -40,8 +40,8 @@ function readSecurityPassed(security: unknown): boolean | null | undefined {
 function projectClawHubVerdictItem(
   item: ClawHubSkillSecurityVerdictItem,
   registry: string,
-): OpenClawSkillSecurityVerdictItem {
-  const projected: OpenClawSkillSecurityVerdictItem = {
+): BotSkillSecurityVerdictItem {
+  const projected: BotSkillSecurityVerdictItem = {
     registry,
     ok: item.ok,
     decision: item.decision,
@@ -85,7 +85,7 @@ function projectClawHubVerdictItem(
     projected.securityPassed = securityPassed;
   }
   if (item.error) {
-    const error: OpenClawSkillSecurityVerdictItem["error"] = {};
+    const error: BotSkillSecurityVerdictItem["error"] = {};
     if (typeof item.error.code === "string") {
       error.code = item.error.code;
     }
@@ -137,9 +137,9 @@ export function collectClawHubVerdictTargets(
   return [...targets.values()];
 }
 
-export async function fetchOpenClawSkillSecurityVerdicts(
+export async function fetchBotSkillSecurityVerdicts(
   targets: Array<{ registry: string; slug: string; version: string }>,
-): Promise<OpenClawSkillSecurityVerdictItem[]> {
+): Promise<BotSkillSecurityVerdictItem[]> {
   const byRegistry = new Map<string, Array<{ slug: string; version: string }>>();
   for (const target of targets) {
     const registryTargets = byRegistry.get(target.registry) ?? [];
@@ -147,7 +147,7 @@ export async function fetchOpenClawSkillSecurityVerdicts(
     byRegistry.set(target.registry, registryTargets);
   }
 
-  const items: OpenClawSkillSecurityVerdictItem[] = [];
+  const items: BotSkillSecurityVerdictItem[] = [];
   for (const [registry, registryTargets] of byRegistry) {
     const response = await fetchClawHubSkillSecurityVerdicts({
       baseUrl: registry,

@@ -13,9 +13,9 @@ import {
   type WorkboardNotification,
   type WorkboardRunAttempt,
   type WorkboardStatus,
-} from "@openclaw/workboard-contract";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "@hanzo/bot-workboard-contract";
+import { safeEqualSecret } from "bot/plugin-sdk/security-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import {
   BLOCKED_TOO_LONG_MS,
   MAX_CARD_ATTEMPTS,

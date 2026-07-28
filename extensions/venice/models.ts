@@ -1,13 +1,13 @@
 import {
   buildManifestModelDefinition,
   readManifestProviderDefaultModelRef,
-} from "openclaw/plugin-sdk/provider-catalog-shared";
+} from "bot/plugin-sdk/provider-catalog-shared";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+} from "bot/plugin-sdk/provider-model-shared";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
+import manifest from "./bot.plugin.json" with { type: "json" };
 
 const VENICE_MANIFEST_CATALOG = manifest.modelCatalog.providers.venice;
 

@@ -26,9 +26,9 @@ import type {
 } from "./channel-entry-contract.types.js";
 
 export type AnyAgentTool = import("../plugins/types.js").AnyAgentTool;
-export type OpenClawPluginApi = import("../plugins/types.js").OpenClawPluginApi;
-export type OpenClawPluginCommandDefinition =
-  import("../plugins/types.js").OpenClawPluginCommandDefinition;
+export type BotPluginApi = import("../plugins/types.js").BotPluginApi;
+export type BotPluginCommandDefinition =
+  import("../plugins/types.js").BotPluginCommandDefinition;
 export type PluginCommandContext = import("../plugins/types.js").PluginCommandContext;
 
 export type {
@@ -61,8 +61,8 @@ type DefineBundledChannelEntryOptions<TPlugin = ChannelPlugin> = {
   runtime?: BundledEntryModuleRef;
   accountInspect?: BundledEntryModuleRef;
   features?: BundledChannelEntryFeatures;
-  registerCliMetadata?: (api: OpenClawPluginApi) => void;
-  registerFull?: (api: OpenClawPluginApi) => void;
+  registerCliMetadata?: (api: BotPluginApi) => void;
+  registerFull?: (api: BotPluginApi) => void;
 };
 
 type DefineBundledChannelSetupEntryOptions = {
@@ -72,7 +72,7 @@ type DefineBundledChannelSetupEntryOptions = {
   runtime?: BundledEntryModuleRef;
   legacyStateMigrations?: BundledEntryModuleRef;
   legacySessionSurface?: BundledEntryModuleRef;
-  registerSetupRuntime?: (api: OpenClawPluginApi) => void;
+  registerSetupRuntime?: (api: BotPluginApi) => void;
   features?: BundledChannelSetupEntryFeatures;
 };
 
@@ -95,7 +95,7 @@ export type BundledChannelEntryContract<TPlugin = ChannelPlugin> = {
   description: string;
   configSchema: ChannelEntryConfigSchema<TPlugin>;
   features?: BundledChannelEntryFeatures;
-  register: (api: OpenClawPluginApi) => void;
+  register: (api: BotPluginApi) => void;
   loadChannelPlugin: (options?: BundledEntryModuleLoadOptions) => TPlugin;
   loadChannelOutbound?: (
     options?: BundledEntryModuleLoadOptions,
@@ -123,7 +123,7 @@ export type BundledChannelSetupEntryContract<TPlugin = ChannelPlugin> = {
     options?: BundledEntryModuleLoadOptions,
   ) => BundledChannelLegacySessionSurface;
   setChannelRuntime?: (runtime: BundledChannelRuntime) => void;
-  registerSetupRuntime?: (api: OpenClawPluginApi) => void;
+  registerSetupRuntime?: (api: BotPluginApi) => void;
   features?: BundledChannelSetupEntryFeatures;
 };
 
@@ -131,7 +131,7 @@ const moduleLoaders: PluginModuleLoaderCache = new Map();
 const entryBoundaryInfoCache = new Map<string, BundledEntryBoundaryInfo>();
 const resolvedModulePaths = new Map<string, string>();
 const loadedModuleExports = new Map<string, unknown>();
-const disableBundledEntrySourceFallbackEnv = "OPENCLAW_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK";
+const disableBundledEntrySourceFallbackEnv = "BOT_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK";
 
 function isTruthyEnvFlag(value: string | undefined): boolean {
   return value !== undefined && !/^(?:0|false)$/iu.test(value.trim());
@@ -364,7 +364,7 @@ function resolveBundledEntryModulePath(importMetaUrl: string, specifier: string)
 function getSourceModuleLoader(
   modulePath: string,
   options: BundledEntryModuleLoadOptions,
-  transformOpenClawDependencies = false,
+  transformBotDependencies = false,
 ) {
   return getCachedPluginSourceModuleLoader({
     cache: moduleLoaders,
@@ -372,7 +372,7 @@ function getSourceModuleLoader(
     importerUrl: import.meta.url,
     preferBuiltDist: true,
     loaderFilename: import.meta.url,
-    transformOpenClawDependencies,
+    transformBotDependencies,
     ...(options.createLoaderForTest ? { createLoader: options.createLoaderForTest } : {}),
   });
 }
@@ -532,7 +532,7 @@ export function defineBundledChannelEntry<TPlugin = ChannelPlugin>({
     ...(features || accountInspect
       ? { features: { ...features, ...(accountInspect ? { accountInspect: true } : {}) } }
       : {}),
-    register(api: OpenClawPluginApi) {
+    register(api: BotPluginApi) {
       if (api.registrationMode === "cli-metadata") {
         registerCliMetadata?.(api);
         return;

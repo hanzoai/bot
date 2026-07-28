@@ -3,9 +3,9 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@hanzo/bot-normalization-core/number-coercion";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import { getSubagentDepthFromSessionStore } from "./subagent-depth.js";
 import { resolveAgentTimeoutMs } from "./timeout.js";
@@ -93,7 +93,7 @@ describe("getSubagentDepthFromSessionStore", () => {
   });
 
   it("resolves prefixed store keys when caller key omits the agent prefix", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-subagent-depth-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-subagent-depth-"));
     const storeTemplate = path.join(tmpDir, "sessions-{agentId}.json");
     const prefixedKey = "agent:main:subagent:flat";
     const storePath = storeTemplate.replaceAll("{agentId}", "main");
@@ -121,7 +121,7 @@ describe("getSubagentDepthFromSessionStore", () => {
   });
 
   it("resolves a cross-agent parent outside the supplied child store", async () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-subagent-depth-cross-agent-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-subagent-depth-cross-agent-"));
     try {
       const storeTemplate = path.join(tmpDir, "sessions-{agentId}.json");
       const parentKey = "agent:main:dashboard:parent";
@@ -176,7 +176,7 @@ describe("resolveAgentTimeoutMs", () => {
     ["negative", -1, 1_000],
     ["NaN", Number.NaN, 48 * 60 * 60 * 1000],
   ])("resolves config timeoutSeconds %s", (_label, timeoutSeconds, expected) => {
-    const cfg = { agents: { defaults: { timeoutSeconds } } } as OpenClawConfig;
+    const cfg = { agents: { defaults: { timeoutSeconds } } } as BotConfig;
     expect(resolveAgentTimeoutMs({ cfg })).toBe(expected);
   });
 

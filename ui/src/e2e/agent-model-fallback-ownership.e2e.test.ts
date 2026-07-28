@@ -11,7 +11,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 const primaryModel = "openai/gpt-5.4";
@@ -101,7 +101,7 @@ describeControlUiE2e("Control UI agent model fallback ownership", () => {
       expect(response?.status()).toBe(200);
       await gateway.waitForRequest("agents.list");
       await gateway.waitForRequest("config.get");
-      const agentPicker = page.locator("openclaw-agents-page openclaw-agent-select");
+      const agentPicker = page.locator("bot-agents-page bot-agent-select");
       await agentPicker.locator(".agent-select__trigger").click();
       await agentPicker
         .locator("wa-dropdown-item[data-agent-option]")

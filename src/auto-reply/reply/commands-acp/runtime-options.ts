@@ -1,7 +1,7 @@
 // Formats ACP runtime option details for command responses.
-import { resolveAcpSessionIdentifierLinesFromIdentity } from "@openclaw/acp-core/runtime/session-identifiers";
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { resolveAcpSessionIdentifierLinesFromIdentity } from "@hanzo/bot-acp-core/runtime/session-identifiers";
+import { timestampMsToIsoString } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { getAcpSessionManager } from "../../../acp/control-plane/manager.js";
 import {
   parseRuntimeTimeoutSecondsInput,

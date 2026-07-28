@@ -4,7 +4,7 @@ import { MANIFEST_KEY } from "../compat/legacy-names.js";
 import { isRecord } from "../utils.js";
 import type { PluginManifestChannelCommandDefaults } from "./manifest-types.js";
 
-/** package.json OpenClaw metadata used for plugin setup and catalog discovery. */
+/** package.json Bot metadata used for plugin setup and catalog discovery. */
 type PluginPackageChannelApprovalFlag = "native";
 
 export type PluginPackageChannel = {
@@ -79,7 +79,7 @@ export type PluginPackageInstall = {
   requiredPlatformPackages?: string[];
 };
 
-type OpenClawPackageStartup = {
+type BotPackageStartup = {
   /**
    * Opt-in for channel plugins whose `setupEntry` fully covers the gateway
    * startup surface needed before the server starts listening.
@@ -87,38 +87,38 @@ type OpenClawPackageStartup = {
   deferConfiguredChannelFullLoadUntilAfterListen?: boolean;
 };
 
-type OpenClawPackageSetupFeatures = {
+type BotPackageSetupFeatures = {
   configPromotion?: boolean;
   legacyStateMigrations?: boolean;
   legacySessionSurfaces?: boolean;
 };
 
-type OpenClawPackageCompat = {
+type BotPackageCompat = {
   pluginApi?: string;
   minGatewayVersion?: string;
 };
 
-export type OpenClawPackageBuild = {
+export type BotPackageBuild = {
   bundledDist?: boolean;
-  openclawVersion?: string;
+  botVersion?: string;
   pluginSdkVersion?: string;
 };
 
-export type OpenClawPackageManifest = {
+export type BotPackageManifest = {
   extensions?: string[];
   runtimeExtensions?: string[];
   setupEntry?: string;
   runtimeSetupEntry?: string;
-  setupFeatures?: OpenClawPackageSetupFeatures;
+  setupFeatures?: BotPackageSetupFeatures;
   plugin?: {
     id?: string;
     label?: string;
   };
   channel?: PluginPackageChannel;
-  compat?: OpenClawPackageCompat;
+  compat?: BotPackageCompat;
   install?: PluginPackageInstall;
-  startup?: OpenClawPackageStartup;
-  build?: OpenClawPackageBuild;
+  startup?: BotPackageStartup;
+  build?: BotPackageBuild;
 };
 
 export const DEFAULT_PLUGIN_ENTRY_CANDIDATES = [
@@ -142,11 +142,11 @@ export type PackageManifest = {
   description?: string;
   dependencies?: Record<string, string>;
   optionalDependencies?: Record<string, string>;
-} & Partial<Record<ManifestKey, OpenClawPackageManifest>>;
+} & Partial<Record<ManifestKey, BotPackageManifest>>;
 
 export function getPackageManifestMetadata(
   manifest: PackageManifest | undefined,
-): OpenClawPackageManifest | undefined {
+): BotPackageManifest | undefined {
   if (!manifest) {
     return undefined;
   }
@@ -156,18 +156,18 @@ export function getPackageManifestMetadata(
 export function resolvePackageExtensionEntries(
   manifest: PackageManifest | undefined,
 ): PackageExtensionResolution {
-  const rawOpenClaw = manifest?.[MANIFEST_KEY] as unknown;
-  if (rawOpenClaw === undefined || rawOpenClaw === null) {
+  const rawBot = manifest?.[MANIFEST_KEY] as unknown;
+  if (rawBot === undefined || rawBot === null) {
     return { status: "missing", entries: [] };
   }
-  if (!isRecord(rawOpenClaw)) {
+  if (!isRecord(rawBot)) {
     return {
       status: "invalid",
       entries: [],
-      error: "package.json openclaw must be an object",
+      error: "package.json bot must be an object",
     };
   }
-  const raw = rawOpenClaw.extensions;
+  const raw = rawBot.extensions;
   if (raw === undefined || raw === null) {
     return { status: "missing", entries: [] };
   }
@@ -175,7 +175,7 @@ export function resolvePackageExtensionEntries(
     return {
       status: "invalid",
       entries: [],
-      error: "package.json openclaw.extensions must be an array",
+      error: "package.json bot.extensions must be an array",
     };
   }
   const entries: string[] = [];
@@ -185,7 +185,7 @@ export function resolvePackageExtensionEntries(
       return {
         status: "invalid",
         entries: [],
-        error: `package.json openclaw.extensions[${index}] must be a non-empty string`,
+        error: `package.json bot.extensions[${index}] must be a non-empty string`,
       };
     }
     entries.push(normalized);

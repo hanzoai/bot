@@ -1,10 +1,10 @@
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
+import { err, ok, type Result } from "@hanzo/bot-normalization-core/result";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";
 // Applies runtime-only config overrides without mutating persisted config.
 import { isPlainObject } from "../utils.js";
 import { attachAgentListProjection } from "./agent-list-projection.js";
 import { parseConfigPath, setConfigValueAtPath, unsetConfigValueAtPath } from "./config-paths.js";
-import type { OpenClawConfig } from "./types.js";
+import type { BotConfig } from "./types.js";
 
 type OverrideTree = Record<string, unknown>;
 
@@ -47,8 +47,8 @@ function mergeOverrides(base: unknown, override: unknown): unknown {
   return next;
 }
 
-function applyOverrideTree(cfg: OpenClawConfig, overrideTree: OverrideTree): OpenClawConfig {
-  const next = mergeOverrides(cfg, overrideTree) as OpenClawConfig;
+function applyOverrideTree(cfg: BotConfig, overrideTree: OverrideTree): BotConfig {
+  const next = mergeOverrides(cfg, overrideTree) as BotConfig;
   if (next.agents === cfg.agents) {
     return next;
   }
@@ -86,7 +86,7 @@ export function unsetConfigOverride(pathRaw: string): Result<boolean, string> {
 }
 
 /** Merge the current runtime overrides over a loaded config without mutating the input config. */
-export function applyConfigOverrides(cfg: OpenClawConfig): OpenClawConfig {
+export function applyConfigOverrides(cfg: BotConfig): BotConfig {
   if (!overrides || Object.keys(overrides).length === 0) {
     return cfg;
   }
@@ -94,7 +94,7 @@ export function applyConfigOverrides(cfg: OpenClawConfig): OpenClawConfig {
 }
 
 /** Capture an immutable applier for the process-local overrides active at this instant. */
-export function captureConfigOverrideApplier(): (cfg: OpenClawConfig) => OpenClawConfig {
+export function captureConfigOverrideApplier(): (cfg: BotConfig) => BotConfig {
   const capturedOverrides = structuredClone(overrides);
   if (Object.keys(capturedOverrides).length === 0) {
     return (cfg) => cfg;

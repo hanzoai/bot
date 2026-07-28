@@ -16,12 +16,12 @@ export type {
   CodexPluginDestructiveApprovalMode,
   CodexPluginMarketplaceName,
   CodexSupervisionEndpoint,
-  OpenClawExecPolicyForCodexAppServer,
+  BotExecPolicyForCodexAppServer,
   ResolvedCodexComputerUseConfig,
   ResolvedCodexPluginPolicy,
   ResolvedCodexPluginsPolicy,
 } from "./config-contracts.js";
-export { resolveOpenClawExecPolicyForCodexAppServer } from "./config-exec-policy.js";
+export { resolveBotExecPolicyForCodexAppServer } from "./config-exec-policy.js";
 export {
   isCodexSandboxExecServerEnabled,
   readCodexPluginConfig,

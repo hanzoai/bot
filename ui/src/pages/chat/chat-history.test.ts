@@ -307,7 +307,7 @@ describe("active-run commentary reconciliation", () => {
     expect(
       state.chatMessages.some(
         (message) =>
-          (message as { openclawStreamFallback?: { itemId?: unknown } }).openclawStreamFallback
+          (message as { botStreamFallback?: { itemId?: unknown } }).botStreamFallback
             ?.itemId === "preamble-live",
       ),
     ).toBe(true);

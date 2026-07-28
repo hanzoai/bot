@@ -30,7 +30,7 @@ import {
 } from "../commands/onboard-helpers.js";
 import type { OnboardOptions } from "../commands/onboard-types.js";
 import type { GatewayAuthConfig } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { describeGatewayServiceRestart, resolveGatewayService } from "../daemon/service.js";
 import { isSystemdUserServiceAvailable } from "../daemon/systemd.js";
 import { isContainerEnvironment } from "../infra/container-environment.js";
@@ -51,9 +51,9 @@ import type { GatewayWizardSettings, WizardFlow } from "./setup.types.js";
 type FinalizeOnboardingOptions = {
   flow: WizardFlow;
   opts: OnboardOptions;
-  baseConfig: OpenClawConfig;
+  baseConfig: BotConfig;
   hadExistingConfig?: boolean;
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   workspaceDir: string;
   settings: GatewayWizardSettings;
   prompter: WizardPrompter;
@@ -63,7 +63,7 @@ type FinalizeOnboardingOptions = {
 const HATCH_TUI_TIMEOUT_MS = 5 * 60 * 1000;
 
 function buildSessionGatewayAuthOverride(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   settings: GatewayWizardSettings;
   resolvedGatewayPassword: string;
 }): GatewayAuthConfig | undefined {
@@ -85,7 +85,7 @@ function buildSessionGatewayAuthOverride(params: {
 }
 
 async function startSessionGatewayForOnboarding(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   settings: GatewayWizardSettings;
   resolvedGatewayPassword: string;
   prompter: WizardPrompter;
@@ -114,7 +114,7 @@ async function startSessionGatewayForOnboarding(params: {
         t("wizard.finalize.sessionGatewayStartFailed"),
         formatErrorMessage(error),
         t("wizard.finalize.startGatewayNow", {
-          command: formatCliCommand("openclaw gateway run"),
+          command: formatCliCommand("bot gateway run"),
         }),
       ].join("\n"),
       "Gateway",
@@ -195,7 +195,7 @@ const loadSearchSetupModule = createLazyRuntimeModule(() => import("../flows/sea
 export async function ensureGatewayServiceForOnboarding(params: {
   flow: WizardFlow;
   opts: Pick<OnboardOptions, "installDaemon" | "daemonRuntime">;
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   settings: Pick<GatewayWizardSettings, "port">;
   prompter: WizardPrompter;
   runtime: RuntimeEnv;
@@ -473,7 +473,7 @@ export async function finalizeSetupWizard(
       });
       if (gatewayProbe.ok) {
         try {
-          const healthConfig: OpenClawConfig =
+          const healthConfig: BotConfig =
             settings.authMode === "token" && settings.gatewayToken
               ? {
                   ...nextConfig,
@@ -502,8 +502,8 @@ export async function finalizeSetupWizard(
           await prompter.note(
             [
               t("common.docs"),
-              "https://docs.openclaw.ai/gateway/health",
-              "https://docs.openclaw.ai/gateway/troubleshooting",
+              "https://docs.bot.ai/gateway/health",
+              "https://docs.bot.ai/gateway/troubleshooting",
             ].join("\n"),
             t("wizard.finalize.healthCheckHelp"),
           );
@@ -519,8 +519,8 @@ export async function finalizeSetupWizard(
         await prompter.note(
           [
             t("common.docs"),
-            "https://docs.openclaw.ai/gateway/health",
-            "https://docs.openclaw.ai/gateway/troubleshooting",
+            "https://docs.bot.ai/gateway/health",
+            "https://docs.bot.ai/gateway/troubleshooting",
           ].join("\n"),
           t("wizard.finalize.healthCheckHelp"),
         );
@@ -530,13 +530,13 @@ export async function finalizeSetupWizard(
             t("wizard.finalize.gatewayNotDetected"),
             t("wizard.finalize.noBackgroundGatewayExpected"),
             t("wizard.finalize.startGatewayNow", {
-              command: formatCliCommand("openclaw gateway run"),
+              command: formatCliCommand("bot gateway run"),
             }),
             t("wizard.finalize.rerunInstallDaemon", {
-              command: formatCliCommand("openclaw onboard --install-daemon"),
+              command: formatCliCommand("bot onboard --install-daemon"),
             }),
             t("wizard.finalize.skipHealthNextTime", {
-              command: formatCliCommand("openclaw onboard --skip-health"),
+              command: formatCliCommand("bot onboard --skip-health"),
             }),
           ].join("\n"),
           "Gateway",
@@ -671,7 +671,7 @@ export async function finalizeSetupWizard(
           [
             t("wizard.finalize.noModelAuth", { provider: modelAuthStatus.provider }),
             t("wizard.finalize.noModelAuthNext", {
-              command: formatCliCommand("openclaw configure --section model"),
+              command: formatCliCommand("bot configure --section model"),
             }),
           ].join("\n"),
           t("wizard.finalize.noModelAuthTitle"),
@@ -683,14 +683,14 @@ export async function finalizeSetupWizard(
           t("wizard.finalize.gatewayTokenShared"),
           t("wizard.finalize.gatewayTokenStored"),
           t("wizard.finalize.gatewayTokenView", {
-            command: formatCliCommand("openclaw config get gateway.auth.token"),
+            command: formatCliCommand("bot config get gateway.auth.token"),
           }),
           t("wizard.finalize.gatewayTokenGenerate", {
-            command: formatCliCommand("openclaw doctor --generate-gateway-token"),
+            command: formatCliCommand("bot doctor --generate-gateway-token"),
           }),
           suppressGatewayTokenOutput ? undefined : t("wizard.finalize.dashboardTokenMemory"),
           t("wizard.finalize.dashboardOpenAnytime", {
-            command: formatCliCommand("openclaw dashboard --no-open"),
+            command: formatCliCommand("bot dashboard --no-open"),
           }),
           suppressGatewayTokenOutput ? undefined : t("wizard.finalize.dashboardTokenPrompt"),
         ].filter(Boolean);
@@ -772,7 +772,7 @@ export async function finalizeSetupWizard(
           [
             t("wizard.finalize.webSearchProviderUnavailable", { provider: label }),
             t("wizard.finalize.webSearchUnavailableAction"),
-            `  ${formatCliCommand("openclaw configure --section web")}`,
+            `  ${formatCliCommand("bot configure --section web")}`,
             "",
             t("wizard.finalize.webDocs"),
           ].join("\n"),
@@ -806,10 +806,10 @@ export async function finalizeSetupWizard(
           [
             t("wizard.finalize.webSearchNoKey", { provider: label }),
             t("wizard.finalize.webSearchNeedsKey"),
-            `  ${formatCliCommand("openclaw configure --section web")}`,
+            `  ${formatCliCommand("bot configure --section web")}`,
             "",
             t("wizard.finalize.webSearchGetKey", {
-              url: entry?.signupUrl ?? "https://docs.openclaw.ai/tools/web",
+              url: entry?.signupUrl ?? "https://docs.bot.ai/tools/web",
             }),
             t("wizard.finalize.webDocs"),
           ].join("\n"),
@@ -820,7 +820,7 @@ export async function finalizeSetupWizard(
           [
             t("wizard.finalize.webSearchDisabled", { provider: label }),
             t("wizard.finalize.webSearchReenable", {
-              command: formatCliCommand("openclaw configure --section web"),
+              command: formatCliCommand("bot configure --section web"),
             }),
             "",
             t("wizard.finalize.webDocs"),
@@ -856,7 +856,7 @@ export async function finalizeSetupWizard(
         await prompter.note(
           [
             t("wizard.finalize.webSearchSkipped"),
-            `  ${formatCliCommand("openclaw configure --section web")}`,
+            `  ${formatCliCommand("bot configure --section web")}`,
             "",
             t("wizard.finalize.webDocs"),
           ].join("\n"),

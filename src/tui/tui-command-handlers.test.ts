@@ -1,7 +1,7 @@
 // Covers TUI slash command handlers and backend call wiring.
 
 import type { OverlayHandle } from "@earendil-works/pi-tui";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { createCommandHandlers } from "./tui-command-handlers.js";
 import {
@@ -638,13 +638,13 @@ describe("tui command handlers", () => {
     expect(addSystem).toHaveBeenCalledWith("Version: 1.2.3");
   });
 
-  it("returns to OpenClaw with an optional request", async () => {
+  it("returns to Bot with an optional request", async () => {
     const { handleCommand, addSystem, requestExit, sendChat } = createHarness();
 
-    await handleCommand("/openclaw restart gateway");
+    await handleCommand("/bot restart gateway");
 
     expect(sendChat).not.toHaveBeenCalled();
-    expect(addSystem).toHaveBeenCalledWith("returning to OpenClaw with request: restart gateway");
+    expect(addSystem).toHaveBeenCalledWith("returning to Bot with request: restart gateway");
     expect(requestExit).toHaveBeenCalledWith({
       exitReason: "return-to-system-agent",
       systemAgentMessage: "restart gateway",
@@ -662,14 +662,14 @@ describe("tui command handlers", () => {
     expect(addSystem).not.toHaveBeenCalled();
   });
 
-  it("leaves a OpenClaw breadcrumb after switching agents", async () => {
+  it("leaves a Bot breadcrumb after switching agents", async () => {
     const { handleCommand, addSystem, setSession, state } = createHarness();
 
     await handleCommand("/agent Work");
 
     expect(state.currentAgentId).toBe("work");
     expect(setSession).toHaveBeenCalledWith("");
-    expect(addSystem).toHaveBeenCalledWith("agent set to work; use /openclaw to return");
+    expect(addSystem).toHaveBeenCalledWith("agent set to work; use /bot to return");
   });
 
   it("marks the generated runId as local before gateway events arrive", async () => {
@@ -1427,15 +1427,15 @@ describe("tui command handlers", () => {
     await codex.handleCommand("/think");
     expect(codex.addSystem).toHaveBeenCalledWith(expect.not.stringContaining("ultra"));
 
-    const openclaw = createHarness({
+    const bot = createHarness({
       sessionInfo: {
         modelProvider: "openai",
         model: "gpt-5.6-luna",
-        agentRuntime: { id: "openclaw", source: "session-key" },
+        agentRuntime: { id: "bot", source: "session-key" },
       },
     });
-    await openclaw.handleCommand("/think");
-    expect(openclaw.addSystem).toHaveBeenCalledWith(expect.stringContaining("ultra"));
+    await bot.handleCommand("/think");
+    expect(bot.addSystem).toHaveBeenCalledWith(expect.stringContaining("ultra"));
   });
 
   it.each([
@@ -1940,7 +1940,7 @@ describe("tui command handlers", () => {
     expect(closeOverlay).toHaveBeenCalledTimes(1);
   });
 
-  it.each(["codex", "openclaw"])(
+  it.each(["codex", "bot"])(
     "forwards model/runtime transactions through the server directive path for %s",
     async (runtime) => {
       const sendChat = vi.fn().mockResolvedValue({ status: "ok" });

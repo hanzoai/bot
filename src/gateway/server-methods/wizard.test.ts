@@ -1,5 +1,5 @@
 // Wizard server-method tests cover stable lifecycle errors for process-local sessions.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import type { GatewayRequestHandlerOptions } from "./types.js";
 import { wizardHandlers } from "./wizard.js";

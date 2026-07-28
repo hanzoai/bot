@@ -1,12 +1,12 @@
 import {
   applyOpenAIResponsesPayloadPolicy,
   resolveOpenAIResponsesPayloadPolicy,
-} from "@openclaw/ai/transports";
+} from "@hanzo/bot-ai/transports";
 /**
  * Regression coverage for OpenAI Responses payload policy.
  * Verifies store, prompt-cache, compaction, service-tier, and reasoning mutations.
  */
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { Model } from "bot/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 
 describe("openai responses payload policy", () => {
@@ -236,7 +236,7 @@ describe("openai responses payload policy", () => {
   it("emits store false for aliased native OpenAI Codex responses disable mode", () => {
     const policy = resolveOpenAIResponsesPayloadPolicy(
       {
-        api: "openclaw-openai-chatgpt-responses-transport",
+        api: "bot-openai-chatgpt-responses-transport",
         provider: "openai",
         baseUrl: "https://chatgpt.com/backend-api/codex",
       },

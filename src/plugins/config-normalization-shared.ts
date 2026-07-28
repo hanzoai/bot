@@ -1,7 +1,7 @@
 // Shares plugin config normalization helpers across control-plane paths.
-import { normalizeArrayBackedTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeArrayBackedTrimmedStringList } from "@hanzo/bot-normalization-core/string-normalization";
 import { normalizeChatChannelId } from "../channels/ids.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeSlotValue, resolveSlotSelection } from "./slots.js";
 
 /** Canonical plugin config shape consumed by runtime policy and loaders. */
@@ -211,7 +211,7 @@ function normalizePluginEntries(
 
 /** Normalizes plugin config while allowing callers to resolve aliases first. */
 export function normalizePluginsConfigWithResolver(
-  config?: OpenClawConfig["plugins"],
+  config?: BotConfig["plugins"],
   normalizePluginId: NormalizePluginId = identityNormalizePluginId,
 ): NormalizedPluginsConfig {
   const memorySlot = resolveSlotSelection("memory", config?.slots?.memory);
@@ -228,7 +228,7 @@ export function normalizePluginsConfigWithResolver(
   };
 }
 
-export function hasExplicitPluginConfig(plugins?: OpenClawConfig["plugins"]): boolean {
+export function hasExplicitPluginConfig(plugins?: BotConfig["plugins"]): boolean {
   if (!plugins) {
     return false;
   }
@@ -254,7 +254,7 @@ export function hasExplicitPluginConfig(plugins?: OpenClawConfig["plugins"]): bo
 }
 
 export function isBundledChannelEnabledByChannelConfig(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   pluginId: string,
 ): boolean {
   if (!cfg) {

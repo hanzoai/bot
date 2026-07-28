@@ -1,6 +1,6 @@
 // Mattermost tests cover channel plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import { createChannelMessageReplyPipeline } from "../runtime-api.js";
 
 const { sendMessageMattermostMock, mockFetchGuard } = vi.hoisted(() => ({
@@ -15,8 +15,8 @@ vi.mock("./mattermost/send.js", () => ({
   sendMessageMattermost: sendMessageMattermostMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async () => {
-  const original = (await vi.importActual("openclaw/plugin-sdk/ssrf-runtime")) as Record<
+vi.mock("bot/plugin-sdk/ssrf-runtime", async () => {
+  const original = (await vi.importActual("bot/plugin-sdk/ssrf-runtime")) as Record<
     string,
     unknown
   >;
@@ -45,7 +45,7 @@ type MattermostSendPayload = NonNullable<
   NonNullable<typeof mattermostPlugin.outbound>["sendPayload"]
 >;
 
-function getDescribedActions(cfg: OpenClawConfig, accountId?: string): string[] {
+function getDescribedActions(cfg: BotConfig, accountId?: string): string[] {
   return [...(mattermostPlugin.actions?.describeMessageTool?.({ cfg, accountId })?.actions ?? [])];
 }
 
@@ -170,7 +170,7 @@ describe("mattermostPlugin", () => {
   });
 
   it("keeps sibling resolution stable across named-account additions and edits", () => {
-    const before: OpenClawConfig = {
+    const before: BotConfig = {
       channels: {
         mattermost: {
           replyToMode: "first",
@@ -183,7 +183,7 @@ describe("mattermostPlugin", () => {
         },
       },
     };
-    const afterAdd: OpenClawConfig = {
+    const afterAdd: BotConfig = {
       channels: {
         mattermost: {
           replyToMode: "first",
@@ -200,7 +200,7 @@ describe("mattermostPlugin", () => {
         },
       },
     };
-    const afterEdit: OpenClawConfig = {
+    const afterEdit: BotConfig = {
       channels: {
         mattermost: {
           replyToMode: "first",
@@ -587,7 +587,7 @@ describe("mattermostPlugin", () => {
     it("uses replyToMode for channel messages and keeps direct messages off", () => {
       const resolveReplyToMode = requireMattermostReplyToModeResolver();
 
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           mattermost: {
             replyToMode: "all",
@@ -614,7 +614,7 @@ describe("mattermostPlugin", () => {
     it("uses configured defaultAccount when accountId is omitted", () => {
       const resolveReplyToMode = requireMattermostReplyToModeResolver();
 
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           mattermost: {
             defaultAccount: "alerts",
@@ -664,7 +664,7 @@ describe("mattermostPlugin", () => {
     };
 
     it("exposes react when mattermost is configured", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -682,7 +682,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("hides react when mattermost is not configured", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -695,7 +695,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("declares presentation capability for message sends", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -711,7 +711,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("hides react when actions.reactions is false", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -728,7 +728,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("respects per-account actions.reactions in message discovery", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -750,7 +750,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("honors the selected Mattermost account during discovery", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -778,7 +778,7 @@ describe("mattermostPlugin", () => {
     });
 
     it("blocks react when default account disables reactions and accountId is omitted", async () => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           mattermost: {
             enabled: true,
@@ -1667,7 +1667,7 @@ describe("mattermostPlugin", () => {
             baseUrl: "https://chat.example.com",
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
 
       const params: MattermostSendTextParams = {
         cfg,
@@ -1729,14 +1729,14 @@ describe("mattermostPlugin", () => {
       const formatAllowFrom = mattermostPlugin.config.formatAllowFrom!;
 
       const formatted = formatAllowFrom({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         allowFrom: [" @Alice ", " user:USER123 ", " mattermost:BOT999 "],
       });
       expect(formatted).toEqual(["@alice", "user123", "bot999"]);
     });
 
     it("uses account responsePrefix overrides", () => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           mattermost: {
             responsePrefix: "[Channel]",

@@ -1,7 +1,7 @@
 // Proxy stream wrapper tests cover wrapper selection and provider passthrough.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
-import { createAssistantMessageEventStream } from "openclaw/plugin-sdk/llm";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
+import type { Context, Model } from "bot/plugin-sdk/llm";
+import { createAssistantMessageEventStream } from "bot/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import { createOpenRouterSystemCacheWrapper, createOpenRouterWrapper } from "./proxy.js";
 
@@ -52,8 +52,8 @@ describe("proxy stream wrappers", () => {
     expect(calls).toEqual([
       {
         headers: {
-          "HTTP-Referer": "https://openclaw.ai",
-          "X-OpenRouter-Title": "OpenClaw",
+          "HTTP-Referer": "https://bot.ai",
+          "X-OpenRouter-Title": "Bot",
           "X-OpenRouter-Categories":
             "cli-agent,cloud-agent,programming-app,creative-writing,writing-assistant,general-chat,personal-agent",
           "X-Custom": "1",
@@ -85,7 +85,7 @@ describe("proxy stream wrappers", () => {
       {},
     );
 
-    expect(calls[0]?.headers?.["HTTP-Referer"]).toBe("https://openclaw.ai");
+    expect(calls[0]?.headers?.["HTTP-Referer"]).toBe("https://bot.ai");
     expect(calls[0]?.headers?.["X-OpenRouter-Cache"]).toBe("true");
     expect(calls[0]?.headers?.["X-OpenRouter-Cache-TTL"]).toBe("900");
   });

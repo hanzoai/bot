@@ -7,13 +7,13 @@ import { setTimeout as delay } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@hanzo/bot-normalization-core/number-coercion";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   COMMAND_TIMEOUT_MS,
   createContainerizedSutSpawnSpec,
   createCrabboxWarmupArgs,
-  createOpenClawGatewaySpawnSpec,
+  createBotGatewaySpawnSpec,
   parseArgs,
   processTargetExists,
   readCodexProxyPort,
@@ -44,7 +44,7 @@ function expectedTaskkillPath(): string {
 }
 
 function makeTempDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-telegram-proof-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-telegram-proof-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -103,8 +103,8 @@ describe("telegram user Crabbox proof log polling", () => {
     const fakePnpm = path.join(root, "pnpm.cjs");
     fs.writeFileSync(fakePnpm, "#!/usr/bin/env node\n", { mode: 0o755 });
 
-    const spec = createOpenClawGatewaySpawnSpec({
-      env: { ...process.env, OPENCLAW_TELEGRAM_PROOF_SENTINEL: "1" },
+    const spec = createBotGatewaySpawnSpec({
+      env: { ...process.env, BOT_TELEGRAM_PROOF_SENTINEL: "1" },
       gatewayPort: 19042,
       nodeExecPath: "/opt/node/bin/node",
       npmExecPath: fakePnpm,
@@ -112,14 +112,14 @@ describe("telegram user Crabbox proof log polling", () => {
     });
 
     expect(spec.command).toBe("/opt/node/bin/node");
-    expect(spec.args).toEqual([fakePnpm, "openclaw", "gateway", "--port", "19042"]);
+    expect(spec.args).toEqual([fakePnpm, "bot", "gateway", "--port", "19042"]);
     expect(spec.options.cwd).toBe(root);
-    expect(spec.options.env?.OPENCLAW_TELEGRAM_PROOF_SENTINEL).toBe("1");
+    expect(spec.options.env?.BOT_TELEGRAM_PROOF_SENTINEL).toBe("1");
     expect(spec.options.shell).toBe(false);
   });
 
   it("uses an explicitly pinned pnpm executable for a worktree gateway", () => {
-    const spec = createOpenClawGatewaySpawnSpec({
+    const spec = createBotGatewaySpawnSpec({
       env: { PATH: "/definitely-missing" },
       gatewayPort: 19042,
       pnpmExecPath: "/opt/mantis-toolchain/pnpm",
@@ -127,7 +127,7 @@ describe("telegram user Crabbox proof log polling", () => {
     });
 
     expect(spec.command).toBe("/opt/mantis-toolchain/pnpm");
-    expect(spec.args).toEqual(["openclaw", "gateway", "--port", "19042"]);
+    expect(spec.args).toEqual(["bot", "gateway", "--port", "19042"]);
     expect(spec.options.cwd).toBe("/repo");
     expect(spec.options.shell).toBe(false);
   });
@@ -137,7 +137,7 @@ describe("telegram user Crabbox proof log polling", () => {
     const runtimeRoot = makeTempDir();
     const spec = createContainerizedSutSpawnSpec({
       codexProxyPort: 43123,
-      containerName: "openclaw-telegram-sut-test",
+      containerName: "bot-telegram-sut-test",
       gatewayEnv: {
         TELEGRAM_BOT_TOKEN: "telegram-burner-token",
       },
@@ -150,7 +150,7 @@ describe("telegram user Crabbox proof log polling", () => {
     });
 
     expect(spec.command).toBe("sudo");
-    expect(spec.args).toContain("/usr/local/sbin/openclaw-mantis-sut-container");
+    expect(spec.args).toContain("/usr/local/sbin/bot-mantis-sut-container");
     expect(spec.args).toContain("run");
     expect(spec.args).toContain("candidate");
     expect(spec.args).not.toContain("docker");
@@ -184,18 +184,18 @@ describe("telegram user Crabbox proof log polling", () => {
     const run = vi.fn(() => ({ signal: null, status: 0, stderr: "" }));
     runSutContainerAction(
       "stop",
-      "openclaw-telegram-sut-test",
-      "/tmp/openclaw-tg-crabbox-sut-test",
+      "bot-telegram-sut-test",
+      "/tmp/bot-tg-crabbox-sut-test",
       run,
     );
     expect(run).toHaveBeenCalledWith(
       "sudo",
       [
         "-n",
-        "/usr/local/sbin/openclaw-mantis-sut-container",
+        "/usr/local/sbin/bot-mantis-sut-container",
         "stop",
-        "openclaw-telegram-sut-test",
-        "/tmp/openclaw-tg-crabbox-sut-test",
+        "bot-telegram-sut-test",
+        "/tmp/bot-tg-crabbox-sut-test",
       ],
       expect.objectContaining({ encoding: "utf8", stdio: "pipe" }),
     );
@@ -203,24 +203,24 @@ describe("telegram user Crabbox proof log polling", () => {
     expect(() =>
       runSutContainerAction(
         "destroy",
-        "openclaw-telegram-sut-test",
-        "/tmp/openclaw-tg-crabbox-sut-test",
+        "bot-telegram-sut-test",
+        "/tmp/bot-tg-crabbox-sut-test",
         () => ({ signal: null, status: 1, stderr: "destroy failed" }),
       ),
     ).toThrow("destroy failed with exit code 1.\ndestroy failed");
     expect(() =>
       runSutContainerAction(
         "stop",
-        "openclaw-telegram-sut-test",
-        "/tmp/openclaw-tg-crabbox-sut-test",
+        "bot-telegram-sut-test",
+        "/tmp/bot-tg-crabbox-sut-test",
         () => ({ signal: "SIGKILL", status: null, stderr: "" }),
       ),
     ).toThrow("stop was terminated by SIGKILL");
     expect(() =>
       runSutContainerAction(
         "stop",
-        "openclaw-telegram-sut-test",
-        "/tmp/openclaw-tg-crabbox-sut-test",
+        "bot-telegram-sut-test",
+        "/tmp/bot-tg-crabbox-sut-test",
         () => ({ error: new Error("spawn failed"), status: null }),
       ),
     ).toThrow("Failed to stop container-isolated SUT: spawn failed");
@@ -272,17 +272,17 @@ describe("telegram user Crabbox proof log polling", () => {
   it("rejects loose numeric log tail limits instead of parsing prefixes", () => {
     expect(() =>
       readTelegramUserProofLogTailBytes({
-        OPENCLAW_TELEGRAM_USER_PROOF_LOG_TAIL_BYTES: "1e3",
+        BOT_TELEGRAM_USER_PROOF_LOG_TAIL_BYTES: "1e3",
       }),
-    ).toThrow("invalid OPENCLAW_TELEGRAM_USER_PROOF_LOG_TAIL_BYTES: 1e3");
+    ).toThrow("invalid BOT_TELEGRAM_USER_PROOF_LOG_TAIL_BYTES: 1e3");
     expect(() =>
       readTelegramUserProofLogTailBytes({
-        OPENCLAW_TELEGRAM_USER_PROOF_LOG_TAIL_BYTES: "1000bytes",
+        BOT_TELEGRAM_USER_PROOF_LOG_TAIL_BYTES: "1000bytes",
       }),
-    ).toThrow("invalid OPENCLAW_TELEGRAM_USER_PROOF_LOG_TAIL_BYTES: 1000bytes");
+    ).toThrow("invalid BOT_TELEGRAM_USER_PROOF_LOG_TAIL_BYTES: 1000bytes");
     expect(
       readTelegramUserProofLogTailBytes({
-        OPENCLAW_TELEGRAM_USER_PROOF_LOG_TAIL_BYTES: "4096",
+        BOT_TELEGRAM_USER_PROOF_LOG_TAIL_BYTES: "4096",
       }),
     ).toBe(4096);
   });
@@ -340,8 +340,8 @@ describe("telegram user Crabbox proof log polling", () => {
       parseArgs(["--output-dir", ".artifacts/one", "--output-dir", ".artifacts/two"]),
     ).toThrow("--output-dir was provided more than once");
 
-    expect(parseArgs(["--expect", "OpenClaw", "--expect", "ready"]).expect).toEqual([
-      "OpenClaw",
+    expect(parseArgs(["--expect", "Bot", "--expect", "ready"]).expect).toEqual([
+      "Bot",
       "ready",
     ]);
   });
@@ -408,7 +408,7 @@ describe("telegram user Crabbox proof log polling", () => {
     expect(config.gateway).toMatchObject({
       auth: {
         mode: "password",
-        password: { id: "OPENCLAW_GATEWAY_PASSWORD", source: "env" },
+        password: { id: "BOT_GATEWAY_PASSWORD", source: "env" },
       },
       tailscale: { mode: "funnel", resetOnExit: true },
     });
@@ -597,7 +597,7 @@ describe("telegram user Crabbox proof log polling", () => {
   });
 
   it("shell-quotes generated remote setup and chat literals", () => {
-    const payload = "name $(touch /tmp/openclaw-proof-injected) `touch /tmp/also-injected`";
+    const payload = "name $(touch /tmp/bot-proof-injected) `touch /tmp/also-injected`";
 
     expect(renderRemoteSetup({ tdlibSha256: payload, tdlibUrl: payload })).toContain(
       `tdlib_url='${payload}'`,
@@ -613,7 +613,7 @@ describe("telegram user Crabbox proof log polling", () => {
     fs.mkdirSync(path.join(outputDir, "publish-gif-only"));
     fs.writeFileSync(
       path.join(outputDir, "session.json"),
-      '{"sshKey":"/private/tmp/openclaw/key"}',
+      '{"sshKey":"/private/tmp/bot/key"}',
     );
     fs.writeFileSync(path.join(outputDir, "lease.json"), '{"token":"secret"}');
     fs.writeFileSync(path.join(outputDir, "status.json"), '{"ok":true}');
@@ -649,7 +649,7 @@ describe("telegram user Crabbox proof log polling", () => {
     const outputDir = makeTempDir();
     fs.writeFileSync(
       path.join(outputDir, "session.json"),
-      '{"sshKey":"/private/tmp/openclaw/key"}',
+      '{"sshKey":"/private/tmp/bot/key"}',
     );
     fs.writeFileSync(path.join(outputDir, "status.json"), '{"ok":true}');
     fs.writeFileSync(path.join(outputDir, "telegram-desktop.log"), "log");
@@ -671,7 +671,7 @@ describe("telegram user Crabbox proof log polling", () => {
       fakePython,
       `#!/usr/bin/env node
 import fs from "node:fs";
-fs.writeFileSync(process.env.OPENCLAW_TEST_ARGV_PATH, JSON.stringify(process.argv.slice(1)));
+fs.writeFileSync(process.env.BOT_TEST_ARGV_PATH, JSON.stringify(process.argv.slice(1)));
 `,
     );
     writeExecutable(
@@ -689,7 +689,7 @@ fs.writeFileSync(process.env.OPENCLAW_TEST_ARGV_PATH, JSON.stringify(process.arg
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_TEST_ARGV_PATH: argvPath,
+        BOT_TEST_ARGV_PATH: argvPath,
         PATH: `${root}${path.delimiter}${process.env.PATH ?? ""}`,
       },
     });

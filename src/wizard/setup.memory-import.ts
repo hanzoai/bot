@@ -5,7 +5,7 @@ import {
   listMemoryMigrationProviders,
   planProviderMemoryImport,
 } from "../commands/migrate/memory-import.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import type { MigrationPlan, MigrationProviderPlugin } from "../plugins/types.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -20,7 +20,7 @@ type MemoryImportOffer = {
   conflicts: number;
 };
 
-// No CLI hint here: `openclaw migrate <id>` runs the FULL provider migration
+// No CLI hint here: `bot migrate <id>` runs the FULL provider migration
 // (config/credentials/skills), not a memory-only retry. The Control UI Memory
 // import page is the only equivalent memory-scoped surface.
 async function showSkipHint(prompter: WizardPrompter): Promise<void> {
@@ -28,7 +28,7 @@ async function showSkipHint(prompter: WizardPrompter): Promise<void> {
 }
 
 export async function runSetupMemoryImportStep(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   prompter: WizardPrompter;
   runtime: RuntimeEnv;
 }): Promise<void> {

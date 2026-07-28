@@ -1,8 +1,8 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { root } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import { resolveMemoryHostEventLogPath } from "openclaw/plugin-sdk/memory-host-events";
+import { root } from "bot/plugin-sdk/memory-core-host-engine-foundation";
+import { resolveMemoryHostEventLogPath } from "bot/plugin-sdk/memory-host-events";
 import { resolveConfiguredWorkspaces } from "./doctor-workspaces.js";
 
 export type LegacyMemoryHostEventSource =

@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 import { INCLUDE_KEY } from "../../../config/includes.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { isRecord } from "../../../utils.js";
 
 export function containsAuthoredInclude(value: unknown): boolean {
@@ -16,8 +16,8 @@ export function containsAuthoredInclude(value: unknown): boolean {
 
 export function isSingleTopLevelIncludeMigration(params: {
   parsed: unknown;
-  sourceConfig: OpenClawConfig;
-  candidate: OpenClawConfig;
+  sourceConfig: BotConfig;
+  candidate: BotConfig;
 }): boolean {
   if (!isRecord(params.parsed)) {
     return false;

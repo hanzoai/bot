@@ -435,7 +435,7 @@ export function renderSessionList(params: {
               data-sidebar-session-error
             >
               <span class="callout__content">${host.sessionData.sessionMutationError}</span>
-              <openclaw-tooltip .content=${t("chat.actions.dismissError")}>
+              <bot-tooltip .content=${t("chat.actions.dismissError")}>
                 <button
                   class="callout__dismiss"
                   type="button"
@@ -444,7 +444,7 @@ export function renderSessionList(params: {
                 >
                   ${icons.x}
                 </button>
-              </openclaw-tooltip>
+              </bot-tooltip>
             </div>
           `
         : nothing}

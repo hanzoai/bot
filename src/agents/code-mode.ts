@@ -4,7 +4,7 @@
  */
 import { Type } from "typebox";
 import { getAgentToolExecutionContext } from "../../packages/agent-core/src/tool-execution-context.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { HookContext } from "./agent-tools.before-tool-call.js";
 import {
   codeModeReplayIdForToolCall,
@@ -74,10 +74,10 @@ function renderCodeModeCatalogIndex(lines: readonly string[], total: number): st
   const omitted = total - lines.length;
   const footer =
     omitted > 0
-      ? `${omitted} additional OpenClaw/plugin tools omitted from this prompt index. Use ALL_TOOLS or tools.search inside exec to find them.`
+      ? `${omitted} additional Bot/plugin tools omitted from this prompt index. Use ALL_TOOLS or tools.search inside exec to find them.`
       : "Use these exact ids with tools.callValue; use ALL_TOOLS or tools.search inside exec when lookup is ambiguous.";
   return [
-    "OpenClaw/plugin tool quick index (exact ids; descriptions are intentionally deferred):",
+    "Bot/plugin tool quick index (exact ids; descriptions are intentionally deferred):",
     "Each line is `id input -> output`; `-> ?` means unknown.",
     "OUTPUT DECLARED RULE: use declared fields for dependent calls in the first exec.",
     "OUTPUT UNKNOWN RULE: return the raw tool value unchanged; inspect or map it only in a later exec.",
@@ -89,7 +89,7 @@ function renderCodeModeCatalogIndex(lines: readonly string[], total: number): st
 
 function formatCodeModeCatalogIndex(catalog: readonly ToolSearchCatalogEntry[]): string {
   const lines = catalog
-    .filter((entry) => entry.source === "openclaw")
+    .filter((entry) => entry.source === "bot")
     .map((entry) => compactToolSearchCatalogEntry(entry))
     // Declared-output entries sort first so byte truncation drops `-> ?`
     // lines, which stay fully discoverable through ALL_TOOLS, before it drops
@@ -146,7 +146,7 @@ function createCodeModeExecDescription(
     : "";
   const catalogIndex = catalog ? formatCodeModeCatalogIndex(catalog) : "";
   return (
-    "Run JavaScript or TypeScript in OpenClaw code mode. Use `return` to pass the final value back; otherwise the result is `null`. Quick-index arrows show trusted declared output hints; `-> ?` means never guess result field names. For declared fields, process them in the first exec; do not spend another exec inspecting them. Perform dependent reads, checks, and follow-up calls in order; parallelize independent work only. For an unknown output, including a final dependent call after declared-output calls, return the raw tool value unchanged; do not wrap it in the requested answer shape or guess fields; filter or map it only in a later exec. Nested calls enforce normal tool policy and approvals. `ALL_TOOLS` is the complete compact catalog. Select exact ids directly or with `tools.search(query: string, options?)`; use `tools.describe(id: string)` only when needed. Never invent or transform a tool id. `tools.callValue(id: string, args?)` returns its JSON value directly; `tools.call(id: string, args?)` preserves `{ tool, result }`. Example: `const hit = ALL_TOOLS.find((entry) => entry.description.includes('weather')) ?? (await tools.search('weather'))[0]; return await tools.callValue(hit.id, {});`. Node.js modules and `require`/`import` are NOT available; use enabled catalog tools allowed by policy for shell, file, network, or external actions." +
+    "Run JavaScript or TypeScript in Bot code mode. Use `return` to pass the final value back; otherwise the result is `null`. Quick-index arrows show trusted declared output hints; `-> ?` means never guess result field names. For declared fields, process them in the first exec; do not spend another exec inspecting them. Perform dependent reads, checks, and follow-up calls in order; parallelize independent work only. For an unknown output, including a final dependent call after declared-output calls, return the raw tool value unchanged; do not wrap it in the requested answer shape or guess fields; filter or map it only in a later exec. Nested calls enforce normal tool policy and approvals. `ALL_TOOLS` is the complete compact catalog. Select exact ids directly or with `tools.search(query: string, options?)`; use `tools.describe(id: string)` only when needed. Never invent or transform a tool id. `tools.callValue(id: string, args?)` returns its JSON value directly; `tools.call(id: string, args?)` preserves `{ tool, result }`. Example: `const hit = ALL_TOOLS.find((entry) => entry.description.includes('weather')) ?? (await tools.search('weather'))[0]; return await tools.callValue(hit.id, {});`. Node.js modules and `require`/`import` are NOT available; use enabled catalog tools allowed by policy for shell, file, network, or external actions." +
     apiGuidance +
     mcpGuidance +
     swarmGuidance +
@@ -183,7 +183,7 @@ export function createCodeModeTools(ctx: CodeModeToolContext): AnyAgentTool[] {
       restartSafe: Type.Optional(
         Type.Boolean({
           description:
-            "Set true only when every catalog call is explicitly replay-safe and OpenClaw may reconstruct the work after a gateway restart. Leave unset for ordinary calls; true rejects unmarked, side-effecting, or namespace tool calls.",
+            "Set true only when every catalog call is explicitly replay-safe and Bot may reconstruct the work after a gateway restart. Leave unset for ordinary calls; true rejects unmarked, side-effecting, or namespace tool calls.",
         }),
       ),
     }),
@@ -217,7 +217,7 @@ export function createCodeModeTools(ctx: CodeModeToolContext): AnyAgentTool[] {
     name: CODE_MODE_WAIT_TOOL_NAME,
     label: "wait",
     hideFromChannelProgress: true,
-    description: "Resume a suspended OpenClaw code mode run returned by exec.",
+    description: "Resume a suspended Bot code mode run returned by exec.",
     parameters: Type.Object({
       runId: Type.String({ description: "Code mode run id returned by exec." }),
     }),
@@ -245,7 +245,7 @@ export function createCodeModeTools(ctx: CodeModeToolContext): AnyAgentTool[] {
 /** Compact normal tools behind Code Mode exec/wait controls. */
 export function applyCodeModeCatalog(params: {
   tools: AnyAgentTool[];
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionId?: string;
   sessionKey?: string;
   agentId?: string;
@@ -311,7 +311,7 @@ export function applyCodeModeCatalog(params: {
 /** Move client-side tool definitions into the active Code Mode catalog. */
 export function addClientToolsToCodeModeCatalog(params: {
   tools: ToolDefinition[];
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionId?: string;
   sessionKey?: string;
   agentId?: string;
@@ -345,5 +345,5 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.codeModeTestApi")] = testing;
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.codeModeTestApi")] = testing;
 }

@@ -7,7 +7,7 @@ import {
   renderMarkdownIRChunksWithinLimit,
   renderMarkdownWithMarkers,
   sliceMarkdownIR,
-} from "openclaw/plugin-sdk/text-chunking";
+} from "bot/plugin-sdk/text-chunking";
 
 const QQBOT_MARKDOWN_SAFE_CHUNK_BYTE_LIMIT = 3600;
 const QQBOT_MARKDOWN_ESCAPE_RE = /([\\`*_{}[\]()#+\-.!|>~])/gu;

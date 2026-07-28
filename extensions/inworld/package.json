@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/inworld-speech",
+  "name": "@hanzo/bot-inworld-speech",
   "version": "2026.7.2",
-  "description": "OpenClaw Inworld speech plugin.",
+  "description": "Bot Inworld speech plugin.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/inworld-speech",
-      "npmSpec": "@openclaw/inworld-speech",
+      "clawhubSpec": "clawhub:@hanzo/bot-inworld-speech",
+      "npmSpec": "@hanzo/bot-inworld-speech",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.8"
     },
@@ -24,7 +24,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {

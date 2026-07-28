@@ -1,9 +1,9 @@
 // Imessage tests cover conversation route plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   testing as sessionBindingTesting,
   registerSessionBindingAdapter,
-} from "openclaw/plugin-sdk/conversation-runtime";
+} from "bot/plugin-sdk/conversation-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveIMessageConversationRoute } from "./conversation-route.js";
 
@@ -12,7 +12,7 @@ const baseCfg = {
   agents: {
     list: [{ id: "main" }, { id: "codex" }],
   },
-} satisfies OpenClawConfig;
+} satisfies BotConfig;
 
 describe("resolveIMessageConversationRoute", () => {
   beforeEach(() => {

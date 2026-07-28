@@ -1,5 +1,5 @@
 // Voice Call setup helper migrates legacy config to the canonical schema.
-import { asOptionalRecord, readStringField } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asOptionalRecord, readStringField } from "bot/plugin-sdk/string-coerce-runtime";
 
 const asObject = asOptionalRecord;
 const getString = readStringField;

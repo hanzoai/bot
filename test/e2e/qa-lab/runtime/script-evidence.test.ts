@@ -12,7 +12,7 @@ import {
 const tempRoots: string[] = [];
 
 async function makeWriter(params: { maxDetailsBytes?: number; maxLogBytes?: number } = {}) {
-  const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-script-evidence-"));
+  const repoRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-script-evidence-"));
   tempRoots.push(repoRoot);
   return {
     artifactBase: path.join(repoRoot, ".artifacts", "qa-e2e", "script"),
@@ -134,13 +134,13 @@ describe("QA script evidence writer", () => {
       maxDetailsBytes: 4096,
       maxLogBytes: 4096,
     });
-    const configPath = path.join(repoRoot, "openclaw.json");
+    const configPath = path.join(repoRoot, "bot.json");
     await fs.writeFile(
       configPath,
       `${JSON.stringify({ logging: { redactPatterns: ["/internal-\\d+/g"] } })}\n`,
       "utf8",
     );
-    vi.stubEnv("OPENCLAW_CONFIG_PATH", configPath);
+    vi.stubEnv("BOT_CONFIG_PATH", configPath);
     writer.appendLog(`${"x".repeat(16_380)}inter`);
     writer.appendLog("nal-12345 should hide password=s");
     writer.appendLog("k-split-secret-1234567890");

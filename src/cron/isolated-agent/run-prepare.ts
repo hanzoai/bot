@@ -10,7 +10,7 @@ import type { SessionEntry } from "../../config/sessions.js";
 import { resolveSessionWorkStartError } from "../../config/sessions/lifecycle.js";
 import { formatSqliteSessionFileMarker } from "../../config/sessions/sqlite-marker.js";
 import type { AgentDefaultsConfig } from "../../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { SourceDeliveryPlan } from "../../infra/outbound/source-delivery-plan.js";
 import { isCronSessionKey } from "../../routing/session-key.js";
 import {
@@ -93,7 +93,7 @@ import { loadCronSessionEntryLatest, resolveCronSession } from "./session.js";
 
 export type PreparedCronRunContext = {
   input: RunCronAgentTurnParams;
-  cfgWithAgentDefaults: OpenClawConfig;
+  cfgWithAgentDefaults: BotConfig;
   agentId: string;
   agentCfg: AgentDefaultsConfig;
   agentDir: string;
@@ -176,7 +176,7 @@ export async function prepareCronRunContext(params: {
     defaults: runtimeCfg.agents?.defaults,
     agentConfigOverride,
   });
-  const requestedCfgWithAgentDefaults: OpenClawConfig = {
+  const requestedCfgWithAgentDefaults: BotConfig = {
     ...runtimeCfg,
     agents: Object.assign({}, runtimeCfg.agents, { defaults: agentCfg }),
   };

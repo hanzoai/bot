@@ -2,7 +2,7 @@
  * Tests keyed async queue serialization and cancellation behavior.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { createDeferred } from "../test-utils/deferred.js";
 import { enqueueKeyedTask, KeyedAsyncQueue } from "./keyed-async-queue.js";

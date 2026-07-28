@@ -1,4 +1,4 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import type { ResolvedProviderAuth } from "./model-auth-runtime-shared.js";
 import { normalizeProviderId } from "./model-selection.js";
 

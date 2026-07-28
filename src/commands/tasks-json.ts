@@ -1,7 +1,7 @@
 // JSON-only task command helpers.
 // These paths avoid maintenance reconciliation so short-lived JSON CLI processes stay read-only and exit cleanly.
 
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { RuntimeEnv } from "../runtime.js";
 import { writeRuntimeJson } from "../runtime.js";
 import { listTaskRecords } from "../tasks/runtime-internal.js";

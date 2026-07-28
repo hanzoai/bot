@@ -1,5 +1,5 @@
 /** Registry for image-generation providers contributed by plugin capabilities. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import * as capabilityProviderRuntime from "../plugins/capability-provider-runtime.js";
 import {
   buildCapabilityProviderMaps,
@@ -11,7 +11,7 @@ import type { ImageGenerationProviderPlugin } from "../plugins/types.js";
 // registry keeps aliases separate from canonical ids for user config lookups.
 const BUILTIN_IMAGE_GENERATION_PROVIDERS: readonly ImageGenerationProviderPlugin[] = [];
 function resolvePluginImageGenerationProviders(
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): ImageGenerationProviderPlugin[] {
   return capabilityProviderRuntime.resolvePluginCapabilityProviders({
     key: "imageGenerationProviders",
@@ -19,7 +19,7 @@ function resolvePluginImageGenerationProviders(
   });
 }
 
-function buildProviderMaps(cfg?: OpenClawConfig): {
+function buildProviderMaps(cfg?: BotConfig): {
   canonical: Map<string, ImageGenerationProviderPlugin>;
   aliases: Map<string, ImageGenerationProviderPlugin>;
 } {
@@ -31,7 +31,7 @@ function buildProviderMaps(cfg?: OpenClawConfig): {
 
 /** Lists canonical image-generation providers visible for config. */
 export function listImageGenerationProviders(
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): ImageGenerationProviderPlugin[] {
   return [...buildProviderMaps(cfg).canonical.values()];
 }
@@ -39,7 +39,7 @@ export function listImageGenerationProviders(
 /** Resolves an image-generation provider by canonical id or alias. */
 export function getImageGenerationProvider(
   providerId: string | undefined,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): ImageGenerationProviderPlugin | undefined {
   const normalized = normalizeCapabilityProviderId(providerId);
   if (!normalized) {

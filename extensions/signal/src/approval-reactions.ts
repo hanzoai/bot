@@ -1,6 +1,6 @@
 // Signal plugin module implements approval reactions behavior.
-import { matchesApprovalRequestFilters } from "openclaw/plugin-sdk/approval-client-runtime";
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
+import { matchesApprovalRequestFilters } from "bot/plugin-sdk/approval-client-runtime";
+import type { ApprovalResolveResult } from "bot/plugin-sdk/approval-gateway-runtime";
 import {
   addApprovalReactionHintToText,
   buildApprovalReactionHint,
@@ -10,20 +10,20 @@ import {
   resolveTypedApprovalReactionTarget,
   type ApprovalReactionDecisionBinding,
   type ApprovalReactionTargetRecord,
-} from "openclaw/plugin-sdk/approval-reaction-runtime";
+} from "bot/plugin-sdk/approval-reaction-runtime";
 import {
   getExecApprovalReplyMetadata,
   type ExecApprovalReplyDecision,
-} from "openclaw/plugin-sdk/approval-reply-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
+} from "bot/plugin-sdk/approval-reply-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
+import { normalizeAccountId } from "bot/plugin-sdk/routing";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { normalizeE164 } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
+import { normalizeE164 } from "bot/plugin-sdk/text-utility-runtime";
 import { resolveSignalTarget } from "./aliases.js";
 import { getSignalApprovalApprovers, signalApprovalAuth } from "./approval-auth.js";
 import { looksLikeUuid } from "./identity.js";
@@ -44,7 +44,7 @@ type SignalApprovalReactionResolution = {
 };
 
 type ApprovalKind = "exec" | "plugin";
-type ApprovalForwardingConfig = NonNullable<NonNullable<OpenClawConfig["approvals"]>["exec"]>;
+type ApprovalForwardingConfig = NonNullable<NonNullable<BotConfig["approvals"]>["exec"]>;
 type ApprovalForwardingMode = NonNullable<ApprovalForwardingConfig["mode"]>;
 
 type SignalApprovalReactionRoute =
@@ -95,7 +95,7 @@ const signalApprovalReactionTargets =
 const loadApprovalResolver = resolverRuntimeLoader;
 
 function resolveApprovalForwardingConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   approvalKind: ApprovalKind;
 }): ApprovalForwardingConfig | undefined {
   return params.approvalKind === "plugin"
@@ -148,7 +148,7 @@ function targetAccountMatches(params: {
 }
 
 function resolveSignalApprovalRouteTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   to: string;
 }): string | null {
@@ -168,7 +168,7 @@ function resolveSignalApprovalRouteTarget(params: {
 }
 
 function hasMatchingSignalApprovalReactionTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   config: ApprovalForwardingConfig;
   route: Extract<SignalApprovalReactionRoute, { deliveryMode: "target" }>;
 }): boolean {
@@ -192,7 +192,7 @@ function hasMatchingSignalApprovalReactionTarget(params: {
 }
 
 function isSignalApprovalReactionRouteStillEnabled(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   target: Pick<SignalApprovalReactionTarget, "approvalKind" | "route">;
 }): boolean {
   const config = resolveApprovalForwardingConfig({
@@ -225,7 +225,7 @@ export function resolveSignalApprovalConversationKey(to: string): string | null 
 }
 
 function resolveSignalApprovalConversationKeyForDeliveredTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   to: string;
 }): string | null {
@@ -442,7 +442,7 @@ function extractSignalApprovalPromptBinding(text: string): {
 }
 
 function buildTargetRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   to: string;
   approvalId: string;
@@ -483,7 +483,7 @@ function buildTargetRoute(params: {
 }
 
 function shouldAppendSignalApprovalReactionHintForOutboundMessage(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   to: string;
   text: string;
@@ -516,7 +516,7 @@ function shouldAppendSignalApprovalReactionHintForOutboundMessage(params: {
 }
 
 export function appendSignalApprovalReactionHintForOutboundMessage(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   to: string;
   text: string;
@@ -545,7 +545,7 @@ export function appendSignalApprovalReactionHintForOutboundMessage(params: {
 }
 
 export function hasSignalApprovalReactionApprovers(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
 }): boolean {
   return getSignalApprovalApprovers(params).length > 0;
@@ -628,7 +628,7 @@ function formatSignalApprovalTerminalTruth(approval: ApprovalResolveResult["appr
 }
 
 export function addSignalApprovalReactionHintToStructuredPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   to: string;
   payload: ReplyPayload;
@@ -697,7 +697,7 @@ function listDeliveredSignalMessageIdsWithVisibleHint(params: {
 }
 
 export function registerSignalApprovalReactionTargetForDeliveredPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   target: SignalApprovalDeliveryTarget;
   payload: ReplyPayload;
   results: readonly SignalApprovalDeliveryResult[];
@@ -769,7 +769,7 @@ export function registerSignalApprovalReactionTargetForDeliveredPayload(params: 
 }
 
 export function registerSignalApprovalReactionTargetForOutboundMessage(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   to: string;
   messageId: string;
@@ -892,7 +892,7 @@ export async function resolveSignalApprovalReactionTargetWithPersistence(params:
 }
 
 export async function maybeResolveSignalApprovalReaction(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   conversationKey: string;
   messageId: string;

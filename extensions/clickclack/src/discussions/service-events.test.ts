@@ -1,12 +1,12 @@
 import type {
-  OpenClawPluginGatewayEvents,
-  OpenClawPluginSessionsChangedEvent,
-} from "openclaw/plugin-sdk/core";
+  BotPluginGatewayEvents,
+  BotPluginSessionsChangedEvent,
+} from "bot/plugin-sdk/core";
 import { describe, expect, it, vi } from "vitest";
 import { createHarness } from "./service-test-support.js";
 
 function createGatewayEventsHarness() {
-  const handlers = new Set<(event: OpenClawPluginSessionsChangedEvent) => void>();
+  const handlers = new Set<(event: BotPluginSessionsChangedEvent) => void>();
   const unsubscribe = vi.fn();
   const gatewayEvents = {
     emit: vi.fn(),
@@ -22,11 +22,11 @@ function createGatewayEventsHarness() {
         unsubscribe();
       };
     }),
-  } satisfies OpenClawPluginGatewayEvents;
+  } satisfies BotPluginGatewayEvents;
   return {
     gatewayEvents,
     unsubscribe,
-    emit(event: OpenClawPluginSessionsChangedEvent) {
+    emit(event: BotPluginSessionsChangedEvent) {
       for (const handler of handlers) {
         handler(event);
       }

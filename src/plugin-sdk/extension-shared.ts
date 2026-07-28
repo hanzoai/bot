@@ -1,8 +1,8 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 // Extension shared helpers expose cross-plugin runtime utilities that remain SDK-safe.
 import { createAmbientNodeProxyAgent, hasAmbientNodeProxyConfigured } from "@openclaw/proxyline";
 import type { z } from "zod";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { resolveActiveManagedProxyTlsOptions } from "../infra/net/proxy/managed-proxy-undici.js";
 import { resolveDefaultSecretProviderAlias } from "../secrets/ref-contract.js";
 import { createDeferred as createSharedDeferred } from "../shared/deferred.js";
@@ -218,7 +218,7 @@ export function mapPluginConfigIssues(
 
 /** Checks whether a read-only plugin path may resolve a secret through an env provider. */
 export function canResolveEnvSecretRefInReadOnlyPath(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   id: string;
 }): boolean {

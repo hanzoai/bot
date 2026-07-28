@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { resolveDefaultModelForAgent } from "../../agents/model-selection-config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { CommandLane } from "../../process/lanes.js";
 import {
   buildSkillHistoryScanPrompt,
@@ -21,7 +21,7 @@ const HISTORY_SCAN_TIMEOUT_MS = 10 * 60_000;
 
 export async function runSkillHistoryScanReview(params: {
   agentId: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   env?: NodeJS.ProcessEnv;
   modelRef?: { model: string; provider: string };
   onComplete?: (ideasFound: number) => Promise<void>;
@@ -58,7 +58,7 @@ export async function runSkillHistoryScanReview(params: {
         recordProgress: params.onProgress,
       }
     : undefined;
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-history-scan-"));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-skill-history-scan-"));
   const runId = params.runId ?? `${HISTORY_SCAN_SESSION_SEGMENT}:${randomUUID()}`;
   let runError: unknown;
   try {
@@ -73,8 +73,8 @@ export async function runSkillHistoryScanReview(params: {
       agentId: params.agentId,
       trigger: "manual",
       lane: CommandLane.SkillWorkshopReview,
-      agentHarnessId: "openclaw",
-      agentHarnessRuntimeOverride: "openclaw",
+      agentHarnessId: "bot",
+      agentHarnessRuntimeOverride: "bot",
       workspaceDir: params.workspaceDir,
       config: params.config,
       prompt: buildSkillHistoryScanPrompt({

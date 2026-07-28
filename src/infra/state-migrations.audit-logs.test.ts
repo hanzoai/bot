@@ -65,7 +65,7 @@ describe("legacy core audit log migration", () => {
   });
 
   it("imports config and system audit JSONL only through explicit doctor repair", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-" }, async (stateDir) => {
       const configPath = path.join(stateDir, "logs", "config-audit.jsonl");
       const systemPath = path.join(stateDir, "audit", "system-agent.jsonl");
       const crestodianPath = path.join(stateDir, "audit", "crestodian.jsonl");
@@ -75,7 +75,7 @@ describe("legacy core audit log migration", () => {
         ts: "2026-07-01T00:00:00.000Z",
         source: "config-io",
         event: "config.write",
-        argv: ["openclaw", "config", "set", "token", "must-redact"],
+        argv: ["bot", "config", "set", "token", "must-redact"],
         execArgv: [],
       };
       const unredactedDigest = createHash("sha256")
@@ -111,7 +111,7 @@ describe("legacy core audit log migration", () => {
       expect(result.warnings).toEqual([]);
       expect(result.changes).toHaveLength(6);
 
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
       const configRecords = listConfigAuditRecordsForTests({ env, homedir: () => stateDir });
       expect(configRecords).toHaveLength(1);
       expect(JSON.stringify(configRecords)).not.toContain("must-redact");
@@ -131,7 +131,7 @@ describe("legacy core audit log migration", () => {
         expect((await fs.stat(`${configPath}.migrated.raw`)).mode & 0o777).toBe(0o600);
       }
       expect(JSON.parse(archivedConfig.trim())).toMatchObject({
-        argv: ["openclaw", "config", "set", "token", "***"],
+        argv: ["bot", "config", "set", "token", "***"],
       });
       expect(
         listSystemAgentAuditEntriesForTests({ env })
@@ -148,7 +148,7 @@ describe("legacy core audit log migration", () => {
       const laterConfigRecord = {
         ...unredactedConfigRecord,
         ts: "2026-07-04T00:00:00.000Z",
-        argv: ["openclaw", "config", "set", "token", "later-redaction-marker"],
+        argv: ["bot", "config", "set", "token", "later-redaction-marker"],
       };
       await fs.appendFile(`${configPath}.migrated.raw`, `${JSON.stringify(laterConfigRecord)}\n`);
       const rawRecovery = detectLegacyAuditLogs({
@@ -181,7 +181,7 @@ describe("legacy core audit log migration", () => {
   });
 
   it("rehashes a checkpointed raw archive before treating it as clean", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-rehash-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-rehash-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
       const rawPath = `${sourcePath}.migrated.raw`;
       const original = {
@@ -214,21 +214,21 @@ describe("legacy core audit log migration", () => {
       expect(result.warnings.join("\n")).toContain("changed other than by append");
       expect(
         listSystemAgentAuditEntriesForTests({
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, BOT_STATE_DIR: stateDir },
         }).map((entry) => entry.value.summary),
       ).toEqual(["original"]);
     });
   });
 
   it("restores the captured archive prefix when an in-place scrub write fails", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-scrub-write-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-scrub-write-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "logs", "config-audit.jsonl");
       const rawPath = `${sourcePath}.migrated.raw`;
       const originalRecord = {
         ts: "2026-07-01T00:00:00.000Z",
         source: "config-io",
         event: "config.write",
-        argv: ["openclaw", "config", "set", "token", "scrub-write-marker"],
+        argv: ["bot", "config", "set", "token", "scrub-write-marker"],
         execArgv: [],
       };
       const originalContent = `${JSON.stringify(originalRecord)}\n`;
@@ -302,7 +302,7 @@ describe("legacy core audit log migration", () => {
   });
 
   it("restores a moved scrub journal before parsing an interrupted archive", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-scrub-restart-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-scrub-restart-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "logs", "config-audit.jsonl");
       const sanitizedPath = `${sourcePath}.migrated`;
       const rawPath = `${sanitizedPath}.raw`;
@@ -311,7 +311,7 @@ describe("legacy core audit log migration", () => {
         ts: "2026-07-01T00:00:00.000Z",
         source: "config-io",
         event: "config.write",
-        argv: ["openclaw", "config", "set", "token", "restart-redaction-marker"],
+        argv: ["bot", "config", "set", "token", "restart-redaction-marker"],
         execArgv: [],
       };
       const originalContent = `${JSON.stringify(originalRecord)}\n`;
@@ -340,7 +340,7 @@ describe("legacy core audit log migration", () => {
       await expect(fs.readFile(rawPath, "utf8")).resolves.not.toContain("restart-redaction-marker");
       expect(
         listConfigAuditRecordsForTests({
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, BOT_STATE_DIR: stateDir },
           homedir: () => stateDir,
         }),
       ).toHaveLength(1);
@@ -351,7 +351,7 @@ describe("legacy core audit log migration", () => {
   });
 
   it("discards a stale restore journal while recovering a post-checkpoint append", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-stale-journal-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-stale-journal-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
       const rawPath = `${sourcePath}.migrated.raw`;
       const restorePath = `${rawPath}.doctor-scrub-restore`;
@@ -393,7 +393,7 @@ describe("legacy core audit log migration", () => {
   });
 
   it("does not replay a scrub journal over a same-inode replacement archive", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-scrub-replaced-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-scrub-replaced-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
       const sanitizedPath = `${sourcePath}.migrated`;
       const rawPath = `${sanitizedPath}.raw`;
@@ -429,7 +429,7 @@ describe("legacy core audit log migration", () => {
   });
 
   it("resumes a deterministic audit claim left by an interrupted Doctor", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-resume-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-resume-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
       const claimPath = path.join(
         path.dirname(sourcePath),
@@ -455,7 +455,7 @@ describe("legacy core audit log migration", () => {
       await expect(fs.access(`${sourcePath}.migrated.raw`)).resolves.toBeUndefined();
       expect(
         listSystemAgentAuditEntriesForTests({
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, BOT_STATE_DIR: stateDir },
         }),
       ).toHaveLength(1);
 
@@ -478,14 +478,14 @@ describe("legacy core audit log migration", () => {
       await migrateLegacyAuditLogs({ detected: numberedRaw, stateDir });
       expect(
         listSystemAgentAuditEntriesForTests({
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, BOT_STATE_DIR: stateDir },
         }),
       ).toHaveLength(2);
     });
   });
 
   it("does not resurrect a pruned raw-archive head when later rows are appended", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-late-tail-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-late-tail-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
       const records = ["first", "second", "third"].map((summary, index) => ({
         timestamp: `2026-07-03T00:00:0${index}.000Z`,
@@ -504,7 +504,7 @@ describe("legacy core audit log migration", () => {
       createSqliteAuditRecordStore({
         scope: SYSTEM_AGENT_AUDIT_SCOPE,
         maxEntries: 3,
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, BOT_STATE_DIR: stateDir },
       }).register("runtime", {
         timestamp: "2026-07-04T00:00:00.000Z",
         operation: "gateway.reload",
@@ -528,13 +528,13 @@ describe("legacy core audit log migration", () => {
       expect(recovered.changes.join("\n")).toContain("Recovered 1 later");
       expect(
         listSystemAgentAuditEntriesForTests({
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, BOT_STATE_DIR: stateDir },
         }).map((entry) => entry.value.summary),
       ).toEqual(["second", "third", "appended", "runtime"]);
       const rawCheckpoints = createSqliteAuditRecordStore<{ recordCount: number }>({
         scope: "migration.legacy-audit-raw",
         maxEntries: 10_000,
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, BOT_STATE_DIR: stateDir },
       }).entries();
       expect(rawCheckpoints).toHaveLength(1);
       expect(rawCheckpoints[0]?.value.recordCount).toBe(0);
@@ -542,7 +542,7 @@ describe("legacy core audit log migration", () => {
   });
 
   it("keeps identical rows from separate raw archive generations", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-generations-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-generations-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
       const record = {
         timestamp: "2026-07-03T00:00:00.000Z",
@@ -576,7 +576,7 @@ describe("legacy core audit log migration", () => {
       expect(result.warnings).toEqual([]);
       expect(
         listSystemAgentAuditEntriesForTests({
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, BOT_STATE_DIR: stateDir },
         }),
       ).toHaveLength(5);
       expect(detectLegacyAuditLogs({ stateDir, doctorOnlyStateMigrations: true }).hasLegacy).toBe(
@@ -586,7 +586,7 @@ describe("legacy core audit log migration", () => {
   });
 
   it("keeps restored raw archives idempotent after device and inode changes", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-restored-" }, async (rootDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-restored-" }, async (rootDir) => {
       const stateDir = path.join(rootDir, "source-state");
       const restoredStateDir = path.join(rootDir, "restored-state");
       const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
@@ -608,7 +608,7 @@ describe("legacy core audit log migration", () => {
       createSqliteAuditRecordStore({
         scope: SYSTEM_AGENT_AUDIT_SCOPE,
         maxEntries: 1,
-        env: { ...process.env, OPENCLAW_STATE_DIR: restoredStateDir },
+        env: { ...process.env, BOT_STATE_DIR: restoredStateDir },
       }).register("runtime-after-restore", {
         timestamp: "2026-07-04T00:00:00.000Z",
         operation: "gateway.reload",
@@ -628,7 +628,7 @@ describe("legacy core audit log migration", () => {
       expect(result.warnings).toEqual([]);
       expect(
         listSystemAgentAuditEntriesForTests({
-          env: { ...process.env, OPENCLAW_STATE_DIR: restoredStateDir },
+          env: { ...process.env, BOT_STATE_DIR: restoredStateDir },
         }).map((entry) => entry.value.summary),
       ).toEqual(["Runtime after restore"]);
       expect(
@@ -642,7 +642,7 @@ describe("legacy core audit log migration", () => {
 
   it("resumes the stable generation of an interrupted sanitized archive", async () => {
     await withTempDir(
-      { prefix: "openclaw-audit-migration-sanitized-resume-" },
+      { prefix: "bot-audit-migration-sanitized-resume-" },
       async (stateDir) => {
         const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
         const claimPath = path.join(
@@ -670,7 +670,7 @@ describe("legacy core audit log migration", () => {
         });
         expect(
           listSystemAgentAuditEntriesForTests({
-            env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+            env: { ...process.env, BOT_STATE_DIR: stateDir },
           }),
         ).toHaveLength(1);
       },
@@ -679,7 +679,7 @@ describe("legacy core audit log migration", () => {
 
   it("allocates a new generation when an active source follows a sanitized-only archive", async () => {
     await withTempDir(
-      { prefix: "openclaw-audit-migration-sanitized-recreated-" },
+      { prefix: "bot-audit-migration-sanitized-recreated-" },
       async (stateDir) => {
         const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
         const record = {
@@ -708,7 +708,7 @@ describe("legacy core audit log migration", () => {
         await expect(fs.access(`${sourcePath}.migrated.2.raw`)).resolves.toBeUndefined();
         expect(
           listSystemAgentAuditEntriesForTests({
-            env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+            env: { ...process.env, BOT_STATE_DIR: stateDir },
           }),
         ).toHaveLength(2);
       },
@@ -717,7 +717,7 @@ describe("legacy core audit log migration", () => {
 
   it("resumes a claim at its reserved generation instead of an older sanitized-only slot", async () => {
     await withTempDir(
-      { prefix: "openclaw-audit-migration-claimed-generation-" },
+      { prefix: "bot-audit-migration-claimed-generation-" },
       async (stateDir) => {
         const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
         const secondClaimPath = path.join(
@@ -757,7 +757,7 @@ describe("legacy core audit log migration", () => {
         await expect(fs.access(`${sourcePath}.migrated.2.raw`)).resolves.toBeUndefined();
         expect(
           listSystemAgentAuditEntriesForTests({
-            env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+            env: { ...process.env, BOT_STATE_DIR: stateDir },
           }),
         ).toHaveLength(2);
       },
@@ -765,7 +765,7 @@ describe("legacy core audit log migration", () => {
   });
 
   it("leaves malformed audit sources in place without partial imports", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-invalid-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-invalid-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
       await fs.mkdir(path.dirname(sourcePath), { recursive: true });
       await fs.writeFile(sourcePath, "{bad json\n");
@@ -779,14 +779,14 @@ describe("legacy core audit log migration", () => {
       await expect(fs.access(sourcePath)).resolves.toBeUndefined();
       expect(
         listSystemAgentAuditEntriesForTests({
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, BOT_STATE_DIR: stateDir },
         }),
       ).toEqual([]);
     });
   });
 
   it("does not migrate newer audit generations before an older source is repaired", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-order-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-order-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
       const rawPath = `${sourcePath}.migrated.raw`;
       const event = (summary: string) => ({
@@ -808,7 +808,7 @@ describe("legacy core audit log migration", () => {
       await expect(fs.access(sourcePath)).resolves.toBeUndefined();
       expect(
         listSystemAgentAuditEntriesForTests({
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, BOT_STATE_DIR: stateDir },
         }),
       ).toEqual([]);
 
@@ -821,20 +821,20 @@ describe("legacy core audit log migration", () => {
       expect(repaired.warnings).toEqual([]);
       expect(
         listSystemAgentAuditEntriesForTests({
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, BOT_STATE_DIR: stateDir },
         }).map((entry) => entry.value.summary),
       ).toEqual(["repaired older generation", "newer generation"]);
     });
   });
 
   it("restores the active source when raw archive hardening fails", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-permissions-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-permissions-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "logs", "config-audit.jsonl");
       const record = {
         ts: "2026-07-01T00:00:00.000Z",
         source: "config-io",
         event: "config.write",
-        argv: ["openclaw", "config", "set", "token", "must-redact"],
+        argv: ["bot", "config", "set", "token", "must-redact"],
         execArgv: [],
       };
       await fs.mkdir(path.dirname(sourcePath), { recursive: true });
@@ -889,7 +889,7 @@ describe("legacy core audit log migration", () => {
   });
 
   it("requires exclusive state ownership before claiming legacy audit files", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-lock-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-lock-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "audit", "system-agent.jsonl");
       await fs.mkdir(path.dirname(sourcePath), { recursive: true });
       await fs.writeFile(
@@ -900,7 +900,7 @@ describe("legacy core audit log migration", () => {
           summary: "Restarted gateway",
         })}\n`,
       );
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
       const gatewayLock = await acquireGatewayLock({
         allowInTests: true,
         env,
@@ -929,7 +929,7 @@ describe("legacy core audit log migration", () => {
   });
 
   it("leaves rows from an old config writer at the recreated source path", async () => {
-    await withTempDir({ prefix: "openclaw-audit-migration-concurrent-" }, async (stateDir) => {
+    await withTempDir({ prefix: "bot-audit-migration-concurrent-" }, async (stateDir) => {
       const sourcePath = path.join(stateDir, "logs", "config-audit.jsonl");
       await fs.mkdir(path.dirname(sourcePath), { recursive: true });
       const records = Array.from({ length: 10_000 }, (_, index) =>
@@ -937,7 +937,7 @@ describe("legacy core audit log migration", () => {
           ts: new Date(Date.UTC(2026, 6, 1, 0, 0, index)).toISOString(),
           source: "config-io",
           event: "config.write",
-          argv: ["openclaw", "config", "set", `key-${index}`, "value"],
+          argv: ["bot", "config", "set", `key-${index}`, "value"],
           execArgv: [],
         }),
       );
@@ -946,7 +946,7 @@ describe("legacy core audit log migration", () => {
         ts: "2026-07-02T00:00:00.000Z",
         source: "config-io",
         event: "config.write",
-        argv: ["openclaw", "config", "set", "later", "value"],
+        argv: ["bot", "config", "set", "later", "value"],
         execArgv: [],
       };
 
@@ -989,7 +989,7 @@ describe("legacy core audit log migration", () => {
         createSqliteAuditRecordStore({
           scope: CONFIG_AUDIT_SCOPE,
           maxEntries: CONFIG_AUDIT_MAX_ENTRIES,
-          env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+          env: { ...process.env, BOT_STATE_DIR: stateDir },
         }).entries(),
       ).toHaveLength(10_001);
     });
@@ -999,10 +999,10 @@ describe("legacy core audit log migration", () => {
     "rejects audit sources beneath symlinked state parents",
     async () => {
       const externalAuditDir = await fs.mkdtemp(
-        path.join(os.tmpdir(), "openclaw-audit-migration-external-"),
+        path.join(os.tmpdir(), "bot-audit-migration-external-"),
       );
       try {
-        await withTempDir({ prefix: "openclaw-audit-migration-symlink-" }, async (stateDir) => {
+        await withTempDir({ prefix: "bot-audit-migration-symlink-" }, async (stateDir) => {
           const externalSource = path.join(externalAuditDir, "system-agent.jsonl");
           await fs.writeFile(
             externalSource,
@@ -1030,7 +1030,7 @@ describe("legacy core audit log migration", () => {
           });
           expect(
             listSystemAgentAuditEntriesForTests({
-              env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+              env: { ...process.env, BOT_STATE_DIR: stateDir },
             }),
           ).toEqual([]);
         });

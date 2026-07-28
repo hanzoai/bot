@@ -1,4 +1,4 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 import { generatePKCE } from "./openai-chatgpt-pkce.runtime.js";
 
 const CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";
@@ -14,7 +14,7 @@ const loadNodeCrypto = createLazyRuntimeModule(() =>
 );
 
 export function resolveOpenAICallbackHost(env: NodeJS.ProcessEnv = process.env): string {
-  const host = env.OPENCLAW_OAUTH_CALLBACK_HOST?.trim() || DEFAULT_CALLBACK_HOST;
+  const host = env.BOT_OAUTH_CALLBACK_HOST?.trim() || DEFAULT_CALLBACK_HOST;
   if (!LOOPBACK_CALLBACK_HOSTS.has(host)) {
     throw new Error("OpenAI Codex OAuth callback host must be localhost, 127.0.0.1, or ::1");
   }

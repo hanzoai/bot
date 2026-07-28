@@ -1,17 +1,17 @@
 // Openai provider module implements model/runtime integration.
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { canonicalizeBase64 } from "openclaw/plugin-sdk/media-runtime";
+import { canonicalizeBase64 } from "bot/plugin-sdk/media-runtime";
 import {
   isProviderAuthProfileConfigured,
   resolveProviderAuthProfileApiKey,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveProviderRequestHeaders } from "openclaw/plugin-sdk/provider-http";
+} from "bot/plugin-sdk/provider-auth";
+import { resolveProviderRequestHeaders } from "bot/plugin-sdk/provider-http";
 import {
   captureWsEvent,
   createDebugProxyWebSocketAgent,
   resolveDebugProxySettings,
-} from "openclaw/plugin-sdk/proxy-capture";
+} from "bot/plugin-sdk/proxy-capture";
 import type {
   RealtimeVoiceAudioFormat,
   RealtimeVoiceBargeInOptions,
@@ -24,16 +24,16 @@ import type {
   RealtimeVoiceProviderPlugin,
   RealtimeVoiceTool,
   RealtimeVoiceToolResultOptions,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "bot/plugin-sdk/realtime-voice";
 import {
   REALTIME_VOICE_AUDIO_FORMAT_G711_ULAW_8KHZ,
   REALTIME_VOICE_AUDIO_FORMAT_PCM16_24KHZ,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { sleepWithAbort, warn } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/realtime-voice";
+import { sleepWithAbort, warn } from "bot/plugin-sdk/runtime-env";
 import {
   normalizeResolvedSecretInputString,
   normalizeSecretInputString,
-} from "openclaw/plugin-sdk/secret-input";
+} from "bot/plugin-sdk/secret-input";
 import WebSocket from "ws";
 import {
   asFiniteNumber,
@@ -1332,7 +1332,7 @@ class OpenAIRealtimeVoiceBridge implements RealtimeVoiceBridge {
       this.responseActive &&
       !this.responseCancelInFlight
     ) {
-      const eventId = `openclaw-response-cancel-${randomUUID()}`;
+      const eventId = `bot-response-cancel-${randomUUID()}`;
       this.manualResponseCancelEventId = eventId;
       this.sendEvent({ type: "response.cancel", event_id: eventId }, "reason=barge-in");
       this.responseCancelInFlight = true;
@@ -1398,7 +1398,7 @@ class OpenAIRealtimeVoiceBridge implements RealtimeVoiceBridge {
     this.responseCreatePending = false;
     this.responseCreateInFlight = true;
     this.suppressAutoRespondForManualResponse();
-    const eventId = `openclaw-response-create-${randomUUID()}`;
+    const eventId = `bot-response-create-${randomUUID()}`;
     // Realtime errors can describe unrelated client events. Keep this id until
     // the manual turn settles so only its rejection may release VAD suppression.
     this.manualResponseCreateEventId = eventId;
@@ -1594,8 +1594,8 @@ type CodexRealtimeGlobalState = {
   };
 };
 
-const CODEX_REALTIME_GLOBAL_STATE = Symbol.for("openclaw.codex.realtime-voice.v1");
-const INTERNAL_REALTIME_VOICE_PROVIDER = Symbol.for("openclaw.internal.realtime-voice-provider.v1");
+const CODEX_REALTIME_GLOBAL_STATE = Symbol.for("bot.codex.realtime-voice.v1");
+const INTERNAL_REALTIME_VOICE_PROVIDER = Symbol.for("bot.internal.realtime-voice-provider.v1");
 
 function readCodexRealtimeBrowserSessionFallback() {
   const state = (

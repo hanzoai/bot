@@ -1,6 +1,6 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import type { ModelCompatConfig, ModelMediaInputConfig } from "../../config/types.models.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { Api, Model } from "../../llm/types.js";
 import type { ProviderRuntimeModel } from "../../plugins/provider-runtime-model.types.js";
 import { resolveCatalogOwnedModelCompat } from "../model-compat-catalog.js";
@@ -46,7 +46,7 @@ export type StaticCatalogFallbackModel = Model & {
 export function shouldSuppressConfiguredModel(params: {
   provider: string;
   modelId: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   baseUrl?: string;
 }): boolean {
@@ -78,7 +78,7 @@ export function shouldSuppressConfiguredModel(params: {
 export function resolveConfiguredProviderDefaultApi(params: {
   provider: string;
   providerConfig: InlineProviderConfig | undefined;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   runtimeHooks?: ProviderRuntimeHooks;
 }): Api | undefined {
@@ -148,7 +148,7 @@ export function findInlineModelMatch(params: {
 }
 
 export function resolveConfiguredProviderConfig(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   provider: string,
 ): InlineProviderConfig | undefined {
   const configuredProviders = cfg?.models?.providers;
@@ -239,7 +239,7 @@ function mergeModelParams(
 }
 
 function findConfiguredAgentModelParams(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   modelId: string;
 }): Record<string, unknown> | undefined {
@@ -281,7 +281,7 @@ function findConfiguredAgentModelParams(params: {
 }
 
 export function mergeConfiguredRuntimeModelParams(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   modelId: string;
   discoveredParams?: unknown;
@@ -324,7 +324,7 @@ export function applyConfiguredProviderOverrides(params: {
   discoveredModel: ProviderRuntimeModel;
   providerConfig?: InlineProviderConfig;
   modelId: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   manifestAlias: ManifestModelCatalogProviderAliasMetadata;
   runtimeHooks?: ProviderRuntimeHooks;
   preferDiscoveredModelMetadata?: boolean;

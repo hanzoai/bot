@@ -1,7 +1,7 @@
 import Foundation
-import OpenClawKit
+import BotKit
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 @MainActor
 struct IOSSystemAgentChatTests {
@@ -88,9 +88,9 @@ struct IOSSystemAgentChatTests {
         await Self.start(model)
 
         let request = try #require(await recorder.allRequests().first)
-        #expect(request.method == "openclaw.chat")
+        #expect(request.method == "bot.chat")
         #expect(request.timeoutMs == 190_000)
-        #expect((request.params["sessionId"]?.value as? String)?.hasPrefix("ios-settings-openclaw-") == true)
+        #expect((request.params["sessionId"]?.value as? String)?.hasPrefix("ios-settings-bot-") == true)
         #expect(request.params["sessionId"]?.value as? String != "main")
         #expect(request.params["message"] == nil)
         #expect(request.params["welcomeVariant"] == nil)
@@ -178,7 +178,7 @@ struct IOSSystemAgentChatTests {
         await Self.start(model)
 
         #expect(model.messages.isEmpty)
-        #expect(model.errorMessage == "The Gateway connection changed. Restart OpenClaw to reconnect.")
+        #expect(model.errorMessage == "The Gateway connection changed. Restart Bot to reconnect.")
     }
 
     @Test func `sensitive answer stays redacted locally and is sent verbatim`() async throws {
@@ -244,7 +244,7 @@ struct IOSSystemAgentChatTests {
         await Self.start(model)
 
         #expect(model.errorMessage != nil)
-        #expect(model.errorMessage != "The Gateway connection changed. Restart OpenClaw to reconnect.")
+        #expect(model.errorMessage != "The Gateway connection changed. Restart Bot to reconnect.")
     }
 
     @Test func `pre-dispatch route change asks for restart`() async {
@@ -262,7 +262,7 @@ struct IOSSystemAgentChatTests {
 
         await Self.start(model)
 
-        #expect(model.errorMessage == "The Gateway connection changed. Restart OpenClaw to reconnect.")
+        #expect(model.errorMessage == "The Gateway connection changed. Restart Bot to reconnect.")
     }
 
     @Test func `leaving settings clears input without canceling an in-flight turn`() async {
@@ -397,17 +397,17 @@ struct IOSSystemAgentChatTests {
             contentsOf: iosRoot.appendingPathComponent("Sources/Design/SettingsSystemAgentChat.swift"),
             encoding: .utf8)
 
-        #expect(source.contains(".font(OpenClawType.title3SemiBold)"))
-        #expect(source.contains(".font(OpenClawType.body)"))
-        #expect(source.contains(".font(OpenClawType.subheadSemiBold)"))
-        #expect(source.contains(".font(OpenClawType.caption)"))
+        #expect(source.contains(".font(BotType.title3SemiBold)"))
+        #expect(source.contains(".font(BotType.body)"))
+        #expect(source.contains(".font(BotType.subheadSemiBold)"))
+        #expect(source.contains(".font(BotType.caption)"))
         #expect(source.contains("SecureField(\"\", text: self.$model.input)"))
         #expect(source.contains(".onChange(of: self.scenePhase)"))
         #expect(source.contains("guard phase == .active else"))
         #expect(source.contains("self.cancelSystemAgentSupportRetry()"))
         #expect(source.contains(".accessibilityLabel(\"Enter secret\")"))
         #expect(source.contains("currentRoute(ifGatewayID: gatewayID)"))
-        #expect(source.contains("supportsServerMethod(\n            \"openclaw.chat\""))
+        #expect(source.contains("supportsServerMethod(\n            \"bot.chat\""))
         #expect(source.contains("matchesGatewayIdentity(gatewayID)"))
         #expect(source.contains("cachedSystemAgentMethodSupport(gatewayID: gatewayID, route: route)"))
         #expect(source.contains("isCurrentSystemAgentSupportCheck(checkID, gatewayID: gatewayID)"))
@@ -424,15 +424,15 @@ struct IOSSystemAgentChatTests {
         #expect(!source.contains("SecureField(\"Enter secret"))
     }
 
-    @Test func `settings route launch argument opens OpenClaw directly`() {
-        let arguments = ["OpenClaw", "--openclaw-settings-route", "openclaw"]
+    @Test func `settings route launch argument opens Bot directly`() {
+        let arguments = ["Bot", "--bot-settings-route", "bot"]
 
         #expect(RootTabs.requestedInitialSettingsRoute(arguments: arguments) == .systemAgent)
         #expect(RootTabs.initialDestination(arguments: arguments) == .settings)
     }
 
     @Test func `settings route is visible and handoff uses root chat navigation`() throws {
-        #expect(SettingsProTab().title(for: .systemAgent) == "OpenClaw")
+        #expect(SettingsProTab().title(for: .systemAgent) == "Bot")
 
         let iosRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
@@ -510,7 +510,7 @@ struct IOSSystemAgentChatTests {
             "question": [
                 "id": "connection",
                 "header": "Connection",
-                "question": "How should OpenClaw connect?",
+                "question": "How should Bot connect?",
                 "options": [
                     [
                         "label": "Use Tailscale",

@@ -106,10 +106,10 @@ describe("registerBackupCommand", () => {
   });
 
   it("runs backup verify with forwarded options", async () => {
-    await runCli(["backup", "verify", "/tmp/openclaw-backup.tar.gz", "--json"]);
+    await runCli(["backup", "verify", "/tmp/bot-backup.tar.gz", "--json"]);
 
     const options = expectForwardedOptions(backupVerifyCommand);
-    expect(options.archive).toBe("/tmp/openclaw-backup.tar.gz");
+    expect(options.archive).toBe("/tmp/bot-backup.tar.gz");
     expect(options.json).toBe(true);
   });
 
@@ -128,7 +128,7 @@ describe("registerBackupCommand", () => {
     ]);
   });
 
-  it("runs SQLite snapshot create for named OpenClaw databases", async () => {
+  it("runs SQLite snapshot create for named Bot databases", async () => {
     await runCli([
       "backup",
       "sqlite",

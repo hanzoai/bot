@@ -1,19 +1,19 @@
-import { buildMeetingSoxAudioCommands } from "openclaw/plugin-sdk/meeting-runtime";
+import { buildMeetingSoxAudioCommands } from "bot/plugin-sdk/meeting-runtime";
 import {
   addTimerTimeoutGraceMs,
   resolvePositiveTimerTimeoutMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/number-runtime";
 import {
   REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME,
   resolveRealtimeVoiceAgentConsultToolPolicy,
   type RealtimeVoiceAgentConsultToolPolicy,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "bot/plugin-sdk/realtime-voice";
 import {
   asRecord,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
   normalizeOptionalTrimmedStringList,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 
 export type ZoomMeetingsMode = "agent" | "bidi" | "transcribe";
 export type ZoomMeetingsTransport = "chrome" | "chrome-node";
@@ -95,7 +95,7 @@ const DEFAULT_SOX_COMMANDS = buildSoxCommands(DEFAULT_AUDIO_FORMAT, DEFAULT_AUDI
 export const DEFAULT_ZOOM_MEETINGS_AUDIO_INPUT_COMMAND = DEFAULT_SOX_COMMANDS.inputCommand;
 export const DEFAULT_ZOOM_MEETINGS_AUDIO_OUTPUT_COMMAND = DEFAULT_SOX_COMMANDS.outputCommand;
 
-const DEFAULT_REALTIME_INSTRUCTIONS = `You are joining a private Zoom meeting as an OpenClaw voice transport. Keep spoken replies brief and natural. In agent mode, wait for OpenClaw consult results and speak them exactly. In bidi mode, answer directly and call ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} for deeper reasoning, current information, or tools.`;
+const DEFAULT_REALTIME_INSTRUCTIONS = `You are joining a private Zoom meeting as an Bot voice transport. Keep spoken replies brief and natural. In agent mode, wait for Bot consult results and speak them exactly. In bidi mode, answer directly and call ${REALTIME_VOICE_AGENT_CONSULT_TOOL_NAME} for deeper reasoning, current information, or tools.`;
 
 const DEFAULT_CONFIG: ZoomMeetingsConfig = {
   enabled: true,
@@ -105,7 +105,7 @@ const DEFAULT_CONFIG: ZoomMeetingsConfig = {
     audioFormat: DEFAULT_AUDIO_FORMAT,
     audioBufferBytes: DEFAULT_AUDIO_BUFFER_BYTES,
     launch: true,
-    guestName: "OpenClaw Agent",
+    guestName: "Bot Agent",
     reuseExistingTab: true,
     autoJoin: true,
     joinTimeoutMs: 30_000,

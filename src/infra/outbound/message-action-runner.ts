@@ -3,8 +3,8 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { resolveSendableOutboundReplyParts } from "openclaw/plugin-sdk/reply-payload";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import { resolveSendableOutboundReplyParts } from "bot/plugin-sdk/reply-payload";
 import { ErrorCodes } from "../../../packages/gateway-protocol/src/schema/error-codes.js";
 import { stripPlainTextToolCallBlocks } from "../../../packages/tool-call-repair/src/index.js";
 import { resolveSessionAgentId } from "../../agents/agent-scope.js";
@@ -38,7 +38,7 @@ import type {
   ChannelThreadingToolContext,
 } from "../../channels/plugins/types.public.js";
 import type { InternalChannelThreadingToolContext } from "../../channels/threading-tool-context-internal.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   hasLegacyInteractiveReplyBlocks,
   hasMessagePresentationBlocks,
@@ -149,7 +149,7 @@ const loadMessageActionGatewayRuntime = createLazyRuntimeModule(
 );
 
 export type RunMessageActionParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   action: ChannelMessageActionName;
   params: Record<string, unknown>;
   defaultAccountId?: string;
@@ -277,7 +277,7 @@ function asResultRecord(value: unknown): Record<string, unknown> | undefined {
 function markDeliveredCurrentSourceReply<T extends MessageActionRunResult>(
   result: T,
   params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     actionParams: Record<string, unknown>;
     channel: ChannelId;
     accountId?: string | null;
@@ -458,7 +458,7 @@ function applyCrossContextMessageDecoration({
 }
 
 async function maybeApplyCrossContextMarker(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: ChannelId;
   action: ChannelMessageActionName;
   target: string;
@@ -492,7 +492,7 @@ async function maybeApplyCrossContextMarker(params: {
 }
 
 async function resolveChannel(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   params: Record<string, unknown>,
   toolContext?: { currentChannelProvider?: string },
   action?: ChannelMessageActionName,
@@ -518,7 +518,7 @@ function enforceCrossProviderEgressPolicyBeforeTargetResolution(params: {
   action: ChannelMessageActionName;
   args: Record<string, unknown>;
   toolContext?: ChannelThreadingToolContext;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string | null;
 }): void {
   const currentProvider = params.toolContext?.currentChannelProvider;
@@ -576,7 +576,7 @@ function inferPeerKindForAccountBinding(
 }
 
 function resolveTargetBoundAccountId(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: ChannelId;
   channelPlugin?: ChannelPlugin;
   args: Record<string, unknown>;
@@ -613,7 +613,7 @@ function resolveTargetBoundAccountId(params: {
 }
 
 async function resolveActionTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: ChannelId;
   action: ChannelMessageActionName;
   args: Record<string, unknown>;
@@ -654,7 +654,7 @@ function sanitizeGroupTargetId(target: string): string {
 }
 
 async function resolveResolvedTargetOrThrow(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: ChannelId;
   input: string;
   accountId?: string;
@@ -679,7 +679,7 @@ async function resolveResolvedTargetOrThrow(params: {
 }
 
 type ResolvedActionContext = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   params: Record<string, unknown>;
   channel: ChannelId;
   channelPlugin?: ChannelPlugin;
@@ -888,7 +888,7 @@ function applyImplicitSourceReplySendPolicy(
 }
 
 async function runGatewayPluginMessageActionOrNull(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   params: Record<string, unknown>;
   channel: ChannelId;
   channelPlugin?: ChannelPlugin;
@@ -1203,7 +1203,7 @@ function buildInternalSourceReplyToolResult(payload: {
 }
 
 async function buildSendPayloadParts(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   actionParams: Record<string, unknown>;
   input: RunMessageActionParams;
   channel?: ChannelId;

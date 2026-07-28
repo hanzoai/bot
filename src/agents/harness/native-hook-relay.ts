@@ -2,9 +2,9 @@
  * Bridges native harness hook events through registered relay processes.
  */
 import { randomUUID } from "node:crypto";
-import { resolveExpiresAtMsFromDurationMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveExpiresAtMsFromDurationMs } from "@hanzo/bot-normalization-core/number-coercion";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+import { resolveBotStateSqlitePath } from "../../state/bot-state-db.paths.js";
 import {
   clearNativeHookRelayBridgesForTests,
   NATIVE_HOOK_BRIDGE_REPLACEMENT_RECORD_GRACE_MS,
@@ -99,7 +99,7 @@ export function registerNativeHookRelay(
     throw new Error("Native hook relay expiry is outside the supported Date range");
   }
   const allowedEvents = normalizeAllowedEvents(params.allowedEvents);
-  const stateDbPath = resolveOpenClawStateSqlitePath();
+  const stateDbPath = resolveBotStateSqlitePath();
   unregisterNativeHookRelay(relayId, undefined, {
     deferBridgeRecordRemovalMs: NATIVE_HOOK_BRIDGE_REPLACEMENT_RECORD_GRACE_MS,
   });

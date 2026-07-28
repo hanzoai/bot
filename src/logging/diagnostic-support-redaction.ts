@@ -1,8 +1,8 @@
 // Diagnostic support redaction helpers scrub support bundle files and paths.
 import path from "node:path";
-import { isSensitiveUrlQueryParamName } from "@openclaw/net-policy/redact-sensitive-url";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { isSensitiveUrlQueryParamName } from "@hanzo/bot-net-policy/redact-sensitive-url";
+import { asOptionalRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { REDACTED_SENTINEL } from "../config/redact-snapshot.js";
 import { isSecretRefShape } from "../config/redact-snapshot.secret-ref.js";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";
@@ -201,7 +201,7 @@ function addPathPrefixVariants(
 
 function pathRedactionPrefixes(options: SupportRedactionContext): PathRedactionPrefix[] {
   const prefixes = new Map<string, PathRedactionPrefix>();
-  addPathPrefixVariants(prefixes, options.stateDir, "$OPENCLAW_STATE_DIR");
+  addPathPrefixVariants(prefixes, options.stateDir, "$BOT_STATE_DIR");
   addPathPrefixVariants(prefixes, options.env.HOME, "~");
   addPathPrefixVariants(prefixes, options.env.USERPROFILE, "~");
   return [...prefixes.values()].toSorted((a, b) => b.prefix.length - a.prefix.length);

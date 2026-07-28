@@ -6,7 +6,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionEntry } from "../config/sessions.js";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
@@ -475,7 +475,7 @@ describe("before_tool_call hook deduplication (#15502)", () => {
     expect(beforeToolCallHook).toHaveBeenCalledTimes(1);
   });
 
-  it("passes agent context to outer code-mode exec hooks through OpenClaw custom tools", async () => {
+  it("passes agent context to outer code-mode exec hooks through Bot custom tools", async () => {
     beforeToolCallHook = installBeforeToolCallHook({
       runBeforeToolCallImpl: async () => ({
         block: true,
@@ -1457,7 +1457,7 @@ describe("before_tool_call adapter and client tool integration", () => {
 
   it("lets trusted policies read session extensions for client tools when config is provided", async () => {
     resetGlobalHookRunner();
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-client-tool-policy-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-client-tool-policy-"));
     const storePath = path.join(stateDir, "sessions.json");
     const config = { session: { store: storePath } };
     const seen: unknown[] = [];

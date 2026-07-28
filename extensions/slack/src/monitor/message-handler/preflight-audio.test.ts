@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SlackMessageEvent } from "../../types.js";
 import type { SlackMediaResult } from "../media-types.js";
@@ -35,7 +35,7 @@ function createSlackMessage(overrides: Partial<SlackMessageEvent>): SlackMessage
   } as SlackMessageEvent;
 }
 
-function createAudioConfig(overrides: Record<string, unknown> = {}): OpenClawConfig {
+function createAudioConfig(overrides: Record<string, unknown> = {}): BotConfig {
   return {
     tools: {
       media: {
@@ -46,7 +46,7 @@ function createAudioConfig(overrides: Record<string, unknown> = {}): OpenClawCon
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 describe("Slack captionless audio preflight", () => {
@@ -162,7 +162,7 @@ describe("Slack captionless audio preflight", () => {
   });
 
   it("removes preflight downloads when the transcript does not admit the message", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-slack-audio-preflight-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-slack-audio-preflight-"));
     const audioPath = path.join(root, "voice.mp4");
     await fs.writeFile(audioPath, "voice");
 

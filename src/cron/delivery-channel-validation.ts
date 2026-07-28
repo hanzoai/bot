@@ -1,5 +1,5 @@
 // Channel-aware cron delivery validation for gateway-owned mutations.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { listConfiguredMessageChannels } from "../infra/outbound/channel-selection.js";
 import {
   resolveTargetPrefixedChannel,
@@ -8,7 +8,7 @@ import {
 import { isDeliverableMessageChannel, normalizeMessageChannel } from "../utils/message-channel.js";
 import type { CronDelivery, CronFailureAlert, CronJobCreate } from "./types.js";
 
-function hasExplicitChannelConfigEntry(cfg: OpenClawConfig): boolean {
+function hasExplicitChannelConfigEntry(cfg: BotConfig): boolean {
   const channels = cfg.channels;
   if (!channels || typeof channels !== "object" || Array.isArray(channels)) {
     return false;
@@ -24,7 +24,7 @@ function hasExplicitChannelConfigEntry(cfg: OpenClawConfig): boolean {
 }
 
 async function assertConfiguredAnnounceChannel(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel?: string;
   field: "delivery.channel" | "delivery.failureDestination.channel" | "failureAlert.channel";
 }) {
@@ -79,7 +79,7 @@ function assertCompatibleAnnounceTarget(params: {
 }
 
 export async function assertValidCronAnnounceDelivery(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   delivery?: CronDelivery;
 }) {
   if (params.delivery && (params.delivery.mode ?? "announce") === "announce") {
@@ -126,7 +126,7 @@ export async function assertValidCronAnnounceDelivery(params: {
  * `--failure-alert-channel`) is stored and only fails later as `channel_not_found`.
  */
 export async function assertValidCronFailureAlert(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   failureAlert?: CronFailureAlert | false;
   delivery?: CronDelivery;
 }) {
@@ -173,7 +173,7 @@ export async function assertValidCronFailureAlert(params: {
   });
 }
 
-export async function assertValidCronCreateDelivery(cfg: OpenClawConfig, job: CronJobCreate) {
+export async function assertValidCronCreateDelivery(cfg: BotConfig, job: CronJobCreate) {
   await assertValidCronAnnounceDelivery({ cfg, delivery: job.delivery });
   await assertValidCronFailureAlert({
     cfg,

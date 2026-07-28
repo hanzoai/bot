@@ -7,7 +7,7 @@ import { resolveMergeHeadDiffBase } from "./lib/merge-head-diff-base.mjs";
 
 const GIT_OUTPUT_MAX_BUFFER = 64 * 1024 * 1024;
 const IMPLAUSIBLE_NO_MERGE_BASE_DIFF_PATHS = 200;
-const RAW_SYNC_CHANGED_LANES_ENV = "OPENCLAW_CHANGED_LANES_RAW_SYNC";
+const RAW_SYNC_CHANGED_LANES_ENV = "BOT_CHANGED_LANES_RAW_SYNC";
 
 const SCRIPTS_TYPECHECK_PATH_RE =
   /^(?:scripts\/.*\.(?:[cm]?ts|[cm]?tsx)|tsconfig\.scripts\.json)$/u;
@@ -43,7 +43,7 @@ export const RELEASE_METADATA_PATHS = new Set([
   "apps/android/fastlane/metadata/android/en-US/release_notes.txt",
   "apps/android/version.json",
   "apps/ios/CHANGELOG.md",
-  "apps/macos/Sources/OpenClaw/Resources/Info.plist",
+  "apps/macos/Sources/Bot/Resources/Info.plist",
   "docs/.generated/config-baseline.counts.json",
   "docs/.generated/config-baseline.sha256",
   "docs/install/updating.md",

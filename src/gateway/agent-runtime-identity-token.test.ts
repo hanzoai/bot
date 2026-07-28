@@ -4,20 +4,20 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { readExecApprovalsSnapshot } from "../infra/exec-approvals-store.js";
 import { testing as execApprovalsStoreTesting } from "../infra/exec-approvals-store.test-support.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 
-const envSnapshot = captureEnv(["HOME", "OPENCLAW_HOME", "OPENCLAW_STATE_DIR"]);
+const envSnapshot = captureEnv(["HOME", "BOT_HOME", "BOT_STATE_DIR"]);
 
 const tempHomes: string[] = [];
 
 function useTempHome(): string {
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-agent-runtime-"));
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "bot-agent-runtime-"));
   tempHomes.push(home);
   setTestEnvValue("HOME", home);
-  setTestEnvValue("OPENCLAW_HOME", home);
-  setTestEnvValue("OPENCLAW_STATE_DIR", path.join(home, ".openclaw"));
-  closeOpenClawStateDatabaseForTest();
+  setTestEnvValue("BOT_HOME", home);
+  setTestEnvValue("BOT_STATE_DIR", path.join(home, ".bot"));
+  closeBotStateDatabaseForTest();
   execApprovalsStoreTesting.reset();
   return home;
 }
@@ -36,7 +36,7 @@ async function importRuntimeTokenModule(): Promise<
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   execApprovalsStoreTesting.reset();
   vi.resetModules();
   envSnapshot.restore();

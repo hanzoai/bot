@@ -3,7 +3,7 @@
  */
 import fs from "node:fs/promises";
 import { StringDecoder } from "node:string_decoder";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { serializeJsonlLine, writeJsonlLines } from "../../config/sessions/transcript-jsonl.js";
 import { invalidateSessionFileRepairCache } from "../session-file-repair.js";
 

@@ -1,4 +1,4 @@
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { QuestionPrompt } from "../../app/question-prompt.ts";
 import type { ChatItem, ChatQueueItem, MessageGroup } from "../../lib/chat/chat-types.ts";
 import {
@@ -172,7 +172,7 @@ export function buildChatItems(props: BuildChatItemsProps): Array<ChatItem | Mes
       continue;
     }
     const raw = asRecord(msg) ?? {};
-    const marker = raw["__openclaw"] as Record<string, unknown> | undefined;
+    const marker = raw["__bot"] as Record<string, unknown> | undefined;
     if (marker && marker.kind === "compaction") {
       items.push(buildCompactionDividerItem(marker, normalized.timestamp ?? Date.now(), i));
       continue;
@@ -491,8 +491,8 @@ export function buildChatItems(props: BuildChatItemsProps): Array<ChatItem | Mes
     tools.some((message) => {
       const record = asRecord(message);
       return (
-        record?.["__openclawToolStreamLive"] === true &&
-        record["__openclawToolStreamResultReceived"] !== true
+        record?.["__botToolStreamLive"] === true &&
+        record["__botToolStreamResultReceived"] !== true
       );
     });
   // The initial-load skeleton owns the empty thread; a background reload with

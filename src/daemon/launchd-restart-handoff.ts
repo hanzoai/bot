@@ -2,8 +2,8 @@
 import { spawn } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
-import { err, ok, type Result } from "@openclaw/normalization-core/result";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { err, ok, type Result } from "@hanzo/bot-normalization-core/result";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { sanitizeForLog } from "../../packages/terminal-core/src/ansi.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { sanitizeHostExecEnv } from "../infra/host-env-security.js";
@@ -32,8 +32,8 @@ const RELOAD_BOOTSTRAP_RETRY_COUNT = 15;
 type LaunchdRestartLogEnv = {
   HOME?: string;
   USERPROFILE?: string;
-  OPENCLAW_STATE_DIR?: string;
-  OPENCLAW_PROFILE?: string;
+  BOT_STATE_DIR?: string;
+  BOT_PROFILE?: string;
 };
 
 function assertValidLaunchAgentLabel(label: string): string {
@@ -67,17 +67,17 @@ function collectRestartLogEnv(env?: Record<string, string | undefined>): Launchd
   return {
     HOME: source.HOME,
     USERPROFILE: source.USERPROFILE,
-    OPENCLAW_STATE_DIR: source.OPENCLAW_STATE_DIR,
-    OPENCLAW_PROFILE: source.OPENCLAW_PROFILE,
+    BOT_STATE_DIR: source.BOT_STATE_DIR,
+    BOT_PROFILE: source.BOT_PROFILE,
   };
 }
 
 function resolveLaunchAgentLabel(env?: Record<string, string | undefined>): string {
-  const envLabel = normalizeOptionalString(env?.OPENCLAW_LAUNCHD_LABEL);
+  const envLabel = normalizeOptionalString(env?.BOT_LAUNCHD_LABEL);
   if (envLabel) {
     return assertValidLaunchAgentLabel(envLabel);
   }
-  return assertValidLaunchAgentLabel(resolveGatewayLaunchAgentLabel(env?.OPENCLAW_PROFILE));
+  return assertValidLaunchAgentLabel(resolveGatewayLaunchAgentLabel(env?.BOT_PROFILE));
 }
 
 function resolveLaunchdRestartTarget(
@@ -102,7 +102,7 @@ function buildLaunchdRestartScript(
   // current gateway process can exit cleanly after scheduling the handoff.
   const waitForCallerPid = `wait_pid="$4"
 ${renderPosixRestartLogSetup(restartLogEnv)}
-printf '[%s] openclaw restart attempt source=handoff mode=${mode} target=%s pid=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$service_target" "$wait_pid" >&2
+printf '[%s] bot restart attempt source=handoff mode=${mode} target=%s pid=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$service_target" "$wait_pid" >&2
 if [ -n "$wait_pid" ] && [ "$wait_pid" -gt 1 ] 2>/dev/null; then
   while kill -0 "$wait_pid" >/dev/null 2>&1; do
     sleep 0.1
@@ -130,9 +130,9 @@ else
   fi
 fi
 if [ "$status" -eq 0 ]; then
-  printf '[%s] openclaw restart done source=handoff mode=${mode} interactive=0\\n' "$(date -u +%FT%TZ)" >&2
+  printf '[%s] bot restart done source=handoff mode=${mode} interactive=0\\n' "$(date -u +%FT%TZ)" >&2
 else
-  printf '[%s] openclaw restart failed source=handoff mode=${mode} status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
+  printf '[%s] bot restart failed source=handoff mode=${mode} status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
 fi
 exit "$status"
 `;
@@ -194,9 +194,9 @@ launchctl bootout "$service_target" >/dev/null 2>&1 || true
 ${bootoutWaitLoop}
 ${bootstrapRetryLoop}
 if [ "$status" -eq 0 ]; then
-  printf '[%s] openclaw restart done source=handoff mode=${mode} interactive=0\\n' "$(date -u +%FT%TZ)" >&2
+  printf '[%s] bot restart done source=handoff mode=${mode} interactive=0\\n' "$(date -u +%FT%TZ)" >&2
 else
-  printf '[%s] openclaw restart failed source=handoff mode=${mode} status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
+  printf '[%s] bot restart failed source=handoff mode=${mode} status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
 fi
 exit "$status"
 `;
@@ -223,9 +223,9 @@ else
   fi
 fi
 if [ "$status" -eq 0 ]; then
-  printf '[%s] openclaw restart done source=handoff mode=${mode} interactive=0\\n' "$(date -u +%FT%TZ)" >&2
+  printf '[%s] bot restart done source=handoff mode=${mode} interactive=0\\n' "$(date -u +%FT%TZ)" >&2
 else
-  printf '[%s] openclaw restart failed source=handoff mode=${mode} status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
+  printf '[%s] bot restart failed source=handoff mode=${mode} status=%s interactive=0\\n' "$(date -u +%FT%TZ)" "$status" >&2
 fi
 exit "$status"
 `;
@@ -252,7 +252,7 @@ export function scheduleDetachedLaunchdRestartHandoff(params: {
       [
         "-c",
         buildLaunchdRestartScript(params.mode, restartLogEnv),
-        "openclaw-launchd-restart-handoff",
+        "bot-launchd-restart-handoff",
         target.serviceTarget,
         target.domain,
         target.plistPath,

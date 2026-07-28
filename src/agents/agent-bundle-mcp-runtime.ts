@@ -9,9 +9,9 @@ import {
   type ClientCapabilities,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { ServerCapabilities } from "@modelcontextprotocol/sdk/types.js";
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { redactSensitiveUrlLikeString } from "@hanzo/bot-net-policy/redact-sensitive-url";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import { logWarn } from "../logger.js";
 import { redactToolPayloadText } from "../logging/redact.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
@@ -57,7 +57,7 @@ import {
 } from "./mcp-connection-resolver.js";
 import { createMcpJsonSchemaValidator } from "./mcp-json-schema-validator.js";
 import { sanitizeMcpMetadataText } from "./mcp-metadata.js";
-import { OpenClawStdioClientTransport } from "./mcp-stdio-transport.js";
+import { BotStdioClientTransport } from "./mcp-stdio-transport.js";
 import { resolveMcpTransport } from "./mcp-transport.js";
 
 type BundleMcpSession = {
@@ -86,7 +86,7 @@ const BUNDLE_MCP_CATALOG_LIST_TIMEOUT_MS = 1_500;
 const BUNDLE_MCP_DISPOSE_TIMEOUT_MS = 5_000;
 const BUNDLE_MCP_CATALOG_CONNECT_CONCURRENCY = 6;
 let bundleMcpCatalogListTimeoutMs: number | undefined;
-const BUNDLE_MCP_TEST_STATE_KEY = Symbol.for("openclaw.bundleMcpTestState");
+const BUNDLE_MCP_TEST_STATE_KEY = Symbol.for("bot.bundleMcpTestState");
 type BundleMcpTestState = { disposeTimeoutMs?: number };
 
 function getBundleMcpTestState(): BundleMcpTestState {
@@ -142,7 +142,7 @@ async function connectWithTimeout(
     ]);
   } catch (error) {
     if (deadlineExpired || (isMcpConfigRecord(error) && error.code === ErrorCode.RequestTimeout)) {
-      if (transport instanceof OpenClawStdioClientTransport) {
+      if (transport instanceof BotStdioClientTransport) {
         await transport.forceClose();
       }
       // Closing the SDK client settles its pending initialize request. Without
@@ -373,7 +373,7 @@ async function disposeSession(session: BundleMcpSession) {
     // gets its AbortSignal triggered by teardown. Stdio owns a process group,
     // so force it dead before disposal can report completion.
     const transportClose =
-      session.transport instanceof OpenClawStdioClientTransport
+      session.transport instanceof BotStdioClientTransport
         ? session.transport.forceClose()
         : session.transport.close();
     await settleWithin(Promise.allSettled([transportClose, session.client.close()]), timeoutMs);
@@ -389,7 +389,7 @@ export function createSessionMcpRuntime(params: {
   sessionKey?: string;
   workspaceDir: string;
   agentDir?: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
   includeServerNames?: ReadonlySet<string>;
   excludeServerNames?: ReadonlySet<string>;
@@ -724,7 +724,7 @@ export function createSessionMcpRuntime(params: {
               if (!session) {
                 const client = new Client(
                   {
-                    name: "openclaw-bundle-mcp",
+                    name: "bot-bundle-mcp",
                     version: "0.0.0",
                   },
                   {

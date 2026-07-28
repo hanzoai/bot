@@ -70,25 +70,25 @@ export function renderChatWorkingIndicator(
           : options.startupPhase
             ? html`
                 <span>${startupStatusLabel(options.startupPhase)}</span>
-                <openclaw-elapsed-time
+                <bot-elapsed-time
                   class="chat-working-indicator__elapsed"
                   .startMs=${part.startedAt}
-                ></openclaw-elapsed-time>
+                ></bot-elapsed-time>
                 ${renderLiveOutputTokens(options.outputTokens)}
               `
             : html`
                 <span class=${continuation ? "" : "agent-chat__sr-only"}
                   >${t("common.working")}</span
                 >
-                <openclaw-elapsed-time
+                <bot-elapsed-time
                   class="chat-working-indicator__elapsed"
                   .startMs=${part.startedAt}
-                ></openclaw-elapsed-time>
-                <openclaw-working-phrase
+                ></bot-elapsed-time>
+                <bot-working-phrase
                   aria-hidden="true"
                   .startMs=${part.startedAt}
                   .seed=${part.key}
-                ></openclaw-working-phrase>
+                ></bot-working-phrase>
                 ${renderLiveOutputTokens(options.outputTokens)}
               `}
       </span>

@@ -1,4 +1,4 @@
-import { definePluginEntry, type OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import { definePluginEntry, type BotPluginApi } from "bot/plugin-sdk/plugin-entry";
 import {
   LLAMA_CPP_PROVIDER_ID,
   LLAMA_CPP_PROVIDER_LABEL,
@@ -13,7 +13,7 @@ export default definePluginEntry({
   id: "llama-cpp",
   name: "llama.cpp Provider",
   description: "Local GGUF text inference and embeddings through node-llama-cpp",
-  register(api: OpenClawPluginApi) {
+  register(api: BotPluginApi) {
     api.registerEmbeddingProvider(llamaCppEmbeddingProviderAdapter);
     api.registerProvider({
       id: LLAMA_CPP_PROVIDER_ID,
@@ -65,7 +65,7 @@ export default definePluginEntry({
         },
         modelPicker: {
           label: "llama.cpp (local GGUF)",
-          hint: "Run a GGUF model in the OpenClaw process",
+          hint: "Run a GGUF model in the Bot process",
           methodId: "local",
         },
       },

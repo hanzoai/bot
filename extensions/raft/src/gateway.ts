@@ -4,11 +4,11 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 import type { EventEmitter } from "node:events";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import type { Socket } from "node:net";
-import type { ChannelGatewayContext } from "openclaw/plugin-sdk/channel-contract";
-import { keepHttpServerTaskAlive, waitUntilAbort } from "openclaw/plugin-sdk/channel-outbound";
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
-import { createChannelReplayGuard } from "openclaw/plugin-sdk/persistent-dedupe";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
+import type { ChannelGatewayContext } from "bot/plugin-sdk/channel-contract";
+import { keepHttpServerTaskAlive, waitUntilAbort } from "bot/plugin-sdk/channel-outbound";
+import { KeyedAsyncQueue } from "bot/plugin-sdk/keyed-async-queue";
+import { createChannelReplayGuard } from "bot/plugin-sdk/persistent-dedupe";
+import { safeEqualSecret } from "bot/plugin-sdk/security-runtime";
 import { RAFT_CHANNEL_ID, type ResolvedRaftAccount } from "./accounts.js";
 import { dispatchRaftWake } from "./inbound.js";
 
@@ -89,7 +89,7 @@ function spawnRaftBridge(params: {
   endpoint: string;
   token: string;
 }): RaftBridgeProcess {
-  // Raft owns the fixed bridge command. OpenClaw passes profile/loopback
+  // Raft owns the fixed bridge command. Bot passes profile/loopback
   // endpoint/token as separate argv/env fields; wake payloads never reach argv.
   return spawn(
     "raft",
@@ -241,7 +241,7 @@ export async function startRaftGatewayAccount(
     throw new Error(`Raft account "${ctx.accountId}" is missing a CLI profile.`);
   }
   if (!ctx.channelRuntime) {
-    throw new Error("Raft requires OpenClaw channel runtime support. Update OpenClaw and retry.");
+    throw new Error("Raft requires Bot channel runtime support. Update Bot and retry.");
   }
 
   const wakeQueue = new KeyedAsyncQueue();
@@ -271,7 +271,7 @@ export async function startRaftGatewayAccount(
           sendJson(response, 401, { error: "unauthorized" });
           return;
         }
-        // Raft drains runtime activity after each wake pass. OpenClaw has no
+        // Raft drains runtime activity after each wake pass. Bot has no
         // portable Raft activity events to export, but must acknowledge an
         // empty batch so the bridge's current protocol remains healthy.
         sendJson(response, 200, {
@@ -294,7 +294,7 @@ export async function startRaftGatewayAccount(
       if (containsMessageContent(payload)) {
         throw new WakeRequestError(400, "Wake payload must not include message content.");
       }
-      // Raft owns wake metadata and its schema evolution. OpenClaw accepts only
+      // Raft owns wake metadata and its schema evolution. Bot accepts only
       // content-free hints, then discards the payload so it cannot reach agent state.
       // Hash delivery identities before durable retention because Raft can retry accepted wakes.
       ctx.setStatus({

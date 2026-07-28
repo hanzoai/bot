@@ -9,9 +9,9 @@ import {
   type WorkboardSessionCardLookupLease,
   type WorkboardSessionCardMatch,
 } from "../../lib/workboard/session-card-lookup.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 
-class WorkboardCardChip extends OpenClawLightDomElement {
+class WorkboardCardChip extends BotLightDomElement {
   @property({ attribute: false }) basePath = "";
   @property({ attribute: false }) client: GatewayBrowserClient | null = null;
   @property({ attribute: false }) sessionKey = "";
@@ -95,12 +95,12 @@ class WorkboardCardChip extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-workboard-card-chip")) {
-  customElements.define("openclaw-workboard-card-chip", WorkboardCardChip);
+if (!customElements.get("bot-workboard-card-chip")) {
+  customElements.define("bot-workboard-card-chip", WorkboardCardChip);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-workboard-card-chip": WorkboardCardChip;
+    "bot-workboard-card-chip": WorkboardCardChip;
   }
 }

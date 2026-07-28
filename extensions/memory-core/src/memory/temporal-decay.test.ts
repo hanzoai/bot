@@ -43,7 +43,7 @@ async function mergeVectorResultsWithTemporalDecay(
 
 describe("temporal decay", () => {
   it("does not decay evergreen memory files", async () => {
-    const dir = await createTempWorkspace("openclaw-temporal-decay-");
+    const dir = await createTempWorkspace("bot-temporal-decay-");
 
     const rootMemoryPath = path.join(dir, "MEMORY.md");
     const topicPath = path.join(dir, "memory", "projects.md");
@@ -118,7 +118,7 @@ describe("temporal decay", () => {
   });
 
   it("uses file mtime fallback for non-memory sources", async () => {
-    const dir = await createTempWorkspace("openclaw-temporal-decay-");
+    const dir = await createTempWorkspace("bot-temporal-decay-");
     const sessionPath = path.join(dir, "sessions", "thread.jsonl");
     await fs.mkdir(path.dirname(sessionPath), { recursive: true });
     await fs.writeFile(sessionPath, "{}\n");

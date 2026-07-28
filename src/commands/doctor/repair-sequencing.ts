@@ -13,7 +13,7 @@ import {
 } from "../doctor-auth-flat-profiles.js";
 import { maybeRepairLegacyOAuthSidecarProfiles } from "../doctor-auth-oauth-sidecar.js";
 import {
-  maybeRepairManagedNpmOpenClawPeerLinks,
+  maybeRepairManagedNpmBotPeerLinks,
   maybeRepairStaleManagedNpmBundledPlugins,
 } from "../doctor-plugin-registry.js";
 import { maybeRepairGroupAllowFromFallback } from "./shared/allowfrom-fallback-migration.js";
@@ -124,7 +124,7 @@ export async function runDoctorRepairSequence(params: {
     env,
     prompter: { shouldRepair: true },
   });
-  await maybeRepairManagedNpmOpenClawPeerLinks({
+  await maybeRepairManagedNpmBotPeerLinks({
     config: state.candidate,
     env,
     prompter: { shouldRepair: true },

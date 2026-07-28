@@ -23,7 +23,7 @@ import {
 } from "./test-helpers/console-snapshot.js";
 
 let snapshot: ConsoleSnapshot;
-const logPathTracker = createSuiteLogPathTracker("openclaw-log-");
+const logPathTracker = createSuiteLogPathTracker("bot-log-");
 
 beforeAll(async () => {
   await logPathTracker.setup();
@@ -227,7 +227,7 @@ describe("enableConsoleCapture", () => {
     const warn = vi.fn();
     console.warn = warn;
 
-    withEnv({ OPENCLAW_CONFIG_PATH: configPath, MISSING_LOG_FILE: undefined }, () => {
+    withEnv({ BOT_CONFIG_PATH: configPath, MISSING_LOG_FILE: undefined }, () => {
       createSubsystemLogger("sensitive-one\nsensitive-two").warn(
         "prefix sensitive-one\nsensitive-two suffix",
         {
@@ -269,7 +269,7 @@ describe("enableConsoleCapture", () => {
     const error = vi.fn();
     console.error = error;
 
-    withEnv({ OPENCLAW_CONFIG_PATH: configPath, MISSING_LOG_FILE: undefined }, () => {
+    withEnv({ BOT_CONFIG_PATH: configPath, MISSING_LOG_FILE: undefined }, () => {
       enableConsoleCapture();
       console.trace("custom-only-secret");
     });

@@ -3,15 +3,15 @@ import type {
   ImageGenerationProvider,
   ImageGenerationRequest,
   ImageGenerationSourceImage,
-} from "openclaw/plugin-sdk/image-generation";
+} from "bot/plugin-sdk/image-generation";
 import {
   createOpenAiCompatibleImageGenerationProvider,
   toImageDataUrl,
-} from "openclaw/plugin-sdk/image-generation";
+} from "bot/plugin-sdk/image-generation";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { XAI_BASE_URL, XAI_DEFAULT_IMAGE_MODEL, XAI_IMAGE_MODELS } from "./model-definitions.js";
 
 const DEFAULT_TIMEOUT_MS = 600_000;

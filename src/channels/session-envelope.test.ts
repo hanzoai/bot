@@ -1,15 +1,15 @@
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
 import { withTempDir } from "../test-helpers/temp-dir.js";
 import { resolveInboundSessionEnvelopeContext } from "./session-envelope.js";
 
 describe("resolveInboundSessionEnvelopeContext", () => {
-  afterEach(() => closeOpenClawAgentDatabasesForTest());
+  afterEach(() => closeBotAgentDatabasesForTest());
 
   it("reads the previous timestamp from SQLite without a sessions.json file", async () => {
-    await withTempDir({ prefix: "openclaw-session-envelope-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-session-envelope-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const sessionKey = "agent:main:telegram:dm:1";
       await replaceSessionEntry(

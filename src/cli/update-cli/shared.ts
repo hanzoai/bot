@@ -3,10 +3,10 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import { resolveRequiredHomeDir } from "../../infra/home-dir.js";
-import { resolveOpenClawPackageRoot } from "../../infra/openclaw-root.js";
+import { resolveBotPackageRoot } from "../../infra/bot-root.js";
 import { readPackageName, readPackageVersion } from "../../infra/package-json.js";
 import { normalizePackageTagInput } from "../../infra/package-tag.js";
 import { parseStrictPositiveInteger } from "../../infra/parse-finite-number.js";
@@ -74,15 +74,15 @@ export function parseTimeoutMsOrExit(timeout?: string): number | undefined | nul
   return seconds * 1000;
 }
 
-const OPENCLAW_REPO_URL = "https://github.com/openclaw/openclaw.git";
+const BOT_REPO_URL = "https://github.com/hanzoai/bot.git";
 const MAX_LOG_CHARS = 8000;
 
-export const DEFAULT_PACKAGE_NAME = "openclaw";
+export const DEFAULT_PACKAGE_NAME = "bot";
 const CORE_PACKAGE_NAMES = new Set([DEFAULT_PACKAGE_NAME]);
 
 /** Normalize a CLI tag/version/spec into the npm target form accepted by update flows. */
 export function normalizeTag(value?: string | null): string | null {
-  return normalizePackageTagInput(value, ["openclaw", DEFAULT_PACKAGE_NAME]);
+  return normalizePackageTagInput(value, ["bot", DEFAULT_PACKAGE_NAME]);
 }
 
 function normalizeVersionTag(tag: string): string | null {
@@ -147,7 +147,7 @@ export async function isEmptyDir(targetPath: string): Promise<boolean> {
 
 /** Resolve the checkout path used by source-based self-update. */
 export function resolveGitInstallDir(): string {
-  const override = process.env.OPENCLAW_GIT_DIR?.trim();
+  const override = process.env.BOT_GIT_DIR?.trim();
   if (override) {
     return path.resolve(override);
   }
@@ -157,9 +157,9 @@ export function resolveGitInstallDir(): string {
 function resolveDefaultGitDir(): string {
   const home = resolveRequiredHomeDir(process.env, os.homedir);
   if (home.startsWith("/")) {
-    return path.posix.join(home, "openclaw");
+    return path.posix.join(home, "bot");
   }
-  return path.join(home, "openclaw");
+  return path.join(home, "bot");
 }
 
 /** Prefer the current Node executable, falling back to `node` when run through another shim. */
@@ -171,16 +171,16 @@ export function resolveNodeRunner(): string {
   return "node";
 }
 
-/** Locate the installed OpenClaw package root that should receive update operations. */
+/** Locate the installed Bot package root that should receive update operations. */
 export async function resolveUpdateRoot(): Promise<string> {
   // Preserve the lexical package path from the invoking shim. pnpm 11 package
   // modules realpath into a shared store, which is not the install owner.
   const invocationRoot = process.argv[1]
-    ? await resolveOpenClawPackageRoot({ cwd: path.dirname(path.resolve(process.argv[1])) })
+    ? await resolveBotPackageRoot({ cwd: path.dirname(path.resolve(process.argv[1])) })
     : null;
   return (
     invocationRoot ??
-    (await resolveOpenClawPackageRoot({ moduleUrl: import.meta.url, cwd: process.cwd() })) ??
+    (await resolveBotPackageRoot({ moduleUrl: import.meta.url, cwd: process.cwd() })) ??
     process.cwd()
   );
 }
@@ -238,7 +238,7 @@ export async function runUpdateStep(params: {
   };
 }
 
-/** Ensure the configured source-update directory exists and points at an OpenClaw checkout. */
+/** Ensure the configured source-update directory exists and points at an Bot checkout. */
 export async function ensureGitCheckout(params: {
   dir: string;
   timeoutMs: number;
@@ -251,7 +251,7 @@ export async function ensureGitCheckout(params: {
     await fs.mkdir(path.dirname(params.dir), { recursive: true });
     return await runUpdateStep({
       name: "git clone",
-      argv: ["git", "clone", OPENCLAW_REPO_URL, params.dir],
+      argv: ["git", "clone", BOT_REPO_URL, params.dir],
       env: gitEnv,
       timeoutMs: params.timeoutMs,
       progress: params.progress,
@@ -262,13 +262,13 @@ export async function ensureGitCheckout(params: {
     const empty = await isEmptyDir(params.dir);
     if (!empty) {
       throw new Error(
-        `OPENCLAW_GIT_DIR points at a non-git directory: ${params.dir}. Set OPENCLAW_GIT_DIR to an empty folder or an openclaw checkout.`,
+        `BOT_GIT_DIR points at a non-git directory: ${params.dir}. Set BOT_GIT_DIR to an empty folder or an bot checkout.`,
       );
     }
 
     return await runUpdateStep({
       name: "git clone",
-      argv: ["git", "clone", OPENCLAW_REPO_URL, params.dir],
+      argv: ["git", "clone", BOT_REPO_URL, params.dir],
       cwd: params.dir,
       env: gitEnv,
       timeoutMs: params.timeoutMs,
@@ -277,13 +277,13 @@ export async function ensureGitCheckout(params: {
   }
 
   if (!(await isCorePackage(params.dir))) {
-    throw new Error(`OPENCLAW_GIT_DIR does not look like a core checkout: ${params.dir}.`);
+    throw new Error(`BOT_GIT_DIR does not look like a core checkout: ${params.dir}.`);
   }
 
   return null;
 }
 
-/** Detect the package manager that owns a global/package OpenClaw install. */
+/** Detect the package manager that owns a global/package Bot install. */
 export async function resolveGlobalManager(params: {
   root: string;
   installKind: "git" | "package" | "unknown";
@@ -308,11 +308,11 @@ export async function resolveGlobalManager(params: {
 
 const COMPLETION_CACHE_WRITE_TIMEOUT_MS = 30_000;
 const COMPLETION_CACHE_MANUAL_REFRESH_HINT =
-  "Shell tab-completion may be stale; refresh manually with: openclaw completion --write-state";
+  "Shell tab-completion may be stale; refresh manually with: bot completion --write-state";
 
 /** Best-effort refresh of shell completion state after a successful update. */
 export async function tryWriteCompletionCache(root: string, jsonMode: boolean): Promise<void> {
-  const binPath = path.join(root, "openclaw.mjs");
+  const binPath = path.join(root, "bot.mjs");
   if (!(await pathExists(binPath))) {
     return;
   }

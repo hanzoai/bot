@@ -1,5 +1,5 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
+import { asNullableRecord as asRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { resolveUsageProviderId } from "../../../../src/infra/provider-usage.shared.js";
 // Merges gateway provider signals (auth status, live usage/quota, local session
 // cost) into one card list for the Model Providers settings page.

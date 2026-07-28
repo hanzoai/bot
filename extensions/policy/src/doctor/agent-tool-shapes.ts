@@ -1,5 +1,5 @@
-import type { HealthFinding } from "openclaw/plugin-sdk/health";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { HealthFinding } from "bot/plugin-sdk/health";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   SUPPORTED_AGENT_WORKSPACE_DENY_TOOLS,
   SUPPORTED_TOOL_EXEC_ASK,

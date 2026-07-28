@@ -10,7 +10,7 @@ async function withPackageManagerRoot<T>(
   files: Array<{ path: string; content: string }>,
   run: (root: string) => Promise<T>,
 ): Promise<T> {
-  return await withTempDir({ prefix: "openclaw-detect-pm-" }, async (root) => {
+  return await withTempDir({ prefix: "bot-detect-pm-" }, async (root) => {
     for (const file of files) {
       const target = path.join(root, file.path);
       await fs.mkdir(path.dirname(target), { recursive: true });
@@ -20,11 +20,11 @@ async function withPackageManagerRoot<T>(
   });
 }
 
-async function writePublishedOpenClawRoot(root: string): Promise<void> {
+async function writePublishedBotRoot(root: string): Promise<void> {
   await fs.mkdir(root, { recursive: true });
   await fs.writeFile(
     path.join(root, "package.json"),
-    JSON.stringify({ name: "openclaw", packageManager: "pnpm@11.2.2" }),
+    JSON.stringify({ name: "bot", packageManager: "pnpm@11.2.2" }),
     "utf8",
   );
   await fs.writeFile(path.join(root, "npm-shrinkwrap.json"), "{}", "utf8");
@@ -94,10 +94,10 @@ describe("detectPackageManager", () => {
   });
 
   it("keeps pnpm-owned direct package roots that ship npm-shrinkwrap", async () => {
-    await withTempDir({ prefix: "openclaw-detect-pm-pnpm-direct-" }, async (base) => {
+    await withTempDir({ prefix: "bot-detect-pm-pnpm-direct-" }, async (base) => {
       const nodeModulesRoot = path.join(base, "pnpm-global", "node_modules");
-      const packageRoot = path.join(nodeModulesRoot, "openclaw");
-      await writePublishedOpenClawRoot(packageRoot);
+      const packageRoot = path.join(nodeModulesRoot, "bot");
+      await writePublishedBotRoot(packageRoot);
       await fs.writeFile(path.join(nodeModulesRoot, ".modules.yaml"), "layoutVersion: 5", "utf8");
 
       await expect(detectPackageManager(packageRoot)).resolves.toBe("pnpm");
@@ -105,16 +105,16 @@ describe("detectPackageManager", () => {
   });
 
   it("keeps pnpm-owned virtual-store package roots that ship npm-shrinkwrap", async () => {
-    await withTempDir({ prefix: "openclaw-detect-pm-pnpm-virtual-" }, async (base) => {
+    await withTempDir({ prefix: "bot-detect-pm-pnpm-virtual-" }, async (base) => {
       const nodeModulesRoot = path.join(base, "project", "node_modules");
       const packageRoot = path.join(
         nodeModulesRoot,
         ".pnpm",
-        "openclaw@2026.5.27",
+        "bot@2026.5.27",
         "node_modules",
-        "openclaw",
+        "bot",
       );
-      await writePublishedOpenClawRoot(packageRoot);
+      await writePublishedBotRoot(packageRoot);
       await fs.writeFile(path.join(nodeModulesRoot, ".modules.yaml"), "layoutVersion: 5", "utf8");
 
       await expect(detectPackageManager(packageRoot)).resolves.toBe("pnpm");
@@ -122,11 +122,11 @@ describe("detectPackageManager", () => {
   });
 
   it("keeps bun-owned global package roots that ship npm-shrinkwrap", async () => {
-    await withTempDir({ prefix: "openclaw-detect-pm-bun-" }, async (base) => {
+    await withTempDir({ prefix: "bot-detect-pm-bun-" }, async (base) => {
       const bunInstall = path.join(base, "bun-home");
       await withEnvAsync({ BUN_INSTALL: bunInstall }, async () => {
-        const packageRoot = path.join(bunInstall, "install", "global", "node_modules", "openclaw");
-        await writePublishedOpenClawRoot(packageRoot);
+        const packageRoot = path.join(bunInstall, "install", "global", "node_modules", "bot");
+        await writePublishedBotRoot(packageRoot);
 
         await expect(detectPackageManager(packageRoot)).resolves.toBe("bun");
       });

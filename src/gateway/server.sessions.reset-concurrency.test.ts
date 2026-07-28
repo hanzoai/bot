@@ -6,7 +6,7 @@ import {
   restoreRegisteredAgentHarnesses,
 } from "../agents/harness/registry.js";
 import { loadTranscriptEvents } from "../config/sessions/session-accessor.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { writeSessionStore } from "./test-helpers.js";
 import {
   sessionLifecycleHookMocks,
@@ -19,7 +19,7 @@ import {
 const { createSessionStoreDir } = setupGatewaySessionsTestHarness();
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
 });
 
 test("sessions.reset preserves a concurrent same-id lifecycle replacement", async () => {

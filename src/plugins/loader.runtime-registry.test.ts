@@ -1,7 +1,7 @@
 // Verifies plugin loader runtime registry behavior.
 import { afterEach, describe, expect, it } from "vitest";
 import { createPluginMetadataSnapshot } from "../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import { setCurrentPluginMetadataSnapshot } from "./current-plugin-metadata-snapshot.js";
 import {
@@ -11,7 +11,7 @@ import {
 import { resolvePluginLoadCacheContext } from "./loader-load-context.js";
 import {
   clearPluginRegistryLoadCache,
-  loadOpenClawPlugins,
+  loadBotPlugins,
   resolveRuntimePluginRegistry,
 } from "./loader.js";
 import { makeTempDir, resetPluginLoaderTestStateForTest } from "./loader.test-fixtures.js";
@@ -37,7 +37,7 @@ function requireMemoryEmbeddingProvider(providerId: string) {
 }
 
 function setLoaderMetadataSnapshot(params: { pluginIds?: readonly string[] } = {}) {
-  const config: OpenClawConfig = {
+  const config: BotConfig = {
     plugins: {
       allow: ["demo"],
       slots: { memory: "none" },
@@ -85,7 +85,7 @@ describe("resolvePluginLoadCacheContext", () => {
   });
 
   it("loads a custom profile's install records instead of reusing the process snapshot", () => {
-    const profileEnv = { ...process.env, OPENCLAW_STATE_DIR: makeTempDir() };
+    const profileEnv = { ...process.env, BOT_STATE_DIR: makeTempDir() };
     const profileInstallRecords: Record<string, PluginInstallRecord> = {
       demo: {
         source: "npm",
@@ -116,7 +116,7 @@ describe("resolvePluginLoadCacheContext", () => {
 
   it("does not reuse metadata when the activation source adds plugin load paths", () => {
     const { config, env, workspaceDir } = setLoaderMetadataSnapshot();
-    const activationSourceConfig: OpenClawConfig = {
+    const activationSourceConfig: BotConfig = {
       plugins: {
         ...config.plugins,
         load: { paths: ["/plugins/activation-source-only"] },
@@ -276,10 +276,10 @@ describe("clearPluginRegistryLoadCache", () => {
       },
       workspaceDir: "/tmp/workspace-a",
     };
-    const registry = loadOpenClawPlugins(loadOptions);
+    const registry = loadBotPlugins(loadOptions);
 
     clearPluginRegistryLoadCache();
 
-    expect(loadOpenClawPlugins(loadOptions)).not.toBe(registry);
+    expect(loadBotPlugins(loadOptions)).not.toBe(registry);
   });
 });

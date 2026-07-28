@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveBootstrapWarningSignaturesSeen } from "../../agents/bootstrap-budget.js";
 import type { BootstrapContextRunKind } from "../../agents/bootstrap-mode.js";
 import type { RunEmbeddedAgentParams } from "../../agents/embedded-agent-runner/run/params.js";
@@ -11,7 +11,7 @@ import {
   resolveAgentRunErrorLifecycleFields,
 } from "../../agents/run-termination.js";
 import { resolveGroupSessionKey } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   isTrustedMessageActionTurnIngress,
   mintMessageActionTurnCapability,
@@ -54,7 +54,7 @@ export async function runEmbeddedFallbackCandidate(params: {
   turn: AgentTurnParams;
   effectiveRun: FollowupRun["run"];
   candidateRun: FollowupRun["run"];
-  runtimeConfig: OpenClawConfig;
+  runtimeConfig: BotConfig;
   provider: string;
   model: string;
   sessionRuntimeOverride?: string;
@@ -129,8 +129,8 @@ export async function runEmbeddedFallbackCandidate(params: {
   });
   const embeddedRunHarnessOverride =
     params.sessionRuntimeOverride ??
-    (agentHarnessPolicy.runtime === "openclaw" && embeddedRunProvider !== params.provider
-      ? "openclaw"
+    (agentHarnessPolicy.runtime === "bot" && embeddedRunProvider !== params.provider
+      ? "bot"
       : undefined);
   const messageActionCapabilitySessionKey =
     turn.runtimePolicySessionKey ?? embeddedContext.sessionKey;

@@ -1,13 +1,13 @@
 // Minimax tests cover index plugin behavior.
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
+import type { Context, Model } from "bot/plugin-sdk/llm";
 import {
   registerProviderPlugin,
   requireRegisteredProvider,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { MINIMAX_OAUTH_MARKER } from "openclaw/plugin-sdk/provider-auth";
+} from "bot/plugin-sdk/plugin-test-runtime";
+import { MINIMAX_OAUTH_MARKER } from "bot/plugin-sdk/provider-auth";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildMinimaxModelDiscovery } from "./provider-catalog.js";
 import { registerMinimaxProviders } from "./provider-registration.js";
@@ -158,7 +158,7 @@ describe("minimax provider hooks", () => {
 
   it("declares CN provider auth aliases in the manifest", () => {
     const pluginJson = JSON.parse(
-      readFileSync(resolve(import.meta.dirname, "openclaw.plugin.json"), "utf-8"),
+      readFileSync(resolve(import.meta.dirname, "bot.plugin.json"), "utf-8"),
     );
 
     expect(pluginJson.providerAuthAliases).toEqual({

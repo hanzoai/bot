@@ -1,11 +1,11 @@
-// Google Meet plugin entrypoint registers its OpenClaw integration.
-import { readPositiveIntegerParam } from "openclaw/plugin-sdk/channel-actions";
-import { ErrorCodes, type GatewayRequestHandlerOptions } from "openclaw/plugin-sdk/gateway-runtime";
-import { definePluginEntry, type OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeAgentId, parseAgentSessionKey } from "openclaw/plugin-sdk/routing";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { jsonResult as json } from "openclaw/plugin-sdk/tool-results";
-import { createMeetingTranscriptSourceProvider } from "openclaw/plugin-sdk/transcripts";
+// Google Meet plugin entrypoint registers its Bot integration.
+import { readPositiveIntegerParam } from "bot/plugin-sdk/channel-actions";
+import { ErrorCodes, type GatewayRequestHandlerOptions } from "bot/plugin-sdk/gateway-runtime";
+import { definePluginEntry, type BotPluginApi } from "bot/plugin-sdk/plugin-entry";
+import { normalizeAgentId, parseAgentSessionKey } from "bot/plugin-sdk/routing";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
+import { jsonResult as json } from "bot/plugin-sdk/tool-results";
+import { createMeetingTranscriptSourceProvider } from "bot/plugin-sdk/transcripts";
 import { buildGoogleMeetCalendarDayWindow, listGoogleMeetCalendarEvents } from "./src/calendar.js";
 import { GOOGLE_MEET_CLI_DESCRIPTOR } from "./src/cli-output-mode.js";
 import {
@@ -54,7 +54,7 @@ export default definePluginEntry({
   name: "Google Meet",
   description: "Join Google Meet calls through Chrome or Twilio transports",
   configSchema: googleMeetConfigSchema,
-  register(api: OpenClawPluginApi) {
+  register(api: BotPluginApi) {
     const config = googleMeetConfigSchema.parse(api.pluginConfig);
     const ensureRuntime = createGoogleMeetRuntimeAccessor({ api, config });
     api.registerTranscriptSourceProvider(

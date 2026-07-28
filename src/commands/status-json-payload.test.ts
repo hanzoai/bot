@@ -57,7 +57,7 @@ describe("status-json-payload", () => {
         surface: {
           cfg: { update: { channel: "stable" }, gateway: {} },
           update: {
-            root: "/tmp/openclaw",
+            root: "/tmp/bot",
             installKind: "package",
             packageManager: "npm",
             registry: { latestVersion: "1.2.3" },
@@ -96,7 +96,7 @@ describe("status-json-payload", () => {
       ok: true,
       os: { platform: "linux" },
       update: {
-        root: "/tmp/openclaw",
+        root: "/tmp/bot",
         installKind: "package",
         packageManager: "npm",
         registry: { latestVersion: "1.2.3" },
@@ -145,7 +145,7 @@ describe("status-json-payload", () => {
         surface: {
           cfg: { gateway: {} },
           update: {
-            root: "/tmp/openclaw",
+            root: "/tmp/bot",
             installKind: "package",
             packageManager: "npm",
           } as never,

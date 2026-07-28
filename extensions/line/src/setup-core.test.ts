@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/setup";
+import type { BotConfig } from "bot/plugin-sdk/setup";
 // Guards the shipped `--token` alias: released CLIs configured LINE through the
 // shared token envelope switch, which must keep writing channelAccessToken.
 import { describe, expect, it } from "vitest";
@@ -8,7 +8,7 @@ type LineChannelConfig = { channelAccessToken?: string };
 
 function appliedLineConfig(input: Record<string, unknown>): LineChannelConfig {
   const cfg = lineSetupAdapter.applyAccountConfig({
-    cfg: {} as OpenClawConfig,
+    cfg: {} as BotConfig,
     accountId: "default",
     input,
   });

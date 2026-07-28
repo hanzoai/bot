@@ -1,6 +1,6 @@
 /**
  * Stdio MCP launch config normalization.
- * Accepts OpenClaw and upstream MCP config field names, keeping only
+ * Accepts Bot and upstream MCP config field names, keeping only
  * command/args/env/cwd needed to spawn a stdio server.
  */
 import { redactSensitiveArgv } from "../config/redact-argv.js";

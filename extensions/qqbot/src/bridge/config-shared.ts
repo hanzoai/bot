@@ -1,9 +1,9 @@
-import { createScopedChannelConfigAdapter } from "openclaw/plugin-sdk/channel-config-helpers";
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+import { createScopedChannelConfigAdapter } from "bot/plugin-sdk/channel-config-helpers";
+import { defineChannelSetupContract } from "bot/plugin-sdk/channel-setup";
 // Qqbot helper module supports config shared behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { applyAccountNameToChannelSection } from "openclaw/plugin-sdk/core";
-import type { ChannelSetupInput } from "openclaw/plugin-sdk/setup";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { applyAccountNameToChannelSection } from "bot/plugin-sdk/core";
+import type { ChannelSetupInput } from "bot/plugin-sdk/setup";
 import {
   describeAccount as engineDescribeAccount,
   formatAllowFrom as engineFormatAllowFrom,
@@ -39,15 +39,15 @@ function validateQQBotSetupInput(params: {
 }
 
 function applyQQBotSetupAccountConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   input: ChannelSetupInput;
-}): OpenClawConfig {
+}): BotConfig {
   return engineApplySetupAccountConfig(
     params.cfg as unknown as Record<string, unknown>,
     params.accountId,
     params.input,
-  ) as OpenClawConfig;
+  ) as BotConfig;
 }
 
 function isQQBotConfigured(account: ResolvedQQBotAccount | undefined): boolean {
@@ -74,14 +74,14 @@ export const qqbotConfigAdapter = {
 };
 
 export const qqbotSetupAdapterShared = {
-  resolveAccountId: ({ cfg, accountId }: { cfg: OpenClawConfig; accountId?: string | null }) =>
+  resolveAccountId: ({ cfg, accountId }: { cfg: BotConfig; accountId?: string | null }) =>
     normalizeLowercaseStringOrEmpty(accountId) || resolveDefaultQQBotAccountId(cfg),
   applyAccountName: ({
     cfg,
     accountId,
     name,
   }: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId: string;
     name?: string;
   }) =>
@@ -98,7 +98,7 @@ export const qqbotSetupAdapterShared = {
     accountId,
     input,
   }: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId: string;
     input: ChannelSetupInput;
   }) => applyQQBotSetupAccountConfig({ cfg, accountId, input }),

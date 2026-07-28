@@ -5,7 +5,7 @@ import type { ChannelPluginCatalogEntry } from "../channels/plugins/catalog.js";
 import { defineChannelSetupContract } from "../channels/plugins/setup-contract.js";
 import type { ChannelSetupInput } from "../channels/plugins/types.core.js";
 import type { ChannelPlugin } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import type { PluginPackageChannelCliOption } from "../plugins/manifest.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
@@ -57,7 +57,7 @@ const channelWizardMocks = vi.hoisted(() => {
   };
   return {
     prompter,
-    setupChannels: vi.fn(async (...args: unknown[]) => args[0] as OpenClawConfig),
+    setupChannels: vi.fn(async (...args: unknown[]) => args[0] as BotConfig),
   };
 });
 
@@ -131,7 +131,7 @@ function createSetupOptionCatalogEntry(
       docsPath: `/channels/${id}`,
       blurb: `${label} test channel.`,
     },
-    install: { npmSpec: `@openclaw/${id}` },
+    install: { npmSpec: `@hanzo/bot-${id}` },
   };
 }
 
@@ -483,13 +483,13 @@ describe("channelsAddCommand", () => {
     channelWizardMocks.prompter.text.mockClear();
     channelWizardMocks.setupChannels.mockClear();
     channelWizardMocks.setupChannels.mockImplementation(
-      async (...args: unknown[]) => args[0] as OpenClawConfig,
+      async (...args: unknown[]) => args[0] as BotConfig,
     );
     setMinimalChannelsAddRegistryForTests();
   });
 
   it("keeps guided channel setup lazy until the user selects a channel", async () => {
-    const config: OpenClawConfig = { channels: {} };
+    const config: BotConfig = { channels: {} };
     configMocks.readConfigFileSnapshot.mockResolvedValue({
       ...baseConfigSnapshot,
       sourceConfig: config,
@@ -510,8 +510,8 @@ describe("channelsAddCommand", () => {
   });
 
   it("persists an accepted plugin install after setup returns to an empty selection", async () => {
-    const config: OpenClawConfig = { channels: {} };
-    const installedConfig: OpenClawConfig = {
+    const config: BotConfig = { channels: {} };
+    const installedConfig: BotConfig = {
       ...config,
       plugins: {
         entries: { "external-chat": { enabled: true } },
@@ -544,7 +544,7 @@ describe("channelsAddCommand", () => {
   });
 
   it("preselects an installable catalog channel in guided setup", async () => {
-    const config: OpenClawConfig = { channels: {} };
+    const config: BotConfig = { channels: {} };
     configMocks.readConfigFileSnapshot.mockResolvedValue({
       ...baseConfigSnapshot,
       sourceConfig: config,
@@ -561,7 +561,7 @@ describe("channelsAddCommand", () => {
   });
 
   it("opens an exact channel id instead of an earlier plugin alias", async () => {
-    const config: OpenClawConfig = { channels: {} };
+    const config: BotConfig = { channels: {} };
     const aliasOwner = createChannelTestPluginBase({
       id: "alias-owner",
       label: "Alias Owner",
@@ -783,7 +783,7 @@ describe("channelsAddCommand", () => {
       {
         channel: "whatsapp",
         account: "work",
-        authDir: "/tmp/openclaw-wa-auth",
+        authDir: "/tmp/bot-wa-auth",
       },
       runtime,
       { hasFlags: true },
@@ -794,7 +794,7 @@ describe("channelsAddCommand", () => {
       accounts: {
         work: {
           enabled: true,
-          authDir: "/tmp/openclaw-wa-auth",
+          authDir: "/tmp/bot-wa-auth",
         },
       },
     });
@@ -1042,7 +1042,7 @@ describe("channelsAddCommand", () => {
         blurb: "WhatsApp channel",
       },
       install: {
-        npmSpec: "@openclaw/whatsapp",
+        npmSpec: "@hanzo/bot-whatsapp",
       },
     };
     catalogMocks.listChannelPluginCatalogEntries.mockReturnValue([catalogEntry]);
@@ -1083,7 +1083,7 @@ describe("channelsAddCommand", () => {
       {
         channel: "whatsapp",
         account: "work",
-        authDir: "/tmp/openclaw-wa-auth",
+        authDir: "/tmp/bot-wa-auth",
       },
       runtime,
       { hasFlags: true },
@@ -1097,7 +1097,7 @@ describe("channelsAddCommand", () => {
       accounts: {
         work: {
           enabled: true,
-          authDir: "/tmp/openclaw-wa-auth",
+          authDir: "/tmp/bot-wa-auth",
         },
       },
     });
@@ -1450,7 +1450,7 @@ describe("channelsAddCommand", () => {
       },
     };
     pluginInstallRecordCommitMocks.commitConfigWithPendingPluginInstalls.mockImplementationOnce(
-      async (params: { nextConfig: OpenClawConfig }) => {
+      async (params: { nextConfig: BotConfig }) => {
         const { installs: _installs, ...plugins } = params.nextConfig.plugins ?? {};
         const writtenConfigLocal = { ...params.nextConfig, plugins };
         await configMocks.writeConfigFile(writtenConfigLocal);

@@ -1,11 +1,11 @@
 // Persists gateway boot outcomes for supervisor crash-loop decisions.
 import { randomUUID } from "node:crypto";
 import { createSubsystemLogger } from "../logging/subsystem.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -38,12 +38,12 @@ export function formatGatewayCrashLoopManualChannelStartHint(target?: {
         ...(target.accountId ? { accountId: target.accountId } : {}),
       })
     : `{"channel":"<id>"}`;
-  return `Start a channel manually with: openclaw gateway call channels.start --params '${params}'`;
+  return `Start a channel manually with: bot gateway call channels.start --params '${params}'`;
 }
 
 const gatewayLifecycleLog = createSubsystemLogger("gateway/lifecycle");
 
-type GatewayBootLifecycleDatabase = Pick<OpenClawStateKyselyDatabase, "gateway_boot_lifecycle">;
+type GatewayBootLifecycleDatabase = Pick<BotStateKyselyDatabase, "gateway_boot_lifecycle">;
 
 type GatewayBootLifecycleOutcome =
   | "clean_stop"
@@ -92,7 +92,7 @@ export function inspectGatewayCrashLoopBreaker(
   nowMs = Date.now(),
 ): GatewayCrashLoopBreakerDecision {
   try {
-    const { db } = openOpenClawStateDatabase({ env });
+    const { db } = openBotStateDatabase({ env });
     const kysely = getNodeSqliteKysely<GatewayBootLifecycleDatabase>(db);
     const windowStartMs = nowMs - GATEWAY_BOOT_LOOP_WINDOW_MS;
     // Unclean means startup_failed by completion time, or an open boot row
@@ -149,7 +149,7 @@ export function recordGatewayBootStart(
 ): string | undefined {
   const bootId = randomUUID();
   try {
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       ({ db }) => {
         const kysely = getNodeSqliteKysely<GatewayBootLifecycleDatabase>(db);
         executeSqliteQuerySync(
@@ -190,7 +190,7 @@ export function completeGatewayBootLifecycle(
     return;
   }
   try {
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       ({ db }) => {
         const kysely = getNodeSqliteKysely<GatewayBootLifecycleDatabase>(db);
         executeSqliteQuerySync(

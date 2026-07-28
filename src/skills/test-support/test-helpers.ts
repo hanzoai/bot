@@ -67,7 +67,7 @@ export function createFixtureSkillEntry(
       description: `${name} description`,
       filePath: `/skills/${name}/SKILL.md`,
       baseDir: `/skills/${name}`,
-      source: opts?.source ?? "openclaw-workspace",
+      source: opts?.source ?? "bot-workspace",
     }),
     frontmatter: {},
     metadata: opts?.skillKey ? { skillKey: opts.skillKey } : undefined,

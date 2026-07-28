@@ -2,7 +2,7 @@
    with the draft block (clean target row + composer) between the hero and the
    recent chats, so the draft reads as the start screen plus "where to start"
    controls. */
-openclaw-new-session-page {
+bot-new-session-page {
   display: flex;
   flex: 1 1 0;
   min-width: 0;
@@ -114,7 +114,7 @@ openclaw-new-session-page {
   position: relative;
 }
 
-.new-session-page__select--agent openclaw-agent-select {
+.new-session-page__select--agent bot-agent-select {
   width: auto;
   max-width: min(40vw, 260px);
 }

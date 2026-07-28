@@ -1,9 +1,9 @@
 // Doctor repair for dmPolicy allowlists whose sender entries only exist in pairing stores.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeUniqueStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
+import { normalizeUniqueStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import { normalizeChatChannelId } from "../../../channels/ids.js";
 import { setCanonicalDmAllowFrom } from "../../../channels/plugins/dm-access.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { readChannelAllowFromStore } from "../../../pairing/pairing-store.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../../../routing/session-key.js";
 import { resolveAllowFromMode, type AllowFromMode } from "./allow-from-mode.js";
@@ -11,8 +11,8 @@ import { hasAllowFromEntries } from "./allowlist.js";
 import { asObjectRecord } from "./object.js";
 
 /** Restore missing allowFrom entries for allowlist DM policies from persisted pairing stores. */
-export async function maybeRepairAllowlistPolicyAllowFrom(cfg: OpenClawConfig): Promise<{
-  config: OpenClawConfig;
+export async function maybeRepairAllowlistPolicyAllowFrom(cfg: BotConfig): Promise<{
+  config: BotConfig;
   changes: string[];
 }> {
   const channels = cfg.channels;

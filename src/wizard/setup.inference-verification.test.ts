@@ -1,6 +1,6 @@
 // Setup inference verification tests keep noninteractive imports prompt-free.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { WizardPrompter } from "./prompts.js";
 
 const mocks = vi.hoisted(() => ({
@@ -14,8 +14,8 @@ vi.mock("../system-agent/setup-inference.js", () => ({
 vi.mock("../agents/auth-profiles/store.js", () => ({
   updateAuthProfileStoreWithLock: vi.fn(),
 }));
-vi.mock("../state/openclaw-agent-db.js", () => ({
-  disposeOpenClawAgentDatabaseByPath: vi.fn(),
+vi.mock("../state/bot-agent-db.js", () => ({
+  disposeBotAgentDatabaseByPath: vi.fn(),
 }));
 vi.mock("./setup.model-auth.js", () => ({
   runSetupModelAuthStep: mocks.repair,
@@ -49,7 +49,7 @@ describe("offerLiveModelVerification", () => {
         opts: { nonInteractive: true },
         prompter,
         runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() } as never,
-        workspaceDir: "/tmp/openclaw-test-workspace",
+        workspaceDir: "/tmp/bot-test-workspace",
         writeConfig: async (config) => config,
         required: true,
       }),
@@ -65,7 +65,7 @@ describe("offerLiveModelVerification", () => {
   });
 
   it("reports when a repair candidate persisted its verified config", async () => {
-    const repairedConfig: OpenClawConfig = {
+    const repairedConfig: BotConfig = {
       agents: { entries: { main: { default: true } } },
       models: {
         providers: {
@@ -100,7 +100,7 @@ describe("offerLiveModelVerification", () => {
         opts: {},
         prompter,
         runtime: { log: vi.fn(), error: vi.fn(), exit: vi.fn() } as never,
-        workspaceDir: "/tmp/openclaw-test-workspace",
+        workspaceDir: "/tmp/bot-test-workspace",
         writeConfig,
       }),
     ).resolves.toEqual({

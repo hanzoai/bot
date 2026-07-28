@@ -297,7 +297,7 @@ export async function processResponsesStream<TApi extends Api>(
       stage: "responses",
       abort: options?.abortFirstEventStream,
       onTimeout: options?.onFirstEventTimeout,
-      hint: "The provider may be stalled while parsing the tool payload; retry with a smaller tool surface or enable OPENCLAW_DEBUG_MODEL_PAYLOAD=tools to inspect exposed tools.",
+      hint: "The provider may be stalled while parsing the tool payload; retry with a smaller tool surface or enable BOT_DEBUG_MODEL_PAYLOAD=tools to inspect exposed tools.",
     }),
     options?.signal,
   );

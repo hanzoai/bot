@@ -2,7 +2,7 @@
 // the approval gate and other devices pick them up. The localStorage mirror gives instant boot and
 // stays authoritative when this client cannot write config (viewer scope, offline). Pending local
 // intent shadows server snapshots until the hash-free LWW ack; failed pushes degrade device-local.
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { GatewayBrowserClient } from "../api/gateway.ts";
 import { normalizeSidebarEntries } from "../app-navigation.ts";
 import { isSupportedLocale } from "../i18n/index.ts";
@@ -167,10 +167,10 @@ export function changedServerUiPrefs(previous: UiSettings, next: UiSettings): Se
 // Last server value this client reconciled against, persisted per gateway scope. Applying only on
 // a server delta keeps an unpushable local edit (viewer scope) from being reverted by every later
 // snapshot, including the first snapshot after reload or reconnect carrying the same old value.
-const LAST_SEEN_KEY = "openclaw.control.serverPrefs.v1";
+const LAST_SEEN_KEY = "bot.control.serverPrefs.v1";
 // Pending keys are local edits not yet acknowledged by the gateway. They shadow reconciliation so
 // snapshots cannot revert unacked edits, and persist so offline edits replay after reload/reconnect.
-const PENDING_KEY = "openclaw.control.serverPrefs.pending.v1";
+const PENDING_KEY = "bot.control.serverPrefs.pending.v1";
 const CONFLICT_REDRAIN_DELAY_MS = 1_000;
 const MAX_CONFLICT_REDRAINS = 5;
 let applyingServerPrefs = false;

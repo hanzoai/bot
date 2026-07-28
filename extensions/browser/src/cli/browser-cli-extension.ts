@@ -1,5 +1,5 @@
 /**
- * `openclaw browser extension` CLI: locate the unpacked Chrome extension and
+ * `bot browser extension` CLI: locate the unpacked Chrome extension and
  * print the pairing string that connects it to this install's relay.
  */
 import path from "node:path";
@@ -107,7 +107,7 @@ function buildPairingString(gatewayUrl?: string): {
   };
 }
 
-/** Register `openclaw browser extension {path,pair}`. */
+/** Register `bot browser extension {path,pair}`. */
 export function registerBrowserExtensionCommands(
   browser: Command,
   _parentOpts: (cmd: Command) => BrowserParentOpts,
@@ -126,7 +126,7 @@ export function registerBrowserExtensionCommands(
 
   extension
     .command("pair")
-    .description("Print the pairing string to paste into the OpenClaw extension popup")
+    .description("Print the pairing string to paste into the Bot extension popup")
     .option("--json", "Print the pairing string as JSON")
     .option(
       "--gateway-url <url>",
@@ -157,7 +157,7 @@ export function registerBrowserExtensionCommands(
               setupLine,
               info("1. Load the extension: chrome://extensions → Developer mode → Load unpacked →"),
               `   ${resolveChromeExtensionDir(pluginRoot)}`,
-              info("2. Open the OpenClaw popup and paste this pairing string:"),
+              info("2. Open the Bot popup and paste this pairing string:"),
               "",
               theme.heading(result.pairing),
               "",

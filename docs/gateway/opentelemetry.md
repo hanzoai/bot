@@ -1,13 +1,13 @@
 ---
-summary: "Export OpenClaw diagnostics to OpenTelemetry collectors or stdout JSONL via the diagnostics-otel plugin"
+summary: "Export Bot diagnostics to OpenTelemetry collectors or stdout JSONL via the diagnostics-otel plugin"
 title: "OpenTelemetry export"
 read_when:
-  - You want to send OpenClaw model usage, message flow, or session metrics to an OpenTelemetry collector
+  - You want to send Bot model usage, message flow, or session metrics to an OpenTelemetry collector
   - You are wiring traces, metrics, or logs into Grafana, Datadog, Honeycomb, New Relic, Tempo, or another OTLP backend
   - You need the exact metric names, span names, or attribute shapes to build dashboards or alerts
 ---
 
-OpenClaw exports diagnostics through the official `diagnostics-otel` plugin
+Bot exports diagnostics through the official `diagnostics-otel` plugin
 using **OTLP/HTTP (protobuf)**. Logs can also be written as stdout JSONL for
 container and sandbox log pipelines. Any collector or backend that accepts
 OTLP/HTTP works without code changes. For local file logs, see
@@ -19,7 +19,7 @@ OTLP/HTTP works without code changes. For local file logs, see
 - **`diagnostics-otel`** subscribes to those events and exports them as
   OpenTelemetry **metrics**, **traces**, and **logs** over OTLP/HTTP, and can
   mirror log records to stdout JSONL.
-- **Provider calls** receive a W3C `traceparent` header from OpenClaw's
+- **Provider calls** receive a W3C `traceparent` header from Bot's
   trusted model-call span context when the provider transport accepts custom
   headers. Plugin-emitted trace context is not propagated.
 - Exporters attach only when both the diagnostics surface and the plugin are
@@ -28,7 +28,7 @@ OTLP/HTTP works without code changes. For local file logs, see
 ## Quick start
 
 ```bash
-openclaw plugins install clawhub:@openclaw/diagnostics-otel
+bot plugins install clawhub:@hanzo/bot-diagnostics-otel
 ```
 
 ```json5
@@ -45,7 +45,7 @@ openclaw plugins install clawhub:@openclaw/diagnostics-otel
       enabled: true,
       endpoint: "http://otel-collector:4318",
       protocol: "http/protobuf",
-      serviceName: "openclaw-gateway",
+      serviceName: "bot-gateway",
       traces: true,
       metrics: true,
       logs: true,
@@ -56,7 +56,7 @@ openclaw plugins install clawhub:@openclaw/diagnostics-otel
 }
 ```
 
-Or enable the plugin from the CLI: `openclaw plugins enable diagnostics-otel`.
+Or enable the plugin from the CLI: `bot plugins enable diagnostics-otel`.
 
 <Note>
 `protocol` supports `http/protobuf` only. Since `traces` and `metrics` default to enabled, any other value (including `grpc`) aborts the entire diagnostics-otel subscription with an `unsupported protocol` warning - this also stops stdout log export. Explicitly set `traces: false` and `metrics: false` if you only want `logsExporter: "stdout"` with a non-OTLP protocol value.
@@ -89,7 +89,7 @@ stdout, or `both` for both.
       metricsEndpoint: "http://otel-collector:4318/v1/metrics",
       logsEndpoint: "http://otel-collector:4318/v1/logs",
       protocol: "http/protobuf", // grpc disables OTLP export
-      serviceName: "openclaw-gateway", // unset falls back to OTEL_SERVICE_NAME, then "openclaw"
+      serviceName: "bot-gateway", // unset falls back to OTEL_SERVICE_NAME, then "bot"
       headers: { "x-collector-token": "..." },
       traces: true,
       metrics: true,
@@ -109,10 +109,10 @@ stdout, or `both` for both.
 | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OTEL_EXPORTER_OTLP_ENDPOINT`                                                                                     | Fallback for `diagnostics.otel.endpoint` when the config key is unset.                                                                                                                                                                                                                                         |
 | `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` / `OTEL_EXPORTER_OTLP_METRICS_ENDPOINT` / `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT` | Signal-specific endpoint fallbacks used when the matching `diagnostics.otel.*Endpoint` config key is unset. Signal-specific config wins over signal-specific env, which wins over the shared endpoint.                                                                                                         |
-| `OTEL_SERVICE_NAME`                                                                                               | Fallback for `diagnostics.otel.serviceName` when the config key is unset. Default service name is `openclaw`.                                                                                                                                                                                                  |
+| `OTEL_SERVICE_NAME`                                                                                               | Fallback for `diagnostics.otel.serviceName` when the config key is unset. Default service name is `bot`.                                                                                                                                                                                                  |
 | `OTEL_EXPORTER_OTLP_PROTOCOL`                                                                                     | Fallback for the wire protocol when `diagnostics.otel.protocol` is unset. Only `http/protobuf` enables export.                                                                                                                                                                                                 |
 | `OTEL_SEMCONV_STABILITY_OPT_IN`                                                                                   | Set to `gen_ai_latest_experimental` to emit the latest GenAI inference span shape: `{gen_ai.operation.name} {gen_ai.request.model}` span names, `CLIENT` span kind, and `gen_ai.provider.name` instead of the legacy `gen_ai.system`. GenAI metrics always use bounded, low-cardinality attributes regardless. |
-| `OPENCLAW_OTEL_PRELOADED`                                                                                         | Set to `1` when another preload or host process already registered the global OpenTelemetry SDK. The plugin then skips its own NodeSDK lifecycle but still wires diagnostic listeners and honors `traces`/`metrics`/`logs`.                                                                                    |
+| `BOT_OTEL_PRELOADED`                                                                                         | Set to `1` when another preload or host process already registered the global OpenTelemetry SDK. The plugin then skips its own NodeSDK lifecycle but still wires diagnostic listeners and honors `traces`/`metrics`/`logs`.                                                                                    |
 
 ## Privacy and content capture
 
@@ -130,7 +130,7 @@ transcripts, audio payloads, session ids, turn ids, call ids, room ids, or
 handoff tokens.
 
 Outbound model requests may include a W3C `traceparent` header generated only
-from OpenClaw-owned diagnostic trace context for the active model call.
+from Bot-owned diagnostic trace context for the active model call.
 Existing caller-supplied `traceparent` headers are replaced, so plugins or
 custom provider options cannot spoof cross-service trace ancestry.
 
@@ -141,10 +141,10 @@ inputs, tool outputs, tool definitions, and OTLP log bodies. System prompts
 remain excluded.
 
 `toolInputs`/`toolOutputs` content is captured for the built-in agent
-runtime's tool executions (`openclaw.content.tool_input` and
+runtime's tool executions (`bot.content.tool_input` and
 `gen_ai.tool.call.arguments` on completed/error spans;
-`openclaw.content.tool_output` and `gen_ai.tool.call.result` on completed
-spans). The `openclaw.content.*` names remain the stable OpenClaw attribute
+`bot.content.tool_output` and `gen_ai.tool.call.result` on completed
+spans). The `bot.content.*` names remain the stable Bot attribute
 names; the `gen_ai.tool.call.*` copies mirror them for semconv-native viewers.
 External harness tool calls (Codex, Claude CLI) emit
 `tool.execution.*` spans without content payloads. Captured content travels on a
@@ -175,17 +175,17 @@ bus.
   scope inherit the request trace by default, while agent run and model-call
   spans are created as children so provider `traceparent` headers stay on the
   same trace.
-- **Model-call correlation:** `openclaw.model.call` spans include safe prompt
+- **Model-call correlation:** `bot.model.call` spans include safe prompt
   component sizes by default and per-call token attributes when the provider
-  result exposes usage. `openclaw.model.usage` remains the run-level
+  result exposes usage. `bot.model.usage` remains the run-level
   accounting span for aggregate cost, context, and channel dashboards, and
   stays on the same diagnostic trace when the emitting runtime has trusted
   trace context.
 
 ### Model-call observation units
 
-Every `openclaw.model.call` span identifies what its lifecycle measures through
-`openclaw.model_call.observation_unit`:
+Every `bot.model.call` span identifies what its lifecycle measures through
+`bot.model_call.observation_unit`:
 
 - `request` - one observable model/provider request. Native embedded model
   calls use this unit, and exporters treat a missing value as `request` for
@@ -199,18 +199,18 @@ output, usage, and hierarchy. Request spans use the API-derived GenAI operation
 (`chat`, `generate_content`, or `text_completion`), while turn spans use
 `gen_ai.operation.name = invoke_agent`. Both contribute to
 `gen_ai.client.operation.duration`, where the operation name keeps direct
-request latency separate from full-turn latency. OpenClaw's OTEL model-call
-metrics also include `openclaw.model_call.observation_unit`; the Prometheus
+request latency separate from full-turn latency. Bot's OTEL model-call
+metrics also include `bot.model_call.observation_unit`; the Prometheus
 model-call metrics expose the equivalent `observation_unit` label.
 
 ### Claude Code CLI model-call fidelity
 
-Claude Code CLI turns emit one synthetic, turn-level `openclaw.model.call`
-span. These are not Anthropic HTTP request spans. They use `openclaw.api =
-claude-code`, `openclaw.model_call.observation_unit = turn`, and identify
+Claude Code CLI turns emit one synthetic, turn-level `bot.model.call`
+span. These are not Anthropic HTTP request spans. They use `bot.api =
+claude-code`, `bot.model_call.observation_unit = turn`, and identify
 the operation as `gen_ai.operation.name = invoke_agent`. They identify
-OpenClaw's CLI boundary through
-`openclaw.transport`:
+Bot's CLI boundary through
+`bot.transport`:
 
 - `stdio` - one-shot local Claude Code process.
 - `stdio-live` - one turn on a managed persistent Claude stdio session.
@@ -226,42 +226,42 @@ are capped at 128 KiB each; assistant output is capped at 128 KiB across at
 most 200 envelopes, with 16 KiB and one item reserved for a final visible
 fallback response. A marker records truncation when the limit is reached.
 
-OpenClaw gives Claude CLI turns the same ownership hierarchy used by other
-agent runtimes: `openclaw.harness.run` (`openclaw.harness.id = claude-cli`)
-contains `openclaw.run`, which contains the Claude `openclaw.model.call`
-span. The harness and run spans are synthetic OpenClaw turn boundaries, not
+Bot gives Claude CLI turns the same ownership hierarchy used by other
+agent runtimes: `bot.harness.run` (`bot.harness.id = claude-cli`)
+contains `bot.run`, which contains the Claude `bot.model.call`
+span. The harness and run spans are synthetic Bot turn boundaries, not
 Claude Code internal phases. One-shot and managed stdio turns use the same
 hierarchy; a real fresh-session retry creates another model-call child inside
-the same OpenClaw run.
+the same Bot run.
 
-The span starts when OpenClaw admits the prepared CLI turn and ends only after
+The span starts when Bot admits the prepared CLI turn and ends only after
 that turn succeeds or fails. For managed sessions, an interim success result
 does not end the span while Claude reports result-holding background agents or
 workflows; the final post-drain result does. Abort, timeout, process failure,
 output/parse failure, and other turn failures end the same span with an error.
 
 Claude Code reports per-assistant-message usage and may also report cumulative
-usage on its terminal result. OpenClaw reply accounting continues to use the
+usage on its terminal result. Bot reply accounting continues to use the
 last assistant message so existing cost semantics do not change; the
 turn-level model-call span uses terminal cumulative usage when available,
 including cache-read and cache-creation tokens.
 
-For these CLI spans, byte and timing fields describe the observable OpenClaw
+For these CLI spans, byte and timing fields describe the observable Bot
 CLI boundary:
 
-- `openclaw.model_call.request_bytes` is the UTF-8 size of the prompt value
+- `bot.model_call.request_bytes` is the UTF-8 size of the prompt value
   sent over one-shot stdin/argv, or the managed stdio JSONL user envelope. It
   is not the size of Claude Code's hidden model request.
-- `openclaw.model_call.response_bytes` is the UTF-8 size of Claude CLI stdout
+- `bot.model_call.response_bytes` is the UTF-8 size of Claude CLI stdout
   observed during the turn. It is not Anthropic HTTP response size.
-- `openclaw.model_call.time_to_first_byte_ms` is time to the first observable
+- `bot.model_call.time_to_first_byte_ms` is time to the first observable
   Claude CLI stdout or stderr output. It is not network TTFB.
 
-With `captureContent` enabled, the span exports the effective prompt OpenClaw
+With `captureContent` enabled, the span exports the effective prompt Bot
 sends to Claude Code and visible assistant text/reasoning/tool-call identity
 through `gen_ai.input.messages` and `gen_ai.output.messages`. Tool arguments,
 opaque thinking signatures, tool results, and system prompts are omitted from
-the Claude assistant envelope. OpenClaw does not
+the Claude assistant envelope. Bot does not
 claim access to Claude Code's private system prompt, hidden resumed or
 compacted request payload, native internal tool schemas, raw Anthropic HTTP
 request, internal retries, upstream request id, or true network TTFB. Because
@@ -277,60 +277,60 @@ bounds; content remains off by default.
 
 ### Model usage
 
-- `openclaw.tokens` (counter, attrs: `openclaw.token`, `openclaw.channel`, `openclaw.provider`, `openclaw.model`, `openclaw.agent`)
-- `openclaw.cost.usd` (counter, attrs: `openclaw.channel`, `openclaw.provider`, `openclaw.model`)
-- `openclaw.run.duration_ms` (histogram, attrs: `openclaw.channel`, `openclaw.provider`, `openclaw.model`)
-- `openclaw.context.tokens` (histogram, attrs: `openclaw.context`, `openclaw.channel`, `openclaw.provider`, `openclaw.model`)
+- `bot.tokens` (counter, attrs: `bot.token`, `bot.channel`, `bot.provider`, `bot.model`, `bot.agent`)
+- `bot.cost.usd` (counter, attrs: `bot.channel`, `bot.provider`, `bot.model`)
+- `bot.run.duration_ms` (histogram, attrs: `bot.channel`, `bot.provider`, `bot.model`)
+- `bot.context.tokens` (histogram, attrs: `bot.context`, `bot.channel`, `bot.provider`, `bot.model`)
 - `gen_ai.client.token.usage` (histogram, GenAI semantic-conventions metric, attrs: `gen_ai.token.type` = `input`/`output`, `gen_ai.provider.name`, `gen_ai.operation.name`, `gen_ai.request.model`)
 - `gen_ai.client.operation.duration` (histogram, seconds, GenAI semantic-conventions metric for model requests and synthetic agent turns; attrs: `gen_ai.provider.name`, `gen_ai.operation.name`, `gen_ai.request.model`, optional `error.type`; turn observations use `gen_ai.operation.name = invoke_agent`)
-- `openclaw.model_call.duration_ms` (histogram, attrs: `openclaw.provider`, `openclaw.model`, `openclaw.api`, `openclaw.transport`, `openclaw.model_call.observation_unit`, plus `openclaw.errorCategory` and `openclaw.failureKind` on classified errors)
-- `openclaw.model_call.request_bytes` (histogram, UTF-8 byte size of the final model request payload; for Claude Code CLI, the observable prompt input/envelope described above; no raw payload content)
-- `openclaw.model_call.response_bytes` (histogram, UTF-8 byte size of streamed response chunk payloads; high-frequency text, thinking, and tool-call deltas count only incremental `delta` bytes; for Claude Code CLI, observed stdout bytes; no raw response content)
-- `openclaw.model_call.time_to_first_byte_ms` (histogram, elapsed time before the first streamed response event; for Claude Code CLI, first observable CLI output rather than network TTFB)
-- `openclaw.model.failover` (counter, attrs: `openclaw.provider`, `openclaw.model`, `openclaw.failover.to_provider`, `openclaw.failover.to_model`, `openclaw.failover.reason`, `openclaw.failover.suspended`, `openclaw.lane`)
-- `openclaw.skill.used` (counter, attrs: `openclaw.skill.name`, `openclaw.skill.source`, `openclaw.skill.activation`, optional `openclaw.agent`, optional `openclaw.toolName`)
+- `bot.model_call.duration_ms` (histogram, attrs: `bot.provider`, `bot.model`, `bot.api`, `bot.transport`, `bot.model_call.observation_unit`, plus `bot.errorCategory` and `bot.failureKind` on classified errors)
+- `bot.model_call.request_bytes` (histogram, UTF-8 byte size of the final model request payload; for Claude Code CLI, the observable prompt input/envelope described above; no raw payload content)
+- `bot.model_call.response_bytes` (histogram, UTF-8 byte size of streamed response chunk payloads; high-frequency text, thinking, and tool-call deltas count only incremental `delta` bytes; for Claude Code CLI, observed stdout bytes; no raw response content)
+- `bot.model_call.time_to_first_byte_ms` (histogram, elapsed time before the first streamed response event; for Claude Code CLI, first observable CLI output rather than network TTFB)
+- `bot.model.failover` (counter, attrs: `bot.provider`, `bot.model`, `bot.failover.to_provider`, `bot.failover.to_model`, `bot.failover.reason`, `bot.failover.suspended`, `bot.lane`)
+- `bot.skill.used` (counter, attrs: `bot.skill.name`, `bot.skill.source`, `bot.skill.activation`, optional `bot.agent`, optional `bot.toolName`)
 
 ### Message flow
 
-- `openclaw.webhook.received` (counter, attrs: `openclaw.channel`, `openclaw.webhook`)
-- `openclaw.webhook.error` (counter, attrs: `openclaw.channel`, `openclaw.webhook`)
-- `openclaw.webhook.duration_ms` (histogram, attrs: `openclaw.channel`, `openclaw.webhook`)
-- `openclaw.message.queued` (counter, attrs: `openclaw.channel`, `openclaw.source`)
-- `openclaw.message.received` (counter, attrs: `openclaw.channel`, `openclaw.source`)
-- `openclaw.message.dispatch.started` (counter, attrs: `openclaw.channel`, `openclaw.source`)
-- `openclaw.message.dispatch.completed` (counter, attrs: `openclaw.channel`, `openclaw.outcome`, `openclaw.reason`, `openclaw.source`)
-- `openclaw.message.dispatch.duration_ms` (histogram, attrs: `openclaw.channel`, `openclaw.outcome`, `openclaw.reason`, `openclaw.source`)
-- `openclaw.message.processed` (counter, attrs: `openclaw.channel`, `openclaw.outcome`)
-- `openclaw.message.duration_ms` (histogram, attrs: `openclaw.channel`, `openclaw.outcome`)
-- `openclaw.message.delivery.started` (counter, attrs: `openclaw.channel`, `openclaw.delivery.kind`)
-- `openclaw.message.delivery.duration_ms` (histogram, attrs: `openclaw.channel`, `openclaw.delivery.kind`, `openclaw.outcome`, `openclaw.errorCategory`)
+- `bot.webhook.received` (counter, attrs: `bot.channel`, `bot.webhook`)
+- `bot.webhook.error` (counter, attrs: `bot.channel`, `bot.webhook`)
+- `bot.webhook.duration_ms` (histogram, attrs: `bot.channel`, `bot.webhook`)
+- `bot.message.queued` (counter, attrs: `bot.channel`, `bot.source`)
+- `bot.message.received` (counter, attrs: `bot.channel`, `bot.source`)
+- `bot.message.dispatch.started` (counter, attrs: `bot.channel`, `bot.source`)
+- `bot.message.dispatch.completed` (counter, attrs: `bot.channel`, `bot.outcome`, `bot.reason`, `bot.source`)
+- `bot.message.dispatch.duration_ms` (histogram, attrs: `bot.channel`, `bot.outcome`, `bot.reason`, `bot.source`)
+- `bot.message.processed` (counter, attrs: `bot.channel`, `bot.outcome`)
+- `bot.message.duration_ms` (histogram, attrs: `bot.channel`, `bot.outcome`)
+- `bot.message.delivery.started` (counter, attrs: `bot.channel`, `bot.delivery.kind`)
+- `bot.message.delivery.duration_ms` (histogram, attrs: `bot.channel`, `bot.delivery.kind`, `bot.outcome`, `bot.errorCategory`)
 
 ### Talk
 
-- `openclaw.talk.event` (counter, attrs: `openclaw.talk.event_type`, `openclaw.talk.mode`, `openclaw.talk.transport`, `openclaw.talk.brain`, `openclaw.talk.provider`)
-- `openclaw.talk.event.duration_ms` (histogram, attrs: same as `openclaw.talk.event`; emitted when a Talk event reports duration)
-- `openclaw.talk.audio.bytes` (histogram, attrs: same as `openclaw.talk.event`; emitted for Talk audio frame events that report byte length)
+- `bot.talk.event` (counter, attrs: `bot.talk.event_type`, `bot.talk.mode`, `bot.talk.transport`, `bot.talk.brain`, `bot.talk.provider`)
+- `bot.talk.event.duration_ms` (histogram, attrs: same as `bot.talk.event`; emitted when a Talk event reports duration)
+- `bot.talk.audio.bytes` (histogram, attrs: same as `bot.talk.event`; emitted for Talk audio frame events that report byte length)
 
 ### Queues and sessions
 
-- `openclaw.queue.lane.enqueue` (counter, attrs: `openclaw.lane`)
-- `openclaw.queue.lane.dequeue` (counter, attrs: `openclaw.lane`)
-- `openclaw.queue.depth` (histogram, attrs: `openclaw.lane` or `openclaw.channel=heartbeat`)
-- `openclaw.queue.wait_ms` (histogram, attrs: `openclaw.lane`)
-- `openclaw.session.state` (counter, attrs: `openclaw.state`, `openclaw.reason`)
-- `openclaw.session.stuck` (counter, attrs: `openclaw.state`; emitted for recoverable stale session bookkeeping)
-- `openclaw.session.stuck_age_ms` (histogram, attrs: `openclaw.state`; emitted for recoverable stale session bookkeeping)
-- `openclaw.session.turn.created` (counter, attrs: `openclaw.agent`, `openclaw.channel`, `openclaw.trigger`)
-- `openclaw.session.recovery.requested` (counter, attrs: `openclaw.state`, `openclaw.action`, `openclaw.active_work_kind`, `openclaw.reason`)
-- `openclaw.session.recovery.completed` (counter, attrs: `openclaw.state`, `openclaw.action`, `openclaw.status`, `openclaw.active_work_kind`, `openclaw.reason`)
-- `openclaw.session.recovery.age_ms` (histogram, attrs: same as the matching recovery counter)
-- `openclaw.run.attempt` (counter, attrs: `openclaw.attempt`)
+- `bot.queue.lane.enqueue` (counter, attrs: `bot.lane`)
+- `bot.queue.lane.dequeue` (counter, attrs: `bot.lane`)
+- `bot.queue.depth` (histogram, attrs: `bot.lane` or `bot.channel=heartbeat`)
+- `bot.queue.wait_ms` (histogram, attrs: `bot.lane`)
+- `bot.session.state` (counter, attrs: `bot.state`, `bot.reason`)
+- `bot.session.stuck` (counter, attrs: `bot.state`; emitted for recoverable stale session bookkeeping)
+- `bot.session.stuck_age_ms` (histogram, attrs: `bot.state`; emitted for recoverable stale session bookkeeping)
+- `bot.session.turn.created` (counter, attrs: `bot.agent`, `bot.channel`, `bot.trigger`)
+- `bot.session.recovery.requested` (counter, attrs: `bot.state`, `bot.action`, `bot.active_work_kind`, `bot.reason`)
+- `bot.session.recovery.completed` (counter, attrs: `bot.state`, `bot.action`, `bot.status`, `bot.active_work_kind`, `bot.reason`)
+- `bot.session.recovery.age_ms` (histogram, attrs: same as the matching recovery counter)
+- `bot.run.attempt` (counter, attrs: `bot.attempt`)
 
 ### Session liveness telemetry
 
-A `processing` session does not age toward the built-in liveness threshold while OpenClaw observes reply, tool, status, block, or ACP runtime progress. Typing keepalives do not count as progress, so a silent model or harness can still be detected.
+A `processing` session does not age toward the built-in liveness threshold while Bot observes reply, tool, status, block, or ACP runtime progress. Typing keepalives do not count as progress, so a silent model or harness can still be detected.
 
-OpenClaw classifies sessions by the work it can still observe:
+Bot classifies sessions by the work it can still observe:
 
 - `session.long_running`: active embedded work, model calls, or tool calls
   are still making progress. Owned silent model calls also report as long-running before the built-in abort threshold, so slow or non-streaming model providers do not look like stalled gateway sessions while abort-observable.
@@ -349,8 +349,8 @@ Recovery emits structured `session.recovery.requested` and
 only after a mutating recovery outcome (`aborted` or `released`) and only if
 the same processing generation is still current.
 
-Only `session.stuck` emits the `openclaw.session.stuck` counter, the
-`openclaw.session.stuck_age_ms` histogram, and the `openclaw.session.stuck`
+Only `session.stuck` emits the `bot.session.stuck` counter, the
+`bot.session.stuck_age_ms` histogram, and the `bot.session.stuck`
 span. Repeated `session.stuck` diagnostics back off while the session remains
 unchanged, so dashboards should alert on sustained increases rather than
 every heartbeat tick. For the config knob and defaults, see
@@ -358,81 +358,81 @@ every heartbeat tick. For the config knob and defaults, see
 
 Liveness warnings also emit:
 
-- `openclaw.liveness.warning` (counter, attrs: `openclaw.liveness.reason`)
-- `openclaw.liveness.event_loop_delay_p99_ms` (histogram, attrs: `openclaw.liveness.reason`)
-- `openclaw.liveness.event_loop_delay_max_ms` (histogram, attrs: `openclaw.liveness.reason`)
-- `openclaw.liveness.event_loop_utilization` (histogram, attrs: `openclaw.liveness.reason`)
-- `openclaw.liveness.cpu_core_ratio` (histogram, attrs: `openclaw.liveness.reason`)
+- `bot.liveness.warning` (counter, attrs: `bot.liveness.reason`)
+- `bot.liveness.event_loop_delay_p99_ms` (histogram, attrs: `bot.liveness.reason`)
+- `bot.liveness.event_loop_delay_max_ms` (histogram, attrs: `bot.liveness.reason`)
+- `bot.liveness.event_loop_utilization` (histogram, attrs: `bot.liveness.reason`)
+- `bot.liveness.cpu_core_ratio` (histogram, attrs: `bot.liveness.reason`)
 
 ### Harness lifecycle
 
-- `openclaw.harness.duration_ms` (histogram, attrs: `openclaw.harness.id`, `openclaw.harness.plugin`, `openclaw.outcome`, `openclaw.harness.phase` on errors)
+- `bot.harness.duration_ms` (histogram, attrs: `bot.harness.id`, `bot.harness.plugin`, `bot.outcome`, `bot.harness.phase` on errors)
 
 ### Tool execution and loop detection
 
-- `openclaw.tool.execution.duration_ms` (histogram, attrs: `gen_ai.tool.name`, `openclaw.toolName`, `openclaw.tool.source`, `openclaw.tool.owner`, `openclaw.tool.params.kind`, plus `openclaw.errorCategory` on errors)
-- `openclaw.tool.execution.blocked` (counter, attrs: `gen_ai.tool.name`, `openclaw.toolName`, `openclaw.tool.source`, `openclaw.tool.owner`, `openclaw.tool.params.kind`, `openclaw.deniedReason`)
-- `openclaw.tool.loop` (counter, attrs: `openclaw.toolName`, `openclaw.loop.level`, `openclaw.loop.action`, `openclaw.loop.detector`, `openclaw.loop.count`, optional `openclaw.loop.paired_tool`; emitted when a repetitive tool-call loop is detected)
+- `bot.tool.execution.duration_ms` (histogram, attrs: `gen_ai.tool.name`, `bot.toolName`, `bot.tool.source`, `bot.tool.owner`, `bot.tool.params.kind`, plus `bot.errorCategory` on errors)
+- `bot.tool.execution.blocked` (counter, attrs: `gen_ai.tool.name`, `bot.toolName`, `bot.tool.source`, `bot.tool.owner`, `bot.tool.params.kind`, `bot.deniedReason`)
+- `bot.tool.loop` (counter, attrs: `bot.toolName`, `bot.loop.level`, `bot.loop.action`, `bot.loop.detector`, `bot.loop.count`, optional `bot.loop.paired_tool`; emitted when a repetitive tool-call loop is detected)
 
 ### Exec
 
-- `openclaw.exec.duration_ms` (histogram, attrs: `openclaw.exec.target`, `openclaw.exec.mode`, `openclaw.outcome`, `openclaw.failureKind`)
+- `bot.exec.duration_ms` (histogram, attrs: `bot.exec.target`, `bot.exec.mode`, `bot.outcome`, `bot.failureKind`)
 
 ### Diagnostics internals (memory, payloads, exporter health)
 
-- `openclaw.payload.large` (counter, attrs: `openclaw.payload.surface`, `openclaw.payload.action`, `openclaw.channel`, `openclaw.plugin`, `openclaw.reason`)
-- `openclaw.payload.large_bytes` (histogram, attrs: same as `openclaw.payload.large`)
-- `openclaw.memory.rss_bytes` / `openclaw.memory.heap_used_bytes` / `openclaw.memory.heap_total_bytes` / `openclaw.memory.external_bytes` / `openclaw.memory.array_buffers_bytes` (histograms, no attrs; process memory samples)
-- `openclaw.memory.pressure` (counter, attrs: `openclaw.memory.level`, `openclaw.memory.reason`)
-- `openclaw.diagnostic.async_queue.dropped` (counter, attrs: `openclaw.diagnostic.async_queue.drop_class`; internal diagnostic-queue backpressure drops)
-- `openclaw.telemetry.exporter.events` (counter, attrs: `openclaw.exporter`, `openclaw.signal`, `openclaw.status`, optional `openclaw.reason`, optional `openclaw.errorCategory`; exporter lifecycle/failure self-telemetry)
+- `bot.payload.large` (counter, attrs: `bot.payload.surface`, `bot.payload.action`, `bot.channel`, `bot.plugin`, `bot.reason`)
+- `bot.payload.large_bytes` (histogram, attrs: same as `bot.payload.large`)
+- `bot.memory.rss_bytes` / `bot.memory.heap_used_bytes` / `bot.memory.heap_total_bytes` / `bot.memory.external_bytes` / `bot.memory.array_buffers_bytes` (histograms, no attrs; process memory samples)
+- `bot.memory.pressure` (counter, attrs: `bot.memory.level`, `bot.memory.reason`)
+- `bot.diagnostic.async_queue.dropped` (counter, attrs: `bot.diagnostic.async_queue.drop_class`; internal diagnostic-queue backpressure drops)
+- `bot.telemetry.exporter.events` (counter, attrs: `bot.exporter`, `bot.signal`, `bot.status`, optional `bot.reason`, optional `bot.errorCategory`; exporter lifecycle/failure self-telemetry)
 
 ## Exported spans
 
-- `openclaw.model.usage`
-  - `openclaw.channel`, `openclaw.provider`, `openclaw.model`
-  - `openclaw.tokens.*` (input/output/cache_read/cache_write/total)
+- `bot.model.usage`
+  - `bot.channel`, `bot.provider`, `bot.model`
+  - `bot.tokens.*` (input/output/cache_read/cache_write/total)
   - `gen_ai.system` by default, or `gen_ai.provider.name` when the latest GenAI semantic conventions are opted in
   - `gen_ai.request.model`, `gen_ai.operation.name`, `gen_ai.usage.*`
-- `openclaw.run`
-  - `openclaw.outcome`, `openclaw.channel`, `openclaw.provider`, `openclaw.model`, `openclaw.errorCategory`
-- `openclaw.model.call`
+- `bot.run`
+  - `bot.outcome`, `bot.channel`, `bot.provider`, `bot.model`, `bot.errorCategory`
+- `bot.model.call`
   - `gen_ai.system` by default, or `gen_ai.provider.name` when the latest GenAI semantic conventions are opted in
-  - `gen_ai.request.model`, `gen_ai.operation.name`, `openclaw.provider`, `openclaw.model`, `openclaw.api`, `openclaw.transport`, `openclaw.model_call.observation_unit` (`request` or `turn`)
-  - `openclaw.errorCategory`, `error.type`, and optional `openclaw.failureKind` on errors
-  - `openclaw.model_call.request_bytes`, `openclaw.model_call.response_bytes`, `openclaw.model_call.time_to_first_byte_ms`
-  - `openclaw.model_call.prompt.input_messages_count`, `openclaw.model_call.prompt.input_messages_chars`, `openclaw.model_call.prompt.system_prompt_chars`, `openclaw.model_call.prompt.tool_definitions_count`, `openclaw.model_call.prompt.tool_definitions_chars`, `openclaw.model_call.prompt.total_chars` (safe component sizes only, no prompt text)
-  - `openclaw.model_call.usage.*` and `gen_ai.usage.*` when the result carries usage for that request or aggregate turn
-  - Span event `openclaw.provider.request` with attribute `openclaw.upstreamRequestIdHash` (bounded, hash-based) when the upstream provider result exposes a request id; raw ids are never exported
-  - With `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental`, request spans use the latest GenAI inference span name `{gen_ai.operation.name} {gen_ai.request.model}`. Turn spans use `invoke_agent` because OpenClaw does not claim a native agent name from the opaque CLI boundary. Both use `CLIENT` span kind instead of `openclaw.model.call`.
-- `openclaw.harness.run`
-  - `openclaw.harness.id`, `openclaw.harness.plugin`, `openclaw.outcome`, `openclaw.provider`, `openclaw.model`, `openclaw.channel`
-  - On completion: `openclaw.harness.result_classification`, `openclaw.harness.yield_detected`, `openclaw.harness.items.started`, `openclaw.harness.items.completed`, `openclaw.harness.items.active`
-  - On error: `openclaw.harness.phase`, `openclaw.errorCategory`, optional `openclaw.harness.cleanup_failed`
-- `openclaw.tool.execution`
-  - `gen_ai.tool.name`, `gen_ai.operation.name` (`execute_tool`), `openclaw.toolName`, `openclaw.tool.source`, optional `gen_ai.tool.call.id`, `openclaw.tool.owner`, `openclaw.tool.params.*`
-  - Optional `openclaw.errorCategory`/`openclaw.errorCode` on errors, `openclaw.deniedReason` and `openclaw.outcome=blocked` when denied by policy or sandbox
-- `openclaw.exec`
-  - `openclaw.exec.target`, `openclaw.exec.mode`, `openclaw.outcome`, `openclaw.failureKind`, `openclaw.exec.command_length`, `openclaw.exec.exit_code`, `openclaw.exec.exit_signal`, `openclaw.exec.timed_out`
-- `openclaw.webhook.processed`
-  - `openclaw.channel`, `openclaw.webhook`
-- `openclaw.webhook.error`
-  - `openclaw.channel`, `openclaw.webhook`, `openclaw.error`
-- `openclaw.message.processed`
-  - `openclaw.channel`, `openclaw.outcome`, `openclaw.reason`
-- `openclaw.message.delivery`
-  - `openclaw.channel`, `openclaw.delivery.kind`, `openclaw.outcome`, `openclaw.errorCategory`, `openclaw.delivery.result_count`
-- `openclaw.session.stuck`
-  - `openclaw.state`, `openclaw.ageMs`, `openclaw.queueDepth`
-- `openclaw.context.assembled`
-  - `openclaw.prompt.size`, `openclaw.history.size`, `openclaw.context.tokens`, `openclaw.errorCategory` (no prompt, history, response, or session-key content)
-- `openclaw.tool.loop`
-  - `openclaw.toolName`, `openclaw.loop.level`, `openclaw.loop.action`, `openclaw.loop.detector`, `openclaw.loop.count`, optional `openclaw.loop.paired_tool` (no loop messages, params, or tool output)
-- `openclaw.memory.pressure`
-  - `openclaw.memory.level`, `openclaw.memory.reason`, `openclaw.memory.rss_bytes`, `openclaw.memory.heap_used_bytes`, `openclaw.memory.heap_total_bytes`, `openclaw.memory.external_bytes`, `openclaw.memory.array_buffers_bytes`, optional `openclaw.memory.threshold_bytes`/`openclaw.memory.rss_growth_bytes`/`openclaw.memory.window_ms`
+  - `gen_ai.request.model`, `gen_ai.operation.name`, `bot.provider`, `bot.model`, `bot.api`, `bot.transport`, `bot.model_call.observation_unit` (`request` or `turn`)
+  - `bot.errorCategory`, `error.type`, and optional `bot.failureKind` on errors
+  - `bot.model_call.request_bytes`, `bot.model_call.response_bytes`, `bot.model_call.time_to_first_byte_ms`
+  - `bot.model_call.prompt.input_messages_count`, `bot.model_call.prompt.input_messages_chars`, `bot.model_call.prompt.system_prompt_chars`, `bot.model_call.prompt.tool_definitions_count`, `bot.model_call.prompt.tool_definitions_chars`, `bot.model_call.prompt.total_chars` (safe component sizes only, no prompt text)
+  - `bot.model_call.usage.*` and `gen_ai.usage.*` when the result carries usage for that request or aggregate turn
+  - Span event `bot.provider.request` with attribute `bot.upstreamRequestIdHash` (bounded, hash-based) when the upstream provider result exposes a request id; raw ids are never exported
+  - With `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental`, request spans use the latest GenAI inference span name `{gen_ai.operation.name} {gen_ai.request.model}`. Turn spans use `invoke_agent` because Bot does not claim a native agent name from the opaque CLI boundary. Both use `CLIENT` span kind instead of `bot.model.call`.
+- `bot.harness.run`
+  - `bot.harness.id`, `bot.harness.plugin`, `bot.outcome`, `bot.provider`, `bot.model`, `bot.channel`
+  - On completion: `bot.harness.result_classification`, `bot.harness.yield_detected`, `bot.harness.items.started`, `bot.harness.items.completed`, `bot.harness.items.active`
+  - On error: `bot.harness.phase`, `bot.errorCategory`, optional `bot.harness.cleanup_failed`
+- `bot.tool.execution`
+  - `gen_ai.tool.name`, `gen_ai.operation.name` (`execute_tool`), `bot.toolName`, `bot.tool.source`, optional `gen_ai.tool.call.id`, `bot.tool.owner`, `bot.tool.params.*`
+  - Optional `bot.errorCategory`/`bot.errorCode` on errors, `bot.deniedReason` and `bot.outcome=blocked` when denied by policy or sandbox
+- `bot.exec`
+  - `bot.exec.target`, `bot.exec.mode`, `bot.outcome`, `bot.failureKind`, `bot.exec.command_length`, `bot.exec.exit_code`, `bot.exec.exit_signal`, `bot.exec.timed_out`
+- `bot.webhook.processed`
+  - `bot.channel`, `bot.webhook`
+- `bot.webhook.error`
+  - `bot.channel`, `bot.webhook`, `bot.error`
+- `bot.message.processed`
+  - `bot.channel`, `bot.outcome`, `bot.reason`
+- `bot.message.delivery`
+  - `bot.channel`, `bot.delivery.kind`, `bot.outcome`, `bot.errorCategory`, `bot.delivery.result_count`
+- `bot.session.stuck`
+  - `bot.state`, `bot.ageMs`, `bot.queueDepth`
+- `bot.context.assembled`
+  - `bot.prompt.size`, `bot.history.size`, `bot.context.tokens`, `bot.errorCategory` (no prompt, history, response, or session-key content)
+- `bot.tool.loop`
+  - `bot.toolName`, `bot.loop.level`, `bot.loop.action`, `bot.loop.detector`, `bot.loop.count`, optional `bot.loop.paired_tool` (no loop messages, params, or tool output)
+- `bot.memory.pressure`
+  - `bot.memory.level`, `bot.memory.reason`, `bot.memory.rss_bytes`, `bot.memory.heap_used_bytes`, `bot.memory.heap_total_bytes`, `bot.memory.external_bytes`, `bot.memory.array_buffers_bytes`, optional `bot.memory.threshold_bytes`/`bot.memory.rss_growth_bytes`/`bot.memory.window_ms`
 
 When content capture is explicitly enabled, model and tool spans can also
-include bounded, redacted `openclaw.content.*` attributes for the specific
+include bounded, redacted `bot.content.*` attributes for the specific
 content classes you opted into.
 
 ## Diagnostic event catalog
@@ -510,7 +510,7 @@ flags. Flags are case-insensitive and support wildcards (`telegram.*` or
 Or as a one-off env override:
 
 ```bash
-OPENCLAW_DIAGNOSTICS=telegram.http,telegram.payload openclaw gateway
+BOT_DIAGNOSTICS=telegram.http,telegram.payload bot gateway
 ```
 
 Flag output goes to the standard log file (`logging.file`) and is still
@@ -526,7 +526,7 @@ redacted by the always-on log redaction policy. Full guide:
 ```
 
 Or leave `diagnostics-otel` out of `plugins.allow`, or run
-`openclaw plugins disable diagnostics-otel`.
+`bot plugins disable diagnostics-otel`.
 
 ## Related
 

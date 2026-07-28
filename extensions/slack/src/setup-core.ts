@@ -1,9 +1,9 @@
-import { createChannelDmPolicy } from "openclaw/plugin-sdk/channel-dm-policy";
+import { createChannelDmPolicy } from "bot/plugin-sdk/channel-dm-policy";
 import {
   defineChannelSetupContract,
   type ChannelSetupInput,
-} from "openclaw/plugin-sdk/channel-setup";
-import { normalizeSecretInputString } from "openclaw/plugin-sdk/secret-input";
+} from "bot/plugin-sdk/channel-setup";
+import { normalizeSecretInputString } from "bot/plugin-sdk/secret-input";
 // Slack plugin module implements setup core behavior.
 import {
   createAccountScopedAllowFromSection,
@@ -20,10 +20,10 @@ import {
   type ChannelSetupAdapter,
   type ChannelSetupDmPolicy,
   type ChannelSetupWizard,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/setup-runtime";
-import { formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+  type BotConfig,
+} from "bot/plugin-sdk/setup-runtime";
+import { formatDocsLink } from "bot/plugin-sdk/setup-tools";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { inspectSlackAccount } from "./account-inspect.js";
 import {
   buildSlackManifest,
@@ -43,7 +43,7 @@ type SlackSetupInput = ChannelSetupInput & {
   mode?: "socket" | "http" | "relay";
 };
 
-function enableSlackAccount(cfg: OpenClawConfig, accountId: string): OpenClawConfig {
+function enableSlackAccount(cfg: BotConfig, accountId: string): BotConfig {
   return patchChannelConfigForAccount({
     cfg,
     channel,
@@ -53,10 +53,10 @@ function enableSlackAccount(cfg: OpenClawConfig, accountId: string): OpenClawCon
 }
 
 function setSlackSetupIdentity(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   identity: "bot" | "user";
-}): OpenClawConfig {
+}): BotConfig {
   const next = patchChannelConfigForAccount({
     cfg: params.cfg,
     channel,
@@ -82,7 +82,7 @@ function setSlackSetupIdentity(params: {
         ...next.channels,
         slack: nextSlack,
       },
-    } as OpenClawConfig;
+    } as BotConfig;
   }
 
   const account = slack.accounts?.[params.accountId];
@@ -109,7 +109,7 @@ function setSlackSetupIdentity(params: {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function createSlackTokenCredential(params: {
@@ -320,7 +320,7 @@ export function createSlackSetupWizardBase(handlers: {
         return { cfg };
       }
       const identity = await prompter.select<"bot" | "user">({
-        message: "How should OpenClaw appear in Slack?",
+        message: "How should Bot appear in Slack?",
         options: [
           { value: "bot", label: "Slack bot", hint: "Post as the Slack app (default)" },
           { value: "user", label: "Slack user", hint: "Post as the authorizing human" },
@@ -456,13 +456,13 @@ export function createSlackSetupWizardBase(handlers: {
       channel,
       label: t("wizard.slack.channelsLabel"),
       placeholder: "#general, #private, C123",
-      currentPolicy: ({ cfg, accountId }: { cfg: OpenClawConfig; accountId: string }) =>
+      currentPolicy: ({ cfg, accountId }: { cfg: BotConfig; accountId: string }) =>
         inspectSlackAccount({ cfg, accountId }).config.groupPolicy ?? "allowlist",
-      currentEntries: ({ cfg, accountId }: { cfg: OpenClawConfig; accountId: string }) =>
+      currentEntries: ({ cfg, accountId }: { cfg: BotConfig; accountId: string }) =>
         Object.entries(inspectSlackAccount({ cfg, accountId }).config.channels ?? {})
           .filter(([, value]) => value?.enabled !== false)
           .map(([key]) => key),
-      updatePrompt: ({ cfg, accountId }: { cfg: OpenClawConfig; accountId: string }) =>
+      updatePrompt: ({ cfg, accountId }: { cfg: BotConfig; accountId: string }) =>
         Boolean(inspectSlackAccount({ cfg, accountId }).config.channels),
       resolveAllowlist: handlers.resolveGroupAllowlist,
       fallbackResolved: (entries) => entries,
@@ -471,12 +471,12 @@ export function createSlackSetupWizardBase(handlers: {
         accountId,
         resolved,
       }: {
-        cfg: OpenClawConfig;
+        cfg: BotConfig;
         accountId: string;
         resolved: unknown;
       }) => setSlackChannelAllowlist(cfg, accountId, resolved as string[]),
     }),
-    disable: (cfg: OpenClawConfig) => setSetupChannelEnabled(cfg, channel, false),
+    disable: (cfg: BotConfig) => setSetupChannelEnabled(cfg, channel, false),
   } satisfies ChannelSetupWizard;
 }
 export function createSlackSetupWizardProxy(

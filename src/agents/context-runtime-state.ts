@@ -3,7 +3,7 @@
  * Keeps discovery loads, config backoff, and token cache reset behavior
  * shared across module reloads and runtime seams.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { createLazyImportLoader, type LazyPromiseLoader } from "../shared/lazy-promise.js";
 import {
   MODEL_CONFIGURED_CONTEXT_TOKEN_CACHE,
@@ -11,13 +11,13 @@ import {
   MODEL_CONTEXT_WINDOW_CACHE,
 } from "./context-cache.js";
 
-const CONTEXT_WINDOW_RUNTIME_STATE_KEY = Symbol.for("openclaw.contextWindowRuntimeState");
+const CONTEXT_WINDOW_RUNTIME_STATE_KEY = Symbol.for("bot.contextWindowRuntimeState");
 
 type ContextWindowRuntimeState = {
   generation: number;
   loadPromise: Promise<void> | null;
   loadGeneration: number | null;
-  configuredConfig: OpenClawConfig | undefined;
+  configuredConfig: BotConfig | undefined;
   configLoadFailures: number;
   nextConfigLoadAttemptAtMs: number;
   // Released gateways may still import this stable runtime path after an

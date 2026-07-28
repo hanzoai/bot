@@ -4,10 +4,10 @@ import { randomUUID } from "node:crypto";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import { sliceUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { validateNodePresenceActivityPayload } from "../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { updatePairedDevicePresence, type NodePairingGeneration } from "../infra/device-pairing.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import {
@@ -516,7 +516,7 @@ function parsePayloadObject(payloadJSON?: string | null): Record<string, unknown
 }
 
 async function sendReceiptAck(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   deps: NodeEventContext["deps"];
   sessionKey: string;
   channel: string;

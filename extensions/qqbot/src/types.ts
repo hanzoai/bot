@@ -1,6 +1,6 @@
-import type { GroupToolPolicyConfig } from "openclaw/plugin-sdk/channel-policy";
+import type { GroupToolPolicyConfig } from "bot/plugin-sdk/channel-policy";
 // Qqbot type declarations define plugin contracts.
-import type { SecretInput } from "openclaw/plugin-sdk/secret-input";
+import type { SecretInput } from "bot/plugin-sdk/secret-input";
 import type { QQBotDmPolicy, QQBotGroupPolicy } from "./engine/access/index.js";
 import type { QQBotGroupCommandLevel } from "./engine/config/group.js";
 
@@ -117,7 +117,7 @@ export interface QQBotAccountConfig {
    * - `mode` "partial" (default) enables block streaming; "off" disables it.
    * - `nativeTransport: true` uses QQ's official C2C `stream_messages` API for DMs.
    * Legacy `streaming: true|false` scalars and the `c2cStreamApi` key migrate
-   * via `openclaw doctor --fix`.
+   * via `bot doctor --fix`.
    */
   streaming?: {
     mode?: "off" | "partial";

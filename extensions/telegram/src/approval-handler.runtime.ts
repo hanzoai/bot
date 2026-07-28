@@ -2,21 +2,21 @@
 import type {
   ChannelApprovalCapabilityHandlerContext,
   PendingApprovalView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
-import { createChannelApprovalNativeRuntimeAdapter } from "openclaw/plugin-sdk/approval-handler-runtime";
-import { buildChannelApprovalNativeTargetKey } from "openclaw/plugin-sdk/approval-native-runtime";
-import { buildPluginApprovalPendingReplyPayload } from "openclaw/plugin-sdk/approval-reply-runtime";
+} from "bot/plugin-sdk/approval-handler-runtime";
+import { createChannelApprovalNativeRuntimeAdapter } from "bot/plugin-sdk/approval-handler-runtime";
+import { buildChannelApprovalNativeTargetKey } from "bot/plugin-sdk/approval-native-runtime";
+import { buildPluginApprovalPendingReplyPayload } from "bot/plugin-sdk/approval-reply-runtime";
 import {
   buildApprovalPresentationFromActionDescriptors,
   buildExecApprovalPendingReplyPayload,
-} from "openclaw/plugin-sdk/approval-reply-runtime";
-import type { ExecApprovalPendingReplyParams } from "openclaw/plugin-sdk/approval-reply-runtime";
+} from "bot/plugin-sdk/approval-reply-runtime";
+import type { ExecApprovalPendingReplyParams } from "bot/plugin-sdk/approval-reply-runtime";
 import type {
   ExecApprovalRequest,
   PluginApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/approval-runtime";
+import { createSubsystemLogger } from "bot/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   buildTelegramNativeExpiredApprovalText,
   buildTelegramNativeResolvedApprovalText,

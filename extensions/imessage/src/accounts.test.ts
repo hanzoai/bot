@@ -189,7 +189,7 @@ describe("iMessage duplicate-source watcher ownership", () => {
 
 describe("iMessage local database account ownership", () => {
   function createLocalFixture() {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-imessage-account-db-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-imessage-account-db-"));
     const cliPath = path.join(root, "imsg");
     const firstDbPath = path.join(root, "first.db");
     const secondDbPath = path.join(root, "second.db");

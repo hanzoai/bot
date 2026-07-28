@@ -5,7 +5,7 @@
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { Worker } from "node:worker_threads";
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveTimerTimeoutMs } from "@hanzo/bot-normalization-core/number-coercion";
 import { toErrorObject } from "../infra/errors.js";
 import {
   buildHistoryPrunePlan,
@@ -426,6 +426,6 @@ const compactionPlanningWorkerTesting = {
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.compactionPlanningWorkerTestApi")
+    Symbol.for("bot.compactionPlanningWorkerTestApi")
   ] = compactionPlanningWorkerTesting;
 }

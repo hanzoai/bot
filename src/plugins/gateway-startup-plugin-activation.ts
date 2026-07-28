@@ -1,7 +1,7 @@
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 // Applies plugin activation policy to configured startup candidates.
 import { collectConfiguredAgentHarnessRuntimes } from "../agents/harness-runtimes.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { hasExplicitChannelConfig } from "./channel-presence-policy.js";
 import { resolveEffectivePluginActivationState } from "./config-state.js";
 import { isPluginEnabledByDefaultForPlatform } from "./default-enablement.js";
@@ -30,13 +30,13 @@ import { manifestOwnsWorkerProvider } from "./worker-provider-registry.js";
 export function addRequiredAgentHarnessPluginIds(
   target: Set<string>,
   params: {
-    activationSourceConfig: OpenClawConfig;
-    config: OpenClawConfig;
+    activationSourceConfig: BotConfig;
+    config: BotConfig;
     index: InstalledPluginIndex;
     pluginsConfig: ReturnType<typeof normalizePluginsConfigForInstalledIndex>;
     activationSource: {
       plugins: ReturnType<typeof normalizePluginsConfigForInstalledIndex>;
-      rootConfig?: OpenClawConfig;
+      rootConfig?: BotConfig;
     };
     env: NodeJS.ProcessEnv;
     platform?: NodeJS.Platform;
@@ -135,9 +135,9 @@ function manifestOwnsConfiguredMemoryEmbeddingProvider(params: {
 
 type ConfiguredProviderActivation = {
   plugin: InstalledPluginIndexRecord;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginsConfig: NormalizedPluginsConfig;
-  activationSource: { plugins: NormalizedPluginsConfig; rootConfig?: OpenClawConfig };
+  activationSource: { plugins: NormalizedPluginsConfig; rootConfig?: BotConfig };
   platform?: NodeJS.Platform;
   autoEnabledReason?: string;
   allowImplicitExternal?: boolean;
@@ -175,11 +175,11 @@ function canStartConfiguredProvider(params: ConfiguredProviderActivation): boole
 export function canStartConfiguredGenerationProviderPlugin(params: {
   plugin: InstalledPluginIndexRecord;
   manifest: PluginManifestRecord | undefined;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginsConfig: ReturnType<typeof normalizePluginsConfigWithRegistry>;
   activationSource: {
     plugins: ReturnType<typeof normalizePluginsConfigWithRegistry>;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
   configuredGenerationProviderIds: ConfiguredGenerationProviderIds;
   platform?: NodeJS.Platform;
@@ -198,11 +198,11 @@ export function canStartConfiguredGenerationProviderPlugin(params: {
 export function canStartConfiguredVoiceProviderPlugin(params: {
   plugin: InstalledPluginIndexRecord;
   manifest: PluginManifestRecord | undefined;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginsConfig: ReturnType<typeof normalizePluginsConfigWithRegistry>;
   activationSource: {
     plugins: ReturnType<typeof normalizePluginsConfigWithRegistry>;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
   configuredVoiceProviderIds: ConfiguredVoiceProviderIds;
   platform?: NodeJS.Platform;
@@ -221,11 +221,11 @@ export function canStartConfiguredVoiceProviderPlugin(params: {
 export function canStartConfiguredMemoryEmbeddingProviderPlugin(params: {
   plugin: InstalledPluginIndexRecord;
   manifest: PluginManifestRecord | undefined;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginsConfig: ReturnType<typeof normalizePluginsConfigWithRegistry>;
   activationSource: {
     plugins: ReturnType<typeof normalizePluginsConfigWithRegistry>;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
   configuredMemoryEmbeddingProviderIds: ReadonlySet<string>;
   platform?: NodeJS.Platform;
@@ -244,11 +244,11 @@ export function canStartConfiguredMemoryEmbeddingProviderPlugin(params: {
 export function canStartConfiguredWorkerProviderPlugin(params: {
   plugin: InstalledPluginIndexRecord;
   manifest: PluginManifestRecord | undefined;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginsConfig: ReturnType<typeof normalizePluginsConfigWithRegistry>;
   activationSource: {
     plugins: ReturnType<typeof normalizePluginsConfigWithRegistry>;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
   configuredWorkerProviderIds: ReadonlySet<string>;
   platform?: NodeJS.Platform;
@@ -265,11 +265,11 @@ export function canStartConfiguredWorkerProviderPlugin(params: {
 export function canStartConfiguredModelProviderPlugin(params: {
   plugin: InstalledPluginIndexRecord;
   manifest: PluginManifestRecord | undefined;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginsConfig: ReturnType<typeof normalizePluginsConfigWithRegistry>;
   activationSource: {
     plugins: ReturnType<typeof normalizePluginsConfigWithRegistry>;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
   configuredModelProviderIds: ReadonlySet<string>;
   platform?: NodeJS.Platform;
@@ -290,9 +290,9 @@ export function canStartRequiredAgentHarnessPlugin(params: {
   pluginsConfig: ReturnType<typeof normalizePluginsConfigWithRegistry>;
   activationSource: {
     plugins: ReturnType<typeof normalizePluginsConfigWithRegistry>;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
-  config: OpenClawConfig;
+  config: BotConfig;
   requiredAgentHarnessRuntimes: ReadonlySet<string>;
   platform?: NodeJS.Platform;
 }): boolean {
@@ -344,11 +344,11 @@ export function canStartRequiredAgentHarnessPlugin(params: {
 export function canStartConfiguredSpeechProviderPlugin(params: {
   plugin: InstalledPluginIndexRecord;
   manifest: PluginManifestRecord | undefined;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginsConfig: ReturnType<typeof normalizePluginsConfigWithRegistry>;
   activationSource: {
     plugins: ReturnType<typeof normalizePluginsConfigWithRegistry>;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
   configuredSpeechProviderIds: ReadonlySet<string>;
   platform?: NodeJS.Platform;
@@ -390,11 +390,11 @@ export function canStartConfiguredSpeechProviderPlugin(params: {
 export function canStartConfiguredWebSearchProviderPlugin(params: {
   plugin: InstalledPluginIndexRecord;
   manifest: PluginManifestRecord | undefined;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginsConfig: ReturnType<typeof normalizePluginsConfigWithRegistry>;
   activationSource: {
     plugins: ReturnType<typeof normalizePluginsConfigWithRegistry>;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
   configuredWebSearchProviderIds: ReadonlySet<string>;
   platform?: NodeJS.Platform;
@@ -413,11 +413,11 @@ export function canStartConfiguredWebSearchProviderPlugin(params: {
 export function canStartConfiguredRootPlugin(params: {
   plugin: InstalledPluginIndexRecord;
   manifest: PluginManifestRecord | undefined;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginsConfig: ReturnType<typeof normalizePluginsConfigWithRegistry>;
   activationSource: {
     plugins: ReturnType<typeof normalizePluginsConfigWithRegistry>;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
   platform?: NodeJS.Platform;
 }): boolean {
@@ -493,11 +493,11 @@ function hasHookRuntimeStartupIntent(params: {
 export function canStartExplicitHookPlugin(params: {
   plugin: InstalledPluginIndexRecord;
   manifest: PluginManifestRecord | undefined;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginsConfig: NormalizedPluginsConfig;
   activationSource: {
     plugins: NormalizedPluginsConfig;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
   activationSourcePlugins: NormalizedPluginsConfig;
   platform?: NodeJS.Platform;
@@ -543,11 +543,11 @@ export function canStartExplicitHookPlugin(params: {
 export function canStartTrustedToolPolicyPlugin(params: {
   plugin: InstalledPluginIndexRecord;
   manifest: PluginManifestRecord | undefined;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginsConfig: NormalizedPluginsConfig;
   activationSource: {
     plugins: NormalizedPluginsConfig;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
   platform?: NodeJS.Platform;
 }): boolean {
@@ -585,11 +585,11 @@ export function canStartTrustedToolPolicyPlugin(params: {
 
 export function canStartConfiguredChannelPlugin(params: {
   plugin: InstalledPluginIndexRecord;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginsConfig: ReturnType<typeof normalizePluginsConfigWithRegistry>;
   activationSource: {
     plugins: ReturnType<typeof normalizePluginsConfigWithRegistry>;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
   manifestLookup: ManifestRegistryLookup;
   platform?: NodeJS.Platform;

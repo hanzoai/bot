@@ -11,7 +11,7 @@ import type {
 } from "./hook-types.js";
 
 const BEFORE_AGENT_REPLY_TRIGGERS = new Set(["user", "heartbeat", "cron"]);
-const BEFORE_AGENT_REPLY_OBSERVER_KEY = Symbol.for("openclaw.beforeAgentReply.observer");
+const BEFORE_AGENT_REPLY_OBSERVER_KEY = Symbol.for("bot.beforeAgentReply.observer");
 
 type BeforeAgentReplyObserver = {
   beforeDispatch: () => Promise<boolean | void>;

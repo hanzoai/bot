@@ -159,12 +159,12 @@ describe("stripInternalRuntimeScaffolding", () => {
       stripInternalRuntimeScaffolding(
         [
           "before",
-          "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+          "<<<BEGIN_BOT_INTERNAL_CONTEXT>>>",
           "internal metadata",
           "<<<BEGIN_UNTRUSTED_CHILD_RESULT>>>",
           "raw child output",
           "<<<END_UNTRUSTED_CHILD_RESULT>>>",
-          "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+          "<<<END_BOT_INTERNAL_CONTEXT>>>",
           "after",
         ].join("\n"),
       ),
@@ -176,9 +176,9 @@ describe("stripInternalRuntimeScaffolding", () => {
       stripInternalRuntimeScaffolding(
         [
           "before",
-          "  <<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+          "  <<<BEGIN_BOT_INTERNAL_CONTEXT>>>",
           "internal",
-          "\t<<<END_OPENCLAW_INTERNAL_CONTEXT>>>  ",
+          "\t<<<END_BOT_INTERNAL_CONTEXT>>>  ",
           "after",
         ].join("\n"),
       ),
@@ -190,9 +190,9 @@ describe("stripInternalRuntimeScaffolding", () => {
       stripInternalRuntimeScaffolding(
         [
           "before  ",
-          "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>",
+          "<<<BEGIN_BOT_INTERNAL_CONTEXT>>>",
           "internal",
-          "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>",
+          "<<<END_BOT_INTERNAL_CONTEXT>>>",
           "    indented code",
         ].join("\n"),
       ),
@@ -246,15 +246,15 @@ describe("stripInternalRuntimeScaffolding", () => {
   it("fails closed on unmatched runtime context delimiters", () => {
     expect(
       stripInternalRuntimeScaffolding(
-        ["visible", "<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>", "internal metadata"].join("\n"),
+        ["visible", "<<<BEGIN_BOT_INTERNAL_CONTEXT>>>", "internal metadata"].join("\n"),
       ),
     ).toBe("visible");
   });
 
   it("preserves inline delimiter mentions", () => {
     expect(
-      stripInternalRuntimeScaffolding("visible <<<END_OPENCLAW_INTERNAL_CONTEXT>>> inline mention"),
-    ).toBe("visible <<<END_OPENCLAW_INTERNAL_CONTEXT>>> inline mention");
+      stripInternalRuntimeScaffolding("visible <<<END_BOT_INTERNAL_CONTEXT>>> inline mention"),
+    ).toBe("visible <<<END_BOT_INTERNAL_CONTEXT>>> inline mention");
     expect(stripInternalRuntimeScaffolding("what is <<<BEGIN_UNTRUSTED_CHILD_RESULT>>>?")).toBe(
       "what is <<<BEGIN_UNTRUSTED_CHILD_RESULT>>>?",
     );
@@ -279,7 +279,7 @@ describe("stripInternalRuntimeScaffolding", () => {
   it("removes stray standalone marker lines", () => {
     expect(
       stripInternalRuntimeScaffolding(
-        ["visible", "<<<END_OPENCLAW_INTERNAL_CONTEXT>>>", "after"].join("\n"),
+        ["visible", "<<<END_BOT_INTERNAL_CONTEXT>>>", "after"].join("\n"),
       ),
     ).toBe("visible\nafter");
     expect(

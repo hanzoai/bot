@@ -2,22 +2,22 @@ import crypto from "node:crypto";
 import type { Dirent } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { reclaimDefinitelyStaleFileLock } from "openclaw/plugin-sdk/file-lock";
-import { resolveUserPath } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import { reclaimDefinitelyStaleFileLock } from "bot/plugin-sdk/file-lock";
+import { resolveUserPath } from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import {
   ensureMemoryIndexSchema,
   loadSqliteVecExtension,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
+import { normalizeAgentId } from "bot/plugin-sdk/routing";
 import {
   legacyStateFileExists,
   type PluginDoctorStateMigration,
-} from "openclaw/plugin-sdk/runtime-doctor";
+} from "bot/plugin-sdk/runtime-doctor";
 import {
-  ensureOpenClawAgentDatabaseSchema,
+  ensureBotAgentDatabaseSchema,
   openNodeSqliteDatabase,
-  resolveOpenClawAgentSqlitePath,
-} from "openclaw/plugin-sdk/sqlite-runtime";
+  resolveBotAgentSqlitePath,
+} from "bot/plugin-sdk/sqlite-runtime";
 import {
   importLegacyMemorySidecarIndex,
   LEGACY_MEMORY_SIDECAR_SUFFIXES,
@@ -163,7 +163,7 @@ async function collectLegacyMemorySidecarSources(params: {
     }
   } catch {}
 
-  const migrationEnv = { ...params.env, OPENCLAW_STATE_DIR: params.stateDir };
+  const migrationEnv = { ...params.env, BOT_STATE_DIR: params.stateDir };
   const sources: LegacyMemorySidecarSource[] = [];
   const seen = new Set<string>();
   async function addSource(agentId: string, legacyPath: string): Promise<void> {
@@ -177,7 +177,7 @@ async function collectLegacyMemorySidecarSources(params: {
       agentId,
       legacyPath: normalizedPath,
       stateDir: params.stateDir,
-      agentDatabasePath: resolveOpenClawAgentSqlitePath({ agentId, env: migrationEnv }),
+      agentDatabasePath: resolveBotAgentSqlitePath({ agentId, env: migrationEnv }),
     });
   }
   for (const agentId of agentIds) {
@@ -347,9 +347,9 @@ async function migrateLegacyMemorySidecarSource(params: {
   try {
     const migrationEnv = {
       ...params.env,
-      OPENCLAW_STATE_DIR: params.source.stateDir,
+      BOT_STATE_DIR: params.source.stateDir,
     };
-    ensureOpenClawAgentDatabaseSchema(db, {
+    ensureBotAgentDatabaseSchema(db, {
       agentId: params.source.agentId,
       env: migrationEnv,
       path: params.source.agentDatabasePath,

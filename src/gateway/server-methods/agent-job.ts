@@ -1,7 +1,7 @@
 // Agent job tracking owns terminal run state and `agent.wait` resolution.
 // Gateway dedupe retains response payloads only for idempotent RPC replay.
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { asFiniteNumber } from "@hanzo/bot-normalization-core/number-coercion";
+import { asOptionalRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   AGENT_RUN_TERMINAL_RETRY_GRACE_MS,
   buildAgentRunTerminalOutcome,

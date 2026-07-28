@@ -1,12 +1,12 @@
-# OpenClaw Inworld Plugin
+# Bot Inworld Plugin
 
-Official OpenClaw plugin for Inworld.
+Official Bot plugin for Inworld.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/inworld-speech
-openclaw gateway restart
+bot plugins install @hanzo/bot-inworld-speech
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/inworld> for setup and configuration.
+See <https://docs.bot.ai/providers/inworld> for setup and configuration.

@@ -1,7 +1,7 @@
 // Public facade for plugin-scoped SQLite blob storage.
 import { normalizeSqliteNumber } from "../infra/sqlite-number.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 import {
   MAX_PLUGIN_BLOB_BYTES_PER_ENTRY,
   MAX_PLUGIN_BLOB_BYTES_PER_PLUGIN,
@@ -198,7 +198,7 @@ function parseMetadata(
     throw new PluginBlobStoreError("Plugin blob entry contains corrupt metadata JSON.", {
       code: "PLUGIN_BLOB_CORRUPT",
       operation,
-      path: resolveOpenClawStateSqlitePath(env ?? process.env),
+      path: resolveBotStateSqlitePath(env ?? process.env),
       cause: error,
     });
   }
@@ -373,6 +373,6 @@ export function createPluginBlobStoreForTests<TMetadata>(
 export function resetPluginBlobStoreForTests(options: { closeDatabase?: boolean } = {}): void {
   namespaceOptionSignatures.clear();
   if (options.closeDatabase !== false) {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
   }
 }

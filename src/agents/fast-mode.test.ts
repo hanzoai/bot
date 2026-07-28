@@ -1,6 +1,6 @@
 // Verifies fast-mode precedence across session, agent, and model defaults.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { formatFastModeAutoLabel } from "../shared/fast-mode.js";
 import {
   formatFastModeAutoProgressText,
@@ -14,7 +14,7 @@ import {
 describe("resolveFastModeState", () => {
   it("prefers session overrides", () => {
     const state = resolveFastModeState({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       provider: "openai",
       model: "gpt-4o",
       sessionEntry: { fastMode: true },
@@ -27,7 +27,7 @@ describe("resolveFastModeState", () => {
 
   it("keeps auto as the persisted mode and starts enabled", () => {
     const state = resolveFastModeState({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       provider: "openai",
       model: "gpt-5.5",
       sessionEntry: { fastMode: "auto" },
@@ -42,7 +42,7 @@ describe("resolveFastModeState", () => {
       agents: {
         list: [{ id: "alpha", fastModeDefault: true }],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const state = resolveFastModeState({
       cfg,
@@ -64,7 +64,7 @@ describe("resolveFastModeState", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const state = resolveFastModeState({
       cfg,
@@ -85,7 +85,7 @@ describe("resolveFastModeState", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const state = resolveFastModeState({
       cfg,
@@ -109,7 +109,7 @@ describe("resolveFastModeState", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const state = resolveFastModeState({
       cfg,
@@ -152,7 +152,7 @@ describe("resolveFastModeState", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const state = resolveFastModeState({
       cfg,
@@ -178,7 +178,7 @@ describe("resolveFastModeState", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const state = resolveFastModeState({
       cfg,
@@ -200,7 +200,7 @@ describe("resolveFastModeState", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const state = resolveFastModeState({
       cfg,
@@ -223,7 +223,7 @@ describe("resolveFastModeState", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const state = resolveFastModeState({
       cfg,
@@ -246,7 +246,7 @@ describe("resolveFastModeState", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const state = resolveFastModeState({
       cfg,
@@ -260,7 +260,7 @@ describe("resolveFastModeState", () => {
 
   it("defaults to off when unset", () => {
     const state = resolveFastModeState({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       provider: "openai",
       model: "gpt-4o",
     });

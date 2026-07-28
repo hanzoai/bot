@@ -2,7 +2,7 @@
 import { collectChannelLegacyConfigRules } from "../../../channels/plugins/legacy-config.js";
 import { findLegacyConfigIssues } from "../../../config/legacy.js";
 import type { LegacyConfigRule } from "../../../config/legacy.shared.js";
-import type { LegacyConfigIssue, OpenClawConfig } from "../../../config/types.js";
+import type { LegacyConfigIssue, BotConfig } from "../../../config/types.js";
 import {
   collectRelevantDoctorPluginIds,
   collectRelevantDoctorPluginIdsForTouchedPaths,
@@ -33,7 +33,7 @@ function collectPluginLegacyConfigRules(
   if (pluginIds.length === 0) {
     return [];
   }
-  return listPluginDoctorLegacyConfigRules({ config: raw as OpenClawConfig, pluginIds });
+  return listPluginDoctorLegacyConfigRules({ config: raw as BotConfig, pluginIds });
 }
 
 /** Find legacy config issues using core rules plus relevant channel/plugin doctor contracts. */

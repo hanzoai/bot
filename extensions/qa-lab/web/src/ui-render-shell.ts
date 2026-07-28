@@ -165,7 +165,7 @@ export function renderSidebar(state: UiState): string {
                 <span class="config-label">Runtime pair</span>
                 <select id="runtime-pair"${isRunning ? " disabled" : ""}>
                   <option value=""${selection?.runtimePair ? "" : " selected"}>Single runtime</option>
-                  <option value="openclaw,codex"${selection?.runtimePair ? " selected" : ""}>OpenClaw × Codex</option>
+                  <option value="bot,codex"${selection?.runtimePair ? " selected" : ""}>Bot × Codex</option>
                 </select>
               </div>
               <div class="config-field">

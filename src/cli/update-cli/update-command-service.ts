@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { Writable } from "node:stream";
 import { confirm, isCancel } from "@clack/prompts";
-import { err as resultError, ok, type Result } from "@openclaw/normalization-core/result";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { err as resultError, ok, type Result } from "@hanzo/bot-normalization-core/result";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { stylePromptMessage } from "../../../packages/terminal-core/src/prompt-style.js";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import {
@@ -14,7 +14,7 @@ import {
 import { doctorCommand } from "../../commands/doctor.js";
 import { UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE_ENV } from "../../commands/doctor/shared/update-phase.js";
 import { resolveGatewayPort } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   GATEWAY_SERVICE_KIND,
   GATEWAY_SERVICE_MARKER,
@@ -69,13 +69,13 @@ const SERVICE_REFRESH_TIMEOUT_MS = 60_000;
 const POST_REFRESH_ALREADY_HEALTHY_ATTEMPTS = 10;
 const POST_REFRESH_ALREADY_HEALTHY_DELAY_MS = 500;
 const SERVICE_REFRESH_PATH_ENV_KEYS = [
-  "OPENCLAW_HOME",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_CONFIG_PATH",
+  "BOT_HOME",
+  "BOT_STATE_DIR",
+  "BOT_CONFIG_PATH",
 ] as const;
 const POST_INSTALL_DOCTOR_SERVICE_ENV_KEYS = [
   ...SERVICE_REFRESH_PATH_ENV_KEYS,
-  "OPENCLAW_PROFILE",
+  "BOT_PROFILE",
 ] as const;
 const JSON_MODE_SERVICE_STDOUT = new Writable({
   write(_chunk, _encoding, callback) {
@@ -130,7 +130,7 @@ export type UpdateCommandRecoveryState = {
 
 export class UpdateCommandAbort extends Error {
   constructor() {
-    super("openclaw-update-abort");
+    super("bot-update-abort");
     this.name = "UpdateCommandAbort";
   }
 }
@@ -150,9 +150,9 @@ export type ManagedServiceRootRedirect = {
 };
 
 function formatGatewayAncestryBlockMessage(pid: number): string {
-  return `openclaw update detected it is running inside the gateway process tree.
+  return `bot update detected it is running inside the gateway process tree.
 Gateway PID ${pid} is an ancestor of this process, so this updater cannot safely stop or restart the gateway that owns it.
-Run \`${replaceCliName(formatCliCommand("openclaw update"), CLI_NAME)}\` from a shell outside the gateway service, or stop the gateway service first and then update.`;
+Run \`${replaceCliName(formatCliCommand("bot update"), CLI_NAME)}\` from a shell outside the gateway service, or stop the gateway service first and then update.`;
 }
 
 function parsePositivePid(value: unknown): number | null {
@@ -440,7 +440,7 @@ export async function maybeStopManagedServiceBeforeMutableUpdate(params: {
     if (!params.jsonMode) {
       defaultRuntime.log(
         theme.muted(
-          `Managed gateway service points at a different OpenClaw root; leaving it running during this ${params.updateInstallKind} update.`,
+          `Managed gateway service points at a different Bot root; leaving it running during this ${params.updateInstallKind} update.`,
         ),
       );
     }
@@ -532,10 +532,10 @@ export async function maybeRestartServiceAfterFailedMutableUpdate(params: {
 function isRunningInsideGatewayService(
   env: Record<string, string | undefined> = process.env,
 ): boolean {
-  if (env.OPENCLAW_SERVICE_MARKER?.trim() !== GATEWAY_SERVICE_MARKER) {
+  if (env.BOT_SERVICE_MARKER?.trim() !== GATEWAY_SERVICE_MARKER) {
     return false;
   }
-  const serviceKind = env.OPENCLAW_SERVICE_KIND?.trim();
+  const serviceKind = env.BOT_SERVICE_KIND?.trim();
   return !serviceKind || serviceKind === GATEWAY_SERVICE_KIND;
 }
 
@@ -654,13 +654,13 @@ export async function resolvePackageRuntimePreflight(params: {
     : `Node ${runtime.version ?? "unknown"}`;
   return resultError(
     [
-      `${runtimeLabel} is too old for openclaw@${targetVersion}.`,
+      `${runtimeLabel} is too old for bot@${targetVersion}.`,
       `The requested package requires ${status.nodeEngine}.`,
       runtime.nodeRunner
-        ? "Upgrade the Node runtime that owns the managed Gateway service, then rerun `openclaw update`."
-        : "Upgrade to Node 22.22.3+, Node 24.15.0+, or Node 25.9.0+, then rerun `openclaw update`.",
-      "Bare `npm i -g openclaw` can silently install an older compatible release.",
-      "After upgrading Node, use `npm i -g openclaw@latest`.",
+        ? "Upgrade the Node runtime that owns the managed Gateway service, then rerun `bot update`."
+        : "Upgrade to Node 22.22.3+, Node 24.15.0+, or Node 25.9.0+, then rerun `bot update`.",
+      "Bare `npm i -g bot` can silently install an older compatible release.",
+      "After upgrading Node, use `npm i -g bot@latest`.",
     ].join("\n"),
   );
 }
@@ -713,8 +713,8 @@ export function disableUpdatedPackageCompileCacheEnv(env: NodeJS.ProcessEnv): No
 
 export function stripGatewayServiceMarkerEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const resolvedEnv = { ...env };
-  delete resolvedEnv.OPENCLAW_SERVICE_MARKER;
-  delete resolvedEnv.OPENCLAW_SERVICE_KIND;
+  delete resolvedEnv.BOT_SERVICE_MARKER;
+  delete resolvedEnv.BOT_SERVICE_KIND;
   delete resolvedEnv[GATEWAY_SERVICE_RUNTIME_PID_ENV];
   return resolvedEnv;
 }
@@ -749,7 +749,7 @@ export function resolvePostInstallDoctorEnv(params?: {
 }
 
 export function resolveUpdatedGatewayRestartPort(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   processEnv?: NodeJS.ProcessEnv;
   serviceEnv?: NodeJS.ProcessEnv;
 }): number {
@@ -888,7 +888,7 @@ export async function tryInstallShellCompletion(opts: {
       if (!opts.skipPrompt) {
         defaultRuntime.log(
           theme.muted(
-            `Skipped. Run \`${replaceCliName(formatCliCommand("openclaw completion --install"), CLI_NAME)}\` later to enable.`,
+            `Skipped. Run \`${replaceCliName(formatCliCommand("bot completion --install"), CLI_NAME)}\` later to enable.`,
           ),
         );
       }
@@ -1142,7 +1142,7 @@ export async function maybeRestartService(params: {
           ]
         : []),
       `Restart log: ${resolveGatewayRestartLogPath(params.serviceEnv ?? process.env)}`,
-      `Run \`${replaceCliName(formatCliCommand("openclaw gateway status --deep"), CLI_NAME)}\` for details.`,
+      `Run \`${replaceCliName(formatCliCommand("bot gateway status --deep"), CLI_NAME)}\` for details.`,
       ...formatPostUpdateGatewayRecoveryInstructions(params.result),
     ];
     if (params.opts.json) {
@@ -1291,7 +1291,7 @@ export async function maybeRestartService(params: {
         defaultRuntime.log(theme.success("Daemon restarted successfully."));
         defaultRuntime.log("");
         await createUpdateConfigSnapshot();
-        process.env.OPENCLAW_UPDATE_IN_PROGRESS = "1";
+        process.env.BOT_UPDATE_IN_PROGRESS = "1";
         process.env[UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE_ENV] = "1";
         try {
           const interactiveDoctor =
@@ -1302,7 +1302,7 @@ export async function maybeRestartService(params: {
         } catch (err) {
           defaultRuntime.log(theme.warn(`Doctor failed: ${String(err)}`));
         } finally {
-          delete process.env.OPENCLAW_UPDATE_IN_PROGRESS;
+          delete process.env.BOT_UPDATE_IN_PROGRESS;
           delete process.env[UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE_ENV];
         }
       }
@@ -1311,7 +1311,7 @@ export async function maybeRestartService(params: {
         defaultRuntime.log(theme.warn(`Gateway: restart failed: ${String(err)}`));
         defaultRuntime.log(
           theme.muted(
-            `You may need to restart the service manually: ${replaceCliName(formatCliCommand("openclaw gateway restart"), CLI_NAME)}`,
+            `You may need to restart the service manually: ${replaceCliName(formatCliCommand("bot gateway restart"), CLI_NAME)}`,
           ),
         );
       }
@@ -1331,13 +1331,13 @@ export async function maybeRestartService(params: {
     if (params.result.mode === "npm" || params.result.mode === "pnpm") {
       defaultRuntime.log(
         theme.muted(
-          `Tip: Run \`${replaceCliName(formatCliCommand("openclaw doctor"), CLI_NAME)}\`, then \`${replaceCliName(formatCliCommand("openclaw gateway restart"), CLI_NAME)}\` to apply updates to a running gateway.`,
+          `Tip: Run \`${replaceCliName(formatCliCommand("bot doctor"), CLI_NAME)}\`, then \`${replaceCliName(formatCliCommand("bot gateway restart"), CLI_NAME)}\` to apply updates to a running gateway.`,
         ),
       );
     } else {
       defaultRuntime.log(
         theme.muted(
-          `Tip: Run \`${replaceCliName(formatCliCommand("openclaw gateway restart"), CLI_NAME)}\` to apply updates to a running gateway.`,
+          `Tip: Run \`${replaceCliName(formatCliCommand("bot gateway restart"), CLI_NAME)}\` to apply updates to a running gateway.`,
         ),
       );
     }

@@ -16,15 +16,15 @@ const loadPluginManifestRegistry = vi.hoisted(() => vi.fn());
 const loadBundledPluginManifestRegistry = vi.hoisted(() => vi.fn());
 const loadBundledPluginPublicSurfaceModuleSync = vi.hoisted(() => vi.fn());
 const tryLoadActivatedBundledPluginPublicSurfaceModuleSync = vi.hoisted(() => vi.fn());
-const resolveOpenClawPackageRootSync = vi.hoisted(() => vi.fn());
+const resolveBotPackageRootSync = vi.hoisted(() => vi.fn());
 
 vi.mock("../plugins/manifest-registry.js", () => ({
   loadBundledPluginManifestRegistry,
   loadPluginManifestRegistry,
 }));
 
-vi.mock("../infra/openclaw-root.js", () => ({
-  resolveOpenClawPackageRootSync,
+vi.mock("../infra/bot-root.js", () => ({
+  resolveBotPackageRootSync,
 }));
 
 vi.mock("./facade-runtime.js", () => ({
@@ -47,8 +47,8 @@ function firstPublicSurfaceCall(): PublicSurfaceCall | undefined {
 
 describe("plugin-sdk qa-runner-runtime", () => {
   const tempDirs: string[] = [];
-  const originalPrivateQaCli = process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
-  const originalBundledPluginsDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+  const originalPrivateQaCli = process.env.BOT_ENABLE_PRIVATE_QA_CLI;
+  const originalBundledPluginsDir = process.env.BOT_BUNDLED_PLUGINS_DIR;
 
   beforeEach(() => {
     vi.resetModules();
@@ -62,18 +62,18 @@ describe("plugin-sdk qa-runner-runtime", () => {
     });
     loadBundledPluginPublicSurfaceModuleSync.mockReset();
     tryLoadActivatedBundledPluginPublicSurfaceModuleSync.mockReset();
-    resolveOpenClawPackageRootSync.mockReset().mockReturnValue(null);
-    delete process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI;
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+    resolveBotPackageRootSync.mockReset().mockReturnValue(null);
+    delete process.env.BOT_ENABLE_PRIVATE_QA_CLI;
+    delete process.env.BOT_BUNDLED_PLUGINS_DIR;
   });
 
   afterEach(() => {
     cleanupTempDirs(tempDirs);
     restorePrivateQaCliEnv(originalPrivateQaCli);
     if (originalBundledPluginsDir === undefined) {
-      delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+      delete process.env.BOT_BUNDLED_PLUGINS_DIR;
     } else {
-      process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = originalBundledPluginsDir;
+      process.env.BOT_BUNDLED_PLUGINS_DIR = originalBundledPluginsDir;
     }
   });
 
@@ -97,13 +97,13 @@ describe("plugin-sdk qa-runner-runtime", () => {
       tempDirs,
       importRuntime: () => import("./qa-runner-runtime.js"),
       loadBundledPluginPublicSurfaceModuleSync,
-      resolveOpenClawPackageRootSync,
+      resolveBotPackageRootSync,
     });
   });
 
   it("loads bundled plugin test APIs with the private QA source tree override", async () => {
-    const sourceRoot = makePrivateQaSourceRoot(tempDirs, "openclaw-qa-test-api-root-");
-    resolveOpenClawPackageRootSync.mockReturnValue(sourceRoot);
+    const sourceRoot = makePrivateQaSourceRoot(tempDirs, "bot-qa-test-api-root-");
+    resolveBotPackageRootSync.mockReturnValue(sourceRoot);
 
     const testApi = { marker: "matrix-test-api" };
     loadBundledPluginPublicSurfaceModuleSync.mockReturnValue(testApi);
@@ -114,8 +114,8 @@ describe("plugin-sdk qa-runner-runtime", () => {
     const testApiCall = firstPublicSurfaceCall();
     expect(testApiCall?.dirName).toBe("matrix");
     expect(testApiCall?.artifactBasename).toBe("test-api.js");
-    expect(testApiCall?.env?.OPENCLAW_ENABLE_PRIVATE_QA_CLI).toBe("1");
-    expect(testApiCall?.env?.OPENCLAW_BUNDLED_PLUGINS_DIR).toBe(
+    expect(testApiCall?.env?.BOT_ENABLE_PRIVATE_QA_CLI).toBe("1");
+    expect(testApiCall?.env?.BOT_BUNDLED_PLUGINS_DIR).toBe(
       path.join(sourceRoot, "extensions"),
     );
   });
@@ -234,8 +234,8 @@ describe("plugin-sdk qa-runner-runtime", () => {
   });
 
   it("prefers the source bundled tree for private qa discovery in repo checkouts", async () => {
-    const sourceRoot = makePrivateQaSourceRoot(tempDirs, "openclaw-qa-runner-root-");
-    resolveOpenClawPackageRootSync.mockReturnValue(sourceRoot);
+    const sourceRoot = makePrivateQaSourceRoot(tempDirs, "bot-qa-runner-root-");
+    resolveBotPackageRootSync.mockReturnValue(sourceRoot);
 
     const register = vi.fn((qa: Command) => qa);
     const adapterFactory = { id: "example", matches: vi.fn(), create: vi.fn() };
@@ -271,16 +271,16 @@ describe("plugin-sdk qa-runner-runtime", () => {
     const manifestCall = loadBundledPluginManifestRegistry.mock.calls[0]?.[0] as
       | ManifestRegistryCall
       | undefined;
-    expect(manifestCall?.env?.OPENCLAW_ENABLE_PRIVATE_QA_CLI).toBe("1");
-    expect(manifestCall?.env?.OPENCLAW_BUNDLED_PLUGINS_DIR).toBe(
+    expect(manifestCall?.env?.BOT_ENABLE_PRIVATE_QA_CLI).toBe("1");
+    expect(manifestCall?.env?.BOT_BUNDLED_PLUGINS_DIR).toBe(
       path.join(sourceRoot, "extensions"),
     );
 
     const publicSurfaceCall = firstPublicSurfaceCall();
     expect(publicSurfaceCall?.dirName).toBe("qa-example");
     expect(publicSurfaceCall?.artifactBasename).toBe("runtime-api.js");
-    expect(publicSurfaceCall?.env?.OPENCLAW_ENABLE_PRIVATE_QA_CLI).toBe("1");
-    expect(publicSurfaceCall?.env?.OPENCLAW_BUNDLED_PLUGINS_DIR).toBe(
+    expect(publicSurfaceCall?.env?.BOT_ENABLE_PRIVATE_QA_CLI).toBe("1");
+    expect(publicSurfaceCall?.env?.BOT_BUNDLED_PLUGINS_DIR).toBe(
       path.join(sourceRoot, "extensions"),
     );
   });
@@ -338,7 +338,7 @@ describe("plugin-sdk qa-runner-runtime", () => {
     const module = await import("./qa-runner-runtime.js");
 
     expect(() => module.listQaRunnerCliContributions()).toThrow(
-      'QA runner plugin "qa-example" exported "extra" from runtime-api.js but did not declare it in openclaw.plugin.json',
+      'QA runner plugin "qa-example" exported "extra" from runtime-api.js but did not declare it in bot.plugin.json',
     );
   });
 });

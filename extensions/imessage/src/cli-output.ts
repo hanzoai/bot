@@ -1,5 +1,5 @@
 // Bounded one-shot iMessage CLI execution shared by action and send surfaces.
-import { runCommandWithTimeout } from "openclaw/plugin-sdk/process-runtime";
+import { runCommandWithTimeout } from "bot/plugin-sdk/process-runtime";
 
 const IMESSAGE_CLI_STDOUT_MAX_BYTES = 8 * 1024 * 1024;
 const IMESSAGE_CLI_STDERR_TAIL_BYTES = 64 * 1024;

@@ -3,7 +3,7 @@
  *
  * Bridges old DM allowlist/pairing behavior to channel ingress access decisions.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   expandAllowFromWithAccessGroups,
   type AccessGroupMembershipResolver,
@@ -21,7 +21,7 @@ export type { AccessGroupMembershipResolver } from "../plugin-sdk/access-groups.
 
 /** Runtime hooks needed by the legacy direct-DM access resolver. */
 export type DirectDmCommandAuthorizationRuntime = {
-  shouldComputeCommandAuthorized: (rawBody: string, cfg: OpenClawConfig) => boolean;
+  shouldComputeCommandAuthorized: (rawBody: string, cfg: BotConfig) => boolean;
   /** @deprecated Command authorization is resolved by channel ingress. Kept for runtime injection compatibility. */
   resolveCommandAuthorizedFromAuthorizers?: (params: {
     useAccessGroups: boolean;
@@ -32,7 +32,7 @@ export type DirectDmCommandAuthorizationRuntime = {
 
 /**
  * Legacy direct-DM ingress decision with command-authorization compatibility fields.
- * @deprecated Use `resolveChannelMessageIngress` from `openclaw/plugin-sdk/channel-ingress-runtime`.
+ * @deprecated Use `resolveChannelMessageIngress` from `bot/plugin-sdk/channel-ingress-runtime`.
  */
 export type ResolvedInboundDirectDmAccess = {
   access: {
@@ -61,10 +61,10 @@ function toLegacyDmReasonCode(reasonCode: string): DmGroupAccessReasonCode {
 
 /**
  * Resolves legacy direct-DM access lists, pairing-store entries, and command authorization.
- * @deprecated Use `resolveChannelMessageIngress` from `openclaw/plugin-sdk/channel-ingress-runtime`.
+ * @deprecated Use `resolveChannelMessageIngress` from `bot/plugin-sdk/channel-ingress-runtime`.
  */
 export async function resolveInboundDirectDmAccessWithRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: ChannelId;
   accountId: string;
   dmPolicy?: string | null;
@@ -156,7 +156,7 @@ export async function resolveInboundDirectDmAccessWithRuntime(params: {
 
 /**
  * Creates a pre-crypto authorizer that can issue pairing challenges before payload decryption.
- * @deprecated Use `resolveChannelMessageIngress` from `openclaw/plugin-sdk/channel-ingress-runtime`.
+ * @deprecated Use `resolveChannelMessageIngress` from `bot/plugin-sdk/channel-ingress-runtime`.
  */
 export function createPreCryptoDirectDmAuthorizer(params: {
   resolveAccess: (

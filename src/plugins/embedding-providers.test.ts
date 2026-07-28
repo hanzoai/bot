@@ -10,7 +10,7 @@ import {
   type EmbeddingProviderAdapter,
 } from "./embedding-providers.js";
 
-const EMBEDDING_PROVIDERS_KEY = Symbol.for("openclaw.embeddingProviders");
+const EMBEDDING_PROVIDERS_KEY = Symbol.for("bot.embeddingProviders");
 const INITIAL_REGISTERED_EMBEDDING_PROVIDERS = listRegisteredEmbeddingProviders();
 
 function createAdapter(id: string): EmbeddingProviderAdapter {

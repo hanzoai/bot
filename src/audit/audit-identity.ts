@@ -8,10 +8,10 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { registerSecretValueForRedaction } from "../logging/secret-redaction-registry.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 
 type AuditIdentityDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  BotStateKyselyDatabase,
   "audit_events" | "audit_identity_keys"
 >;
 type AuditIdentityKeyRow = Pick<
@@ -23,7 +23,7 @@ const AUDIT_IDENTITY_SINGLETON_ID = 1;
 const AUDIT_IDENTITY_KEY_BYTES = 32;
 const AUDIT_IDENTITY_KEY_ID_BYTES = 16;
 const AUDIT_IDENTITY_KEY_ID_RE = /^[a-f0-9]{32}$/u;
-const AUDIT_IDENTITY_DOMAIN = "openclaw.audit.identity.v1";
+const AUDIT_IDENTITY_DOMAIN = "bot.audit.identity.v1";
 // Only a top-level (depth-0) recordAuditEvent may create the key: the caller's
 // catch clears this cache on rollback, but a rolled-back outer transaction
 // around a nested creation would leave a cached key that was never persisted.

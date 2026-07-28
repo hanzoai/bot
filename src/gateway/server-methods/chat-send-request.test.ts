@@ -5,13 +5,13 @@ import type { GatewayRequestHandlerOptions } from "./types.js";
 function copilotClient(caps: string[] = []): NonNullable<GatewayRequestHandlerOptions["client"]> {
   return {
     connId: "copilot",
-    pairedClientId: "openclaw-browser-copilot",
+    pairedClientId: "bot-browser-copilot",
     connect: {
       role: "operator",
       scopes: ["operator.read", "operator.write"],
       caps,
       client: {
-        id: "openclaw-browser-copilot",
+        id: "bot-browser-copilot",
         version: "test",
         platform: "chrome",
         mode: "ui",
@@ -137,7 +137,7 @@ describe("normalizeChatSendRequest", () => {
     ).toEqual({ ok: false, error: "run tool bindings require a paired browser copilot" });
 
     const otherClient = copilotClient(["run-tool-bindings"]);
-    otherClient.connect.client.id = "openclaw-control-ui";
+    otherClient.connect.client.id = "bot-control-ui";
     expect(
       normalizeChatSendRequest({ params: validParams({ toolBindings }), client: otherClient }),
     ).toEqual({ ok: false, error: "run tool bindings require a paired browser copilot" });

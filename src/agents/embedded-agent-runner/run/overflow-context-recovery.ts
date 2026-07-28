@@ -1,5 +1,5 @@
-import { isContextOverflow } from "@openclaw/ai/internal/runtime";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { isContextOverflow } from "@hanzo/bot-ai/internal/runtime";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { buildContextEngineRuntimeSettings } from "../../../context-engine/runtime-settings.js";
 import type { ContextEngine, ContextEngineSessionTarget } from "../../../context-engine/types.js";
 import { formatErrorMessage } from "../../../infra/errors.js";

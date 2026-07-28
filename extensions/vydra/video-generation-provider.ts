@@ -1,6 +1,6 @@
 // Vydra provider module implements model/runtime integration.
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
-import { isProviderApiKeyConfigured } from "openclaw/plugin-sdk/provider-auth";
+import { resolveGeneratedMediaMaxBytes } from "bot/plugin-sdk/media-generation-runtime";
+import { isProviderApiKeyConfigured } from "bot/plugin-sdk/provider-auth";
 import {
   assertOkOrThrowHttpError,
   createProviderOperationDeadline,
@@ -8,8 +8,8 @@ import {
   postJsonRequest,
   readProviderJsonResponse,
   resolveProviderOperationTimeoutMs,
-} from "openclaw/plugin-sdk/provider-http";
-import type { VideoGenerationProvider } from "openclaw/plugin-sdk/video-generation";
+} from "bot/plugin-sdk/provider-http";
+import type { VideoGenerationProvider } from "bot/plugin-sdk/video-generation";
 import {
   DEFAULT_VYDRA_VIDEO_MODEL,
   downloadVydraAsset,

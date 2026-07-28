@@ -201,7 +201,7 @@ describe("AppSidebar session attention", () => {
     expect(homeBadge?.getAttribute("aria-label")).toBe("Approval needed");
     expect(homeBadge?.hasAttribute("title")).toBe(false);
     expect(
-      (homeBadge?.closest("openclaw-tooltip") as (HTMLElement & { content?: string }) | null)
+      (homeBadge?.closest("bot-tooltip") as (HTMLElement & { content?: string }) | null)
         ?.content,
     ).toBe("Approval needed");
 
@@ -210,7 +210,7 @@ describe("AppSidebar session attention", () => {
     expect(agentLabel).toBeTruthy();
     expect(agentBadge?.hasAttribute("title")).toBe(false);
     expect(
-      (agentBadge?.closest("openclaw-tooltip") as (HTMLElement & { content?: string }) | null)
+      (agentBadge?.closest("bot-tooltip") as (HTMLElement & { content?: string }) | null)
         ?.content,
     ).toBe(agentLabel);
   });
@@ -262,7 +262,7 @@ describe("AppSidebar session attention", () => {
 
   it("marks a collapsed section that contains agent-declared attention", async () => {
     localStorage.setItem(
-      "openclaw:sidebar:sessions:collapsed-sections",
+      "bot:sidebar:sessions:collapsed-sections",
       JSON.stringify(["ungrouped"]),
     );
     const sessionsHarness = createSessionsHarness("main", [sessionKey]);
@@ -280,7 +280,7 @@ describe("AppSidebar session attention", () => {
   it("bubbles unloaded child attention to its parent and collapsed section", async () => {
     const parentKey = "agent:main:parent";
     for (const kind of ["question", "approval"] as const) {
-      localStorage.setItem("openclaw:sidebar:sessions:collapsed-sections", "[]");
+      localStorage.setItem("bot:sidebar:sessions:collapsed-sections", "[]");
       const childKey = `agent:main:subagent:${kind}`;
       const gatewayHarness = createGatewayHarness({
         request: vi.fn().mockResolvedValue({ questions: [] }),

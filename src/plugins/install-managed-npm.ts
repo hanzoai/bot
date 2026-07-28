@@ -6,13 +6,13 @@ import {
   listMissingRequiredPlatformPackages,
   readManagedNpmRootInstalledDependency,
   readManagedNpmRootPeerDependencySnapshot,
-  readOpenClawManagedNpmRootOverrides,
-  repairManagedNpmRootOpenClawPeer,
+  readBotManagedNpmRootOverrides,
+  repairManagedNpmRootBotPeer,
   syncManagedNpmRootPeerDependencies,
   upsertManagedNpmRootDependency,
   type ManagedNpmRootInstalledDependency,
 } from "../infra/npm-managed-root.js";
-import { installedPackageNeedsOpenClawPeerLinkRepair } from "../infra/package-update-utils.js";
+import { installedPackageNeedsBotPeerLinkRepair } from "../infra/package-update-utils.js";
 import {
   createSafeNpmInstallArgs,
   createSafeNpmInstallEnv,
@@ -52,7 +52,7 @@ import {
 import {
   defaultLogger,
   ensureInstallTargetAvailableForMode,
-  formatUnresolvedOpenClawPeerLinkError,
+  formatUnresolvedBotPeerLinkError,
   loadPluginInstallRuntime,
   readOptionalPackageManifest,
   resolveEffectiveInstallMode,
@@ -65,7 +65,7 @@ import type {
   PluginInstallPolicyRequest,
 } from "./install-types.js";
 import { hasRetainedManagedNpmInstallMarker } from "./managed-npm-retention.js";
-import { relinkOpenClawPeerDependenciesInManagedNpmRoot } from "./plugin-peer-link.js";
+import { relinkBotPeerDependenciesInManagedNpmRoot } from "./plugin-peer-link.js";
 
 export async function installPluginFromManagedNpmRoot(
   params: InstallSafetyOverrides & {
@@ -191,17 +191,17 @@ export async function installPluginFromManagedNpmRoot(
     prepared: ManagedNpmRootPreparedDependency,
   ): Promise<InstallPluginResult> => {
     logger.info?.(`Installing ${params.displaySpec} into ${npmRoot}…`);
-    if (params.packageName !== "openclaw") {
-      const repairedOpenClawPeer = await repairManagedNpmRootOpenClawPeer({
+    if (params.packageName !== "bot") {
+      const repairedBotPeer = await repairManagedNpmRootBotPeer({
         npmRoot,
         timeoutMs,
         logger,
       });
-      if (repairedOpenClawPeer) {
-        logger.info?.(`Repaired stale openclaw peer dependency in ${npmRoot}`);
+      if (repairedBotPeer) {
+        logger.info?.(`Repaired stale bot peer dependency in ${npmRoot}`);
       }
     }
-    const managedOverrides = await readOpenClawManagedNpmRootOverrides();
+    const managedOverrides = await readBotManagedNpmRootOverrides();
     rollbackPeerDependencySnapshot ??= await readManagedNpmRootPeerDependencySnapshot({ npmRoot });
     const rollbackFailedManagedNpmInstall = async (
       failure: Extract<InstallPluginResult, { ok: false }>,
@@ -233,7 +233,7 @@ export async function installPluginFromManagedNpmRoot(
       } catch (error) {
         return await rollbackFailedManagedNpmInstall({
           ok: false,
-          error: `${cause.error}, but OpenClaw could not quarantine ${npmRoot} for rebuild: ${String(error)}`,
+          error: `${cause.error}, but Bot could not quarantine ${npmRoot} for rebuild: ${String(error)}`,
         });
       }
       logger.warn?.(
@@ -415,7 +415,7 @@ export async function installPluginFromManagedNpmRoot(
       );
       let freshCacheDir: string | undefined;
       try {
-        freshCacheDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-npm-cache-"));
+        freshCacheDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-npm-cache-"));
         install = await runCommandWithTimeout(npmInstallArgs, {
           ...npmInstallOptions,
           env: {
@@ -465,31 +465,31 @@ export async function installPluginFromManagedNpmRoot(
         });
       }
     }
-    if (params.packageName !== "openclaw") {
-      const repairedOpenClawPeer = await repairManagedNpmRootOpenClawPeer({
+    if (params.packageName !== "bot") {
+      const repairedBotPeer = await repairManagedNpmRootBotPeer({
         npmRoot,
         timeoutMs,
         logger,
       });
-      if (repairedOpenClawPeer) {
-        logger.info?.(`Repaired stale openclaw peer dependency in ${npmRoot} after npm install`);
+      if (repairedBotPeer) {
+        logger.info?.(`Repaired stale bot peer dependency in ${npmRoot} after npm install`);
       }
     }
     try {
-      await relinkOpenClawPeerDependenciesInManagedNpmRoot({
+      await relinkBotPeerDependenciesInManagedNpmRoot({
         npmRoot,
         logger,
       });
     } catch (error) {
       return await rollbackFailedManagedNpmInstall({
         ok: false,
-        error: `Failed to repair openclaw peer links after npm install: ${String(error)}`,
+        error: `Failed to repair bot peer links after npm install: ${String(error)}`,
       });
     }
-    if (installedPackageNeedsOpenClawPeerLinkRepair(installRoot)) {
+    if (installedPackageNeedsBotPeerLinkRepair(installRoot)) {
       return await rollbackFailedManagedNpmInstall({
         ok: false,
-        error: formatUnresolvedOpenClawPeerLinkError(params.packageName),
+        error: formatUnresolvedBotPeerLinkError(params.packageName),
       });
     }
 

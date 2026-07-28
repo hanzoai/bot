@@ -29,7 +29,7 @@ import {
   normalizeTasksListResult,
   type TaskSummary,
 } from "../../lib/tasks/data.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { renderTasks } from "./view.ts";
 
@@ -62,7 +62,7 @@ type TaskRefreshEventBuffer = {
   events: TaskRefreshEvent[];
 };
 
-class TasksPage extends OpenClawLightDomElement {
+class TasksPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -403,6 +403,6 @@ class TasksPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-tasks-page")) {
-  customElements.define("openclaw-tasks-page", TasksPage);
+if (!customElements.get("bot-tasks-page")) {
+  customElements.define("bot-tasks-page", TasksPage);
 }

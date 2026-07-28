@@ -1,7 +1,7 @@
-/** Manifest-backed model catalog row loaders for `openclaw models list`. */
-import { normalizeModelCatalogProviderId } from "@openclaw/model-catalog-core/model-catalog-refs";
-import type { NormalizedModelCatalogRow } from "@openclaw/model-catalog-core/model-catalog-types";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+/** Manifest-backed model catalog row loaders for `bot models list`. */
+import { normalizeModelCatalogProviderId } from "@hanzo/bot-model-catalog-core/model-catalog-refs";
+import type { NormalizedModelCatalogRow } from "@hanzo/bot-model-catalog-core/model-catalog-types";
+import type { BotConfig } from "../../config/types.bot.js";
 import { planEffectiveModelCatalogRows } from "../../model-catalog/index.js";
 import { loadManifestMetadataSnapshot } from "../../plugins/manifest-contract-eligibility.js";
 import type { PluginManifestRegistry } from "../../plugins/manifest-registry.js";
@@ -14,7 +14,7 @@ import {
 } from "../../plugins/plugin-registry.js";
 
 function loadManifestCatalogRowsForPluginIds(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   registry: PluginManifestRegistry;
   pluginIds?: readonly string[];
   providerFilter?: string;
@@ -38,7 +38,7 @@ function loadManifestCatalogRowsForPluginIds(params: {
 }
 
 function resolveConventionModelCatalogPluginIds(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   index: PluginRegistrySnapshot;
   providerFilter: string;
 }): readonly string[] {
@@ -60,7 +60,7 @@ function resolveConventionModelCatalogPluginIds(params: {
 }
 
 function resolveDeclaredModelCatalogPluginIds(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   index: PluginRegistrySnapshot;
   providerFilter: string;
 }): readonly string[] {
@@ -74,7 +74,7 @@ function resolveDeclaredModelCatalogPluginIds(params: {
 
 /** Loads authoritative static manifest catalog rows for model-list output. */
 export function loadStaticManifestCatalogRowsForList(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   providerFilter?: string;
   env?: NodeJS.ProcessEnv;
   metadataSnapshot?: PluginMetadataSnapshot;

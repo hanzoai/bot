@@ -3,7 +3,7 @@ import { spawn } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
 
 type SignalDaemonOpts = {
   cliPath: string;

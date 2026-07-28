@@ -13,7 +13,7 @@ describe("Buzz message events", () => {
       {
         kind: 9,
         created_at: 1_700_000_000,
-        content: "hello OpenClaw",
+        content: "hello Bot",
         tags: [
           ["h", "7c4a6d2a-2ed9-4b4e-a5e2-4d705ee9b34c"],
           ["e", "root-id", "", "root"],
@@ -26,7 +26,7 @@ describe("Buzz message events", () => {
 
     expect(parseBuzzMessageEvent(event)).toMatchObject({
       id: event.id,
-      text: "hello OpenClaw",
+      text: "hello Bot",
       channelId: "7c4a6d2a-2ed9-4b4e-a5e2-4d705ee9b34c",
       threadId: "root-id",
       replyToId: "reply-id",

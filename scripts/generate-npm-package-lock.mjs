@@ -27,7 +27,7 @@ const NPM_LOCK_COMMAND_TIMEOUT_MS = 10 * 60 * 1000;
 const NPM_LOCK_COMMAND_MAX_BUFFER_BYTES = 64 * 1024 * 1024;
 const NPM_LOCK_DEFAULT_JOBS = 4;
 const NPM_LOCK_MAX_JOBS = 16;
-const NPM_LOCK_WORKER_KIND = "openclaw-npm-lock-package";
+const NPM_LOCK_WORKER_KIND = "bot-npm-lock-package";
 
 function usage() {
   return [
@@ -544,14 +544,14 @@ export function createNpmLockExecOptions(invocation, cwd, env = process.env) {
     cwd,
     env: invocation.env ?? env,
     maxBuffer: readPositiveIntEnv(
-      "OPENCLAW_NPM_LOCK_COMMAND_MAX_BUFFER_BYTES",
+      "BOT_NPM_LOCK_COMMAND_MAX_BUFFER_BYTES",
       NPM_LOCK_COMMAND_MAX_BUFFER_BYTES,
       env,
     ),
     shell: invocation.shell,
     stdio: ["ignore", "pipe", "pipe"],
     timeout: readPositiveIntEnv(
-      "OPENCLAW_NPM_LOCK_COMMAND_TIMEOUT_MS",
+      "BOT_NPM_LOCK_COMMAND_TIMEOUT_MS",
       NPM_LOCK_COMMAND_TIMEOUT_MS,
       env,
     ),
@@ -819,7 +819,7 @@ function normalizeNpmVersionDrift(lockfile) {
 }
 
 export function generateNpmPackageLock(packageDir) {
-  const tempDir = mkdtempSync(path.join(tmpdir(), "openclaw-npm-lock-"));
+  const tempDir = mkdtempSync(path.join(tmpdir(), "bot-npm-lock-"));
   try {
     const packageJson = JSON.parse(readFileSync(path.join(packageDir, "package.json"), "utf8"));
     const npmLockOverrides = readNpmLockOverrides();
@@ -935,7 +935,7 @@ function listManagedNpmLockPackageDirs() {
         return false;
       }
       const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
-      return packageJson.openclaw?.release?.publishToNpm === true;
+      return packageJson.bot?.release?.publishToNpm === true;
     })
     .toSorted((left, right) => left.localeCompare(right));
 }
@@ -1086,12 +1086,12 @@ function checkPackage(packageDir) {
 
 /** @internal Directly tested script implementation detail. */
 export function resolveNpmLockJobs(rawValue, env = process.env, fallback = NPM_LOCK_DEFAULT_JOBS) {
-  const raw = rawValue ?? env.OPENCLAW_NPM_LOCK_JOBS ?? String(fallback);
-  const jobs = readPositiveIntEnv("OPENCLAW_NPM_LOCK_JOBS", raw, {
-    OPENCLAW_NPM_LOCK_JOBS: raw,
+  const raw = rawValue ?? env.BOT_NPM_LOCK_JOBS ?? String(fallback);
+  const jobs = readPositiveIntEnv("BOT_NPM_LOCK_JOBS", raw, {
+    BOT_NPM_LOCK_JOBS: raw,
   });
   if (jobs > NPM_LOCK_MAX_JOBS) {
-    throw new Error(`invalid OPENCLAW_NPM_LOCK_JOBS: ${raw}; maximum is ${NPM_LOCK_MAX_JOBS}`);
+    throw new Error(`invalid BOT_NPM_LOCK_JOBS: ${raw}; maximum is ${NPM_LOCK_MAX_JOBS}`);
   }
   return jobs;
 }

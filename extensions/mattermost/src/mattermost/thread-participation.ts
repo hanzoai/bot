@@ -1,5 +1,5 @@
 // Mattermost plugin module implements thread participation cache behavior.
-import { createPersistentDedupeCache } from "openclaw/plugin-sdk/dedupe-runtime";
+import { createPersistentDedupeCache } from "bot/plugin-sdk/dedupe-runtime";
 import { getOptionalMattermostRuntime } from "../runtime.js";
 
 /**
@@ -21,7 +21,7 @@ type MattermostThreadParticipationRecord = {
  * Keep thread participation shared across bundled chunks so thread auto-reply
  * gating does not diverge between the inbound-gate and reply-dispatch paths.
  */
-const MATTERMOST_THREAD_PARTICIPATION_KEY = Symbol.for("openclaw.mattermostThreadParticipation");
+const MATTERMOST_THREAD_PARTICIPATION_KEY = Symbol.for("bot.mattermostThreadParticipation");
 const threadParticipation = createPersistentDedupeCache<MattermostThreadParticipationRecord>({
   globalKey: MATTERMOST_THREAD_PARTICIPATION_KEY,
   ttlMs: TTL_MS,

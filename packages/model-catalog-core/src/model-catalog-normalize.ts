@@ -1,9 +1,9 @@
 // Model Catalog Core helper module supports model catalog normalize behavior.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   normalizeOptionalTrimmedStringList,
   normalizeTrimmedStringList,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@hanzo/bot-normalization-core/string-normalization";
 import {
   buildModelCatalogMergeKey,
   buildModelCatalogRef,

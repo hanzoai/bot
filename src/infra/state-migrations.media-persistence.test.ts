@@ -9,19 +9,19 @@ import {
 } from "../config/sessions/archive-compression.js";
 import { appendTranscriptEventInTransaction } from "../config/sessions/session-accessor.sqlite-transcript-store.js";
 import { reconcileSessionTranscriptIndexInTransaction } from "../config/sessions/session-transcript-index.js";
-import { registerOpenClawAgentDatabase } from "../state/openclaw-agent-db-registry.js";
+import { registerBotAgentDatabase } from "../state/bot-agent-db-registry.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  OPENCLAW_AGENT_SCHEMA_VERSION,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeBotAgentDatabasesForTest,
+  BOT_AGENT_SCHEMA_VERSION,
+  openBotAgentDatabase,
+  runBotAgentWriteTransaction,
+} from "../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { requireNodeSqlite } from "./node-sqlite.js";
 import { migrateLegacyMediaPersistence } from "./state-migrations.media-persistence.js";
 
 const tempDirs: string[] = [];
-const PREVIOUS_VERSION = OPENCLAW_AGENT_SCHEMA_VERSION - 1;
+const PREVIOUS_VERSION = BOT_AGENT_SCHEMA_VERSION - 1;
 
 type FixtureEvent = Record<string, unknown>;
 
@@ -46,9 +46,9 @@ function createLegacyDatabaseFixture(params: {
   eventsBySession: Record<string, FixtureEvent[]>;
 }): string {
   const agentId = params.agentId ?? "main";
-  const opened = openOpenClawAgentDatabase({ agentId, env: params.env });
+  const opened = openBotAgentDatabase({ agentId, env: params.env });
   const databasePath = opened.path;
-  closeOpenClawAgentDatabasesForTest();
+  closeBotAgentDatabasesForTest();
   const { DatabaseSync } = requireNodeSqlite();
   const database = new DatabaseSync(databasePath);
   try {
@@ -103,7 +103,7 @@ function createLegacyDatabaseFixture(params: {
   } finally {
     database.close();
   }
-  registerOpenClawAgentDatabase({ agentId, env: params.env, path: databasePath });
+  registerBotAgentDatabase({ agentId, env: params.env, path: databasePath });
   return databasePath;
 }
 
@@ -186,16 +186,16 @@ function writeArchive(filePath: string, events: FixtureEvent[], compressed: bool
 }
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeBotAgentDatabasesForTest();
+  closeBotStateDatabaseForTest();
   cleanupTempDirs(tempDirs);
 });
 
 describe("legacy media persistence doctor migration", () => {
   it("canonicalizes assistant media at the generic transcript append owner", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-append-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
-    runOpenClawAgentWriteTransaction(
+    const env = { BOT_STATE_DIR: stateDir };
+    runBotAgentWriteTransaction(
       (database) => {
         expect(
           appendTranscriptEventInTransaction(
@@ -222,7 +222,7 @@ describe("legacy media persistence doctor migration", () => {
       },
       { agentId: "main", env },
     );
-    const database = openOpenClawAgentDatabase({ agentId: "main", env });
+    const database = openBotAgentDatabase({ agentId: "main", env });
     const row = database.db
       .prepare("SELECT event_json FROM transcript_events WHERE session_id = ? AND seq = 0")
       .get("append-session") as { event_json: string };
@@ -230,14 +230,14 @@ describe("legacy media persistence doctor migration", () => {
     expect(message).toMatchObject({ role: "assistant", content: "append" });
     expect(message).not.toHaveProperty("MediaPaths");
     expect(message).not.toHaveProperty("MediaTypes");
-    expect(message["__openclaw"]).toMatchObject({
+    expect(message["__bot"]).toMatchObject({
       media: [expect.objectContaining({ path: "/media/a.png", contentType: "image/png" })],
     });
   });
 
   it("rewrites every active shape and trajectory snapshot, migrates mixed archives, and reruns as a no-op", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-migration-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { BOT_STATE_DIR: stateDir };
     const legacy = createEvent({
       id: "event-legacy",
       parentId: null,
@@ -261,7 +261,7 @@ describe("legacy media persistence doctor migration", () => {
         content: "conflict",
         MediaPath: "/legacy.png",
         MediaType: "image/png",
-        __openclaw: {
+        __bot: {
           traceId: "trace-1",
           media: [{ path: "/canonical.jpg", contentType: "image/jpeg" }],
         },
@@ -364,7 +364,7 @@ describe("legacy media persistence doctor migration", () => {
     expect(result.changes).toHaveLength(3);
 
     const after = readDatabaseSnapshot(databasePath);
-    expect(after.version.user_version).toBe(OPENCLAW_AGENT_SCHEMA_VERSION);
+    expect(after.version.user_version).toBe(BOT_AGENT_SCHEMA_VERSION);
     expect(after.trajectoryCount).toBe(4);
     expect(after.trajectoryRows.map(({ event_json: _eventJson, ...row }) => row)).toEqual(
       before.trajectoryRows.map(({ event_json: _eventJson, ...row }) => row),
@@ -383,7 +383,7 @@ describe("legacy media persistence doctor migration", () => {
       migratedMessagesSnapshot as Array<Record<string, unknown>>
     )[0];
     expect(migratedTrajectoryMessage).not.toHaveProperty("MediaPaths");
-    expect(migratedTrajectoryMessage?.["__openclaw"]).toMatchObject({
+    expect(migratedTrajectoryMessage?.["__bot"]).toMatchObject({
       media: [
         expect.objectContaining({ path: "/media/a.ogg" }),
         expect.objectContaining({ path: "/media/b.png" }),
@@ -396,7 +396,7 @@ describe("legacy media persistence doctor migration", () => {
       }
     ).data.messagesSnapshot[0];
     expect(topLevelMediaMessage).not.toHaveProperty("media");
-    expect(topLevelMediaMessage?.["__openclaw"]).toMatchObject({
+    expect(topLevelMediaMessage?.["__bot"]).toMatchObject({
       media: [expect.objectContaining({ path: "/legacy-top-level.png" })],
     });
     expect(after.trajectoryRows[3]?.event_json).toBe(emptyCarrierEventJson);
@@ -413,7 +413,7 @@ describe("legacy media persistence doctor migration", () => {
         role: "user",
         content: "legacy",
         idempotencyKey: "idem-legacy",
-        __openclaw: {
+        __bot: {
           media: [
             expect.objectContaining({ kind: "audio", transcribed: true }),
             expect.objectContaining({ contentType: "image/png" }),
@@ -421,13 +421,13 @@ describe("legacy media persistence doctor migration", () => {
         },
       }),
       expect.objectContaining({
-        __openclaw: {
+        __bot: {
           traceId: "trace-1",
           media: [expect.objectContaining({ path: "/canonical.jpg" })],
         },
       }),
       expect.objectContaining({
-        __openclaw: {
+        __bot: {
           media: [expect.any(Object), expect.objectContaining({ path: "/media/c.pdf" })],
         },
       }),
@@ -435,17 +435,17 @@ describe("legacy media persistence doctor migration", () => {
     for (const message of messages) {
       expect(JSON.stringify(message)).not.toMatch(/"Media(?:Path|Paths|Type|Types|Url|Urls)/u);
     }
-    expect(readSessionArchiveContentSync(plainArchive)).toContain('"__openclaw"');
-    expect(readSessionArchiveContentSync(compressedArchive)).toContain('"__openclaw"');
+    expect(readSessionArchiveContentSync(plainArchive)).toContain('"__bot"');
+    expect(readSessionArchiveContentSync(compressedArchive)).toContain('"__bot"');
 
-    expect(openOpenClawAgentDatabase({ agentId: "main", env }).db.isOpen).toBe(true);
-    closeOpenClawAgentDatabasesForTest();
+    expect(openBotAgentDatabase({ agentId: "main", env }).db.isOpen).toBe(true);
+    closeBotAgentDatabasesForTest();
     expect(migrateLegacyMediaPersistence({ env })).toEqual({ changes: [], warnings: [] });
   });
 
   it("upgrades the existing v14 structural schema before the media cutover", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-v14-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { BOT_STATE_DIR: stateDir };
     const databasePath = createLegacyDatabaseFixture({
       env,
       eventsBySession: {
@@ -473,7 +473,7 @@ describe("legacy media persistence doctor migration", () => {
     const after = new DatabaseSync(databasePath, { readOnly: true });
     try {
       expect(after.prepare("PRAGMA user_version").get()).toEqual({
-        user_version: OPENCLAW_AGENT_SCHEMA_VERSION,
+        user_version: BOT_AGENT_SCHEMA_VERSION,
       });
       expect(
         after
@@ -487,7 +487,7 @@ describe("legacy media persistence doctor migration", () => {
         .get("legacy") as { event_json: string };
       const message = (JSON.parse(row.event_json) as { message: Record<string, unknown> }).message;
       expect(message).not.toHaveProperty("MediaPath");
-      expect(message["__openclaw"]).toMatchObject({
+      expect(message["__bot"]).toMatchObject({
         media: [expect.objectContaining({ path: "/media/a.png" })],
       });
     } finally {
@@ -497,7 +497,7 @@ describe("legacy media persistence doctor migration", () => {
 
   it("upgrades an owned v0 database through the media prerequisite schema", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-v0-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { BOT_STATE_DIR: stateDir };
     const databasePath = createLegacyDatabaseFixture({
       env,
       eventsBySession: {
@@ -522,14 +522,14 @@ describe("legacy media persistence doctor migration", () => {
     const result = migrateLegacyMediaPersistence({ env });
     expect(result.warnings).toEqual([]);
     const after = readDatabaseSnapshot(databasePath);
-    expect(after.version.user_version).toBe(OPENCLAW_AGENT_SCHEMA_VERSION);
+    expect(after.version.user_version).toBe(BOT_AGENT_SCHEMA_VERSION);
     const message = (JSON.parse(after.rows[0]?.event_json ?? "null") as FixtureEvent).message;
     expect(message).not.toHaveProperty("MediaPath");
   });
 
   it("migrates complete PR-1 facts beside a compact legacy projection", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-dual-write-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { BOT_STATE_DIR: stateDir };
     const databasePath = createLegacyDatabaseFixture({
       env,
       eventsBySession: {
@@ -543,7 +543,7 @@ describe("legacy media persistence doctor migration", () => {
               content: "dual",
               MediaPaths: ["/media/a.bin", "/media/b.pdf"],
               MediaTypes: ["application/pdf"],
-              __openclaw: {
+              __bot: {
                 media: [
                   { path: "/media/a.bin", contentType: "application/octet-stream" },
                   { path: "/media/b.pdf", contentType: "application/pdf" },
@@ -558,7 +558,7 @@ describe("legacy media persistence doctor migration", () => {
     const result = migrateLegacyMediaPersistence({ env });
     expect(result.warnings).toEqual([]);
     const after = readDatabaseSnapshot(databasePath);
-    expect(after.version.user_version).toBe(OPENCLAW_AGENT_SCHEMA_VERSION);
+    expect(after.version.user_version).toBe(BOT_AGENT_SCHEMA_VERSION);
     const message = (
       JSON.parse(after.rows[0]?.event_json ?? "null") as {
         message: Record<string, unknown>;
@@ -566,7 +566,7 @@ describe("legacy media persistence doctor migration", () => {
     ).message;
     expect(message).not.toHaveProperty("MediaPaths");
     expect(message).not.toHaveProperty("MediaTypes");
-    expect(message["__openclaw"]).toMatchObject({
+    expect(message["__bot"]).toMatchObject({
       media: [
         expect.objectContaining({
           path: "/media/a.bin",
@@ -579,7 +579,7 @@ describe("legacy media persistence doctor migration", () => {
 
   it("repairs a missing canonical v15 index before the media cutover", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-v15-index-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { BOT_STATE_DIR: stateDir };
     const databasePath = createLegacyDatabaseFixture({
       env,
       eventsBySession: {
@@ -603,7 +603,7 @@ describe("legacy media persistence doctor migration", () => {
     const after = new DatabaseSync(databasePath, { readOnly: true });
     try {
       expect(after.prepare("PRAGMA user_version").get()).toEqual({
-        user_version: OPENCLAW_AGENT_SCHEMA_VERSION,
+        user_version: BOT_AGENT_SCHEMA_VERSION,
       });
       expect(
         after
@@ -619,7 +619,7 @@ describe("legacy media persistence doctor migration", () => {
 
   it("canonicalizes retired media carriers on every transcript message role", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-message-roles-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { BOT_STATE_DIR: stateDir };
     const databasePath = createLegacyDatabaseFixture({
       env,
       eventsBySession: {
@@ -647,10 +647,10 @@ describe("legacy media persistence doctor migration", () => {
     expect(messages).toEqual([
       expect.objectContaining({
         role: "assistant",
-        __openclaw: { media: [expect.objectContaining({ path: "/media/result.png" })] },
+        __bot: { media: [expect.objectContaining({ path: "/media/result.png" })] },
       }),
       expect.objectContaining({
-        __openclaw: { media: [expect.objectContaining({ path: "/media/imported.png" })] },
+        __bot: { media: [expect.objectContaining({ path: "/media/imported.png" })] },
       }),
     ]);
     for (const message of messages) {
@@ -660,7 +660,7 @@ describe("legacy media persistence doctor migration", () => {
 
   it("canonicalizes legacy trajectory metadata onto existing facts", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-trajectory-metadata-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { BOT_STATE_DIR: stateDir };
     const databasePath = createLegacyDatabaseFixture({
       env,
       eventsBySession: {
@@ -672,7 +672,7 @@ describe("legacy media persistence doctor migration", () => {
             message: {
               role: "user",
               content: "metadata",
-              __openclaw: {
+              __bot: {
                 media: [{ path: "/media/a.png", contentType: "image/png" }],
               },
             },
@@ -696,7 +696,7 @@ describe("legacy media persistence doctor migration", () => {
               {
                 role: "user",
                 content: "metadata",
-                __openclaw: {
+                __bot: {
                   media: [{ path: "/media/a.png", contentType: "image/png" }],
                 },
                 MediaTranscribedIndexes: [0],
@@ -723,7 +723,7 @@ describe("legacy media persistence doctor migration", () => {
     expect(message).not.toHaveProperty("MediaTranscribedIndexes");
     expect(message).not.toHaveProperty("MediaWorkspaceDir");
     expect(message).not.toHaveProperty("MediaStaged");
-    expect(message?.["__openclaw"]).toMatchObject({
+    expect(message?.["__bot"]).toMatchObject({
       media: [
         expect.objectContaining({
           path: "/media/a.png",
@@ -737,7 +737,7 @@ describe("legacy media persistence doctor migration", () => {
 
   it("preserves duplicate physical transcript rows during canonicalization", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-duplicates-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { BOT_STATE_DIR: stateDir };
     const event = createEvent({
       id: "duplicate-event",
       parentId: null,
@@ -766,14 +766,14 @@ describe("legacy media persistence doctor migration", () => {
     for (const entry of migrated) {
       expect(entry.message).not.toHaveProperty("MediaPath");
       expect(entry.message).toMatchObject({
-        __openclaw: { media: [expect.objectContaining({ path: "/media/a.png" })] },
+        __bot: { media: [expect.objectContaining({ path: "/media/a.png" })] },
       });
     }
   });
 
   it("aborts one database on invalid JSON without advancing its version", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-corrupt-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { BOT_STATE_DIR: stateDir };
     const databasePath = createLegacyDatabaseFixture({
       env,
       eventsBySession: {
@@ -794,10 +794,10 @@ describe("legacy media persistence doctor migration", () => {
       .run("{broken", "corrupt");
     database.close();
 
-    expect(() => openOpenClawAgentDatabase({ agentId: "main", env })).toThrow(
-      "run openclaw doctor --fix to migrate persisted media",
+    expect(() => openBotAgentDatabase({ agentId: "main", env })).toThrow(
+      "run bot doctor --fix to migrate persisted media",
     );
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
     const result = migrateLegacyMediaPersistence({ env });
     expect(result.warnings).toHaveLength(1);
     expect(readDatabaseSnapshot(databasePath).version.user_version).toBe(PREVIOUS_VERSION);
@@ -805,7 +805,7 @@ describe("legacy media persistence doctor migration", () => {
 
   it("aborts one database on invalid trajectory JSON without advancing its version", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-corrupt-trajectory-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { BOT_STATE_DIR: stateDir };
     const databasePath = createLegacyDatabaseFixture({
       env,
       eventsBySession: {
@@ -838,7 +838,7 @@ describe("legacy media persistence doctor migration", () => {
 
   it("aborts on active-row drift and archive source replacement without partial deletion", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-drift-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { BOT_STATE_DIR: stateDir };
     const { DatabaseSync } = requireNodeSqlite();
     const event = createEvent({
       id: "event-1",
@@ -932,7 +932,7 @@ describe("legacy media persistence doctor migration", () => {
 
   it("rejects ambiguous sparse arrays and ignores stale interrupted temp files", () => {
     const stateDir = makeTempDir(tempDirs, "media-persistence-sparse-");
-    const env = { OPENCLAW_STATE_DIR: stateDir };
+    const env = { BOT_STATE_DIR: stateDir };
     createLegacyDatabaseFixture({ env, eventsBySession: {} });
     const archiveDir = path.join(stateDir, "agents", "main", "sessions");
     const archivePath = path.join(archiveDir, "sparse.jsonl.bak.2026-07-24T01-02-03.000Z");
@@ -979,6 +979,6 @@ describe("legacy media persistence doctor migration", () => {
     expect(migrateLegacyMediaPersistence({ env }).changes.join("\n")).toContain(
       "Migrated archived transcript media",
     );
-    expect(readSessionArchiveContentSync(archivePath)).toContain('"__openclaw"');
+    expect(readSessionArchiveContentSync(archivePath)).toContain('"__bot"');
   });
 });

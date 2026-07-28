@@ -182,12 +182,12 @@ describe("classifyRunForRevive", () => {
       classifyRunForRevive({
         run: {
           head_branch: "automation/refresh",
-          head_repository: { full_name: "openclaw/openclaw" },
+          head_repository: { full_name: "hanzoai/bot" },
           ...run,
         },
         prCreatedAt,
         prHeadBranch: "automation/refresh",
-        repoFullName: "openclaw/openclaw",
+        repoFullName: "hanzoai/bot",
       }),
     ).toEqual(expected);
   });
@@ -204,7 +204,7 @@ describe("classifyRunForRevive", () => {
         },
         prCreatedAt,
         prHeadBranch: "automation/refresh",
-        repoFullName: "openclaw/openclaw",
+        repoFullName: "hanzoai/bot",
       }),
     ).toEqual({ action: "skip", reason: "different-head-branch" });
   });
@@ -218,11 +218,11 @@ describe("classifyRunForRevive", () => {
           run_attempt: 1,
           created_at: new Date(NOW - 1 * HOURS).toISOString(),
           head_branch: null,
-          head_repository: { full_name: "openclaw/openclaw" },
+          head_repository: { full_name: "hanzoai/bot" },
         },
         prCreatedAt,
         prHeadBranch: "automation/refresh",
-        repoFullName: "openclaw/openclaw",
+        repoFullName: "hanzoai/bot",
       }),
     ).toEqual({ action: "skip", reason: "different-head-branch" });
   });
@@ -239,7 +239,7 @@ describe("classifyRunForRevive", () => {
         },
         prCreatedAt,
         prHeadBranch: "automation/refresh",
-        repoFullName: "openclaw/openclaw",
+        repoFullName: "hanzoai/bot",
       }),
     ).toEqual({ action: "skip", reason: "fork-head-repository" });
   });
@@ -253,11 +253,11 @@ describe("classifyRunForRevive", () => {
           run_attempt: 1,
           created_at: new Date(NOW - 1 * HOURS).toISOString(),
           head_branch: "automation/refresh",
-          head_repository: { full_name: "fork/openclaw" },
+          head_repository: { full_name: "fork/bot" },
         },
         prCreatedAt,
         prHeadBranch: "automation/refresh",
-        repoFullName: "openclaw/openclaw",
+        repoFullName: "hanzoai/bot",
       }),
     ).toEqual({ action: "skip", reason: "fork-head-repository" });
   });
@@ -390,7 +390,7 @@ function fakeGithub(options: {
   return { github, calls };
 }
 
-const context = { repo: { owner: "openclaw", repo: "openclaw" } };
+const context = { repo: { owner: "bot", repo: "bot" } };
 const core = { info: () => {}, setFailed: () => {} };
 
 function recordingCore() {
@@ -418,7 +418,7 @@ function githubActionsCheck(runId: number, overrides: Partial<FakeCheckRun> = {}
     conclusion: "cancelled",
     status: "completed",
     app: { slug: "github-actions" },
-    details_url: `https://github.com/openclaw/openclaw/actions/runs/${runId}/job/456`,
+    details_url: `https://github.com/hanzoai/bot/actions/runs/${runId}/job/456`,
     ...overrides,
   };
 }
@@ -431,7 +431,7 @@ function cancelledRun(runId: number, overrides: Partial<FakeWorkflowRun> = {}): 
     run_attempt: 1,
     created_at: new Date(NOW - 1 * HOURS).toISOString(),
     head_branch: "automation/refresh",
-    head_repository: { full_name: "openclaw/openclaw" },
+    head_repository: { full_name: "hanzoai/bot" },
     ...overrides,
   };
 }
@@ -462,7 +462,7 @@ describe("runPrCiSweeper", () => {
       context: context as never,
       core: core as never,
       dryRun: true,
-      appSlug: "openclaw-barnacle",
+      appSlug: "bot-barnacle",
       now: NOW,
     });
     expect(results).toEqual([
@@ -590,8 +590,8 @@ describe("runPrCiSweeper", () => {
     });
     expect(calls.filter((call) => call.method === "pulls.update").map((call) => call.args)).toEqual(
       [
-        { owner: "openclaw", repo: "openclaw", pull_number: 210, state: "closed" },
-        { owner: "openclaw", repo: "openclaw", pull_number: 210, state: "open" },
+        { owner: "bot", repo: "bot", pull_number: 210, state: "closed" },
+        { owner: "bot", repo: "bot", pull_number: 210, state: "open" },
       ],
     );
     expect(logs.at(-1)).toContain("1 re-fire");
@@ -643,7 +643,7 @@ describe("runPrCiSweeper", () => {
       github: github as never,
       context: context as never,
       core: core as never,
-      appSlug: "openclaw-barnacle",
+      appSlug: "bot-barnacle",
       now: NOW,
     });
     expect(results).toEqual([
@@ -676,7 +676,7 @@ describe("runPrCiSweeper", () => {
     expect(calls.filter((call) => call.method === "actions.reRunWorkflow")).toEqual([
       {
         method: "actions.reRunWorkflow",
-        args: { owner: "openclaw", repo: "openclaw", run_id: 1234 },
+        args: { owner: "bot", repo: "bot", run_id: 1234 },
       },
     ]);
     // Discovery plus the pre-mutation revalidation both list the head's checks.
@@ -684,8 +684,8 @@ describe("runPrCiSweeper", () => {
     expect(checkLists).toHaveLength(2);
     for (const call of checkLists) {
       expect(call.args).toEqual({
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "bot",
+        repo: "bot",
         ref: generated.head.sha,
         filter: "latest",
         per_page: 100,

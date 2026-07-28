@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Cohere provider plugin."
+summary: "Bot Cohere provider plugin."
 read_when:
   - You are installing, configuring, or auditing the cohere plugin
 title: "Cohere plugin"
@@ -7,12 +7,12 @@ title: "Cohere plugin"
 
 # Cohere plugin
 
-OpenClaw Cohere provider plugin.
+Bot Cohere provider plugin.
 
 ## Distribution
 
-- Package: `@openclaw/cohere-provider`
-- Install route: included in OpenClaw; npm; ClawHub: `clawhub:@openclaw/cohere-provider`
+- Package: `@hanzo/bot-cohere-provider`
+- Install route: included in Bot; npm; ClawHub: `clawhub:@hanzo/bot-cohere-provider`
 
 ## Surface
 

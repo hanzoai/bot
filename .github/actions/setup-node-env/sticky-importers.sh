@@ -5,9 +5,9 @@ mode="${1:?mode is required}"
 sticky_root="${2:?sticky root is required}"
 workspace="${3:?workspace is required}"
 archive="$sticky_root/importer-node-modules.tar"
-archive_checksum="$sticky_root/.openclaw-importer-archive.sha256"
+archive_checksum="$sticky_root/.bot-importer-archive.sha256"
 importer_manifest="$sticky_root/importer-node-modules.manifest"
-marker="$sticky_root/.openclaw-deps-fingerprint"
+marker="$sticky_root/.bot-deps-fingerprint"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 archive_sha256() {

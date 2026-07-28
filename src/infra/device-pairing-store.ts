@@ -7,17 +7,17 @@
 // concurrent gateway/CLI access safe at the statement level.
 import type { DatabaseSync } from "node:sqlite";
 import type {
-  DB as OpenClawStateKyselyDatabase,
+  DB as BotStateKyselyDatabase,
   DevicePairingPaired,
   DevicePairingPending,
   DeviceBootstrapTokens,
-} from "../state/openclaw-state-db.generated.js";
+} from "../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+  type BotStateDatabase,
+  type BotStateDatabaseOptions,
+} from "../state/bot-state-db.js";
 import type {
   DeviceAuthToken,
   DeviceBootstrapTokenRecord,
@@ -77,8 +77,8 @@ type PairedDevicePresenceUpdate<T> =
 let devicePairingStoreCache: DevicePairingStoreCache | undefined;
 
 /** Route an explicit pairing base dir (tests, alternate state roots) to that dir's DB. */
-function resolveDevicePairingStateDbOptions(baseDir?: string): OpenClawStateDatabaseOptions {
-  return baseDir ? { env: { ...process.env, OPENCLAW_STATE_DIR: baseDir } } : {};
+function resolveDevicePairingStateDbOptions(baseDir?: string): BotStateDatabaseOptions {
+  return baseDir ? { env: { ...process.env, BOT_STATE_DIR: baseDir } } : {};
 }
 
 function readDataVersion(database: DatabaseSync): number {
@@ -113,7 +113,7 @@ function devicePairingStoreValidityTokensEqual(
   return left.dataVersion === right.dataVersion && left.totalChanges === right.totalChanges;
 }
 
-function invalidateDevicePairingStoreCache(database: OpenClawStateDatabase): void {
+function invalidateDevicePairingStoreCache(database: BotStateDatabase): void {
   if (
     devicePairingStoreCache?.connection === database.db &&
     devicePairingStoreCache.path === database.path
@@ -124,11 +124,11 @@ function invalidateDevicePairingStoreCache(database: OpenClawStateDatabase): voi
 
 function runDevicePairingStoreMutation<T>(
   baseDir: string | undefined,
-  mutate: (database: OpenClawStateDatabase) => DevicePairingStoreMutation<T>,
+  mutate: (database: BotStateDatabase) => DevicePairingStoreMutation<T>,
 ): T {
   const databaseOptions = resolveDevicePairingStateDbOptions(baseDir);
-  const database = openOpenClawStateDatabase(databaseOptions);
-  const result = runOpenClawStateWriteTransaction(mutate, { ...databaseOptions, database });
+  const database = openBotStateDatabase(databaseOptions);
+  const result = runBotStateWriteTransaction(mutate, { ...databaseOptions, database });
   if (result.mutated) {
     invalidateDevicePairingStoreCache(database);
   }
@@ -322,7 +322,7 @@ function fromBootstrapRow(row: DeviceBootstrapTokens): DeviceBootstrapTokenRecor
 
 /** Load the full pending + paired device snapshot from the shared state DB. */
 export function loadDevicePairingStoreState(baseDir?: string): DevicePairingStoreState {
-  const database = openOpenClawStateDatabase(resolveDevicePairingStateDbOptions(baseDir));
+  const database = openBotStateDatabase(resolveDevicePairingStateDbOptions(baseDir));
   const { db } = database;
   const validityToken = readDevicePairingStoreValidityToken(db);
   if (
@@ -332,7 +332,7 @@ export function loadDevicePairingStoreState(baseDir?: string): DevicePairingStor
   ) {
     return structuredClone(devicePairingStoreCache.state);
   }
-  const kysely = getNodeSqliteKysely<OpenClawStateKyselyDatabase>(db);
+  const kysely = getNodeSqliteKysely<BotStateKyselyDatabase>(db);
   const pendingById: Record<string, DevicePairingPendingRecord> = {};
   for (const row of executeSqliteQuerySync(
     db,
@@ -362,20 +362,20 @@ export function loadPairedDevicePairingStoreRecord(
   deviceId: string,
   baseDir?: string,
 ): PairedDevice | null {
-  const { db } = openOpenClawStateDatabase(resolveDevicePairingStateDbOptions(baseDir));
+  const { db } = openBotStateDatabase(resolveDevicePairingStateDbOptions(baseDir));
   return loadPairedDevicePairingStoreRecordFromDatabase(db, deviceId);
 }
 
 /** Load one paired-device row from an existing shared-state transaction. */
 export function loadPairedDevicePairingStoreRecordFromDatabase(
-  db: OpenClawStateDatabase["db"],
+  db: BotStateDatabase["db"],
   deviceId: string,
 ): PairedDevice | null {
   const normalizedDeviceId = deviceId.trim();
   if (!normalizedDeviceId) {
     return null;
   }
-  const kysely = getNodeSqliteKysely<OpenClawStateKyselyDatabase>(db);
+  const kysely = getNodeSqliteKysely<BotStateKyselyDatabase>(db);
   const row = executeSqliteQueryTakeFirstSync(
     db,
     kysely
@@ -404,7 +404,7 @@ export function updatePairedDeviceNodeSurfaceInTransaction<T>(
     if (!device) {
       throw new Error("cannot update a missing paired-device node surface");
     }
-    const kysely = getNodeSqliteKysely<OpenClawStateKyselyDatabase>(db);
+    const kysely = getNodeSqliteKysely<BotStateKyselyDatabase>(db);
     executeSqliteQuerySync(
       db,
       kysely
@@ -434,7 +434,7 @@ export function updatePairedDevicePresenceInTransaction<T>(
     if (!device) {
       throw new Error("cannot update presence for a missing paired device");
     }
-    const kysely = getNodeSqliteKysely<OpenClawStateKyselyDatabase>(db);
+    const kysely = getNodeSqliteKysely<BotStateKyselyDatabase>(db);
     executeSqliteQuerySync(
       db,
       kysely
@@ -457,7 +457,7 @@ export function persistDevicePairingStoreState(
   options?: { clearApnsNodeIds?: readonly string[] },
 ): void {
   runDevicePairingStoreMutation(baseDir, ({ db }) => {
-    const kysely = getNodeSqliteKysely<OpenClawStateKyselyDatabase>(db);
+    const kysely = getNodeSqliteKysely<BotStateKyselyDatabase>(db);
     if (target !== "paired") {
       executeSqliteQuerySync(db, kysely.deleteFrom("device_pairing_pending"));
       const rows = Object.values(state.pendingById).map(toPendingRow);
@@ -483,8 +483,8 @@ export function persistDevicePairingStoreState(
 export function loadDeviceBootstrapTokenRecords(
   baseDir?: string,
 ): Record<string, DeviceBootstrapTokenRecord> {
-  const { db } = openOpenClawStateDatabase(resolveDevicePairingStateDbOptions(baseDir));
-  const kysely = getNodeSqliteKysely<OpenClawStateKyselyDatabase>(db);
+  const { db } = openBotStateDatabase(resolveDevicePairingStateDbOptions(baseDir));
+  const kysely = getNodeSqliteKysely<BotStateKyselyDatabase>(db);
   const state: Record<string, DeviceBootstrapTokenRecord> = {};
   for (const row of executeSqliteQuerySync(
     db,
@@ -500,8 +500,8 @@ export function persistDeviceBootstrapTokenRecords(
   state: Record<string, DeviceBootstrapTokenRecord>,
   baseDir?: string,
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
-    const kysely = getNodeSqliteKysely<OpenClawStateKyselyDatabase>(db);
+  runBotStateWriteTransaction(({ db }) => {
+    const kysely = getNodeSqliteKysely<BotStateKyselyDatabase>(db);
     executeSqliteQuerySync(db, kysely.deleteFrom("device_bootstrap_tokens"));
     const rows = Object.entries(state).map(([tokenKey, record]) =>
       toBootstrapRow(tokenKey, record),

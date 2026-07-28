@@ -4,8 +4,8 @@ import type {
   AcpSessionRuntimeOptions,
   SessionAcpIdentity,
   SessionAcpMeta,
-} from "@openclaw/acp-core/types";
-import { normalizeOptionalString, type FastMode } from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-acp-core/types";
+import { normalizeOptionalString, type FastMode } from "@hanzo/bot-normalization-core/string-coerce";
 import type { SessionObserverDigest } from "../../../packages/gateway-protocol/src/schema/sessions.js";
 import type { SessionAgentStatus } from "../../../packages/gateway-protocol/src/session-icon.js";
 import type { ChatType } from "../../channels/chat-type.js";
@@ -499,7 +499,7 @@ export type SessionEntry = SessionRestartRecoveryState &
     modelProvider?: string;
     model?: string;
     /**
-     * Prevents OpenClaw model changes and automatic maintenance eviction until
+     * Prevents Bot model changes and automatic maintenance eviction until
      * the owning harness explicitly retires the session.
      */
     modelSelectionLocked?: boolean;
@@ -540,7 +540,7 @@ export type SessionEntry = SessionRestartRecoveryState &
     /** Preferred Control UI face when a caller opens this session without explicit face intent. */
     boardFace?: SessionBoardFace;
     displayName?: string;
-    /** Canonical delivery state. Legacy delivery fields are migrated by `openclaw doctor --fix`. */
+    /** Canonical delivery state. Legacy delivery fields are migrated by `bot doctor --fix`. */
     delivery?: SessionDeliveryState;
     groupId?: string;
     subject?: string;

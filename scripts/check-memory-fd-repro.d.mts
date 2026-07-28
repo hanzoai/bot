@@ -23,7 +23,7 @@ export function parseArgs(argv: string[]): {
   allowNonDarwin: boolean;
 };
 /**
- * Writes isolated OpenClaw config for the synthetic memory workspace.
+ * Writes isolated Bot config for the synthetic memory workspace.
  */
 export function writeConfig({
   homeDir,

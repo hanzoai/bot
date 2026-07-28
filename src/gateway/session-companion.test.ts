@@ -3,7 +3,7 @@ import {
   createAgentToAgentPolicy,
   createSessionVisibilityGuard,
 } from "../agents/tools/sessions-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { SessionCompanionAskError } from "./session-companion-ask.js";
 import {
   buildSessionCompanionRunConfig,
@@ -31,7 +31,7 @@ function createHarness(overrides?: {
   }) => Promise<string>;
   snapshot?: () => SessionObserverCompanionSnapshot;
 }) {
-  const cfg: OpenClawConfig = {};
+  const cfg: BotConfig = {};
   const readSeedMessages = vi.fn(
     overrides?.readSeedMessages ??
       (async () => [{ role: "user" as const, text: "seed question", ts: 1 }]),

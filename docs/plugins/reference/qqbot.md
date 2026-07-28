@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw QQ Bot channel plugin for group and direct-message workflows."
+summary: "Bot QQ Bot channel plugin for group and direct-message workflows."
 read_when:
   - You are installing, configuring, or auditing the qqbot plugin
 title: "QQ Bot plugin"
@@ -7,11 +7,11 @@ title: "QQ Bot plugin"
 
 # QQ Bot plugin
 
-OpenClaw QQ Bot channel plugin for group and direct-message workflows.
+Bot QQ Bot channel plugin for group and direct-message workflows.
 
 ## Distribution
 
-- Package: `@openclaw/qqbot`
+- Package: `@hanzo/bot-qqbot`
 - Install route: npm; ClawHub
 
 ## Surface

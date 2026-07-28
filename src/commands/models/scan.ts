@@ -1,6 +1,6 @@
 /** OpenRouter free-model scanner and fallback updater for model commands. */
 import { cancel, multiselect as clackMultiselect, isCancel } from "@clack/prompts";
-import { getEnvApiKey } from "@openclaw/ai/internal/runtime";
+import { getEnvApiKey } from "@hanzo/bot-ai/internal/runtime";
 import { styleSelectParams } from "../../../packages/terminal-core/src/prompt-select-styled-params.js";
 import { stylePromptTitle } from "../../../packages/terminal-core/src/prompt-style.js";
 import { resolveApiKeyForProvider } from "../../agents/model-auth.js";
@@ -288,7 +288,7 @@ export async function modelsScanCommand(
   const toolOk = results.filter((entry) => entry.tool.ok);
   if (toolOk.length === 0) {
     throw new Error(
-      `No tool-capable OpenRouter free models found. Try ${formatCliCommand("openclaw models scan --no-probe")} to inspect metadata-only candidates, or configure OPENROUTER_API_KEY before probing.`,
+      `No tool-capable OpenRouter free models found. Try ${formatCliCommand("bot models scan --no-probe")} to inspect metadata-only candidates, or configure OPENROUTER_API_KEY before probing.`,
     );
   }
 

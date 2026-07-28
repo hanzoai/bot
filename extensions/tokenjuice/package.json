@@ -1,34 +1,34 @@
 {
-  "name": "@openclaw/tokenjuice",
+  "name": "@hanzo/bot-tokenjuice",
   "version": "2026.7.2",
-  "description": "OpenClaw tokenjuice exec output compaction plugin",
+  "description": "Bot tokenjuice exec output compaction plugin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "dependencies": {
     "tokenjuice": "0.8.1"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*",
+    "@hanzo/bot": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/tokenjuice",
-      "npmSpec": "@openclaw/tokenjuice",
+      "clawhubSpec": "clawhub:@hanzo/bot-tokenjuice",
+      "npmSpec": "@hanzo/bot-tokenjuice",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.5.28"
     },
@@ -36,7 +36,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {

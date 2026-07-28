@@ -17,7 +17,7 @@ describe("Linux Canvas socket availability", () => {
   it.runIf(process.platform === "linux")(
     "requires a live, user-only socket instead of a stale inode or symlink",
     async () => {
-      const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-linux-canvas-path-"));
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-linux-canvas-path-"));
       tempDirs.push(dir);
       const socketPath = path.join(dir, "canvas.sock");
       const symlinkPath = path.join(dir, "canvas-link.sock");

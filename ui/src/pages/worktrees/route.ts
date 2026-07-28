@@ -8,6 +8,6 @@ export const page = definePage({
   component: () =>
     import("./worktrees-page.ts").then(() => ({
       header: true,
-      render: () => html`<openclaw-worktrees-page></openclaw-worktrees-page>`,
+      render: () => html`<bot-worktrees-page></bot-worktrees-page>`,
     })),
 });

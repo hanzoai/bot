@@ -1,6 +1,6 @@
 // Googlechat plugin module implements monitor reply delivery behavior.
-import { resolveSendableOutboundReplyParts } from "openclaw/plugin-sdk/reply-payload";
-import type { OpenClawConfig } from "../runtime-api.js";
+import { resolveSendableOutboundReplyParts } from "bot/plugin-sdk/reply-payload";
+import type { BotConfig } from "../runtime-api.js";
 import type { ResolvedGoogleChatAccount } from "./accounts.js";
 import { deleteGoogleChatMessage, sendGoogleChatMessage, updateGoogleChatMessage } from "./api.js";
 import type { GoogleChatCoreRuntime, GoogleChatRuntimeEnv } from "./monitor-types.js";
@@ -21,7 +21,7 @@ export async function deliverGoogleChatReply(params: {
   spaceId: string;
   runtime: GoogleChatRuntimeEnv;
   core: GoogleChatCoreRuntime;
-  config: OpenClawConfig;
+  config: BotConfig;
   statusSink?: (patch: { lastInboundAt?: number; lastOutboundAt?: number }) => void;
   typingMessage?: GoogleChatTypingMessage;
 }): Promise<void> {

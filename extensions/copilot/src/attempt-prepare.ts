@@ -2,13 +2,13 @@ import fsp from "node:fs/promises";
 import type {
   AgentHarnessAttemptParams,
   SandboxContext,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   buildAgentHookContextChannelFields,
   isHostScopedAgentToolActive,
   resolveSandboxContext as defaultResolveSandboxContext,
   resolveSessionAgentIds,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import { readResolvedAttemptPath, readString, resolveModelRef } from "./attempt-config.js";
 import type { AttemptParamsLike, CopilotAttemptDeps } from "./attempt-types.js";
 import { createCopilotToolBridge } from "./tool-bridge.js";
@@ -42,11 +42,11 @@ export function prepareCopilotAttemptContext(
   ) as AttemptParamsLike;
   const createToolBridge = deps.createToolBridge ?? createCopilotToolBridge;
   const hostSystemAgentActive =
-    deps.isHostScopedToolActive?.("openclaw") ?? isHostScopedAgentToolActive("openclaw");
+    deps.isHostScopedToolActive?.("bot") ?? isHostScopedAgentToolActive("bot");
   const ringZeroSystemAgentRun =
     hostSystemAgentActive &&
     input.toolsAllow?.length === 1 &&
-    input.toolsAllow[0]?.trim().toLowerCase() === "openclaw";
+    input.toolsAllow[0]?.trim().toLowerCase() === "bot";
   const messages = Array.isArray(input.messages) ? [...input.messages] : [];
   const modelRef = resolveModelRef(input);
   const resolvedWorkspaceForSandbox =

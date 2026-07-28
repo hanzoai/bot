@@ -1,5 +1,5 @@
 // Shared base compatibility normalizers reused by core and plugin setup migrations.
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import type { LegacyCodexModelIdentity } from "./codex-route-model-ref.js";
 import {
   normalizeLegacyBrowserConfig,
@@ -17,11 +17,11 @@ import { migrateLegacyXSearchConfig } from "./legacy-x-search-migrate.js";
 
 /** Run common compatibility migrations before caller-specific setup/channel passes. */
 export function normalizeBaseCompatibilityConfigValues(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   changes: string[],
-  afterBrowser?: (config: OpenClawConfig) => OpenClawConfig,
+  afterBrowser?: (config: BotConfig) => BotConfig,
   blockedModelIdentities?: ReadonlySet<LegacyCodexModelIdentity>,
-): OpenClawConfig {
+): BotConfig {
   let next = seedMissingDefaultAccountsFromSingleAccountBase(cfg, changes);
   next = normalizeLegacyBrowserConfig(next, changes);
   next = afterBrowser ? afterBrowser(next) : next;

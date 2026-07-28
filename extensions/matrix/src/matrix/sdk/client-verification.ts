@@ -1,4 +1,4 @@
-import { normalizeNullableString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeNullableString } from "bot/plugin-sdk/string-coerce-runtime";
 import { formatMatrixErrorMessage } from "../errors.js";
 import { loadMatrixCryptoRuntime } from "./client-base.js";
 import { MatrixClientCore } from "./client-core.js";

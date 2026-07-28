@@ -7,11 +7,11 @@ import {
   getNodeSqliteKysely,
 } from "../../infra/kysely-sync.js";
 import { runSqliteDeferredTransactionSync } from "../../infra/sqlite-transaction.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+import type { DB as BotAgentKyselyDatabase } from "../../state/bot-agent-db.generated.js";
 import {
-  openOpenClawAgentDatabase,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  openBotAgentDatabase,
+  type BotAgentDatabase,
+} from "../../state/bot-agent-db.js";
 import type {
   SessionTranscriptVisibleMessageDeltaLimits,
   SessionTranscriptVisibleMessageDeltaResult,
@@ -33,7 +33,7 @@ import {
 } from "./session-transcript-reconcile.js";
 
 type ActiveTranscriptDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  BotAgentKyselyDatabase,
   | "session_transcript_active_events"
   | "transcript_rewrite_watermarks"
   | "session_transcript_index_state"
@@ -95,7 +95,7 @@ export async function waitForSessionTranscriptProjection(
 }
 
 type CurrentProjection = {
-  database: OpenClawAgentDatabase;
+  database: BotAgentDatabase;
   resolved: ReturnType<typeof resolveSqliteTranscriptReadScope>;
   state: SessionTranscriptProjectionState;
 };
@@ -108,7 +108,7 @@ const EMPTY_PROJECTION_STATE: SessionTranscriptProjectionState = {
   needsRebuild: false,
 };
 
-function getActiveTranscriptKysely(database: OpenClawAgentDatabase) {
+function getActiveTranscriptKysely(database: BotAgentDatabase) {
   return getNodeSqliteKysely<ActiveTranscriptDatabase>(database.db);
 }
 
@@ -173,7 +173,7 @@ function bootstrapVisibleMessageCursor(
 }
 
 function readProjectionSnapshot(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
 ): { latestSeq: number; state?: SessionTranscriptProjectionState } | undefined {
   const row = executeSqliteQueryTakeFirstSync(
@@ -218,7 +218,7 @@ function withCurrentProjectionSnapshot<T>(
 ): T {
   const resolved = resolveSqliteTranscriptReadScope(scope);
   const databaseOptions = toDatabaseOptions(resolved);
-  const database = openOpenClawAgentDatabase(databaseOptions);
+  const database = openBotAgentDatabase(databaseOptions);
   const result = runSqliteDeferredTransactionSync(
     database.db,
     () => {

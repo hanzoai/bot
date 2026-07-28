@@ -13,9 +13,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.BOT_CAPTURE_UI_PROOF === "1";
 const artifactDir = path.resolve(process.cwd(), ".artifacts/control-ui-e2e/chat-message-actions");
 
 let browser: Browser;
@@ -34,7 +34,7 @@ async function expectHoverTooltip(button: Locator, text: string): Promise<void> 
     .poll(() =>
       button.evaluate((element) => {
         const tooltip = element
-          .closest("openclaw-tooltip")
+          .closest("bot-tooltip")
           ?.shadowRoot?.querySelector<
             HTMLElement & { anchor?: Element | null; popup?: { active?: boolean } }
           >("wa-tooltip");
@@ -60,7 +60,7 @@ async function expectHoverTooltip(button: Locator, text: string): Promise<void> 
     });
   const bounds = await button.evaluate((element) => {
     const body = element
-      .closest("openclaw-tooltip")
+      .closest("bot-tooltip")
       ?.shadowRoot?.querySelector<HTMLElement>("wa-tooltip")
       ?.shadowRoot?.querySelector<HTMLElement>('[part="body"]');
     const slot = body?.querySelector<HTMLSlotElement>("slot");
@@ -141,13 +141,13 @@ describeControlUiE2e("Control UI chat message actions", () => {
           role: "assistant",
           content: [{ type: "text", text: messageText }],
           timestamp: Date.now(),
-          __openclaw: { id: "assistant-action-proof", seq: 1 },
+          __bot: { id: "assistant-action-proof", seq: 1 },
         },
         {
           role: "user",
           content: [{ type: "text", text: "Keep the next assistant message separate." }],
           timestamp: Date.now() + 1,
-          __openclaw: { id: "user-action-separator", seq: 2 },
+          __bot: { id: "user-action-separator", seq: 2 },
         },
         {
           role: "assistant",
@@ -158,7 +158,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
             },
           ],
           timestamp: Date.now() + 2,
-          __openclaw: { id: "assistant-thinking-proof", seq: 3 },
+          __bot: { id: "assistant-thinking-proof", seq: 3 },
         },
       ],
     });
@@ -181,7 +181,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
         "Open split view",
       );
       await page.evaluate(() => {
-        const tooltip = document.createElement("openclaw-tooltip");
+        const tooltip = document.createElement("bot-tooltip");
         tooltip.setAttribute("content", "First line\nSecond line");
         const trigger = document.createElement("button");
         trigger.textContent = "Multiline tooltip probe";
@@ -198,7 +198,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
       expect(
         await multilineTooltipButton.evaluate((element) => {
           const content = element
-            .closest("openclaw-tooltip")
+            .closest("bot-tooltip")
             ?.shadowRoot?.querySelector<HTMLElement>(".tooltip-content");
           if (!content) {
             return 0;
@@ -209,7 +209,7 @@ describeControlUiE2e("Control UI chat message actions", () => {
         }),
       ).toBe(2);
       await multilineTooltipButton.evaluate((element) =>
-        element.closest("openclaw-tooltip")?.remove(),
+        element.closest("bot-tooltip")?.remove(),
       );
       await screenshot(page, "00-header-tooltips.png");
       const group = page.locator(".chat-group.assistant").filter({ hasText: messageText });

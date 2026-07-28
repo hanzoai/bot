@@ -2,7 +2,7 @@ import {
   hasOutboundReplyContent,
   isFastModeAutoProgressPayload,
   resolveSendableOutboundReplyParts,
-} from "openclaw/plugin-sdk/reply-payload";
+} from "bot/plugin-sdk/reply-payload";
 import { isAskUserPromptPending } from "../../agents/tools/ask-user-tool.js";
 import { normalizeAgentPlanSteps } from "../../channels/streaming.js";
 import type { BlockReplyContext } from "../get-reply-options.types.js";
