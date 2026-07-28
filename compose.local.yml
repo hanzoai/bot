@@ -85,9 +85,13 @@ services:
       # Config file with controlUi.allowedOrigins
       BOT_CONFIG_PATH: /etc/bot/config.json
       # Model providers — set at least one to enable chat
-      HANZO_API_KEY: "hk-0d2eb9cfafd049389f2904cad770a9d8"
-      # ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
-      # OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # Never inline a value here: this repo is public. HANZO_API_KEY is a
+      # SECRET completions credential — it authenticates as its owner and it
+      # spends, so it can only arrive from the environment. Source of truth is
+      # KMS: project hanzo, env prod, path /bot, key HANZO_API_KEY.
+      HANZO_API_KEY: ${HANZO_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       # Playground integration
       PLAYGROUND_URL: http://playground:8080
       HANZO_NODE_ID: local-bot-gateway
