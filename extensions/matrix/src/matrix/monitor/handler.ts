@@ -5,6 +5,7 @@ import {
 } from "bot/plugin-sdk/channel-inbound";
 import { resolveChannelContextVisibilityMode } from "bot/plugin-sdk/context-visibility-runtime";
 import { KeyedAsyncQueue } from "bot/plugin-sdk/keyed-async-queue";
+import { getGlobalHookRunner } from "bot/plugin-sdk/plugin-runtime";
 import { resolveInboundLastRouteSessionKey } from "bot/plugin-sdk/routing";
 import { resolvePinnedMainDmOwnerFromAllowlist } from "bot/plugin-sdk/security-runtime";
 import { resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
@@ -388,9 +389,16 @@ export function createMatrixRoomMessageHandler(params: MatrixMonitorHandlerParam
           });
         },
       });
+      // Matrix drafts are provider-visible before outbound modifiers run. Keep them off when a
+      // hook can rewrite or cancel so the original payload cannot escape the delivery gate.
+      const hookRunner = getGlobalHookRunner();
+      const allowProviderPreview = !(
+        (hookRunner?.hasHooks("reply_payload_sending") ?? false) ||
+        (hookRunner?.hasHooks("message_sending") ?? false)
+      );
       const draftController = await createMatrixDraftController({
-        streaming,
-        previewToolProgressEnabled,
+        streaming: allowProviderPreview ? streaming : "off",
+        previewToolProgressEnabled: allowProviderPreview && previewToolProgressEnabled,
         replyToMode,
         messageId,
         threadTarget,

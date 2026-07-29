@@ -25,6 +25,41 @@ struct NixModeStableSuiteTests {
         #expect(resolved)
     }
 
+    @Test func `detects SwiftPM and XCTest runners`() {
+        #expect(ProcessInfo.resolveIsRunningTests(
+            environment: [:],
+            processName: "swiftpm-testing-helper",
+            arguments: [],
+            bundleURLs: []))
+        #expect(ProcessInfo.resolveIsRunningTests(
+            environment: [:],
+            processName: "swiftpm-xctest-helper",
+            arguments: [],
+            bundleURLs: []))
+        for helper in ["swiftpm-testing-helper", "swiftpm-xctest-helper"] {
+            #expect(ProcessInfo.resolveIsRunningTests(
+                environment: [:],
+                processName: "BotTests",
+                arguments: ["/Library/Developer/Toolchains/usr/libexec/swift/pm/\(helper)"],
+                bundleURLs: []))
+        }
+        #expect(ProcessInfo.resolveIsRunningTests(
+            environment: ["XCTestSessionIdentifier": "session"],
+            processName: "BotTests",
+            arguments: [],
+            bundleURLs: []))
+        #expect(ProcessInfo.resolveIsRunningTests(
+            environment: [:],
+            processName: "BotTests",
+            arguments: [],
+            bundleURLs: [URL(fileURLWithPath: "/tmp/BotTests.xctest")]))
+        #expect(!ProcessInfo.resolveIsRunningTests(
+            environment: [:],
+            processName: "Bot",
+            arguments: [],
+            bundleURLs: []))
+    }
+
     @Test func `ignores stable suite outside app bundles`() throws {
         let suite = try #require(UserDefaults(suiteName: launchdLabel))
         let key = "bot.nixMode"

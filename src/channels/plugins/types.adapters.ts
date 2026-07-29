@@ -73,6 +73,8 @@ export type ChannelCapabilitiesDiagnostics = {
 
 type ChannelAdapterCallback<T extends (...args: never[]) => unknown> = T;
 
+export type ChannelAccountLinkState = "linked" | "not-linked" | "unknown";
+
 export type ChannelConfigAdapter<ResolvedAccount> = {
   listAccountIds: (cfg: BotConfig) => string[];
   resolveAccount: (cfg: BotConfig, accountId?: string | null) => ResolvedAccount;
@@ -91,7 +93,16 @@ export type ChannelConfigAdapter<ResolvedAccount> = {
   isConfigured?: ChannelAdapterCallback<
     (account: ResolvedAccount, cfg: BotConfig) => boolean | Promise<boolean>
   >;
+  isLinked?: ChannelAdapterCallback<
+    (
+      account: ResolvedAccount,
+      cfg: BotConfig,
+    ) => ChannelAccountLinkState | Promise<ChannelAccountLinkState>
+  >;
   unconfiguredReason?: ChannelAdapterCallback<
+    (account: ResolvedAccount, cfg: BotConfig) => string
+  >;
+  unlinkedReason?: ChannelAdapterCallback<
     (account: ResolvedAccount, cfg: BotConfig) => string
   >;
   describeAccount?: ChannelAdapterCallback<

@@ -26,7 +26,7 @@ export async function registerNodesCli(program: Command, argv: readonly string[]
       () =>
         `\n${theme.heading("Examples:")}\n${formatHelpExamples([
           ["bot nodes status", "List known nodes with live status."],
-          ["bot nodes pairing pending", "Show pending node pairing requests."],
+          ["bot nodes pending", "Show pending node pairing requests."],
           ["bot nodes remove --node <id|name|ip>", "Remove a stale paired node entry."],
           [
             'bot nodes invoke --node <id> --command system.which --params \'{"bins":["uname"]}\'',

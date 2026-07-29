@@ -226,12 +226,13 @@ export async function buildDynamicTools(input: DynamicToolBuildParams) {
   });
   const modelHasVision = params.model.input?.includes("image") ?? false;
   const agentDir = params.agentDir ?? resolveAgentDir(params.config ?? {}, input.sessionAgentId);
-  const {
-    createBotCodingTools: defaultCreateBotCodingTools,
-    resolveWebSearchToolPolicy,
-  } = await import("bot/plugin-sdk/agent-harness");
+  const injectedBotCodingToolsFactory = dynamicToolBuildState.botCodingToolsFactory;
+  let agentHarnessModule: typeof import("bot/plugin-sdk/agent-harness") | undefined;
+  const loadAgentHarnessModule = async () =>
+    (agentHarnessModule ??= await import("bot/plugin-sdk/agent-harness"));
   const createBotCodingTools =
-    dynamicToolBuildState.botCodingToolsFactory ?? defaultCreateBotCodingTools;
+    injectedBotCodingToolsFactory ??
+    (await loadAgentHarnessModule()).createBotCodingTools;
   toolBuildStages.mark("load-agent-harness-tools");
   const sessionKeys = resolveBotCodingToolsSessionKeys(params, input.sandboxSessionKey);
   const nativeExecutionPolicy = resolveCodexNativeExecutionPolicyForDynamicTools(input);
@@ -378,36 +379,41 @@ export async function buildDynamicTools(input: DynamicToolBuildParams) {
   });
   toolBuildStages.mark("vision-filtering");
   const webSearchPresent = visionFilteredTools.some((tool) => tool.name === "web_search");
-  const webSearchPolicy = resolveWebSearchToolPolicy({
-    config: params.config,
-    modelProvider: params.model.provider,
-    modelId: params.modelId,
-    agentId: input.sessionAgentId,
-    sessionKey: input.sandboxSessionKey,
-    sandboxToolPolicy: input.sandbox?.tools,
-    messageProvider: resolveCodexMessageToolProvider(params),
-    agentAccountId: params.agentAccountId,
-    groupId: params.groupId,
-    groupChannel: params.groupChannel,
-    groupSpace: params.groupSpace,
-    spawnedBy: params.spawnedBy,
-    senderId: params.senderId,
-    senderName: params.senderName,
-    senderUsername: params.senderUsername,
-    senderE164: params.senderE164,
-    inputProvenance: params.inputProvenance,
-    trustedInternalHandoff: params.trustedInternalHandoff,
-    scheduledToolPolicy: params.scheduledToolPolicy,
-  });
-  const senderScopedWebSearchRestriction =
-    !webSearchPolicy.allowed && webSearchPolicy.persistentAllowed;
-  const transientWebSearchRestriction =
-    senderScopedWebSearchRestriction || isCodexMemoryFlushRun(params);
   const persistentCodexWebSearchSurface =
     params.config?.tools?.web?.search?.enabled !== false &&
     !(input.pluginConfig.codexDynamicToolsExclude ?? []).some(
       (name) => normalizeCodexDynamicToolName(name) === "web_search",
     );
+  // An injected tool factory can prove that no managed or native search surface exists.
+  // Avoid loading the heavyweight default factory graph when no search policy can affect output.
+  const webSearchPolicy =
+    webSearchPresent || persistentCodexWebSearchSurface
+      ? (await loadAgentHarnessModule()).resolveWebSearchToolPolicy({
+          config: params.config,
+          modelProvider: params.model.provider,
+          modelId: params.modelId,
+          agentId: input.sessionAgentId,
+          sessionKey: input.sandboxSessionKey,
+          sandboxToolPolicy: input.sandbox?.tools,
+          messageProvider: resolveCodexMessageToolProvider(params),
+          agentAccountId: params.agentAccountId,
+          groupId: params.groupId,
+          groupChannel: params.groupChannel,
+          groupSpace: params.groupSpace,
+          spawnedBy: params.spawnedBy,
+          senderId: params.senderId,
+          senderName: params.senderName,
+          senderUsername: params.senderUsername,
+          senderE164: params.senderE164,
+          inputProvenance: params.inputProvenance,
+          trustedInternalHandoff: params.trustedInternalHandoff,
+          scheduledToolPolicy: params.scheduledToolPolicy,
+        })
+      : { allowed: false, persistentAllowed: false };
+  const senderScopedWebSearchRestriction =
+    !webSearchPolicy.allowed && webSearchPolicy.persistentAllowed;
+  const transientWebSearchRestriction =
+    senderScopedWebSearchRestriction || isCodexMemoryFlushRun(params);
   input.onPersistentWebSearchPolicyResolved?.(
     webSearchPresent ||
       (persistentCodexWebSearchSurface &&

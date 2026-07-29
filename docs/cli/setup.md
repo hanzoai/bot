@@ -116,6 +116,7 @@ bot setup --non-interactive --accept-risk --mode remote --remote-url wss://gatew
 
 ## Notes
 
+- Inside the Bot chat, `configure skills` and `configure web search` run the hosted skills and web-search setup flows; `open search wizard` hands off to the masked terminal wizard when a credential is needed. See [`bot setup` operations](/cli/bot#operations-and-approval).
 - After baseline setup, run `bot onboard` for the full guided journey, `bot configure` for targeted changes, or `bot channels add` to add channel accounts.
 - If Hermes state is detected, interactive onboarding can offer migration automatically. Import onboarding requires a fresh setup; use [Migrate](/cli/migrate) for dry-run plans, backups, and overwrite mode outside onboarding.
 

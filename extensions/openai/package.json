@@ -5,7 +5,8 @@
   "description": "Bot OpenAI provider plugins",
   "type": "module",
   "dependencies": {
-    "ws": "8.21.1"
+    "ws": "8.21.1",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@hanzo/bot-plugin-sdk": "workspace:*"

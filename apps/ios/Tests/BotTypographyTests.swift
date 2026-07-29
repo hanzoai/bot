@@ -376,17 +376,17 @@ struct BotTypographyTests {
             #expect(source.contains(".font(BotType.body)"))
         }
 
-        #expect(chatMessageViews.contains("font: BotChatTypography.body"))
+        #expect(chatMessageViews.contains("typography: segment.kind.markdownTypography"))
         #expect(chatMessageViews.contains(".font(BotChatTypography.caption)"))
         #expect(chatMessageViews.contains("chat-user-message-disclosure-toggle"))
-        #expect(chatMessageViews.contains("BotChatTypography.callout.italic()"))
+        #expect(chatMarkdownRenderer.contains("BotChatTypography.callout.italic()"))
         #expect(!chatMessageViews.contains("font: .body"))
         #expect(!chatMessageViews.contains("Font.body"))
         #expect(!chatMessageViews.contains("Font.callout"))
         #expect(chatWorkingClawView.contains(".font(BotChatTypography.caption)"))
         #expect(chatWorkingClawView.contains(".font(BotChatTypography.captionSemiBold)"))
         #expect(!chatWorkingClawView.contains(".font(."))
-        #expect(chatMarkdownRenderer.contains(".font(self.font)"))
+        #expect(chatMarkdownRenderer.contains(".font(self.typography.proseFont)"))
         #expect(chatTypography
             .contains("Font.custom(self.macSystemFontName(size: size), size: size, relativeTo: textStyle)"))
         #expect(chatTypography.contains(

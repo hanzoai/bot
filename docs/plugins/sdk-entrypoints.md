@@ -279,6 +279,9 @@ Pair `defineSetupPluginEntry(...)` with the narrow setup helper families:
 | `bot/plugin-sdk/channel-setup`     | Optional-install setup surfaces                                                                                                                                                    |
 | `bot/plugin-sdk/channel-dm-policy` | Account-aware DM policy descriptors for setup flows                                                                                                                                |
 | `bot/plugin-sdk/setup-tools`       | Setup/install CLI, archive, and docs helpers                                                                                                                                       |
+| `bot/plugin-sdk/archive`           | Bounded archive extraction and single-entry reads                                                                                                                                  |
+| `bot/plugin-sdk/root-walk`         | Budgeted, root-bounded directory walking                                                                                                                                           |
+| `bot/plugin-sdk/secret-file`       | Pinned secret reads and first-writer-wins creation                                                                                                                                 |
 
 Keep heavy SDKs, CLI registration, and long-lived runtime services in the
 full entry.

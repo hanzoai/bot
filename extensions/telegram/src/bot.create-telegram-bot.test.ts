@@ -17,7 +17,10 @@ import type { GetReplyOptions, MsgContext } from "bot/plugin-sdk/reply-runtime";
 import { withEnvAsync } from "bot/plugin-sdk/test-env";
 import { sanitizeTerminalText } from "bot/plugin-sdk/test-fixtures";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { telegramBotInfoForTest } from "./bot.create-telegram-bot.test-support.js";
+import {
+  createTelegramNativeCommandTestDeps,
+  telegramBotInfoForTest,
+} from "./bot.create-telegram-bot.test-support.js";
 import {
   createTelegramCallbackContext,
   runTelegramTestMiddlewareChain,
@@ -438,7 +441,10 @@ describe("createTelegramBot", () => {
       createTelegramBotBase({
         botInfo: telegramBotInfoForTest,
         ...opts,
-        telegramDeps: telegramBotDepsForTest,
+        telegramDeps: {
+          ...telegramBotDepsForTest,
+          ...createTelegramNativeCommandTestDeps(dispatchReplyWithBufferedBlockDispatcher),
+        },
       });
     pluginStateTestRuntime.resetPluginStateStoreForTests({ closeDatabase: false });
   });

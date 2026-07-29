@@ -1,4 +1,5 @@
 // Openai plugin entrypoint registers its Bot integration.
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { resolvePluginConfigObject } from "bot/plugin-sdk/plugin-config-runtime";
 import { definePluginEntry } from "bot/plugin-sdk/plugin-entry";
 import { buildProviderToolCompatFamilyHooks } from "bot/plugin-sdk/provider-tools";
@@ -10,6 +11,10 @@ import {
   resolveOpenAIPromptOverlayMode,
   resolveOpenAISystemPromptContribution,
 } from "./prompt-overlay.js";
+import {
+  createOpenAIQuicksilverBrowserSessionBroker,
+  OPENAI_QUICKSILVER_OFFER_PATH,
+} from "./realtime-quicksilver-session.js";
 import { buildOpenAIRealtimeTranscriptionProvider } from "./realtime-transcription-provider.js";
 import { buildOpenAIRealtimeVoiceProvider } from "./realtime-voice-provider.js";
 import { buildOpenAISpeechProvider } from "./speech-provider.js";
@@ -20,6 +25,26 @@ export default definePluginEntry({
   name: "OpenAI Provider",
   description: "Bundled OpenAI provider plugins",
   register(api) {
+    const quicksilverSession =
+      api.registrationMode === "full"
+        ? createOpenAIQuicksilverBrowserSessionBroker({
+            getConfig: () => api.runtime.config.current() as BotConfig,
+            logger: api.logger,
+          })
+        : undefined;
+    if (quicksilverSession) {
+      api.registerHttpRoute({
+        path: OPENAI_QUICKSILVER_OFFER_PATH,
+        auth: "plugin",
+        match: "exact",
+        handler: quicksilverSession.handler,
+      });
+      api.lifecycle.registerRuntimeLifecycle({
+        id: "openai-quicksilver-realtime-browser-session",
+        description: "Close GPT-Live browser sidebands when the OpenAI plugin stops",
+        cleanup: () => quicksilverSession.cleanup(),
+      });
+    }
     const openAIToolCompatHooks = buildProviderToolCompatFamilyHooks("openai");
     const buildProviderWithPromptContribution = <T extends ReturnType<typeof buildOpenAIProvider>>(
       provider: T,
@@ -45,7 +70,11 @@ export default definePluginEntry({
     api.registerMemoryEmbeddingProvider(openAiMemoryEmbeddingProviderAdapter);
     api.registerImageGenerationProvider(buildOpenAIImageGenerationProvider());
     api.registerRealtimeTranscriptionProvider(buildOpenAIRealtimeTranscriptionProvider());
-    api.registerRealtimeVoiceProvider(buildOpenAIRealtimeVoiceProvider());
+    api.registerRealtimeVoiceProvider(
+      buildOpenAIRealtimeVoiceProvider({
+        quicksilverBrowserSessionBroker: quicksilverSession?.broker,
+      }),
+    );
     api.registerSpeechProvider(buildOpenAISpeechProvider());
     api.registerMediaUnderstandingProvider(openaiMediaUnderstandingProvider);
     api.registerVideoGenerationProvider(buildOpenAIVideoGenerationProvider());

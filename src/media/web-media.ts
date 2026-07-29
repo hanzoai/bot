@@ -27,7 +27,7 @@ import { assertNoWindowsNetworkPath, safeFileURLToPath } from "../infra/local-fi
 import type { PinnedDispatcherPolicy, SsrFPolicy } from "../infra/net/ssrf.js";
 import { isNotFoundPathError } from "../infra/path-guards.js";
 import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
-import { getActivePluginRegistry } from "../plugins/runtime.js";
+import { getActivePluginHttpRouteRegistry } from "../plugins/runtime.js";
 import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
   openBotStateDatabase,
@@ -118,7 +118,7 @@ async function resolveMediaStoreUriToPath(mediaUrl: string): Promise<string | nu
 }
 
 async function resolveHostedPluginMediaUrl(mediaUrl: string): Promise<string | null> {
-  const registry = getActivePluginRegistry();
+  const registry = getActivePluginHttpRouteRegistry();
   for (const entry of registry?.hostedMediaResolvers ?? []) {
     try {
       const resolved = await entry.resolver(mediaUrl);

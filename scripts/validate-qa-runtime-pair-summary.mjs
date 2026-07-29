@@ -119,10 +119,12 @@ function requireRuntimePairScenario(scenario, index) {
   }
 
   if (scenario.status === "pass") {
+    const hasTwoPassingCells = bot.status === "pass" && codex.status === "pass";
+    const hasAdvisoryCodexGap =
+      parity.drift === "structural" && bot.status === "pass" && isExplicitCodexGap(codex);
     if (
       parity.drift === "failure-mode" ||
-      bot.status !== "pass" ||
-      codex.status !== "pass" ||
+      (!hasTwoPassingCells && !hasAdvisoryCodexGap) ||
       !isPassableCell(bot) ||
       !isPassableCell(codex)
     ) {

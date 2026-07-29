@@ -1,8 +1,7 @@
 import type WaDialog from "@awesome.me/webawesome/dist/components/dialog/dialog.js";
 // Control UI test helper supports modal dialog setup.
 import { expect } from "vitest";
-
-type BotModalDialog = HTMLElement & { updateComplete: Promise<boolean> };
+import type { BotModalDialog } from "../components/modal-dialog.ts";
 
 type DialogMethodName = "showModal" | "close";
 type DialogDescriptorSnapshot = Record<DialogMethodName, PropertyDescriptor | undefined>;

@@ -11,6 +11,7 @@ struct IOSGatewayChatTransport: BotChatTransport {
     private let globalAgentId: String?
     private let outboxGatewayID: String?
     private let sessionMutationRequest: (@Sendable (BotChatGatewayRequest) async throws -> Data)?
+    private let imageArtifactLoader: IOSImageArtifactLoader?
 
     var outboxRequiresSessionRoutingContract: Bool {
         true
@@ -21,7 +22,8 @@ struct IOSGatewayChatTransport: BotChatTransport {
         widgetGateway: GatewayNodeSession? = nil,
         globalAgentId: String? = nil,
         outboxGatewayID: String? = nil,
-        sessionMutationRequest: (@Sendable (BotChatGatewayRequest) async throws -> Data)? = nil)
+        sessionMutationRequest: (@Sendable (BotChatGatewayRequest) async throws -> Data)? = nil,
+        imageArtifactLoader: IOSImageArtifactLoader? = nil)
     {
         self.gateway = gateway
         self.widgetGateway = widgetGateway
@@ -30,6 +32,7 @@ struct IOSGatewayChatTransport: BotChatTransport {
         let normalizedGatewayID = outboxGatewayID?.trimmingCharacters(in: .whitespacesAndNewlines)
         self.outboxGatewayID = normalizedGatewayID?.isEmpty == false ? normalizedGatewayID : nil
         self.sessionMutationRequest = sessionMutationRequest
+        self.imageArtifactLoader = imageArtifactLoader
     }
 
     func acquireOutboxRouteLease() async -> BotChatTransportRouteLeaseResult {
@@ -560,6 +563,31 @@ struct IOSGatewayChatTransport: BotChatTransport {
             refreshOperatorSurfaceRoute: { observed in
                 await gateway.refreshCanvasHostRoute(replacing: observed?.url)
             })
+    }
+
+    func loadImageArtifact(
+        sessionKey: String,
+        artifactId: String) async throws -> BotChatLoadedImage?
+    {
+        guard let imageArtifactLoader,
+              let route = await gateway.currentRoute(),
+              let gatewayID = await gateway.currentGatewayID(ifCurrentRoute: route)
+        else { return nil }
+        let target = self.sessionTarget(for: sessionKey)
+        let request = BotChatGatewayRequests.artifactDownload(
+            sessionKey: target.sessionKey,
+            agentID: target.agentID,
+            artifactId: artifactId)
+        let data = try await gateway.request(request, ifCurrentRoute: route)
+        let response = try JSONDecoder().decode(ArtifactsDownloadResult.self, from: data)
+        guard let url = response.url?.trimmingCharacters(in: .whitespacesAndNewlines), !url.isEmpty
+        else { return nil }
+        guard await self.gateway.currentRoute() == route else { throw CancellationError() }
+        let loaded = try await imageArtifactLoader.load(
+            ticketedPath: url,
+            expectedGatewayID: gatewayID)
+        guard await self.gateway.currentRoute() == route else { throw CancellationError() }
+        return loaded
     }
 
     func resolveInlineWidgetURL(path: String, replacing failedURL: URL?) async -> URL? {

@@ -1,12 +1,12 @@
-// Covers Bot's default fs-safe Python helper configuration.
+// Covers Bot's default fs-safe native helper configuration.
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-const { configureFsSafePython } = vi.hoisted(() => ({
-  configureFsSafePython: vi.fn(),
+const { configureFsSafeNative } = vi.hoisted(() => ({
+  configureFsSafeNative: vi.fn(),
 }));
 
 vi.mock("@openclaw/fs-safe/config", () => ({
-  configureFsSafePython,
+  configureFsSafeNative,
 }));
 
 async function importDefaults() {
@@ -16,30 +16,62 @@ async function importDefaults() {
 
 describe("fs-safe defaults", () => {
   afterEach(() => {
-    configureFsSafePython.mockReset();
+    configureFsSafeNative.mockReset();
+    delete process.env.FS_SAFE_NATIVE_MODE;
+    delete process.env.BOT_FS_SAFE_NATIVE_MODE;
+    delete process.env.bot_fs_safe_native_mode;
     delete process.env.FS_SAFE_PYTHON_MODE;
     delete process.env.BOT_FS_SAFE_PYTHON_MODE;
+    delete process.env.FS_SAFE_PYTHON;
+    delete process.env.BOT_FS_SAFE_PYTHON;
+    delete process.env.BOT_PINNED_PYTHON;
+    delete process.env.BOT_PINNED_WRITE_PYTHON;
   });
 
-  it("disables the Python helper by default in Bot", async () => {
+  it("disables the native helper by default in Bot", async () => {
     await importDefaults();
 
-    expect(configureFsSafePython).toHaveBeenCalledWith({ mode: "off" });
+    expect(configureFsSafeNative).toHaveBeenCalledWith({ mode: "off" });
   });
 
   it("lets fs-safe env mode overrides opt back into the helper", async () => {
-    process.env.FS_SAFE_PYTHON_MODE = "require";
+    process.env.FS_SAFE_NATIVE_MODE = "require";
 
     await importDefaults();
 
-    expect(configureFsSafePython).not.toHaveBeenCalled();
+    expect(configureFsSafeNative).not.toHaveBeenCalled();
   });
 
   it("honors the Bot-specific env mode override", async () => {
-    process.env.BOT_FS_SAFE_PYTHON_MODE = "auto";
+    process.env.BOT_FS_SAFE_NATIVE_MODE = "auto";
 
     await importDefaults();
 
-    expect(configureFsSafePython).not.toHaveBeenCalled();
+    expect(configureFsSafeNative).not.toHaveBeenCalled();
+  });
+
+  it("honors case-insensitive mode overrides on Windows", async () => {
+    vi.spyOn(process, "platform", "get").mockReturnValue("win32");
+    process.env.bot_fs_safe_native_mode = "require";
+
+    await importDefaults();
+
+    expect(configureFsSafeNative).not.toHaveBeenCalled();
+  });
+
+  it("lets fs-safe migrate legacy require mode without overriding it", async () => {
+    process.env.BOT_FS_SAFE_PYTHON_MODE = "require";
+
+    await importDefaults();
+
+    expect(configureFsSafeNative).not.toHaveBeenCalled();
+  });
+
+  it("does not treat a retired interpreter path as a native mode override", async () => {
+    process.env.BOT_FS_SAFE_PYTHON = "/usr/bin/python3";
+
+    await importDefaults();
+
+    expect(configureFsSafeNative).toHaveBeenCalledWith({ mode: "off" });
   });
 });

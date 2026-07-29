@@ -5,8 +5,8 @@
  */
 import type { Usage } from "@hanzo/bot-llm-core";
 import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
-import { sanitizeSurrogates } from "../internal/shared.js";
 import { createAssistantMessageEventStream } from "../utils/event-stream.js";
+import { sanitizeSurrogates } from "../utils/sanitize-unicode.js";
 import { redactSensitiveText } from "./transport-utils.js";
 
 type ContextUsage = NonNullable<Usage["contextUsage"]>;

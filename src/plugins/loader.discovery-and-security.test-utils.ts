@@ -441,7 +441,11 @@ describe("loadBotPlugins", () => {
           fs.writeFileSync(
             path.join(memoryLanceDir, "bot.plugin.json"),
             JSON.stringify(
-              { id: "memory-lancedb", kind: "memory", configSchema: EMPTY_PLUGIN_SCHEMA },
+              {
+                id: "memory-lancedb",
+                kind: "memory",
+                configSchema: { type: "object", additionalProperties: true },
+              },
               null,
               2,
             ),
@@ -457,7 +461,10 @@ describe("loadBotPlugins", () => {
                 slots: { memory: "memory-lancedb" },
                 entries: {
                   "memory-core": { enabled: true },
-                  "memory-lancedb": { enabled: true },
+                  "memory-lancedb": {
+                    enabled: true,
+                    config: { dreaming: { enabled: false } },
+                  },
                 },
               },
             },

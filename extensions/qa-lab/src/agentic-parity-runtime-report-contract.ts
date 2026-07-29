@@ -1,4 +1,5 @@
 import type { QaRuntimeParityCacheUsage } from "./agentic-parity-cache-usage.js";
+import type { RuntimeParityCacheDiagnostics } from "./runtime-parity-cache-diagnostics.js";
 import type { QaRuntimeTiming } from "./runtime-parity-timing.js";
 import type { RuntimeId, RuntimeParityDrift, RuntimeParityUsagePolicy } from "./runtime-parity.js";
 
@@ -14,6 +15,8 @@ export type QaRuntimeParityScenarioReport = {
   codexTokens: number;
   botUsage: QaRuntimeParityCacheUsage | null;
   codexUsage: QaRuntimeParityCacheUsage | null;
+  botCacheDiagnostics?: RuntimeParityCacheDiagnostics;
+  codexCacheDiagnostics?: RuntimeParityCacheDiagnostics;
   botToolCalls: number;
   codexToolCalls: number;
   botWallClockMs: number | null;

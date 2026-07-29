@@ -5,7 +5,7 @@ import { parseStrictPositiveInteger } from "@hanzo/bot-normalization-core/number
  * server-compaction, service-tier, and reasoning payload rules.
  */
 import { readStringValue } from "@hanzo/bot-normalization-core/string-coerce";
-import { supportsOpenAIReasoningEffort } from "../internal/openai.js";
+import { supportsOpenAIReasoningEffort } from "../providers/openai-reasoning-effort.js";
 
 type OpenAIResponsesPayloadModel = {
   api?: unknown;

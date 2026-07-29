@@ -9,6 +9,7 @@ import {
   inferToolMetaFromArgs,
   resetAgentEventsForTest,
 } from "bot/plugin-sdk/agent-harness-runtime";
+import { openFileBackedSessionManagerForTest } from "bot/plugin-sdk/agent-runtime-test-contracts";
 import { SessionManager } from "bot/plugin-sdk/agent-sessions";
 import {
   onInternalDiagnosticEvent,
@@ -90,7 +91,9 @@ export async function createParams(): Promise<EmbeddedRunAttemptParams> {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-codex-projector-"));
   tempDirs.add(tempDir);
   const sessionFile = path.join(tempDir, "session.jsonl");
-  SessionManager.open(sessionFile).appendMessage(assistantMessage("history", Date.now()));
+  openFileBackedSessionManagerForTest(sessionFile).appendMessage(
+    assistantMessage("history", Date.now()),
+  );
   return {
     prompt: "hello",
     sessionId: "session-1",

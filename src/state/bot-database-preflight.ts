@@ -7,7 +7,10 @@ import {
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
-import { readSqliteUserVersion } from "../infra/sqlite-user-version.js";
+import {
+  describeRunningBotBuild,
+  readSqliteUserVersion,
+} from "../infra/sqlite-user-version.js";
 import type { BotSchemaVersions } from "./bot-schema-versions.js";
 import type { DB as BotStateKyselyDatabase } from "./bot-state-db.generated.js";
 import {
@@ -44,7 +47,8 @@ type AgentRegistryDatabase = Pick<BotStateKyselyDatabase, "agent_databases">;
 export class BotDatabaseSchemaPreflightError extends Error {
   constructor(readonly incompatibleDatabases: readonly IncompatibleBotDatabase[]) {
     super(
-      `Gateway refused startup because ${incompatibleDatabases.length} Bot database schema(s) are newer than this build. See ${BOT_DATABASE_SCHEMA_DOCS_URL}.`,
+      `Gateway refused startup because ${incompatibleDatabases.length} Bot database schema(s) are newer than this build. ` +
+        `Refused by ${describeRunningBotBuild()}. See ${BOT_DATABASE_SCHEMA_DOCS_URL}.`,
     );
     this.name = "BotDatabaseSchemaPreflightError";
   }

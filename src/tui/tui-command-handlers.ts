@@ -33,11 +33,15 @@ import {
 } from "./components/selectors.js";
 import type { TuiBackend, TuiSessionMutationResult } from "./tui-backend.js";
 import { addBlockedChatSubmitNotice } from "./tui-busy-notice.js";
-import { sanitizeRenderableText } from "./tui-formatters.js";
+import { formatTuiErrorMessage } from "./tui-formatters.js";
 import {
   TUI_RECENT_SESSIONS_ACTIVE_MINUTES,
   TUI_SESSION_PICKER_LIMIT,
 } from "./tui-session-list-policy.js";
+import {
+  readTuiSessionProjectionScope,
+  reduceTuiSessionProjection,
+} from "./tui-session-projection.js";
 import { formatStatusSummary } from "./tui-status-summary.js";
 import {
   acceptPendingSubmit,
@@ -272,14 +276,14 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           applySessionInfoFromPatch(result);
           await refreshSessionInfo();
         } catch (err) {
-          chatLog.addSystem(`model set failed: ${String(err)}`);
+          chatLog.addSystem(`model set failed: ${formatTuiErrorMessage(err)}`);
         }
       });
     } catch (err) {
       if (!isCurrentSessionSelection(selection)) {
         return;
       }
-      chatLog.addSystem(`model list failed: ${String(err)}`);
+      chatLog.addSystem(`model list failed: ${formatTuiErrorMessage(err)}`);
       tui.requestRender();
     }
   };
@@ -378,7 +382,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
       if (!isCurrentSessionSelection(selection)) {
         return;
       }
-      chatLog.addSystem(`sessions list failed: ${String(err)}`);
+      chatLog.addSystem(`sessions list failed: ${formatTuiErrorMessage(err)}`);
       tui.requestRender();
     }
   };
@@ -476,7 +480,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
             setActivityStatus("error");
           }
         } catch (err) {
-          chatLog.addSystem(`auth flow failed: ${sanitizeRenderableText(String(err))}`);
+          chatLog.addSystem(`auth flow failed: ${formatTuiErrorMessage(err)}`);
           setActivityStatus("error");
         }
         break;
@@ -497,7 +501,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           }
           chatLog.addSystem("status: unknown response");
         } catch (err) {
-          chatLog.addSystem(`status failed: ${String(err)}`);
+          chatLog.addSystem(`status failed: ${formatTuiErrorMessage(err)}`);
         }
         break;
       case "agent":
@@ -534,7 +538,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
               await sendMessage(continuation);
             }
           } catch (err) {
-            chatLog.addSystem(`goal failed: ${sanitizeRenderableText(String(err))}`);
+            chatLog.addSystem(`goal failed: ${formatTuiErrorMessage(err)}`);
           }
         } else {
           await sendMessage(raw);
@@ -591,7 +595,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
             applySessionInfoFromPatch(result);
             await refreshSessionInfo();
           } catch (err) {
-            chatLog.addSystem(`model set failed: ${String(err)}`);
+            chatLog.addSystem(`model set failed: ${formatTuiErrorMessage(err)}`);
           }
         }
         break;
@@ -621,7 +625,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           applySessionInfoFromPatch(result);
           await refreshSessionInfo();
         } catch (err) {
-          chatLog.addSystem(`think failed: ${String(err)}`);
+          chatLog.addSystem(`think failed: ${formatTuiErrorMessage(err)}`);
         }
         break;
       case "verbose":
@@ -643,7 +647,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
             await loadHistory();
           }
         } catch (err) {
-          chatLog.addSystem(`verbose failed: ${String(err)}`);
+          chatLog.addSystem(`verbose failed: ${formatTuiErrorMessage(err)}`);
         }
         break;
       case "trace":
@@ -660,7 +664,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           applySessionInfoFromPatch(result);
           await refreshSessionInfo();
         } catch (err) {
-          chatLog.addSystem(`trace failed: ${String(err)}`);
+          chatLog.addSystem(`trace failed: ${formatTuiErrorMessage(err)}`);
         }
         break;
       case "fast":
@@ -683,7 +687,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           applySessionInfoFromPatch(result);
           await refreshSessionInfo();
         } catch (err) {
-          chatLog.addSystem(`fast failed: ${String(err)}`);
+          chatLog.addSystem(`fast failed: ${formatTuiErrorMessage(err)}`);
         }
         break;
       case "reasoning":
@@ -700,7 +704,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           applySessionInfoFromPatch(result);
           await refreshSessionInfo();
         } catch (err) {
-          chatLog.addSystem(`reasoning failed: ${String(err)}`);
+          chatLog.addSystem(`reasoning failed: ${formatTuiErrorMessage(err)}`);
         }
         break;
       case "usage": {
@@ -722,7 +726,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
             delete state.sessionInfo.effectiveResponseUsage;
             await refreshSessionInfo();
           } catch (err) {
-            chatLog.addSystem(`usage failed: ${String(err)}`);
+            chatLog.addSystem(`usage failed: ${formatTuiErrorMessage(err)}`);
           }
           break;
         }
@@ -740,7 +744,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           applySessionInfoFromPatch(result);
           await refreshSessionInfo();
         } catch (err) {
-          chatLog.addSystem(`usage failed: ${String(err)}`);
+          chatLog.addSystem(`usage failed: ${formatTuiErrorMessage(err)}`);
         }
         break;
       }
@@ -762,7 +766,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           applySessionInfoFromPatch(result);
           await refreshSessionInfo();
         } catch (err) {
-          chatLog.addSystem(`elevated failed: ${String(err)}`);
+          chatLog.addSystem(`elevated failed: ${formatTuiErrorMessage(err)}`);
         }
         break;
       case "activation": {
@@ -784,7 +788,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           applySessionInfoFromPatch(result);
           await refreshSessionInfo();
         } catch (err) {
-          chatLog.addSystem(`activation failed: ${String(err)}`);
+          chatLog.addSystem(`activation failed: ${formatTuiErrorMessage(err)}`);
         }
         break;
       }
@@ -814,7 +818,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           await setSession(result.key);
           chatLog.addSystem(`new session: ${result.key}`);
         } catch (err) {
-          chatLog.addSystem(`new session failed: ${sanitizeRenderableText(String(err))}`);
+          chatLog.addSystem(`new session failed: ${formatTuiErrorMessage(err)}`);
         } finally {
           sessionCreationInFlight = false;
         }
@@ -856,7 +860,7 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           if (!isCurrentSessionSelection(resetResultSelection)) {
             return;
           }
-          chatLog.addSystem(`reset failed: ${sanitizeRenderableText(String(err))}`);
+          chatLog.addSystem(`reset failed: ${formatTuiErrorMessage(err)}`);
         }
         break;
       }
@@ -916,12 +920,23 @@ export function createCommandHandlers(context: CommandHandlerContext) {
       return;
     }
     const runId = randomUUID();
+    const sendScope = readTuiSessionProjectionScope(state);
     try {
       if (!isBtw) {
         if (opts.local === true && state.activeChatRunId && !hasPendingSubmit(state)) {
           chatLog.reserveAssistantSlot(state.activeChatRunId);
         }
         chatLog.addPendingUser(runId, text);
+        reduceTuiSessionProjection(state, {
+          type: "sendPending",
+          message: {
+            role: "user",
+            content: [{ type: "text", text }],
+            __bot: { idempotencyKey: `${runId}:user` },
+          },
+          runId,
+          scope: sendScope,
+        });
         beginPendingSubmit(state, runId, text);
         noteLocalRunId?.(runId);
         setActivityStatus("sending");
@@ -962,6 +977,14 @@ export function createCommandHandlers(context: CommandHandlerContext) {
         return;
       }
       if (!isBtw) {
+        // Adopt a durable turn that beat its ACK; otherwise preserve and re-key
+        // the optimistic viewport until the authoritative message arrives.
+        const acknowledgedProjection = reduceTuiSessionProjection(state, {
+          type: "sendAcknowledged",
+          runId: acceptedRunId,
+          previousRunId: runId,
+          scope: sendScope,
+        });
         const acceptedRunAlreadyCompleted =
           acceptedRunId !== runId &&
           !terminalAck &&
@@ -978,12 +1001,25 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           if (!acceptedRunAlreadyCompleted && !terminalAck) {
             noteLocalRunId?.(acceptedRunId);
           }
-          chatLog.rekeyPendingUser(runId, acceptedRunId);
+          if (
+            acknowledgedProjection.entries.some(
+              (entry) => entry.pending && entry.pendingRunId === acceptedRunId,
+            )
+          ) {
+            chatLog.rekeyPendingUser(runId, acceptedRunId);
+          } else {
+            chatLog.dropPendingUser(runId);
+          }
         }
         if (terminalAck) {
           clearPendingSubmit(state, acceptedRunId);
           forgetLocalRunId?.(acceptedRunId);
           if (terminalAckFailure) {
+            reduceTuiSessionProjection(state, {
+              type: "sendFailed",
+              runId: acceptedRunId,
+              scope: sendScope,
+            });
             chatLog.dropPendingUser(acceptedRunId);
           }
           if (state.activeChatRunId === acceptedRunId) {
@@ -1027,9 +1063,14 @@ export function createCommandHandlers(context: CommandHandlerContext) {
           state.activeChatRunId = null;
         }
         clearPendingSubmit(state, runId);
+        reduceTuiSessionProjection(state, {
+          type: "sendFailed",
+          runId,
+          scope: sendScope,
+        });
         chatLog.dropPendingUser(runId);
       }
-      chatLog.addSystem(`${isBtw ? "btw failed" : "send failed"}: ${String(err)}`);
+      chatLog.addSystem(`${isBtw ? "btw failed" : "send failed"}: ${formatTuiErrorMessage(err)}`);
       if (!isBtw) {
         setActivityStatus("error");
       }

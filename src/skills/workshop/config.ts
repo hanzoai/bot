@@ -3,7 +3,7 @@ import { asNullableRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { BotConfig } from "../../config/types.bot.js";
 
 /** Runtime configuration for the skill workshop proposal flow. */
-export type SkillWorkshopConfig = {
+type SkillWorkshopConfig = {
   autonomous: {
     enabled: boolean;
   };

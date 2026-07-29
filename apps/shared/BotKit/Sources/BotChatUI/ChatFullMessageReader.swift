@@ -41,7 +41,6 @@ struct ChatFullMessageReader: View {
                             text: markdown,
                             context: .assistant,
                             variant: self.markdownVariant,
-                            font: BotChatTypography.body,
                             textColor: BotChatTheme.assistantText)
                             .textSelection(.enabled)
                             .frame(maxWidth: .infinity, alignment: .leading)

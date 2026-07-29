@@ -548,6 +548,16 @@ public struct BotChatMetadataCapabilities: Codable, Sendable, Equatable {
     }
 }
 
+public struct BotChatLoadedImage: Sendable {
+    public let data: Data
+    public let mimeType: String
+
+    public init(data: Data, mimeType: String) {
+        self.data = data
+        self.mimeType = mimeType
+    }
+}
+
 /// One physical Gateway route for Swarm capability discovery and child paging.
 /// All pages use the captured route so a reconnect cannot combine two servers.
 public struct BotChatSwarmRouteLease: Sendable {
@@ -671,6 +681,7 @@ public protocol BotChatTransport: Sendable {
         path: String,
         replacing failedResource: BotChatWidgetResource?) async -> BotChatWidgetResource?
     func resolveInlineWidgetURL(path: String, replacing failedURL: URL?) async -> URL?
+    func loadImageArtifact(sessionKey: String, artifactId: String) async throws -> BotChatLoadedImage?
 
     func setActiveSessionKey(_ sessionKey: String) async throws
     func resetSession(sessionKey: String) async throws
@@ -678,6 +689,13 @@ public protocol BotChatTransport: Sendable {
 }
 
 extension BotChatTransport {
+    public func loadImageArtifact(
+        sessionKey _: String,
+        artifactId _: String) async throws -> BotChatLoadedImage?
+    {
+        nil
+    }
+
     public func isSwarmEnabled(sessionKey _: String) async throws -> Bool {
         false
     }

@@ -12,6 +12,8 @@ import {
 } from "bot/plugin-sdk/memory-host-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  buildCodexBotPromptContext,
+  buildCodexWatchedSessionsContext,
   buildCodexWorkspaceBootstrapContext,
   buildCodexSystemPromptReport,
   readContextEngineThreadBootstrapProjection,
@@ -248,5 +250,48 @@ describe("Codex app-server attempt context", () => {
       project: true,
       reason: "dynamic-tools-mismatch",
     });
+  });
+
+  it("stitches watched-session context into the per-turn Bot prompt context", () => {
+    const attempt = { config: {} } as EmbeddedRunAttemptParams;
+
+    expect(
+      buildCodexBotPromptContext({
+        params: attempt,
+        watchedSessionsContext: [
+          "## Watched Sessions",
+          "- agent:main:telegram:group:beta — Family group",
+        ].join("\n"),
+      }),
+    ).toContain("## Watched Sessions");
+
+    // No ambient watches (and no state) must render nothing, not an empty section.
+    expect(
+      buildCodexWatchedSessionsContext({
+        attempt,
+        dynamicTools: [
+          {
+            type: "function",
+            name: "sessions_history",
+            description: "history",
+            inputSchema: {},
+          },
+        ],
+        sessionKey: "agent:codex-test:main",
+      }),
+    ).toBe(undefined);
+
+    // Lightweight cron turns keep the runtime context byte-for-byte untouched.
+    expect(
+      buildCodexWatchedSessionsContext({
+        attempt: {
+          config: {},
+          bootstrapContextMode: "lightweight",
+          bootstrapContextRunKind: "cron",
+        } as EmbeddedRunAttemptParams,
+        dynamicTools: [],
+        sessionKey: "agent:codex-test:main",
+      }),
+    ).toBe(undefined);
   });
 });

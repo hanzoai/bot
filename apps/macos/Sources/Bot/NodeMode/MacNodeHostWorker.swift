@@ -5,6 +5,8 @@ import OSLog
 
 extension Notification.Name {
     static let botNodeHostWorkerFailed = Notification.Name("bot.node-host-worker.failed")
+    static let botNodeHostWorkerRetryExhausted = Notification.Name(
+        "bot.node-host-worker.retry-exhausted")
 }
 
 struct MacNodeHostManifest: Equatable, Sendable {

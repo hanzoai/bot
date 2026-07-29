@@ -9,11 +9,7 @@ export {
   type ChannelStatusIssue,
   type BotConfig,
 } from "../runtime-api.js";
-export {
-  listGoogleChatAccountIds,
-  resolveGoogleChatAccount,
-  type ResolvedGoogleChatAccount,
-} from "./accounts.js";
+export { resolveGoogleChatAccount, type ResolvedGoogleChatAccount } from "./accounts.js";
 export {
   isGoogleChatSpaceTarget,
   isGoogleChatUserTarget,
