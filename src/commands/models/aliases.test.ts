@@ -195,7 +195,7 @@ describe("modelsAliasesAddCommand", () => {
     mocks.readConfigFileSnapshot.mockResolvedValue(snapshot(cfg));
     mocks.replaceConfigFile.mockResolvedValue(undefined);
 
-    await modelsAliasesAddCommand("zippy", "clawrouter/deepseek/deepseek-v4-flash", makeRuntime());
+    await modelsAliasesAddCommand("zippy", "botrouter/deepseek/deepseek-v4-flash", makeRuntime());
 
     const [replaceParams] = mocks.replaceConfigFile.mock.calls[0] ?? [];
     const written = replaceParams?.nextConfig as BotConfig;
@@ -203,7 +203,7 @@ describe("modelsAliasesAddCommand", () => {
     const policy = createModelVisibilityPolicy({
       cfg: persisted,
       catalog: [],
-      defaultProvider: "clawrouter",
+      defaultProvider: "botrouter",
       defaultModel: "deepseek/deepseek-v4-flash",
     });
     expect(written.agents?.defaults?.modelPolicy).toBeUndefined();

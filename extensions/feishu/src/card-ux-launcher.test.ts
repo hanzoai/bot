@@ -1,7 +1,7 @@
 // Feishu tests cover card ux launcher plugin behavior.
 import { createRuntimeEnv } from "bot/plugin-sdk/plugin-test-runtime";
 import { afterAll, describe, expect, it, vi, beforeEach } from "vitest";
-import type { ClawdbotConfig, RuntimeEnv } from "../runtime-api.js";
+import type { BotConfig, RuntimeEnv } from "../runtime-api.js";
 import {
   expectFirstSentCardUsesFillWidthOnly,
   expectSentCardHasP2pAction,
@@ -15,7 +15,7 @@ vi.mock("./send.js", () => ({
 }));
 
 describe("feishu quick-action launcher", () => {
-  const cfg: ClawdbotConfig = {};
+  const cfg: BotConfig = {};
 
   afterAll(() => {
     vi.doUnmock("./send.js");
@@ -51,7 +51,7 @@ describe("feishu quick-action launcher", () => {
     expect(handled).toBe(true);
     expect(sendCardFeishuMock).toHaveBeenCalledTimes(1);
     const sendArgs = sendCardFeishuMock.mock.calls.at(0)?.[0] as
-      | { accountId?: string; card?: unknown; cfg?: ClawdbotConfig; to?: string }
+      | { accountId?: string; card?: unknown; cfg?: BotConfig; to?: string }
       | undefined;
     expect(Object.keys(sendArgs ?? {}).toSorted()).toEqual(["accountId", "card", "cfg", "to"]);
     expect(sendArgs?.cfg).toBe(cfg);

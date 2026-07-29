@@ -14,10 +14,10 @@ import { resolve } from "node:path";
 const STATE_VERSION = 1;
 const DEPENDENCY_INPUTS = ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", ".npmrc"];
 const ENVIRONMENT_INPUTS = [
-  ".crabbox.yaml",
+  ".botbox.yaml",
   ".github/workflows/ci-check-testbox.yml",
   ".node-version",
-  "scripts/crabbox-wrapper.mjs",
+  "scripts/botbox-wrapper.mjs",
 ];
 
 function optionValue(args, name, fallback = "") {
@@ -104,7 +104,7 @@ export function prepareTestboxLeaseFreshness({ args, env, provider, repoRoot }) 
   if (env.VITEST && !configuredStateDir) {
     return null;
   }
-  const stateDir = resolve(configuredStateDir || resolve(repoRoot, ".crabbox", "testbox-leases"));
+  const stateDir = resolve(configuredStateDir || resolve(repoRoot, ".botbox", "testbox-leases"));
   const path = resolve(stateDir, `${id}.json`);
   const current = buildTestboxLeaseFingerprint(repoRoot, args);
   if (existsSync(path)) {

@@ -356,7 +356,7 @@ SECRET_PLACEHOLDER_VALUES = {
     "test-token",
     "test-token-placeholder",
     "token-oversized",
-    "clawrouter-e2e-secret",
+    "botrouter-e2e-secret",
     "config-token",
     "very-long-browser-token-0123456789",
 }
@@ -365,7 +365,7 @@ SYNTHETIC_SECRET_PREFIXES = frozenset(
 )
 FETCH_CREDENTIAL_MODE_VALUES = {"include", "omit", "same-origin"}
 URI_PASSWORD_PLACEHOLDER_VALUES = {
-    "clawrouter-e2e-secret",
+    "botrouter-e2e-secret",
     "dummy",
     "example",
     "fake",

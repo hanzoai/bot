@@ -34,7 +34,7 @@ Map of Bot features that can call paid provider APIs, where each reads its crede
 **CLI usage windows** (provider quotas, not per-message cost)
 
 - `bot status --usage` and `bot channels list` show provider **usage windows** as `X% left`.
-- Current usage-window providers: Anthropic, ClawRouter, DeepSeek, GitHub Copilot, Gemini CLI, MiniMax, OpenAI (covers ChatGPT/Codex OAuth/token auth), Xiaomi, and z.ai. See [Models CLI](/cli/models) and [Channels CLI](/cli/channels) for the full provider/flag list.
+- Current usage-window providers: Anthropic, BotRouter, DeepSeek, GitHub Copilot, Gemini CLI, MiniMax, OpenAI (covers ChatGPT/Codex OAuth/token auth), Xiaomi, and z.ai. See [Models CLI](/cli/models) and [Channels CLI](/cli/channels) for the full provider/flag list.
 - MiniMax's raw `usage_percent` / `usagePercent` fields report remaining quota, so Bot inverts them; count-based fields win when present. If the response includes a `model_remains` array, Bot picks the chat-model entry, derives the window label from timestamps when needed, and includes the model name in the plan label.
 - Usage auth comes from provider-specific hooks when available, otherwise Bot falls back to matching OAuth/API-key credentials from auth profiles, env, or config.
 

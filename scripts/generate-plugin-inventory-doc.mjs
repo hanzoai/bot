@@ -138,7 +138,7 @@ function humanizeId(value) {
     ["aws", "AWS"],
     ["azure", "Azure"],
     ["byteplus", "BytePlus"],
-    ["clawrouter", "ClawRouter"],
+    ["botrouter", "BotRouter"],
     ["codex", "Codex"],
     ["cli", "CLI"],
     ["comfy", "ComfyUI"],

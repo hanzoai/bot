@@ -39,7 +39,7 @@ import {
 } from "./reply-delivery-result.js";
 import {
   createReplyPrefixContext,
-  type ClawdbotConfig,
+  type BotConfig,
   type OutboundIdentity,
   type ReplyPayload,
   type RuntimeEnv,
@@ -151,7 +151,7 @@ function resolveCardNote(
 }
 
 type CreateFeishuReplyDispatcherParams = {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   agentId: string;
   runtime: RuntimeEnv;
   chatId: string;

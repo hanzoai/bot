@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig, PluginRuntime } from "../runtime-api.js";
+import type { BotConfig, PluginRuntime } from "../runtime-api.js";
 import type { FeishuMessageEvent } from "./event-types.js";
 import { monitorSingleAccount } from "./monitor.account.js";
 import { createFeishuVcMeetingInvitedHandler } from "./monitor.vc-meeting-invited-handler.js";
@@ -48,7 +48,7 @@ vi.mock("./dedup.js", async () => {
   };
 });
 
-function buildConfig(overrides?: Partial<ClawdbotConfig>): ClawdbotConfig {
+function buildConfig(overrides?: Partial<BotConfig>): BotConfig {
   return {
     channels: {
       feishu: {
@@ -58,7 +58,7 @@ function buildConfig(overrides?: Partial<ClawdbotConfig>): ClawdbotConfig {
       },
     },
     ...overrides,
-  } as ClawdbotConfig;
+  } as BotConfig;
 }
 
 function buildAccount(config?: Partial<ResolvedFeishuAccount["config"]>): ResolvedFeishuAccount {
@@ -169,7 +169,7 @@ describe("createFeishuVcMeetingInvitedHandler", () => {
 
     expect(handleFeishuMessageMock).toHaveBeenCalledTimes(1);
     const params = mockCallArg(handleFeishuMessageMock, "handleFeishuMessage") as {
-      cfg?: ClawdbotConfig;
+      cfg?: BotConfig;
       accountId?: string;
       event?: {
         sender?: {

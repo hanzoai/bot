@@ -193,9 +193,9 @@ lane when validating the external inspector against Bot plugin
 packages. Run it from a clean Bot checkout after the package is built:
 
 ```sh
-pnpm crabbox:run -- --provider blacksmith-testbox --timing-json --shell -- "pnpm install && pnpm build && npm exec --yes @hanzo/bot-plugin-inspector@0.1.0 -- ./extensions/telegram --json"
-pnpm crabbox:run -- --provider blacksmith-testbox --timing-json --shell -- "npm exec --yes @hanzo/bot-plugin-inspector@0.1.0 -- ./extensions/discord --json"
-pnpm crabbox:run -- --provider blacksmith-testbox --timing-json --shell -- "npm exec --yes @hanzo/bot-plugin-inspector@0.1.0 -- <clawhub-plugin-dir> --json"
+pnpm botbox:run -- --provider blacksmith-testbox --timing-json --shell -- "pnpm install && pnpm build && npm exec --yes @hanzo/bot-plugin-inspector@0.1.0 -- ./extensions/telegram --json"
+pnpm botbox:run -- --provider blacksmith-testbox --timing-json --shell -- "npm exec --yes @hanzo/bot-plugin-inspector@0.1.0 -- ./extensions/discord --json"
+pnpm botbox:run -- --provider blacksmith-testbox --timing-json --shell -- "npm exec --yes @hanzo/bot-plugin-inspector@0.1.0 -- <clawhub-plugin-dir> --json"
 ```
 
 Keep this lane opt-in for maintainers, since it installs an external npm

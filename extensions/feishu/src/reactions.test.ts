@@ -1,6 +1,6 @@
 // Feishu tests cover reactions plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 
 const listMock = vi.hoisted(() => vi.fn());
 
@@ -52,7 +52,7 @@ describe("listReactionsFeishu", () => {
 
     await expect(
       listReactionsFeishu({
-        cfg: {} as ClawdbotConfig,
+        cfg: {} as BotConfig,
         messageId: "om_message",
       }),
     ).resolves.toEqual([
@@ -90,7 +90,7 @@ describe("listReactionsFeishu", () => {
     });
 
     const reactions = await listReactionsFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       messageId: "om_message",
     });
 

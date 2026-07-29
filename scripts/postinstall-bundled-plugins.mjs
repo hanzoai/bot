@@ -425,7 +425,7 @@ export function collectLegacyPluginRuntimeDepsStateRoots(params = {}) {
     addStateRoot(dirname(resolvePostinstallUserPath(configPath, botHome)));
   }
   addStateRoot(join(botHome, ".bot"));
-  addStateRoot(join(botHome, ".clawdbot"));
+  addStateRoot(join(botHome, ".bot"));
 
   for (const entry of splitPostinstallPathList(env?.STATE_DIRECTORY)) {
     addStateRoot(resolvePostinstallUserPath(entry, botHome));

@@ -6,7 +6,7 @@ import { resolveFeishuRuntimeAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";
 import {
   createReplyPrefixContext,
-  type ClawdbotConfig,
+  type BotConfig,
   type ReplyPayload,
   type RuntimeEnv,
 } from "./comment-dispatcher-runtime-api.js";
@@ -22,7 +22,7 @@ import {
 import { getFeishuRuntime } from "./runtime.js";
 
 type CreateFeishuCommentReplyDispatcherParams = {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   agentId: string;
   runtime: RuntimeEnv;
   accountId?: string;

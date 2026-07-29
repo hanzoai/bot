@@ -67,8 +67,8 @@ describe("package manager build policy", () => {
 
     expect(packageJson.files).toEqual(
       expect.arrayContaining([
-        "scripts/crabbox-wrapper.mjs",
-        "scripts/crabbox-wrapper-providers.mjs",
+        "scripts/botbox-wrapper.mjs",
+        "scripts/botbox-wrapper-providers.mjs",
         "scripts/testbox-lease-freshness.mjs",
       ]),
     );

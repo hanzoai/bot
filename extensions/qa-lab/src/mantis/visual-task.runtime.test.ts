@@ -50,10 +50,10 @@ describe("mantis visual task runtime", () => {
     const commands: { args: readonly string[]; command: string }[] = [];
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
       commands.push({ command, args });
-      if (command === "/tmp/crabbox" && args[0] === "warmup") {
+      if (command === "/tmp/botbox" && args[0] === "warmup") {
         return { stdout: "ready lease cbx_abc123\n", stderr: "" };
       }
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             id: "cbx_abc123",
@@ -64,7 +64,7 @@ describe("mantis visual task runtime", () => {
           stderr: "",
         };
       }
-      if (command === "/tmp/crabbox" && args[0] === "record") {
+      if (command === "/tmp/botbox" && args[0] === "record") {
         const outputPath = requireArgAfter(args, "--output");
         const outputDir = requireArgAfter(args, "--output-dir");
         await fs.mkdir(path.dirname(outputPath), { recursive: true });
@@ -92,7 +92,7 @@ describe("mantis visual task runtime", () => {
 
     const result = await runMantisVisualTask({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       duration: "12s",
       env: { PATH: process.env.PATH },
       now: () => new Date("2026-05-04T12:00:00.000Z"),
@@ -104,10 +104,10 @@ describe("mantis visual task runtime", () => {
 
     expect(result.status).toBe("pass");
     expect(commands.map((entry) => [entry.command, entry.args[0]])).toEqual([
-      ["/tmp/crabbox", "warmup"],
-      ["/tmp/crabbox", "inspect"],
-      ["/tmp/crabbox", "record"],
-      ["/tmp/crabbox", "stop"],
+      ["/tmp/botbox", "warmup"],
+      ["/tmp/botbox", "inspect"],
+      ["/tmp/botbox", "record"],
+      ["/tmp/botbox", "stop"],
     ]);
     const recordArgs = commands.find((entry) => entry.args[0] === "record")?.args ?? [];
     const finalVideoPath = path.join(
@@ -135,13 +135,13 @@ describe("mantis visual task runtime", () => {
     await expect(fs.readFile(result.screenshotPath ?? "", "utf8")).resolves.toBe("png");
     await expect(fs.readFile(result.videoPath ?? "", "utf8")).resolves.toBe("mp4");
     const summary = JSON.parse(await fs.readFile(result.summaryPath, "utf8")) as {
-      crabbox: { id: string; vncCommand: string };
+      botbox: { id: string; vncCommand: string };
       status: string;
       visionMode: string;
     };
-    expect(summary.crabbox.id).toBe("cbx_abc123");
-    expect(summary.crabbox.vncCommand).toBe(
-      "/tmp/crabbox vnc --provider hetzner --id cbx_abc123 --open",
+    expect(summary.botbox.id).toBe("cbx_abc123");
+    expect(summary.botbox.vncCommand).toBe(
+      "/tmp/botbox vnc --provider hetzner --id cbx_abc123 --open",
     );
     expect(summary.status).toBe("pass");
     expect(summary.visionMode).toBe("metadata");
@@ -151,10 +151,10 @@ describe("mantis visual task runtime", () => {
     const commands: { args: readonly string[]; command: string }[] = [];
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
       commands.push({ command, args });
-      if (command === "/tmp/crabbox" && args[0] === "warmup") {
+      if (command === "/tmp/botbox" && args[0] === "warmup") {
         return { stdout: "ready lease cbx_abc123\n", stderr: "" };
       }
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             id: "cbx_abc123",
@@ -165,7 +165,7 @@ describe("mantis visual task runtime", () => {
           stderr: "",
         };
       }
-      if (command === "/tmp/crabbox" && args[0] === "record") {
+      if (command === "/tmp/botbox" && args[0] === "record") {
         const outputDir = requireArgAfter(args, "--output-dir");
         await fs.mkdir(outputDir, { recursive: true });
         await fs.writeFile(path.join(outputDir, "visual-task.png"), "png");
@@ -185,14 +185,14 @@ describe("mantis visual task runtime", () => {
             },
           })}\n`,
         );
-        throw new Error("crabbox record failed after driver exit");
+        throw new Error("botbox record failed after driver exit");
       }
       return { stdout: "", stderr: "" };
     });
 
     const result = await runMantisVisualTask({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       env: { PATH: process.env.PATH },
       now: () => new Date("2026-05-04T12:00:00.000Z"),
       outputDir: ".artifacts/qa-e2e/mantis/visual-task-recording-fail",
@@ -204,17 +204,17 @@ describe("mantis visual task runtime", () => {
     expect(result.status).toBe("fail");
     expect(result.videoPath).toBeUndefined();
     expect(commands.map((entry) => [entry.command, entry.args[0]])).toEqual([
-      ["/tmp/crabbox", "warmup"],
-      ["/tmp/crabbox", "inspect"],
-      ["/tmp/crabbox", "record"],
+      ["/tmp/botbox", "warmup"],
+      ["/tmp/botbox", "inspect"],
+      ["/tmp/botbox", "record"],
     ]);
     const summary = JSON.parse(await fs.readFile(result.summaryPath, "utf8")) as {
       error?: string;
       recording?: { error?: string; required: boolean };
       status: string;
     };
-    expect(summary.error).toBe("crabbox record failed after driver exit");
-    expect(summary.recording?.error).toBe("crabbox record failed after driver exit");
+    expect(summary.error).toBe("botbox record failed after driver exit");
+    expect(summary.recording?.error).toBe("botbox record failed after driver exit");
     expect(summary.recording?.required).toBe(true);
     expect(summary.status).toBe("fail");
   });
@@ -224,10 +224,10 @@ describe("mantis visual task runtime", () => {
     let stagedVideoPath = "";
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
       commands.push({ command, args });
-      if (command === "/tmp/crabbox" && args[0] === "warmup") {
+      if (command === "/tmp/botbox" && args[0] === "warmup") {
         return { stdout: "ready lease cbx_abc123\n", stderr: "" };
       }
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             id: "cbx_abc123",
@@ -238,7 +238,7 @@ describe("mantis visual task runtime", () => {
           stderr: "",
         };
       }
-      if (command === "/tmp/crabbox" && args[0] === "record") {
+      if (command === "/tmp/botbox" && args[0] === "record") {
         const outputPath = requireArgAfter(args, "--output");
         const outputDir = requireArgAfter(args, "--output-dir");
         stagedVideoPath = outputPath;
@@ -262,14 +262,14 @@ describe("mantis visual task runtime", () => {
             },
           })}\n`,
         );
-        throw new Error("crabbox record failed after writing video");
+        throw new Error("botbox record failed after writing video");
       }
       return { stdout: "", stderr: "" };
     });
 
     const result = await runMantisVisualTask({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       env: { PATH: process.env.PATH },
       now: () => new Date("2026-05-04T12:00:00.000Z"),
       outputDir: ".artifacts/qa-e2e/mantis/visual-task-recording-preserved",
@@ -294,8 +294,8 @@ describe("mantis visual task runtime", () => {
       status: string;
     };
     expect(summary.artifacts?.videoPath).toBe(result.videoPath);
-    expect(summary.error).toBe("crabbox record failed after writing video");
-    expect(summary.recording?.error).toBe("crabbox record failed after writing video");
+    expect(summary.error).toBe("botbox record failed after writing video");
+    expect(summary.recording?.error).toBe("botbox record failed after writing video");
     expect(summary.recording?.required).toBe(true);
     expect(summary.status).toBe("fail");
   });
@@ -304,7 +304,7 @@ describe("mantis visual task runtime", () => {
     const commands: { args: readonly string[]; command: string }[] = [];
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
       commands.push({ command, args });
-      if (command === "/tmp/crabbox" && args[0] === "screenshot") {
+      if (command === "/tmp/botbox" && args[0] === "screenshot") {
         const outputPath = requireArgAfter(args, "--output");
         await fs.mkdir(path.dirname(outputPath), { recursive: true });
         await fs.writeFile(outputPath, "png");
@@ -335,7 +335,7 @@ describe("mantis visual task runtime", () => {
     const result = await runMantisVisualDriver({
       browserUrl: "https://example.net",
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       env: { PATH: process.env.PATH },
       expectText: "Example Domain",
       leaseId: "cbx_abc123",
@@ -349,8 +349,8 @@ describe("mantis visual task runtime", () => {
 
     expect(result.status).toBe("pass");
     expect(commands.map((entry) => [entry.command, entry.args[0], entry.args[1]])).toEqual([
-      ["/tmp/crabbox", "desktop", "launch"],
-      ["/tmp/crabbox", "screenshot", "--provider"],
+      ["/tmp/botbox", "desktop", "launch"],
+      ["/tmp/botbox", "screenshot", "--provider"],
       ["pnpm", "--dir", repoRoot],
     ]);
     const launchArgs = commands.find((entry) => entry.args[0] === "desktop")?.args ?? [];
@@ -379,7 +379,7 @@ describe("mantis visual task runtime", () => {
 
   it("fails image-describe text checks when the model gives negative evidence that quotes the target", async () => {
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
-      if (command === "/tmp/crabbox" && args[0] === "screenshot") {
+      if (command === "/tmp/botbox" && args[0] === "screenshot") {
         const outputPath = requireArgAfter(args, "--output");
         await fs.mkdir(path.dirname(outputPath), { recursive: true });
         await fs.writeFile(outputPath, "png");
@@ -403,7 +403,7 @@ describe("mantis visual task runtime", () => {
 
     const result = await runMantisVisualDriver({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       expectText: "Example Domain",
       leaseId: "cbx_abc123",
       outputDir: ".artifacts/qa-e2e/mantis/visual-driver-negative",
@@ -422,7 +422,7 @@ describe("mantis visual task runtime", () => {
 
   it("fails metadata mode when text evidence is requested", async () => {
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
-      if (command === "/tmp/crabbox" && args[0] === "screenshot") {
+      if (command === "/tmp/botbox" && args[0] === "screenshot") {
         const outputPath = requireArgAfter(args, "--output");
         await fs.mkdir(path.dirname(outputPath), { recursive: true });
         await fs.writeFile(outputPath, "png");
@@ -432,7 +432,7 @@ describe("mantis visual task runtime", () => {
 
     const result = await runMantisVisualDriver({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       expectText: "Example Domain",
       leaseId: "cbx_abc123",
       outputDir: ".artifacts/qa-e2e/mantis/visual-driver-metadata",

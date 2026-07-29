@@ -784,22 +784,22 @@ Control traffic and workspace transfer use separate SSH connections. Both reuse 
 
 ### Crabbox profile
 
-The bundled `crabbox` provider provisions an SSH-capable lease through the local Crabbox CLI. The inner `settings.provider` selects the Crabbox backend; it is separate from the outer Bot provider id.
+The bundled `botbox` provider provisions an SSH-capable lease through the local Crabbox CLI. The inner `settings.provider` selects the Crabbox backend; it is separate from the outer Bot provider id.
 
 ```json5
 {
   cloudWorkers: {
     profiles: {
       production: {
-        provider: "crabbox",
+        provider: "botbox",
         install: "bundle", // Default; use "npm" only for a released gateway version.
         settings: {
           provider: "aws",
           class: "standard",
           ttl: "24h",
           idleTimeout: "60m",
-          // Optional absolute path. Default: sibling ../crabbox/bin/crabbox, then PATH.
-          binary: "/usr/local/bin/crabbox",
+          // Optional absolute path. Default: sibling ../botbox/bin/botbox, then PATH.
+          binary: "/usr/local/bin/botbox",
         },
         lifetime: {
           idleTimeoutMinutes: 60,
@@ -814,12 +814,12 @@ The bundled `crabbox` provider provisions an SSH-capable lease through the local
 - `settings.provider` (required): Crabbox backend passed through `--provider`. Use a backend whose inspect output includes an SSH endpoint; `aws` selects the direct AWS backend.
 - `settings.class` (required): Crabbox machine class passed to `--class`.
 - `settings.ttl` and `settings.idleTimeout` (required): positive Go duration strings passed to `--ttl` and `--idle-timeout`. These provider-side failsafes are distinct from Bot's stored `lifetime` policy below.
-- `settings.binary`: optional absolute Crabbox executable path. Without it, Bot checks the sibling Crabbox checkout, then executable entries on `PATH`, and finally invokes `crabbox` so a missing CLI remains a visible provider error.
+- `settings.binary`: optional absolute Crabbox executable path. Without it, Bot checks the sibling Crabbox checkout, then executable entries on `PATH`, and finally invokes `botbox` so a missing CLI remains a visible provider error.
 
-Unknown settings are rejected. Crabbox credentials and backend-specific account configuration remain owned by Crabbox; do not place them in `settings`. Bot invokes only the local CLI and makes no provider network calls from this plugin. Provisioning always passes `--keep=true`; Bot owns the external lifecycle and destroys the lease with `crabbox stop`.
+Unknown settings are rejected. Crabbox credentials and backend-specific account configuration remain owned by Crabbox; do not place them in `settings`. Bot invokes only the local CLI and makes no provider network calls from this plugin. Provisioning always passes `--keep=true`; Bot owns the external lifecycle and destroys the lease with `botbox stop`.
 
 <Note>
-  Bot resolves Crabbox's lease-local `sshKey` path through the provider-owned secret resolver and pins the authoritative `sshHostKey` returned by `crabbox inspect --json`. AWS admission also requires `providerMetadata.instanceProfileAttached`. Install Crabbox 0.38.1 or newer for this closed inspection contract.
+  Bot resolves Crabbox's lease-local `sshKey` path through the provider-owned secret resolver and pins the authoritative `sshHostKey` returned by `botbox inspect --json`. AWS admission also requires `providerMetadata.instanceProfileAttached`. Install Crabbox 0.38.1 or newer for this closed inspection contract.
 </Note>
 
 ### Static SSH development profile
@@ -852,9 +852,9 @@ Unknown settings are rejected. Crabbox credentials and backend-specific account 
 ```
 
 - `profiles`: named worker profiles with non-empty, whitespace-trimmed ids. Each profile selects a provider registered by a plugin.
-- `provider`: non-empty worker provider id. The examples use the bundled `crabbox` provider and the QA Lab `static-ssh` provider.
+- `provider`: non-empty worker provider id. The examples use the bundled `botbox` provider and the QA Lab `static-ssh` provider.
 - `install`: worker installation method. `"bundle"` (default) transfers a content-hashed bundle of the gateway's installed build and supports released, development, and unreleased versions. `"npm"` is an opt-in optimization for an unmodified packaged release; it installs `bot@<exact gateway version>` from the public npm registry and never installs `latest`.
-- Bundled provider plugins are selected automatically when configured, but explicit disables and `plugins.allow` still apply. Include the provider id (for example, `crabbox`) when an allowlist is configured. External provider plugins must also be installed and explicitly enabled.
+- Bundled provider plugins are selected automatically when configured, but explicit disables and `plugins.allow` still apply. Include the provider id (for example, `botbox`) when an allowlist is configured. External provider plugins must also be installed and explicitly enabled.
 - `settings`: provider-owned bounded JSON. The selected plugin defines and validates its keys; use [SecretRef objects](/gateway/secrets) for secret-bearing values. The static SSH provider requires `host`, `user`, `hostKey`, and `keyRef`; `port` defaults to `22`. `hostKey` must be one OpenSSH public host-key line (`algorithm base64`) obtained from the known host or another trusted channel, with no options prefix.
 - `lifetime.idleTimeoutMinutes`: positive integer minutes stored for later idle-reclamation policy.
 - `lifetime.maxLifetimeMinutes`: positive integer minutes stored for later lifecycle policy.

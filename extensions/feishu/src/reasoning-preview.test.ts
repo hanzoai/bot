@@ -1,6 +1,6 @@
 // Feishu tests cover reasoning preview plugin behavior.
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig } from "./bot-runtime-api.js";
+import type { BotConfig } from "./bot-runtime-api.js";
 import { resolveFeishuReasoningPreviewEnabled } from "./reasoning-preview.js";
 
 const { getSessionEntryMock } = vi.hoisted(() => ({
@@ -22,7 +22,7 @@ afterAll(() => {
 });
 
 describe("resolveFeishuReasoningPreviewEnabled", () => {
-  const emptyCfg: ClawdbotConfig = {};
+  const emptyCfg: BotConfig = {};
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -91,7 +91,7 @@ describe("resolveFeishuReasoningPreviewEnabled", () => {
       return entries[sessionKey as keyof typeof entries];
     });
 
-    const cfg: ClawdbotConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: { reasoningDefault: "stream" },
         list: [{ id: "Ops", reasoningDefault: "off" }],

@@ -316,7 +316,7 @@ describe("runIMessageCatchup", () => {
     expect(summary.replayed).toBe(5);
     // Oldest-first by rowid: 100, 101, 102, 103, 200 (chat 1's first 4, then chat 2's first).
     expect(dispatched).toEqual(["g-100", "g-101", "g-102", "g-103", "g-200"]);
-    // Regression for clawsweeper #79387 finding: the cursor must NOT
+    // Regression for botsweeper #79387 finding: the cursor must NOT
     // advance past the last dispatched row when perRunLimit truncates
     // the cross-chat page. Without the cap-aware watermark clamp, the
     // bridge would emit a watermark covering the raw rows it dropped

@@ -21,7 +21,7 @@ import {
 } from "./web-awesome.ts";
 
 // External rows of the footer identity menu. Docs-first: public docs pages over
-// raw GitHub, matching the ClawSweeper docs-link policy for user-facing copy.
+// raw GitHub, matching the BotSweeper docs-link policy for user-facing copy.
 const IDENTITY_MENU_LINKS: ReadonlyArray<{
   href: string;
   icon: IconName;

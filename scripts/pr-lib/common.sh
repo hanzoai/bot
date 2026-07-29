@@ -151,7 +151,7 @@ pr_contributor_allows_human_trailers() {
   normalized=$(printf '%s' "$contrib" | tr '[:upper:]' '[:lower:]')
 
   case "$normalized" in
-    ""|"null"|"app/"*|"codex"|"bot"|"clawsweeper"|"bot-clawsweeper"|"clawsweeper[bot]"|"bot-clawsweeper[bot]"|"steipete")
+    ""|"null"|"app/"*|"codex"|"bot"|"botsweeper"|"bot-botsweeper"|"botsweeper[bot]"|"bot-botsweeper[bot]"|"steipete")
       return 1
       ;;
   esac

@@ -309,7 +309,7 @@ provider-neutral for CLI, app, and Control UI consumers.
   when Anthropic reports them. An explicit Anthropic Admin API key, or an
   auto-detected `sk-ant-admin...` provider profile, instead shows 30-day
   organization cost and Messages API history.
-- **ClawRouter**: API key (`CLAWROUTER_API_KEY`). Shows a monthly budget window
+- **BotRouter**: API key (`CLAWROUTER_API_KEY`). Shows a monthly budget window
   and typed USD budget when configured; otherwise shows aggregate spend and a
   request/token/cost summary.
 - **DeepSeek**: API key via env/config/auth store (`DEEPSEEK_API_KEY`).

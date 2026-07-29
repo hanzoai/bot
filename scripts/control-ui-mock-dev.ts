@@ -1291,7 +1291,7 @@ async function createChatPickerScenario(
     sessionRow("agent:main:production-export", "Production export", baseTime - 75_000, {
       category: "Research",
       createdActor: MOCK_CREATOR_MIRA,
-      execCwd: "/Users/peter/Projects/clawdbot",
+      execCwd: "/Users/peter/Projects/bot",
     }),
     sessionRow("agent:main:model-budget", "Model budget review", baseTime - 80_000, {
       category: "Research",
@@ -1562,7 +1562,7 @@ async function createChatPickerScenario(
               home: "/Users/peter",
               entries: [
                 { name: "bot", path: "/Users/peter/Projects/bot" },
-                { name: "clawdbot", path: "/Users/peter/Projects/clawdbot" },
+                { name: "bot", path: "/Users/peter/Projects/bot" },
                 { name: "sweetistics", path: "/Users/peter/Projects/sweetistics" },
                 { name: "Peekaboo", path: "/Users/peter/Projects/Peekaboo" },
               ],
@@ -1598,9 +1598,9 @@ async function createChatPickerScenario(
             },
           },
           {
-            match: { repoRoot: "/Users/peter/Projects/clawdbot" },
+            match: { repoRoot: "/Users/peter/Projects/bot" },
             response: {
-              repoRoot: "/Users/peter/Projects/clawdbot",
+              repoRoot: "/Users/peter/Projects/bot",
               branches: [
                 { kind: "local", name: "main" },
                 { kind: "local", name: "steipete/storage-selector-design" },

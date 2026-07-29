@@ -1524,7 +1524,7 @@ describe("session cost usage", () => {
   });
 
   it("fills every calendar day in a bounded range that spans a spring-forward DST transition", async () => {
-    // Regression for the bug ClawSweeper flagged on PR #81467: a fixed-24h
+    // Regression for the bug BotSweeper flagged on PR #81467: a fixed-24h
     // millisecond step in `fillMissingDays` can skip an interior calendar
     // day across local-clock spring-forward (e.g. March 8, 2026 in
     // US/Mountain: 02:00 MST -> 03:00 MDT, so the day is only 23h long).

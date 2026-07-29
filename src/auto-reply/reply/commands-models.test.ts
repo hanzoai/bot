@@ -879,18 +879,18 @@ describe("handleModelsCommand", () => {
 
   it("filters nested provider namespaces with the same prefix policy as enforcement", async () => {
     modelCatalogMocks.loadModelCatalog.mockResolvedValue([
-      { provider: "clawrouter", id: "anthropic/claude-haiku-4-5", name: "Claude Haiku" },
-      { provider: "clawrouter", id: "google/gemini-3.5-flash", name: "Gemini Flash" },
+      { provider: "botrouter", id: "anthropic/claude-haiku-4-5", name: "Claude Haiku" },
+      { provider: "botrouter", id: "google/gemini-3.5-flash", name: "Gemini Flash" },
       { provider: "openai", id: "gpt-5.6-sol", name: "GPT-5.6 Sol" },
     ]);
-    modelProviderAuthMocks.authenticatedProviders = new Set(["clawrouter", "openai"]);
+    modelProviderAuthMocks.authenticatedProviders = new Set(["botrouter", "openai"]);
 
     const data = await buildModelsProviderData({
-      agents: { defaults: { modelPolicy: { allow: ["clawrouter/anthropic/*"] } } },
+      agents: { defaults: { modelPolicy: { allow: ["botrouter/anthropic/*"] } } },
     } as BotConfig);
 
-    expect(data.providers).toEqual(["clawrouter"]);
-    expect([...expectDefined(data.byProvider.get("clawrouter"), "clawrouter models")]).toEqual([
+    expect(data.providers).toEqual(["botrouter"]);
+    expect([...expectDefined(data.byProvider.get("botrouter"), "botrouter models")]).toEqual([
       "anthropic/claude-haiku-4-5",
     ]);
   });

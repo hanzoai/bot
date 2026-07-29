@@ -15,7 +15,7 @@ debug signal rather than a guess.
 - `docs/reference/test.md` for local test commands.
 - `docs/tools/code-mode.md` for code-mode exec/wait and tool catalog rules.
 - Use `$bot-testing` for choosing test lanes.
-- Use `$crabbox` for broad, Docker, package, Linux, live-key, or CI-parity proof.
+- Use `$botbox` for broad, Docker, package, Linux, live-key, or CI-parity proof.
 
 ## Default Loop
 
@@ -100,7 +100,7 @@ bot logs --follow
 - Worker/dist/lazy import/package surface: targeted tests plus `pnpm build`.
 - Live provider/model behavior: same provider/model with debug flags and a real
   key if available.
-- Docker/package/Linux/CI-parity: `$crabbox`.
+- Docker/package/Linux/CI-parity: `$botbox`.
 - CI failure: exact SHA, relevant job only, logs only after failure/completion.
 
 ## Output Habit

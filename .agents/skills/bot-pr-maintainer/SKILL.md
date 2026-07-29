@@ -177,7 +177,7 @@ Output only qualifying candidates, with: ref, surface, proof, cause, fix sketch,
 - Always answer: bug/behavior being fixed, PR/issue URL and affected surface, provenance for regressions when traceable, and best-fix verdict.
 - For bug/regression fixes, include a compact `Provenance:` line after cause/root-cause when a bounded history pass can identify it. Use `git log -S/-G`, `git blame`, linked PRs/issues, and tests.
 - Provenance must separate roles when they differ: blamed code author username, blamed PR author username, blamed PR merger/committer username, automerge trigger when known, current PR author username, PR number, and date. Do not collapse them into one "introduced by" actor.
-- If the blamed PR was merged by `clawsweeper[bot]` or another automation, identify the human trigger when practical. Check live PR timeline/comments first; if rate-limited, use gitcrawl/cache or public PR HTML. Look for maintainer command comments such as `@clawsweeper automerge`, `/landpr`, labels/events that armed automerge, and ClawSweeper status comments. Report `automerge triggered by @login`; if not found, say trigger unknown rather than naming the bot as the human decision-maker.
+- If the blamed PR was merged by `botsweeper[bot]` or another automation, identify the human trigger when practical. Check live PR timeline/comments first; if rate-limited, use gitcrawl/cache or public PR HTML. Look for maintainer command comments such as `@botsweeper automerge`, `/landpr`, labels/events that armed automerge, and BotSweeper status comments. Report `automerge triggered by @login`; if not found, say trigger unknown rather than naming the bot as the human decision-maker.
 - For any confirmed bug, run `git blame` on the implicated line(s) after identifying the root cause. Report who broke it as the blamed PR merger/committer, and also name the blamed code author. Include the PR number. If no PR is traceable, use the blamed commit as the provenance: commit SHA, date, and author username. Do not guess a merger or frame missing PR metadata as a separate finding.
 - Phrase provenance as `introduced by`, `made visible by`, or `carried forward by`, with confidence (`clear`, `likely`, `unknown`). If unclear, say what evidence is missing instead of guessing. For features, docs, and refactors, use `Provenance: N/A` or omit it when no broken behavior is being fixed.
 - Keep summaries compact, but include enough proof that the verdict is auditable without rereading the PR.
@@ -227,7 +227,7 @@ If the best-fix answer is only "maybe", keep reading or state the missing eviden
 ## Enforce the bug-fix evidence bar
 
 - Never merge a bug-fix PR based only on issue text, PR text, or AI rationale.
-- Whenever feasible, use Crabbox (`$crabbox`) for end-to-end verification before
+- Whenever feasible, use Crabbox (`$botbox`) for end-to-end verification before
   commenting that a bug is unreproducible, closing an issue, or opening/landing
   a fix PR. Prefer a real packaged/Docker/live lane that exercises the reported
   user flow over unit-only proof.
@@ -289,7 +289,7 @@ gh search issues --repo hanzoai/bot --match title,body --limit 50 \
   Tests that source `scripts/pr-lib/*` directly must provide the same command
   surface instead of weakening the production wrapper for a minimal test image.
 - At the start of code-changing or landing work that will need tests or heavy
-  proof, classify source trust and pre-warm the safe backend through `$crabbox`
+  proof, classify source trust and pre-warm the safe backend through `$botbox`
   in the background. Trusted maintainer code defaults to Blacksmith Testbox;
   contributor/fork code stays untrusted unless a maintainer explicitly approves
   credentialed execution after review; it uses secretless fork CI or
@@ -300,11 +300,11 @@ gh search issues --repo hanzoai/bot --match title,body --limit 50 \
   with `--fresh-pr`, unset and reject any resolved AWS instance profile, verify
   trusted IMDS reports no IAM credentials, bind the lease to the reviewed head
   SHA, and never execute its local wrapper or config. Upload trusted
-  `scripts/crabbox-untrusted-bootstrap.sh` from clean `main` alongside
+  `scripts/botbox-untrusted-bootstrap.sh` from clean `main` alongside
   `--fresh-pr`; it installs the pinned Node/pnpm runtime before executing PR
   code. Force public networking, disable and
   unset inherited Tailscale/exit-node settings, and fail closed unless
-  `crabbox inspect` reports no Tailscale state before any script. Rewarm after
+  `botbox inspect` reports no Tailscale state before any script. Rewarm after
   any head change. Continue
   review/editing while it hydrates, sync every run, reuse the lease, then stop
   it before handoff. Skip warmup for read-only triage and docs-only work.

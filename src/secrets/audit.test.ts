@@ -822,15 +822,15 @@ describe("secrets audit", () => {
     ).toBe(true);
   });
 
-  it("scans .env in legacy .clawdbot state directory via automatic fallback", async () => {
+  it("scans .env in legacy .bot state directory via automatic fallback", async () => {
     // Do NOT set BOT_STATE_DIR or BOT_CONFIG_PATH — rely on
     // resolveStateDir's automatic legacy-directory fallback. A controlled
-    // HOME that contains only .clawdbot (no .bot) exercises the exact
+    // HOME that contains only .bot (no .bot) exercises the exact
     // path the old resolveConfigDir call could not reach: resolveConfigDir
     // always returns $HOME/.bot, so it would miss the .env inside
-    // .clawdbot.  resolveStateDir finds .clawdbot via its legacy-dir scan.
+    // .bot.  resolveStateDir finds .bot via its legacy-dir scan.
     const homeDir = tempDirs.make("bot-secrets-audit-legacy-");
-    const legacyStateDir = path.join(homeDir, ".clawdbot");
+    const legacyStateDir = path.join(homeDir, ".bot");
     const configPath = path.join(legacyStateDir, "bot.json");
     const envPath = path.join(legacyStateDir, ".env");
     const agentDir = path.join(legacyStateDir, "agents", "main", "agent");

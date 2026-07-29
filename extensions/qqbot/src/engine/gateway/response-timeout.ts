@@ -18,7 +18,7 @@ import {
  *   `RESPONSE_TIMEOUT = 300_000` watchdog that quietly undercut the
  *   configured ceiling.
  *
- * Fix shape (clawsweeper `clawsweeper:fix-shape-clear`):
+ * Fix shape (botsweeper `botsweeper:fix-shape-clear`):
  *   Don't add a new QQBot-only knob. Instead derive the QQBot wait
  *   budget from the existing agent/provider timeout settings the user
  *   already configured:

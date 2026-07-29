@@ -48,14 +48,14 @@ describe("shared/node-match", () => {
     ).toBe("mac-studio");
   });
 
-  it("prefers a unique current Bot client over a legacy clawdbot client", () => {
+  it("prefers a unique current Bot client over a legacy bot client", () => {
     expect(
       resolveNodeIdFromCandidates(
         [
           {
             nodeId: "legacy-mac",
             displayName: "Peter’s Mac Studio",
-            clientId: "clawdbot-macos",
+            clientId: "bot-macos",
             connected: false,
           },
           {
@@ -113,7 +113,7 @@ describe("shared/node-match", () => {
           {
             nodeId: "legacy-mac",
             displayName: "Peter’s Mac Studio",
-            clientId: "clawdbot-macos",
+            clientId: "bot-macos",
             connected: true,
           },
           {

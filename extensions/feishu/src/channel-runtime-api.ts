@@ -3,7 +3,7 @@ export type {
   ChannelMessageActionName,
   ChannelMeta,
   ChannelPlugin,
-  ClawdbotConfig,
+  BotConfig,
 } from "../runtime-api.js";
 
 export { DEFAULT_ACCOUNT_ID } from "bot/plugin-sdk/account-resolution";

@@ -820,7 +820,7 @@ describe("iMessage approval reactions", () => {
   });
 
   it("resolves a reaction when the approver was configured with a service-prefixed allowFrom entry", async () => {
-    // Regression test for the ClawSweeper-flagged normalizer bug: a previous
+    // Regression test for the BotSweeper-flagged normalizer bug: a previous
     // version of normalizeIMessageApproverId rejected service-prefixed direct
     // handles (`imessage:+...`, `sms:+...`, `auto:+...`) before stripping the
     // prefix, so the approver list collapsed to empty and reaction resolution
@@ -859,7 +859,7 @@ describe("iMessage approval reactions", () => {
   });
 
   it("resolves a reaction when the binding was registered under a `p:0/…` prefixed GUID and the tapback surfaces both forms", async () => {
-    // Regression for the second ClawSweeper P1 finding: imsg can return
+    // Regression for the second BotSweeper P1 finding: imsg can return
     // `p:0/<guid>` as the outbound guid, so send.ts registers the binding
     // under that prefixed key. The inbound tapback's `targetGuid` is the
     // normalized (unprefixed) form, but `targetGuids` contains BOTH the

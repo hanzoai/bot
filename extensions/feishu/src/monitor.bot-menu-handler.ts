@@ -1,6 +1,6 @@
 // Feishu plugin module implements monitor.bot menu handler behavior.
 import { isRecord, readStringValue as readString } from "bot/plugin-sdk/string-coerce-runtime";
-import type { ClawdbotConfig, HistoryEntry, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
+import type { BotConfig, HistoryEntry, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
 import { handleFeishuMessage, type FeishuMessageEvent } from "./bot.js";
 import { maybeHandleFeishuQuickActionMenu } from "./card-ux-launcher.js";
 import { claimUnprocessedFeishuMessage, forgetProcessedFeishuMessage } from "./dedup.js";
@@ -47,7 +47,7 @@ function parseFeishuBotMenuEvent(value: unknown): FeishuBotMenuEvent | null {
 }
 
 export function createFeishuBotMenuHandler(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   accountId: string;
   runtime?: RuntimeEnv;
   channelRuntime?: PluginRuntime["channel"];

@@ -3470,7 +3470,7 @@ describe("message tool boot-echo guard", () => {
     setBootEchoContextForSession("agent:main", longBootPrompt);
 
     // The model is paraphrasing out the wrapper but copying the BOOT.md
-    // sentence verbatim — exactly the leak vector clawsweeper called out
+    // sentence verbatim — exactly the leak vector botsweeper called out
     // on #75128 that the marker-only strip would miss.
     const echoedText =
       "Here is what I was told: When you wake up each morning, send a thoughtful greeting to the operator over the configured channel";

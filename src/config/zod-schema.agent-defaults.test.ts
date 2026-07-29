@@ -87,7 +87,7 @@ describe("agent defaults schema", () => {
             allow: [
               "openai/gpt-5.6-sol",
               "provider/a/b/c/d/e/f",
-              "clawrouter/anthropic/*",
+              "botrouter/anthropic/*",
               "provider/a/b/c/d/*",
               "sonnet",
               "openrouter:free",

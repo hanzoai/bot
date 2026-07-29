@@ -585,15 +585,15 @@ describe("scripts/changed-lanes", () => {
   });
 
   it("ignores local Crabbox metadata in the default local diff", () => {
-    const dir = makeTempRepoRoot(tempDirs, "bot-changed-lanes-crabbox-");
+    const dir = makeTempRepoRoot(tempDirs, "bot-changed-lanes-botbox-");
     git(dir, ["init", "-q", "--initial-branch=main"]);
-    writeFileSync(path.join(dir, ".gitignore"), ".crabbox/\n", "utf8");
+    writeFileSync(path.join(dir, ".gitignore"), ".botbox/\n", "utf8");
     writeFileSync(path.join(dir, "README.md"), "initial\n", "utf8");
     commitAll(dir, "initial");
 
-    mkdirSync(path.join(dir, ".crabbox"), { recursive: true });
-    writeFileSync(path.join(dir, ".crabbox", "capture-files.txt"), "stdout.log\n", "utf8");
-    writeFileSync(path.join(dir, ".crabbox", "capture-manifest.txt"), "stdout.log\t12\n", "utf8");
+    mkdirSync(path.join(dir, ".botbox"), { recursive: true });
+    writeFileSync(path.join(dir, ".botbox", "capture-files.txt"), "stdout.log\n", "utf8");
+    writeFileSync(path.join(dir, ".botbox", "capture-manifest.txt"), "stdout.log\t12\n", "utf8");
 
     const result = runChangedLanesCli(dir, ["--json", "--base", "HEAD"]);
 
@@ -1096,7 +1096,7 @@ describe("scripts/changed-lanes", () => {
     expect(changedCheckRequiresRemote(result)).toBe(true);
 
     expect(buildChangedCheckCrabboxArgs(["--base", "origin/main", "--head", "HEAD"])).toEqual([
-      "scripts/crabbox-wrapper.mjs",
+      "scripts/botbox-wrapper.mjs",
       "run",
       "--provider",
       "blacksmith-testbox",

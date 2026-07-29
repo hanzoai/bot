@@ -100,7 +100,7 @@ describe("oauth.http fetchWithTimeout body byte cap", () => {
 // blocks 127.0.0.1 by design) and exercise `readResponseWithLimit` directly
 // against a real `http.createServer` listener — the same helper that
 // `fetchWithTimeout` calls inside its try/finally block. Captured vitest
-// output for these two tests is the ClawSweeper "real behavior proof" required
+// output for these two tests is the BotSweeper "real behavior proof" required
 // before merge.
 describe("oauth.http bounded-read real wire proof (loopback http.createServer)", () => {
   it("caps an oversized body streamed chunked over real wire", async () => {

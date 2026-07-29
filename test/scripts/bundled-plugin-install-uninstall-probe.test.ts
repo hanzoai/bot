@@ -1611,7 +1611,7 @@ describe("bundled plugin install/uninstall probe", () => {
   it("accepts native Windows bundled source paths when asserting install state", () => {
     const root = makePackageRoot();
     const stateDir = path.join(root, "state");
-    const windowsSourcePath = "C:\\crabbox\\qa-windows\\dist\\extensions\\nostr";
+    const windowsSourcePath = "C:\\botbox\\qa-windows\\dist\\extensions\\nostr";
     fs.mkdirSync(path.join(stateDir, "plugins"), { recursive: true });
     fs.writeFileSync(
       path.join(stateDir, "bot.json"),
@@ -1727,7 +1727,7 @@ describe("bundled plugin install/uninstall probe", () => {
     fs.writeFileSync(
       path.join(stateDir, "bot.json"),
       JSON.stringify({
-        plugins: { load: { paths: ["C:\\crabbox\\qa-windows\\dist\\extensions\\nostr"] } },
+        plugins: { load: { paths: ["C:\\botbox\\qa-windows\\dist\\extensions\\nostr"] } },
       }),
       "utf8",
     );

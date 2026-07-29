@@ -28,10 +28,10 @@ describe("mantis desktop browser smoke runtime", () => {
     const runner = vi.fn(
       async (command: string, args: readonly string[], options: { env?: NodeJS.ProcessEnv }) => {
         commands.push({ command, args, env: options.env });
-        if (command === "/tmp/crabbox" && args[0] === "warmup") {
+        if (command === "/tmp/botbox" && args[0] === "warmup") {
           return { stdout: "ready lease cbx_abc123\n", stderr: "" };
         }
-        if (command === "/tmp/crabbox" && args[0] === "inspect") {
+        if (command === "/tmp/botbox" && args[0] === "inspect") {
           return {
             stdout: `${JSON.stringify({
               host: "203.0.113.10",
@@ -40,7 +40,7 @@ describe("mantis desktop browser smoke runtime", () => {
               slug: "brisk-mantis",
               sshKey: "/tmp/key",
               sshPort: "2222",
-              sshUser: "crabbox",
+              sshUser: "botbox",
               state: "active",
             })}\n`,
             stderr: "",
@@ -64,7 +64,7 @@ describe("mantis desktop browser smoke runtime", () => {
     const result = await runMantisDesktopBrowserSmoke({
       browserUrl: "https://bot.ai/docs",
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       env: runtimeEnv,
       htmlFile: "qa-artifacts/timeline.html",
       now: () => new Date("2026-05-04T12:00:00.000Z"),
@@ -74,11 +74,11 @@ describe("mantis desktop browser smoke runtime", () => {
 
     expect(result.status).toBe("pass");
     expect(commands.map((entry) => [entry.command, entry.args[0]])).toEqual([
-      ["/tmp/crabbox", "warmup"],
-      ["/tmp/crabbox", "inspect"],
-      ["/tmp/crabbox", "run"],
+      ["/tmp/botbox", "warmup"],
+      ["/tmp/botbox", "inspect"],
+      ["/tmp/botbox", "run"],
       ["rsync", "-az"],
-      ["/tmp/crabbox", "stop"],
+      ["/tmp/botbox", "stop"],
     ]);
     expect(commands.map((entry) => entry.env)).toEqual(commands.map(() => runtimeEnv));
     const rsyncArgs = commands.find((entry) => entry.command === "rsync")?.args ?? [];
@@ -87,10 +87,10 @@ describe("mantis desktop browser smoke runtime", () => {
     expect(excludeIndex).toBeGreaterThanOrEqual(0);
     expect(rsyncArgs[excludeIndex + 1]).toBe("chrome-profile/**");
     expect(rsyncArgs).toContain(
-      "crabbox@203.0.113.10:/tmp/bot-mantis-desktop-2026-05-04T12-00-00-000Z/",
+      "botbox@203.0.113.10:/tmp/bot-mantis-desktop-2026-05-04T12-00-00-000Z/",
     );
     const remoteScript = commands
-      .find((entry) => entry.command === "/tmp/crabbox" && entry.args[0] === "run")
+      .find((entry) => entry.command === "/tmp/botbox" && entry.args[0] === "run")
       ?.args.at(-1);
     expect(remoteScript).toContain("${BROWSER:-}");
     expect(remoteScript).toContain("${CHROME_BIN:-}");
@@ -110,16 +110,16 @@ describe("mantis desktop browser smoke runtime", () => {
     await expect(fs.readFile(result.videoPath ?? "", "utf8")).resolves.toBe("mp4");
     const summary = JSON.parse(await fs.readFile(result.summaryPath, "utf8")) as {
       browserUrl: string;
-      crabbox: { id: string; vncCommand: string };
+      botbox: { id: string; vncCommand: string };
       htmlFile?: string;
       status: string;
     };
     expect(summary.browserUrl).toMatch(/^file:\/\//u);
     expect(summary.htmlFile).toBe(path.join(repoRoot, "qa-artifacts", "timeline.html"));
     expect(summary.status).toBe("pass");
-    expect(summary.crabbox.id).toBe("cbx_abc123");
-    expect(summary.crabbox.vncCommand).toBe(
-      "/tmp/crabbox vnc --provider hetzner --id cbx_abc123 --open",
+    expect(summary.botbox.id).toBe("cbx_abc123");
+    expect(summary.botbox.vncCommand).toBe(
+      "/tmp/botbox vnc --provider hetzner --id cbx_abc123 --open",
     );
   });
 
@@ -129,7 +129,7 @@ describe("mantis desktop browser smoke runtime", () => {
     await expect(
       runMantisDesktopBrowserSmoke({
         commandRunner: runner,
-        crabboxBin: "/tmp/crabbox",
+        botboxBin: "/tmp/botbox",
         htmlFile: "../outside.html",
         outputDir: ".artifacts/qa-e2e/mantis/desktop-browser-outside",
         repoRoot,
@@ -142,14 +142,14 @@ describe("mantis desktop browser smoke runtime", () => {
     const commands: { args: readonly string[]; command: string }[] = [];
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
       commands.push({ command, args });
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             host: "203.0.113.10",
             id: "cbx_existing",
             provider: "hetzner",
             sshKey: "/tmp/key",
-            sshUser: "crabbox",
+            sshUser: "botbox",
           })}\n`,
           stderr: "",
         };
@@ -167,7 +167,7 @@ describe("mantis desktop browser smoke runtime", () => {
       browserProfileArchiveEnv: "MANTIS_DISCORD_VIEWER_CHROME_PROFILE_TGZ_B64",
       browserProfileDir: "$HOME/.config/bot-mantis/discord-viewer-chrome-profile",
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       leaseId: "cbx_existing",
       outputDir: ".artifacts/qa-e2e/mantis/desktop-browser-profile",
       repoRoot,
@@ -177,7 +177,7 @@ describe("mantis desktop browser smoke runtime", () => {
     expect(result.status).toBe("pass");
 
     const remoteScript = commands
-      .find((entry) => entry.command === "/tmp/crabbox" && entry.args[0] === "run")
+      .find((entry) => entry.command === "/tmp/botbox" && entry.args[0] === "run")
       ?.args.at(-1);
     expect(remoteScript).toContain("${MANTIS_DISCORD_VIEWER_CHROME_PROFILE_TGZ_B64:-}");
     expect(remoteScript).toContain(
@@ -195,7 +195,7 @@ describe("mantis desktop browser smoke runtime", () => {
       runMantisDesktopBrowserSmoke({
         browserProfileArchiveEnv: "BAD-NAME",
         commandRunner: runner,
-        crabboxBin: "/tmp/crabbox",
+        botboxBin: "/tmp/botbox",
         outputDir: ".artifacts/qa-e2e/mantis/desktop-browser-profile",
         repoRoot,
       }),
@@ -210,7 +210,7 @@ describe("mantis desktop browser smoke runtime", () => {
       runMantisDesktopBrowserSmoke({
         browserProfileDir: "relative-profile",
         commandRunner: runner,
-        crabboxBin: "/tmp/crabbox",
+        botboxBin: "/tmp/botbox",
         outputDir: ".artifacts/qa-e2e/mantis/desktop-browser-profile",
         repoRoot,
       }),
@@ -222,10 +222,10 @@ describe("mantis desktop browser smoke runtime", () => {
     const commands: { args: readonly string[]; command: string }[] = [];
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
       commands.push({ command, args });
-      if (command === "/tmp/crabbox" && args[0] === "warmup") {
+      if (command === "/tmp/botbox" && args[0] === "warmup") {
         return { stdout: "ready: tbx_abc-123_more\n", stderr: "" };
       }
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             host: "203.0.113.10",
@@ -233,7 +233,7 @@ describe("mantis desktop browser smoke runtime", () => {
             provider: "blacksmith-testbox",
             sshKey: "/tmp/key",
             sshPort: "2222",
-            sshUser: "crabbox",
+            sshUser: "botbox",
             state: "active",
           })}\n`,
           stderr: "",
@@ -251,7 +251,7 @@ describe("mantis desktop browser smoke runtime", () => {
 
     const result = await runMantisDesktopBrowserSmoke({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       now: () => new Date("2026-05-04T12:30:00.000Z"),
       outputDir: ".artifacts/qa-e2e/mantis/desktop-browser-testbox",
       provider: "blacksmith-testbox",
@@ -260,21 +260,21 @@ describe("mantis desktop browser smoke runtime", () => {
 
     expect(result.status).toBe("pass");
     const commandWithLeaseId = commands.find(
-      (entry) => entry.command === "/tmp/crabbox" && entry.args.includes("tbx_abc-123_more"),
+      (entry) => entry.command === "/tmp/botbox" && entry.args.includes("tbx_abc-123_more"),
     );
     expect(commandWithLeaseId?.args).toContain("--id");
     const summary = JSON.parse(await fs.readFile(result.summaryPath, "utf8")) as {
-      crabbox: { id: string; provider: string };
+      botbox: { id: string; provider: string };
     };
-    expect(summary.crabbox.id).toBe("tbx_abc-123_more");
-    expect(summary.crabbox.provider).toBe("blacksmith-testbox");
+    expect(summary.botbox.id).toBe("tbx_abc-123_more");
+    expect(summary.botbox.provider).toBe("blacksmith-testbox");
   });
 
   it("keeps an existing lease and writes failure reports when the remote run fails", async () => {
     const commands: { args: readonly string[]; command: string }[] = [];
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
       commands.push({ command, args });
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             host: "203.0.113.10",
@@ -282,12 +282,12 @@ describe("mantis desktop browser smoke runtime", () => {
             provider: "hetzner",
             sshKey: "/tmp/key",
             sshPort: "2222",
-            sshUser: "crabbox",
+            sshUser: "botbox",
           })}\n`,
           stderr: "",
         };
       }
-      if (command === "/tmp/crabbox" && args[0] === "run") {
+      if (command === "/tmp/botbox" && args[0] === "run") {
         throw new Error("remote chrome failed");
       }
       return { stdout: "", stderr: "" };
@@ -295,7 +295,7 @@ describe("mantis desktop browser smoke runtime", () => {
 
     const result = await runMantisDesktopBrowserSmoke({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       leaseId: "cbx_existing",
       outputDir: ".artifacts/qa-e2e/mantis/desktop-browser-fail",
       repoRoot,
@@ -303,8 +303,8 @@ describe("mantis desktop browser smoke runtime", () => {
 
     expect(result.status).toBe("fail");
     expect(commands.map((entry) => [entry.command, entry.args[0]])).toEqual([
-      ["/tmp/crabbox", "inspect"],
-      ["/tmp/crabbox", "run"],
+      ["/tmp/botbox", "inspect"],
+      ["/tmp/botbox", "run"],
     ]);
     await expect(fs.readFile(path.join(result.outputDir, "error.txt"), "utf8")).resolves.toContain(
       "remote chrome failed",

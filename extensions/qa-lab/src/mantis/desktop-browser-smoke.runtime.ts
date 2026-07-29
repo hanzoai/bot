@@ -17,14 +17,14 @@ import {
   sshCommand,
   stopCrabbox,
   warmupCrabbox,
-} from "./crabbox-runtime.js";
+} from "./botbox-runtime.js";
 
 export type MantisDesktopBrowserSmokeOptions = {
   browserProfileArchiveEnv?: string;
   browserProfileDir?: string;
   browserUrl?: string;
   commandRunner?: CommandRunner;
-  crabboxBin?: string;
+  botboxBin?: string;
   env?: NodeJS.ProcessEnv;
   htmlFile?: string;
   idleTimeout?: string;
@@ -57,7 +57,7 @@ type MantisDesktopBrowserSmokeSummary = {
   };
   browserUrl: string;
   htmlFile?: string;
-  crabbox: {
+  botbox: {
     bin: string;
     createdLease: boolean;
     id: string;
@@ -259,11 +259,11 @@ function renderReport(summary: MantisDesktopBrowserSmokeSummary) {
     "",
     "## Crabbox",
     "",
-    `- Provider: ${summary.crabbox.provider}`,
-    `- Lease: ${summary.crabbox.id}${summary.crabbox.slug ? ` (${summary.crabbox.slug})` : ""}`,
-    `- Created by run: ${summary.crabbox.createdLease}`,
-    `- State: ${summary.crabbox.state ?? "unknown"}`,
-    `- VNC: \`${summary.crabbox.vncCommand}\``,
+    `- Provider: ${summary.botbox.provider}`,
+    `- Lease: ${summary.botbox.id}${summary.botbox.slug ? ` (${summary.botbox.slug})` : ""}`,
+    `- Created by run: ${summary.botbox.createdLease}`,
+    `- State: ${summary.botbox.state ?? "unknown"}`,
+    `- VNC: \`${summary.botbox.vncCommand}\``,
     "",
     "## Artifacts",
     "",
@@ -322,10 +322,10 @@ export async function runMantisDesktopBrowserSmoke(
   );
   const summaryPath = path.join(outputDir, "mantis-desktop-browser-smoke-summary.json");
   const reportPath = path.join(outputDir, "mantis-desktop-browser-smoke-report.md");
-  const crabboxBin = await resolveCrabboxBin({
+  const botboxBin = await resolveCrabboxBin({
     env,
     envName: CRABBOX_BIN_ENV,
-    explicit: opts.crabboxBin,
+    explicit: opts.botboxBin,
     repoRoot,
   });
   const provider =
@@ -375,7 +375,7 @@ export async function runMantisDesktopBrowserSmoke(
     leaseId =
       leaseId ??
       (await warmupCrabbox({
-        crabboxBin,
+        botboxBin,
         cwd: repoRoot,
         env,
         idleTimeout,
@@ -385,7 +385,7 @@ export async function runMantisDesktopBrowserSmoke(
         ttl,
       }));
     const inspected = await inspectCrabbox({
-      crabboxBin,
+      botboxBin,
       cwd: repoRoot,
       env,
       leaseId,
@@ -393,7 +393,7 @@ export async function runMantisDesktopBrowserSmoke(
       runner,
     });
     await runCommand({
-      command: crabboxBin,
+      command: botboxBin,
       args: [
         "run",
         "--provider",
@@ -442,14 +442,14 @@ export async function runMantisDesktopBrowserSmoke(
       },
       browserUrl,
       htmlFile,
-      crabbox: {
-        bin: crabboxBin,
+      botbox: {
+        bin: botboxBin,
         createdLease,
         id: leaseId,
         provider,
         slug: inspected.slug,
         state: inspected.state,
-        vncCommand: `${crabboxBin} vnc --provider ${provider} --id ${leaseId} --open`,
+        vncCommand: `${botboxBin} vnc --provider ${provider} --id ${leaseId} --open`,
       },
       finishedAt: new Date().toISOString(),
       outputDir,
@@ -473,13 +473,13 @@ export async function runMantisDesktopBrowserSmoke(
       },
       browserUrl,
       htmlFile,
-      crabbox: {
-        bin: crabboxBin,
+      botbox: {
+        bin: botboxBin,
         createdLease,
         id: leaseId ?? "unallocated",
         provider,
         vncCommand: leaseId
-          ? `${crabboxBin} vnc --provider ${provider} --id ${leaseId} --open`
+          ? `${botboxBin} vnc --provider ${provider} --id ${leaseId} --open`
           : "unallocated",
       },
       error: formatErrorMessage(error),
@@ -503,7 +503,7 @@ export async function runMantisDesktopBrowserSmoke(
       await fs.writeFile(reportPath, renderReport(summary), "utf8");
     }
     if (summary?.status === "pass" && createdLease && leaseId && !keepLease) {
-      await stopCrabbox({ crabboxBin, cwd: repoRoot, env, leaseId, provider, runner });
+      await stopCrabbox({ botboxBin, cwd: repoRoot, env, leaseId, provider, runner });
     }
   }
 }

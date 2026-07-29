@@ -1,18 +1,18 @@
 ---
-summary: "How Barnacle and ClawSweeper feedback helps move Bot pull requests through review."
+summary: "How Barnacle and BotSweeper feedback helps move Bot pull requests through review."
 read_when:
-  - Following up after Barnacle or ClawSweeper feedback
-  - Asking ClawSweeper for review
-  - Debugging Barnacle, ClawSweeper, stale labels, or auto-closures
+  - Following up after Barnacle or BotSweeper feedback
+  - Asking BotSweeper for review
+  - Debugging Barnacle, BotSweeper, stale labels, or auto-closures
 title: "Pull request review flow"
 sidebarTitle: "PR review flow"
 ---
 
 This page explains the review flow after you open or update an Bot pull
-request: what Barnacle and ClawSweeper do, how to improve the PR from their
+request: what Barnacle and BotSweeper do, how to improve the PR from their
 feedback, and what to check when automation stays quiet.
 
-Barnacle and ClawSweeper help maintainers keep the review queue usable. They do
+Barnacle and BotSweeper help maintainers keep the review queue usable. They do
 not replace maintainer judgment.
 
 ## Barnacle
@@ -36,48 +36,48 @@ run contributor code.
 Most routing labels are maintainer or automation signals, so contributors do
 not need to add labels themselves.
 
-## ClawSweeper
+## BotSweeper
 
-ClawSweeper is the AI-assisted review and maintenance bot for Bot
+BotSweeper is the AI-assisted review and maintenance bot for Bot
 repositories. It can review PRs, evaluate proof, leave durable review comments,
 and help maintainers with guarded repair or automerge flows.
 
-A positive ClawSweeper result is supporting evidence, not maintainer approval.
+A positive BotSweeper result is supporting evidence, not maintainer approval.
 Maintainers still decide whether and when a PR is ready to merge.
 
-ClawSweeper is queue-based. Do not expect an immediate response after opening a
+BotSweeper is queue-based. Do not expect an immediate response after opening a
 PR, pushing a commit, or adding a review request. Label updates after a
-ClawSweeper run can also take time.
+BotSweeper run can also take time.
 
-New PRs enter the ClawSweeper review queue. Maintainers can also queue review,
+New PRs enter the BotSweeper review queue. Maintainers can also queue review,
 repair, or automerge flows with labels or commands. For ordinary contributor
-updates, ask ClawSweeper for another review only after you have updated the
+updates, ask BotSweeper for another review only after you have updated the
 branch, PR description, proof, or code. Then request a fresh review with a new
 PR comment:
 
 ```text
-@clawsweeper re-review
+@botsweeper re-review
 ```
 
-PR authors can also use `@clawsweeper re-run`; users with repository write
+PR authors can also use `@botsweeper re-run`; users with repository write
 access can use either command on any open item. The plain
-`@clawsweeper review` command is maintainer-only. Be patient: asking again
+`@botsweeper review` command is maintainer-only. Be patient: asking again
 before the requested changes are present just adds queue noise.
 
-When ClawSweeper leaves review conversations, treat them like normal review
+When BotSweeper leaves review conversations, treat them like normal review
 feedback and use the follow-up checklist below.
 
 If a human contributor or maintainer has taken over the PR and is actively
-working on it, do not summon ClawSweeper or otherwise work on the PR at the same
+working on it, do not summon BotSweeper or otherwise work on the PR at the same
 time. Let the human review or repair finish first. If activity stops, check
 whether the author was asked to provide proof or make other updates.
 
 ## Improve a PR during review
 
-Once Barnacle, ClawSweeper, or a maintainer responds, use that feedback as the
+Once Barnacle, BotSweeper, or a maintainer responds, use that feedback as the
 next-step checklist for the PR.
 
-1. Read ClawSweeper's `Rank-up moves:` and `Proof guidance:` as the action list
+1. Read BotSweeper's `Rank-up moves:` and `Proof guidance:` as the action list
    for that PR. Ratings and labels are review signals, not fixed merge targets.
 2. Push the requested code or docs change, and update the PR description when
    the problem, solution, user impact, or evidence has changed.
@@ -86,7 +86,7 @@ next-step checklist for the PR.
    conversation open only when you need maintainer or reviewer judgment.
 5. Ask for a re-review only after the branch, PR description, evidence, and
    relevant CI results are current. Multiple update and review cycles between the
-   author, maintainer, and ClawSweeper are normal.
+   author, maintainer, and BotSweeper are normal.
 6. Keep discussion on the PR when possible. Move to `#clawtributors` on Discord
    only when the PR needs maintainer coordination, automation appears blocked,
    or the next decision is hard to settle in GitHub comments. Include the PR
@@ -119,7 +119,7 @@ still active, coordinate with the maintainer working on it.
 
 Automation may stay quiet when a maintainer is already handling the item, a
 review or repair request is still queued, the event is routine, or the
-ClawSweeper lane is not configured for the requested action.
+BotSweeper lane is not configured for the requested action.
 
 It may also avoid action when a trusted workflow would need to run untrusted
 contributor code. In that case, maintainers use normal review or a safer
@@ -127,7 +127,7 @@ workflow instead.
 
 ## Troubleshooting
 
-If ClawSweeper does not respond immediately, wait before retrying. The service is
+If BotSweeper does not respond immediately, wait before retrying. The service is
 queue-based, and repeated comments or label changes can make the thread harder
 to review without making the queue faster.
 
@@ -138,21 +138,21 @@ Before asking for help, check:
 - CI has finished, or the PR body explains why any remaining failure is
   unrelated to the PR;
 - the latest review request was made as a PR comment:
-  `@clawsweeper re-review`;
+  `@botsweeper re-review`;
 - a maintainer or contributor is not already actively working on the PR;
-- the latest request is not still within the normal ClawSweeper queue delay.
+- the latest request is not still within the normal BotSweeper queue delay.
 
-If there is still no ClawSweeper response several hours after the PR is current,
+If there is still no BotSweeper response several hours after the PR is current,
 or if the PR appears blocked by automation, ask in `#clawtributors` on Discord.
 Include the PR link, what you expected, when you asked, and what changed since
 the last bot comment.
 
 ## Forking the automation
 
-Projects that want similar review automation can study or fork ClawSweeper:
+Projects that want similar review automation can study or fork BotSweeper:
 
-- [bot/clawsweeper](https://github.com/bot/clawsweeper)
-- [ClawSweeper docs](https://clawsweeper.bot/)
+- [bot/botsweeper](https://github.com/bot/botsweeper)
+- [BotSweeper docs](https://botsweeper.bot/)
 
 ## Related
 

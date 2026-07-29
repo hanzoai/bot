@@ -30,7 +30,7 @@ const PLUGIN_ART_SLUGS: ReadonlySet<string> = new Set([
   "canvas",
   "cerebras",
   "chutes",
-  "clawrouter",
+  "botrouter",
   "clickclack",
   "cloudflare-ai-gateway",
   "codex",

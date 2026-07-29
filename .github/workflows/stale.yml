@@ -74,7 +74,7 @@ jobs:
           days-before-pr-close: 7
           stale-issue-label: stale
           stale-pr-label: stale
-          exempt-issue-labels: enhancement,maintainer,pinned,security,no-stale,bad-barnacle,bug,clawsweeper:queueable-fix,clawsweeper:source-repro,clawsweeper:fix-shape-clear
+          exempt-issue-labels: enhancement,maintainer,pinned,security,no-stale,bad-barnacle,bug,botsweeper:queueable-fix,botsweeper:source-repro,botsweeper:fix-shape-clear
           exempt-pr-labels: maintainer,no-stale,bad-barnacle
           operations-per-run: 2000
           ascending: true
@@ -106,7 +106,7 @@ jobs:
           days-before-pr-stale: -1
           days-before-pr-close: -1
           stale-issue-label: stale
-          exempt-issue-labels: enhancement,maintainer,pinned,security,no-stale,bad-barnacle,bug,clawsweeper:queueable-fix,clawsweeper:source-repro,clawsweeper:fix-shape-clear
+          exempt-issue-labels: enhancement,maintainer,pinned,security,no-stale,bad-barnacle,bug,botsweeper:queueable-fix,botsweeper:source-repro,botsweeper:fix-shape-clear
           operations-per-run: 2000
           ascending: true
           include-only-assigned: true
@@ -178,7 +178,7 @@ jobs:
           days-before-pr-close: 7
           stale-issue-label: stale
           stale-pr-label: stale
-          exempt-issue-labels: enhancement,maintainer,pinned,security,no-stale,bad-barnacle,bug,clawsweeper:queueable-fix,clawsweeper:source-repro,clawsweeper:fix-shape-clear
+          exempt-issue-labels: enhancement,maintainer,pinned,security,no-stale,bad-barnacle,bug,botsweeper:queueable-fix,botsweeper:source-repro,botsweeper:fix-shape-clear
           exempt-pr-labels: maintainer,no-stale,bad-barnacle
           operations-per-run: 2000
           ascending: true
@@ -209,7 +209,7 @@ jobs:
           days-before-pr-stale: -1
           days-before-pr-close: -1
           stale-issue-label: stale
-          exempt-issue-labels: enhancement,maintainer,pinned,security,no-stale,bad-barnacle,bug,clawsweeper:queueable-fix,clawsweeper:source-repro,clawsweeper:fix-shape-clear
+          exempt-issue-labels: enhancement,maintainer,pinned,security,no-stale,bad-barnacle,bug,botsweeper:queueable-fix,botsweeper:source-repro,botsweeper:fix-shape-clear
           operations-per-run: 2000
           ascending: true
           include-only-assigned: true
@@ -268,7 +268,7 @@ jobs:
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY_FALLBACK }}
           permission-issues: write
           permission-metadata: read
-      - name: Mark inactive bugs for ClawSweeper verification
+      - name: Mark inactive bugs for BotSweeper verification
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           github-token: ${{ steps.app-token.outputs.token || steps.app-token-fallback.outputs.token }}
@@ -285,9 +285,9 @@ jobs:
               "security",
               "no-stale",
               "bad-barnacle",
-              "clawsweeper:queueable-fix",
-              "clawsweeper:source-repro",
-              "clawsweeper:fix-shape-clear",
+              "botsweeper:queueable-fix",
+              "botsweeper:source-repro",
+              "botsweeper:fix-shape-clear",
             ]);
             const { owner, repo } = context.repo;
             const marked = [];
@@ -409,7 +409,7 @@ jobs:
                   currentlyAssigned
                     ? "This assigned bug report has been automatically marked as stale after 30 days of inactivity."
                     : "This bug report has been automatically marked as stale due to inactivity.",
-                  "ClawSweeper is checking whether current `main` already fixes the reported behavior.",
+                  "BotSweeper is checking whether current `main` already fixes the reported behavior.",
                   "Inactivity alone will not close a bug report.",
                 ].join("\n");
                 await github.rest.issues.createComment({
@@ -422,11 +422,11 @@ jobs:
               }
             }
 
-            core.info(`Marked ${marked.length} bug issue(s) for ClawSweeper verification.`);
+            core.info(`Marked ${marked.length} bug issue(s) for BotSweeper verification.`);
             core.info(`Removed stale from ${unmarked.length} updated or exempt bug issue(s).`);
             await core.summary
               .addHeading("Bug stale verification")
-              .addRaw(`Marked for ClawSweeper review: ${marked.length}\n\n`)
+              .addRaw(`Marked for BotSweeper review: ${marked.length}\n\n`)
               .addRaw(`Returned to active/exempt state: ${unmarked.length}\n\n`)
               .write();
 
@@ -471,9 +471,9 @@ jobs:
               "no-stale",
               "bad-barnacle",
               "bug",
-              "clawsweeper:queueable-fix",
-              "clawsweeper:source-repro",
-              "clawsweeper:fix-shape-clear",
+              "botsweeper:queueable-fix",
+              "botsweeper:source-repro",
+              "botsweeper:fix-shape-clear",
             ]);
             const prExemptLabels = new Set(["maintainer", "no-stale", "bad-barnacle"]);
             const maintainerAssociations = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
@@ -763,7 +763,7 @@ jobs:
             await core.summary
               .addHeading("Barnacle bug closure invariant failed")
               .addRaw(
-                "Bug-labeled issues must be verified by ClawSweeper instead of closed by Barnacle as not planned.\n\n",
+                "Bug-labeled issues must be verified by BotSweeper instead of closed by Barnacle as not planned.\n\n",
               )
               .addTable([
                 [

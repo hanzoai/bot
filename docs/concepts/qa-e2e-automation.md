@@ -370,7 +370,7 @@ pnpm bot qa mantis visual-task \
 ```
 
 `visual-task` leases or reuses a Crabbox desktop/browser machine, starts
-`crabbox record --while`, drives the visible browser through a nested
+`botbox record --while`, drives the visible browser through a nested
 `visual-driver`, captures `visual-task.png`, runs `bot infer image
 describe` against the screenshot when `--vision-mode image-describe` is
 selected, and writes `visual-task.mp4`, `mantis-visual-task-summary.json`,

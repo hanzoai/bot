@@ -828,7 +828,7 @@ describe("loadCliDotEnv", () => {
     await withIsolatedEnvAndCwd(async () => {
       const base = await fs.mkdtemp(path.join(os.tmpdir(), "bot-dotenv-legacy-"));
       const cwdDir = path.join(base, "cwd");
-      const legacyStateDir = path.join(base, ".clawdbot");
+      const legacyStateDir = path.join(base, ".bot");
       setTestEnvValue("HOME", base);
       deleteTestEnvValue("BOT_STATE_DIR");
       delete process.env.BOT_TEST_FAST;

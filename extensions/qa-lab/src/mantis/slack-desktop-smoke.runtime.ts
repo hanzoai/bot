@@ -22,13 +22,13 @@ import {
   sshCommand,
   stopCrabbox,
   warmupCrabbox,
-} from "./crabbox-runtime.js";
+} from "./botbox-runtime.js";
 
 export type MantisSlackDesktopSmokeOptions = {
   alternateModel?: string;
   approvalCheckpoints?: boolean;
   commandRunner?: CommandRunner;
-  crabboxBin?: string;
+  botboxBin?: string;
   credentialRole?: string;
   credentialSource?: string;
   env?: NodeJS.ProcessEnv;
@@ -85,7 +85,7 @@ type MantisSlackDesktopSmokeSummary = {
     summaryPath: string;
     videoPath?: string;
   };
-  crabbox: {
+  botbox: {
     bin: string;
     createdLease: boolean;
     id: string;
@@ -706,7 +706,7 @@ run_mantis_remote_body() {
   if ! node_supports_type_stripping; then
     # Distro Node builds can satisfy the version range while omitting native
     # TypeScript stripping, which the repository build requires.
-    node_version="$(sed -n 's/^node_version="\\([0-9][0-9.]*\\)"$/\\1/p' scripts/crabbox-untrusted-bootstrap.sh)"
+    node_version="$(sed -n 's/^node_version="\\([0-9][0-9.]*\\)"$/\\1/p' scripts/botbox-untrusted-bootstrap.sh)"
     case "$node_version" in
       ''|*[!0-9.]*)
         echo "Could not resolve the trusted Crabbox Node version." >&2
@@ -788,8 +788,8 @@ console.log(match[1] + " " + match[2]);
       sudo apt-get update -y >>"$out/apt.log" 2>&1 || true
       sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential python3 >>"$out/apt.log" 2>&1 || true
     fi
-    if [ -d /var/cache/crabbox ]; then
-      export PNPM_STORE_DIR="\${PNPM_STORE_DIR:-/var/cache/crabbox/pnpm}"
+    if [ -d /var/cache/botbox ]; then
+      export PNPM_STORE_DIR="\${PNPM_STORE_DIR:-/var/cache/botbox/pnpm}"
       mkdir -p "$PNPM_STORE_DIR" >/dev/null 2>&1 || true
       pnpm config set store-dir "$PNPM_STORE_DIR" >/dev/null 2>&1 || true
     fi
@@ -1197,11 +1197,11 @@ function renderReport(summary: MantisSlackDesktopSmokeSummary) {
     "",
     "## Crabbox",
     "",
-    `- Provider: ${summary.crabbox.provider}`,
-    `- Lease: ${summary.crabbox.id}${summary.crabbox.slug ? ` (${summary.crabbox.slug})` : ""}`,
-    `- Created by run: ${summary.crabbox.createdLease}`,
-    `- State: ${summary.crabbox.state ?? "unknown"}`,
-    `- VNC: \`${summary.crabbox.vncCommand}\``,
+    `- Provider: ${summary.botbox.provider}`,
+    `- Lease: ${summary.botbox.id}${summary.botbox.slug ? ` (${summary.botbox.slug})` : ""}`,
+    `- Created by run: ${summary.botbox.createdLease}`,
+    `- State: ${summary.botbox.state ?? "unknown"}`,
+    `- VNC: \`${summary.botbox.vncCommand}\``,
     `- Hydrate mode: ${summary.hydrateMode}`,
     "",
     "## Timings",
@@ -1292,10 +1292,10 @@ export async function runMantisSlackDesktopSmoke(
   );
   const summaryPath = path.join(outputDir, "mantis-slack-desktop-smoke-summary.json");
   const reportPath = path.join(outputDir, "mantis-slack-desktop-smoke-report.md");
-  const crabboxBin = await resolveCrabboxBin({
+  const botboxBin = await resolveCrabboxBin({
     env,
     envName: CRABBOX_BIN_ENV,
-    explicit: opts.crabboxBin,
+    explicit: opts.botboxBin,
     repoRoot,
   });
   const provider =
@@ -1354,9 +1354,9 @@ export async function runMantisSlackDesktopSmoke(
   try {
     leaseId =
       leaseId ??
-      (await timer.timePhase("crabbox.warmup", () =>
+      (await timer.timePhase("botbox.warmup", () =>
         warmupCrabbox({
-          crabboxBin,
+          botboxBin,
           cwd: repoRoot,
           env,
           idleTimeout,
@@ -1371,9 +1371,9 @@ export async function runMantisSlackDesktopSmoke(
       throw new Error("Crabbox lease id was not resolved.");
     }
     const resolvedLeaseId = leaseId;
-    const inspected = await timer.timePhase("crabbox.inspect", () =>
+    const inspected = await timer.timePhase("botbox.inspect", () =>
       inspectCrabbox({
-        crabboxBin,
+        botboxBin,
         cwd: repoRoot,
         env,
         leaseId: resolvedLeaseId,
@@ -1395,7 +1395,7 @@ export async function runMantisSlackDesktopSmoke(
     const remoteRunStartedAt = new Date();
     const freshPrArgs = freshPr ? ["--fresh-pr", freshPr] : [];
     await runCommand({
-      command: crabboxBin,
+      command: botboxBin,
       args: [
         "run",
         "--provider",
@@ -1430,10 +1430,10 @@ export async function runMantisSlackDesktopSmoke(
       stdio: "inherit",
     }).then(
       () => {
-        timer.recordPhase("crabbox.remote_run", remoteRunStartedAt, "pass");
+        timer.recordPhase("botbox.remote_run", remoteRunStartedAt, "pass");
       },
       (error: unknown) => {
-        timer.recordPhase("crabbox.remote_run", remoteRunStartedAt, "fail");
+        timer.recordPhase("botbox.remote_run", remoteRunStartedAt, "fail");
         remoteRunError = error;
         return { stdout: "", stderr: "" };
       },
@@ -1461,10 +1461,10 @@ export async function runMantisSlackDesktopSmoke(
       gatewaySetup && remoteMetadata?.qaExitCode === 0 && remoteMetadata.gatewayAlive === true;
     const slackQaCompleted = !gatewaySetup && remoteMetadata?.qaExitCode === 0;
     if (remoteRunError && gatewaySetupCompleted) {
-      timer.updatePhaseStatus("crabbox.remote_run", "accepted");
+      timer.updatePhaseStatus("botbox.remote_run", "accepted");
     }
     if (remoteRunError && slackQaCompleted) {
-      timer.updatePhaseStatus("crabbox.remote_run", "accepted");
+      timer.updatePhaseStatus("botbox.remote_run", "accepted");
     }
     if (remoteRunError && !gatewaySetupCompleted && !slackQaCompleted) {
       throw toErrorObject(remoteRunError);
@@ -1493,14 +1493,14 @@ export async function runMantisSlackDesktopSmoke(
         summaryPath,
         videoPath,
       },
-      crabbox: {
-        bin: crabboxBin,
+      botbox: {
+        bin: botboxBin,
         createdLease,
         id: resolvedLeaseId,
         provider,
         slug: inspected.slug,
         state: inspected.state,
-        vncCommand: `${crabboxBin} vnc --provider ${provider} --id ${resolvedLeaseId} --open`,
+        vncCommand: `${botboxBin} vnc --provider ${provider} --id ${resolvedLeaseId} --open`,
       },
       finishedAt: new Date().toISOString(),
       hydrateMode: normalizeHydrateMode(remoteMetadata?.hydrateMode) ?? hydrateMode,
@@ -1532,13 +1532,13 @@ export async function runMantisSlackDesktopSmoke(
         summaryPath,
         videoPath,
       },
-      crabbox: {
-        bin: crabboxBin,
+      botbox: {
+        bin: botboxBin,
         createdLease,
         id: leaseId ?? "unallocated",
         provider,
         vncCommand: leaseId
-          ? `${crabboxBin} vnc --provider ${provider} --id ${leaseId} --open`
+          ? `${botboxBin} vnc --provider ${provider} --id ${leaseId} --open`
           : "unallocated",
       },
       error: formatErrorMessage(error),
@@ -1568,7 +1568,7 @@ export async function runMantisSlackDesktopSmoke(
       await fs.writeFile(reportPath, renderReport(summary), "utf8");
     }
     if (createdLease && leaseId && !keepLease) {
-      await stopCrabbox({ crabboxBin, cwd: repoRoot, env, leaseId, provider, runner });
+      await stopCrabbox({ botboxBin, cwd: repoRoot, env, leaseId, provider, runner });
     }
     if (leaseHeartbeat) {
       await leaseHeartbeat.stop().catch((error: unknown) => {

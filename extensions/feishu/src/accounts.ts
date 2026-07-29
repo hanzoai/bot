@@ -1,7 +1,7 @@
 // Feishu plugin module implements accounts behavior.
 import {
   DEFAULT_ACCOUNT_ID,
-  type BotConfig as ClawdbotConfig,
+  type BotConfig as BotConfig,
   createAccountListHelpers,
   hasConfiguredAccountValue,
   normalizeAccountId,
@@ -143,7 +143,7 @@ function resolveFeishuEventSecrets(
 /**
  * Resolve the default account selection and its source.
  */
-export function resolveDefaultFeishuAccountSelection(cfg: ClawdbotConfig): {
+export function resolveDefaultFeishuAccountSelection(cfg: BotConfig): {
   accountId: string;
   source: FeishuDefaultAccountSelectionSource;
 } {
@@ -172,7 +172,7 @@ export function resolveDefaultFeishuAccountSelection(cfg: ClawdbotConfig): {
 /**
  * Resolve the default account ID.
  */
-export function resolveDefaultFeishuAccountId(cfg: ClawdbotConfig): string {
+export function resolveDefaultFeishuAccountId(cfg: BotConfig): string {
   return resolveDefaultAccountId(cfg);
 }
 
@@ -180,7 +180,7 @@ export function resolveDefaultFeishuAccountId(cfg: ClawdbotConfig): string {
  * Merge top-level config with account-specific config.
  * Account-specific fields override top-level fields.
  */
-function mergeFeishuAccountConfig(cfg: ClawdbotConfig, accountId: string): FeishuConfig {
+function mergeFeishuAccountConfig(cfg: BotConfig, accountId: string): FeishuConfig {
   const feishuCfg = cfg.channels?.feishu as FeishuConfig | undefined;
   const accounts = feishuCfg?.accounts as Record<string, Partial<FeishuConfig>> | undefined;
   const merged = resolveMergedAccountConfig<FeishuConfig>({
@@ -260,7 +260,7 @@ export function inspectFeishuCredentials(cfg?: FeishuConfig) {
 }
 
 function buildResolvedFeishuAccount(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   baseMode: FeishuCredentialResolutionMode;
   eventSecretMode: FeishuCredentialResolutionMode;
@@ -306,7 +306,7 @@ function buildResolvedFeishuAccount(params: {
  * Unresolved SecretRefs are treated as unavailable instead of throwing.
  */
 export function resolveFeishuAccount(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   accountId?: string | null;
 }): ResolvedFeishuAccount {
   return buildResolvedFeishuAccount({
@@ -322,7 +322,7 @@ export function resolveFeishuAccount(params: {
  */
 export function resolveFeishuRuntimeAccount(
   params: {
-    cfg: ClawdbotConfig;
+    cfg: BotConfig;
     accountId?: string | null;
   },
   options?: { requireEventSecrets?: boolean },
@@ -337,7 +337,7 @@ export function resolveFeishuRuntimeAccount(
 /**
  * List all enabled and configured accounts.
  */
-export function listEnabledFeishuAccounts(cfg: ClawdbotConfig): ResolvedFeishuAccount[] {
+export function listEnabledFeishuAccounts(cfg: BotConfig): ResolvedFeishuAccount[] {
   return listFeishuAccountIds(cfg)
     .map((accountId) => resolveFeishuAccount({ cfg, accountId }))
     .filter((account) => account.enabled && account.configured);

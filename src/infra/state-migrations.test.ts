@@ -2367,7 +2367,7 @@ describe("state migrations", () => {
 
   it("runs plugin doctor migrations against the canonical state dir after state-dir repair", async () => {
     const root = await createTempDir();
-    const legacyStateDir = path.join(root, ".clawdbot");
+    const legacyStateDir = path.join(root, ".bot");
     const canonicalStateDir = path.join(root, ".bot");
     await fs.mkdir(legacyStateDir, { recursive: true });
     await fs.writeFile(path.join(legacyStateDir, "legacy.txt"), "legacy", "utf8");

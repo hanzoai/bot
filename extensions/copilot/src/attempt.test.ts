@@ -4144,7 +4144,7 @@ describe("runCopilotAttempt", () => {
     });
   });
 
-  // ClawSweeper PR #86155 [P1] round-8: the SDK SessionConfig accepts
+  // BotSweeper PR #86155 [P1] round-8: the SDK SessionConfig accepts
   // `availableTools` as a hard catalog allowlist
   // (`@github/copilot-sdk/dist/types.d.ts:1059-1066`). Without it, the
   // CLI keeps its native read/write/shell/url/mcp/memory/hook tools

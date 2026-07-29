@@ -1222,7 +1222,7 @@ describe("scripts/test-projects changed-target routing", () => {
   });
 
   it("keeps Crabbox config edits on package acceptance tests", () => {
-    expect(resolveChangedTestTargetPlan([".crabbox.yaml"])).toEqual({
+    expect(resolveChangedTestTargetPlan([".botbox.yaml"])).toEqual({
       mode: "targets",
       targets: ["test/scripts/package-acceptance-workflow.test.ts"],
     });
@@ -1280,12 +1280,12 @@ describe("scripts/test-projects changed-target routing", () => {
 
   it("keeps Crabbox runner script edits on their regression tests", () => {
     for (const scriptPath of [
-      "scripts/crabbox-wrapper.mjs",
-      "scripts/crabbox-wrapper-providers.mjs",
+      "scripts/botbox-wrapper.mjs",
+      "scripts/botbox-wrapper-providers.mjs",
     ]) {
       expect(resolveChangedTestTargetPlan([scriptPath]), scriptPath).toEqual({
         mode: "targets",
-        targets: ["test/scripts/crabbox-wrapper.test.ts"],
+        targets: ["test/scripts/botbox-wrapper.test.ts"],
       });
     }
   });
@@ -1337,7 +1337,7 @@ describe("scripts/test-projects changed-target routing", () => {
   it("keeps PR automation workflow edits on workflow guard tests", () => {
     for (const workflowPath of [
       ".github/workflows/auto-response.yml",
-      ".github/workflows/clawsweeper-dispatch.yml",
+      ".github/workflows/botsweeper-dispatch.yml",
       ".github/workflows/labeler.yml",
       ".github/workflows/real-behavior-proof.yml",
       ".github/workflows/stale.yml",
@@ -1389,7 +1389,7 @@ describe("scripts/test-projects changed-target routing", () => {
         ],
       ],
       [
-        ".github/workflows/crabbox-hydrate.yml",
+        ".github/workflows/botbox-hydrate.yml",
         [
           "test/scripts/ci-workflow-guards.test.ts",
           "test/scripts/package-acceptance-workflow.test.ts",
@@ -4288,7 +4288,7 @@ describe("scripts/test-projects changed-target routing", () => {
     const readFileSync = vi.spyOn(fs, "readFileSync");
     const before = readFileSync.mock.calls.length;
     const plan = resolveChangedTestTargetPlan([
-      ".crabbox.yaml",
+      ".botbox.yaml",
       "scripts/check.mjs",
       "src/gateway/server.impl.ts",
     ]);

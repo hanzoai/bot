@@ -753,7 +753,7 @@ describe("bot launcher", () => {
   it("checks legacy config candidates before using precomputed root help", async () => {
     const fixtureRoot = await makeLauncherFixture(fixtureRoots);
     const home = path.join(fixtureRoot, "home");
-    const legacyConfigDir = path.join(home, ".clawdbot");
+    const legacyConfigDir = path.join(home, ".bot");
     await fs.mkdir(legacyConfigDir, { recursive: true });
     await fs.writeFile(
       path.join(fixtureRoot, "dist", "cli-startup-metadata.json"),
@@ -766,7 +766,7 @@ describe("bot launcher", () => {
       "utf8",
     );
     await fs.writeFile(
-      path.join(legacyConfigDir, "clawdbot.json"),
+      path.join(legacyConfigDir, "bot.json"),
       JSON.stringify({ plugins: { slots: { memory: "memory-lancedb" } } }),
       "utf8",
     );

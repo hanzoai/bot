@@ -29,7 +29,7 @@ function hasDurableGatewayPasswordEnvForInstall(
   const durableServiceEnv = collectDurableServiceEnvVars({ env, config: cfg });
   return Boolean(
     normalizeOptionalString(durableServiceEnv.BOT_GATEWAY_PASSWORD) ||
-    normalizeOptionalString(durableServiceEnv.CLAWDBOT_GATEWAY_PASSWORD),
+    normalizeOptionalString(durableServiceEnv.BOT_GATEWAY_PASSWORD),
   );
 }
 

@@ -153,7 +153,7 @@ Docs: https://docs.bot.ai
 - **Official plugin beta compatibility:** keep the exact beta.5 session-store helper imports working over SQLite through the documented deprecation window, preventing installed Codex and Feishu plugins from failing during package acceptance and upgrades. (#105287) Thanks @vincentkoc.
 - **SQLite terminal session recovery:** track physical transcript mutation time in the agent database so killed or timed-out main sessions rotate when transcript writes outlive the registry update, while preserving legacy transcript mtimes during doctor import.
 - **Gateway chat typecheck:** import chat event types from their owning protocol schema after the retired aggregate type module was removed, restoring full project typechecks.
-- **Packaged Crabbox commands:** include the lease-freshness helper imported by the published wrapper so `crabbox:*` commands do not fail with `ERR_MODULE_NOT_FOUND` in npm installs.
+- **Packaged Crabbox commands:** include the lease-freshness helper imported by the published wrapper so `botbox:*` commands do not fail with `ERR_MODULE_NOT_FOUND` in npm installs.
 - **Plugin session catalogs:** reject unknown catalog filters, report catalogs as plugin capabilities, and preserve them in SDK registration captures instead of silently returning empty results or classifying catalog-only plugins as capability-free.
 - **Gateway service audit:** treat POSIX shell `-c` wrappers as opaque for the gateway-subcommand check, avoiding false missing-command warnings for shell-wrapped macOS LaunchAgents without parsing inner commands or ports. Fixes #81751. (#81778) Thanks @liaoandi.
 - **Memory filename search:** index paths separately from chunk bodies so exact full-path, basename, and stem queries rank the intended memory file first without changing body BM25 scores, snippets, or embeddings. (#96052, #94102) Thanks @Pick-cat.
@@ -571,7 +571,7 @@ Claude Sonnet 5 is selectable through direct Anthropic, Claude CLI, supported Ve
 
 ##### More provider options
 
-Copilot sessions can explicitly use supported custom OpenAI, Azure OpenAI, Ollama-compatible, or Anthropic providers and start a compatible session when connection or credential settings change. Paired computers can run short tasks on eligible local Ollama models, while ClawRouter can expose the models granted to one managed key and report their usage and budget. Users can also claim active promotional models without replacing existing defaults, install LongCat-2.0 through its official provider, and continue Gemini latest tool-calling conversations across both supported Google transports.
+Copilot sessions can explicitly use supported custom OpenAI, Azure OpenAI, Ollama-compatible, or Anthropic providers and start a compatible session when connection or credential settings change. Paired computers can run short tasks on eligible local Ollama models, while BotRouter can expose the models granted to one managed key and report their usage and budget. Users can also claim active promotional models without replacing existing defaults, install LongCat-2.0 through its official provider, and continue Gemini latest tool-calling conversations across both supported Google transports.
 
 - Copilot sessions can now use explicitly selected custom OpenAI, Azure OpenAI, Ollama-compatible, or Anthropic providers and restart cleanly when model, endpoint, credentials, headers, or token limits change. [#96345](https://github.com/hanzoai/bot/pull/96345) Thanks @vincentkoc.
 - Bot agents can now run short tasks on chat-capable Ollama models installed on paired macOS, Linux, or Windows nodes, with a separate control for disabling node inference. [#99234](https://github.com/hanzoai/bot/pull/99234) Related [#99228](https://github.com/hanzoai/bot/issues/99228).
@@ -1197,7 +1197,7 @@ The [model catalog](https://docs.bot.ai/concepts/models) also reports availabili
 - xAI sign-in, token refresh, and device approval now stop oversized OAuth responses before they can consume unbounded memory. [#97615](https://github.com/hanzoai/bot/pull/97615) Thanks @cxbasdev.
 - Existing xAI and Grok OAuth sessions using the retired token endpoint can renew after expiry without forcing another browser or SSH-tunneled login. [#96146](https://github.com/hanzoai/bot/pull/96146) Thanks @fuller-stack-dev, @jaaneek.
 
-##### Ollama, MiniMax, Chutes, Z.AI, OpenRouter, and ClawRouter
+##### Ollama, MiniMax, Chutes, Z.AI, OpenRouter, and BotRouter
 
 - Ollama Cloud setup now stops oversized or malicious authentication responses before they can consume excessive memory, while normal sign-in remains unchanged. [#97581](https://github.com/hanzoai/bot/pull/97581) Thanks @hugenshen.
 - MiniMax OAuth device setup now limits authorization response size so a faulty proxied or self-hosted endpoint cannot exhaust Gateway memory. [#96322](https://github.com/hanzoai/bot/pull/96322) Thanks @lsr911.
@@ -1207,7 +1207,7 @@ The [model catalog](https://docs.bot.ai/concepts/models) also reports availabili
 - Chutes sign-in and token refresh errors now include a useful bounded snippet without allowing an endpoint to stream an unlimited response into memory. [#97808](https://github.com/hanzoai/bot/pull/97808) Thanks @pick-cat.
 - OpenRouter sign-in now fails safely on oversized replies, and Discord webhook sends remain successful when their optional response body is absent, malformed, or too large. [#98098](https://github.com/hanzoai/bot/pull/98098) Thanks @lwy-2.
 - OpenRouter model probes and agent requests now use discovered environment or profile API keys correctly instead of failing with a missing-authentication-header error. [#98187](https://github.com/hanzoai/bot/pull/98187) Related [#97934](https://github.com/hanzoai/bot/issues/97934). Thanks @laurencebrown, @sunlit-deng.
-- ClawRouter models selected in agent defaults now resolve at runtime when the credential is stored in an auth profile instead of the environment. [#99759](https://github.com/hanzoai/bot/pull/99759)
+- BotRouter models selected in agent defaults now resolve at runtime when the credential is stored in an auth profile instead of the environment. [#99759](https://github.com/hanzoai/bot/pull/99759)
 
 ##### Amazon Bedrock
 
@@ -3113,7 +3113,7 @@ The [Bot CLI](https://docs.bot.ai/cli/index), [tab completion](https://docs.bot.
 - Bot now keeps config recovery markers, last-known-good snapshots, and suspicious-read history in its shared state through migration, without leaving a separate config-health log file behind. [6daabd2](https://github.com/hanzoai/bot/commit/6daabd23f821c66154739de4b0f103e33343333c) Thanks @vincentkoc.
 - On Windows, Crabbox commands launched through Node package shims now receive provider flags, shell commands, and special shell characters as entered instead of losing or reinterpreting them. [54d24cd](https://github.com/hanzoai/bot/commit/54d24cd956ff91f4fa8c4924f17c06798c1e0359) Thanks @vincentkoc.
 - Windows-targeted Crabbox workflows are less likely to fail or fall back to slower shell handling when launching Node tools through `.cmd` and `.bat` shims. [d48dcc6](https://github.com/hanzoai/bot/commit/d48dcc664bc6e1106a61942a951745886f22d582) Thanks @vincentkoc.
-- Windows users can run `crabbox`, `git`, and other Node-backed tools through npm-installed command shims without Crabbox stopping before the tool opens. [77f4e45](https://github.com/hanzoai/bot/commit/77f4e45c3518751b5f586eac193c4aee904f02d9) Thanks @vincentkoc.
+- Windows users can run `botbox`, `git`, and other Node-backed tools through npm-installed command shims without Crabbox stopping before the tool opens. [77f4e45](https://github.com/hanzoai/bot/commit/77f4e45c3518751b5f586eac193c4aee904f02d9) Thanks @vincentkoc.
 - `bot doctor` now checks profiles that omit tool policy settings without treating the valid omission as an error. [03ba09b](https://github.com/hanzoai/bot/commit/03ba09bfa8676832d55bdc7724e79d9980fdd2d7)
 - `bot doctor` no longer shows misleading tool-section warnings when it cannot evaluate a custom preview profile. [420a0e6](https://github.com/hanzoai/bot/commit/420a0e6fce4b2c5339e535e6b307f50df1c00bb2) Thanks @vincentkoc.
 - `bot doctor` now limits preview warnings to tool profiles it can evaluate, avoiding misleading configured-grant warnings for unknown profiles. [541f7ff](https://github.com/hanzoai/bot/commit/541f7ffc6558c0e59a8afca066a9f00884d39b65) Thanks @vincentkoc.
@@ -3156,7 +3156,7 @@ Additional [`bot config`](https://docs.bot.ai/cli/config) and CLI fixes improve 
 - Fixes `infer inspect --name <id> --json` showing flags that the matching CLI commands did not accept, so developers and operators can reliably discover supported model, auth, and transcription options. [#95719](https://github.com/hanzoai/bot/pull/95719) Thanks @ly-wang19, @vincentkoc.
 - People inspecting very large or out-of-order sessions can open usage details and still get the latest timestamped log entries without Bot retaining the entire parsed log history in memory. [#96019](https://github.com/hanzoai/bot/pull/96019) Thanks @vincentkoc.
 - Operators can now set up the auth monitor, systemd timer, and Termux widgets for their own Bot host without first replacing maintainer-specific hostnames and filesystem paths. [af3e509](https://github.com/hanzoai/bot/commit/af3e509ab823dac5f91b16915ee7067b369656a3) Thanks @vincentkoc.
-- Native Windows crabbox hydration now selects the required Windows daemon job automatically, avoiding failed or misrouted runs while leaving WSL2 and explicit job overrides unchanged. [d5d9a82](https://github.com/hanzoai/bot/commit/d5d9a8256d6bc2ff8d699152923357bd61c606c1) Thanks @vincentkoc.
+- Native Windows botbox hydration now selects the required Windows daemon job automatically, avoiding failed or misrouted runs while leaving WSL2 and explicit job overrides unchanged. [d5d9a82](https://github.com/hanzoai/bot/commit/d5d9a8256d6bc2ff8d699152923357bd61c606c1) Thanks @vincentkoc.
 
 #### User operation documentation
 
@@ -3174,7 +3174,7 @@ Additional [plugin SDK](https://docs.bot.ai/plugins/sdk-runtime) and automation 
 - SDK applications now receive `tool.call.failed` when terminal tools fail or are blocked, instead of a misleading completion event, so existing failure handling can react correctly. [#95383](https://github.com/hanzoai/bot/pull/95383) Thanks @ly-wang19.
 - Fixes cron add and update requests being rejected when recognized job fields arrive with harmless trailing spaces, so schedules can be saved without relaxing checks for ambiguous or unsafe input. [#95674](https://github.com/hanzoai/bot/pull/95674) Related [#95407](https://github.com/hanzoai/bot/issues/95407). Thanks @nassiel, @zw-xysk.
 - Codex subagent monitoring handles large sets of child agents and transcript files with less unnecessary scanning, while older transcript filename formats continue to resolve as before. [#96085](https://github.com/hanzoai/bot/pull/96085) Thanks @vincentkoc.
-- Fixes native Windows crabbox hydration getting stuck or missing handoffs when the runner and daemon use different home directories, so both can find the same job state and stop files. [f354889](https://github.com/hanzoai/bot/commit/f354889efa1c8bafca9304767afba2c270add549) Thanks @vincentkoc.
+- Fixes native Windows botbox hydration getting stuck or missing handoffs when the runner and daemon use different home directories, so both can find the same job state and stop files. [f354889](https://github.com/hanzoai/bot/commit/f354889efa1c8bafca9304767afba2c270add549) Thanks @vincentkoc.
 
 ### Additional contributions
 
@@ -3614,11 +3614,11 @@ This audited record covers the complete v2026.6.8..HEAD history: 423 merged PRs.
 - **PR #88748** fix(gemini): bridge OAuth profiles into CLI runtime. Related #88742. Thanks @jason-allen-oneal.
 - **PR #93857** fix(deps): remediate Dependabot alerts. Thanks @vincentkoc.
 - **PR #93874** fix(slack): recognize MiniMax mm: namespaced reasoning tags in monitor preview. Thanks @Alix-007.
-- **PR #93832** feat(providers): add ClawRouter managed proxy. Thanks @vincentkoc.
+- **PR #93832** feat(providers): add BotRouter managed proxy. Thanks @vincentkoc.
 - **PR #93880** fix(macos): preserve approvals migration data. Thanks @vincentkoc.
 - **PR #93903** fix(cron): reject invalid absolute timestamps. Thanks @Alix-007 and @vincentkoc.
 - **PR #93879** fix(update): use configured npm registry for update metadata. Related #79140. Thanks @vincentkoc and @sixerLiu.
-- **PR #93924** revert(providers): remove ClawRouter provider. Thanks @vincentkoc.
+- **PR #93924** revert(providers): remove BotRouter provider. Thanks @vincentkoc.
 - **PR #93955** fix(telegram): surface rich-message disabled state. Thanks @obviyus.
 - **PR #93881** fix(agents): route BTW through canonical Codex runtime. Related #88902. Thanks @vincentkoc and @TurboTheTurtle and @khalil-omer.
 - **PR #90192** fix(feishu): fetch quoted content before empty-message guard. Related #90177. Thanks @bladin and @sliverp and @lkxlaz.
@@ -3644,7 +3644,7 @@ This audited record covers the complete v2026.6.8..HEAD history: 423 merged PRs.
 - **PR #93659** refactor: add session reset delete lifecycle seam. Thanks @jalehman.
 - **PR #93852** ci(release): harden release controls. Thanks @vincentkoc.
 - **PR #94203** feat(codex): support remote app-server plugins. Thanks @kevinslin.
-- **PR #94263** chore: migrate claw-score skill. Thanks @RomneyDa and @kevinslin.
+- **PR #94263** chore: migrate bot-score skill. Thanks @RomneyDa and @kevinslin.
 - **PR #93695** refactor: add compact trim lifecycle seam. Thanks @jalehman.
 - **PR #93114** test: fold lifecycle and package proof into QA Lab. Thanks @RomneyDa.
 - **PR #93181** test: fold otel smoke into qa e2e. Thanks @RomneyDa.
@@ -3912,7 +3912,7 @@ This audited record covers the complete v2026.6.6..v2026.6.8 history: 192 merged
 - **PR #92834** feat(browser): extend --labels overlay to full-page and element captures. Thanks @hxy91819 and @FMLS and @cursoragent.
 - **PR #92836** fix(discord): raise thread title timeout and tokens to fit reasoning models. Thanks @hanamizuki.
 - **PR #92095** fix #92039: [Bug]: WhatsApp login reports success before auth is durably persisted, so Docker rebuilds/upgrades can force relink. Thanks @zhangguiping-xydt and @dinorastoder.
-- **PR #92801** fix(stale): exempt ClawSweeper actionable labels from stale lifecycle (fixes #89564). Thanks @liuhao1024 and @brokemac79.
+- **PR #92801** fix(stale): exempt BotSweeper actionable labels from stale lifecycle (fixes #89564). Thanks @liuhao1024 and @brokemac79.
 - **PR #89736** fix(status): render sub-1000 token counts as plain integers. Related #89735. Thanks @jbetala7 and @vincentkoc.
 - **PR #92792** fix(agents): catch malformed image blocks in sanitizeContentBlocksImages. Thanks @LowCode191 and @vincentkoc.
 - **PR #92555** ci: gate stable releases on Windows companion assets. Thanks @fuller-stack-dev.
@@ -4957,7 +4957,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - **PR #88536** feat: improve MCP operator controls.
 - **PR #84290** Doctor: expose UI freshness health findings. Thanks @giodl73-repo.
 - **PR #88539** refactor(telegram): keep topic thread mapping plugin-local.
-- **PR #80391** fix(scripts): timeout crabbox wrapper sanity checks. Thanks @ejames-dev.
+- **PR #80391** fix(scripts): timeout botbox wrapper sanity checks. Thanks @ejames-dev.
 - **PR #85990** Prefer Talk source-reply final text. Related #85275. Thanks @TurboTheTurtle and @BsnizND.
 - **PR #65914** fix(memory): respect qmd status timeout and skip checkpoint exports. Thanks @shawnduggan.
 - **PR #88555** feat(workboard): add worker dispatch CLI.
@@ -4991,7 +4991,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - **PR #88474** [AI-assisted] fix(gateway): avoid restarts for auth cooldown reloads. Related #88443. Thanks @IWhatsskill and @MrMaturin.
 - **PR #88603** fix(media): use typed auth for no-auth media providers. Related #74644. Thanks @mozi1924.
 - **PR #88605** refactor: make OpenAI Codex legacy doctor-only.
-- **PR #88440** Retry stale CLI sessions inside runner lifecycle. Related #77089. Thanks @brokemac79 and @clawdbotv2.
+- **PR #88440** Retry stale CLI sessions inside runner lifecycle. Related #77089. Thanks @brokemac79 and @botv2.
 - **PR #88393** fix(browser): document stable tab references. Thanks @FMLS and @hxy91819.
 - **PR #88340** fix(agents): classify expired thinking signatures. Related #88020. Thanks @Takhoffman and @BryanTegomoh and @bryanbaer.
 - **PR #88607** fix(devices): refresh paired device last-seen metadata. Related #81169. Thanks @vyctorbrzezowski and @deminson.
@@ -5941,7 +5941,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Discord: preserve streamed reply previews when recovered tool-warning finals are delivered before or after the assistant's final reply. (#84169) Thanks @neeravmakwana.
 - Control UI: keep the chat delete confirmation popover clamped inside the visible viewport on small screens. (#83804) Thanks @ThiagoCAltoe.
 - Browser: enforce current-tab URL allowlist checks for `/act` evaluate/batch actions and `/highlight` routes while leaving tab-management actions unblocked. (#78523)
-- CI: require real-behavior-proof verdict markers to come from the ClawSweeper GitHub App before accepting exact-head proof. (#83692)
+- CI: require real-behavior-proof verdict markers to come from the BotSweeper GitHub App before accepting exact-head proof. (#83692)
 - Models: show the effective OpenAI/Codex auth profile in `/models` provider headers instead of falling back to the OpenAI env-key label. (#83697) Thanks @yu-xin-c.
 - CLI: include active bundled loopback MCP tools in CLI system prompts and reset provider-side CLI sessions when that prompt-visible tool surface changes. (#83785) Thanks @TurboTheTurtle.
 - Browser: keep a profile `cdpPort` when its `cdpUrl` omits a port, while still letting explicitly written URL ports win. (#82166) Thanks @Marvae.
@@ -6934,7 +6934,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Image generation: include enabled generation providers such as fal in provider discovery even when another image provider is already active. Fixes #78141. Thanks @leoge007.
 - Slack: keep Socket Mode's native reconnect enabled so transient ping/pong misses can recover without forcing a full provider rebuild. Fixes #77933. Thanks @bmoran1022 and @brokemac79.
 - Cron: preserve cron timeout results when an isolated agent turn's `cron-nested` lane watchdog fires, preventing internal command-lane or model-fallback timeout text from being persisted. Fixes #77703. (#78168) Thanks @brokemac79 and @transxtech.
-- PR triage: mark external pull requests with `proof: supplied` when Barnacle finds structured real behavior proof, keep stale negative proof labels in sync across CRLF-edited PR bodies, and let ClawSweeper own the stronger `proof: sufficient` judgement.
+- PR triage: mark external pull requests with `proof: supplied` when Barnacle finds structured real behavior proof, keep stale negative proof labels in sync across CRLF-edited PR bodies, and let BotSweeper own the stronger `proof: sufficient` judgement.
 - ACPX/Codex: preserve trusted Codex project declarations when launching isolated Codex ACP sessions, avoiding interactive trust prompts in headless runs. Thanks @Stedyclaw.
 - ACPX/Codex: reap stale Bot-owned ACPX/Codex ACP process trees on startup and after ACP session close, preventing orphaned harness processes from slowing the Gateway. Thanks @91wan.
 - ACP bridge: implement stable session list, resume, and close handlers so ACP clients can page Gateway sessions, rebind existing sessions without replay, and close bridge sessions cleanly. Thanks @amknight.
@@ -8377,7 +8377,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Providers/OpenAI: add `extraBody`/`extra_body` passthrough for OpenAI-compatible TTS endpoints, so custom speech servers can receive fields such as `lang` in `/audio/speech` requests. Fixes #39900. Thanks @R3NK0R.
 - Dependencies: refresh workspace dependency pins, including TypeBox 1.1.37, AWS SDK 3.1041.0, Microsoft Teams 2.0.9, and Marked 18.0.3. Thanks @mariozechner, @aws, and @microsoft.
 - Discord/channels: add reusable message-channel access groups plus Discord channel-audience DM authorization, so allowlists can reference `accessGroup:<name>` across channel auth paths. (#75813)
-- Crabbox/scripts: print the selected Crabbox binary, version, and supported providers before `pnpm crabbox:*` commands, and reject stale binaries that lack `blacksmith-testbox` provider support.
+- Crabbox/scripts: print the selected Crabbox binary, version, and supported providers before `pnpm botbox:*` commands, and reject stale binaries that lack `blacksmith-testbox` provider support.
 - Agents/Codex: add committed happy-path prompt snapshots for Codex/message-tool Telegram direct, Discord group, and heartbeat turns so prompt drift can be reviewed. Thanks @pashpashpash.
 
 ### Fixes
@@ -9312,7 +9312,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Control UI/WebChat: confirm toolbar New Session button resets before dispatching `/new` while leaving typed `/new` and `/reset` commands immediate. Fixes #45800; refs #27065, #56611, #54499, and #27110. Thanks @aethnova, @kosta228-huli, @adambezemek, and @xss925175263 (xianshishan).
 - Agents/models: keep per-agent primary models strict when `fallbacks` is omitted, so probe-only custom providers are not tried as hidden fallback candidates unless the agent explicitly opts in. Fixes #73332. Thanks @haumanto.
 - Gateway/models: add `models.pricing.enabled` so offline or restricted-network installs can skip startup OpenRouter and LiteLLM pricing-catalog fetches while keeping explicit model costs working. Fixes #53639. Thanks @callebtc, @palewire, and @rjdjohnston.
-- Gateway/startup: warn when legacy `CLAWDBOT_*` or `MOLTBOT_*` environment variables are still present, pointing users to `BOT_*` names instead of failing silently. Fixes #53482; carries forward #53667. Thanks @lndyzwdxhs.
+- Gateway/startup: warn when legacy `BOT_*` or `BOT_*` environment variables are still present, pointing users to `BOT_*` names instead of failing silently. Fixes #53482; carries forward #53667. Thanks @lndyzwdxhs.
 - Onboarding: pin interactive and non-interactive health checks to the just-configured setup token/password so stale `BOT_GATEWAY_TOKEN` or `BOT_GATEWAY_PASSWORD` values do not produce false gateway-token-mismatch failures after setup. Fixes #72203. Thanks @galiniliev.
 - Doctor/state: require an interactive confirmation before archiving orphan transcript files, so `bot doctor --fix` no longer silently renames recoverable session history after upgrades regenerate `sessions.json`. Fixes #73106. Thanks @scottgl9.
 - Cron/Telegram: preserve explicit `:topic:` delivery targets over stale session-derived thread IDs when isolated cron announces to Telegram forum topics. Carries forward #59069; refs #49704 and #43808. Thanks @roytong9.
@@ -10334,7 +10334,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Plugins/Voice Call: resolve queued-but-not-yet-playing Twilio TTS entries when barge-in or stream teardown clears the playback queue, so callers awaiting `queueTts()` do not hang. Thanks @kevinWangSheng.
 - Plugins/Voice Call: terminate expired restored call sessions with the provider and restart restored max-duration timers with only the remaining duration, preventing stale outbound retry loops after Gateway restarts. Fixes #48739. Thanks @mira-solari.
 - Plugins/Voice Call: start provider STT after Telnyx outbound conversation greetings and pass configured Telnyx voice IDs through to the speak action. Fixes #56091. Thanks @Roshan.
-- Skills: honor legacy `metadata.clawdbot` requirements and installer hints when `metadata.bot` is absent, so older skills no longer appear ready when required binaries are missing. Fixes #71323. Thanks @chen-zhang-cs-code.
+- Skills: honor legacy `metadata.bot` requirements and installer hints when `metadata.bot` is absent, so older skills no longer appear ready when required binaries are missing. Fixes #71323. Thanks @chen-zhang-cs-code.
 - Browser/config: expand `~` in `browser.executablePath` before Chromium launch, so home-relative custom browser paths no longer fail with `ENOENT`. Fixes #67264. Thanks @Quratulain-bilal.
 - Channels/streaming: keep Telegram tool-progress preview updates enabled by default to match released behavior, document `streaming.preview.toolProgress: false` for disabling only those status lines, and prevent preview progress text from triggering Telegram Markdown links, Discord mentions, or Slack mrkdwn mentions. Fixes #71320. Thanks @neeravmakwana.
 - Gateway/sessions: copy the oversized `sessions.json` to a rotation backup before the atomic rewrite instead of renaming the live store away, so a crash during rotation keeps the existing session-to-transcript mapping authoritative. Fixes #68229. Thanks @jjjojoj.
@@ -12564,7 +12564,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Feishu/MSTeams message tool: keep provider-native `card` payloads optional in merged tool schemas so media-only sends stop failing validation before channel runtime dispatch. (#53715) Thanks @lndyzwdxhs.
 - Feishu/docx block ordering: preserve the document tree order from `docx.document.convert` when inserting blocks, fixing heading/paragraph/list misordering in newly written Feishu documents. (#40524) Thanks @TaoXieSZ.
 - Telegram/native commands: run native slash-command execution against the resolved runtime snapshot so DM commands still reply when fresh config reads surface unresolved SecretRefs. (#53179) Thanks @nimbleenigma.
-- Gateway/ports: parse Docker Compose-style `BOT_GATEWAY_PORT` host publish values correctly without reviving the legacy `CLAWDBOT_GATEWAY_PORT` override. (#44083) Thanks @bebule.
+- Gateway/ports: parse Docker Compose-style `BOT_GATEWAY_PORT` host publish values correctly without reviving the legacy `BOT_GATEWAY_PORT` override. (#44083) Thanks @bebule.
 - Plugins/memory-lancedb: bootstrap the env-configured HTTP/HTTPS proxy dispatcher before OpenAI embeddings requests so memory capture and recall work in proxy-required environments again. (#54119) Thanks @neeravmakwana.
 - Runtime/build: stabilize long-lived lazy `dist` runtime entry paths and harden bundled plugin npm staging so local rebuilds stop breaking on missing hashed chunks or broken shell `npm` shims. (#53855) Thanks @vincentkoc.
 - Security/skills: validate skill installer metadata against strict regex allowlists per package manager, sanitize skill metadata for terminal output, add URL protocol allowlisting in markdown preview and skill homepage links, warn on non-bundled skill install sources, and remove unsafe `file://` workspace links. (#53471) Thanks @BunsDev.
@@ -12661,8 +12661,8 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Plugins/SDK: the new public plugin SDK surface is `bot/plugin-sdk/*`; `bot/extension-api` is removed with no compatibility shim. Bundled plugins must use injected runtime for host-side operations (for example `api.runtime.agent.runEmbeddedPiAgent`) and any remaining direct imports must come from narrow `bot/plugin-sdk/*` subpaths instead of the monolithic SDK root. Docs: https://docs.bot.ai/plugins/sdk-migration and https://docs.bot.ai/plugins/sdk-overview.
 - Plugins/message discovery: require `ChannelMessageActionAdapter.describeMessageTool(...)` for shared `message` tool discovery. The legacy `listActions`, `getCapabilities`, and `getToolSchema` adapter methods are removed. Plugin authors should migrate message discovery to `describeMessageTool(...)` and keep channel-specific action runtime code inside the owning plugin package. Thanks @gumadeiras.
 - Plugins/Matrix: add a new Matrix plugin backed by the official `matrix-js-sdk`. If you are upgrading from the previous public Matrix plugin, follow the migration guide: https://docs.bot.ai/install/migrating-matrix Thanks @gumadeiras.
-- Config/env: remove legacy `CLAWDBOT_*` and `MOLTBOT_*` compatibility env names across runtime, installers, and test tooling. Use the matching `BOT_*` env names instead.
-- Config/state: remove legacy `.moltbot` state-dir and `moltbot.json` auto-detection/migration fallback. If you still keep state under `~/.moltbot`, move it to `~/.bot` or set `BOT_STATE_DIR` / `BOT_CONFIG_PATH` explicitly. Docs: https://docs.bot.ai/install/migrating and https://docs.bot.ai/start/getting-started.
+- Config/env: remove legacy `BOT_*` and `BOT_*` compatibility env names across runtime, installers, and test tooling. Use the matching `BOT_*` env names instead.
+- Config/state: remove legacy `.bot` state-dir and `bot.json` auto-detection/migration fallback. If you still keep state under `~/.bot`, move it to `~/.bot` or set `BOT_STATE_DIR` / `BOT_CONFIG_PATH` explicitly. Docs: https://docs.bot.ai/install/migrating and https://docs.bot.ai/start/getting-started.
 - Exec/env sandbox: block build-tool JVM injection (`MAVEN_OPTS`, `SBT_OPTS`, `GRADLE_OPTS`, `ANT_OPTS`), glibc tunable exploitation (`GLIBC_TUNABLES`), and .NET dependency resolution hijack (`DOTNET_ADDITIONAL_DEPS`) from the host exec environment, and restrict Gradle init script redirect (`GRADLE_USER_HOME`) as an override-only block so user-configured Gradle homes still propagate. (#49702).
 - Discord/commands: switch native command deployment to Carbon reconcile by default so Discord restarts stop churning slash commands through Bot's local deploy path. (#46597) Thanks @huntharo and @thewilloftheshadow.
 - Security/exec approvals: treat `time` as a transparent dispatch wrapper during allowlist evaluation and allow-always persistence so approved `time ...` commands bind the inner executable instead of the wrapper path. Thanks @YLChen-007 for reporting.
@@ -12772,7 +12772,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Agents/openai-responses: strip `prompt_cache_key` and `prompt_cache_retention` for non-OpenAI-compatible Responses endpoints while keeping them on direct OpenAI and Azure OpenAI paths, so third-party OpenAI-compatible providers no longer reject those requests with HTTP 400. (#49877) Thanks @ShaunTsai.
 - Models/OpenRouter runtime capabilities: fetch uncatalogued OpenRouter model metadata on first use so newly added vision models keep image input instead of silently degrading to text-only, with top-level capability field fallbacks for `/api/v1/models`. (#45824) Thanks @DJjjjhao.
 - Control UI/session routing: preserve established external delivery routes when webchat views or sends in externally originated sessions, so subagent completions still return to the original channel instead of the dashboard. (#47797) Thanks @brokemac79.
-- Telegram/replies: set `allow_sending_without_reply` on reply-targeted sends and media-error notices so deleted parent messages no longer drop otherwise valid replies. (#52524) Thanks @moltbot886.
+- Telegram/replies: set `allow_sending_without_reply` on reply-targeted sends and media-error notices so deleted parent messages no longer drop otherwise valid replies. (#52524) Thanks @bot886.
 - Telegram/polling: hard-timeout stuck `getUpdates` requests so wedged network paths fail over sooner instead of waiting for the polling stall watchdog. Thanks @vincentkoc.
 - Android/location: make current-location requests drop late callbacks after timeout instead of crashing with `Already resumed`. (#52318) Thanks @Kaneki-x.
 - Android/pairing: resolve portless secure setup URLs to `443` while preserving direct cleartext gateway defaults and explicit `:80` manual endpoints in onboarding. (#43540) Thanks @fmercurio.
@@ -13791,11 +13791,11 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Daemon/Homebrew runtime pinning: resolve Homebrew Cellar Node paths to stable Homebrew-managed symlinks (including versioned formulas like `node@22`) so gateway installs keep the intended runtime across brew upgrades. (#32185) Thanks @scoootscooob.
 - Browser/Security output boundary hardening: replace check-then-rename output commits with root-bound fd-verified writes, unify install/skills canonical path-boundary checks, and add regression coverage for symlink-rebind race paths across browser output and shared fs-safe write flows. Thanks @tdjackey for reporting.
 - Gateway/Security canonicalization hardening: decode plugin route path variants to canonical fixpoint (with bounded depth), fail closed on canonicalization anomalies, and enforce gateway auth for deeply encoded `/api/channels/*` variants to prevent alternate-path auth bypass through plugin handlers. Thanks @tdjackey for reporting.
-- Browser/Gateway hardening: preserve env credentials for `BOT_GATEWAY_URL` / `CLAWDBOT_GATEWAY_URL` while treating explicit `--url` as override-only auth, and make container browser hardening flags optional with safer defaults for Docker/LXC stability. (#31504) Thanks @vincentkoc.
+- Browser/Gateway hardening: preserve env credentials for `BOT_GATEWAY_URL` / `BOT_GATEWAY_URL` while treating explicit `--url` as override-only auth, and make container browser hardening flags optional with safer defaults for Docker/LXC stability. (#31504) Thanks @vincentkoc.
 - Gateway/Control UI basePath webhook passthrough: let non-read methods under configured `controlUiBasePath` fall through to plugin routes (instead of returning Control UI 405), restoring webhook handlers behind basePath mounts. (#32311) Thanks @ademczuk.
 - Gateway/Webchat streaming finalization: flush throttled trailing assistant text before `final` chat events so streaming consumers do not miss tail content, while preserving duplicate suppression and heartbeat/silent lead-fragment guards. (#24856) Thanks @visionik and @vincentkoc.
 - Control UI/Legacy browser compatibility: replace `toSorted`-dependent cron suggestion sorting in `app-render` with a compatibility helper so older browsers without `Array.prototype.toSorted` no longer white-screen. (#31775) Thanks @liuxiaopai-ai.
-- macOS/PeekabooBridge: add compatibility socket symlinks for legacy `clawdbot`, `clawdis`, and `moltbot` Application Support socket paths so pre-rename clients can still connect. (#6033) Thanks @lumpinif and @vincentkoc.
+- macOS/PeekabooBridge: add compatibility socket symlinks for legacy `bot`, `clawdis`, and `bot` Application Support socket paths so pre-rename clients can still connect. (#6033) Thanks @lumpinif and @vincentkoc.
 - Gateway/message tool reliability: avoid false `Unknown channel` failures when `message.*` actions receive platform-specific channel ids by falling back to `toolContext.currentChannelProvider`, and prevent health-monitor restart thrash for channels that just (re)started by adding a per-channel startup-connect grace window. (from #32367) Thanks @MunemHashmi.
 - Windows/Spawn canonicalization: unify non-core Windows spawn handling across ACP client, QMD/mcporter memory paths, and sandbox Docker execution using the shared wrapper-resolution policy, with targeted regression coverage for `.cmd` shim unwrapping and shell fallback behavior. (#31750) Thanks @Takhoffman.
 - Security/ACP sandbox inheritance: enforce fail-closed runtime guardrails for `sessions_spawn` with `runtime="acp"` by rejecting ACP spawns from sandboxed requester sessions and rejecting `sandbox="require"` for ACP runtime, preventing sandbox-boundary bypass via host-side ACP initialization. (#32254) Thanks @tdjackey for reporting, and @dutifulbob for the fix.
@@ -14110,7 +14110,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Dashboard/Sessions: allow authenticated Control UI clients to delete and patch sessions while still blocking regular webchat clients from session mutation RPCs, fixing Dashboard session delete failures. (#21264) Thanks @jskoiz.
 - Web UI/Control UI WebSocket defaults: include normalized `gateway.controlUi.basePath` (or inferred nested route base path) in the default `gatewayUrl` so first-load dashboard connections work behind path-based reverse proxies. (#30228) Thanks @gittb.
 - Gateway/Control UI API routing: when `gateway.controlUi.basePath` is unset (default), stop serving Control UI SPA HTML for `/api` and `/api/*` so API paths fall through to normal gateway handlers/404 responses instead of `index.html`. (#30333) Fixes #30295. thanks @Sid-Qin.
-- Node host/service auth env: include `BOT_GATEWAY_TOKEN` in `bot node install` service environments (with `CLAWDBOT_GATEWAY_TOKEN` compatibility fallback) so installed node services keep remote gateway token auth across restart/reboot. Fixes #31041. Thanks @OneStepAt4time for reporting, @byungsker, @liuxiaopai-ai, and @vincentkoc.
+- Node host/service auth env: include `BOT_GATEWAY_TOKEN` in `bot node install` service environments (with `BOT_GATEWAY_TOKEN` compatibility fallback) so installed node services keep remote gateway token auth across restart/reboot. Fixes #31041. Thanks @OneStepAt4time for reporting, @byungsker, @liuxiaopai-ai, and @vincentkoc.
 - Gateway/Control UI origins: support wildcard `"*"` in `gateway.controlUi.allowedOrigins` for trusted remote access setups. Landed from contributor PR #31088. Thanks @frankekn.
 - Gateway/Cron auditability: add gateway info logs for successful cron create, update, and remove operations. (#25090) Thanks @MoerAI.
 - Control UI/Cron editor: include `{ mode: "none" }` in `cron.update` patches when editing an existing job and selecting "Result delivery = None (internal)", so saved jobs no longer keep stale announce delivery mode. Fixes #31075 (#57018). Thanks @hydro13.
@@ -14969,7 +14969,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Browser/Security: block upload path symlink escapes so browser upload sources cannot traverse outside the allowed workspace via symlinked paths. (#21972) Thanks @mbelinky.
 - Security/Dependencies: bump transitive `hono` usage to `4.11.10` to incorporate timing-safe authentication comparison hardening for `basicAuth`/`bearerAuth` (`GHSA-gq3j-xvxp-8hrf`). Thanks @vincentkoc.
 - Security/Gateway: parse `X-Forwarded-For` with trust-preserving semantics when requests come from configured trusted proxies, preventing proxy-chain spoofing from influencing client IP classification and rate-limit identity. Thanks @AnthonyDiSanti and @vincentkoc.
-- Security/Sandbox: remove default `--no-sandbox` for the browser container entrypoint, add explicit opt-in via `BOT_BROWSER_NO_SANDBOX` / `CLAWDBOT_BROWSER_NO_SANDBOX`, and add security-audit checks for stale/missing sandbox browser Docker hash labels. Thanks @TerminalsandCoffee and @vincentkoc.
+- Security/Sandbox: remove default `--no-sandbox` for the browser container entrypoint, add explicit opt-in via `BOT_BROWSER_NO_SANDBOX` / `BOT_BROWSER_NO_SANDBOX`, and add security-audit checks for stale/missing sandbox browser Docker hash labels. Thanks @TerminalsandCoffee and @vincentkoc.
 - Security/Sandbox Browser: require VNC password auth for noVNC observer sessions in the sandbox browser entrypoint, plumb per-container noVNC passwords from runtime, and emit short-lived noVNC observer token URLs while keeping loopback-only host port publishing. Thanks @TerminalsandCoffee for reporting.
 - Security/Sandbox Browser: default browser sandbox containers to a dedicated Docker network (`bot-sandbox-browser`), add optional CDP ingress source-range restrictions, auto-create missing dedicated networks, and warn in `bot security --audit` when browser sandboxing runs on bridge without source-range limits. Thanks @TerminalsandCoffee for reporting.
 
@@ -15580,7 +15580,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 
 ### Breaking
 
-- Config/State: removed legacy `.moltbot` auto-detection/migration and `moltbot.json` config candidates. If you still have state/config under `~/.moltbot`, move it to `~/.bot` (recommended) or set `BOT_STATE_DIR` / `BOT_CONFIG_PATH` explicitly.
+- Config/State: removed legacy `.bot` auto-detection/migration and `bot.json` config candidates. If you still have state/config under `~/.bot`, move it to `~/.bot` (recommended) or set `BOT_STATE_DIR` / `BOT_CONFIG_PATH` explicitly.
 
 ## 2026.2.12
 
@@ -15643,7 +15643,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Discord: add optional gateway proxy support for WebSocket connections via `channels.discord.proxy`. (#10400) Thanks @winter-loo, @thewilloftheshadow.
 - Browser: add Chrome launch flag `--disable-blink-features=AutomationControlled` to reduce `navigator.webdriver` automation detection issues on reCAPTCHA-protected sites. (#10735) Thanks @Milofax.
 - Heartbeat: filter noise-only system events so scheduled reminder notifications do not fire when cron runs carry only heartbeat markers. (#13317) Thanks @pvtclawn.
-- Signal: render mention placeholders as `@uuid`/`@phone` so mention gating and Clawdbot targeting work. (#2013) Thanks @alexgleason.
+- Signal: render mention placeholders as `@uuid`/`@phone` so mention gating and Bot targeting work. (#2013) Thanks @alexgleason.
 - Agents/Reminders: guard reminder promises by appending a note when no `cron.add` succeeded in the turn, so users know nothing was scheduled. (#18588) Thanks @vignesh07.
 - Discord: omit empty content fields for media-only messages while preserving caption whitespace. (#9507) Thanks @leszekszpunar.
 - Onboarding/Providers: add Z.AI endpoint-specific auth choices (`zai-coding-global`, `zai-coding-cn`, `zai-global`, `zai-cn`) and expand default Z.AI model wiring. (#13456) Thanks @tomsun28.
@@ -15949,7 +15949,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Auto-reply: avoid referencing workspace files in /new greeting prompt. (#5706) Thanks @bravostation.
 - Tools: align tool execute adapters/signatures (legacy + parameter order + arg normalization).
 - Tools: treat "\*" tool allowlist entries as valid to avoid spurious unknown-entry warnings. Thanks @shakkernerd.
-- Skills: update session-logs paths from .clawdbot to .bot. (#4502)
+- Skills: update session-logs paths from .bot to .bot. (#4502)
 - Slack: harden media fetch limits and Slack file URL validation. (#6639) Thanks @davidiach.
 - Lint: satisfy curly rule after import sorting. (#6310)
 - Process: resolve Windows `spawn()` failures for npm-family CLIs by appending `.cmd` when needed. (#5815) Thanks @thejhinvirtuoso.
@@ -16326,7 +16326,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 - Exec: fall back to non-PTY when PTY spawn fails (EBADF). (#1484).
 - Exec approvals: allow per-segment allowlists for chained shell commands on gateway + node hosts. (#1458) Thanks @czekaj.
 - Agents: make OpenAI sessions image-sanitize-only; gate tool-id/repair sanitization by provider.
-- Doctor: honor CLAWDBOT_GATEWAY_TOKEN for auth checks and security audit token reuse. (#1448) Thanks @azade-c.
+- Doctor: honor BOT_GATEWAY_TOKEN for auth checks and security audit token reuse. (#1448) Thanks @azade-c.
 - Agents: make tool summaries more readable and only show optional params when set.
 - Agents: honor SOUL.md guidance even when the file is nested or path-qualified. (#1434) Thanks @neooriginal.
 - Matrix (plugin): persist m.direct for resolved DMs and harden room fallback. (#1436, #1486) Thanks @sibbl.
@@ -16484,7 +16484,7 @@ This audited record covers the complete v2026.5.28..v2026.5.31-beta.4 history: 4
 
 ### Fixes
 
-- Discovery: shorten Bonjour DNS-SD service type to `_moltbot-gw._tcp` and update discovery clients/docs.
+- Discovery: shorten Bonjour DNS-SD service type to `_bot-gw._tcp` and update discovery clients/docs.
 - Diagnostics: export OTLP logs, correct queue depth tracking, and document message-flow telemetry.
 - Diagnostics: emit message-flow diagnostics across channels via shared dispatch. (#1244).
 - Diagnostics: gate heartbeat/webhook logging. (#1244).
@@ -16728,7 +16728,7 @@ Thanks @AlexMikhalev, @CoreyH, @John-Rood, @KrauseFx, @MaudeBot, @Nachx639, @Nic
 - UI: add session deletion action in Control UI sessions list. (#1017) - thanks @Szpadel.
 - Security: warn on weak model tiers (Haiku, below GPT-5, below Claude 4.5) in `bot security audit`.
 - Apps: store node auth tokens encrypted (Keychain/SecurePrefs).
-- Daemon: share profile/state-dir resolution across service helpers and honor `CLAWDBOT_STATE_DIR` for Windows task scripts.
+- Daemon: share profile/state-dir resolution across service helpers and honor `BOT_STATE_DIR` for Windows task scripts.
 - Docs: clarify multi-gateway rescue bot guidance. (#969) - thanks @bjesuiter.
 - Agents: add Current Date & Time system prompt section with configurable time format (auto/12/24).
 - Tools: normalize Slack/Discord message timestamps with `timestampMs`/`timestampUtc` while keeping raw provider fields.
@@ -16933,7 +16933,7 @@ Thanks @AlexMikhalev, @CoreyH, @John-Rood, @KrauseFx, @MaudeBot, @Nachx639, @Nic
 - Gemini: normalize Gemini 3 ids to preview variants; strip Gemini CLI tool call/response ids; downgrade missing `thought_signature`; strip Claude `msg_*` thought_signature fields to avoid base64 decode errors. (#795) - thanks @thewilloftheshadow; (#783) - thanks @ananth-vardhan-cn; (#793) - thanks @hsrvc; (#805) - thanks @marcmarg.
 - Agents: auto-recover from compaction context overflow by resetting the session and retrying; propagate overflow details from embedded runs so callers can recover.
 - MiniMax: strip malformed tool invocation XML; include `MiniMax-VL-01` in implicit provider for image pairing. (#809) - thanks @latitudeki5223.
-- Onboarding/Auth: honor `CLAWDBOT_AGENT_DIR` / `PI_CODING_AGENT_DIR` when writing auth profiles (MiniMax). (#829) - thanks @roshanasingh4.
+- Onboarding/Auth: honor `BOT_AGENT_DIR` / `PI_CODING_AGENT_DIR` when writing auth profiles (MiniMax). (#829) - thanks @roshanasingh4.
 - Anthropic: handle `overloaded_error` with a friendly message and failover classification. (#832) - thanks @danielz1z.
 - Anthropic: merge consecutive user turns (preserve newest metadata) before validation to avoid incorrect role errors. (#804) - thanks @ThomsenDrake.
 - Messaging: enforce context isolation for message tool sends; keep typing indicators alive during tool execution. (#793) - thanks @hsrvc; (#450, #447) - thanks @thewilloftheshadow.
@@ -16944,7 +16944,7 @@ Thanks @AlexMikhalev, @CoreyH, @John-Rood, @KrauseFx, @MaudeBot, @Nachx639, @Nic
 - Telegram: preserve forum topic thread ids, persist polling offsets, respect account bindings in webhook mode, and show typing indicator in General topics. (#727, #739) - thanks @thewilloftheshadow; (#821) - thanks @gumadeiras; (#779) - thanks @azade-c.
 - Slack: accept slash commands with or without leading `/` for custom command configs. (#798) - thanks @thewilloftheshadow.
 - Cron: persist disabled jobs correctly; accept `jobId` aliases for update/run/remove params. (#205, #252) - thanks @thewilloftheshadow.
-- Gateway/CLI: honor `CLAWDBOT_LAUNCHD_LABEL` / `CLAWDBOT_SYSTEMD_UNIT` overrides; `agents.list` respects explicit config; reduce noisy loopback WS logs during tests; run `bot doctor --non-interactive` during updates. (#781) - thanks @ronyrus.
+- Gateway/CLI: honor `BOT_LAUNCHD_LABEL` / `BOT_SYSTEMD_UNIT` overrides; `agents.list` respects explicit config; reduce noisy loopback WS logs during tests; run `bot doctor --non-interactive` during updates. (#781) - thanks @ronyrus.
 - Onboarding/Control UI: refuse invalid configs (run doctor first); quote Windows browser URLs for OAuth; keep chat scroll position unless the user is near the bottom. (#764) - thanks @mukhtharcm; (#794) - thanks @roshanasingh4; (#217) - thanks @thewilloftheshadow.
 - Tools/UI: harden tool input schemas for strict providers; drop null-only union variants for Gemini schema cleanup; treat `maxChars: 0` as unlimited; keep TUI last streamed response instead of "(no output)". (#782) - thanks @AbhisekBasu1; (#796) - thanks @gabriel-trigo; (#747) - thanks @thewilloftheshadow.
 - Connections UI: polish multi-account account cards. (#816).
@@ -17017,7 +17017,7 @@ Thanks @AlexMikhalev, @CoreyH, @John-Rood, @KrauseFx, @MaudeBot, @Nachx639, @Nic
 - macOS/Release: avoid bundling dist artifacts in relay builds and generate appcasts from zip-only sources.
 - Doctor: surface plugin diagnostics in the report.
 - Plugins: treat `plugins.load.paths` directory entries as package roots when they contain `package.json` + `bot.extensions`; load plugin packages from config dirs; extract archives without system tar.
-- Config: expand `~` in `CLAWDBOT_CONFIG_PATH` and common path-like config fields (including `plugins.load.paths`); guard invalid `$include` paths. (#731) - thanks @pasogott.
+- Config: expand `~` in `BOT_CONFIG_PATH` and common path-like config fields (including `plugins.load.paths`); guard invalid `$include` paths. (#731) - thanks @pasogott.
 - Memory/QMD: honor `memorySearch.sync.watch` and first-session warm sync for the QMD backend, so managed collections refresh after watched file changes and on the first search in a new session. (#47482) Thanks @Ryce and @vincentkoc.
 - Agents: stop pre-creating session transcripts so first user messages persist in JSONL history.
 - Agents: skip pre-compaction memory flush when the session workspace is read-only.
@@ -17049,7 +17049,7 @@ Thanks @AlexMikhalev, @CoreyH, @John-Rood, @KrauseFx, @MaudeBot, @Nachx639, @Nic
 - Postinstall: replace `git apply` with builtin JS patcher (works npm/pnpm/bun; no git dependency) plus regression tests.
 - Postinstall: skip pnpm patch fallback when the new patcher is active.
 - Installer tests: add root+non-root docker smokes, CI workflow to fetch bot.ai scripts and run install sh/cli with onboarding skipped.
-- Installer UX: support `CLAWDBOT_NO_ONBOARD=1` for non-interactive installs; fix npm prefix on Linux and auto-install git.
+- Installer UX: support `BOT_NO_ONBOARD=1` for non-interactive installs; fix npm prefix on Linux and auto-install git.
 - Installer UX: add `install.sh --help` with flags/env and git install hint.
 - Installer UX: add `--install-method git|npm` and auto-detect source checkouts (prompt to update git checkout vs migrate to npm).
 
@@ -17118,13 +17118,13 @@ Thanks @AlexMikhalev, @CoreyH, @John-Rood, @KrauseFx, @MaudeBot, @Nachx639, @Nic
 - Hooks/Gmail: allow Tailscale target URLs to preserve internal serve paths.
 - Auth: update Claude Code keychain credentials in-place during refresh sync; share JSON file helpers; add CLI fallback coverage.
 - Auth: throttle external CLI credential syncs (Claude/Codex), reduce Keychain reads, and skip sync when cached credentials are still fresh.
-- CLI: respect `CLAWDBOT_STATE_DIR` for node pairing + voice wake settings storage. (#664) - thanks @azade-c.
+- CLI: respect `BOT_STATE_DIR` for node pairing + voice wake settings storage. (#664) - thanks @azade-c.
 - Onboarding/Gateway: persist non-interactive gateway token auth in config; add WS wizard + gateway tool-calling regression coverage.
 - Gateway/Control UI: make `chat.send` non-blocking, wire Stop to `chat.abort`, and treat `/stop` as an out-of-band abort. (#653).
 - Gateway/Control UI: allow `chat.abort` without `runId` (abort active runs), suppress post-abort chat streaming, and prune stuck chat runs. (#653).
 - Gateway/Control UI: sniff image attachments for chat.send, drop non-images, and log mismatches. (#670) - thanks @cristip73.
 - macOS: force `restart-mac.sh --sign` to require identities and keep bundled Node signed for relay verification. (#580) - thanks @jeffersonwarrior.
-- Gateway/Agent: accept image attachments on `agent` (multimodal message) and add live gateway image probe (`CLAWDBOT_LIVE_GATEWAY_IMAGE_PROBE=1`).
+- Gateway/Agent: accept image attachments on `agent` (multimodal message) and add live gateway image probe (`BOT_LIVE_GATEWAY_IMAGE_PROBE=1`).
 - CLI: `bot sessions` now includes `elev:*` + `usage:*` flags in the table output.
 - CLI/Pairing: accept positional provider for `pairing list|approve` (npm-run compatible); update docs/bot hints.
 - Branding: normalize legacy casing/branding to "Bot" (CLI, status, docs) (#57018). Thanks @hydro13.
@@ -17197,7 +17197,7 @@ Thanks @AlexMikhalev, @CoreyH, @John-Rood, @KrauseFx, @MaudeBot, @Nachx639, @Nic
 - Signal: reaction handling safety; own-reaction matching (uuid+phone); UUID-only senders accepted; ignore reaction-only messages.
 - MS Teams: download image attachments reliably; fix top-level replies; stop on shutdown + honor chunk limits; normalize poll providers/deps; pairing label fixes.
 - iMessage: isolate group-ish threads by chat_id.
-- Gateway/Daemon/Doctor: atomic config writes; repair gateway service entrypoint + install switches; non-interactive legacy migrations; systemd unit alignment + KillMode=process; node bridge keepalive/pings; Launch at Login persistence; bundle MoltbotKit resources + Swift 6.2 compat dylib; relay version check + remove smoke test; regen Swift GatewayModels + keep agent provider string; cron jobId alias + channel alias migration + main session key normalization; heartbeat Telegram accountId resolution; avoid WhatsApp fallback for internal runs; gateway listener error wording; serveBaseUrl param; honor gateway --dev; fix wide-area discovery updates; align agents.defaults schema; provider account metadata in daemon status; refresh Carbon patch for gateway fixes; restore doctor prompter initialValue handling.
+- Gateway/Daemon/Doctor: atomic config writes; repair gateway service entrypoint + install switches; non-interactive legacy migrations; systemd unit alignment + KillMode=process; node bridge keepalive/pings; Launch at Login persistence; bundle BotKit resources + Swift 6.2 compat dylib; relay version check + remove smoke test; regen Swift GatewayModels + keep agent provider string; cron jobId alias + channel alias migration + main session key normalization; heartbeat Telegram accountId resolution; avoid WhatsApp fallback for internal runs; gateway listener error wording; serveBaseUrl param; honor gateway --dev; fix wide-area discovery updates; align agents.defaults schema; provider account metadata in daemon status; refresh Carbon patch for gateway fixes; restore doctor prompter initialValue handling.
 - Control UI/TUI: persist per-session verbose off + hide tool cards; logs tab opens at bottom; relative asset paths + landing cleanup; session labels lookup/persistence; stop pinning main session in recents; start logs at bottom; TUI status bar refresh + timeout handling + hide reasoning label when off.
 - Onboarding/Configure: QuickStart single-select provider picker; avoid Codex CLI false-expiry warnings; clarify WhatsApp owner prompt; fix Minimax hosted onboarding (agents.defaults + msteams heartbeat target); remove configure Control UI prompt; honor gateway --dev flag.
 - Agent loop: guard overflow compaction throws and restore compaction hooks for engine-owned context engines. (#41361) - thanks @davidrudduck

@@ -3,7 +3,7 @@
 Prepare the next Gateway patch for the active `extended-stable` line: the
 `bot` npm package, official npm plugins, and matching Docker Gateway
 images. Discover the complete candidate set, obtain approval, and prepare one
-coordinated PR. Commits are canonical; PRs, issues, ClawSweeper reports, and
+coordinated PR. Commits are canonical; PRs, issues, BotSweeper reports, and
 advisories provide context.
 
 Read `backport-discovery.md` first. Its evidence-driven inventory, detached
@@ -145,7 +145,7 @@ patches, branch-specific equivalents, and companion commits that `git cherry`
 misses. Do not finish while any entry remains unclassified.
 
 Also inspect direct maintainer/security commits, linked PRs and issues,
-ClawSweeper findings, companion fixes, callers, siblings, tests, and dependency
+BotSweeper findings, companion fixes, callers, siblings, tests, and dependency
 contracts.
 
 ## Filter by Publication Surface

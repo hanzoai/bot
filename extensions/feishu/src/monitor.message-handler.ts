@@ -1,6 +1,6 @@
 // Feishu plugin module implements monitor.message handler behavior.
 import { isRecord, readStringValue as readString } from "bot/plugin-sdk/string-coerce-runtime";
-import type { ClawdbotConfig, HistoryEntry, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
+import type { BotConfig, HistoryEntry, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
 import { claimUnprocessedFeishuMessage, type FeishuMessageProcessingClaim } from "./dedup.js";
 import { resolveFeishuMessageDedupeKey } from "./dedupe-key.js";
 import type { FeishuMessageEvent } from "./event-types.js";
@@ -14,14 +14,14 @@ import { createSequentialQueue } from "./sequential-queue.js";
 import type { FeishuChatType } from "./types.js";
 
 type FeishuMessageReceiveHandlerContext = {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   channelRuntime: PluginRuntime["channel"];
   accountId: string;
   runtime?: RuntimeEnv;
   chatHistories: Map<string, HistoryEntry[]>;
   fireAndForget?: boolean;
   handleMessage: (params: {
-    cfg: ClawdbotConfig;
+    cfg: BotConfig;
     event: FeishuMessageEvent;
     botOpenId?: string;
     botName?: string;

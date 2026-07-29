@@ -1,7 +1,7 @@
 ---
 summary: "Path 3 plan for archiving all SQLite transcript artifacts that belong to a session"
 read_when:
-  - You are implementing clawdbot-d63.2 / clawdbot-04b
+  - You are implementing bot-d63.2 / bot-04b
   - You are touching SQLite session retention, reset, delete, or agent-deletion archival
   - You need to distinguish SQLite-era artifact families from legacy JSONL sidecars
 title: "Path 3 SQLite session artifact family"
@@ -9,7 +9,7 @@ title: "Path 3 SQLite session artifact family"
 
 # Path 3 SQLite Session Artifact Family
 
-This note scopes `clawdbot-d63.2` while `clawdbot-d63.1` owns the overlapping
+This note scopes `bot-d63.2` while `bot-d63.1` owns the overlapping
 reset/delete archive helper in `src/config/sessions/session-accessor.sqlite.ts`.
 The implementation file was dirty during this pass, so this artifact records
 the exact contract and patch points without racing the sibling worker.
@@ -55,7 +55,7 @@ second importer or file fallback.
 
 ## Patch points
 
-Extend the SQLite archive helper introduced by `clawdbot-d63.1` rather than
+Extend the SQLite archive helper introduced by `bot-d63.1` rather than
 adding a parallel path.
 
 1. Add a local collector near `deleteSqliteSessionStateIfUnreferenced`:
@@ -82,7 +82,7 @@ adding a parallel path.
 ## Focused tests
 
 Add SQLite-only tests to `src/config/sessions/session-accessor.conformance.test.ts`
-or the sibling lifecycle test after `clawdbot-d63.1` commits:
+or the sibling lifecycle test after `bot-d63.1` commits:
 
 - Deleting an entry with a pre-compaction transcript archives both the current
   session and the pre-compaction session, then removes both SQLite row sets.

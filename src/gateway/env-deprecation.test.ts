@@ -25,9 +25,9 @@ describe("warnLegacyBotEnvVars", () => {
 
   it("warns with counts and prefixes instead of secret-shaped env names", () => {
     warnLegacyBotEnvVars({
-      CLAWDBOT_GATEWAY_TOKEN: "old-token",
-      MOLTBOT_GATEWAY_PASSWORD: "old-password", // pragma: allowlist secret
-      "CLAWDBOT_MALICIOUS\nforged": "old-value",
+      BOT_GATEWAY_TOKEN: "old-token",
+      BOT_GATEWAY_PASSWORD: "old-password", // pragma: allowlist secret
+      "BOT_MALICIOUS\nforged": "old-value",
     });
 
     expect(emitWarning).toHaveBeenCalledOnce();
@@ -35,7 +35,7 @@ describe("warnLegacyBotEnvVars", () => {
       string,
       { code: string; type: string },
     ];
-    expect(message).toContain("Legacy CLAWDBOT_*, MOLTBOT_* environment variables");
+    expect(message).toContain("Legacy BOT_*, BOT_* environment variables");
     expect(message).toContain("3 total");
     expect(message).toContain("replacing the legacy prefix with BOT_");
     expect(message).not.toContain("GATEWAY_TOKEN");
@@ -54,8 +54,8 @@ describe("warnLegacyBotEnvVars", () => {
   });
 
   it("warns only once after a successful emit", () => {
-    warnLegacyBotEnvVars({ CLAWDBOT_GATEWAY_TOKEN: "old-token" });
-    warnLegacyBotEnvVars({ MOLTBOT_GATEWAY_TOKEN: "old-token" });
+    warnLegacyBotEnvVars({ BOT_GATEWAY_TOKEN: "old-token" });
+    warnLegacyBotEnvVars({ BOT_GATEWAY_TOKEN: "old-token" });
 
     expect(emitWarning).toHaveBeenCalledOnce();
   });
@@ -67,17 +67,17 @@ describe("warnLegacyBotEnvVars", () => {
       })
       .mockImplementationOnce(() => {});
 
-    expect(() => warnLegacyBotEnvVars({ CLAWDBOT_GATEWAY_TOKEN: "old-token" })).toThrow(
+    expect(() => warnLegacyBotEnvVars({ BOT_GATEWAY_TOKEN: "old-token" })).toThrow(
       "warning sink failed",
     );
-    warnLegacyBotEnvVars({ CLAWDBOT_GATEWAY_TOKEN: "old-token" });
+    warnLegacyBotEnvVars({ BOT_GATEWAY_TOKEN: "old-token" });
 
     expect(emitWarning).toHaveBeenCalledTimes(2);
   });
 
   it("suppresses warning noise based on the passed env", () => {
     warnLegacyBotEnvVars({
-      CLAWDBOT_GATEWAY_TOKEN: "old-token",
+      BOT_GATEWAY_TOKEN: "old-token",
       VITEST: "true",
     });
 
@@ -86,7 +86,7 @@ describe("warnLegacyBotEnvVars", () => {
 
   it("does not let process.env test flags suppress a synthetic env", () => {
     withEnv({ VITEST: "true" }, () => {
-      warnLegacyBotEnvVars({ CLAWDBOT_GATEWAY_TOKEN: "old-token" });
+      warnLegacyBotEnvVars({ BOT_GATEWAY_TOKEN: "old-token" });
 
       expect(emitWarning).toHaveBeenCalledOnce();
     });

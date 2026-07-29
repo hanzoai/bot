@@ -20,7 +20,7 @@ import {
   withTempWorkspace,
   withTempDownloadPath,
 } from "bot/plugin-sdk/temp-path";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import { resolveFeishuRuntimeAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";
 import { requestFeishuApi } from "./comment-shared.js";
@@ -77,7 +77,7 @@ type SaveMessageResourceResult = {
   fileName?: string;
 };
 
-function createConfiguredFeishuMediaClient(params: { cfg: ClawdbotConfig; accountId?: string }): {
+function createConfiguredFeishuMediaClient(params: { cfg: BotConfig; accountId?: string }): {
   account: ReturnType<typeof resolveFeishuRuntimeAccount>;
   client: ReturnType<typeof createFeishuClient>;
 } {
@@ -364,7 +364,7 @@ async function saveMessageResourceWithType(params: {
 }
 
 export async function saveMessageResourceFeishu(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   messageId: string;
   fileKey: string;
   type: "image" | "file";
@@ -427,7 +427,7 @@ export type SendMediaResult = {
  * Supports: JPEG, PNG, WEBP, GIF, TIFF, BMP, ICO
  */
 async function uploadImageFeishu(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   image: Buffer | string; // Buffer or file path
   imageType?: "message" | "avatar";
   accountId?: string;
@@ -480,7 +480,7 @@ function sanitizeFileNameForUpload(fileName: string): string {
  * Max file size: 30MB
  */
 async function uploadFileFeishu(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   file: Buffer | string; // Buffer or file path
   fileName: string;
   fileType: "opus" | "mp4" | "pdf" | "doc" | "xls" | "ppt" | "stream";
@@ -524,7 +524,7 @@ async function uploadFileFeishu(params: {
  * Send an image message using an image_key
  */
 async function sendImageFeishu(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   to: string;
   imageKey: string;
   replyToMessageId?: string;
@@ -587,7 +587,7 @@ async function sendImageFeishu(params: {
  * Send a file message using a file_key
  */
 async function sendFileFeishu(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   to: string;
   fileKey: string;
   /** Use "audio" for audio, "media" for video (mp4), "file" for documents */
@@ -909,7 +909,7 @@ async function maybeProbeUploadDurationMs(params: {
  * must be passed so loadWebMedia allows the path (post CVE-2026-26321).
  */
 export async function sendMediaFeishu(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   to: string;
   mediaUrl?: string;
   mediaBuffer?: Buffer;

@@ -4,9 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 import {
   NEEDS_PR_CONTEXT_LABEL,
   PROOF_OVERRIDE_LABEL,
-  evaluateClawSweeperExactHeadProof,
+  evaluateBotSweeperExactHeadProof,
   evaluatePullRequestContext,
-  hasClawSweeperExactHeadProof,
+  hasBotSweeperExactHeadProof,
   isMaintainerTeamMember,
   labelsForPullRequestContext,
   readBoundedGitHubApiJson,
@@ -413,7 +413,7 @@ describe("real-behavior-proof-policy", () => {
     ).toBe("missing");
   });
 
-  it("accepts ClawSweeper pass verdict comments only for the exact PR head", () => {
+  it("accepts BotSweeper pass verdict comments only for the exact PR head", () => {
     const pullRequest = {
       number: 83581,
       head: {
@@ -423,23 +423,23 @@ describe("real-behavior-proof-policy", () => {
     const comments = [
       {
         user: {
-          login: "clawsweeper[bot]",
+          login: "botsweeper[bot]",
           type: "Bot",
         },
         performed_via_github_app: {
-          slug: "clawsweeper",
+          slug: "botsweeper",
         },
         body: [
           "Codex review: passed.",
-          "<!-- clawsweeper-verdict:pass item=83581 sha=06ee95df6608d29a395c52ba8ab53fdd93a9dc4f confidence=high -->",
+          "<!-- botsweeper-verdict:pass item=83581 sha=06ee95df6608d29a395c52ba8ab53fdd93a9dc4f confidence=high -->",
         ].join("\n"),
       },
     ];
 
-    expect(hasClawSweeperExactHeadProof({ pullRequest, comments })).toBe(true);
-    expect(evaluateClawSweeperExactHeadProof({ pullRequest, comments }).passed).toBe(true);
+    expect(hasBotSweeperExactHeadProof({ pullRequest, comments })).toBe(true);
+    expect(evaluateBotSweeperExactHeadProof({ pullRequest, comments }).passed).toBe(true);
     expect(
-      hasClawSweeperExactHeadProof({
+      hasBotSweeperExactHeadProof({
         pullRequest: {
           ...pullRequest,
           head: { sha: "d0215b2d67a45a783277fc7d2949ac4a30f63ec6" },
@@ -449,7 +449,7 @@ describe("real-behavior-proof-policy", () => {
     ).toBe(false);
   });
 
-  it("rejects forged ClawSweeper pass verdict markers from contributor comments", () => {
+  it("rejects forged BotSweeper pass verdict markers from contributor comments", () => {
     const pullRequest = {
       number: 83581,
       head: {
@@ -462,15 +462,15 @@ describe("real-behavior-proof-policy", () => {
           login: "external-contributor",
           type: "User",
         },
-        body: "<!-- clawsweeper-verdict:pass item=83581 sha=06ee95df6608d29a395c52ba8ab53fdd93a9dc4f confidence=high -->",
+        body: "<!-- botsweeper-verdict:pass item=83581 sha=06ee95df6608d29a395c52ba8ab53fdd93a9dc4f confidence=high -->",
       },
     ];
 
-    expect(hasClawSweeperExactHeadProof({ pullRequest, comments })).toBe(false);
-    expect(evaluateClawSweeperExactHeadProof({ pullRequest, comments }).passed).toBe(false);
+    expect(hasBotSweeperExactHeadProof({ pullRequest, comments })).toBe(false);
+    expect(evaluateBotSweeperExactHeadProof({ pullRequest, comments }).passed).toBe(false);
   });
 
-  it("accepts exact ClawSweeper bot pass verdict markers when GitHub omits the app source", () => {
+  it("accepts exact BotSweeper bot pass verdict markers when GitHub omits the app source", () => {
     const pullRequest = {
       number: 83581,
       head: {
@@ -480,18 +480,18 @@ describe("real-behavior-proof-policy", () => {
     const comments = [
       {
         user: {
-          login: "clawsweeper[bot]",
+          login: "botsweeper[bot]",
           type: "Bot",
         },
-        body: "<!-- clawsweeper-verdict:pass item=83581 sha=06ee95df6608d29a395c52ba8ab53fdd93a9dc4f confidence=high -->",
+        body: "<!-- botsweeper-verdict:pass item=83581 sha=06ee95df6608d29a395c52ba8ab53fdd93a9dc4f confidence=high -->",
       },
     ];
 
-    expect(hasClawSweeperExactHeadProof({ pullRequest, comments })).toBe(true);
-    expect(evaluateClawSweeperExactHeadProof({ pullRequest, comments }).passed).toBe(true);
+    expect(hasBotSweeperExactHeadProof({ pullRequest, comments })).toBe(true);
+    expect(evaluateBotSweeperExactHeadProof({ pullRequest, comments }).passed).toBe(true);
   });
 
-  it("accepts exact Bot ClawSweeper bot pass verdict markers when GitHub omits the app source", () => {
+  it("accepts exact Bot BotSweeper bot pass verdict markers when GitHub omits the app source", () => {
     const pullRequest = {
       number: 83581,
       head: {
@@ -501,15 +501,15 @@ describe("real-behavior-proof-policy", () => {
     const comments = [
       {
         user: {
-          login: "bot-clawsweeper[bot]",
+          login: "bot-botsweeper[bot]",
           type: "Bot",
         },
-        body: "<!-- clawsweeper-verdict:pass item=83581 sha=06ee95df6608d29a395c52ba8ab53fdd93a9dc4f confidence=high -->",
+        body: "<!-- botsweeper-verdict:pass item=83581 sha=06ee95df6608d29a395c52ba8ab53fdd93a9dc4f confidence=high -->",
       },
     ];
 
-    expect(hasClawSweeperExactHeadProof({ pullRequest, comments })).toBe(true);
-    expect(evaluateClawSweeperExactHeadProof({ pullRequest, comments }).passed).toBe(true);
+    expect(hasBotSweeperExactHeadProof({ pullRequest, comments })).toBe(true);
+    expect(evaluateBotSweeperExactHeadProof({ pullRequest, comments }).passed).toBe(true);
   });
 
   it("rejects bot-shaped pass verdict markers from other bot users", () => {
@@ -522,15 +522,15 @@ describe("real-behavior-proof-policy", () => {
     const comments = [
       {
         user: {
-          login: "not-clawsweeper[bot]",
+          login: "not-botsweeper[bot]",
           type: "Bot",
         },
-        body: "<!-- clawsweeper-verdict:pass item=83581 sha=06ee95df6608d29a395c52ba8ab53fdd93a9dc4f confidence=high -->",
+        body: "<!-- botsweeper-verdict:pass item=83581 sha=06ee95df6608d29a395c52ba8ab53fdd93a9dc4f confidence=high -->",
       },
     ];
 
-    expect(hasClawSweeperExactHeadProof({ pullRequest, comments })).toBe(false);
-    expect(evaluateClawSweeperExactHeadProof({ pullRequest, comments }).passed).toBe(false);
+    expect(hasBotSweeperExactHeadProof({ pullRequest, comments })).toBe(false);
+    expect(evaluateBotSweeperExactHeadProof({ pullRequest, comments }).passed).toBe(false);
   });
 });
 

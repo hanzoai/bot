@@ -50,9 +50,9 @@ For coordinated change sets that genuinely need more than 20 PRs, join the **#cl
 - Use **Node 24.15+** for source checkouts when possible. Bot also supports Node 22.22.3+ and Node 25.9+, but Node 23, Node 22 before 22.22.3, and Node 24 before 24.15 are below the repository engine floor and can fail before `pnpm` commands run. See [Node install guidance](docs/install/node.md) if your local version is too old.
 - Test locally with your Bot instance
 - External PRs must describe the user, product, or operational problem in **What Problem This Solves** and include useful validation in **Evidence**. Focused tests, CI results, screenshots, recordings, terminal output, live observations, redacted logs, and artifact links all count. Reviewers will inspect the code, tests, and CI; use the PR body to explain intent and make validation easy to understand.
-- When ClawSweeper, Barnacle, or a maintainer asks for more context or evidence, edit the PR description instead of only replying in a new comment. Keep **What Problem This Solves**, **Why This Change Was Made**, **User Impact**, and **Evidence** current; a short comment can point reviewers to the update, but the PR body should remain the durable explanation for maintainers and bots.
+- When BotSweeper, Barnacle, or a maintainer asks for more context or evidence, edit the PR description instead of only replying in a new comment. Keep **What Problem This Solves**, **Why This Change Was Made**, **User Impact**, and **Evidence** current; a short comment can point reviewers to the update, but the PR body should remain the durable explanation for maintainers and bots.
 - Keep PRs takeover-ready: open them from a branch maintainers can push to. For fork PRs, leave GitHub's **Allow edits by maintainers** option enabled so maintainers can finish urgent fixes, changelog entries, or merge prep when needed. If GitHub shows **Allow edits and access to secrets by maintainers**, enable it only when that workflow/secrets access is acceptable and say so in the PR.
-- Do not edit `CHANGELOG.md` in contributor PRs. Maintainers or ClawSweeper add the changelog entry when landing user-facing changes.
+- Do not edit `CHANGELOG.md` in contributor PRs. Maintainers or BotSweeper add the changelog entry when landing user-facing changes.
 - Run tests: `pnpm build && pnpm check && pnpm test`
 - For iterative local commits, `scripts/committer --fast "message" <files...>` skips commit hooks. Only use it when you've already run equivalent targeted validation for the touched surface.
 - For extension/plugin changes, run the fast local lane first:
@@ -80,7 +80,7 @@ For coordinated change sets that genuinely need more than 20 PRs, join the **#cl
 
 ## Review Conversations Are Author-Owned
 
-After your PR receives Barnacle, ClawSweeper, or maintainer feedback, read the [pull request review flow](https://docs.bot.ai/reference/pull-request-review-flow) for how to interpret rank-up moves, proof guidance, re-review requests, and review conversation follow-up.
+After your PR receives Barnacle, BotSweeper, or maintainer feedback, read the [pull request review flow](https://docs.bot.ai/reference/pull-request-review-flow) for how to interpret rank-up moves, proof guidance, re-review requests, and review conversation follow-up.
 
 ## Control UI Decorators
 
@@ -108,7 +108,7 @@ Please include in your PR:
 - [ ] Include prompts or session logs if possible (super helpful!)
 - [ ] Confirm you understand what the code does
 - [ ] Run the `autoreview` skill when available and address accepted/actionable findings
-- [ ] Follow the [pull request review flow](https://docs.bot.ai/reference/pull-request-review-flow) after Barnacle, ClawSweeper, or maintainer feedback
+- [ ] Follow the [pull request review flow](https://docs.bot.ai/reference/pull-request-review-flow) after Barnacle, BotSweeper, or maintainer feedback
 
 AI PRs are first-class citizens here. We just want transparency so reviewers know what to look for.
 

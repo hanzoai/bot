@@ -63,7 +63,7 @@ describe("shared/frontmatter", () => {
     expect(
       resolveBotManifestBlock({
         frontmatter: {
-          metadata: "{ clawdbot: { requires: { bins: ['op'] }, install: [] } }",
+          metadata: "{ bot: { requires: { bins: ['op'] }, install: [] } }",
         },
       }),
     ).toEqual({ requires: { bins: ["op"] }, install: [] });
@@ -74,7 +74,7 @@ describe("shared/frontmatter", () => {
       resolveBotManifestBlock({
         frontmatter: {
           metadata:
-            "{ bot: { requires: { bins: ['current'] } }, clawdbot: { requires: { bins: ['legacy'] } } }",
+            "{ bot: { requires: { bins: ['current'] } }, bot: { requires: { bins: ['legacy'] } } }",
         },
       }),
     ).toEqual({ requires: { bins: ["current"] } });

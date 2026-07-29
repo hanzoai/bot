@@ -324,7 +324,7 @@ describe("tool display details", () => {
           name: "bash",
           args: {
             command: "command -v discrawl",
-            workdir: "/root/.bot/sandboxes/agent-clawsweeper-sandbox-discor-766423d0",
+            workdir: "/root/.bot/sandboxes/agent-botsweeper-sandbox-discor-766423d0",
           },
           detailMode: "explain",
         }),

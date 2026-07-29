@@ -202,7 +202,7 @@ export function describeChannelPluginCatalogEntriesContract() {
             env: {
               ...process.env,
               BOT_STATE_DIR: stateDir,
-              CLAWDBOT_STATE_DIR: undefined,
+              BOT_STATE_DIR: undefined,
               BOT_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
             },
             expected: {

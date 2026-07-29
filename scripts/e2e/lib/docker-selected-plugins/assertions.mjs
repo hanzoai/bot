@@ -32,7 +32,7 @@ const selected = {
     entries: ["index.js", "setup-entry.js"],
     capability: "channel",
   },
-  clawrouter: {
+  botrouter: {
     entries: ["index.js"],
     capability: "text-inference",
   },

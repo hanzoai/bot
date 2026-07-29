@@ -1200,7 +1200,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Fail-fast order
   - H2: PR context and evidence
   - H2: Scope and routing
-  - H2: ClawSweeper activity forwarding
+  - H2: BotSweeper activity forwarding
   - H2: Manual dispatches
   - H2: Runners
   - H2: Runner registration budget
@@ -6451,11 +6451,11 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Surface
   - H2: Related docs
 
-## plugins/reference/clawrouter.md
+## plugins/reference/botrouter.md
 
-- Route: /plugins/reference/clawrouter
+- Route: /plugins/reference/botrouter
 - Headings:
-  - H1: ClawRouter plugin
+  - H1: BotRouter plugin
   - H2: Distribution
   - H2: Surface
   - H2: Related docs
@@ -6522,9 +6522,9 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Surface
   - H2: Related docs
 
-## plugins/reference/crabbox.md
+## plugins/reference/botbox.md
 
-- Route: /plugins/reference/crabbox
+- Route: /plugins/reference/botbox
 - Headings:
   - H1: Crabbox plugin
   - H2: Distribution
@@ -8078,9 +8078,9 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
   - H2: Notes
   - H2: Related
 
-## providers/clawrouter.md
+## providers/botrouter.md
 
-- Route: /providers/clawrouter
+- Route: /providers/botrouter
 - Headings:
   - H2: Getting started
   - H2: Managed non-interactive deployment
@@ -9052,7 +9052,7 @@ Do not edit it by hand; run `pnpm docs:map:gen`.
 - Route: /reference/pull-request-review-flow
 - Headings:
   - H2: Barnacle
-  - H2: ClawSweeper
+  - H2: BotSweeper
   - H2: Improve a PR during review
   - H2: When automation stays quiet
   - H2: Troubleshooting

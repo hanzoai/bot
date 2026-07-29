@@ -12,10 +12,10 @@ const FORBIDDEN_CHANGELOG_THANKS_HANDLES = [
   "codex",
   "bot",
   "steipete",
-  "clawsweeper",
-  "bot-clawsweeper",
-  "clawsweeper[bot]",
-  "bot-clawsweeper[bot]",
+  "botsweeper",
+  "bot-botsweeper",
+  "botsweeper[bot]",
+  "bot-botsweeper[bot]",
 ];
 /**
  * Handle prefixes that identify forbidden changelog thanks credits.
@@ -29,10 +29,10 @@ const FORBIDDEN_CHANGELOG_THANKS_HANDLE_SUFFIXES = ["[bot]"];
  * Handles that require an explicit human credit instead.
  */
 const CHANGELOG_THANKS_REQUIRE_HUMAN_CREDIT_HANDLES = new Set([
-  "clawsweeper",
-  "bot-clawsweeper",
-  "clawsweeper[bot]",
-  "bot-clawsweeper[bot]",
+  "botsweeper",
+  "bot-botsweeper",
+  "botsweeper[bot]",
+  "bot-botsweeper[bot]",
 ]);
 /**
  * Handle prefixes that require explicit human credit instead.

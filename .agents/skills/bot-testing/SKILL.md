@@ -40,7 +40,7 @@ untrusted checkout's wrapper or config locally:
 ```bash
 cd <trusted-bot-main>
 env -u CRABBOX_AWS_INSTANCE_PROFILE \
-  crabbox config show --json | \
+  botbox config show --json | \
   jq -e '.aws.instanceProfile == ""' >/dev/null
 env -u CRABBOX_AWS_INSTANCE_PROFILE \
   -u CRABBOX_TAILSCALE \
@@ -50,7 +50,7 @@ env -u CRABBOX_AWS_INSTANCE_PROFILE \
   -u CRABBOX_TAILSCALE_EXIT_NODE_ALLOW_LAN_ACCESS \
   -u CRABBOX_TAILSCALE_HOSTNAME_TEMPLATE \
   -u CRABBOX_TAILSCALE_TAGS \
-  crabbox warmup \
+  botbox warmup \
   --provider aws \
   --network public \
   --tailscale=false \
@@ -58,7 +58,7 @@ env -u CRABBOX_AWS_INSTANCE_PROFILE \
   --tailscale-exit-node-allow-lan-access=false \
   --keep \
   --timing-json
-crabbox inspect --provider aws --id <cbx_id> --json | \
+botbox inspect --provider aws --id <cbx_id> --json | \
   jq -e '.network == "public" and .tailscale == null' >/dev/null
 ```
 
@@ -76,17 +76,17 @@ requested test command:
 ```bash
 env -u CRABBOX_AWS_INSTANCE_PROFILE \
   CRABBOX_ENV_ALLOW=CI \
-  crabbox run \
+  botbox run \
   --provider aws \
   --id <cbx_id> \
   --fresh-pr <owner/repo#number> \
   --no-hydrate \
   --timing-json \
-  --script scripts/crabbox-untrusted-bootstrap.sh -- \
+  --script scripts/botbox-untrusted-bootstrap.sh -- \
   <expected_head_sha> /usr/local/bin/pnpm test <path-or-filter>
 # After all proof:
 env -u CRABBOX_AWS_INSTANCE_PROFILE \
-  crabbox stop --provider aws <cbx_id>
+  botbox stop --provider aws <cbx_id>
 ```
 
 Once heavy proof starts, save the returned id, reuse it for later heavy gates,
@@ -123,8 +123,8 @@ sync the current checkout on every run, and stop it before handoff.
   once, then report the first actionable error. Do not reconcile or reinstall a
   local Codex worktree merely to run validation.
 - In a Codex worktree or linked/sparse checkout, do not run direct local
-  `pnpm test*`, `pnpm check*`, `pnpm crabbox:run`, or `scripts/committer`. Use
-  `node scripts/crabbox-wrapper.mjs` for remote proof and
+  `pnpm test*`, `pnpm check*`, `pnpm botbox:run`, or `scripts/committer`. Use
+  `node scripts/botbox-wrapper.mjs` for remote proof and
   `node scripts/check-changed.mjs` for classify-first changed checks. Use
   `node scripts/run-vitest.mjs` for bounded focused local proof when the
   dependency install is ready. Use `git commit --no-verify` only after the
@@ -144,14 +144,14 @@ sync the current checkout on every run, and stop it before handoff.
   not execute repo scripts or config from the untrusted local checkout: launch
   an installed trusted Crabbox binary from a clean trusted `main` checkout and
   fetch the PR with `--fresh-pr`. Unset `CRABBOX_AWS_INSTANCE_PROFILE` and fail
-  closed unless `crabbox config show --json` resolves an empty
+  closed unless `botbox config show --json` resolves an empty
   `aws.instanceProfile`. Before any install/test, use trusted absolute-path
   tools to require an IMDSv2 token, prove the IAM credentials endpoint returns
   404, and compare remote `git rev-parse HEAD` with the full reviewed head SHA.
   Unset all `CRABBOX_TAILSCALE*` overrides, pass `--network public
---tailscale=false`, clear exit-node/LAN flags, then require `crabbox inspect`
+--tailscale=false`, clear exit-node/LAN flags, then require `botbox inspect`
   to report `network=public` and no Tailscale state before uploading any script.
-  Upload trusted `scripts/crabbox-untrusted-bootstrap.sh` with `--fresh-pr`; it
+  Upload trusted `scripts/botbox-untrusted-bootstrap.sh` with `--fresh-pr`; it
   bootstraps Node 24 and repository-pinned pnpm before executing PR code and
   rejects a changed `packageManager` pin before install.
   If the broker cannot provide that no-role proof or no remote PR exists, use

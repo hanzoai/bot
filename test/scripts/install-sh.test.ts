@@ -994,7 +994,7 @@ NODE
     expect(result?.stderr ?? "").toBe("");
   });
 
-  it.each(["bot.json", "clawdbot.json"])(
+  it.each(["bot.json", "bot.json"])(
     "detects %s under BOT_STATE_DIR",
     (configName) => {
       const tmp = mkdtempSync(join(tmpdir(), "bot-install-state-config-"));

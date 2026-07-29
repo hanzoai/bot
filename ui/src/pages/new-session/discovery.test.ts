@@ -9,12 +9,12 @@ describe("readDraftCloudProfiles", () => {
         null,
         42,
         { id: " zeta ", providerId: " static-ssh ", settings: { token: "hidden" } },
-        { id: "aws", providerId: "crabbox" },
-        { id: "", providerId: "crabbox" },
+        { id: "aws", providerId: "botbox" },
+        { id: "", providerId: "botbox" },
         { id: "missing-provider" },
       ]),
     ).toEqual([
-      { id: "aws", providerId: "crabbox" },
+      { id: "aws", providerId: "botbox" },
       { id: "zeta", providerId: "static-ssh" },
     ]);
   });

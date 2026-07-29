@@ -1,7 +1,7 @@
 // Feishu tests cover monitor.comment plugin behavior.
 import { createNonExitingRuntimeEnv } from "bot/plugin-sdk/plugin-test-runtime";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import type { FeishuIngressLifecycle } from "./feishu-ingress.js";
 import { createFeishuDriveCommentNoticeHandler } from "./monitor.comment-notice-handler.js";
 import {
@@ -34,14 +34,14 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-function buildMonitorConfig(): ClawdbotConfig {
+function buildMonitorConfig(): BotConfig {
   return {
     channels: {
       feishu: {
         enabled: true,
       },
     },
-  } as ClawdbotConfig;
+  } as BotConfig;
 }
 
 function makeDriveCommentEvent(

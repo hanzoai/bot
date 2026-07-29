@@ -4,7 +4,7 @@ import {
   registerHookHandlersForTest,
 } from "bot/plugin-sdk/channel-test-helpers";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { ClawdbotConfig, BotPluginApi } from "../runtime-api.js";
+import type { BotConfig, BotPluginApi } from "../runtime-api.js";
 import { registerFeishuSubagentHooks } from "../subagent-hooks-api.js";
 import { handleFeishuSubagentSpawning } from "./subagent-hooks.js";
 import {
@@ -12,7 +12,7 @@ import {
   testing as threadBindingTesting,
 } from "./thread-bindings.js";
 
-const baseConfig: ClawdbotConfig = {
+const baseConfig: BotConfig = {
   session: { mainKey: "main", scope: "per-sender" },
   channels: { feishu: {} },
 };

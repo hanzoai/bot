@@ -53,7 +53,7 @@ actually available and exercised. Source inspection is not runtime proof.
 
 ## Remote execution
 
-Follow `.agents/skills/crabbox/SKILL.md` for heavy trusted-source suites,
+Follow `.agents/skills/botbox/SKILL.md` for heavy trusted-source suites,
 packaging, Docker, browser, and live provider proof. Acquire a trusted lease
 only when needed and execute **one command at a time per lease**. Sync and
 verify the exact candidate SHA before running. A 780-second timeout bounds an

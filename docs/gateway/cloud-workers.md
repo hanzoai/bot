@@ -28,8 +28,8 @@ The box needs no inbound ports except `sshd`: the Gateway connects out via pinne
 
 ## Requirements
 
-- A worker provider plugin. The bundled `crabbox` plugin drives the [Crabbox](https://github.com/bot/crabbox) CLI, which brokers leases across cloud backends (AWS, Hetzner, and others). The `crabbox` binary must be on `PATH` (or set `settings.binary`) with provider credentials already configured. AWS admission requires Crabbox 0.38.1 or newer.
-- For Crabbox AWS workers, the effective `aws.instanceProfile` must be empty. The provider checks `crabbox config show --json` before allocation, then requires `crabbox inspect --json` to report `providerMetadata.instanceProfileAttached: false` from EC2 `DescribeInstances`. Leases with an instance role or without authoritative metadata are stopped and rejected.
+- A worker provider plugin. The bundled `botbox` plugin drives the [Crabbox](https://github.com/bot/botbox) CLI, which brokers leases across cloud backends (AWS, Hetzner, and others). The `botbox` binary must be on `PATH` (or set `settings.binary`) with provider credentials already configured. AWS admission requires Crabbox 0.38.1 or newer.
+- For Crabbox AWS workers, the effective `aws.instanceProfile` must be empty. The provider checks `botbox config show --json` before allocation, then requires `botbox inspect --json` to report `providerMetadata.instanceProfileAttached: false` from EC2 `DescribeInstances`. Leases with an instance role or without authoritative metadata are stopped and rejected.
 - Node.js on the leased machine. Bare cloud images usually lack it — install it in the profile's `setup` command.
 - A session with a session-owned managed worktree (create one with `worktree: true`). Dispatch moves that worktree's contents; plain directories sync as a manifest mirror.
 
@@ -42,7 +42,7 @@ Add a profile under `cloudWorkers.profiles` in `bot.json`:
   "cloudWorkers": {
     "profiles": {
       "aws": {
-        "provider": "crabbox",
+        "provider": "botbox",
         "install": "bundle",
         "settings": {
           "provider": "aws",
@@ -61,9 +61,9 @@ Profile fields:
 
 | Key        | Meaning                                                                                                                                                                                                                                        |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `provider` | Worker provider id registered by a plugin (`crabbox` for the bundled plugin).                                                                                                                                                                  |
+| `provider` | Worker provider id registered by a plugin (`botbox` for the bundled plugin).                                                                                                                                                                  |
 | `install`  | `bundle` (default) ships the running Gateway's build; `npm` installs the exact released Gateway version with pinned integrity. `npm` requires the Gateway to run from a packaged release.                                                      |
-| `settings` | Provider-owned JSON. For crabbox: `provider` (backend), `class` (machine class), `ttl`, `idleTimeout` (Go durations), optional `setup` and absolute `binary` path. Bot forces public SSH and disables managed Tailscale for these leases. |
+| `settings` | Provider-owned JSON. For botbox: `provider` (backend), `class` (machine class), `ttl`, `idleTimeout` (Go durations), optional `setup` and absolute `binary` path. Bot forces public SSH and disables managed Tailscale for these leases. |
 | `lifetime` | Optional stored policy (`idleTimeoutMinutes`, `maxLifetimeMinutes`).                                                                                                                                                                           |
 
 ### The setup command
@@ -137,7 +137,7 @@ Placement moves through a durable state machine (`local → requested → provis
 - **Worker reclaimed after upgrading from a 2026.7.2 beta** — those betas used the older worker launch contract. On restart, Bot destroys an idle incompatible worker, keeps the session and workspace, marks the placement reclaimed, and provisions a current worker on the next dispatch or turn. A beta worker interrupted while still starting is marked failed after cleanup; retry the dispatch to provision it with the current contract.
 - **Cloud workspace conflict notice** — the turn completed and kept the local version of each listed path. Use the staged-ref commands in the notice to inspect or take the cloud version; no retry is required for the non-conflicting changes, which are already applied.
 - **“The previous cloud turn's workspace result is still reconciling”** — the Gateway waited briefly for the prior result's durable fence and could not acquire the session claim. Wait for reconciliation to finish, then retry the turn; restarting the Gateway is safe because recovery preserves staged results before reclaiming a dead worker.
-- **Lease housekeeping** — `crabbox list --provider <backend>` shows live leases; `crabbox stop --provider <backend> --id <lease>` releases one manually. Idle leases expire on the profile's `idleTimeout`.
+- **Lease housekeeping** — `botbox list --provider <backend>` shows live leases; `botbox stop --provider <backend> --id <lease>` releases one manually. Idle leases expire on the profile's `idleTimeout`.
 
 ## Related
 

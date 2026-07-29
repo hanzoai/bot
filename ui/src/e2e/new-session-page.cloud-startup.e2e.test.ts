@@ -49,7 +49,7 @@ suite.define(() => {
         },
         "environments.list": {
           environments: [],
-          profiles: [{ id: "aws", providerId: "crabbox" }],
+          profiles: [{ id: "aws", providerId: "botbox" }],
         },
         "fs.listDir": {
           path: WORKSPACE,
@@ -330,7 +330,7 @@ suite.define(() => {
         },
         "environments.list": {
           environments: [],
-          profiles: [{ id: "aws", providerId: "crabbox" }],
+          profiles: [{ id: "aws", providerId: "botbox" }],
         },
         "worktrees.branches": {
           branches: [{ kind: "local", name: "main" }],
@@ -411,7 +411,7 @@ suite.define(() => {
         },
         "environments.list": {
           environments: [],
-          profiles: [{ id: "aws", providerId: "crabbox" }],
+          profiles: [{ id: "aws", providerId: "botbox" }],
         },
         "worktrees.branches": {
           branches: [{ kind: "local", name: "main" }],
@@ -543,7 +543,7 @@ suite.define(() => {
         },
         "environments.list": {
           environments: [],
-          profiles: [{ id: "aws", providerId: "crabbox" }],
+          profiles: [{ id: "aws", providerId: "botbox" }],
         },
         "worktrees.branches": {
           branches: [{ kind: "local", name: "main" }],
@@ -675,7 +675,7 @@ suite.define(() => {
         },
         "environments.list": {
           environments: [],
-          profiles: [{ id: "aws", providerId: "crabbox" }],
+          profiles: [{ id: "aws", providerId: "botbox" }],
         },
         "worktrees.branches": {
           branches: [{ kind: "local", name: "main" }],
@@ -754,7 +754,7 @@ suite.define(() => {
         },
         "environments.list": {
           environments: [],
-          profiles: [{ id: "aws", providerId: "crabbox" }],
+          profiles: [{ id: "aws", providerId: "botbox" }],
         },
         "worktrees.branches": {
           branches: [{ kind: "local", name: "main" }],
@@ -843,7 +843,7 @@ suite.define(() => {
         },
         "environments.list": {
           environments: [],
-          profiles: [{ id: "aws", providerId: "crabbox" }],
+          profiles: [{ id: "aws", providerId: "botbox" }],
         },
         "worktrees.branches": {
           branches: [{ kind: "local", name: "main" }],

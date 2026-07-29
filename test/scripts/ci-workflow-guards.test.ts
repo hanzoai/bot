@@ -747,24 +747,24 @@ function runGeneratedPublisherScenario(
 describe("ci workflow guards", () => {
   it("routes PR edited metadata only to interested automation", () => {
     const autoResponse = readWorkflow(".github/workflows/auto-response.yml");
-    const clawsweeperDispatch = readWorkflow(".github/workflows/clawsweeper-dispatch.yml");
+    const botsweeperDispatch = readWorkflow(".github/workflows/botsweeper-dispatch.yml");
     const labeler = readWorkflow(".github/workflows/labeler.yml");
     const realBehaviorProof = readWorkflow(".github/workflows/real-behavior-proof.yml");
 
-    for (const workflow of [autoResponse, clawsweeperDispatch, labeler, realBehaviorProof]) {
+    for (const workflow of [autoResponse, botsweeperDispatch, labeler, realBehaviorProof]) {
       expect(workflow.on.pull_request_target.types).toContain("edited");
     }
 
     expect({
       autoResponse: readPullRequestEditFields(autoResponse.jobs["auto-response"].if),
-      clawsweeperDispatch: readPullRequestEditFields(clawsweeperDispatch.jobs.dispatch.if),
+      botsweeperDispatch: readPullRequestEditFields(botsweeperDispatch.jobs.dispatch.if),
       labeler: readPullRequestEditFields(labeler.jobs.label.if),
       realBehaviorProof: readPullRequestEditFields(
         realBehaviorProof.jobs["real-behavior-proof"].if,
       ),
     }).toEqual({
       autoResponse: [],
-      clawsweeperDispatch: [],
+      botsweeperDispatch: [],
       labeler: ["title", "base"],
       realBehaviorProof: ["body", "base"],
     });
@@ -791,7 +791,7 @@ describe("ci workflow guards", () => {
     });
   });
 
-  it("routes stale bug issues through ClawSweeper instead of Barnacle closure", () => {
+  it("routes stale bug issues through BotSweeper instead of Barnacle closure", () => {
     const staleWorkflow = readWorkflow(".github/workflows/stale.yml");
     const staleSteps = staleWorkflow.jobs.stale.steps as WorkflowStep[];
     const stepNamed = (name: string) =>
@@ -817,7 +817,7 @@ describe("ci workflow guards", () => {
     expect(bugJob["runs-on"]).toBe("ubuntu-24.04");
     const bugScript = String(
       (bugJob.steps as WorkflowStep[]).find(
-        (step) => step.name === "Mark inactive bugs for ClawSweeper verification",
+        (step) => step.name === "Mark inactive bugs for BotSweeper verification",
       )?.with?.script,
     );
     expect(bugScript).toContain("const maxMarks = 25;");
@@ -839,7 +839,7 @@ describe("ci workflow guards", () => {
     );
     expect(backfillScript).toMatch(/issueExemptLabels[\s\S]*"bug"/);
 
-    const dispatchWorkflow = readWorkflow(".github/workflows/clawsweeper-dispatch.yml");
+    const dispatchWorkflow = readWorkflow(".github/workflows/botsweeper-dispatch.yml");
     const dispatchCondition = String(dispatchWorkflow.jobs.dispatch.if);
     expect(dispatchCondition).toContain("github.event.label.name == 'stale'");
     expect(dispatchCondition).toContain("contains(github.event.issue.labels.*.name, 'bug')");
@@ -3218,7 +3218,7 @@ describe("ci workflow guards", () => {
       [".github/workflows/ci-check-testbox.yml", "120s"],
       [".github/workflows/ci-check-arm-testbox.yml", "120s"],
       [".github/workflows/ci-build-artifacts-testbox.yml", "120s"],
-      [".github/workflows/crabbox-hydrate.yml", "30s"],
+      [".github/workflows/botbox-hydrate.yml", "30s"],
     ] as const;
 
     for (const [workflowPath, timeoutSeconds] of workflowPaths) {
@@ -3521,7 +3521,7 @@ describe("ci workflow guards", () => {
   });
 
   it("bounds the Windows Crabbox hydrate main fetch", () => {
-    const workflow = readFileSync(".github/workflows/crabbox-hydrate.yml", "utf8");
+    const workflow = readFileSync(".github/workflows/botbox-hydrate.yml", "utf8");
 
     expect(workflow).toContain("$fetchInfo = New-Object System.Diagnostics.ProcessStartInfo");
     expect(workflow).toContain('$fetchInfo.FileName = "git"');

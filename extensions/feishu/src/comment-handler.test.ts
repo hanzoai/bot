@@ -1,6 +1,6 @@
 // Feishu tests cover comment handler plugin behavior.
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig, PluginRuntime } from "../runtime-api.js";
+import type { BotConfig, PluginRuntime } from "../runtime-api.js";
 import { handleFeishuCommentEvent } from "./comment-handler.js";
 import { setFeishuRuntime } from "./runtime.js";
 
@@ -45,7 +45,7 @@ async function raceWithNextMacrotask<T>(promise: Promise<T>): Promise<T | "pendi
   ]);
 }
 
-function buildConfig(overrides?: Partial<ClawdbotConfig>): ClawdbotConfig {
+function buildConfig(overrides?: Partial<BotConfig>): BotConfig {
   return {
     channels: {
       feishu: {
@@ -55,7 +55,7 @@ function buildConfig(overrides?: Partial<ClawdbotConfig>): ClawdbotConfig {
       },
     },
     ...overrides,
-  } as ClawdbotConfig;
+  } as BotConfig;
 }
 
 let currentRuntimeConfig = buildConfig();
@@ -84,7 +84,7 @@ function mockCallArg(mockFn: ReturnType<typeof vi.fn>, label: string, callIndex 
 }
 
 function createTestRuntime(overrides?: {
-  currentCfg?: ClawdbotConfig;
+  currentCfg?: BotConfig;
   readAllowFromStore?: () => Promise<unknown[]>;
   upsertPairingRequest?: () => Promise<{ code: string; created: boolean }>;
   resolveAgentRoute?: () => ReturnType<typeof buildResolvedRoute>;

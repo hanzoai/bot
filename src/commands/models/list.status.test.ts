@@ -604,17 +604,17 @@ describe("modelsStatusCommand auth overview", () => {
   it("expands nested wildcard policy entries to the models they actually allow", async () => {
     await withOpenAIStatusFixture(
       {
-        primary: "clawrouter/anthropic/claude-haiku-4-5",
+        primary: "botrouter/anthropic/claude-haiku-4-5",
         profiles: {},
-        modelPolicyAllow: ["clawrouter/anthropic/*"],
+        modelPolicyAllow: ["botrouter/anthropic/*"],
         catalog: [
           {
-            provider: "clawrouter",
+            provider: "botrouter",
             id: "anthropic/claude-haiku-4-5",
             name: "Claude Haiku",
           },
           {
-            provider: "clawrouter",
+            provider: "botrouter",
             id: "google/gemini-3.5-flash",
             name: "Gemini Flash",
           },
@@ -626,7 +626,7 @@ describe("modelsStatusCommand auth overview", () => {
         await modelsStatusCommand({ json: true }, localRuntime as never);
 
         expect(parseFirstJsonLog(localRuntime).allowed).toEqual([
-          "clawrouter/anthropic/claude-haiku-4-5",
+          "botrouter/anthropic/claude-haiku-4-5",
         ]);
       },
     );
@@ -637,14 +637,14 @@ describe("modelsStatusCommand auth overview", () => {
       {
         primary: "openai/gpt-5.6-sol",
         profiles: {},
-        modelPolicyAllow: ["clawrouter/anthropic/*"],
+        modelPolicyAllow: ["botrouter/anthropic/*"],
         catalog: [{ provider: "openai", id: "gpt-5.6-sol", name: "GPT-5.6 Sol" }],
       },
       async () => {
         const localRuntime = createRuntime();
         await modelsStatusCommand({ json: true }, localRuntime as never);
 
-        expect(parseFirstJsonLog(localRuntime).allowed).toEqual(["clawrouter/anthropic/*"]);
+        expect(parseFirstJsonLog(localRuntime).allowed).toEqual(["botrouter/anthropic/*"]);
       },
     );
   });

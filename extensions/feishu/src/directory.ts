@@ -1,6 +1,6 @@
 // Feishu plugin module implements directory behavior.
 import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import { resolveFeishuAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";
 import {
@@ -13,7 +13,7 @@ import {
 const MAX_FEISHU_DIRECTORY_PAGES = 100;
 
 export async function listFeishuDirectoryPeersLive(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   query?: string;
   limit?: number;
   accountId?: string;
@@ -70,7 +70,7 @@ export async function listFeishuDirectoryPeersLive(params: {
 }
 
 export async function listFeishuDirectoryGroupsLive(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   query?: string;
   limit?: number;
   accountId?: string;

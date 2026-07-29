@@ -218,7 +218,7 @@ function changedCheckDiffRefsReady({ base, head, cwd = process.cwd() }) {
 export function buildChangedCheckCrabboxArgs(argv = [], options = {}) {
   const delegatedArgv = buildDelegatedChangedCheckArgv(argv, options);
   return [
-    "scripts/crabbox-wrapper.mjs",
+    "scripts/botbox-wrapper.mjs",
     "run",
     "--provider",
     "blacksmith-testbox",

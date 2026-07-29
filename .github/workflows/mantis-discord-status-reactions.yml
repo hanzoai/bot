@@ -269,13 +269,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          install_dir="${RUNNER_TEMP}/crabbox"
+          install_dir="${RUNNER_TEMP}/botbox"
           mkdir -p "$install_dir" "$HOME/.local/bin"
-          timeout --signal=TERM --kill-after=10s 120s git clone --depth 1 https://github.com/bot/crabbox.git "$install_dir/src"
-          go build -C "$install_dir/src" -o "$HOME/.local/bin/crabbox" ./cmd/crabbox
+          timeout --signal=TERM --kill-after=10s 120s git clone --depth 1 https://github.com/bot/botbox.git "$install_dir/src"
+          go build -C "$install_dir/src" -o "$HOME/.local/bin/botbox" ./cmd/botbox
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          "$HOME/.local/bin/crabbox" --version
-          "$HOME/.local/bin/crabbox" warmup --help 2>&1 | grep -q -- "-desktop"
+          "$HOME/.local/bin/botbox" --version
+          "$HOME/.local/bin/botbox" warmup --help 2>&1 | grep -q -- "-desktop"
 
       - name: Prepare baseline and candidate worktrees
         shell: bash
@@ -362,7 +362,7 @@ jobs:
 
           desktop_lease_id=""
           warmup_output="$(
-            crabbox warmup \
+            botbox warmup \
               --provider hetzner \
               --desktop \
               --browser \
@@ -370,7 +370,7 @@ jobs:
               --idle-timeout 30m \
               --ttl 90m
           )"
-          printf '%s\n' "$warmup_output" | tee "$root/crabbox-desktop-warmup.log"
+          printf '%s\n' "$warmup_output" | tee "$root/botbox-desktop-warmup.log"
           desktop_lease_id="$(printf '%s\n' "$warmup_output" | grep -Eo 'cbx_[a-f0-9]+' | head -n 1 || true)"
           if [[ ! "$desktop_lease_id" =~ ^cbx_[a-f0-9]+$ ]]; then
             echo "Crabbox desktop warmup did not return a lease id." >&2
@@ -379,7 +379,7 @@ jobs:
 
           cleanup_desktop_lease() {
             if [[ -n "$desktop_lease_id" ]]; then
-              crabbox stop --provider hetzner "$desktop_lease_id" || true
+              botbox stop --provider hetzner "$desktop_lease_id" || true
             fi
           }
           trap cleanup_desktop_lease EXIT
@@ -416,7 +416,7 @@ jobs:
             local output="$root/$lane/discord-status-reactions-tool-only-desktop-preview.gif"
             local clip="$root/$lane/discord-status-reactions-tool-only-desktop-change.mp4"
             local metadata="$root/$lane/discord-status-reactions-tool-only-desktop-preview.json"
-            crabbox media preview \
+            botbox media preview \
               --input "$input" \
               --output "$output" \
               --trimmed-video-output "$clip" \
@@ -559,7 +559,7 @@ jobs:
           GH_TOKEN: ${{ steps.mantis_app_token.outputs.token }}
           ARTIFACT_URL: ${{ steps.upload_artifact.outputs.artifact-url }}
           MANTIS_ARTIFACT_R2_ACCESS_KEY_ID: ${{ secrets.MANTIS_ARTIFACT_R2_ACCESS_KEY_ID }}
-          MANTIS_ARTIFACT_R2_BUCKET: bot-crabbox-artifacts
+          MANTIS_ARTIFACT_R2_BUCKET: bot-botbox-artifacts
           MANTIS_ARTIFACT_R2_ENDPOINT: ${{ vars.MANTIS_ARTIFACT_R2_ENDPOINT }}
           MANTIS_ARTIFACT_R2_PUBLIC_BASE_URL: https://artifacts.bot.ai
           MANTIS_ARTIFACT_R2_REGION: auto

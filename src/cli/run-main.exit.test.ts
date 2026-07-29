@@ -999,7 +999,7 @@ describe("runCli exit behavior", () => {
 
   it("loads and repins a legacy state dotenv after automatic state migration", async () => {
     const homeDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gateway-legacy-env-"));
-    const legacyStateDir = path.join(homeDir, ".clawdbot");
+    const legacyStateDir = path.join(homeDir, ".bot");
     const newStateDir = path.join(homeDir, ".bot");
     await fs.mkdir(legacyStateDir, { recursive: true });
     await fs.writeFile(path.join(legacyStateDir, ".env"), "BOT_GATEWAY_TOKEN=legacy-token\n");

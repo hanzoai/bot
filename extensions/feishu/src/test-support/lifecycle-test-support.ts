@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import { createPluginRuntimeMock } from "bot/plugin-sdk/channel-test-helpers";
 import { expect, vi, type Mock } from "vitest";
-import type { ClawdbotConfig, PluginRuntime, RuntimeEnv } from "../../runtime-api.js";
+import type { BotConfig, PluginRuntime, RuntimeEnv } from "../../runtime-api.js";
 import { getFeishuRuntime, setFeishuRuntime } from "../runtime.js";
 import type { ResolvedFeishuAccount } from "../types.js";
 
@@ -221,7 +221,7 @@ export function createFeishuLifecycleConfig(params: {
   channelConfig?: Record<string, unknown>;
   accountConfig?: Record<string, unknown>;
   extraConfig?: Record<string, unknown>;
-}): ClawdbotConfig {
+}): BotConfig {
   const extraConfig = params.extraConfig ?? {};
   return {
     ...extraConfig,
@@ -253,7 +253,7 @@ export function createFeishuLifecycleConfig(params: {
         },
       },
     },
-  } as ClawdbotConfig;
+  } as BotConfig;
 }
 
 export function createFeishuLifecycleFixture(params: {
@@ -449,7 +449,7 @@ export async function setupFeishuLifecycleHandler(params: {
   };
   onRegister: (registered: Record<string, (data: unknown) => Promise<void>>) => void;
   runtime: RuntimeEnv;
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   account: ResolvedFeishuAccount;
   handlerKey: string;
   missingHandlerMessage: string;

@@ -4,7 +4,7 @@ import {
   resolveExpiresAtMsFromDurationMs,
 } from "bot/plugin-sdk/number-runtime";
 import { normalizeOptionalLowercaseString } from "bot/plugin-sdk/string-coerce-runtime";
-import type { ClawdbotConfig, RuntimeEnv } from "../runtime-api.js";
+import type { BotConfig, RuntimeEnv } from "../runtime-api.js";
 import { createFeishuCardInteractionEnvelope } from "./card-interaction.js";
 import { FEISHU_APPROVAL_REQUEST_ACTION } from "./card-ux-approval.js";
 import { buildFeishuCardButton, buildFeishuCardInteractionContext } from "./card-ux-shared.js";
@@ -90,7 +90,7 @@ function createQuickActionLauncherCard(params: {
 }
 
 export async function maybeHandleFeishuQuickActionMenu(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   eventKey: string;
   operatorOpenId: string;
   runtime?: RuntimeEnv;

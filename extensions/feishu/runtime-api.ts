@@ -17,7 +17,7 @@ export type {
   PluginRuntime,
   ReplyPayload,
 } from "bot/plugin-sdk/core";
-export type { BotConfig as ClawdbotConfig } from "bot/plugin-sdk/core";
+export type { BotConfig as BotConfig } from "bot/plugin-sdk/core";
 export type RuntimeEnv = {
   log: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;

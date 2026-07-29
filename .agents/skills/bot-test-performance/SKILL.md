@@ -94,9 +94,9 @@ barrels, package-boundary tests, or extension suites.
      available.
 4. For broad or package-heavy plugin proof, use Crabbox-backed Blacksmith
    Testbox by default on maintainer machines:
-   - `pnpm crabbox:run -- --provider blacksmith-testbox --timing-json -- BOT_TESTBOX=1 pnpm test:extensions:batch <ids>`
+   - `pnpm botbox:run -- --provider blacksmith-testbox --timing-json -- BOT_TESTBOX=1 pnpm test:extensions:batch <ids>`
    - add `--keep`/`--id <id-or-slug>` only when several commands must share one
-     warmed box; stop it with `pnpm crabbox:stop -- <id-or-slug>`.
+     warmed box; stop it with `pnpm botbox:stop -- <id-or-slug>`.
 5. If plugin performance is package-artifact sensitive, switch to
    `release-bot-plugin-testing` and Package Acceptance rather than
    trusting source-only timing.

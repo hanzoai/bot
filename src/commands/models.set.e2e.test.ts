@@ -77,7 +77,7 @@ describe("models set + fallbacks", () => {
   it("does not make an unlisted model override invalid on a fresh config", async () => {
     mockConfigSnapshot({});
 
-    await modelsSetCommand("clawrouter/google/gemini-3.5-flash", makeRuntime());
+    await modelsSetCommand("botrouter/google/gemini-3.5-flash", makeRuntime());
 
     const written = getWrittenConfig();
     const persisted = stampConfigWriteMetadata(
@@ -89,7 +89,7 @@ describe("models set + fallbacks", () => {
     const policy = createModelVisibilityPolicy({
       cfg: persisted,
       catalog: [],
-      defaultProvider: "clawrouter",
+      defaultProvider: "botrouter",
       defaultModel: "google/gemini-3.5-flash",
     });
     expect(written.agents?.defaults?.modelPolicy).toBeUndefined();

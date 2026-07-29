@@ -27,7 +27,7 @@ on:
         required: false
         default: false
         type: boolean
-      crabbox_provider:
+      botbox_provider:
         description: Crabbox provider for the desktop lease
         required: false
         default: aws
@@ -35,7 +35,7 @@ on:
         options:
           - aws
           - hetzner
-      crabbox_market:
+      botbox_market:
         description: Crabbox capacity market for AWS leases
         required: false
         default: on-demand
@@ -43,7 +43,7 @@ on:
         options:
           - on-demand
           - spot
-      crabbox_lease_id:
+      botbox_lease_id:
         description: Optional existing Crabbox desktop/browser lease id or slug to reuse
         required: false
         type: string
@@ -199,18 +199,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          install_dir="${RUNNER_TEMP}/crabbox"
+          install_dir="${RUNNER_TEMP}/botbox"
           mkdir -p "$install_dir" "$HOME/.local/bin"
           git init "$install_dir/src"
-          git -C "$install_dir/src" remote add origin https://github.com/bot/crabbox.git
+          git -C "$install_dir/src" remote add origin https://github.com/bot/botbox.git
           timeout --signal=TERM --kill-after=10s 120s git -C "$install_dir/src" fetch --depth 1 origin "$CRABBOX_REF"
           git -C "$install_dir/src" checkout --detach FETCH_HEAD
-          go build -C "$install_dir/src" -o "$HOME/.local/bin/crabbox" ./cmd/crabbox
+          go build -C "$install_dir/src" -o "$HOME/.local/bin/botbox" ./cmd/botbox
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          "$HOME/.local/bin/crabbox" --version
-          "$HOME/.local/bin/crabbox" warmup --help > "$install_dir/warmup-help.txt" 2>&1
+          "$HOME/.local/bin/botbox" --version
+          "$HOME/.local/bin/botbox" warmup --help > "$install_dir/warmup-help.txt" 2>&1
           grep -q -- "-desktop" "$install_dir/warmup-help.txt"
-          "$HOME/.local/bin/crabbox" media preview --help >/dev/null
+          "$HOME/.local/bin/botbox" media preview --help >/dev/null
 
       - name: Prepare candidate worktree
         env:
@@ -238,9 +238,9 @@ jobs:
           BOT_QA_MANTIS_CRABBOX_COORDINATOR_TOKEN: ${{ secrets.BOT_QA_MANTIS_CRABBOX_COORDINATOR_TOKEN }}
           CRABBOX_ACCESS_CLIENT_ID: ${{ secrets.CRABBOX_ACCESS_CLIENT_ID }}
           CRABBOX_ACCESS_CLIENT_SECRET: ${{ secrets.CRABBOX_ACCESS_CLIENT_SECRET }}
-          CRABBOX_LEASE_ID: ${{ inputs.crabbox_lease_id }}
-          CRABBOX_PROVIDER: ${{ inputs.crabbox_provider }}
-          CRABBOX_MARKET: ${{ inputs.crabbox_market }}
+          CRABBOX_LEASE_ID: ${{ inputs.botbox_lease_id }}
+          CRABBOX_PROVIDER: ${{ inputs.botbox_provider }}
+          CRABBOX_MARKET: ${{ inputs.botbox_market }}
           KEEP_VM: ${{ inputs.keep_vm }}
           HYDRATE_MODE: ${{ inputs.hydrate_mode }}
           SCENARIO_ID: ${{ inputs.scenario_id }}
@@ -361,7 +361,7 @@ jobs:
               sudo apt-get update -y >/tmp/mantis-slack-ffmpeg-apt.log 2>&1 || true
               sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ffmpeg >>/tmp/mantis-slack-ffmpeg-apt.log 2>&1 || true
             fi
-            if ! crabbox media preview \
+            if ! botbox media preview \
               --input "$root/slack-desktop-smoke.mp4" \
               --output "$root/slack-desktop-smoke-preview.gif" \
               --trimmed-video-output "$root/slack-desktop-smoke-change.mp4" \
@@ -504,7 +504,7 @@ jobs:
           GH_TOKEN: ${{ steps.mantis_app_token.outputs.token }}
           ARTIFACT_URL: ${{ steps.upload_artifact.outputs.artifact-url }}
           MANTIS_ARTIFACT_R2_ACCESS_KEY_ID: ${{ secrets.MANTIS_ARTIFACT_R2_ACCESS_KEY_ID }}
-          MANTIS_ARTIFACT_R2_BUCKET: bot-crabbox-artifacts
+          MANTIS_ARTIFACT_R2_BUCKET: bot-botbox-artifacts
           MANTIS_ARTIFACT_R2_ENDPOINT: ${{ vars.MANTIS_ARTIFACT_R2_ENDPOINT }}
           MANTIS_ARTIFACT_R2_PUBLIC_BASE_URL: https://artifacts.bot.ai
           MANTIS_ARTIFACT_R2_REGION: auto

@@ -8,7 +8,7 @@ import { createRuntimeEnv } from "bot/plugin-sdk/plugin-test-runtime";
 import type { ResolvedAgentRoute } from "bot/plugin-sdk/routing";
 import { resolveGroupSessionKey } from "bot/plugin-sdk/session-store-runtime";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig, PluginRuntime } from "../runtime-api.js";
+import type { BotConfig, PluginRuntime } from "../runtime-api.js";
 import { parseMergeForwardContent } from "./bot-content.js";
 import type { FeishuMessageEvent } from "./bot.js";
 import { handleFeishuMessage } from "./bot.js";
@@ -146,7 +146,7 @@ function createBoundConversation(): NonNullable<BoundConversation> {
   };
 }
 
-let currentRuntimeConfig = {} as ClawdbotConfig;
+let currentRuntimeConfig = {} as BotConfig;
 
 function createFeishuBotRuntime(overrides: DeepPartial<PluginRuntime> = {}): PluginRuntime {
   const runtime = {
@@ -473,8 +473,8 @@ afterAll(() => {
 });
 
 async function dispatchMessage(params: {
-  cfg: ClawdbotConfig;
-  currentCfg?: ClawdbotConfig;
+  cfg: BotConfig;
+  currentCfg?: BotConfig;
   event: FeishuMessageEvent;
   channelRuntime?: PluginRuntime["channel"];
   botOpenId?: string;
@@ -493,7 +493,7 @@ async function dispatchMessage(params: {
               allowFrom: ["*"],
             },
           },
-        } as ClawdbotConfig)
+        } as BotConfig)
       : params.cfg;
   currentRuntimeConfig = params.currentCfg ?? cfg;
   if (params.directPreDispatchTarget) {
@@ -1182,7 +1182,7 @@ describe("handleFeishuMessage command authorization", () => {
           },
         ],
       },
-    } as ClawdbotConfig;
+    } as BotConfig;
     mockMaybeCreateDynamicAgent.mockResolvedValueOnce({
       created: false,
       updatedCfg: refreshedCfg,
@@ -1290,7 +1290,7 @@ describe("handleFeishuMessage command authorization", () => {
     const refreshedCfg = {
       ...cfg,
       commands: { useAccessGroups: true },
-    } as ClawdbotConfig;
+    } as BotConfig;
     mockShouldComputeCommandAuthorized.mockImplementation((_body, candidateCfg) => {
       return candidateCfg === refreshedCfg;
     });

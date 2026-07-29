@@ -5,7 +5,7 @@ import {
   resolveExpiresAtMsFromDurationMs,
 } from "bot/plugin-sdk/number-runtime";
 import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
-import type { ClawdbotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
+import type { BotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
 import { resolveFeishuRuntimeAccount } from "./accounts.js";
 import { handleFeishuMessage, type FeishuMessageEvent } from "./bot.js";
 import { processedCardActions, resolvedCardActionChatTypes } from "./card-action-state.js";
@@ -144,7 +144,7 @@ function resolveCallbackTarget(event: FeishuCardActionEvent): string {
 }
 
 async function dispatchSyntheticCommand(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   event: FeishuCardActionEvent;
   command: string;
   account: ReturnType<typeof resolveFeishuRuntimeAccount>;
@@ -278,7 +278,7 @@ async function resolveCardActionChatType(params: {
 }
 
 async function sendInvalidInteractionNotice(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   event: FeishuCardActionEvent;
   reason: "malformed" | "stale" | "wrong_user" | "wrong_conversation";
   accountId?: string;
@@ -301,7 +301,7 @@ async function sendInvalidInteractionNotice(params: {
 }
 
 export async function handleFeishuCardAction(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   event: FeishuCardActionEvent;
   botOpenId?: string;
   runtime?: RuntimeEnv;

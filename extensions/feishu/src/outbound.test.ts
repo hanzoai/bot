@@ -10,7 +10,7 @@ import {
   type MessagePresentationAction,
 } from "bot/plugin-sdk/interactive-runtime";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 
 const sendMediaFeishuMock = vi.hoisted(() => vi.fn());
 const sendMessageFeishuMock = vi.hoisted(() => vi.fn());
@@ -161,8 +161,8 @@ function requireFeishuMediaSender(
 }
 
 const sendText = requireFeishuSendText();
-const emptyConfig: ClawdbotConfig = {};
-const cardRenderConfig: ClawdbotConfig = {
+const emptyConfig: BotConfig = {};
+const cardRenderConfig: BotConfig = {
   channels: {
     feishu: {
       renderMode: "card",

@@ -292,13 +292,13 @@ Do not rely on writing only to `~/.bot/.env` for this variable; Node reads
 ## Legacy environment variables
 
 Bot only reads `BOT_*` environment variables. The legacy
-`CLAWDBOT_*` and `MOLTBOT_*` prefixes from earlier releases are silently
+`BOT_*` and `BOT_*` prefixes from earlier releases are silently
 ignored.
 
 If any are still set on the Gateway process at startup, Bot emits a
 single Node deprecation warning (`BOT_LEGACY_ENV_VARS`) listing the
 detected prefixes and the total count. Rename each value by replacing the
-legacy prefix with `BOT_` (for example `CLAWDBOT_GATEWAY_TOKEN` to
+legacy prefix with `BOT_` (for example `BOT_GATEWAY_TOKEN` to
 `BOT_GATEWAY_TOKEN`); the old names take no effect.
 
 ## Related

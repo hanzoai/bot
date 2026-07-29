@@ -6,7 +6,7 @@ import {
   ssrfPolicyFromDangerouslyAllowPrivateNetwork,
 } from "bot/plugin-sdk/ssrf-runtime";
 import { vi } from "vitest";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import type { monitorFeishuProvider } from "./monitor.js";
 
 const WEBHOOK_READY_MAX_ATTEMPTS = 200;
@@ -60,7 +60,7 @@ export function buildWebhookConfig(params: {
   port: number;
   verificationToken?: string;
   encryptKey?: string;
-}): ClawdbotConfig {
+}): BotConfig {
   return {
     channels: {
       feishu: {
@@ -80,7 +80,7 @@ export function buildWebhookConfig(params: {
         },
       },
     },
-  } as ClawdbotConfig;
+  } as BotConfig;
 }
 
 export async function withRunningWebhookMonitor(

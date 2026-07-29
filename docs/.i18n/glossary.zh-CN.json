@@ -76,20 +76,20 @@
     "target": "MCP 配置"
   },
   {
-    "source": "ClawRouter (managed multi-provider routing)",
-    "target": "ClawRouter（托管式多提供商路由）"
+    "source": "BotRouter (managed multi-provider routing)",
+    "target": "BotRouter（托管式多提供商路由）"
   },
   {
-    "source": "ClawRouter",
-    "target": "ClawRouter"
+    "source": "BotRouter",
+    "target": "BotRouter"
   },
   {
-    "source": "ClawRouter plugin",
-    "target": "ClawRouter 插件"
+    "source": "BotRouter plugin",
+    "target": "BotRouter 插件"
   },
   {
-    "source": "clawrouter",
-    "target": "clawrouter"
+    "source": "botrouter",
+    "target": "botrouter"
   },
   {
     "source": "OpenAI",

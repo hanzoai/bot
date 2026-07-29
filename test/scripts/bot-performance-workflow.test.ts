@@ -312,7 +312,7 @@ describe("Bot performance workflow", () => {
     expect(verify.run).toContain("Artifact-only performance mode requires");
   });
 
-  it("mints only a short-lived repo-scoped ClawSweeper app token", () => {
+  it("mints only a short-lived repo-scoped BotSweeper app token", () => {
     const workflowText = readFileSync(WORKFLOW, "utf8");
     const publisher = readWorkflow().jobs?.publish;
     const publishSteps = publisher?.steps ?? [];
@@ -610,12 +610,12 @@ esac
       const failure = execute({ pushStatus: "1" });
       expect(failure.result.status).toBe(1);
       expect(failure.summary).toContain("Clawgrit report publish failed");
-      expect(failure.summary).toContain("ClawSweeper GitHub App installation");
+      expect(failure.summary).toContain("BotSweeper GitHub App installation");
       expect(failure.summary).not.toContain("Published report:");
 
       const missing = execute({ pushStatus: "0", appToken: null });
       expect(missing.result.status).toBe(1);
-      expect(missing.result.stdout).toContain("ClawSweeper GitHub App token is unavailable");
+      expect(missing.result.stdout).toContain("BotSweeper GitHub App token is unavailable");
       expect(missing.summary).toContain("Clawgrit report publish unavailable");
       expect(missing.summary).not.toContain("Published report:");
       expect(existsSync(missing.pushMarker)).toBe(false);

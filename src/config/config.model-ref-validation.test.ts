@@ -183,9 +183,9 @@ describe("config model reference validation", () => {
             modelPolicy: {
               allow: [
                 " openai / gpt-5.5 ",
-                "clawrouter/ anthropic/claude-haiku-4-5",
+                "botrouter/ anthropic/claude-haiku-4-5",
                 " openai / * ",
-                " clawrouter / anthropic / * ",
+                " botrouter / anthropic / * ",
               ],
             },
           },
@@ -213,7 +213,7 @@ describe("config model reference validation", () => {
     expect(res.ok).toBe(true);
   });
 
-  it.each(["clawrouter/anthropic /claude-haiku-4-5", "openai/gpt 5.5", "openai//gpt-5.5"])(
+  it.each(["botrouter/anthropic /claude-haiku-4-5", "openai/gpt 5.5", "openai//gpt-5.5"])(
     "still rejects malformed model policy ref %j",
     (ref) => {
       const res = validateConfigObjectWithPlugins(

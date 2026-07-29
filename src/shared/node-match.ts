@@ -76,9 +76,9 @@ function isCurrentBotClient(clientId: string | undefined): boolean {
   return normalized.startsWith("bot-");
 }
 
-function isLegacyClawdbotClient(clientId: string | undefined): boolean {
+function isLegacyBotClient(clientId: string | undefined): boolean {
   const normalized = normalizeOptionalLowercaseString(clientId) ?? "";
-  return normalized.startsWith("clawdbot-") || normalized.startsWith("moldbot-");
+  return normalized.startsWith("bot-") || normalized.startsWith("moldbot-");
 }
 
 function pickPreferredLegacyMigrationMatch(
@@ -88,11 +88,11 @@ function pickPreferredLegacyMigrationMatch(
   if (current.length !== 1) {
     return undefined;
   }
-  const legacyCount = matches.filter((match) => isLegacyClawdbotClient(match.clientId)).length;
+  const legacyCount = matches.filter((match) => isLegacyBotClient(match.clientId)).length;
   if (legacyCount === 0 || current.length + legacyCount !== matches.length) {
     return undefined;
   }
-  // During Clawdbot -> Bot migration, a unique current client should win only
+  // During Bot -> Bot migration, a unique current client should win only
   // when every other tie is a known legacy client for the same human-facing node.
   return current[0];
 }
@@ -135,7 +135,7 @@ function scoreNodeCandidate(node: NodeMatchCandidate, matchScore: number): numbe
   }
   if (isCurrentBotClient(node.clientId)) {
     score += 10;
-  } else if (isLegacyClawdbotClient(node.clientId)) {
+  } else if (isLegacyBotClient(node.clientId)) {
     score -= 10;
   }
   return score;

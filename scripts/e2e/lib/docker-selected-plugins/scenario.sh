@@ -20,7 +20,7 @@ fs.writeFileSync(
 );
 NODE
 
-for plugin_id in clickclack slack msteams clawrouter; do
+for plugin_id in clickclack slack msteams botrouter; do
   node /app/bot.mjs plugins inspect "$plugin_id" --runtime --json \
     >"/tmp/bot-${plugin_id}-inspect.json"
 done

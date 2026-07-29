@@ -6,7 +6,7 @@ import {
 import { hasControlCommand, isControlCommandMessage } from "bot/plugin-sdk/command-detection";
 import { createNonExitingRuntimeEnv } from "bot/plugin-sdk/plugin-test-runtime";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig, PluginRuntime } from "../runtime-api.js";
+import type { BotConfig, PluginRuntime } from "../runtime-api.js";
 import { parseFeishuMessageEvent, type FeishuMessageEvent } from "./bot.js";
 import * as dedup from "./dedup.js";
 import {
@@ -54,7 +54,7 @@ afterAll(() => {
   vi.resetModules();
 });
 
-const cfg = {} as ClawdbotConfig;
+const cfg = {} as BotConfig;
 
 function makeReactionEvent(
   overrides: Partial<FeishuReactionCreatedEvent> = {},
@@ -95,7 +95,7 @@ async function resolveReactionWithLookup(params: {
   });
 }
 
-async function resolveNonBotReaction(params?: { cfg?: ClawdbotConfig; uuid?: () => string }) {
+async function resolveNonBotReaction(params?: { cfg?: BotConfig; uuid?: () => string }) {
   return await resolveReactionSyntheticEvent({
     cfg: params?.cfg ?? cfg,
     accountId: "default",
@@ -116,7 +116,7 @@ async function resolveNonBotReaction(params?: { cfg?: ClawdbotConfig; uuid?: () 
 
 type FeishuMention = NonNullable<FeishuMessageEvent["message"]["mentions"]>[number];
 
-function buildDebounceConfig(): ClawdbotConfig {
+function buildDebounceConfig(): BotConfig {
   return {
     messages: {
       inbound: {
@@ -131,7 +131,7 @@ function buildDebounceConfig(): ClawdbotConfig {
         enabled: true,
       },
     },
-  } as ClawdbotConfig;
+  } as BotConfig;
 }
 
 function buildDebounceAccount(): ResolvedFeishuAccount {
@@ -344,7 +344,7 @@ describe("resolveReactionSyntheticEvent", () => {
             reactionNotifications: "off",
           },
         },
-      } as ClawdbotConfig,
+      } as BotConfig,
       accountId: "default",
       event,
       botOpenId: "ou_bot",
@@ -373,7 +373,7 @@ describe("resolveReactionSyntheticEvent", () => {
             reactionNotifications: "all",
           },
         },
-      } as ClawdbotConfig,
+      } as BotConfig,
       uuid: () => "fixed-uuid",
     });
     expect(result?.message.message_id).toBe("om_msg1:reaction:THUMBSUP:fixed-uuid");

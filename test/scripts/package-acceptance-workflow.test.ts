@@ -54,8 +54,8 @@ const CI_CHECK_TESTBOX_WORKFLOW = ".github/workflows/ci-check-testbox.yml";
 const CI_CHECK_ARM_TESTBOX_WORKFLOW = ".github/workflows/ci-check-arm-testbox.yml";
 const CI_BUILD_ARTIFACTS_TESTBOX_WORKFLOW = ".github/workflows/ci-build-artifacts-testbox.yml";
 const WINDOWS_BLACKSMITH_TESTBOX_WORKFLOW = ".github/workflows/windows-blacksmith-testbox.yml";
-const CRABBOX_HYDRATE_WORKFLOW = ".github/workflows/crabbox-hydrate.yml";
-const CRABBOX_CONFIG = ".crabbox.yaml";
+const CRABBOX_HYDRATE_WORKFLOW = ".github/workflows/botbox-hydrate.yml";
+const CRABBOX_CONFIG = ".botbox.yaml";
 const SCHEDULED_LIVE_CHECKS_WORKFLOW = ".github/workflows/bot-scheduled-live-checks.yml";
 const CI_HYDRATE_LIVE_AUTH_SCRIPT = "scripts/ci-hydrate-live-auth.sh";
 const VERIFY_PROVIDER_SECRETS_SCRIPT =
@@ -874,7 +874,7 @@ describe("package acceptance workflow", () => {
   });
 
   it("keeps Crabbox hydration compatible with local Actions replay", () => {
-    const crabboxConfig = parse(readFileSync(CRABBOX_CONFIG, "utf8")) as {
+    const botboxConfig = parse(readFileSync(CRABBOX_CONFIG, "utf8")) as {
       actions?: { job?: string };
     };
     const workflowText = readFileSync(CRABBOX_HYDRATE_WORKFLOW, "utf8");
@@ -882,9 +882,9 @@ describe("package acceptance workflow", () => {
     const hydrateWindowsDaemon = workflowJob(CRABBOX_HYDRATE_WORKFLOW, "hydrate-windows-daemon");
     const hydrateGithub = workflowJob(CRABBOX_HYDRATE_WORKFLOW, "hydrate-github");
 
-    expect(crabboxConfig.actions?.job).toBe("hydrate");
+    expect(botboxConfig.actions?.job).toBe("hydrate");
     expect(hydrate.if).toBe(
-      "${{ inputs.crabbox_job != 'hydrate-github' && inputs.crabbox_job != 'hydrate-windows-daemon' }}",
+      "${{ inputs.botbox_job != 'hydrate-github' && inputs.botbox_job != 'hydrate-windows-daemon' }}",
     );
     expect(workflowStep(hydrate, "Setup Node.js").uses).toBe(SETUP_NODE_V6);
     expect(workflowStep(hydrate, "Setup Node.js").with?.["node-version"]).toBe("24");
@@ -892,8 +892,8 @@ describe("package acceptance workflow", () => {
     expect(hydratePnpm.if).toBeUndefined();
     expect(hydratePnpm.run).toContain('corepack enable --install-directory "$PNPM_HOME"');
     expect(hydratePnpm.run).toContain("COREPACK_HOME");
-    expect(workflowText).toContain('PNPM_CONFIG_STORE_DIR: "/var/cache/crabbox/pnpm/store"');
-    expect(hydratePnpm.run).toContain("prepare_crabbox_pnpm_dirs");
+    expect(workflowText).toContain('PNPM_CONFIG_STORE_DIR: "/var/cache/botbox/pnpm/store"');
+    expect(hydratePnpm.run).toContain("prepare_botbox_pnpm_dirs");
     expect(hydratePnpm.run).toContain('case "${PNPM_CONFIG_MODULES_DIR:?}" in "$volatile_root"/*)');
     expect(hydratePnpm.run).toContain(
       'case "${PNPM_CONFIG_VIRTUAL_STORE_DIR:?}" in "$volatile_root"/*)',
@@ -939,7 +939,7 @@ describe("package acceptance workflow", () => {
     expect(workflowStep(hydrate, "Mark Crabbox ready").run).toContain("COREPACK_HOME");
     expect(workflowStep(hydrate, "Hydrate provider env helper").env).toBeUndefined();
 
-    expect(hydrateWindowsDaemon.if).toBe("${{ inputs.crabbox_job == 'hydrate-windows-daemon' }}");
+    expect(hydrateWindowsDaemon.if).toBe("${{ inputs.botbox_job == 'hydrate-windows-daemon' }}");
     expect(workflowStep(hydrateWindowsDaemon, "Setup Node.js").uses).toBe(SETUP_NODE_V6);
     const hydrateWindowsPnpm = workflowStep(hydrateWindowsDaemon, "Setup pnpm and dependencies");
     expect(hydrateWindowsPnpm.shell).toBe("powershell");
@@ -1002,7 +1002,7 @@ describe("package acceptance workflow", () => {
     expect(workflowText).toContain("--retry-all-errors");
     expect(workflowText).not.toContain("curl -fsSL https://get.docker.com | sudo sh");
 
-    expect(hydrateGithub.if).toBe("${{ inputs.crabbox_job == 'hydrate-github' }}");
+    expect(hydrateGithub.if).toBe("${{ inputs.botbox_job == 'hydrate-github' }}");
     expect(workflowStep(hydrateGithub, "Setup Node environment").uses).toBe(
       "./.github/actions/setup-node-env",
     );
@@ -1020,7 +1020,7 @@ describe("package acceptance workflow", () => {
   });
 
   it("defaults Crabbox proof to Blacksmith while keeping direct jobs on Azure", () => {
-    const crabboxConfig = parse(readFileSync(CRABBOX_CONFIG, "utf8")) as {
+    const botboxConfig = parse(readFileSync(CRABBOX_CONFIG, "utf8")) as {
       aws?: { region?: string };
       capacity?: {
         availabilityZones?: string[];
@@ -1042,27 +1042,27 @@ describe("package acceptance workflow", () => {
       ssh?: { port?: string; user?: string };
     };
 
-    expect(crabboxConfig.provider).toBe("blacksmith-testbox");
-    expect(crabboxConfig.capacity?.market).toBe("on-demand");
-    expect(crabboxConfig.capacity?.fallback).toBeUndefined();
-    expect(crabboxConfig.capacity?.regions).toBeUndefined();
-    expect(crabboxConfig.capacity?.availabilityZones).toBeUndefined();
-    expect(crabboxConfig.aws?.region).toBe("eu-west-1");
-    expect(crabboxConfig.jobs?.prewarm?.market).toBe("on-demand");
-    expect(crabboxConfig.jobs?.prewarm?.provider).toBe("azure");
-    expect(crabboxConfig.jobs?.prewarm?.type).toBe("Standard_D4ads_v6");
-    expect(crabboxConfig.jobs?.changed?.market).toBe("on-demand");
-    expect(crabboxConfig.jobs?.changed?.provider).toBe("azure");
-    expect(crabboxConfig.jobs?.changed?.type).toBe("Standard_D4ads_v6");
-    expect(crabboxConfig.jobs?.changed?.shell).toBe(true);
-    expect(crabboxConfig.jobs?.changed?.command).toContain("set -euo pipefail");
-    expect(crabboxConfig.jobs?.changed?.command).toContain("git init -q");
-    expect(crabboxConfig.jobs?.changed?.command).toContain(
+    expect(botboxConfig.provider).toBe("blacksmith-testbox");
+    expect(botboxConfig.capacity?.market).toBe("on-demand");
+    expect(botboxConfig.capacity?.fallback).toBeUndefined();
+    expect(botboxConfig.capacity?.regions).toBeUndefined();
+    expect(botboxConfig.capacity?.availabilityZones).toBeUndefined();
+    expect(botboxConfig.aws?.region).toBe("eu-west-1");
+    expect(botboxConfig.jobs?.prewarm?.market).toBe("on-demand");
+    expect(botboxConfig.jobs?.prewarm?.provider).toBe("azure");
+    expect(botboxConfig.jobs?.prewarm?.type).toBe("Standard_D4ads_v6");
+    expect(botboxConfig.jobs?.changed?.market).toBe("on-demand");
+    expect(botboxConfig.jobs?.changed?.provider).toBe("azure");
+    expect(botboxConfig.jobs?.changed?.type).toBe("Standard_D4ads_v6");
+    expect(botboxConfig.jobs?.changed?.shell).toBe(true);
+    expect(botboxConfig.jobs?.changed?.command).toContain("set -euo pipefail");
+    expect(botboxConfig.jobs?.changed?.command).toContain("git init -q");
+    expect(botboxConfig.jobs?.changed?.command).toContain(
       "commit -q --no-gpg-sign -m remote-check-tree",
     );
-    expect(crabboxConfig.jobs?.changed?.command).toContain("env CI=1 corepack pnpm check --timed");
-    expect(crabboxConfig.ssh?.user).toBe("crabbox");
-    expect(crabboxConfig.ssh?.port).toBe("22");
+    expect(botboxConfig.jobs?.changed?.command).toContain("env CI=1 corepack pnpm check --timed");
+    expect(botboxConfig.ssh?.user).toBe("botbox");
+    expect(botboxConfig.ssh?.port).toBe("22");
   });
 
   it("resolves candidate package sources before reusing Docker E2E lanes", () => {

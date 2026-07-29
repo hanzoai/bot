@@ -1,8 +1,8 @@
 // Product/package naming constants that bridge current Bot manifests with
-// legacy Clawdbot keys still seen in older configs and packages.
+// legacy Bot keys still seen in older configs and packages.
 const PROJECT_NAME = "bot" as const;
 
-const LEGACY_PROJECT_NAMES = ["clawdbot"] as const;
+const LEGACY_PROJECT_NAMES = ["bot"] as const;
 
 export const MANIFEST_KEY = PROJECT_NAME;
 

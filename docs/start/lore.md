@@ -15,11 +15,11 @@ In the beginning, there was **Warelay** — a sensible name for a WhatsApp gatew
 
 Then came a space lobster.
 
-For a while it was **Clawd**, living in a **Clawdbot**. In January 2026, Anthropic sent a polite email asking for a name change (trademark stuff). So the lobster did what lobsters do best:
+For a while it was **Clawd**, living in a **Bot**. In January 2026, Anthropic sent a polite email asking for a name change (trademark stuff). So the lobster did what lobsters do best:
 
 **It molted.**
 
-Shedding its old shell, it emerged as **Molty**, living in **Moltbot**. That name never quite rolled off the tongue either.
+Shedding its old shell, it emerged as **Molty**, living in **Bot**. That name never quite rolled off the tongue either.
 
 On January 30, 2026, the lobster molted one more time into its final form: **Bot**.
 
@@ -114,7 +114,7 @@ The molt was chaotic. But the lobster emerged stronger. And funnier.
 
 ### The Final Form (January 30, 2026)
 
-Moltbot never quite rolled off the tongue. So at 4am GMT, the team gathered again for **The Great Bot Migration**.
+Bot never quite rolled off the tongue. So at 4am GMT, the team gathered again for **The Great Bot Migration**.
 
 In just 3 hours:
 
@@ -136,7 +136,7 @@ In just 3 hours:
 
 **New traditions born:** "The claw is the law," "Yee-claw," "Claw abiding citizens," "Clawntroversy."
 
-**Clawd → Moltbot → Bot.** _The lobster has molted into its final form._
+**Clawd → Bot → Bot.** _The lobster has molted into its final form._
 
 ### The Robot Shopping Spree (Dec 3, 2025)
 

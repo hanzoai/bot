@@ -1217,7 +1217,7 @@ Model Q&A - defaults, selection, aliases, switching, failover, auth profiles - l
 
     Recommended: `bot --profile <name> ...` per instance (auto-creates `~/.bot-<name>`), a unique `gateway.port` per profile config (or `--port` for manual runs), and a per-profile service with `bot --profile <name> gateway install`.
 
-    Profiles also suffix service names: launchd `ai.bot.<profile>`, systemd `bot-gateway-<profile>.service`, Windows `Bot Gateway (<profile>)`. The unqualified `bot-gateway` systemd unit only exists for the default profile; the legacy pre-rename systemd unit name `clawdbot-gateway` is migrated automatically.
+    Profiles also suffix service names: launchd `ai.bot.<profile>`, systemd `bot-gateway-<profile>.service`, Windows `Bot Gateway (<profile>)`. The unqualified `bot-gateway` systemd unit only exists for the default profile; the legacy pre-rename systemd unit name `bot-gateway` is migrated automatically.
 
     Full guide: [Multiple gateways](/gateway/multiple-gateways).
 
