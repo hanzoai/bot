@@ -4,7 +4,7 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import { withTempDir } from "bot/plugin-sdk/test-env";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 
 const createFeishuClientMock = vi.hoisted(() => vi.fn());
 const resolveFeishuAccountMock = vi.hoisted(() => vi.fn());
@@ -21,7 +21,7 @@ const messageResourceGetMock = vi.hoisted(() => vi.fn());
 const messageReplyMock = vi.hoisted(() => vi.fn());
 
 const FEISHU_MEDIA_HTTP_TIMEOUT_MS = 120_000;
-const emptyConfig: ClawdbotConfig = {};
+const emptyConfig: BotConfig = {};
 
 vi.mock("./client.js", () => ({
   createFeishuClient: createFeishuClientMock,

@@ -3688,7 +3688,7 @@ class AutoreviewHardeningTests(unittest.TestCase):
     def test_secret_detector_allows_common_fixture_literals(self) -> None:
         for content in (
             'token: "token-oversized"',
-            'API_KEY = "clawrouter-e2e-secret"',
+            'API_KEY = "botrouter-e2e-secret"',
             'token: "very-long-browser-token-0123456789"',
             'token: "config-token"',
         ):

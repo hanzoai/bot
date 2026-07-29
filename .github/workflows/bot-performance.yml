@@ -1182,9 +1182,9 @@ jobs:
             {
               echo "### Clawgrit report publish unavailable"
               echo
-              echo "The repository-scoped ClawSweeper GitHub App token could not be created."
+              echo "The repository-scoped BotSweeper GitHub App token could not be created."
             } >> "$GITHUB_STEP_SUMMARY"
-            echo "::${annotation}::ClawSweeper GitHub App token is unavailable; Kova artifacts were uploaded, but the report cannot be published."
+            echo "::${annotation}::BotSweeper GitHub App token is unavailable; Kova artifacts were uploaded, but the report cannot be published."
             exit 1
           fi
           token="$CLAWGRIT_REPORTS_APP_TOKEN"
@@ -1221,7 +1221,7 @@ jobs:
               echo "### Clawgrit report publish failed"
               echo
               echo "Kova artifacts were uploaded, but publishing the clawgrit report failed after $1 attempts."
-              echo "Check the ClawSweeper GitHub App installation and contents permission for bot/clawgrit-reports."
+              echo "Check the BotSweeper GitHub App installation and contents permission for bot/clawgrit-reports."
             } >> "$GITHUB_STEP_SUMMARY"
             echo "::${annotation}::Kova artifacts uploaded, but clawgrit report publish failed after $1 attempts."
           }

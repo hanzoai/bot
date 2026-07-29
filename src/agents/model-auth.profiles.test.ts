@@ -1807,7 +1807,7 @@ describe("resolveApiKeyForProvider — per-entry apiKey as profile ID reference"
     expect(resolved.source).toBe("profile:openrouter:key-b");
   });
 
-  it("resolves profile reference even when provider sets auth: api-key explicitly (regression for clawsweeper P3)", async () => {
+  it("resolves profile reference even when provider sets auth: api-key explicitly (regression for botsweeper P3)", async () => {
     // Before the fix the explicit `auth: "api-key"` early-return short-circuited
     // resolveUsableCustomProviderApiKey and sent "openrouter:key-b" as a literal bearer
     // before the profile-ref logic could run. Verify the profile-ref lookup wins.
@@ -1879,7 +1879,7 @@ describe("resolveApiKeyForProvider — per-entry apiKey as profile ID reference"
     ).rejects.toThrow(/requires an OpenAI API key profile/);
   });
 
-  it("throws when matched profile is an OAuth credential routed to an api-key provider (clawsweeper P1)", async () => {
+  it("throws when matched profile is an OAuth credential routed to an api-key provider (botsweeper P1)", async () => {
     await expect(
       resolveApiKeyForProvider({
         provider: "openrouter-minimax",
@@ -1948,7 +1948,7 @@ describe("resolveApiKeyForProvider — per-entry apiKey as profile ID reference"
     ).rejects.toThrow(/not compatible with this provider entry's auth binding/);
   });
 
-  it("throws (does not fall through to literal bearer) when matched profile resolution fails (clawsweeper P2)", async () => {
+  it("throws (does not fall through to literal bearer) when matched profile resolution fails (botsweeper P2)", async () => {
     // Profile is matched on ID but its credential has no usable api key material
     // (no `key` and no `keyRef`). Pre-fix, this would fall through to the late
     // `resolveUsableCustomProviderApiKey` and send "openrouter:key-b" itself as the

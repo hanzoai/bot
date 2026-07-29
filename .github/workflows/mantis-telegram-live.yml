@@ -19,7 +19,7 @@ on:
         required: false
         default: telegram-status-command
         type: string
-      crabbox_provider:
+      botbox_provider:
         description: Crabbox provider for the desktop transcript capture
         required: false
         default: aws
@@ -27,7 +27,7 @@ on:
         options:
           - aws
           - hetzner
-      crabbox_lease_id:
+      botbox_lease_id:
         description: Optional existing Crabbox desktop/browser lease id or slug to reuse
         required: false
         type: string
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       candidate_ref: ${{ steps.resolve.outputs.candidate_ref }}
-      crabbox_provider: ${{ steps.resolve.outputs.crabbox_provider }}
+      botbox_provider: ${{ steps.resolve.outputs.botbox_provider }}
       lease_id: ${{ steps.resolve.outputs.lease_id }}
       pr_number: ${{ steps.resolve.outputs.pr_number }}
       request_source: ${{ steps.resolve.outputs.request_source }}
@@ -121,8 +121,8 @@ jobs:
               setOutput("candidate_ref", inputs.candidate_ref || "main");
               setOutput("pr_number", inputs.pr_number || "");
               setOutput("scenario", inputs.scenario || "telegram-status-command");
-              setOutput("crabbox_provider", inputs.crabbox_provider || "aws");
-              setOutput("lease_id", inputs.crabbox_lease_id || "");
+              setOutput("botbox_provider", inputs.botbox_provider || "aws");
+              setOutput("lease_id", inputs.botbox_lease_id || "");
               setOutput("request_source", "workflow_dispatch");
               return;
             }
@@ -158,7 +158,7 @@ jobs:
               setOutput("candidate_ref", "");
               setOutput("pr_number", "");
               setOutput("scenario", "");
-              setOutput("crabbox_provider", "");
+              setOutput("botbox_provider", "");
               setOutput("lease_id", "");
               setOutput("request_source", "unsupported_issue_comment");
               return;
@@ -172,8 +172,8 @@ jobs:
             });
             const candidateMatch = body.match(/(?:candidate|head)[\s:=]+([^\s`]+)/i);
             const scenarioMatch = body.match(/(?:scenario|scenarios)[\s:=]+([^\s`]+)/i);
-            const providerMatch = body.match(/(?:provider|crabbox_provider)[\s:=]+([^\s`]+)/i);
-            const leaseMatch = body.match(/(?:lease|lease_id|crabbox_lease_id)[\s:=]+([^\s`]+)/i);
+            const providerMatch = body.match(/(?:provider|botbox_provider)[\s:=]+([^\s`]+)/i);
+            const leaseMatch = body.match(/(?:lease|lease_id|botbox_lease_id)[\s:=]+([^\s`]+)/i);
             const rawCandidate = candidateMatch?.[1];
             const candidate =
               rawCandidate && !["head", "pr", "pr-head"].includes(rawCandidate.toLowerCase())
@@ -189,7 +189,7 @@ jobs:
             setOutput("candidate_ref", candidate);
             setOutput("pr_number", String(issue.number));
             setOutput("scenario", scenarioMatch?.[1] || "telegram-status-command");
-            setOutput("crabbox_provider", provider);
+            setOutput("botbox_provider", provider);
             setOutput("lease_id", leaseMatch?.[1] || "");
             setOutput("request_source", "issue_comment");
 
@@ -346,18 +346,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          install_dir="${RUNNER_TEMP}/crabbox"
+          install_dir="${RUNNER_TEMP}/botbox"
           mkdir -p "$install_dir/src" "$HOME/.local/bin"
           git init "$install_dir/src"
-          git -C "$install_dir/src" remote add origin https://github.com/bot/crabbox.git
+          git -C "$install_dir/src" remote add origin https://github.com/bot/botbox.git
           timeout --signal=TERM --kill-after=10s 120s git -C "$install_dir/src" fetch --depth 1 origin "$CRABBOX_REF"
           git -C "$install_dir/src" checkout --detach FETCH_HEAD
-          go build -C "$install_dir/src" -o "$HOME/.local/bin/crabbox" ./cmd/crabbox
+          go build -C "$install_dir/src" -o "$HOME/.local/bin/botbox" ./cmd/botbox
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          "$HOME/.local/bin/crabbox" --version
-          "$HOME/.local/bin/crabbox" warmup --help > "$install_dir/warmup-help.txt" 2>&1
+          "$HOME/.local/bin/botbox" --version
+          "$HOME/.local/bin/botbox" warmup --help > "$install_dir/warmup-help.txt" 2>&1
           grep -q -- "-desktop" "$install_dir/warmup-help.txt"
-          "$HOME/.local/bin/crabbox" media preview --help >/dev/null
+          "$HOME/.local/bin/botbox" media preview --help >/dev/null
 
       - name: Prepare candidate worktree
         env:
@@ -388,7 +388,7 @@ jobs:
           CRABBOX_AWS_REGION: ${{ env.CRABBOX_AWS_REGION }}
           CRABBOX_CAPACITY_REGIONS: ${{ env.CRABBOX_CAPACITY_REGIONS }}
           CRABBOX_LEASE_ID: ${{ needs.resolve_request.outputs.lease_id }}
-          CRABBOX_PROVIDER: ${{ needs.resolve_request.outputs.crabbox_provider }}
+          CRABBOX_PROVIDER: ${{ needs.resolve_request.outputs.botbox_provider }}
           SCENARIO_INPUT: ${{ needs.resolve_request.outputs.scenario }}
           CANDIDATE_SHA: ${{ needs.validate_ref.outputs.candidate_revision }}
         shell: bash
@@ -484,7 +484,7 @@ jobs:
               sudo apt-get update -y >/tmp/mantis-telegram-ffmpeg-apt.log 2>&1 || true
               sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ffmpeg >>/tmp/mantis-telegram-ffmpeg-apt.log 2>&1 || true
             fi
-            if ! crabbox media preview \
+            if ! botbox media preview \
               --input "$root/telegram-live.mp4" \
               --output "$root/telegram-live-preview.gif" \
               --trimmed-video-output "$root/telegram-live-change.mp4" \
@@ -526,7 +526,7 @@ jobs:
           GH_TOKEN: ${{ steps.mantis_app_token.outputs.token }}
           ARTIFACT_URL: ${{ steps.upload_artifact.outputs.artifact-url }}
           MANTIS_ARTIFACT_R2_ACCESS_KEY_ID: ${{ secrets.MANTIS_ARTIFACT_R2_ACCESS_KEY_ID }}
-          MANTIS_ARTIFACT_R2_BUCKET: bot-crabbox-artifacts
+          MANTIS_ARTIFACT_R2_BUCKET: bot-botbox-artifacts
           MANTIS_ARTIFACT_R2_ENDPOINT: ${{ vars.MANTIS_ARTIFACT_R2_ENDPOINT }}
           MANTIS_ARTIFACT_R2_PUBLIC_BASE_URL: https://artifacts.bot.ai
           MANTIS_ARTIFACT_R2_REGION: auto

@@ -1,5 +1,5 @@
 // Feishu helper module supports agent config behavior.
-import type { ClawdbotConfig } from "./bot-runtime-api.js";
+import type { BotConfig } from "./bot-runtime-api.js";
 
 type ReasoningDefault = "on" | "stream" | "off";
 
@@ -11,7 +11,7 @@ function normalizeAgentId(value: string | undefined | null): string {
 }
 
 export function resolveFeishuConfigReasoningDefault(
-  cfg: ClawdbotConfig,
+  cfg: BotConfig,
   agentId: string,
 ): ReasoningDefault {
   const id = normalizeAgentId(agentId);

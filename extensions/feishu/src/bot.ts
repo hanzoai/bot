@@ -55,7 +55,7 @@ import {
   normalizeAgentId,
   resolveChannelContextVisibilityMode,
 } from "./bot-runtime-api.js";
-import type { ClawdbotConfig, RuntimeEnv } from "./bot-runtime-api.js";
+import type { BotConfig, RuntimeEnv } from "./bot-runtime-api.js";
 import { resolveFeishuSenderName, type FeishuPermissionError } from "./bot-sender-name.js";
 import { createFeishuClient } from "./client.js";
 import { resolveConfiguredFeishuGroupSessionScope } from "./conversation-id.js";
@@ -129,7 +129,7 @@ function isFeishuTopicSessionScope(
 }
 
 async function resolveFeishuAudioPreflightTranscript(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   mediaList: FeishuMediaInfo[];
   content: string;
   messageType: string;
@@ -217,7 +217,7 @@ export function parseFeishuMessageEvent(
 }
 
 async function shouldIncludeFetchedGroupContextMessage(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   accountId: string;
   chatId: string;
   isGroup: boolean;
@@ -255,7 +255,7 @@ async function filterFetchedGroupContextMessages<
 >(
   messages: readonly T[],
   params: {
-    cfg: ClawdbotConfig;
+    cfg: BotConfig;
     accountId: string;
     chatId: string;
     isGroup: boolean;
@@ -285,7 +285,7 @@ async function filterFetchedGroupContextMessages<
 }
 
 export async function handleFeishuMessage(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   event: FeishuMessageEvent;
   botOpenId?: string;
   botName?: string;
@@ -697,7 +697,7 @@ export async function handleFeishuMessage(params: {
       cfg,
     );
     const resolveDirectAuthorization = async (
-      candidateCfg: ClawdbotConfig,
+      candidateCfg: BotConfig,
       mayPair: boolean,
       shouldComputeCommand = core.channel.commands.shouldComputeCommandAuthorized(
         commandProbeBody,
@@ -779,7 +779,7 @@ export async function handleFeishuMessage(params: {
       directAuthorization?.shouldComputeCommandAuthorized ?? shouldComputeCommandAuthorized;
     let effectiveCfg = cfg;
     if (isDirect) {
-      const currentCfg = getFeishuRuntime().config.current() as ClawdbotConfig;
+      const currentCfg = getFeishuRuntime().config.current() as BotConfig;
       if (currentCfg !== effectiveCfg) {
         const currentAuthorization = await resolveDirectAuthorization(currentCfg, true);
         if (currentAuthorization.ingress.ingress.admission !== "dispatch") {

@@ -20,7 +20,7 @@ describe("changed path facts", () => {
       [".github/workflows/ci.yml", "rootTooling"],
       ["package.json", "rootGlobal"],
       ["assets/legacy.png", "legacyRootAsset"],
-      [".crabbox.yaml", "unknown"],
+      [".botbox.yaml", "unknown"],
     ] as const;
 
     for (const [changedPath, surface] of cases) {

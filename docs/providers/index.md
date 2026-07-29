@@ -34,7 +34,7 @@ Looking for chat channel docs (WhatsApp/Telegram/Discord/Slack/Mattermost (plugi
 - [BytePlus (International)](/concepts/model-providers#byteplus-international)
 - [Cerebras](/providers/cerebras)
 - [Chutes](/providers/chutes)
-- [ClawRouter (managed multi-provider routing)](/providers/clawrouter)
+- [BotRouter (managed multi-provider routing)](/providers/botrouter)
 - [Cloudflare AI Gateway](/providers/cloudflare-ai-gateway)
 - [Cohere](/providers/cohere)
 - [ComfyUI](/providers/comfy)

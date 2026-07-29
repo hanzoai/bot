@@ -21,7 +21,7 @@ Mantis uses three storage layers:
   Holds machine capabilities (Chrome/Chromium, ffmpeg, scrot,
   Node/corepack/pnpm, native build tools) and empty cache directories.
 - **Warm lease state** - owned by the current operator session. Can hold a
-  logged-in browser profile, `/var/cache/crabbox/pnpm`, and a prepared source
+  logged-in browser profile, `/var/cache/botbox/pnpm`, and a prepared source
   checkout while the lease is alive.
 - **Mantis artifacts** - owned by the Bot run. Live under
   `.artifacts/qa-e2e/mantis/...`; GitHub Actions uploads them and the Mantis
@@ -40,7 +40,7 @@ gh workflow run mantis-slack-desktop-smoke.yml \
   -f candidate_ref=<trusted-ref-or-sha> \
   -f pr_number=<pr-number> \
   -f scenario_id=slack-canary \
-  -f crabbox_provider=aws \
+  -f botbox_provider=aws \
   -f keep_vm=false \
   -f hydrate_mode=source
 ```
@@ -92,7 +92,7 @@ pnpm bot qa mantis slack-desktop-smoke \
 Open VNC:
 
 ```bash
-crabbox vnc --provider aws --id <cbx_id> --open
+botbox vnc --provider aws --id <cbx_id> --open
 ```
 
 Reuse a warm lease:
@@ -148,20 +148,20 @@ Slack Web.
 
 GitHub Actions always prepares the candidate checkout before the VM run. Its
 pnpm store is cached by OS, Node version, and lockfile. The VM `source` run
-also reuses `/var/cache/crabbox/pnpm` when present.
+also reuses `/var/cache/botbox/pnpm` when present.
 
 ## Timing interpretation
 
 `mantis-slack-desktop-smoke-report.md` includes phase timings:
 
-- `crabbox.warmup` - cloud provider boot, desktop/browser readiness, SSH.
-- `crabbox.inspect` - lease metadata lookup.
+- `botbox.warmup` - cloud provider boot, desktop/browser readiness, SSH.
+- `botbox.inspect` - lease metadata lookup.
 - `credentials.prepare` - Convex credential lease acquisition.
-- `crabbox.remote_run` - sync, browser launch, Bot install/build or
+- `botbox.remote_run` - sync, browser launch, Bot install/build or
   hydrate validation, gateway startup, screenshot, and video capture.
 - `artifacts.copy` - rsync back from the VM.
 
-`crabbox.remote_run` can show `accepted` when Crabbox returns a non-zero
+`botbox.remote_run` can show `accepted` when Crabbox returns a non-zero
 remote status but Mantis copied metadata proving either the Bot gateway
 setup completed or the Slack QA command itself exited successfully. Treat
 `accepted` as pass-with-explanation, not a failed scenario.
@@ -207,11 +207,11 @@ cat chrome.log
 cat ffmpeg.log
 ```
 
-If the run kept the lease, open VNC with the report's `crabbox vnc ...`
+If the run kept the lease, open VNC with the report's `botbox vnc ...`
 command, then stop the lease when done:
 
 ```bash
-crabbox stop --provider aws <cbx_id-or-slug>
+botbox stop --provider aws <cbx_id-or-slug>
 ```
 
 If Slack login expired, repair it in VNC on a kept lease and rerun with

@@ -224,7 +224,7 @@ suite.define(() => {
       methodResponses: {
         "environments.list": {
           environments: [],
-          profiles: [{ id: "aws", providerId: "crabbox" }],
+          profiles: [{ id: "aws", providerId: "botbox" }],
         },
         "fs.listDir": { path: WORKSPACE, home: "/home/peter", entries: [] },
         "worktrees.branches": {

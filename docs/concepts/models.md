@@ -119,7 +119,7 @@ Fix it by adding the model or a provider wildcard to the named `modelPolicy.allo
 
 For local/GGUF models, the allowlist needs the full provider-prefixed ref, for example `ollama/gemma4:26b` or `lmstudio/Gemma4-26b-a4-it-gguf` — check `bot models list --provider <provider>` for the exact string. Bare filenames or display names are not enough once the allowlist is active.
 
-To limit providers without listing every model, use trailing prefix wildcard entries. A provider-wide `provider/*` matches every model under that provider; a narrower prefix such as `clawrouter/anthropic/*` matches only that namespace:
+To limit providers without listing every model, use trailing prefix wildcard entries. A provider-wide `provider/*` matches every model under that provider; a narrower prefix such as `botrouter/anthropic/*` matches only that namespace:
 
 ```json5
 {

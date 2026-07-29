@@ -876,7 +876,7 @@ describe("release candidate checklist", () => {
       duplicateFlag("--skip-parallels"),
       duplicateFlag("--skip-telegram"),
       duplicateOption("--telegram-provider-mode", "mock-openai", "live-frontier"),
-      duplicateOption("--provider", "blacksmith-testbox", "crabbox"),
+      duplicateOption("--provider", "blacksmith-testbox", "botbox"),
       duplicateOption("--mode", "fresh", "upgrade"),
       duplicateOption("--release-profile", "beta", "stable"),
       duplicateOption("--npm-dist-tag", "beta", "latest"),

@@ -1,11 +1,11 @@
 import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 // Feishu plugin module implements monitor behavior.
-import type { ClawdbotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
+import type { BotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
 import { listEnabledFeishuAccounts, resolveFeishuRuntimeAccount } from "./accounts.js";
 import { fetchBotIdentityForMonitor } from "./monitor.startup.js";
 
 type MonitorFeishuOpts = {
-  config?: ClawdbotConfig;
+  config?: BotConfig;
   runtime?: RuntimeEnv;
   channelRuntime?: PluginRuntime["channel"];
   abortSignal?: AbortSignal;

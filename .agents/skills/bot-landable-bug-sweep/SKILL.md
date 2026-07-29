@@ -36,7 +36,7 @@ In `provided-prs` mode, inspect only the supplied PRs plus directly linked dupli
 
 ## Companion Skills
 
-Use `$gitcrawl` for discovery/clustering, `$bot-pr-maintainer` for live GitHub mutation rules, `$github-author-context` when contributor trust matters, `$bot-testing` for proof choice, `$autoreview` before publishing/landing, and `$crabbox` for broad/E2E/live proof.
+Use `$gitcrawl` for discovery/clustering, `$bot-pr-maintainer` for live GitHub mutation rules, `$github-author-context` when contributor trust matters, `$bot-testing` for proof choice, `$autoreview` before publishing/landing, and `$botbox` for broad/E2E/live proof.
 
 ## Candidate Bar
 

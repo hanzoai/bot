@@ -1,6 +1,6 @@
 ---
 name: bot-ci-limits
-description: Manage Bot GitHub Actions and Blacksmith CI capacity, runner-registration budgets, fanout caps, main-push single-flight, shard sizing, hosted-runner offload, queue health, and safe ramp-down/ramp-up changes. Use when tuning `.github/workflows/*`, `docs/ci.md`, CI runner labels, matrix `max-parallel`, ClawSweeper/Blacksmith burst protection, CodeQL runner placement, or investigating slow/queued Bot CI.
+description: Manage Bot GitHub Actions and Blacksmith CI capacity, runner-registration budgets, fanout caps, main-push single-flight, shard sizing, hosted-runner offload, queue health, and safe ramp-down/ramp-up changes. Use when tuning `.github/workflows/*`, `docs/ci.md`, CI runner labels, matrix `max-parallel`, BotSweeper/Blacksmith burst protection, CodeQL runner placement, or investigating slow/queued Bot CI.
 ---
 
 # Bot CI Limits
@@ -36,11 +36,11 @@ Before changing CI, collect current pressure:
 ```bash
 ghx api rate_limit --jq '{core:.resources.core,graphql:.resources.graphql,search:.resources.search,actions_runner_registration:.resources.actions_runner_registration}'
 ghx run list -R hanzoai/bot --limit 20 --json databaseId,status,conclusion,workflowName,event,headBranch,createdAt,updatedAt,url
-ghx run list -R bot/clawsweeper --limit 20 --json databaseId,status,conclusion,workflowName,event,headBranch,createdAt,updatedAt,url
-ghx api repos/bot/clawsweeper/actions/runs/<run-id>/jobs --paginate --jq '.jobs[] | {id,name,status,conclusion,labels,created_at,started_at,completed_at,runner_name,runner_group_name}'
+ghx run list -R bot/botsweeper --limit 20 --json databaseId,status,conclusion,workflowName,event,headBranch,createdAt,updatedAt,url
+ghx api repos/bot/botsweeper/actions/runs/<run-id>/jobs --paginate --jq '.jobs[] | {id,name,status,conclusion,labels,created_at,started_at,completed_at,runner_name,runner_group_name}'
 blacksmith testbox list --all
-curl -fsS https://clawsweeper.bot.ai/api/status | jq '{generated_at,fleet,diagnostics:{errors:.diagnostics.errors}}'
-curl -fsS https://clawsweeper.bot.ai/api/exact-review-queue | jq '{generated_at,review:.lanes.review,publication:.lanes.publication,state_writer,state_append}'
+curl -fsS https://botsweeper.bot.ai/api/status | jq '{generated_at,fleet,diagnostics:{errors:.diagnostics.errors}}'
+curl -fsS https://botsweeper.bot.ai/api/exact-review-queue | jq '{generated_at,review:.lanes.review,publication:.lanes.publication,state_writer,state_append}'
 node scripts/ci-run-timings.mjs --latest-main
 node scripts/ci-run-timings.mjs --recent 10
 ```
@@ -87,10 +87,10 @@ Classify the issue before changing caps:
   Use `$bot-test-performance` instead of runner tuning.
 - **Real failing CI:** one job fails after starting. Use `$github:gh-fix-ci` or
   `$bot-testing`, not this skill.
-- **ClawSweeper review backlog:** review pending/ready grows while publication
+- **BotSweeper review backlog:** review pending/ready grows while publication
   and state writers remain healthy. Tune review admission/workers in
-  `bot/clawsweeper`.
-- **ClawSweeper publication backlog:** publication pending/ready and oldest age
+  `bot/botsweeper`.
+- **BotSweeper publication backlog:** publication pending/ready and oldest age
   grow, net drain is zero or negative, or dead letters rise. Inspect publication
   batches, state-writer coordination, and GitHub mutation latency first.
 - **State materializer/append backlog:** `state_append.pending_rows`,
@@ -121,7 +121,7 @@ active main matrix plus its next pending matrix, not every intermediate merge.
 Reject a change unless the org-level worst case stays below about 60% of the
 live bucket. With the current 10,000-registration bucket, keep planned
 Blacksmith burst load under 6,000 registrations per 5 minutes with headroom for
-ClawSweeper, ClawHub, Clownfish, Bot RTT, and Clawbench.
+BotSweeper, ClawHub, Clownfish, Bot RTT, and Clawbench.
 
 ## Safe Levers
 
@@ -223,10 +223,10 @@ After merge, watch at least one fresh main cycle and the adjacent repos:
 
 ```bash
 ghx run list -R hanzoai/bot --limit 20 --json databaseId,status,conclusion,workflowName,event,headBranch,createdAt,updatedAt,url
-for repo in bot/clawsweeper bot/clawhub bot/clownfish hanzoai/bot-rtt bot/clawbench; do
+for repo in bot/botsweeper bot/clawhub bot/clownfish hanzoai/bot-rtt bot/clawbench; do
   ghx run list -R "$repo" --limit 12 --json databaseId,status,conclusion,workflowName,event,headBranch,createdAt,updatedAt,url
 done
-curl -fsS https://clawsweeper.bot.ai/api/exact-review-queue | jq '.'
+curl -fsS https://botsweeper.bot.ai/api/exact-review-queue | jq '.'
 ```
 
 Report:
@@ -237,7 +237,7 @@ Report:
 - queued job labels, runner assignment, and dependency state for any outlier;
 - Blacksmith Actions runner evidence separately from Testbox control-plane
   health;
-- ClawSweeper queue pending, dispatching, leased, oldest pending age;
+- BotSweeper queue pending, dispatching, leased, oldest pending age;
 - publication net drain/dead letters, state-writer queued/waiting, and state
   append rows/bytes/oldest item;
 - any real failures that remain outside runner registration.

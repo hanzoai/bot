@@ -119,10 +119,10 @@ describe("mantis Slack desktop smoke runtime", () => {
     const runner = vi.fn(
       async (command: string, args: readonly string[], options: { env?: NodeJS.ProcessEnv }) => {
         commands.push({ command, args, env: options.env });
-        if (command === "/tmp/crabbox" && args[0] === "warmup") {
+        if (command === "/tmp/botbox" && args[0] === "warmup") {
           return { stdout: "ready lease cbx_abc123\n", stderr: "" };
         }
-        if (command === "/tmp/crabbox" && args[0] === "inspect") {
+        if (command === "/tmp/botbox" && args[0] === "inspect") {
           return {
             stdout: `${JSON.stringify({
               host: "203.0.113.10",
@@ -131,7 +131,7 @@ describe("mantis Slack desktop smoke runtime", () => {
               slug: "bright-mantis",
               sshKey: "/tmp/key",
               sshPort: "2222",
-              sshUser: "crabbox",
+              sshUser: "botbox",
               state: "active",
             })}\n`,
             stderr: "",
@@ -162,7 +162,7 @@ describe("mantis Slack desktop smoke runtime", () => {
 
     const result = await runMantisSlackDesktopSmoke({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       env: runtimeEnv,
       freshPr: "hanzoai/bot#85141",
       now: () => new Date("2026-05-04T13:00:00.000Z"),
@@ -175,18 +175,18 @@ describe("mantis Slack desktop smoke runtime", () => {
 
     expect(result.status).toBe("pass");
     expect(commands.map((entry) => [entry.command, entry.args[0]])).toEqual([
-      ["/tmp/crabbox", "warmup"],
-      ["/tmp/crabbox", "inspect"],
-      ["/tmp/crabbox", "run"],
+      ["/tmp/botbox", "warmup"],
+      ["/tmp/botbox", "inspect"],
+      ["/tmp/botbox", "run"],
       ["rsync", "-az"],
       ["rsync", "-az"],
-      ["/tmp/crabbox", "stop"],
+      ["/tmp/botbox", "stop"],
     ]);
     expect(
       commands.every((entry) => entry.env?.BOT_LIVE_OPENAI_KEY === "openai-runtime-key"),
     ).toBe(true);
     const runArgs = commands.find(
-      (entry) => entry.command === "/tmp/crabbox" && entry.args[0] === "run",
+      (entry) => entry.command === "/tmp/botbox" && entry.args[0] === "run",
     )?.args;
     expect(runArgs).toContain("--no-hydrate");
     expect(runArgs).toContain("--fresh-pr");
@@ -199,7 +199,7 @@ describe("mantis Slack desktop smoke runtime", () => {
     expect(remoteScript).toContain("PNPM_STORE_DIR");
     expect(remoteScript).toContain("build-essential python3");
     expect(remoteScript).toContain("node_supports_type_stripping");
-    expect(remoteScript).toContain("scripts/crabbox-untrusted-bootstrap.sh");
+    expect(remoteScript).toContain("scripts/botbox-untrusted-bootstrap.sh");
     expect(remoteScript).toContain(
       "curl -fsSL --connect-timeout 10 --max-time 120 https://deb.nodesource.com/setup_22.x",
     );
@@ -268,30 +268,30 @@ describe("mantis Slack desktop smoke runtime", () => {
       .flatMap((entry) => entry.args);
     expect(rsyncArgs).not.toContain("--delete");
     expect(rsyncArgs).toContain(
-      "crabbox@203.0.113.10:/tmp/bot-mantis-slack-desktop-2026-05-04T13-00-00-000Z/",
+      "botbox@203.0.113.10:/tmp/bot-mantis-slack-desktop-2026-05-04T13-00-00-000Z/",
     );
     expect(rsyncArgs).toContain(
-      "crabbox@203.0.113.10:/tmp/bot-mantis-slack-desktop-2026-05-04T13-00-00-000Z/slack-qa/",
+      "botbox@203.0.113.10:/tmp/bot-mantis-slack-desktop-2026-05-04T13-00-00-000Z/slack-qa/",
     );
     await expect(fs.readFile(result.screenshotPath ?? "", "utf8")).resolves.toBe("png");
     await expect(fs.readFile(result.videoPath ?? "", "utf8")).resolves.toBe("mp4");
     const summary = JSON.parse(await fs.readFile(result.summaryPath, "utf8")) as {
-      crabbox: { id: string; vncCommand: string };
+      botbox: { id: string; vncCommand: string };
       hydrateMode: string;
       status: string;
       timings: { phases: { name: string; status: string }[]; totalMs: number };
     };
-    expect(summary.crabbox.id).toBe("cbx_abc123");
-    expect(summary.crabbox.vncCommand).toBe(
-      "/tmp/crabbox vnc --provider hetzner --id cbx_abc123 --open",
+    expect(summary.botbox.id).toBe("cbx_abc123");
+    expect(summary.botbox.vncCommand).toBe(
+      "/tmp/botbox vnc --provider hetzner --id cbx_abc123 --open",
     );
     expect(summary.hydrateMode).toBe("source");
     expect(summary.status).toBe("pass");
     expect(summary.timings.totalMs).toBeGreaterThanOrEqual(0);
-    expect(summary.timings.phases.map((phase) => phase.name)).toContain("crabbox.warmup");
-    expect(summary.timings.phases.map((phase) => phase.name)).toContain("crabbox.inspect");
+    expect(summary.timings.phases.map((phase) => phase.name)).toContain("botbox.warmup");
+    expect(summary.timings.phases.map((phase) => phase.name)).toContain("botbox.inspect");
     expect(summary.timings.phases.map((phase) => phase.name)).toContain("credentials.prepare");
-    expect(summary.timings.phases.map((phase) => phase.name)).toContain("crabbox.remote_run");
+    expect(summary.timings.phases.map((phase) => phase.name)).toContain("botbox.remote_run");
     expect(summary.timings.phases.map((phase) => phase.name)).toContain("artifacts.copy");
   });
 
@@ -300,10 +300,10 @@ describe("mantis Slack desktop smoke runtime", () => {
     const expectedScenarios = ["slack-approval-exec-native", "slack-approval-plugin-native"];
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
       commands.push({ command, args });
-      if (command === "/tmp/crabbox" && args[0] === "warmup") {
+      if (command === "/tmp/botbox" && args[0] === "warmup") {
         return { stdout: "ready lease cbx_123abc\n", stderr: "" };
       }
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             host: "203.0.113.10",
@@ -311,7 +311,7 @@ describe("mantis Slack desktop smoke runtime", () => {
             provider: "hetzner",
             sshKey: "/tmp/key",
             sshPort: "2222",
-            sshUser: "crabbox",
+            sshUser: "botbox",
             state: "active",
           })}\n`,
           stderr: "",
@@ -338,7 +338,7 @@ describe("mantis Slack desktop smoke runtime", () => {
     const result = await runMantisSlackDesktopSmoke({
       approvalCheckpoints: true,
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       now: () => new Date("2026-05-04T13:15:00.000Z"),
       outputDir: ".artifacts/qa-e2e/mantis/slack-desktop-checkpoints",
       repoRoot,
@@ -347,7 +347,7 @@ describe("mantis Slack desktop smoke runtime", () => {
     expect(result.status).toBe("pass");
     expect(result.approvalCheckpointScreenshotPaths).toHaveLength(4);
     const remoteScript = commands
-      .find((entry) => entry.command === "/tmp/crabbox" && entry.args[0] === "run")
+      .find((entry) => entry.command === "/tmp/botbox" && entry.args[0] === "run")
       ?.args.at(-1);
     expect(remoteScript).toContain("approval_checkpoints=1");
     expect(remoteScript).toContain('export BOT_QA_SLACK_CHANNEL_ID="$slack_channel_id"');
@@ -399,7 +399,7 @@ describe("mantis Slack desktop smoke runtime", () => {
     await expect(
       runMantisSlackDesktopSmoke({
         approvalCheckpoints: true,
-        crabboxBin: "/tmp/crabbox",
+        botboxBin: "/tmp/botbox",
         repoRoot,
         scenarioIds: ["slack-canary"],
       }),
@@ -438,10 +438,10 @@ describe("mantis Slack desktop smoke runtime", () => {
       const commands: { args: readonly string[]; command: string }[] = [];
       const runner = vi.fn(async (command: string, args: readonly string[]) => {
         commands.push({ command, args });
-        if (command === "/tmp/crabbox" && args[0] === "warmup") {
+        if (command === "/tmp/botbox" && args[0] === "warmup") {
           return { stdout: "ready lease cbx_123abc\n", stderr: "" };
         }
-        if (command === "/tmp/crabbox" && args[0] === "inspect") {
+        if (command === "/tmp/botbox" && args[0] === "inspect") {
           return {
             stdout: `${JSON.stringify({
               host: "203.0.113.10",
@@ -449,13 +449,13 @@ describe("mantis Slack desktop smoke runtime", () => {
               provider: "hetzner",
               sshKey: "/tmp/key",
               sshPort: "2222",
-              sshUser: "crabbox",
+              sshUser: "botbox",
               state: "active",
             })}\n`,
             stderr: "",
           };
         }
-        if (command === "/tmp/crabbox" && args[0] === "run") {
+        if (command === "/tmp/botbox" && args[0] === "run") {
           throw new Error("stop after remote script capture");
         }
         return { stdout: "", stderr: "" };
@@ -464,7 +464,7 @@ describe("mantis Slack desktop smoke runtime", () => {
       const result = await runMantisSlackDesktopSmoke({
         approvalCheckpoints: true,
         commandRunner: runner,
-        crabboxBin: "/tmp/crabbox",
+        botboxBin: "/tmp/botbox",
         outputDir: `.artifacts/qa-e2e/mantis/${requestedScenarioIds.join("-")}`,
         repoRoot,
         scenarioIds: requestedScenarioIds,
@@ -472,7 +472,7 @@ describe("mantis Slack desktop smoke runtime", () => {
 
       expect(result.status).toBe("fail");
       const remoteScript = commands
-        .find((entry) => entry.command === "/tmp/crabbox" && entry.args[0] === "run")
+        .find((entry) => entry.command === "/tmp/botbox" && entry.args[0] === "run")
         ?.args.at(-1);
       for (const scenarioId of expectedScenarioIds) {
         expect(remoteScript?.split(`--scenario '${scenarioId}'`)).toHaveLength(3);
@@ -490,10 +490,10 @@ describe("mantis Slack desktop smoke runtime", () => {
   it("fails approval checkpoint mode when ack metadata does not match the expected state", async () => {
     const expectedScenarios = ["slack-approval-exec-native", "slack-approval-plugin-native"];
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
-      if (command === "/tmp/crabbox" && args[0] === "warmup") {
+      if (command === "/tmp/botbox" && args[0] === "warmup") {
         return { stdout: "ready lease cbx_123abc\n", stderr: "" };
       }
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             host: "203.0.113.10",
@@ -501,7 +501,7 @@ describe("mantis Slack desktop smoke runtime", () => {
             provider: "hetzner",
             sshKey: "/tmp/key",
             sshPort: "2222",
-            sshUser: "crabbox",
+            sshUser: "botbox",
             state: "active",
           })}\n`,
           stderr: "",
@@ -540,7 +540,7 @@ describe("mantis Slack desktop smoke runtime", () => {
     const result = await runMantisSlackDesktopSmoke({
       approvalCheckpoints: true,
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       outputDir: ".artifacts/qa-e2e/mantis/slack-desktop-bad-checkpoints",
       repoRoot,
     });
@@ -556,7 +556,7 @@ describe("mantis Slack desktop smoke runtime", () => {
     await expect(
       runMantisSlackDesktopSmoke({
         approvalCheckpoints: true,
-        crabboxBin: "/tmp/crabbox",
+        botboxBin: "/tmp/botbox",
         gatewaySetup: true,
         repoRoot,
       }),
@@ -567,7 +567,7 @@ describe("mantis Slack desktop smoke runtime", () => {
     const commands: { args: readonly string[]; command: string }[] = [];
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
       commands.push({ command, args });
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             host: "203.0.113.10",
@@ -575,7 +575,7 @@ describe("mantis Slack desktop smoke runtime", () => {
             provider: "hetzner",
             sshKey: "/tmp/key",
             sshPort: "2222",
-            sshUser: "crabbox",
+            sshUser: "botbox",
           })}\n`,
           stderr: "",
         };
@@ -596,7 +596,7 @@ describe("mantis Slack desktop smoke runtime", () => {
 
     const result = await runMantisSlackDesktopSmoke({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       hydrateMode: "prehydrated",
       leaseId: "cbx_warm",
       outputDir: ".artifacts/qa-e2e/mantis/slack-desktop-prehydrated",
@@ -605,7 +605,7 @@ describe("mantis Slack desktop smoke runtime", () => {
 
     expect(result.status).toBe("pass");
     const remoteScript = commands
-      .find((entry) => entry.command === "/tmp/crabbox" && entry.args[0] === "run")
+      .find((entry) => entry.command === "/tmp/botbox" && entry.args[0] === "run")
       ?.args.at(-1);
     expect(remoteScript).toContain("hydrate_mode='prehydrated'");
     expect(remoteScript).toContain("hydrate-mode=prehydrated requires node_modules");
@@ -615,7 +615,7 @@ describe("mantis Slack desktop smoke runtime", () => {
       timings: { phases: { name: string; status: string }[] };
     };
     expect(summary.hydrateMode).toBe("prehydrated");
-    expect(summary.timings.phases.map((phase) => phase.name)).not.toContain("crabbox.warmup");
+    expect(summary.timings.phases.map((phase) => phase.name)).not.toContain("botbox.warmup");
   });
 
   it("leases Convex Slack credentials for gateway setup and maps them into the VM env", async () => {
@@ -653,10 +653,10 @@ describe("mantis Slack desktop smoke runtime", () => {
       async (command: string, args: readonly string[], options: { env?: NodeJS.ProcessEnv }) => {
         commands.push({ command, args, env: options.env });
         events.push(`${command}:${args[0]}`);
-        if (command === "/tmp/crabbox" && args[0] === "warmup") {
+        if (command === "/tmp/botbox" && args[0] === "warmup") {
           return { stdout: "ready lease cbx_c0ffee\n", stderr: "" };
         }
-        if (command === "/tmp/crabbox" && args[0] === "inspect") {
+        if (command === "/tmp/botbox" && args[0] === "inspect") {
           return {
             stdout: `${JSON.stringify({
               host: "203.0.113.10",
@@ -664,7 +664,7 @@ describe("mantis Slack desktop smoke runtime", () => {
               provider: "hetzner",
               sshKey: "/tmp/key",
               sshPort: "2222",
-              sshUser: "crabbox",
+              sshUser: "botbox",
               state: "active",
             })}\n`,
             stderr: "",
@@ -693,7 +693,7 @@ describe("mantis Slack desktop smoke runtime", () => {
 
     const result = await runMantisSlackDesktopSmoke({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       credentialRole: "ci",
       credentialSource: "convex",
       env: {
@@ -711,15 +711,15 @@ describe("mantis Slack desktop smoke runtime", () => {
     });
 
     expect(result.status).toBe("pass");
-    expect(events).toContain("/tmp/crabbox:warmup");
-    expect(events).toContain("/tmp/crabbox:inspect");
+    expect(events).toContain("/tmp/botbox:warmup");
+    expect(events).toContain("/tmp/botbox:inspect");
     expect(events).toContain("acquire");
-    expect(events).toContain("/tmp/crabbox:run");
+    expect(events).toContain("/tmp/botbox:run");
     expect(events).toContain("release");
-    expect(events.indexOf("acquire")).toBeGreaterThan(events.indexOf("/tmp/crabbox:inspect"));
-    expect(events.indexOf("acquire")).toBeLessThan(events.indexOf("/tmp/crabbox:run"));
+    expect(events.indexOf("acquire")).toBeGreaterThan(events.indexOf("/tmp/botbox:inspect"));
+    expect(events.indexOf("acquire")).toBeLessThan(events.indexOf("/tmp/botbox:run"));
     const runCommand = commands.find(
-      (entry) => entry.command === "/tmp/crabbox" && entry.args[0] === "run",
+      (entry) => entry.command === "/tmp/botbox" && entry.args[0] === "run",
     );
     expect(runCommand?.env?.BOT_MANTIS_SLACK_APP_TOKEN).toBe("xapp-leased");
     expect(runCommand?.env?.BOT_MANTIS_SLACK_BOT_TOKEN).toBe("xoxb-leased");
@@ -738,7 +738,7 @@ describe("mantis Slack desktop smoke runtime", () => {
       "https://example.convex.site/qa-credentials/v1/release",
     ]);
     expect(
-      commands.some((entry) => entry.command === "/tmp/crabbox" && entry.args[0] === "stop"),
+      commands.some((entry) => entry.command === "/tmp/botbox" && entry.args[0] === "stop"),
     ).toBe(true);
     const summary = JSON.parse(await fs.readFile(result.summaryPath, "utf8")) as {
       slackUrl: string;
@@ -750,10 +750,10 @@ describe("mantis Slack desktop smoke runtime", () => {
     const commands: { args: readonly string[]; command: string }[] = [];
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
       commands.push({ command, args });
-      if (command === "/tmp/crabbox" && args[0] === "warmup") {
+      if (command === "/tmp/botbox" && args[0] === "warmup") {
         return { stdout: "ready lease cbx_fade123\n", stderr: "" };
       }
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             host: "203.0.113.10",
@@ -761,12 +761,12 @@ describe("mantis Slack desktop smoke runtime", () => {
             provider: "hetzner",
             sshKey: "/tmp/key",
             sshPort: "2222",
-            sshUser: "crabbox",
+            sshUser: "botbox",
           })}\n`,
           stderr: "",
         };
       }
-      if (command === "/tmp/crabbox" && args[0] === "run") {
+      if (command === "/tmp/botbox" && args[0] === "run") {
         throw new Error("remote Slack QA failed");
       }
       if (command === "rsync") {
@@ -782,7 +782,7 @@ describe("mantis Slack desktop smoke runtime", () => {
 
     const result = await runMantisSlackDesktopSmoke({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       keepLease: false,
       outputDir: ".artifacts/qa-e2e/mantis/slack-desktop-created-fail",
       repoRoot,
@@ -792,7 +792,7 @@ describe("mantis Slack desktop smoke runtime", () => {
     expect(
       commands.some(
         (entry) =>
-          entry.command === "/tmp/crabbox" &&
+          entry.command === "/tmp/botbox" &&
           JSON.stringify(entry.args) ===
             JSON.stringify(["stop", "--provider", "hetzner", "cbx_fade123"]),
       ),
@@ -801,10 +801,10 @@ describe("mantis Slack desktop smoke runtime", () => {
 
   it("passes gateway setup when Crabbox returns non-zero after remote metadata proves success", async () => {
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
-      if (command === "/tmp/crabbox" && args[0] === "warmup") {
+      if (command === "/tmp/botbox" && args[0] === "warmup") {
         return { stdout: "ready lease cbx_cafe123\n", stderr: "" };
       }
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             host: "203.0.113.10",
@@ -812,13 +812,13 @@ describe("mantis Slack desktop smoke runtime", () => {
             provider: "hetzner",
             sshKey: "/tmp/key",
             sshPort: "2222",
-            sshUser: "crabbox",
+            sshUser: "botbox",
             state: "active",
           })}\n`,
           stderr: "",
         };
       }
-      if (command === "/tmp/crabbox" && args[0] === "run") {
+      if (command === "/tmp/botbox" && args[0] === "run") {
         throw new Error("remote command exited 1");
       }
       if (command === "rsync") {
@@ -842,7 +842,7 @@ describe("mantis Slack desktop smoke runtime", () => {
 
     const result = await runMantisSlackDesktopSmoke({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       env: {
         OPENAI_API_KEY: "openai-runtime-key",
         BOT_MANTIS_SLACK_APP_TOKEN: "xapp-direct",
@@ -863,16 +863,16 @@ describe("mantis Slack desktop smoke runtime", () => {
     };
     expect(summary.status).toBe("pass");
     expect(summary.warning).toBeUndefined();
-    expect(phaseStatus(summary.timings.phases, "crabbox.remote_run")).toBe("accepted");
+    expect(phaseStatus(summary.timings.phases, "botbox.remote_run")).toBe("accepted");
   });
 
   it("passes Slack QA when Crabbox returns non-zero after remote metadata proves QA success", async () => {
     const expectedScenarios = ["slack-approval-exec-native", "slack-approval-plugin-native"];
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
-      if (command === "/tmp/crabbox" && args[0] === "warmup") {
+      if (command === "/tmp/botbox" && args[0] === "warmup") {
         return { stdout: "ready lease cbx_ba5eba11\n", stderr: "" };
       }
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             host: "203.0.113.10",
@@ -880,13 +880,13 @@ describe("mantis Slack desktop smoke runtime", () => {
             provider: "hetzner",
             sshKey: "/tmp/key",
             sshPort: "2222",
-            sshUser: "crabbox",
+            sshUser: "botbox",
             state: "active",
           })}\n`,
           stderr: "",
         };
       }
-      if (command === "/tmp/crabbox" && args[0] === "run") {
+      if (command === "/tmp/botbox" && args[0] === "run") {
         throw new Error("remote command exited 1");
       }
       if (command === "rsync") {
@@ -910,7 +910,7 @@ describe("mantis Slack desktop smoke runtime", () => {
     const result = await runMantisSlackDesktopSmoke({
       approvalCheckpoints: true,
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       now: () => new Date("2026-05-04T14:45:00.000Z"),
       outputDir: ".artifacts/qa-e2e/mantis/slack-desktop-qa-metadata",
       repoRoot,
@@ -923,12 +923,12 @@ describe("mantis Slack desktop smoke runtime", () => {
       timings: { phases: { name: string; status: string }[] };
     };
     expect(summary.status).toBe("pass");
-    expect(phaseStatus(summary.timings.phases, "crabbox.remote_run")).toBe("accepted");
+    expect(phaseStatus(summary.timings.phases, "botbox.remote_run")).toBe("accepted");
   });
 
   it("copies the screenshot before reporting a failed remote Slack QA run", async () => {
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             host: "203.0.113.10",
@@ -936,12 +936,12 @@ describe("mantis Slack desktop smoke runtime", () => {
             provider: "hetzner",
             sshKey: "/tmp/key",
             sshPort: "2222",
-            sshUser: "crabbox",
+            sshUser: "botbox",
           })}\n`,
           stderr: "",
         };
       }
-      if (command === "/tmp/crabbox" && args[0] === "run") {
+      if (command === "/tmp/botbox" && args[0] === "run") {
         throw new Error("remote Slack QA failed");
       }
       if (command === "rsync") {
@@ -959,7 +959,7 @@ describe("mantis Slack desktop smoke runtime", () => {
 
     const result = await runMantisSlackDesktopSmoke({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       leaseId: "cbx_existing",
       outputDir: ".artifacts/qa-e2e/mantis/slack-desktop-fail",
       repoRoot,
@@ -981,7 +981,7 @@ describe("mantis Slack desktop smoke runtime", () => {
     expect(summary.status).toBe("fail");
     expect(summary.hydrateMode).toBe("source");
     expect(summary.timings.totalMs).toBeGreaterThanOrEqual(0);
-    expect(phaseStatus(summary.timings.phases, "crabbox.remote_run")).toBe("fail");
+    expect(phaseStatus(summary.timings.phases, "botbox.remote_run")).toBe("fail");
     expect(summary.error).toContain("remote Slack QA failed");
     expect(summary.artifacts.screenshotPath).toContain("slack-desktop-smoke.png");
     expect(summary.artifacts.videoPath).toContain("slack-desktop-smoke.mp4");
@@ -989,7 +989,7 @@ describe("mantis Slack desktop smoke runtime", () => {
 
   it("reports Slack QA failure from copied remote metadata when Crabbox run exits zero", async () => {
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             host: "203.0.113.10",
@@ -997,7 +997,7 @@ describe("mantis Slack desktop smoke runtime", () => {
             provider: "hetzner",
             sshKey: "/tmp/key",
             sshPort: "2222",
-            sshUser: "crabbox",
+            sshUser: "botbox",
           })}\n`,
           stderr: "",
         };
@@ -1019,7 +1019,7 @@ describe("mantis Slack desktop smoke runtime", () => {
 
     const result = await runMantisSlackDesktopSmoke({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       leaseId: "cbx_existing",
       outputDir: ".artifacts/qa-e2e/mantis/slack-desktop-metadata-fail",
       repoRoot,
@@ -1033,17 +1033,17 @@ describe("mantis Slack desktop smoke runtime", () => {
     };
     expect(summary.status).toBe("fail");
     expect(summary.error).toContain("Slack QA exited with code 7");
-    expect(phaseStatus(summary.timings.phases, "crabbox.remote_run")).toBe("pass");
+    expect(phaseStatus(summary.timings.phases, "botbox.remote_run")).toBe("pass");
   });
 
   it("accepts Blacksmith Testbox lease ids from Crabbox warmup", async () => {
     const commands: { args: readonly string[]; command: string }[] = [];
     const runner = vi.fn(async (command: string, args: readonly string[]) => {
       commands.push({ command, args });
-      if (command === "/tmp/crabbox" && args[0] === "warmup") {
+      if (command === "/tmp/botbox" && args[0] === "warmup") {
         return { stdout: "ready: tbx_abc-123_more\n", stderr: "" };
       }
-      if (command === "/tmp/crabbox" && args[0] === "inspect") {
+      if (command === "/tmp/botbox" && args[0] === "inspect") {
         return {
           stdout: `${JSON.stringify({
             host: "203.0.113.10",
@@ -1051,7 +1051,7 @@ describe("mantis Slack desktop smoke runtime", () => {
             provider: "blacksmith-testbox",
             sshKey: "/tmp/key",
             sshPort: "2222",
-            sshUser: "crabbox",
+            sshUser: "botbox",
             state: "active",
           })}\n`,
           stderr: "",
@@ -1079,7 +1079,7 @@ describe("mantis Slack desktop smoke runtime", () => {
 
     const result = await runMantisSlackDesktopSmoke({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       now: () => new Date("2026-05-04T13:30:00.000Z"),
       outputDir: ".artifacts/qa-e2e/mantis/slack-desktop-testbox",
       provider: "blacksmith-testbox",
@@ -1090,16 +1090,16 @@ describe("mantis Slack desktop smoke runtime", () => {
     expect(
       commands.some(
         (entry) =>
-          entry.command === "/tmp/crabbox" &&
+          entry.command === "/tmp/botbox" &&
           entry.args.includes("--id") &&
           entry.args.includes("tbx_abc-123_more"),
       ),
     ).toBe(true);
     const summary = JSON.parse(await fs.readFile(result.summaryPath, "utf8")) as {
-      crabbox: { id: string; provider: string };
+      botbox: { id: string; provider: string };
     };
-    expect(summary.crabbox.id).toBe("tbx_abc-123_more");
-    expect(summary.crabbox.provider).toBe("blacksmith-testbox");
+    expect(summary.botbox.id).toBe("tbx_abc-123_more");
+    expect(summary.botbox.provider).toBe("blacksmith-testbox");
   });
 
   it("routes the approval checkpoints CLI flag into the Slack desktop runtime", async () => {

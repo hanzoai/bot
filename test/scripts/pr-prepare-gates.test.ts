@@ -108,7 +108,7 @@ function makeRetryRepo(): { repoDir: string; stubBin: string; headSha: string } 
   mkdirSync(stubBin);
   writeFileSync(join(stubBin, "pnpm"), "#!/bin/sh\nexit 0\n");
   chmodSync(join(stubBin, "pnpm"), 0o755);
-  // Route the crabbox wrapper to a canned timing report; everything else
+  // Route the botbox wrapper to a canned timing report; everything else
   // (the gate lock helper) still needs the real node.
   writeFileSync(
     join(stubBin, "node"),
@@ -395,7 +395,7 @@ describe("prepare gate changed-file plan", () => {
 });
 
 describe("remote testbox gate delegation", () => {
-  it("runs the full pnpm test through the worktree crabbox wrapper", () => {
+  it("runs the full pnpm test through the worktree botbox wrapper", () => {
     const dir = makeTempDir("bot-pr-gates-remote-");
     const stubBin = join(dir, "bin");
     mkdirSync(stubBin);
@@ -423,10 +423,10 @@ describe("remote testbox gate delegation", () => {
     expect(result.status).toBe(0);
     const argLine = result.stdout
       .split("\n")
-      .find((line) => line.includes("crabbox-wrapper.mjs"))
+      .find((line) => line.includes("botbox-wrapper.mjs"))
       ?.replaceAll("ARG:", "");
     expect(argLine).toBe(
-      "scripts/crabbox-wrapper.mjs run " +
+      "scripts/botbox-wrapper.mjs run " +
         "--provider blacksmith-testbox " +
         "--blacksmith-org bot " +
         "--blacksmith-workflow .github/workflows/ci-check-testbox.yml " +

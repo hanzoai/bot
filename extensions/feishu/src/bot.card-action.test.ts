@@ -1,7 +1,7 @@
 // Feishu tests cover bot.card action plugin behavior.
 import { createRuntimeEnv } from "bot/plugin-sdk/plugin-test-runtime";
 import { afterAll, afterEach, describe, it, expect, vi, beforeEach } from "vitest";
-import type { ClawdbotConfig, RuntimeEnv } from "../runtime-api.js";
+import type { BotConfig, RuntimeEnv } from "../runtime-api.js";
 import { processedCardActions, resolvedCardActionChatTypes } from "./card-action-state.js";
 import { handleFeishuCardAction, type FeishuCardActionEvent } from "./card-action.js";
 import { createFeishuCardInteractionEnvelope } from "./card-interaction.js";
@@ -42,7 +42,7 @@ vi.mock("./send.js", () => ({
 import { handleFeishuMessage } from "./bot.js";
 
 describe("Feishu Card Action Handler", () => {
-  const cfg: ClawdbotConfig = {};
+  const cfg: BotConfig = {};
   const runtime: RuntimeEnv = createRuntimeEnv();
 
   afterAll(() => {

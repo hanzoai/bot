@@ -26,11 +26,11 @@ export function isMaintainerTeamMember(params?: {
   timeoutMs?: number;
 }): Promise<boolean>;
 export function hasAuthoredPullRequestSection(heading: string, body?: string): boolean;
-export function hasClawSweeperExactHeadProof(params?: {
+export function hasBotSweeperExactHeadProof(params?: {
   pullRequest?: PullRequest;
   comments?: Comment[];
 }): boolean;
-export function evaluateClawSweeperExactHeadProof(params?: {
+export function evaluateBotSweeperExactHeadProof(params?: {
   pullRequest?: PullRequest;
   comments?: Comment[];
 }): Evaluation;

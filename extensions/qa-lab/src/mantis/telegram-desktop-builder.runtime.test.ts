@@ -32,10 +32,10 @@ describe("mantis Telegram desktop builder runtime", () => {
     const runner = vi.fn(
       async (command: string, args: readonly string[], options: { env?: NodeJS.ProcessEnv }) => {
         commands.push({ command, args, env: options.env });
-        if (command === "/tmp/crabbox" && args[0] === "warmup") {
+        if (command === "/tmp/botbox" && args[0] === "warmup") {
           return { stdout: "ready lease cbx_a123\n", stderr: "" };
         }
-        if (command === "/tmp/crabbox" && args[0] === "inspect") {
+        if (command === "/tmp/botbox" && args[0] === "inspect") {
           return {
             stdout: `${JSON.stringify({
               host: "203.0.113.20",
@@ -44,7 +44,7 @@ describe("mantis Telegram desktop builder runtime", () => {
               slug: "telegram-builder",
               sshKey: "/tmp/key",
               sshPort: "2222",
-              sshUser: "crabbox",
+              sshUser: "botbox",
               state: "active",
             })}\n`,
             stderr: "",
@@ -73,7 +73,7 @@ describe("mantis Telegram desktop builder runtime", () => {
 
     const result = await runMantisTelegramDesktopBuilder({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       credentialSource: "env",
       env: {
         OPENAI_API_KEY: "openai-runtime-key",
@@ -87,18 +87,18 @@ describe("mantis Telegram desktop builder runtime", () => {
       outputDir: ".artifacts/qa-e2e/mantis/telegram-desktop-test",
       repoRoot,
       telegramProfileArchiveEnv: "TELEGRAM_PROFILE_TGZ_B64",
-      telegramProfileDir: "/home/crabbox/.local/share/TelegramDesktop",
+      telegramProfileDir: "/home/botbox/.local/share/TelegramDesktop",
     });
 
     expect(result.status).toBe("pass");
     expect(commands.map((entry) => [entry.command, entry.args[0]])).toEqual([
-      ["/tmp/crabbox", "warmup"],
-      ["/tmp/crabbox", "inspect"],
-      ["/tmp/crabbox", "run"],
+      ["/tmp/botbox", "warmup"],
+      ["/tmp/botbox", "inspect"],
+      ["/tmp/botbox", "run"],
       ["rsync", "-az"],
     ]);
     const runCommand = commands.find(
-      (entry) => entry.command === "/tmp/crabbox" && entry.args[0] === "run",
+      (entry) => entry.command === "/tmp/botbox" && entry.args[0] === "run",
     );
     expect(runCommand?.env?.BOT_LIVE_OPENAI_KEY).toBe("openai-runtime-key");
     expect(runCommand?.env?.BOT_MANTIS_TELEGRAM_DESKTOP_PROFILE_TGZ_B64).toBe(
@@ -140,26 +140,26 @@ describe("mantis Telegram desktop builder runtime", () => {
     );
     expect(remoteScript?.match(/signal: AbortSignal\.timeout\(15_000\)/gu)?.length).toBe(2);
     expect(
-      commands.some((entry) => entry.command === "/tmp/crabbox" && entry.args[0] === "stop"),
+      commands.some((entry) => entry.command === "/tmp/botbox" && entry.args[0] === "stop"),
     ).toBe(false);
     await expect(fs.readFile(result.screenshotPath ?? "", "utf8")).resolves.toBe("png");
     await expect(fs.readFile(result.videoPath ?? "", "utf8")).resolves.toBe("mp4");
     const summary = JSON.parse(await fs.readFile(result.summaryPath, "utf8")) as {
-      crabbox: { id: string; vncCommand: string };
+      botbox: { id: string; vncCommand: string };
       gatewaySetup: boolean;
       hydrateMode: string;
       status: string;
       telegramDesktop: { profileArchiveEnv?: string; profileDir: string };
     };
-    expect(summary.crabbox.id).toBe("cbx_a123");
-    expect(summary.crabbox.vncCommand).toBe(
-      "/tmp/crabbox vnc --provider hetzner --id cbx_a123 --open",
+    expect(summary.botbox.id).toBe("cbx_a123");
+    expect(summary.botbox.vncCommand).toBe(
+      "/tmp/botbox vnc --provider hetzner --id cbx_a123 --open",
     );
     expect(summary.gatewaySetup).toBe(true);
     expect(summary.hydrateMode).toBe("source");
     expect(summary.status).toBe("pass");
     expect(summary.telegramDesktop.profileArchiveEnv).toBe("TELEGRAM_PROFILE_TGZ_B64");
-    expect(summary.telegramDesktop.profileDir).toBe("/home/crabbox/.local/share/TelegramDesktop");
+    expect(summary.telegramDesktop.profileDir).toBe("/home/botbox/.local/share/TelegramDesktop");
   });
 
   it("leases Convex Telegram credentials and maps them into the VM env", async () => {
@@ -200,10 +200,10 @@ describe("mantis Telegram desktop builder runtime", () => {
     const runner = vi.fn(
       async (command: string, args: readonly string[], options: { env?: NodeJS.ProcessEnv }) => {
         commands.push({ command, args, env: options.env });
-        if (command === "/tmp/crabbox" && args[0] === "warmup") {
+        if (command === "/tmp/botbox" && args[0] === "warmup") {
           return { stdout: "ready lease cbx_c0ffee\n", stderr: "" };
         }
-        if (command === "/tmp/crabbox" && args[0] === "inspect") {
+        if (command === "/tmp/botbox" && args[0] === "inspect") {
           return {
             stdout: `${JSON.stringify({
               host: "203.0.113.20",
@@ -211,7 +211,7 @@ describe("mantis Telegram desktop builder runtime", () => {
               provider: "hetzner",
               sshKey: "/tmp/key",
               sshPort: "2222",
-              sshUser: "crabbox",
+              sshUser: "botbox",
               state: "active",
             })}\n`,
             stderr: "",
@@ -232,7 +232,7 @@ describe("mantis Telegram desktop builder runtime", () => {
 
     const result = await runMantisTelegramDesktopBuilder({
       commandRunner: runner,
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       credentialRole: "ci",
       credentialSource: "convex",
       env: {
@@ -250,7 +250,7 @@ describe("mantis Telegram desktop builder runtime", () => {
     expect(result.status).toBe("pass");
     expect(events).toEqual(["acquire", "release"]);
     const runCommand = commands.find(
-      (entry) => entry.command === "/tmp/crabbox" && entry.args[0] === "run",
+      (entry) => entry.command === "/tmp/botbox" && entry.args[0] === "run",
     );
     expect(runCommand?.env?.BOT_MANTIS_TELEGRAM_DRIVER_BOT_TOKEN).toBe("driver-leased");
     expect(runCommand?.env?.BOT_MANTIS_TELEGRAM_GROUP_ID).toBe("-100222333444");
@@ -259,7 +259,7 @@ describe("mantis Telegram desktop builder runtime", () => {
     expect(runCommand?.env?.BOT_QA_TELEGRAM_GROUP_ID).toBe("-100222333444");
     expect(runCommand?.env?.BOT_QA_TELEGRAM_SUT_BOT_TOKEN).toBe("sut-leased");
     expect(
-      commands.some((entry) => entry.command === "/tmp/crabbox" && entry.args[0] === "stop"),
+      commands.some((entry) => entry.command === "/tmp/botbox" && entry.args[0] === "stop"),
     ).toBe(true);
     expect(fetchMock.mock.calls.map(([url]) => describeFetchInput(url))).toEqual([
       "https://example.convex.site/qa-credentials/v1/acquire",

@@ -1,5 +1,5 @@
 // Feishu plugin module implements comment reaction behavior.
-import type { ClawdbotConfig, RuntimeEnv } from "../runtime-api.js";
+import type { BotConfig, RuntimeEnv } from "../runtime-api.js";
 import { resolveFeishuRuntimeAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";
 import { encodeQuery, formatFeishuApiError } from "./comment-shared.js";
@@ -100,7 +100,7 @@ function formatCommentReactionFailure(error: unknown): string {
 }
 
 async function requestCommentTypingReaction(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   fileToken: string;
   fileType: CommentFileType;
   replyId: string;
@@ -205,7 +205,7 @@ export async function cleanupAmbientCommentTypingReaction(params: {
 }
 
 export function createCommentTypingReactionLifecycle(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   fileToken: string;
   fileType: CommentFileType;
   replyId?: string;

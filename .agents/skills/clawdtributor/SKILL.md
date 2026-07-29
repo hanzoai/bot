@@ -12,7 +12,7 @@ Use for the `#clawtributors` queue: Discord-discovered Bot PRs/issues that need 
 - `$discrawl`: local Discord archive sync/search.
 - `$bot-pr-maintainer`: live GitHub PR/issue review, duplicate search, close/land rules.
 - `$gitcrawl`: related issue/PR and current-main/stale-proof search.
-- `$bot-testing` / `$crabbox`: proof choice when a candidate needs real validation.
+- `$bot-testing` / `$botbox`: proof choice when a candidate needs real validation.
 
 ## Archive flow
 

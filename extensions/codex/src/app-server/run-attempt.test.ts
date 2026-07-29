@@ -3447,7 +3447,7 @@ describe("runCodexAppServerAttempt", () => {
   it("keeps lightweight cron Codex turns out of Bot bootstrap context", async () => {
     const { sessionFile, workspaceDir } = createRunPaths();
     const exactCommand =
-      "cd /Users/phaedrus/Projects/bot && /Users/phaedrus/clawd/scripts/clawsweeper-related-scan.py";
+      "cd /Users/phaedrus/Projects/bot && /Users/phaedrus/clawd/scripts/botsweeper-related-scan.py";
     await fs.mkdir(workspaceDir, { recursive: true });
     await fs.writeFile(path.join(workspaceDir, "AGENTS.md"), "Follow AGENTS guidance.");
     await fs.writeFile(path.join(workspaceDir, "SOUL.md"), "Soul voice goes here.");

@@ -123,7 +123,7 @@ describe("setJsoncOcPath — quoted segments (regression: resolve↔edit symmetr
     // The provider/model alias key contains a `/`; without quoting
     // it would be split as two segments. `resolveJsoncOcPath` handles
     // this; `setJsoncOcPath` MUST handle it the same way or the path
-    // becomes resolve-only. Closes ClawSweeper P2 on PR #78678.
+    // becomes resolve-only. Closes BotSweeper P2 on PR #78678.
     const raw = `{
   "agents": {
     "defaults": {

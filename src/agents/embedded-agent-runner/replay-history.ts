@@ -438,7 +438,7 @@ function isReplayDroppableTrailingAssistant(message: AgentMessage | undefined): 
   // turn carries that synthetic provenance: without this guard, a real
   // model reply that happens to consist of exactly the sentinel string
   // would be silently removed on next replay
-  // (clawsweeper review on #77287, P2).
+  // (botsweeper review on #77287, P2).
   if (!isStreamErrorSentinelContent(content)) {
     return false;
   }

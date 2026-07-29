@@ -1,6 +1,6 @@
 import * as crypto from "node:crypto";
 import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
-import type { ClawdbotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
+import type { BotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
 import { handleFeishuMessage, type FeishuMessageEvent } from "./bot.js";
 import { setFeishuSyntheticDirectPreDispatchTarget } from "./synthetic-event-target.js";
 
@@ -132,7 +132,7 @@ function buildSyntheticMessageEvent(turn: VcMeetingInvitedTurn): FeishuMessageEv
 }
 
 async function dispatchVcMeetingInvitedTurn(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   accountId: string;
   runtime?: RuntimeEnv;
   channelRuntime?: PluginRuntime["channel"];
@@ -155,7 +155,7 @@ async function dispatchVcMeetingInvitedTurn(params: {
 }
 
 export function createFeishuVcMeetingInvitedHandler(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   accountId: string;
   runtime?: RuntimeEnv;
   channelRuntime?: PluginRuntime["channel"];

@@ -101,7 +101,7 @@ If you used a profile, replace the label and plist name with `ai.bot.<profile>`.
 
 ### Linux (systemd user unit)
 
-Default unit name is `bot-gateway.service` (or `bot-gateway-<profile>.service`). A pre-rename `clawdbot-gateway.service` unit may still exist on machines upgraded from very old installs; `bot uninstall` / `bot gateway uninstall` detects and removes it automatically.
+Default unit name is `bot-gateway.service` (or `bot-gateway-<profile>.service`). A pre-rename `bot-gateway.service` unit may still exist on machines upgraded from very old installs; `bot uninstall` / `bot gateway uninstall` detects and removes it automatically.
 
 ```bash
 systemctl --user disable --now bot-gateway.service

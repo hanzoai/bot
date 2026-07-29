@@ -67,7 +67,7 @@ Skip with terse reason. Do not pad with low-confidence fixes.
 
 ## PR Rules
 
-- `ready-to-merge`: code is good, current head checked, required proof is green or clearly pending only external CI; list for maintainer merge or `@clawsweeper automerge`
+- `ready-to-merge`: code is good, current head checked, required proof is green or clearly pending only external CI; list for maintainer merge or `@botsweeper automerge`
 - `needs-fixup`: small bug is clear, but PR branch needs changes; list exact files/tests and wait for explicit fix/push/automerge instruction
 - `skip`: broad, stale, speculative, config/product/security/release, owner-boundary, or refactor-sized
 - if source PR is untrusted/uneditable, do not create a replacement PR during sweep

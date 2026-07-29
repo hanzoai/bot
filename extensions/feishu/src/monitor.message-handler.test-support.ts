@@ -1,6 +1,6 @@
 // Feishu test support covers monitor.message handler plugin behavior.
 import { describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig, PluginRuntime } from "../runtime-api.js";
+import type { BotConfig, PluginRuntime } from "../runtime-api.js";
 import type { FeishuMessageEvent } from "./event-types.js";
 import { createFeishuMessageReceiveHandler } from "./monitor.message-handler.js";
 
@@ -47,7 +47,7 @@ function createHandler() {
   const handleMessage = vi.fn(async (_params: HandleMessageParams) => {});
 
   const handler = createFeishuMessageReceiveHandler({
-    cfg: {} as ClawdbotConfig,
+    cfg: {} as BotConfig,
     channelRuntime,
     accountId: "default",
     chatHistories: new Map(),

@@ -20,9 +20,9 @@ UI chat lanes exist too; WhatsApp and Matrix are unimplemented.
 
 - Bot (`extensions/qa-lab/src/mantis/*`): scenario runtime, `pnpm bot qa mantis <command>` CLI, evidence schema.
 - QA Lab (`extensions/qa-lab/src/live-transports/*`): live transport harness, driver/SUT bots, report/evidence writers.
-- Crabbox (`bot/crabbox`): warmed Linux machines, leases, VNC, `crabbox media preview`.
+- Crabbox (`bot/botbox`): warmed Linux machines, leases, VNC, `botbox media preview`.
 - GitHub Actions (`.github/workflows/mantis-*.yml`): remote entrypoints, artifact retention.
-- ClawSweeper: parses maintainer PR commands, dispatches workflows, posts the final PR comment.
+- BotSweeper: parses maintainer PR commands, dispatches workflows, posts the final PR comment.
 
 ## CLI commands
 
@@ -38,10 +38,10 @@ at build/run time (bundled workflows set `BOT_BUILD_PRIVATE_QA=1` and
 | `desktop-browser-smoke`         | Lease/reuse a Crabbox desktop, open a visible browser, capture screenshot + video.                                                                        |
 | `slack-desktop-smoke`           | Lease/reuse a Crabbox desktop, run Slack QA inside it, open Slack Web, capture evidence.                                                                  |
 | `telegram-desktop-builder`      | Lease/reuse a Crabbox desktop, install Telegram Desktop, optionally configure an Bot gateway.                                                        |
-| `visual-task` / `visual-driver` | Generic Crabbox desktop capture with optional image-understanding assertions; `visual-driver` is the driver half launched under `crabbox record --while`. |
+| `visual-task` / `visual-driver` | Generic Crabbox desktop capture with optional image-understanding assertions; `visual-driver` is the driver half launched under `botbox record --while`. |
 
 Every command accepts `--repo-root <path>` and `--output-dir <path>`; Crabbox
-commands also accept `--crabbox-bin`, `--provider`, `--machine-class`/`--class`,
+commands also accept `--botbox-bin`, `--provider`, `--machine-class`/`--class`,
 `--lease-id`, `--idle-timeout`, `--ttl`, and `--keep-lease`. Local CLI defaults
 for provider/class are `hetzner`/`beast` unless noted otherwise; CI workflows
 usually override both.
@@ -293,7 +293,7 @@ creates a new one. Required env:
 
 - `MANTIS_ARTIFACT_R2_ACCESS_KEY_ID`
 - `MANTIS_ARTIFACT_R2_SECRET_ACCESS_KEY`
-- `MANTIS_ARTIFACT_R2_BUCKET` (workflows set `bot-crabbox-artifacts`)
+- `MANTIS_ARTIFACT_R2_BUCKET` (workflows set `bot-botbox-artifacts`)
 - `MANTIS_ARTIFACT_R2_ENDPOINT`
 - `MANTIS_ARTIFACT_R2_REGION` (workflows set `auto`)
 - `MANTIS_ARTIFACT_R2_PUBLIC_BASE_URL` (workflows set `https://artifacts.bot.ai`)
@@ -305,7 +305,7 @@ marker comment as the upsert key.
 | Workflow                          | Trigger                                                                                    | What it does                                                                                                                                                                                                                                                                                                     |
 | --------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Mantis Discord Smoke`            | manual dispatch                                                                            | Runs `discord-smoke` against a chosen ref.                                                                                                                                                                                                                                                                       |
-| `Mantis Discord Status Reactions` | PR comment or manual dispatch                                                              | Builds separate baseline/candidate worktrees, runs `discord-status-reactions-tool-only` on each, renders each lane's timeline in a Crabbox desktop browser, generates motion-trimmed GIF/MP4 previews with `crabbox media preview`, uploads artifacts, posts inline PR evidence.                                 |
+| `Mantis Discord Status Reactions` | PR comment or manual dispatch                                                              | Builds separate baseline/candidate worktrees, runs `discord-status-reactions-tool-only` on each, renders each lane's timeline in a Crabbox desktop browser, generates motion-trimmed GIF/MP4 previews with `botbox media preview`, uploads artifacts, posts inline PR evidence.                                 |
 | `Mantis Scenario`                 | manual dispatch                                                                            | Generic dispatcher: takes `scenario_id` (`discord-status-reactions-tool-only`, `discord-thread-reply-filepath-attachment`, `slack-desktop-smoke`, `telegram-live`, `telegram-desktop-proof`, `web-ui-chat-proof`), `baseline_ref`, `candidate_ref`, `pr_number`, and forwards to the matching scenario workflow. |
 | `Mantis Slack Desktop Smoke`      | manual dispatch                                                                            | Leases a Crabbox Linux desktop (defaults to `aws`, choice of `hetzner`), runs `slack-desktop-smoke --gateway-setup` against the candidate, records the desktop, generates a motion preview, uploads artifacts, posts PR evidence when a PR number is given.                                                      |
 | `Mantis Telegram Live`            | PR comment or manual dispatch                                                              | Runs the bot-API Telegram live QA lane (`bot qa telegram`), writes `mantis-evidence.json` from the QA summary, renders redacted evidence HTML through a Crabbox desktop browser, generates a motion GIF, posts PR evidence. Telegram Web login is not required for this lane.                               |
@@ -341,10 +341,10 @@ the Control UI mocked-Gateway chat proof and publish browser artifacts; use
 normal Playwright/browser proof, maintainer screenshots, Crabbox, or local
 artifacts for other web pages and native app surfaces.
 
-ClawSweeper can also dispatch a scenario directly:
+BotSweeper can also dispatch a scenario directly:
 
 ```text
-@clawsweeper mantis discord discord-status-reactions-tool-only
+@botsweeper mantis discord discord-status-reactions-tool-only
 ```
 
 ## Machines and secrets
@@ -429,6 +429,6 @@ implemented yet.
 - Which Discord bot should be the driver vs. the SUT when the existing Mantis
   bot is reused?
 - How long should GitHub retain Mantis artifacts for PRs?
-- When should ClawSweeper automatically recommend a Mantis scenario instead of
+- When should BotSweeper automatically recommend a Mantis scenario instead of
   waiting for a maintainer command?
 - Should screenshots be redacted or cropped before upload for public PRs?

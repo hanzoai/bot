@@ -21,10 +21,10 @@ export function resolveIsNixMode(env: NodeJS.ProcessEnv = process.env): boolean 
 export let isNixMode = resolveIsNixMode();
 
 // Support the remaining legacy pre-rebrand state dir.
-const LEGACY_STATE_DIRNAMES = [".clawdbot"] as const;
+const LEGACY_STATE_DIRNAMES = [".bot"] as const;
 const NEW_STATE_DIRNAME = ".bot";
 const CONFIG_FILENAME = "bot.json";
-const LEGACY_CONFIG_FILENAMES = ["clawdbot.json"] as const;
+const LEGACY_CONFIG_FILENAMES = ["bot.json"] as const;
 
 /** True when the root CLI selected a non-default isolated profile. */
 export function isNamedProfile(env: NodeJS.ProcessEnv = process.env): boolean {

@@ -53,9 +53,9 @@ describe("resolveSessionDisplayName", () => {
   it("names unnamed work sessions after their checkout", () => {
     expect(
       resolveSessionDisplayName("agent:main:dashboard:uuid", {
-        worktree: { branch: "bot/wt-3f2a", repoRoot: "/Users/dev/Projects/clawdbot" },
+        worktree: { branch: "bot/wt-3f2a", repoRoot: "/Users/dev/Projects/bot" },
       }),
-    ).toBe("clawdbot ⎇ wt-3f2a");
+    ).toBe("bot ⎇ wt-3f2a");
   });
 
   it("uses a gateway-derived title for otherwise unnamed sessions", () => {
@@ -77,10 +77,10 @@ describe("resolveSessionDisplayName", () => {
     ).toBe("Release room");
     expect(
       resolveSessionDisplayName("agent:main:dashboard:uuid", {
-        worktree: { branch: "bot/wt-3f2a", repoRoot: "/repo/clawdbot" },
+        worktree: { branch: "bot/wt-3f2a", repoRoot: "/repo/bot" },
         derivedTitle: "Quarterly launch plan",
       }),
-    ).toBe("clawdbot ⎇ wt-3f2a");
+    ).toBe("bot ⎇ wt-3f2a");
   });
 
   it("names named subsessions after their slug, never the raw agent key", () => {
@@ -129,15 +129,15 @@ describe("resolveSessionWorkSubtitle", () => {
   it("combines repo, branch, and node host", () => {
     expect(
       resolveSessionWorkSubtitle({
-        worktree: { branch: "bot/session-ui", repoRoot: "/repo/clawdbot" },
+        worktree: { branch: "bot/session-ui", repoRoot: "/repo/bot" },
       }),
-    ).toBe("clawdbot ⎇ session-ui");
+    ).toBe("bot ⎇ session-ui");
     expect(
       resolveSessionWorkSubtitle({
-        worktree: { branch: "feature/x", repoRoot: "/repo/clawdbot" },
+        worktree: { branch: "feature/x", repoRoot: "/repo/bot" },
         execNode: "macbook",
       }),
-    ).toBe("clawdbot ⎇ feature/x · macbook");
+    ).toBe("bot ⎇ feature/x · macbook");
     expect(resolveSessionWorkSubtitle({ execNode: "macbook" })).toBe("macbook");
     expect(resolveSessionWorkSubtitle({})).toBeUndefined();
   });
@@ -148,10 +148,10 @@ describe("resolveSessionWorkSubtitle", () => {
     ).toBe("…0357");
     expect(
       resolveSessionWorkSubtitle({
-        worktree: { branch: "bot/wt-1", repoRoot: "/repo/clawdbot" },
+        worktree: { branch: "bot/wt-1", repoRoot: "/repo/bot" },
         execNode: "11c38726acc6fac280357576c87acc6fac280357",
       }),
-    ).toBe("clawdbot ⎇ wt-1 · …0357");
+    ).toBe("bot ⎇ wt-1 · …0357");
   });
 });
 

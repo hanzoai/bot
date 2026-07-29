@@ -90,9 +90,9 @@ describe("check-changelog-attributions", () => {
       "- Org-owned fix. Thanks @bot.",
       "- Maintainer-owned fix. Thanks @steipete.",
       "- Mixed credit. Thanks @contributor and @Bot.",
-      "- Bot repair. Thanks @clawsweeper[bot].",
+      "- Bot repair. Thanks @botsweeper[bot].",
       "- Dependency bump. Thanks @dependabot[bot].",
-      "- App repair. Thanks @app/clawsweeper.",
+      "- App repair. Thanks @app/botsweeper.",
     ].join("\n");
 
     expect(findForbiddenChangelogThanks(content)).toEqual([
@@ -100,9 +100,9 @@ describe("check-changelog-attributions", () => {
       { line: 2, handle: "bot", text: "- Org-owned fix. Thanks @bot." },
       { line: 3, handle: "steipete", text: "- Maintainer-owned fix. Thanks @steipete." },
       { line: 4, handle: "bot", text: "- Mixed credit. Thanks @contributor and @Bot." },
-      { line: 5, handle: "clawsweeper[bot]", text: "- Bot repair. Thanks @clawsweeper[bot]." },
+      { line: 5, handle: "botsweeper[bot]", text: "- Bot repair. Thanks @botsweeper[bot]." },
       { line: 6, handle: "dependabot[bot]", text: "- Dependency bump. Thanks @dependabot[bot]." },
-      { line: 7, handle: "app/clawsweeper", text: "- App repair. Thanks @app/clawsweeper." },
+      { line: 7, handle: "app/botsweeper", text: "- App repair. Thanks @app/botsweeper." },
     ]);
   });
 
@@ -133,26 +133,26 @@ describe("check-changelog-attributions", () => {
     expect(isForbiddenChangelogThanksHandle("codex")).toBe(true);
     expect(isForbiddenChangelogThanksHandle("bot")).toBe(true);
     expect(isForbiddenChangelogThanksHandle("steipete")).toBe(true);
-    expect(isForbiddenChangelogThanksHandle("app/clawsweeper")).toBe(true);
-    expect(isForbiddenChangelogThanksHandle("clawsweeper")).toBe(true);
-    expect(isForbiddenChangelogThanksHandle("clawsweeper[bot]")).toBe(true);
-    expect(isForbiddenChangelogThanksHandle("bot-clawsweeper")).toBe(true);
-    expect(isForbiddenChangelogThanksHandle("bot-clawsweeper[bot]")).toBe(true);
+    expect(isForbiddenChangelogThanksHandle("app/botsweeper")).toBe(true);
+    expect(isForbiddenChangelogThanksHandle("botsweeper")).toBe(true);
+    expect(isForbiddenChangelogThanksHandle("botsweeper[bot]")).toBe(true);
+    expect(isForbiddenChangelogThanksHandle("bot-botsweeper")).toBe(true);
+    expect(isForbiddenChangelogThanksHandle("bot-botsweeper[bot]")).toBe(true);
     expect(isForbiddenChangelogThanksHandle("dependabot[bot]")).toBe(true);
     expect(isForbiddenChangelogThanksHandle("dependabot[bot]", { strictBotHandle: true })).toBe(
       true,
     );
     expect(isForbiddenChangelogThanksHandle("alice")).toBe(false);
-    expect(isForbiddenChangelogThanksHandle("human-clawsweeper-fan")).toBe(false);
+    expect(isForbiddenChangelogThanksHandle("human-botsweeper-fan")).toBe(false);
     expect(
-      isForbiddenChangelogThanksHandle("human-clawsweeper-fan", { strictBotHandle: true }),
+      isForbiddenChangelogThanksHandle("human-botsweeper-fan", { strictBotHandle: true }),
     ).toBe(false);
 
-    expect(requiresExplicitHumanChangelogThanks("clawsweeper")).toBe(true);
-    expect(requiresExplicitHumanChangelogThanks("clawsweeper[bot]")).toBe(true);
+    expect(requiresExplicitHumanChangelogThanks("botsweeper")).toBe(true);
+    expect(requiresExplicitHumanChangelogThanks("botsweeper[bot]")).toBe(true);
     expect(requiresExplicitHumanChangelogThanks("dependabot[bot]")).toBe(true);
-    expect(requiresExplicitHumanChangelogThanks("app/clawsweeper")).toBe(true);
-    expect(requiresExplicitHumanChangelogThanks("human-clawsweeper-fan")).toBe(false);
+    expect(requiresExplicitHumanChangelogThanks("app/botsweeper")).toBe(true);
+    expect(requiresExplicitHumanChangelogThanks("human-botsweeper-fan")).toBe(false);
     expect(requiresExplicitHumanChangelogThanks("steipete")).toBe(false);
     expect(requiresExplicitHumanChangelogThanks("")).toBe(false);
   });

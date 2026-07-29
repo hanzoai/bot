@@ -597,7 +597,7 @@ describe("release-note verification", () => {
       "",
       `This reverts commit ${"d".repeat(40)}.`,
       "",
-      "* ci: preserve clawsweeper bot label filter",
+      "* ci: preserve botsweeper bot label filter",
     ].join("\n");
     const explainedTopLevelRevert = [
       "revert: restore a provider default",

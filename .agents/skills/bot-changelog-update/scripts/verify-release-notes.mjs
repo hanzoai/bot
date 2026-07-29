@@ -26,7 +26,7 @@ const githubSnapshotCheckpointInterval = 25;
 const commitAssociationQueryBatchSize = 20;
 const excludedHandles = new Set([
   "bot",
-  "clawsweeper",
+  "botsweeper",
   "claude",
   "codex",
   "hugin-bot",

@@ -253,7 +253,7 @@ describe("channels list", () => {
         discord: [
           {
             accountId: "default",
-            name: "clawsweeper",
+            name: "botsweeper",
             configured: true,
             tokenSource: "env",
             tokenStatus: "available",
@@ -279,7 +279,7 @@ describe("channels list", () => {
       timeoutMs: 5000,
     });
     const output = stripAnsi(loggedText(runtime));
-    expect(output).toContain("Discord default (clawsweeper):");
+    expect(output).toContain("Discord default (botsweeper):");
     expect(output).toContain("configured");
     expect(output).toContain("token=env");
     expect(output).not.toContain("not configured");

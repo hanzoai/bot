@@ -21,11 +21,11 @@ import {
   sshCommand,
   stopCrabbox,
   warmupCrabbox,
-} from "./crabbox-runtime.js";
+} from "./botbox-runtime.js";
 
 export type MantisTelegramDesktopBuilderOptions = {
   commandRunner?: CommandRunner;
-  crabboxBin?: string;
+  botboxBin?: string;
   credentialRole?: string;
   credentialSource?: string;
   env?: NodeJS.ProcessEnv;
@@ -73,7 +73,7 @@ type MantisTelegramDesktopBuilderSummary = {
     summaryPath: string;
     videoPath?: string;
   };
-  crabbox: {
+  botbox: {
     bin: string;
     createdLease: boolean;
     id: string;
@@ -369,8 +369,8 @@ qa_status=0
       sudo apt-get update -y >>"$out/apt.log" 2>&1 || true
       sudo DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential python3 >>"$out/apt.log" 2>&1 || true
     fi
-    if [ -d /var/cache/crabbox ]; then
-      export PNPM_STORE_DIR="\${PNPM_STORE_DIR:-/var/cache/crabbox/pnpm}"
+    if [ -d /var/cache/botbox ]; then
+      export PNPM_STORE_DIR="\${PNPM_STORE_DIR:-/var/cache/botbox/pnpm}"
       mkdir -p "$PNPM_STORE_DIR" >/dev/null 2>&1 || true
       pnpm config set store-dir "$PNPM_STORE_DIR" >/dev/null 2>&1 || true
     fi
@@ -499,11 +499,11 @@ function renderReport(summary: MantisTelegramDesktopBuilderSummary) {
     "",
     "## Crabbox",
     "",
-    `- Provider: ${summary.crabbox.provider}`,
-    `- Lease: ${summary.crabbox.id}${summary.crabbox.slug ? ` (${summary.crabbox.slug})` : ""}`,
-    `- Created by run: ${summary.crabbox.createdLease}`,
-    `- State: ${summary.crabbox.state ?? "unknown"}`,
-    `- VNC: \`${summary.crabbox.vncCommand}\``,
+    `- Provider: ${summary.botbox.provider}`,
+    `- Lease: ${summary.botbox.id}${summary.botbox.slug ? ` (${summary.botbox.slug})` : ""}`,
+    `- Created by run: ${summary.botbox.createdLease}`,
+    `- State: ${summary.botbox.state ?? "unknown"}`,
+    `- VNC: \`${summary.botbox.vncCommand}\``,
     `- Hydrate mode: ${summary.hydrateMode}`,
     `- Gateway setup: ${summary.gatewaySetup ? "yes" : "no"}`,
     "",
@@ -578,10 +578,10 @@ export async function runMantisTelegramDesktopBuilder(
   );
   const summaryPath = path.join(outputDir, "mantis-telegram-desktop-builder-summary.json");
   const reportPath = path.join(outputDir, "mantis-telegram-desktop-builder-report.md");
-  const crabboxBin = await resolveCrabboxBin({
+  const botboxBin = await resolveCrabboxBin({
     env,
     envName: CRABBOX_BIN_ENV,
-    explicit: opts.crabboxBin,
+    explicit: opts.botboxBin,
     repoRoot,
   });
   const provider =
@@ -629,9 +629,9 @@ export async function runMantisTelegramDesktopBuilder(
   try {
     leaseId =
       leaseId ??
-      (await timer.timePhase("crabbox.warmup", () =>
+      (await timer.timePhase("botbox.warmup", () =>
         warmupCrabbox({
-          crabboxBin,
+          botboxBin,
           cwd: repoRoot,
           env,
           idleTimeout,
@@ -645,9 +645,9 @@ export async function runMantisTelegramDesktopBuilder(
       throw new Error("Crabbox lease id was not resolved.");
     }
     const resolvedLeaseId = leaseId;
-    const inspected = await timer.timePhase("crabbox.inspect", () =>
+    const inspected = await timer.timePhase("botbox.inspect", () =>
       inspectCrabbox({
-        crabboxBin,
+        botboxBin,
         cwd: repoRoot,
         env,
         leaseId: resolvedLeaseId,
@@ -668,7 +668,7 @@ export async function runMantisTelegramDesktopBuilder(
     let remoteRunError: unknown;
     const remoteRunStartedAt = new Date();
     await runCommand({
-      command: crabboxBin,
+      command: botboxBin,
       args: [
         "run",
         "--provider",
@@ -693,10 +693,10 @@ export async function runMantisTelegramDesktopBuilder(
       stdio: "inherit",
     }).then(
       () => {
-        timer.recordPhase("crabbox.remote_run", remoteRunStartedAt, "pass");
+        timer.recordPhase("botbox.remote_run", remoteRunStartedAt, "pass");
       },
       (error: unknown) => {
-        timer.recordPhase("crabbox.remote_run", remoteRunStartedAt, "fail");
+        timer.recordPhase("botbox.remote_run", remoteRunStartedAt, "fail");
         remoteRunError = error;
         return { stdout: "", stderr: "" };
       },
@@ -724,7 +724,7 @@ export async function runMantisTelegramDesktopBuilder(
     const gatewaySetupCompleted =
       gatewaySetup && remoteMetadata?.qaExitCode === 0 && remoteMetadata.gatewayAlive === true;
     if (remoteRunError && gatewaySetupCompleted) {
-      timer.updatePhaseStatus("crabbox.remote_run", "accepted");
+      timer.updatePhaseStatus("botbox.remote_run", "accepted");
     }
     if (remoteRunError && !gatewaySetupCompleted) {
       throw toErrorObject(remoteRunError);
@@ -739,14 +739,14 @@ export async function runMantisTelegramDesktopBuilder(
         summaryPath,
         videoPath,
       },
-      crabbox: {
-        bin: crabboxBin,
+      botbox: {
+        bin: botboxBin,
         createdLease,
         id: resolvedLeaseId,
         provider,
         slug: inspected.slug,
         state: inspected.state,
-        vncCommand: `${crabboxBin} vnc --provider ${provider} --id ${resolvedLeaseId} --open`,
+        vncCommand: `${botboxBin} vnc --provider ${provider} --id ${resolvedLeaseId} --open`,
       },
       finishedAt: new Date().toISOString(),
       gatewaySetup,
@@ -777,13 +777,13 @@ export async function runMantisTelegramDesktopBuilder(
         summaryPath,
         videoPath,
       },
-      crabbox: {
-        bin: crabboxBin,
+      botbox: {
+        bin: botboxBin,
         createdLease,
         id: leaseId ?? "unallocated",
         provider,
         vncCommand: leaseId
-          ? `${crabboxBin} vnc --provider ${provider} --id ${leaseId} --open`
+          ? `${botboxBin} vnc --provider ${provider} --id ${leaseId} --open`
           : "unallocated",
       },
       error: formatErrorMessage(error),
@@ -817,7 +817,7 @@ export async function runMantisTelegramDesktopBuilder(
       await fs.writeFile(reportPath, renderReport(summary), "utf8");
     }
     if (createdLease && leaseId && !keepLease) {
-      await stopCrabbox({ crabboxBin, cwd: repoRoot, env, leaseId, provider, runner });
+      await stopCrabbox({ botboxBin, cwd: repoRoot, env, leaseId, provider, runner });
     }
     if (leaseHeartbeat) {
       await leaseHeartbeat.stop().catch((error: unknown) => {

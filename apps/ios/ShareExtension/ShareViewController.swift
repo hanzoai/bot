@@ -194,7 +194,7 @@ final class ShareViewController: UIViewController {
                 credentials: GatewayNodeSessionCredentials(
                     token: config.token,
                     password: config.password),
-                connectOptions: makeOptions("moltbot-ios"),
+                connectOptions: makeOptions("bot-ios"),
                 sessionBox: nil,
                 onConnected: {},
                 onDisconnected: { _ in },

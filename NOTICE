@@ -1,7 +1,7 @@
 bot
 Copyright (c) 2026 Hanzo AI Inc.
 
-This product includes software from Bot, formerly Warelay / Clawdbot / Moltbot (https://github.com/hanzoai/bot), licensed under MIT:
+This product includes software from Bot, formerly Warelay / Bot / Bot (https://github.com/hanzoai/bot), licensed under MIT:
 
     Copyright (c) 2026 Bot Foundation
 
@@ -12,7 +12,7 @@ assistant published by the Bot Foundation (upstream sites bot.ai and
 docs.bot.ai). Hanzo Bot tracks the TypeScript reference implementation of
 that project. This repository's root commit is the Bot initial import
 (matching the upstream repository's own initial commit), and earlier upstream
-names — Moltbot, Clawdbot, Warelay — are recorded in CHANGELOG.md.
+names — Bot, Bot, Warelay — are recorded in CHANGELOG.md.
 
 --- DEVIATIONS ---
 
@@ -20,7 +20,7 @@ Changes made by Hanzo AI, Inc. on top of the Bot MIT baseline:
 
 - Rebranded product-facing surfaces to "Hanzo Bot": CLI binaries `hanzo-bot` and
   `bot`, npm package `@hanzo/bot`, README, and documentation pointing to hanzo.ai
-  and docs.hanzo.ai. Legacy `CLAWDBOT_*` and `BOT_*` environment variables are
+  and docs.hanzo.ai. Legacy `BOT_*` and `BOT_*` environment variables are
   retained for compatibility.
 - Added Hanzo IAM (OIDC) authentication for the Gateway (src/gateway/auth-iam.ts,
   src/commands/auth-choice.apply.hanzo-iam.ts), driven by the canonical

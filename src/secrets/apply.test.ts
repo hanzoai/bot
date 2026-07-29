@@ -1584,14 +1584,14 @@ describe("secrets apply", () => {
     );
   });
 
-  it("scrubs .env in legacy .clawdbot state directory via automatic fallback", async () => {
+  it("scrubs .env in legacy .bot state directory via automatic fallback", async () => {
     // Do NOT set BOT_STATE_DIR — rely on resolveStateDir's automatic
     // legacy-directory fallback. A controlled HOME that contains only
-    // .clawdbot (no .bot) exercises the scrub path so the old
+    // .bot (no .bot) exercises the scrub path so the old
     // resolveConfigDir call (which always returns $HOME/.bot) would
-    // miss the .env inside .clawdbot.
+    // miss the .env inside .bot.
     const homeDir = tempDirs.make("bot-secrets-apply-legacy-");
-    const legacyStateDir = path.join(homeDir, ".clawdbot");
+    const legacyStateDir = path.join(homeDir, ".bot");
     const configPath = path.join(legacyStateDir, "bot.json");
     const agentDir = path.join(legacyStateDir, "agents", "main", "agent");
     const envPath = path.join(legacyStateDir, ".env");
@@ -1649,21 +1649,21 @@ describe("secrets apply", () => {
     // appearing or disappearing during the operation could direct .env
     // scrubbing at a different file.
     //
-    // Set up a HOME where both .bot and .clawdbot exist.
+    // Set up a HOME where both .bot and .bot exist.
     // resolveStateDir returns .bot when both exist because it checks
     // .bot first. The apply must use that same root for .env.
     const homeDir = tempDirs.make("bot-secrets-apply-root-");
     const botDir = path.join(homeDir, ".bot");
-    const clawdbotDir = path.join(homeDir, ".clawdbot");
+    const botDir = path.join(homeDir, ".bot");
     const configPath = path.join(botDir, "bot.json");
     const agentDir = path.join(botDir, "agents", "main", "agent");
     const botEnvPath = path.join(botDir, ".env");
-    const clawdbotEnvPath = path.join(clawdbotDir, ".env");
+    const botEnvPath = path.join(botDir, ".env");
     const authStorePath = resolveAuthProfileDatabasePath(agentDir);
 
     await fs.mkdir(agentDir, { recursive: true });
-    // Create .clawdbot dir (without config) to simulate a legacy install
-    await fs.mkdir(clawdbotDir, { recursive: true });
+    // Create .bot dir (without config) to simulate a legacy install
+    await fs.mkdir(botDir, { recursive: true });
 
     const env = {
       HOME: homeDir,
@@ -1687,9 +1687,9 @@ describe("secrets apply", () => {
       "OPENAI_API_KEY=sk-openai-plaintext\nUNRELATED=value\n", // pragma: allowlist secret
       "utf8",
     );
-    // .env in the legacy .clawdbot dir — must NOT be touched
+    // .env in the legacy .bot dir — must NOT be touched
     await fs.writeFile(
-      clawdbotEnvPath,
+      botEnvPath,
       "OPENAI_API_KEY=sk-should-not-touch\nUNRELATED=legacy\n", // pragma: allowlist secret
       "utf8",
     );
@@ -1709,10 +1709,10 @@ describe("secrets apply", () => {
       expect(nextBotEnv).not.toContain("sk-openai-plaintext");
       expect(nextBotEnv).toContain("UNRELATED=value");
 
-      // Legacy .clawdbot/.env was NOT touched — same stateDir used throughout
-      const nextClawdbotEnv = await fs.readFile(clawdbotEnvPath, "utf8");
-      expect(nextClawdbotEnv).toContain("sk-should-not-touch");
-      expect(nextClawdbotEnv).toContain("UNRELATED=legacy");
+      // Legacy .bot/.env was NOT touched — same stateDir used throughout
+      const nextBotEnv = await fs.readFile(botEnvPath, "utf8");
+      expect(nextBotEnv).toContain("sk-should-not-touch");
+      expect(nextBotEnv).toContain("UNRELATED=legacy");
     } finally {
       clearSecretsRuntimeSnapshot();
       closeBotAgentDatabasesForTest();

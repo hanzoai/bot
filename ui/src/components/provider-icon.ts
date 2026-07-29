@@ -15,7 +15,7 @@ const PROVIDER_ICON_NAMES = new Set([
   "bedrock",
   "chutes",
   "claude",
-  "clawrouter",
+  "botrouter",
   "codebuff",
   "codex",
   "commandcode",

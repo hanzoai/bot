@@ -281,7 +281,7 @@ const candidateActionRules = [
 ];
 
 const normalizeLogin = (login) => login.toLowerCase();
-const automationPrHeadPrefixes = ["clawsweeper/", "clownfish/"];
+const automationPrHeadPrefixes = ["botsweeper/", "clownfish/"];
 
 function isAutomationPullRequest(pullRequest) {
   const headRefName = pullRequest.headRefName ?? pullRequest.head?.ref ?? "";
@@ -769,8 +769,8 @@ async function addMissingLabels(github, context, core, issueNumber, labels, labe
   core.info(`Added candidate labels to #${issueNumber}: ${missingLabels.join(", ")}`);
 }
 
-function isClawSweeperOwnedLabel(label) {
-  return label === "clawsweeper" || label.startsWith("clawsweeper:");
+function isBotSweeperOwnedLabel(label) {
+  return label === "botsweeper" || label.startsWith("botsweeper:");
 }
 
 async function applyPullRequestCandidateLabels(github, context, core, pullRequest, labelSet) {
@@ -805,13 +805,13 @@ function isAutomationActor(context) {
   return isAutomationUser(context.payload.sender, context.actor ?? "");
 }
 
-function isClawSweeperProofSufficientLabelEvent(context) {
+function isBotSweeperProofSufficientLabelEvent(context) {
   const senderLogin = context.payload.sender?.login ?? context.actor ?? "";
   return (
     context.payload.action === "labeled" &&
     context.payload.label?.name === PROOF_SUFFICIENT_LABEL &&
     isAutomationUser(context.payload.sender, senderLogin) &&
-    /clawsweeper/i.test(senderLogin)
+    /botsweeper/i.test(senderLogin)
   );
 }
 
@@ -879,7 +879,7 @@ async function removeLabels(github, context, issueNumber, labels, labelSet) {
     if (!labelSet.has(label)) {
       continue;
     }
-    if (isClawSweeperOwnedLabel(label)) {
+    if (isBotSweeperOwnedLabel(label)) {
       continue;
     }
     try {
@@ -1065,9 +1065,9 @@ export async function runBarnacleAutoResponse({ github, context, core = console 
       return;
     }
 
-    if (isClawSweeperProofSufficientLabelEvent(context)) {
+    if (isBotSweeperProofSufficientLabelEvent(context)) {
       core.info(
-        `Skipping PR auto-response checks for #${pullRequest.number} because ClawSweeper owns ${PROOF_SUFFICIENT_LABEL}.`,
+        `Skipping PR auto-response checks for #${pullRequest.number} because BotSweeper owns ${PROOF_SUFFICIENT_LABEL}.`,
       );
       return;
     }

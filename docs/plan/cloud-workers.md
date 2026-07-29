@@ -136,7 +136,7 @@ Ownership split — commit vs. publish:
 
 Two sync modes, selected by whether the workspace is a git repository:
 
-- Git mode. Outbound: rsync the worktree (uncommitted and eligible untracked files included; crabbox-style include/exclude, `.worktreeinclude` respected) over the tunnel's SSH identity, recorded as an immutable base manifest (content hashes + base commit). Inbound: new commits return as a git bundle or temporary ref against the recorded base; untracked artifacts return via an explicit manifest with size/type/symlink-containment checks. Adoption verifies base ancestry and stops on divergence — nothing silently overwrites either side. Deletes, renames, submodules, and symlink escapes are handled by the manifest rules, not rsync heuristics.
+- Git mode. Outbound: rsync the worktree (uncommitted and eligible untracked files included; botbox-style include/exclude, `.worktreeinclude` respected) over the tunnel's SSH identity, recorded as an immutable base manifest (content hashes + base commit). Inbound: new commits return as a git bundle or temporary ref against the recorded base; untracked artifacts return via an explicit manifest with size/type/symlink-containment checks. Adoption verifies base ancestry and stops on divergence — nothing silently overwrites either side. Deletes, renames, submodules, and symlink escapes are handled by the manifest rules, not rsync heuristics.
 - Plain mode (no git — e.g. building a project from scratch on the box). Outbound is the same rsync + base manifest. Inbound is a manifest-diffed mirror back into the gateway-owned target directory with delete propagation. Safe for the same reason git mode is: exclusive ownership means no concurrent local edits exist to conflict with; the base manifest still detects unexpected local drift and stops instead of overwriting.
 
 Checkpointing protects days-long sessions from lease loss: periodic inbound checkpoints (session-branch commits in git mode, manifest snapshots in plain mode); cadence is profile policy (turn-based default).
@@ -207,7 +207,7 @@ Minimal and opt-in: a provider profile block (provider id, credentials/CLI refer
 
 Implementation lands as small, independently mergeable PRs; each milestone below is a PR series, not one change.
 
-1. Foundations: environment state machine + provider contract + crabbox-shape provider (static-SSH as dev harness), worker bundle bootstrap + admission handshake, SSH tunnel + host-key pinning, managed-worktree snapshot + outbound sync (git + plain modes). Orphan sweep + restart adoption.
+1. Foundations: environment state machine + provider contract + botbox-shape provider (static-SSH as dev harness), worker bundle bootstrap + admission handshake, SSH tunnel + host-key pinning, managed-worktree snapshot + outbound sync (git + plain modes). Orphan sweep + restart adoption.
 2. Worker protocol + worker loop: authenticated worker role, durable ops/epochs/ACK cursors, transcript commit + live event contracts, inference proxy with gateway-resolved models, flow control. One provider, human dispatch of new sessions only, no handoff. Fault-injection tests (tunnel partition, gateway restart, worker death) gate exit.
 3. Dispatch + pull-back + agent dispatch: migration barrier, placement state machine wired to UI target bar, inbound reconciliation + checkpoints, per-environment audit, capacity limits, agent dispatch tool (worker sessions cannot recurse). Prompt-cache byte-equivalence tests.
 4. Symmetric live handoff, after milestone-3 fault-injection proof.

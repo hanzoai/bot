@@ -182,7 +182,7 @@ export function resolveRememberAcrossConversations(cfg: BotConfig, agentId: stri
 export const MEMORY_HOST_ROOT_FILENAME = "MEMORY.md";
 
 const DEFAULT_AGENT_ID = "main";
-const LEGACY_STATE_DIRNAMES = [".clawdbot"] as const;
+const LEGACY_STATE_DIRNAMES = [".bot"] as const;
 const NEW_STATE_DIRNAME = ".bot";
 /** Treat shell-placeholder home values as absent. */
 function normalizeHomeValue(value: string | undefined): string | undefined {

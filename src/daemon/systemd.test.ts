@@ -28,7 +28,7 @@ const findSystemGatewayServicesMock = vi.hoisted(() =>
         label: string;
         detail: string;
         scope: "user" | "system";
-        marker?: "bot" | "clawdbot";
+        marker?: "bot" | "bot";
         legacy?: boolean;
       }>
     >
@@ -626,15 +626,15 @@ describe("system-scope gateway unit detection (bot#87577)", () => {
     });
   });
 
-  it("findInstalledSystemdGatewayScope ignores legacy clawdbot system units in the marker fallback", async () => {
+  it("findInstalledSystemdGatewayScope ignores legacy bot system units in the marker fallback", async () => {
     mockUnitFileLayout({ system: false });
     findSystemGatewayServicesMock.mockResolvedValueOnce([
       {
         platform: "linux",
-        label: "clawdbot.service",
-        detail: "unit: /etc/systemd/system/clawdbot.service",
+        label: "bot.service",
+        detail: "unit: /etc/systemd/system/bot.service",
         scope: "system",
-        marker: "clawdbot",
+        marker: "bot",
         legacy: true,
       },
     ]);

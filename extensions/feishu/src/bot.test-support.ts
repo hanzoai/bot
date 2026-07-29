@@ -1,8 +1,8 @@
 import type { ResolvedAgentRoute } from "bot/plugin-sdk/routing";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import type { FeishuMessageEvent } from "./bot.js";
 
-type FeishuConfig = NonNullable<NonNullable<ClawdbotConfig["channels"]>["feishu"]>;
+type FeishuConfig = NonNullable<NonNullable<BotConfig["channels"]>["feishu"]>;
 type FeishuMessage = FeishuMessageEvent["message"];
 type FeishuSender = FeishuMessageEvent["sender"];
 type TestConfigBase = Record<string, unknown> & {
@@ -12,11 +12,11 @@ type TestConfigBase = Record<string, unknown> & {
 export function createFeishuTestConfig(
   feishu: FeishuConfig,
   base: TestConfigBase = {},
-): ClawdbotConfig {
+): BotConfig {
   return {
     ...base,
     channels: { ...base.channels, feishu },
-  } as ClawdbotConfig;
+  } as BotConfig;
 }
 
 export function createFeishuTestEvent(params: {

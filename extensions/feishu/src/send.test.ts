@@ -1,6 +1,6 @@
 // Feishu tests cover send plugin behavior.
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 
 const {
   mockConvertMarkdownTables,
@@ -129,7 +129,7 @@ describe("getMessageFeishu", () => {
     });
 
     const result = await sendMessageFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       to: "oc_send",
       text: "hello",
     });
@@ -189,7 +189,7 @@ describe("getMessageFeishu", () => {
     });
 
     await sendMessageFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       to: "oc_send",
       text: "first line\nsecond line\n\n```ts\nconst value = 1\n```",
     });
@@ -217,7 +217,7 @@ describe("getMessageFeishu", () => {
     });
 
     const result = await sendMessageFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       to: "oc_send",
       text: 'body <at user_id="ou_body">Body User</at>',
       mentions: [{ openId: "ou_target", name: "Target User", key: "@_user_1" }],
@@ -284,7 +284,7 @@ describe("getMessageFeishu", () => {
       name: "structured",
       send: () =>
         sendStructuredCardFeishu({
-          cfg: {} as ClawdbotConfig,
+          cfg: {} as BotConfig,
           to: "oc_card",
           text: "hello",
           header: { title: "Agent", template: "space lobster" },
@@ -297,7 +297,7 @@ describe("getMessageFeishu", () => {
     {
       name: "markdown",
       send: () =>
-        sendMarkdownCardFeishu({ cfg: {} as ClawdbotConfig, to: "oc_card", text: "hello" }),
+        sendMarkdownCardFeishu({ cfg: {} as BotConfig, to: "oc_card", text: "hello" }),
       expectedHeader: undefined,
     },
   ])("sends $name cards with schema-2.0 width config", async ({ send, expectedHeader }) => {
@@ -348,7 +348,7 @@ describe("getMessageFeishu", () => {
     });
 
     const result = await getMessageFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       messageId: "om_1",
     });
 
@@ -405,7 +405,7 @@ describe("getMessageFeishu", () => {
     });
 
     const result = await getMessageFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       messageId: "om_i18n_card",
     });
 
@@ -449,7 +449,7 @@ describe("getMessageFeishu", () => {
     });
 
     const result = await getMessageFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       messageId: "om_post_card",
     });
 
@@ -490,7 +490,7 @@ describe("getMessageFeishu", () => {
     });
 
     const result = await getMessageFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       messageId: "om_post",
     });
 
@@ -526,7 +526,7 @@ describe("getMessageFeishu", () => {
     });
 
     const result = await getMessageFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       messageId: "om_file",
     });
 
@@ -558,7 +558,7 @@ describe("getMessageFeishu", () => {
     });
 
     const result = await getMessageFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       messageId: "om_single",
     });
 
@@ -621,7 +621,7 @@ describe("getMessageFeishu", () => {
     });
 
     const result = await listFeishuThreadMessages({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       threadId: "omt_1",
       rootMessageId: "om_root",
     });
@@ -677,7 +677,7 @@ describe("getMessageFeishu", () => {
     });
 
     const result = await listFeishuThreadMessages({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       threadId: "omt_1",
       rootMessageId: "om_root",
     });
@@ -721,7 +721,7 @@ describe("editMessageFeishu", () => {
     mockClientPatch.mockResolvedValueOnce({ code: 0 });
 
     const result = await editMessageFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       messageId: "om_edit",
       text: "updated body",
     });
@@ -751,7 +751,7 @@ describe("editMessageFeishu", () => {
     const text = `${"a".repeat(4_500)}\nsecond line`;
 
     await editMessageFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       messageId: "om_edit",
       text,
     });
@@ -764,7 +764,7 @@ describe("editMessageFeishu", () => {
   it("rejects edits that exceed the rich-post byte envelope", async () => {
     await expect(
       editMessageFeishu({
-        cfg: {} as ClawdbotConfig,
+        cfg: {} as BotConfig,
         messageId: "om_edit",
         text: "界".repeat(11_000),
       }),
@@ -776,7 +776,7 @@ describe("editMessageFeishu", () => {
     mockClientPatch.mockResolvedValueOnce({ code: 0 });
 
     const result = await editMessageFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       messageId: "om_card",
       card: { schema: "2.0" },
     });
@@ -827,7 +827,7 @@ describe("Feishu card-mode newline preservation", () => {
   it("preserves single newlines in markdown card text", async () => {
     const create = createCardClient();
     await sendMarkdownCardFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       to: "oc_card",
       text: "line one\nline two\nline three",
     });
@@ -839,7 +839,7 @@ describe("Feishu card-mode newline preservation", () => {
   it("preserves single newlines in structured card text", async () => {
     const create = createCardClient();
     await sendStructuredCardFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       to: "oc_card",
       text: "first\nsecond\nthird",
     });
@@ -849,7 +849,7 @@ describe("Feishu card-mode newline preservation", () => {
   it("keeps existing double newlines unchanged in markdown card text", async () => {
     const create = createCardClient();
     await sendMarkdownCardFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       to: "oc_card",
       text: "para a\n\npara b",
     });
@@ -859,7 +859,7 @@ describe("Feishu card-mode newline preservation", () => {
   it("keeps existing double newlines unchanged in structured card text", async () => {
     const create = createCardClient();
     await sendStructuredCardFeishu({
-      cfg: {} as ClawdbotConfig,
+      cfg: {} as BotConfig,
       to: "oc_card",
       text: "section 1\n\nsection 2",
     });

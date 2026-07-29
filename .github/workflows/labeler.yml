@@ -418,7 +418,7 @@ jobs:
               return false;
             };
 
-            const automationPrHeadPrefixes = ["clawsweeper/", "clownfish/"];
+            const automationPrHeadPrefixes = ["botsweeper/", "clownfish/"];
             const isAutomationPullRequest =
               typeof headRefName === "string" &&
               automationPrHeadPrefixes.some((prefix) => headRefName.startsWith(prefix));

@@ -620,7 +620,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
-  extensions/clawrouter:
+  extensions/botrouter:
     devDependencies:
       '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
@@ -701,7 +701,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
-  extensions/crabbox:
+  extensions/botbox:
     devDependencies:
       '@hanzo/bot-plugin-sdk':
         specifier: workspace:*

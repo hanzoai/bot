@@ -2,7 +2,7 @@
 import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import { asBoolean as readBoolean } from "bot/plugin-sdk/string-coerce-runtime";
 import { sliceUtf16Safe, truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import { raceWithTimeoutAndAbort, waitForAbortableDelay } from "./async.js";
 import { createFeishuClient } from "./client.js";
 import {
@@ -52,7 +52,7 @@ export type FeishuDriveCommentNoticeEvent = {
 };
 
 type ResolveDriveCommentEventParams = {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   accountId: string;
   event: FeishuDriveCommentNoticeEvent;
   account?: ResolvedFeishuAccount;

@@ -9,14 +9,14 @@ function createPolicy(cfg: BotConfig, agentId?: string) {
     catalog: [
       { provider: "anthropic", id: "claude-sonnet-4-6", name: "Claude Sonnet" },
       {
-        provider: "clawrouter",
+        provider: "botrouter",
         id: "anthropic/claude-haiku-4-5",
-        name: "Claude Haiku via ClawRouter",
+        name: "Claude Haiku via BotRouter",
       },
       {
-        provider: "clawrouter",
+        provider: "botrouter",
         id: "google/gemini-3.5-flash",
-        name: "Gemini Flash via ClawRouter",
+        name: "Gemini Flash via BotRouter",
       },
       { provider: "external", id: "sensitive", name: "Sensitive external model" },
       { provider: "openai", id: "gpt-5.5", name: "GPT 5.5" },
@@ -190,25 +190,25 @@ describe("explicit model visibility policy", () => {
     const policy = createPolicy({
       agents: {
         defaults: {
-          modelPolicy: { allow: ["clawrouter/anthropic/*", "openai/gpt-5.5"] },
+          modelPolicy: { allow: ["botrouter/anthropic/*", "openai/gpt-5.5"] },
         },
       },
     });
 
-    expect(policy.allowsKey("clawrouter/anthropic/claude-haiku-4-5")).toBe(true);
+    expect(policy.allowsKey("botrouter/anthropic/claude-haiku-4-5")).toBe(true);
     expect(
       policy.allowsByWildcard({
-        provider: "clawrouter",
+        provider: "botrouter",
         model: "anthropic/claude-haiku-4-5",
       }),
     ).toBe(true);
-    expect(policy.allowsKey("clawrouter/anthropicX/claude-haiku-4-5")).toBe(false);
-    expect(policy.allowsKey("clawrouter/google/gemini-3.5-flash")).toBe(false);
+    expect(policy.allowsKey("botrouter/anthropicX/claude-haiku-4-5")).toBe(false);
+    expect(policy.allowsKey("botrouter/google/gemini-3.5-flash")).toBe(false);
     expect(policy.allowsKey("openai/gpt-5.5")).toBe(true);
     expect(policy.allowsByWildcard({ provider: "openai", model: "gpt-5.5" })).toBe(false);
     expect(policy.allowsKey("openai/gpt-5.6-sol")).toBe(false);
     expect(policy.allowedCatalog.map((entry) => `${entry.provider}/${entry.id}`)).toEqual([
-      "clawrouter/anthropic/claude-haiku-4-5",
+      "botrouter/anthropic/claude-haiku-4-5",
       "openai/gpt-5.5",
     ]);
   });
@@ -217,19 +217,19 @@ describe("explicit model visibility policy", () => {
     const policy = createPolicy({
       agents: {
         defaults: {
-          modelPolicy: { allow: [" clawrouter / anthropic / * ", " openai / gpt-5.5 "] },
+          modelPolicy: { allow: [" botrouter / anthropic / * ", " openai / gpt-5.5 "] },
         },
       },
     });
 
     // The padded nested wildcard must keep its namespace rather than widening to
-    // every clawrouter model.
-    expect(policy.allowsKey("clawrouter/anthropic/claude-haiku-4-5")).toBe(true);
-    expect(policy.allowsKey("clawrouter/google/gemini-3.5-flash")).toBe(false);
+    // every botrouter model.
+    expect(policy.allowsKey("botrouter/anthropic/claude-haiku-4-5")).toBe(true);
+    expect(policy.allowsKey("botrouter/google/gemini-3.5-flash")).toBe(false);
     expect(policy.allowsKey("openai/gpt-5.5")).toBe(true);
     expect(policy.allowsKey("openai/gpt-5.6-sol")).toBe(false);
     expect(policy.allowedCatalog.map((entry) => `${entry.provider}/${entry.id}`)).toEqual([
-      "clawrouter/anthropic/claude-haiku-4-5",
+      "botrouter/anthropic/claude-haiku-4-5",
       "openai/gpt-5.5",
     ]);
   });
@@ -238,13 +238,13 @@ describe("explicit model visibility policy", () => {
     const policy = createPolicy({
       agents: {
         defaults: {
-          modelPolicy: { allow: ["clawrouter/*"] },
+          modelPolicy: { allow: ["botrouter/*"] },
         },
       },
     });
 
-    expect(policy.allowsKey("clawrouter/anthropic/claude-haiku-4-5")).toBe(true);
-    expect(policy.allowsKey("clawrouter/google/gemini-3.5-flash")).toBe(true);
+    expect(policy.allowsKey("botrouter/anthropic/claude-haiku-4-5")).toBe(true);
+    expect(policy.allowsKey("botrouter/google/gemini-3.5-flash")).toBe(true);
     expect(policy.allowsKey("openai/gpt-5.6-sol")).toBe(false);
   });
 

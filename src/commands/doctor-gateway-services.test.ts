@@ -1766,8 +1766,8 @@ describe("maybeScanExtraGatewayServices", () => {
     expect(
       extraGatewayServiceToRepairEffects({
         platform: "linux",
-        label: "clawdbot-gateway.service",
-        detail: "unit: /home/test/.config/systemd/user/clawdbot-gateway.service",
+        label: "bot-gateway.service",
+        detail: "unit: /home/test/.config/systemd/user/bot-gateway.service",
         scope: "user",
         legacy: true,
       }),
@@ -1775,7 +1775,7 @@ describe("maybeScanExtraGatewayServices", () => {
       {
         kind: "service",
         action: "would-remove-legacy-gateway-service",
-        target: "clawdbot-gateway.service",
+        target: "bot-gateway.service",
         dryRunSafe: false,
       },
     ]);
@@ -1798,16 +1798,16 @@ describe("maybeScanExtraGatewayServices", () => {
     mocks.findExtraGatewayServices.mockResolvedValue([
       {
         platform: "linux",
-        label: "clawdbot-gateway.service",
-        detail: "unit: /home/test/.config/systemd/user/clawdbot-gateway.service",
+        label: "bot-gateway.service",
+        detail: "unit: /home/test/.config/systemd/user/bot-gateway.service",
         scope: "user",
         legacy: true,
       },
     ]);
     mocks.uninstallLegacySystemdUnits.mockResolvedValue([
       {
-        name: "clawdbot-gateway",
-        unitPath: "/home/test/.config/systemd/user/clawdbot-gateway.service",
+        name: "bot-gateway",
+        unitPath: "/home/test/.config/systemd/user/bot-gateway.service",
         enabled: true,
         exists: true,
       },
@@ -1838,7 +1838,7 @@ describe("maybeScanExtraGatewayServices", () => {
       env: process.env,
       stdout: process.stdout,
     });
-    expectNoteContaining("clawdbot-gateway.service", "Legacy gateway removed");
+    expectNoteContaining("bot-gateway.service", "Legacy gateway removed");
     expect(runtime.log).toHaveBeenCalledWith(
       "Legacy gateway services removed. Installing Bot gateway next.",
     );
@@ -2027,8 +2027,8 @@ describe("maybeScanExtraGatewayServices", () => {
       mocks.findExtraGatewayServices.mockResolvedValue([
         {
           platform: "linux",
-          label: "clawdbot-gateway.service",
-          detail: "unit: /home/test/.config/systemd/user/clawdbot-gateway.service",
+          label: "bot-gateway.service",
+          detail: "unit: /home/test/.config/systemd/user/bot-gateway.service",
           scope: "user",
           legacy: true,
         },
@@ -2037,7 +2037,7 @@ describe("maybeScanExtraGatewayServices", () => {
       const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
       await maybeScanExtraGatewayServices({ deep: false }, runtime, makeDoctorPrompts());
 
-      expectNoteContaining("clawdbot-gateway.service", "Other gateway-like services detected");
+      expectNoteContaining("bot-gateway.service", "Other gateway-like services detected");
       expect(mocks.note).toHaveBeenCalledWith(
         EXTERNAL_SERVICE_REPAIR_NOTE,
         "Legacy gateway cleanup skipped",

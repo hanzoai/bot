@@ -12,7 +12,7 @@
             <description><![CDATA[<h2>Bot 2026.7.1</h2>
 <h3>Highlights</h3>
 <ul>
-<li><strong>New models and providers:</strong> add Featherless, Claude Sonnet 5 and Mythos 5, Meta Muse Spark 1.1, and ClawRouter; make GPT-5.6 the new-setup default with <code>/think ultra</code> for Sol and Terra plus <code>max</code> for Luna, honor Z.AI <code>max</code>, and refresh model availability after OAuth renewal. (#101092, #98254, #101238, #102873, #103070, #103163, #99658, #99759, #98333, #103581, #98021, #104778, #102289) Thanks @vincentkoc, @vortexbot, @HamidShojanazeri, @davemorin, @Solvely-Colin, @jalehman, @steipete-oai, @bdjben, @obviyus, @sallyom, @anyech, @100yenadmin, and @fuller-stack-dev.</li>
+<li><strong>New models and providers:</strong> add Featherless, Claude Sonnet 5 and Mythos 5, Meta Muse Spark 1.1, and BotRouter; make GPT-5.6 the new-setup default with <code>/think ultra</code> for Sol and Terra plus <code>max</code> for Luna, honor Z.AI <code>max</code>, and refresh model availability after OAuth renewal. (#101092, #98254, #101238, #102873, #103070, #103163, #99658, #99759, #98333, #103581, #98021, #104778, #102289) Thanks @vincentkoc, @vortexbot, @HamidShojanazeri, @davemorin, @Solvely-Colin, @jalehman, @steipete-oai, @bdjben, @obviyus, @sallyom, @anyech, @100yenadmin, and @fuller-stack-dev.</li>
 <li><strong>Control UI and native macOS chat:</strong> make sessions primary with a minimal searchable sidebar, compact context ring, reasoning-effort slider, cleaner dashboard chrome, and a native macOS session browser with model and thinking pickers, slash commands, transcript export, and context usage. (#99289, #99838, #100386, #101103, #101497)</li>
 <li><strong>Conversational onboarding:</strong> Crestodian now runs a real agent-loop setup across the CLI, web install, and macOS app, with AI-guided provider setup, model-judged approvals bound to exact operations, masked credential prompts, and deterministic fallback when no model is available. (#99935, #100029, #100656, #101887) Thanks @fuller-stack-dev.</li>
 <li><strong>Offline and spoken mobile chat:</strong> iOS and Android now pre-paint bounded per-gateway session and transcript caches offline; Apple Watch gains full voice turns, and iOS can speak replies through configured Gateway TTS with on-device fallback. (#100219, #100227, #100283, #100770, #100771)</li>
@@ -44,7 +44,7 @@
 <li><strong>Apple Watch voice turns:</strong> dictate a message from the Watch chat and hear the new Bot reply spoken on the Watch, with explicit silent-message and stop-speaking controls. (#100224) Thanks @vincentkoc.</li>
 <li><strong>Conversational onboarding:</strong> add a real agent-loop Crestodian setup flow across the CLI, Gateway, web install, and macOS app, with typed operations, exact approval binding, masked credential prompts, isolated session transcripts, and safe handoff to the normal agent. Thanks @vincentkoc.</li>
 <li><strong>Generated session titles:</strong> name new Control UI sessions from their first message, and add default/per-agent <code>utilityModel</code> routing for lower-cost session, topic, and thread title generation. Thanks @Juliangsm, @zhangguiping-xydt, and @vincentkoc.</li>
-<li><strong>ClawRouter routing and quotas:</strong> add the bundled ClawRouter provider plugin with credential-scoped dynamic model discovery, OpenAI-compatible and native Anthropic/Gemini transports, and managed budget reporting across Bot usage surfaces. (#99658)</li>
+<li><strong>BotRouter routing and quotas:</strong> add the bundled BotRouter provider plugin with credential-scoped dynamic model discovery, OpenAI-compatible and native Anthropic/Gemini transports, and managed budget reporting across Bot usage surfaces. (#99658)</li>
 <li><strong>Model and provider coverage:</strong> add GPT-5.6 support, use Nemotron Super's 1M context window, and preserve explicit OpenRouter authentication headers. (#98333, #98726, #98187) Thanks @steipete-oai, @eleqtrizit, @sunlit-deng, @laurencebrown, and @shakkernerd.</li>
 <li><strong>CLI and node workflows:</strong> add <code>bot attach</code>, node context-path support, actionable device-approval recovery guidance, soft-resume CLI sessions when prompt metadata changes, and clearer plugin install exit diagnostics. (#96454, #97679, #98115, #98146, #98497, #99822) Thanks @anagnorisis2peripeteia, @obviyus, @wm0018, @welfo-beo, @RomneyDa, @Sanjays2402, and @vincentkoc.</li>
 <li><strong>Cron and usage:</strong> add exit-triggered schedules, detached session-targeted runs, and an in-flight job doctor warning, while making the existing usage footer easier to wrap on Telegram. (#92037, #98755, #98620, #92877) Thanks @anagnorisis2peripeteia, @obviyus, @EthanSK, @masatohoshino, @Marvinthebored, and @vincentkoc.</li>
@@ -188,7 +188,7 @@
 <li><strong>Slack transcript history:</strong> let Codex app-server own its persisted assistant replies so Slack does not append redundant delivery-mirror rows, while the Control UI keeps legacy duplicate mirrors hidden. Thanks @bek91.</li>
 <li><strong>Control UI chat history:</strong> hide redundant channel-final delivery mirrors when the preceding app-server assistant reply already shows the same text.</li>
 <li><strong>Control UI chat spacing:</strong> keep the first message comfortably clear of the topbar with a responsive minimum transcript inset.</li>
-<li><strong>ClawRouter auth profiles:</strong> resolve credential-scoped catalog models during agent runs when the proxy key is stored in an auth profile, and document plugin and model allowlists.</li>
+<li><strong>BotRouter auth profiles:</strong> resolve credential-scoped catalog models during agent runs when the proxy key is stored in an auth profile, and document plugin and model allowlists.</li>
 <li><strong>Telegram durability:</strong> retry restart-dropped media, survive transient polling errors, dead-letter poison updates, preserve forwarded rich text, route plugin callbacks correctly, keep progress updates in one stable multi-line window, map self-hosted Bot API container paths through trusted host roots, and fall back safely when Telegram rejects rich final replies. (#98102, #98735, #98775, #98776, #97174, #98907, #91984, #98786) Thanks @luoyanglang, @DaveArcher18, @obviyus, @goldmar, @Marvinthebored, @Dizesales, @shakkernerd, @AiLucasdz, and @RomneyDa.</li>
 <li><strong>Cross-channel inbound media:</strong> preserve captions and expose unavailable-attachment notices when WhatsApp, LINE, Signal, iMessage, Microsoft Teams, Feishu, Mattermost, or Zalo cannot materialize inbound media, instead of dispatching phantom placeholders or dropping media-only turns. (#100092)</li>
 <li><strong>Agent and context reliability:</strong> preserve runtime overrides, steered subagent tasks, fallback tool-call hints, and legacy reseed attachments; soft-resume CLI sessions across prompt-only drift; improve harness-aware context estimation; time out silent local streams; recover mid-stream failures; and cap Gateway run-cache growth. (#92237, #77539, #99851, #99839, #99822, #97928, #98525, #95430, #77973) Thanks @sercada, @amittell, @obviyus, @liuhao1024, @yetval, @osolmaz, @lzyyzznl, @vincentkoc, @alexelgier, and @fede-kamel.</li>
@@ -620,9 +620,9 @@ Shipped baseline exclusions: v2026.6.11 (10 PRs: #87298, #89949, #90811, #92020,
 <li><strong>PR #99231</strong> improve: native iOS look with stock SwiftUI navigation, forms, chat, and talk visualizer. Related #99195. Thanks @marvkr.</li>
 <li><strong>PR #99549</strong> fix(auto-reply): don't block reply completion on transcript mirror. Thanks @Shagrat2.</li>
 <li><strong>PR #99736</strong> fix(qa): prevent smoke gateways from losing built files. Related #99734. Thanks @RomneyDa.</li>
-<li><strong>PR #99658</strong> feat(providers): add ClawRouter routing and quotas. Related #99657.</li>
+<li><strong>PR #99658</strong> feat(providers): add BotRouter routing and quotas. Related #99657.</li>
 <li><strong>PR #99238</strong> Expose channel preview warning doctor findings. Thanks @giodl73-repo.</li>
-<li><strong>PR #99759</strong> fix(providers): resolve ClawRouter auth-profile models.</li>
+<li><strong>PR #99759</strong> fix(providers): resolve BotRouter auth-profile models.</li>
 <li><strong>PR #99561</strong> fix: keep Bot control tools available when tool_search misroutes. Related #99464. Thanks @100yenadmin and @joshavant.</li>
 <li><strong>PR #99750</strong> refactor: consolidate exact boolean coercion. Thanks @RomneyDa.</li>
 <li><strong>PR #99753</strong> refactor: consolidate abort primitives. Thanks @RomneyDa.</li>
@@ -1652,7 +1652,7 @@ Shipped baseline exclusions: v2026.6.11 (10 PRs: #87298, #89949, #90811, #92020,
 <li><strong>PR #102032</strong> Harden jq safe-bin semantics. Thanks @pgondhi987.</li>
 <li><strong>PR #101353</strong> fix: detect joined inline eval flags [AI]. Thanks @pgondhi987.</li>
 <li><strong>PR #100827</strong> fix(state): close agent-db and proxy-capture SQLite handles on exit; rebind stale proxy stores after shared-state close. Thanks @amknight.</li>
-<li><strong>PR #102159</strong> fix(crabbox): retry cold metadata probes so a slow run --help does not block validation.</li>
+<li><strong>PR #102159</strong> fix(botbox): retry cold metadata probes so a slow run --help does not block validation.</li>
 <li><strong>PR #102009</strong> feat(secrets): egress-time credential injection with process-local sentinels. Related #102008.</li>
 <li><strong>PR #102030</strong> fix: restrict non-owner gateway tool inventory [AI]. Thanks @pgondhi987.</li>
 <li><strong>PR #102031</strong> fix: gate Gateway message action requester provenance [AI]. Thanks @pgondhi987.</li>
@@ -1790,7 +1790,7 @@ This audited record covers the complete v2026.6.10..0a4d0daa8cc99e9b2c6bc78c2e67
 <li><strong>PR #95406</strong> test(qa): make release scorecard categories explicit. Thanks @RomneyDa.</li>
 <li><strong>PR #94700</strong> test: fold HTTP API script proof into QA Lab. Thanks @RomneyDa.</li>
 <li><strong>PR #95499</strong> fix(test): unit-fast flow mocks. Thanks @RomneyDa.</li>
-<li><strong>PR #95308</strong> fix(ci): filter ClawSweeper comment dispatches before token minting. Thanks @vincentkoc.</li>
+<li><strong>PR #95308</strong> fix(ci): filter BotSweeper comment dispatches before token minting. Thanks @vincentkoc.</li>
 <li><strong>PR #95532</strong> fix(telegram): materialize rich message line breaks as <br>. Related #95409. Thanks @amknight and @snowzlmbot.</li>
 <li><strong>PR #91786</strong> fix(plugins): reconcile managed npm root overrides with managed peer pins. Related #91772. Thanks @amknight and @mkdelta221.</li>
 <li><strong>PR #93002</strong> Fix Telegram progress draft cleanup before tool output. Related #90753. Thanks @zhangguiping-xydt and @shadow-enthusiast.</li>
@@ -2074,7 +2074,7 @@ This audited record covers the complete v2026.6.10..0a4d0daa8cc99e9b2c6bc78c2e67
 <li><strong>PR #96220</strong> fix(whatsapp): quote current follow-up in durable replies. Thanks @mcaxtr.</li>
 <li><strong>PR #96226</strong> fix(macos): drop Textual from chat packaging. Thanks @vincentkoc.</li>
 <li><strong>PR #96212</strong> fix(codex): deliver generated images from remote app-server. Thanks @sjf-oa.</li>
-<li><strong>PR #96235</strong> fix(crabbox): require Xcode for macOS proof. Thanks @vincentkoc.</li>
+<li><strong>PR #96235</strong> fix(botbox): require Xcode for macOS proof. Thanks @vincentkoc.</li>
 <li><strong>PR #96145</strong> fix: UI glitch: config is not visible. Related #94202. Thanks @sunlit-deng and @vporton.</li>
 <li><strong>PR #96072</strong> perf(browser): index role snapshot references. Thanks @vincentkoc.</li>
 <li><strong>PR #96085</strong> perf(codex): index rollout transcript ids. Thanks @vincentkoc.</li>

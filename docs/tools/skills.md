@@ -369,7 +369,7 @@ metadata:
 </ParamField>
 
 <Note>
-  Legacy `metadata.clawdbot` blocks are still accepted when
+  Legacy `metadata.bot` blocks are still accepted when
   `metadata.bot` is absent, so older installed skills keep their
   dependency gates and installer hints. New skills should use
   `metadata.bot`.

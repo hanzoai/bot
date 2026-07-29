@@ -1,7 +1,7 @@
 // Feishu tests cover monitor.startup plugin behavior.
 import { createNonExitingRuntimeEnv } from "bot/plugin-sdk/plugin-test-runtime";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import { resolveStartupProbeTimeoutMs } from "./monitor-startup-timeout.js";
 import { cleanupFeishuMonitorStateForTests } from "./monitor.cleanup.test-helpers.js";
 import { monitorFeishuProvider } from "./monitor.js";
@@ -56,7 +56,7 @@ beforeEach(() => {
   createFeishuDurableIngressMock.mockReset().mockReturnValue(undefined);
 });
 
-function buildMultiAccountWebsocketConfig(accountIds: string[]): ClawdbotConfig {
+function buildMultiAccountWebsocketConfig(accountIds: string[]): BotConfig {
   return {
     channels: {
       feishu: {
@@ -74,7 +74,7 @@ function buildMultiAccountWebsocketConfig(accountIds: string[]): ClawdbotConfig 
         ),
       },
     },
-  } as ClawdbotConfig;
+  } as BotConfig;
 }
 
 async function waitForStartedAccount(started: string[], accountId: string) {

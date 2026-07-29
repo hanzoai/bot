@@ -3,7 +3,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 
-const PROOF_SCRIPT = "scripts/e2e/telegram-user-crabbox-proof.ts";
+const PROOF_SCRIPT = "scripts/e2e/telegram-user-botbox-proof.ts";
 const SUT_CONTAINER_WRAPPER = "scripts/mantis/mantis-sut-container.sh";
 const CREDENTIAL_SCRIPT = "scripts/e2e/telegram-user-credential.ts";
 const USER_DRIVER = "scripts/e2e/telegram-user-driver.py";
@@ -13,7 +13,7 @@ const WORKFLOW = ".github/workflows/mantis-telegram-desktop-proof.yml";
 const LIVE_WORKFLOW = ".github/workflows/mantis-telegram-live.yml";
 const SCENARIO_WORKFLOW = ".github/workflows/mantis-scenario.yml";
 const PROMPT = ".github/codex/prompts/mantis-telegram-desktop-proof.md";
-const TELEGRAM_PROOF_SKILL = ".agents/skills/telegram-crabbox-e2e-proof/SKILL.md";
+const TELEGRAM_PROOF_SKILL = ".agents/skills/telegram-botbox-e2e-proof/SKILL.md";
 const DOCS = ["docs/help/testing.md", "docs/concepts/qa-e2e-automation.md"];
 
 type WorkflowStep = {
@@ -170,12 +170,12 @@ describe("Mantis Telegram Desktop proof workflow", () => {
       "secrets.BOT_QA_CONVEX_SITE_URL",
     );
     expect(cleanupStep.env?.CRABBOX_PROVIDER).toContain(
-      "needs.resolve_request.outputs.crabbox_provider",
+      "needs.resolve_request.outputs.botbox_provider",
     );
     expect(cleanupStep.run).toContain("sudo find .artifacts/qa-e2e");
     expect(cleanupStep.run).toContain("-name session.json");
-    expect(cleanupStep.run).toContain('session.command === "telegram-user-crabbox-session"');
-    expect(cleanupStep.run).toContain("telegram-user-crabbox-proof.ts");
+    expect(cleanupStep.run).toContain('session.command === "telegram-user-botbox-session"');
+    expect(cleanupStep.run).toContain("telegram-user-botbox-proof.ts");
     expect(cleanupStep.run).toContain(
       'finish --session "$session_file" --preview-crop telegram-window',
     );
@@ -185,8 +185,8 @@ describe("Mantis Telegram Desktop proof workflow", () => {
     expect(cleanupStep.run).toContain("release --lease-file");
     expect(cleanupStep.run).toContain("status=1");
     expect(cleanupStep.run).toContain("sudo -u codex env");
-    expect(cleanupStep.run).not.toContain("*/telegram-user-crabbox/*/session.json");
-    expect(cleanupStep.run).not.toContain("*/telegram-user-crabbox/*/.session/lease.json");
+    expect(cleanupStep.run).not.toContain("*/telegram-user-botbox/*/session.json");
+    expect(cleanupStep.run).not.toContain("*/telegram-user-botbox/*/.session/lease.json");
     expect(cleanupStep.run).toContain('sudo -u codex "$MANTIS_NODE_BIN"');
     expect(cleanupStep.run).not.toContain("sudo -u codex node");
 
@@ -225,7 +225,7 @@ describe("Mantis Telegram Desktop proof workflow", () => {
     expect(workflowText).not.toContain("pull_request_target:");
     expect(workflowText).not.toContain("clear_issue_comment_reaction:");
     expect(workflowText).toContain("allow-bot-users: github-actions[bot]");
-    expect(workflowText).not.toContain("allow-bot-users: clawsweeper[bot]");
+    expect(workflowText).not.toContain("allow-bot-users: botsweeper[bot]");
     expect(workflowText).toContain('setOutput("request_source", "workflow_dispatch")');
   });
 
@@ -275,18 +275,18 @@ describe("Mantis Telegram Desktop proof workflow", () => {
     );
 
     expect(readFileSync(QA_LAB_RUNTIME_API, "utf8")).not.toContain("telegram-user");
-    expect(packageJson.scripts).not.toHaveProperty("qa:telegram-user:crabbox");
+    expect(packageJson.scripts).not.toHaveProperty("qa:telegram-user:botbox");
     expect(telegramUserWorkflows).toEqual([WORKFLOW]);
     for (const doc of DOCS) {
-      expect(readFileSync(doc, "utf8")).not.toContain("pnpm qa:telegram-user:crabbox");
+      expect(readFileSync(doc, "utf8")).not.toContain("pnpm qa:telegram-user:botbox");
     }
     expect(readFileSync(TELEGRAM_PROOF_SKILL, "utf8")).not.toContain(
-      "pnpm qa:telegram-user:crabbox",
+      "pnpm qa:telegram-user:botbox",
     );
     expect(readFileSync(TELEGRAM_PROOF_SKILL, "utf8")).toContain(
       "BOT_TELEGRAM_USER_PROOF_CMD",
     );
-    expect(readFileSync(PROOF_SCRIPT, "utf8")).not.toContain("pnpm qa:telegram-user:crabbox");
+    expect(readFileSync(PROOF_SCRIPT, "utf8")).not.toContain("pnpm qa:telegram-user:botbox");
     expect(readFileSync(CREDENTIAL_SCRIPT, "utf8")).toContain(
       'const TELEGRAM_USER_QA_CREDENTIAL_KIND = "telegram-user";',
     );
@@ -320,9 +320,9 @@ describe("Mantis Telegram Desktop proof workflow", () => {
     expect(install.run).toContain('corepack_bin="$(command -v corepack)"');
     expect(install.run).toContain("/usr/local/lib/mantis-toolchain/node");
     expect(install.run).toContain("/usr/local/lib/mantis-toolchain/pnpm");
-    expect(install.run).toContain("/usr/local/bin/bot-telegram-user-crabbox-proof");
+    expect(install.run).toContain("/usr/local/bin/bot-telegram-user-botbox-proof");
     expect(install.run).toContain(
-      'exec /usr/local/lib/mantis-toolchain/node --import tsx "${GITHUB_WORKSPACE}/scripts/e2e/telegram-user-crabbox-proof.ts" "\\$@"',
+      'exec /usr/local/lib/mantis-toolchain/node --import tsx "${GITHUB_WORKSPACE}/scripts/e2e/telegram-user-botbox-proof.ts" "\\$@"',
     );
     expect(install.run).toContain("BtbN/FFmpeg-Builds");
     expect(install.run).toContain("ffmpeg-master-latest-linux64-gpl.tar.xz");
@@ -335,9 +335,9 @@ describe("Mantis Telegram Desktop proof workflow", () => {
       "${{ github.workspace }}/scripts/e2e/telegram-user-driver.py",
     );
     expect(agent.env?.BOT_TELEGRAM_USER_PROOF_CMD).toBe(
-      "/usr/local/bin/bot-telegram-user-crabbox-proof",
+      "/usr/local/bin/bot-telegram-user-botbox-proof",
     );
-    expect(agent.env?.BOT_TELEGRAM_USER_CRABBOX_BIN).toBe("/usr/local/bin/crabbox");
+    expect(agent.env?.BOT_TELEGRAM_USER_CRABBOX_BIN).toBe("/usr/local/bin/botbox");
     expect(agent.env?.MANTIS_NODE_BIN).toBe("/usr/local/lib/mantis-toolchain/node");
     expect(agent.env?.MANTIS_PNPM_BIN).toBe("/usr/local/lib/mantis-toolchain/pnpm");
     expect(agent.env?.CRABBOX_COORDINATOR).toContain(
@@ -360,7 +360,7 @@ describe("Mantis Telegram Desktop proof workflow", () => {
     expect(prompt).toContain("`--link-preview false`");
     expect(prompt).toContain("Do not edit the generated\n   config or restart the Gateway");
     expect(prompt).toContain("`--mock-response-chunk-delay-ms 1200`");
-    expect(prompt).toContain("do not run\n   `pnpm qa:telegram-user:crabbox` directly");
+    expect(prompt).toContain("do not run\n   `pnpm qa:telegram-user:botbox` directly");
     expect(prompt).toContain("Let `start` return or fail on its\n   own");
     expect(prompt).toContain("MCP App Funnel proof is not supported");
     expect(prompt).toContain("do not pass `--mcp-app-fixture`");

@@ -574,8 +574,8 @@ describe("barnacle-auto-response", () => {
 
   it("does not close automation PRs for the active PR limit", async () => {
     for (const automationPullRequest of [
-      { head: { ref: "clawsweeper/bot-bot-73880" }, login: "app/bot-clawsweeper" },
-      { headRefName: "clawsweeper/bot-bot-73880", login: "app/bot-clawsweeper" },
+      { head: { ref: "botsweeper/bot-bot-73880" }, login: "app/bot-botsweeper" },
+      { headRefName: "botsweeper/bot-bot-73880", login: "app/bot-botsweeper" },
       {
         head: { ref: "clownfish/ghcrawl-156993-autonomous-smoke" },
         login: "app/bot-clownfish",
@@ -709,7 +709,7 @@ describe("barnacle-auto-response", () => {
     expect(calls.update).toStrictEqual([]);
   });
 
-  it("removes stale context labels without changing ClawSweeper proof labels", async () => {
+  it("removes stale context labels without changing BotSweeper proof labels", async () => {
     const { calls, github } = barnacleGithub([file("src/gateway/server.ts")]);
 
     await runBarnacleAutoResponse({
@@ -786,7 +786,7 @@ describe("barnacle-auto-response", () => {
   });
 
   it.each(["edited", "synchronize"])(
-    "preserves ClawSweeper sufficient proof labels after PR %s events",
+    "preserves BotSweeper sufficient proof labels after PR %s events",
     async (action) => {
       const { calls, github } = barnacleGithub([file("src/gateway/server.ts")]);
 
@@ -810,19 +810,19 @@ describe("barnacle-auto-response", () => {
     },
   );
 
-  it("preserves sufficient proof on synchronize when ClawSweeper passed the exact head", async () => {
+  it("preserves sufficient proof on synchronize when BotSweeper passed the exact head", async () => {
     const headSha = "06ee95df6608d29a395c52ba8ab53fdd93a9dc4f";
     const { calls, github } = barnacleGithub([file("src/gateway/server.ts")], {
       comments: [
         {
           user: {
-            login: "clawsweeper[bot]",
+            login: "botsweeper[bot]",
             type: "Bot",
           },
           performed_via_github_app: {
-            slug: "clawsweeper",
+            slug: "botsweeper",
           },
-          body: `<!-- clawsweeper-verdict:pass item=123 sha=${headSha} confidence=high -->`,
+          body: `<!-- botsweeper-verdict:pass item=123 sha=${headSha} confidence=high -->`,
         },
       ],
     });
@@ -856,7 +856,7 @@ describe("barnacle-auto-response", () => {
             login: "external-contributor",
             type: "User",
           },
-          body: `<!-- clawsweeper-verdict:pass item=123 sha=${headSha} confidence=high -->`,
+          body: `<!-- botsweeper-verdict:pass item=123 sha=${headSha} confidence=high -->`,
         },
       ],
     });
@@ -879,7 +879,7 @@ describe("barnacle-auto-response", () => {
     expect(calls.removeLabel).toEqual([]);
   });
 
-  it("preserves stale sufficient proof while ClawSweeper automerge owns the PR", async () => {
+  it("preserves stale sufficient proof while BotSweeper automerge owns the PR", async () => {
     const { calls, github } = barnacleGithub([file("src/gateway/server.ts")]);
 
     await runBarnacleAutoResponse({
@@ -892,7 +892,7 @@ describe("barnacle-auto-response", () => {
           },
           body: prContextBody("![after](https://github.com/user-attachments/assets/gateway-ready)"),
         },
-        [clawSweeperProofSuppliedLabel, PROOF_SUFFICIENT_LABEL, "clawsweeper:automerge"],
+        [clawSweeperProofSuppliedLabel, PROOF_SUFFICIENT_LABEL, "botsweeper:automerge"],
         { action: "synchronize" },
       ),
       core: {
@@ -903,7 +903,7 @@ describe("barnacle-auto-response", () => {
     expect(calls.removeLabel).toEqual([]);
   });
 
-  it("preserves stale sufficient proof on ClawSweeper branch updates", async () => {
+  it("preserves stale sufficient proof on BotSweeper branch updates", async () => {
     const { calls, github } = barnacleGithub([file("src/gateway/server.ts")]);
 
     await runBarnacleAutoResponse({
@@ -911,7 +911,7 @@ describe("barnacle-auto-response", () => {
       context: barnacleContext(
         {
           head: {
-            ref: "clawsweeper/repair-pr-83758",
+            ref: "botsweeper/repair-pr-83758",
             sha: "0ede3d716805e7d2ced8df37c6666af510dc9e19",
           },
           body: prContextBody("![after](https://github.com/user-attachments/assets/gateway-ready)"),
@@ -927,7 +927,7 @@ describe("barnacle-auto-response", () => {
     expect(calls.removeLabel).toEqual([]);
   });
 
-  it("preserves stale sufficient proof on ClawSweeper-authored PR updates", async () => {
+  it("preserves stale sufficient proof on BotSweeper-authored PR updates", async () => {
     const { calls, github } = barnacleGithub([file("src/gateway/server.ts")]);
 
     await runBarnacleAutoResponse({
@@ -936,7 +936,7 @@ describe("barnacle-auto-response", () => {
         {
           body: prContextBody("![after](https://github.com/user-attachments/assets/gateway-ready)"),
           user: {
-            login: "clawsweeper[bot]",
+            login: "botsweeper[bot]",
             type: "Bot",
           },
         },
@@ -953,7 +953,7 @@ describe("barnacle-auto-response", () => {
     );
   });
 
-  it("preserves ClawSweeper's sufficient proof label on ordinary label events", async () => {
+  it("preserves BotSweeper's sufficient proof label on ordinary label events", async () => {
     const { calls, github } = barnacleGithub([file("src/gateway/server.ts")]);
 
     await runBarnacleAutoResponse({
@@ -966,7 +966,7 @@ describe("barnacle-auto-response", () => {
         {
           action: "labeled",
           label: { name: PROOF_SUFFICIENT_LABEL },
-          sender: { login: "bot-clawsweeper[bot]", type: "Bot" },
+          sender: { login: "bot-botsweeper[bot]", type: "Bot" },
         },
       ),
       core: {
@@ -985,7 +985,7 @@ describe("barnacle-auto-response", () => {
       context: barnacleContext({}, [PROOF_SUFFICIENT_LABEL], {
         action: "labeled",
         label: { name: "status: ready for maintainer look" },
-        sender: { login: "bot-clawsweeper[bot]", type: "Bot" },
+        sender: { login: "bot-botsweeper[bot]", type: "Bot" },
       }),
       core: {
         info: () => undefined,
@@ -1027,7 +1027,7 @@ describe("barnacle-auto-response", () => {
       context: barnacleContext({}, [PROOF_SUFFICIENT_LABEL, candidateLabels.needsPrContext], {
         action: "labeled",
         label: { name: "status: ready for maintainer look" },
-        sender: { login: "bot-clawsweeper[bot]", type: "Bot" },
+        sender: { login: "bot-botsweeper[bot]", type: "Bot" },
       }),
       core: {
         info: () => undefined,
@@ -1040,7 +1040,7 @@ describe("barnacle-auto-response", () => {
     );
   });
 
-  it("does not let Barnacle veto ClawSweeper's sufficient proof label add", async () => {
+  it("does not let Barnacle veto BotSweeper's sufficient proof label add", async () => {
     const { calls, github } = barnacleGithub([file("src/gateway/server.ts")]);
 
     await runBarnacleAutoResponse({
@@ -1048,7 +1048,7 @@ describe("barnacle-auto-response", () => {
       context: barnacleContext({}, [PROOF_SUFFICIENT_LABEL], {
         action: "labeled",
         label: { name: PROOF_SUFFICIENT_LABEL },
-        sender: { login: "bot-clawsweeper[bot]", type: "Bot" },
+        sender: { login: "bot-botsweeper[bot]", type: "Bot" },
       }),
       core: {
         info: () => undefined,

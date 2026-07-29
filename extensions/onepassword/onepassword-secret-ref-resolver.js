@@ -115,7 +115,7 @@ function resolveStateDir() {
     return path.join(home, `.bot-${profile}`);
   }
   const current = path.join(home, ".bot");
-  const legacy = path.join(home, ".clawdbot");
+  const legacy = path.join(home, ".bot");
   return fsSync.existsSync(current) || !fsSync.existsSync(legacy) ? current : legacy;
 }
 

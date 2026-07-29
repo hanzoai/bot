@@ -14,14 +14,14 @@ import {
   runCommand,
   stopCrabbox,
   warmupCrabbox,
-} from "./crabbox-runtime.js";
+} from "./botbox-runtime.js";
 
 export type MantisVisualTaskVisionMode = "image-describe" | "metadata";
 
 export type MantisVisualTaskOptions = {
   browserUrl?: string;
   commandRunner?: CommandRunner;
-  crabboxBin?: string;
+  botboxBin?: string;
   duration?: string;
   env?: NodeJS.ProcessEnv;
   expectText?: string;
@@ -44,7 +44,7 @@ export type MantisVisualTaskOptions = {
 export type MantisVisualDriverOptions = {
   browserUrl?: string;
   commandRunner?: CommandRunner;
-  crabboxBin?: string;
+  botboxBin?: string;
   env?: NodeJS.ProcessEnv;
   expectText?: string;
   leaseId?: string;
@@ -104,7 +104,7 @@ type MantisVisualTaskSummary = {
     videoPath?: string;
   };
   browserUrl: string;
-  crabbox: {
+  botbox: {
     bin: string;
     createdLease: boolean;
     id: string;
@@ -239,7 +239,7 @@ function toErrorObject(error: unknown): Error {
 
 function buildVisualDriverArgs(params: {
   browserUrl: string;
-  crabboxBin: string;
+  botboxBin: string;
   expectText?: string;
   leaseId: string;
   outputDir: string;
@@ -262,8 +262,8 @@ function buildVisualDriverArgs(params: {
     params.repoRoot,
     "--output-dir",
     params.outputDir,
-    "--crabbox-bin",
-    params.crabboxBin,
+    "--botbox-bin",
+    params.botboxBin,
     "--provider",
     params.provider,
     "--lease-id",
@@ -411,11 +411,11 @@ function renderReport(summary: MantisVisualTaskSummary) {
     "",
     "## Crabbox",
     "",
-    `- Provider: ${summary.crabbox.provider}`,
-    `- Lease: ${summary.crabbox.id}${summary.crabbox.slug ? ` (${summary.crabbox.slug})` : ""}`,
-    `- Created by run: ${summary.crabbox.createdLease}`,
-    `- State: ${summary.crabbox.state ?? "unknown"}`,
-    `- VNC: \`${summary.crabbox.vncCommand}\``,
+    `- Provider: ${summary.botbox.provider}`,
+    `- Lease: ${summary.botbox.id}${summary.botbox.slug ? ` (${summary.botbox.slug})` : ""}`,
+    `- Created by run: ${summary.botbox.createdLease}`,
+    `- State: ${summary.botbox.state ?? "unknown"}`,
+    `- VNC: \`${summary.botbox.vncCommand}\``,
     "",
     "## Artifacts",
     "",
@@ -462,10 +462,10 @@ export async function runMantisVisualDriver(
   );
   const resultPath = path.join(outputDir, "mantis-visual-task-driver-result.json");
   const screenshotPath = path.join(outputDir, "visual-task.png");
-  const crabboxBin = await resolveCrabboxBin({
+  const botboxBin = await resolveCrabboxBin({
     env,
     envName: CRABBOX_BIN_ENV,
-    explicit: opts.crabboxBin,
+    explicit: opts.botboxBin,
     repoRoot,
   });
   const provider =
@@ -490,7 +490,7 @@ export async function runMantisVisualDriver(
 
   try {
     await runCommand({
-      command: crabboxBin,
+      command: botboxBin,
       args: [
         "desktop",
         "launch",
@@ -519,7 +519,7 @@ export async function runMantisVisualDriver(
       });
     }
     await runCommandWithExternalOutput({
-      command: crabboxBin,
+      command: botboxBin,
       outputPath: screenshotPath,
       buildArgs: (tempPath) => [
         "screenshot",
@@ -623,10 +623,10 @@ export async function runMantisVisualTask(
   const driverResultPath = path.join(outputDir, "mantis-visual-task-driver-result.json");
   const screenshotPath = path.join(outputDir, "visual-task.png");
   const videoPath = path.join(outputDir, "visual-task.mp4");
-  const crabboxBin = await resolveCrabboxBin({
+  const botboxBin = await resolveCrabboxBin({
     env,
     envName: CRABBOX_BIN_ENV,
-    explicit: opts.crabboxBin,
+    explicit: opts.botboxBin,
     repoRoot,
   });
   const provider =
@@ -654,7 +654,7 @@ export async function runMantisVisualTask(
     leaseId =
       leaseId ??
       (await warmupCrabbox({
-        crabboxBin,
+        botboxBin,
         cwd: repoRoot,
         env,
         idleTimeout,
@@ -664,7 +664,7 @@ export async function runMantisVisualTask(
         ttl,
       }));
     inspected = await inspectCrabbox({
-      crabboxBin,
+      botboxBin,
       cwd: repoRoot,
       env,
       leaseId,
@@ -678,7 +678,7 @@ export async function runMantisVisualTask(
     }
     try {
       await runCommandWithExternalOutput({
-        command: crabboxBin,
+        command: botboxBin,
         outputPath: videoPath,
         buildArgs: (tempPath) => [
           "record",
@@ -695,7 +695,7 @@ export async function runMantisVisualTask(
           "pnpm",
           ...buildVisualDriverArgs({
             browserUrl,
-            crabboxBin,
+            botboxBin,
             expectText,
             leaseId: activeLeaseId,
             outputDir,
@@ -739,14 +739,14 @@ export async function runMantisVisualTask(
         videoPath: copiedVideo,
       },
       browserUrl,
-      crabbox: {
-        bin: crabboxBin,
+      botbox: {
+        bin: botboxBin,
         createdLease,
         id: leaseId,
         provider,
         slug: inspected.slug,
         state: inspected.state,
-        vncCommand: `${crabboxBin} vnc --provider ${provider} --id ${leaseId} --open`,
+        vncCommand: `${botboxBin} vnc --provider ${provider} --id ${leaseId} --open`,
       },
       driver,
       error: recordingFailure,
@@ -777,15 +777,15 @@ export async function runMantisVisualTask(
         videoPath: (await pathExists(videoPath)) ? videoPath : undefined,
       },
       browserUrl,
-      crabbox: {
-        bin: crabboxBin,
+      botbox: {
+        bin: botboxBin,
         createdLease,
         id: leaseId ?? "unallocated",
         provider,
         slug: inspected.slug,
         state: inspected.state,
         vncCommand: leaseId
-          ? `${crabboxBin} vnc --provider ${provider} --id ${leaseId} --open`
+          ? `${botboxBin} vnc --provider ${provider} --id ${leaseId} --open`
           : "unallocated",
       },
       error: formatErrorMessage(error),
@@ -814,7 +814,7 @@ export async function runMantisVisualTask(
       await fs.writeFile(reportPath, renderReport(summary), "utf8");
     }
     if (summary?.status === "pass" && createdLease && leaseId && !keepLease) {
-      await stopCrabbox({ crabboxBin, cwd: repoRoot, env, leaseId, provider, runner });
+      await stopCrabbox({ botboxBin, cwd: repoRoot, env, leaseId, provider, runner });
     }
   }
 }

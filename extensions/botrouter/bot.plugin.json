@@ -1,0 +1,40 @@
+{
+  "id": "botrouter",
+  "activation": {
+    "onStartup": false
+  },
+  "enabledByDefault": true,
+  "providers": ["botrouter"],
+  "contracts": {
+    "usageProviders": ["botrouter"]
+  },
+  "setup": {
+    "providers": [
+      {
+        "id": "botrouter",
+        "envVars": ["CLAWROUTER_API_KEY"]
+      }
+    ]
+  },
+  "providerAuthChoices": [
+    {
+      "provider": "botrouter",
+      "method": "api-key",
+      "choiceId": "botrouter-api-key",
+      "choiceLabel": "BotRouter proxy key",
+      "choiceHint": "Approved models through one managed key",
+      "groupId": "botrouter",
+      "groupLabel": "BotRouter",
+      "groupHint": "Managed model access and quotas",
+      "optionKey": "botrouterApiKey",
+      "cliFlag": "--botrouter-api-key",
+      "cliOption": "--botrouter-api-key <key>",
+      "cliDescription": "BotRouter proxy key"
+    }
+  ],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

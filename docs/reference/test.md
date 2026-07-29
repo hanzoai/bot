@@ -24,7 +24,7 @@ first heavy command is ready, reuse the returned `tbx_...` id for later heavy
 commands, sync the current checkout on every run, and stop it before handoff.
 
 After the first successful reuse, the wrapper records the lease's base,
-dependency, and Testbox workflow fingerprint under `.crabbox/testbox-leases/`.
+dependency, and Testbox workflow fingerprint under `.botbox/testbox-leases/`.
 Source-only edits keep reusing the warmed box. A changed merge base, lockfile,
 package-manager input, wrapper, or Testbox workflow fails closed and requires a
 fresh lease. Every run still syncs the current checkout.
@@ -47,14 +47,14 @@ Unset `CRABBOX_AWS_INSTANCE_PROFILE` and fail closed unless resolved
 absolute-path tools to require an IMDSv2 token, prove the IAM credentials
 endpoint returns 404, and verify remote `git rev-parse HEAD` equals the full
 reviewed PR head SHA. Bind the lease to that SHA and stop/rewarm when the head
-changes. Upload trusted `scripts/crabbox-untrusted-bootstrap.sh` from clean
+changes. Upload trusted `scripts/botbox-untrusted-bootstrap.sh` from clean
 `main` alongside `--fresh-pr`; it installs pinned Node/pnpm, verifies the SHA
 and package-manager pin, isolates `HOME`, installs dependencies, then executes
 the requested test. If the broker cannot prove no role or no remote PR exists,
 use secretless fork CI. Do not use `hydrate-github`, `--no-sync`, or a
 credential-hydrated Testbox workflow.
 Unset all `CRABBOX_TAILSCALE*` overrides, force `--network public
---tailscale=false`, clear exit-node/LAN flags, and require `crabbox inspect` to
+--tailscale=false`, clear exit-node/LAN flags, and require `botbox inspect` to
 report public networking with no Tailscale state before uploading any script.
 
 ## Routine local order
@@ -64,14 +64,14 @@ report public networking with no Tailscale state before uploading any script.
 3. `pnpm test` only when you intentionally need the full local Vitest suite.
 
 In a Codex worktree or linked/sparse checkout, agents avoid direct local
-`pnpm test*` / `pnpm check*` / `pnpm crabbox:run`:
+`pnpm test*` / `pnpm check*` / `pnpm botbox:run`:
 
 - Bounded focused proof with ready dependencies:
   `node scripts/run-vitest.mjs <path-or-filter>`.
 - Classify-first changed check: `node scripts/check-changed.mjs`; docs-only,
   no-change, and small metadata plans stay local when dependencies are ready,
   while heavy or dependency-missing plans delegate to Testbox.
-- Explicit kept-lease broad proof: `node scripts/crabbox-wrapper.mjs run --provider blacksmith-testbox ... -- env BOT_CHECK_CHANGED_REMOTE_CHILD=1 BOT_CHANGED_LANES_RAW_SYNC=1 corepack pnpm check:changed` so pnpm runs inside Testbox.
+- Explicit kept-lease broad proof: `node scripts/botbox-wrapper.mjs run --provider blacksmith-testbox ... -- env BOT_CHECK_CHANGED_REMOTE_CHILD=1 BOT_CHANGED_LANES_RAW_SYNC=1 corepack pnpm check:changed` so pnpm runs inside Testbox.
 - The wrapper's final `exitCode` and timing JSON are the command result. A delegated Blacksmith GitHub Actions run may show `cancelled` after a successful SSH command because the Testbox is stopped from outside the keepalive action; check the wrapper summary and command output before treating that as a failure.
 - `BOT_HEAVY_CHECK_LOCK_SCOPE=worktree <local-heavy-check command>`: keeps heavy-check serialization inside the current worktree instead of the Git common dir for commands such as `pnpm check:changed` and targeted `pnpm test ...`. Use it only on high-capacity local hosts when you intentionally run independent checks across linked worktrees.
 

@@ -227,7 +227,7 @@ an empty `groupInviteAllowlist`, no non-owner invite is accepted):
 Most of the settings above (`dmAllowlist`, `groupInviteAllowlist`, `groupChannels`,
 `defaultAuthorizedShips`, `autoDiscoverChannels`, `autoAcceptDmInvites`,
 `autoAcceptGroupInvites`, `ownerShip`, `showModelSignature`) are mirrored into the ship's
-`%settings` agent (desk `moltbot`, bucket `tlon`) on first run and then read live from there,
+`%settings` agent (desk `bot`, bucket `tlon`) on first run and then read live from there,
 so changes made via a Landscape client or the bundled skill's settings commands apply without a
 gateway restart. `channelRules` and pending approvals are also persisted there as JSON. File
 config stays the source of truth for values never written to the settings store.

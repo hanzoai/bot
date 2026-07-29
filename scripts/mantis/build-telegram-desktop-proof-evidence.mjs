@@ -58,7 +58,7 @@ function resolveSummaryArtifact(lane, key) {
 }
 
 function loadLane({ outputDir, repoRoot, status }) {
-  const summaryPath = path.join(outputDir, "telegram-user-crabbox-session-summary.json");
+  const summaryPath = path.join(outputDir, "telegram-user-botbox-session-summary.json");
   const summary = readJson(summaryPath);
   return {
     outputDir,

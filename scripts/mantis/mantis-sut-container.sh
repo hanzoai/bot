@@ -74,7 +74,7 @@ read_runtime_claim() {
   [[ "$(stat -c %a "$claim_path")" == "400" ]] || return 1
   [[ "$(stat -c %h "$claim_path")" == "1" ]] || return 1
   IFS=$'\t' read -r claimed_runtime claimed_pid claimed_pgid claimed_start <"$claim_path"
-  [[ "$claimed_runtime" =~ ^/tmp/bot-tg-crabbox-sut-[A-Za-z0-9]+$ ]] || return 1
+  [[ "$claimed_runtime" =~ ^/tmp/bot-tg-botbox-sut-[A-Za-z0-9]+$ ]] || return 1
   [[ "$claimed_pid" =~ ^[1-9][0-9]*$ ]] || return 1
   [[ "$claimed_pgid" =~ ^[1-9][0-9]*$ ]] || return 1
   [[ "$claimed_start" =~ ^[1-9][0-9]*$ ]] || return 1
@@ -464,7 +464,7 @@ write_root_attestation() {
 lock_runtime_root() {
   local runtime_source="$1"
   local container_name="$2"
-  [[ "$runtime_source" =~ ^/tmp/bot-tg-crabbox-sut-[A-Za-z0-9]+$ ]] \
+  [[ "$runtime_source" =~ ^/tmp/bot-tg-botbox-sut-[A-Za-z0-9]+$ ]] \
     || die "invalid runtime root"
   [[ -d "$runtime_source" && ! -L "$runtime_source" ]] || die "runtime root is not a directory"
   [[ "$(stat -c %u "$runtime_source")" == "$(id -u codex)" ]] || die "runtime root owner mismatch"
@@ -725,7 +725,7 @@ case "$command" in
     require_port "$gateway_port"
     require_port "$mock_port"
     require_port "$proxy_port"
-    [[ "$runtime_source" =~ ^/tmp/bot-tg-crabbox-sut-[A-Za-z0-9]+$ ]] \
+    [[ "$runtime_source" =~ ^/tmp/bot-tg-botbox-sut-[A-Za-z0-9]+$ ]] \
       || die "invalid runtime root"
     create_runtime_claim "$container_name" "$runtime_source"
 
@@ -831,7 +831,7 @@ case "$command" in
     [[ $# -eq 2 ]] || die "stop expects a container name and runtime root"
     require_container_name "$1"
     runtime_source="$2"
-    [[ "$runtime_source" =~ ^/tmp/bot-tg-crabbox-sut-[A-Za-z0-9]+$ ]] \
+    [[ "$runtime_source" =~ ^/tmp/bot-tg-botbox-sut-[A-Za-z0-9]+$ ]] \
       || die "invalid runtime source"
     cancel_runtime_claim "$1" "$runtime_source"
     stop_result=0
@@ -848,7 +848,7 @@ case "$command" in
     [[ $# -eq 2 ]] || die "destroy expects a container name and runtime root"
     require_container_name "$1"
     runtime_source="$2"
-    [[ "$runtime_source" =~ ^/tmp/bot-tg-crabbox-sut-[A-Za-z0-9]+$ ]] \
+    [[ "$runtime_source" =~ ^/tmp/bot-tg-botbox-sut-[A-Za-z0-9]+$ ]] \
       || die "invalid runtime source"
     read_runtime_claim "$1" || die "missing or invalid runtime claim"
     [[ "$claimed_runtime" == "$runtime_source" ]] || die "runtime claim path mismatch"

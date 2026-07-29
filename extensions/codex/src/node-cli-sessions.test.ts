@@ -133,7 +133,7 @@ describe("codex cli node sessions", () => {
     const command = createCodexCliSessionNodeHostCommands().find(
       (entry) => entry.command === CODEX_CLI_SESSIONS_LIST_COMMAND,
     );
-    const raw = await command?.handle(JSON.stringify({ filter: "crabbox", limit: 5 }));
+    const raw = await command?.handle(JSON.stringify({ filter: "botbox", limit: 5 }));
     const parsed = JSON.parse(raw ?? "{}") as {
       sessions?: Array<{
         sessionId?: string;

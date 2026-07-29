@@ -158,7 +158,7 @@ export async function resolveGatewayRuntimeConfig(params: {
   }
   if (!isLoopbackHost(bindHost) && !hasSharedSecret && authMode !== "trusted-proxy") {
     throw new Error(
-      `refusing to bind gateway to ${bindHost}:${params.port} without auth (set gateway.auth.token/password, or set BOT_GATEWAY_TOKEN/BOT_GATEWAY_PASSWORD; legacy CLAWDBOT_* and MOLTBOT_* environment variables are ignored)`,
+      `refusing to bind gateway to ${bindHost}:${params.port} without auth (set gateway.auth.token/password, or set BOT_GATEWAY_TOKEN/BOT_GATEWAY_PASSWORD; legacy BOT_* and BOT_* environment variables are ignored)`,
     );
   }
   if (

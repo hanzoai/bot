@@ -443,15 +443,15 @@
       - any-glob-to-any-file:
           - "extensions/baseten/**"
           - "docs/providers/baseten.md"
-"extensions: clawrouter":
+"extensions: botrouter":
   - changed-files:
       - any-glob-to-any-file:
-          - "extensions/clawrouter/**"
-          - "docs/providers/clawrouter.md"
-"extensions: crabbox":
+          - "extensions/botrouter/**"
+          - "docs/providers/botrouter.md"
+"extensions: botbox":
   - changed-files:
       - any-glob-to-any-file:
-          - "extensions/crabbox/**"
+          - "extensions/botbox/**"
 "extensions: deepseek":
   - changed-files:
       - any-glob-to-any-file:

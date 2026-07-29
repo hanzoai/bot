@@ -564,14 +564,14 @@ const resolveLauncherConfigPaths = () => {
   const stateOverride = process.env.BOT_STATE_DIR?.trim();
   if (stateOverride) {
     const stateDir = resolveLauncherUserPath(stateOverride);
-    return [path.join(stateDir, "bot.json"), path.join(stateDir, "clawdbot.json")];
+    return [path.join(stateDir, "bot.json"), path.join(stateDir, "bot.json")];
   }
   const homeDir = resolveLauncherHomeDir();
   return [
     path.join(homeDir, ".bot", "bot.json"),
-    path.join(homeDir, ".bot", "clawdbot.json"),
-    path.join(homeDir, ".clawdbot", "bot.json"),
-    path.join(homeDir, ".clawdbot", "clawdbot.json"),
+    path.join(homeDir, ".bot", "bot.json"),
+    path.join(homeDir, ".bot", "bot.json"),
+    path.join(homeDir, ".bot", "bot.json"),
   ];
 };
 

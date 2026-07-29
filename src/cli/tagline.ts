@@ -105,7 +105,7 @@ const TAGLINES: string[] = [
   "You'll name me something adorable, then ask me to do DevOps.",
   "Your mom texts me now. We're good, actually.",
   "Four bots roasting each other in a group chat isn't a bug—it's a support group.",
-  "The artist formerly known as Clawdbot.",
+  "The artist formerly known as Bot.",
   "Home is wherever port 18789 is.",
   "When my context fills up, I summarize you. Don't worry—you come across great.",
   "I hold 200k tokens of context and exactly one grudge.",

@@ -58,7 +58,7 @@ import type {
   ChannelMessageActionName,
   ChannelMeta,
   ChannelPlugin,
-  ClawdbotConfig,
+  BotConfig,
 } from "./channel-runtime-api.js";
 import {
   buildProbeChannelStatusSummary,
@@ -279,7 +279,7 @@ async function resolveFeishuMessageChatType(params: {
 }
 
 const collectFeishuSecurityWarnings = createAllowlistProviderGroupPolicyWarningCollector<{
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   accountId?: string | null;
 }>({
   providerConfigPresent: (cfg) => cfg.channels?.feishu !== undefined,
@@ -358,7 +358,7 @@ const feishuConfigAdapter = createHybridChannelConfigAdapter<
 });
 
 function isFeishuReactionsActionEnabled(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   account: ResolvedFeishuAccount;
 }): boolean {
   if (!params.account.enabled || !params.account.configured) {
@@ -374,7 +374,7 @@ function isFeishuReactionsActionEnabled(params: {
   return gate("reactions");
 }
 
-function areAnyFeishuReactionActionsEnabled(cfg: ClawdbotConfig): boolean {
+function areAnyFeishuReactionActionsEnabled(cfg: BotConfig): boolean {
   for (const account of listEnabledFeishuAccounts(cfg)) {
     if (isFeishuReactionsActionEnabled({ cfg, account })) {
       return true;
@@ -970,7 +970,7 @@ export const feishuPlugin: ChannelPlugin<ResolvedFeishuAccount, FeishuProbeResul
 
           if (isDefault) {
             // Delete entire feishu config
-            const next = { ...cfg } as ClawdbotConfig;
+            const next = { ...cfg } as BotConfig;
             const nextChannels = { ...cfg.channels };
             delete (nextChannels as Record<string, unknown>).feishu;
             if (Object.keys(nextChannels).length > 0) {
@@ -1768,7 +1768,7 @@ export const feishuPlugin: ChannelPlugin<ResolvedFeishuAccount, FeishuProbeResul
     },
     security: {
       collectWarnings: projectConfigAccountIdWarningCollector<{
-        cfg: ClawdbotConfig;
+        cfg: BotConfig;
         accountId?: string | null;
       }>(collectFeishuSecurityWarnings),
       collectAuditFindings: ({ cfg }) => collectFeishuSecurityAuditFindings({ cfg }),

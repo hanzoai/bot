@@ -71,7 +71,7 @@ Each entry lists the package, distribution route, and description.
 
 - **[canvas](/plugins/reference/canvas)** (`@hanzo/bot-canvas-plugin`) - included in Bot. Experimental Canvas control and A2UI rendering surfaces for paired nodes.
 
-- **[clawrouter](/plugins/reference/clawrouter)** (`@hanzo/bot-clawrouter`) - included in Bot. Adds ClawRouter model provider support to Bot.
+- **[botrouter](/plugins/reference/botrouter)** (`@hanzo/bot-botrouter`) - included in Bot. Adds BotRouter model provider support to Bot.
 
 - **[cohere](/plugins/reference/cohere)** (`@hanzo/bot-cohere-provider`) - included in Bot; npm; ClawHub: `clawhub:@hanzo/bot-cohere-provider`. Bot Cohere provider plugin.
 
@@ -79,7 +79,7 @@ Each entry lists the package, distribution route, and description.
 
 - **[copilot-proxy](/plugins/reference/copilot-proxy)** (`@hanzo/bot-copilot-proxy`) - included in Bot. Adds Copilot Proxy model provider support to Bot.
 
-- **[crabbox](/plugins/reference/crabbox)** (`@hanzo/bot-crabbox-provider`) - included in Bot. Cloud worker provider backed by the Crabbox CLI.
+- **[botbox](/plugins/reference/botbox)** (`@hanzo/bot-botbox-provider`) - included in Bot. Cloud worker provider backed by the Crabbox CLI.
 
 - **[cua-computer](/plugins/reference/cua-computer)** (`@hanzo/bot-cua-computer`) - included in Bot. Experimental cua-driver computer control for Windows and Linux node hosts.
 

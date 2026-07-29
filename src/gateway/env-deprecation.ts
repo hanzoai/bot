@@ -4,12 +4,12 @@ import { isVitestRuntimeEnv } from "../infra/env.js";
 
 // Legacy env warnings are process-wide and intentionally one-shot so normal
 // gateway startup is noisy enough to notice but not spammed by repeated imports.
-const LEGACY_ENV_PREFIXES = ["CLAWDBOT_", "MOLTBOT_"] as const;
+const LEGACY_ENV_PREFIXES = ["BOT_", "BOT_"] as const;
 type LegacyEnvPrefix = (typeof LEGACY_ENV_PREFIXES)[number];
 
 let warned = false;
 
-/** Emits a one-time warning when ignored legacy CLAWDBOT_/MOLTBOT_ env vars are present. */
+/** Emits a one-time warning when ignored legacy BOT_/BOT_ env vars are present. */
 export function warnLegacyBotEnvVars(env: NodeJS.ProcessEnv = process.env): void {
   if (warned || isVitestRuntimeEnv(env)) {
     return;

@@ -1,5 +1,5 @@
 import type { ChannelReplayClaimHandle } from "bot/plugin-sdk/persistent-dedupe";
-import type { ClawdbotConfig } from "./bot-runtime-api.js";
+import type { BotConfig } from "./bot-runtime-api.js";
 import type { FeishuIngressLifecycle } from "./feishu-ingress.js";
 
 export function createFeishuBroadcastIngressSettlement(params: {
@@ -235,7 +235,7 @@ export function createFeishuBroadcastIngressSettlement(params: {
   };
 }
 
-export function resolveBroadcastAgents(cfg: ClawdbotConfig, peerId: string): string[] | null {
+export function resolveBroadcastAgents(cfg: BotConfig, peerId: string): string[] | null {
   const broadcast = (cfg as Record<string, unknown>).broadcast;
   if (!broadcast || typeof broadcast !== "object") {
     return null;

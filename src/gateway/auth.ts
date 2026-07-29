@@ -32,7 +32,7 @@ export {
 export { hasForwardedRequestHeaders, isLocalDirectRequest } from "./net.js";
 
 const LEGACY_BOT_ENV_NOTE =
-  " Legacy CLAWDBOT_* and MOLTBOT_* environment variables are ignored; use BOT_* names.";
+  " Legacy BOT_* and BOT_* environment variables are ignored; use BOT_* names.";
 
 /** Normalized outcome for gateway shared-secret, Tailscale, device, and proxy auth. */
 export type GatewayAuthResult = {

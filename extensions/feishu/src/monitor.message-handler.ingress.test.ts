@@ -1,7 +1,7 @@
 import { createNonExitingRuntimeEnv } from "bot/plugin-sdk/plugin-test-runtime";
 // Feishu ingress tests cover debounce ownership and constituent claim settlement.
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
+import type { BotConfig, PluginRuntime, RuntimeEnv } from "../runtime-api.js";
 import * as dedup from "./dedup.js";
 import type { FeishuMessageEvent } from "./event-types.js";
 import type { FeishuIngressLifecycle } from "./feishu-ingress.js";
@@ -109,7 +109,7 @@ function createHarness(params: {
     claim.mockResolvedValueOnce({ kind: "claimed", handle });
   }
   const handler = createFeishuMessageReceiveHandler({
-    cfg: {} as ClawdbotConfig,
+    cfg: {} as BotConfig,
     channelRuntime,
     accountId: "default",
     runtime: { ...createNonExitingRuntimeEnv(), error: runtimeError } satisfies RuntimeEnv,

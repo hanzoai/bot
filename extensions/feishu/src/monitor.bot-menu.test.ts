@@ -1,6 +1,6 @@
 // Feishu tests cover monitor.bot menu plugin behavior.
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig, RuntimeEnv } from "../runtime-api.js";
+import type { BotConfig, RuntimeEnv } from "../runtime-api.js";
 import { expectFirstSentCardUsesFillWidthOnly } from "./card-test-helpers.js";
 import { createFeishuBotMenuHandler } from "./monitor.bot-menu-handler.js";
 
@@ -50,7 +50,7 @@ async function registerHandlers(params: { runtime?: RuntimeEnv } = {}) {
       exit: vi.fn(),
     } as RuntimeEnv);
   return createFeishuBotMenuHandler({
-    cfg: {} as ClawdbotConfig,
+    cfg: {} as BotConfig,
     accountId: "default",
     runtime,
     chatHistories: new Map(),

@@ -6,7 +6,7 @@ import {
   normalizeLowercaseStringOrEmpty,
 } from "bot/plugin-sdk/string-coerce-runtime";
 import { convertMarkdownTables } from "bot/plugin-sdk/text-chunking";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import { resolveFeishuRuntimeAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";
 import { requestFeishuApi } from "./comment-shared.js";
@@ -391,7 +391,7 @@ function parseFeishuMessageItem(
  * Useful for fetching quoted/replied message content.
  */
 export async function getMessageFeishu(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   messageId: string;
   accountId?: string;
 }): Promise<FeishuMessageInfo | null> {
@@ -445,7 +445,7 @@ type FeishuThreadMessageInfo = {
  * which includes both the root message and all replies (including bot replies).
  */
 export async function listFeishuThreadMessages(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   threadId: string;
   currentMessageId?: string;
   /** Exclude the root message (already provided separately as ThreadStarterBody). */
@@ -524,7 +524,7 @@ export async function listFeishuThreadMessages(params: {
 }
 
 type SendFeishuMessageParams = {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   to: string;
   text: string;
   replyToMessageId?: string;
@@ -578,7 +578,7 @@ export async function sendMessageFeishu(
 }
 
 type SendFeishuCardParams = {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   to: string;
   card: Record<string, unknown>;
   replyToMessageId?: string;
@@ -608,7 +608,7 @@ export async function sendCardFeishu(params: SendFeishuCardParams): Promise<Feis
 }
 
 export async function editMessageFeishu(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   messageId: string;
   text?: string;
   card?: Record<string, unknown>;
@@ -726,7 +726,7 @@ function buildStructuredCard(
  * Send a message as a structured card with optional header and note.
  */
 export async function sendStructuredCardFeishu(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   to: string;
   text: string;
   replyToMessageId?: string;
@@ -771,7 +771,7 @@ export async function sendStructuredCardFeishu(params: {
  * This renders markdown properly in Feishu (code blocks, tables, bold/italic, etc.)
  */
 export async function sendMarkdownCardFeishu(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   to: string;
   text: string;
   replyToMessageId?: string;

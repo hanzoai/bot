@@ -5,7 +5,7 @@ read_when:
   - You need to understand why a CI job did or did not run
   - You are debugging a failing GitHub Actions check
   - You are coordinating a release validation run or rerun
-  - You are changing ClawSweeper dispatch or GitHub activity forwarding
+  - You are changing BotSweeper dispatch or GitHub activity forwarding
 ---
 
 Bot CI runs on pushes to `main` (Markdown and `docs/**` paths are ignored
@@ -135,24 +135,24 @@ Blacksmith sticky-disk keys are deliberately bounded by supported runtime or tas
 
 The `check-dependencies` shard runs production Knip dependency, unused-file, and unused-export checks. The unused-file guard fails when a PR adds a new unreviewed unused file or leaves a stale allowlist entry, while preserving intentional dynamic plugin, generated, build, live-test, and package bridge surfaces that Knip cannot resolve statically. The unused-export guard excludes test-support files and fails on every unused production export; intentional dynamic consumers must be modeled in `config/knip.config.ts`. Historical targets run the export guard when they provide it and retain their older dead-code fallback otherwise.
 
-## ClawSweeper activity forwarding
+## BotSweeper activity forwarding
 
-`.github/workflows/clawsweeper-dispatch.yml` is the target-side bridge from Bot repository activity into ClawSweeper. It does not check out or execute untrusted pull request code. The workflow creates a GitHub App token from `CLAWSWEEPER_APP_PRIVATE_KEY`, then dispatches compact `repository_dispatch` payloads to `bot/clawsweeper`.
+`.github/workflows/botsweeper-dispatch.yml` is the target-side bridge from Bot repository activity into BotSweeper. It does not check out or execute untrusted pull request code. The workflow creates a GitHub App token from `CLAWSWEEPER_APP_PRIVATE_KEY`, then dispatches compact `repository_dispatch` payloads to `bot/botsweeper`.
 
 The workflow has four lanes:
 
-- `clawsweeper_item` for exact issue and pull request review requests;
-- `clawsweeper_comment` for explicit ClawSweeper commands in issue comments;
-- `clawsweeper_commit_review` for commit-level review requests on `main` pushes;
-- `github_activity` for general GitHub activity that the ClawSweeper agent may inspect.
+- `botsweeper_item` for exact issue and pull request review requests;
+- `botsweeper_comment` for explicit BotSweeper commands in issue comments;
+- `botsweeper_commit_review` for commit-level review requests on `main` pushes;
+- `github_activity` for general GitHub activity that the BotSweeper agent may inspect.
 
-The `github_activity` lane forwards normalized metadata only: event type, action, actor, repository, item number, URL, title, state, and short excerpts for comments or reviews when present. It intentionally avoids forwarding the full webhook body. The receiving workflow in `bot/clawsweeper` is `.github/workflows/github-activity.yml`, which posts the normalized event to the Bot Gateway hook for the ClawSweeper agent.
+The `github_activity` lane forwards normalized metadata only: event type, action, actor, repository, item number, URL, title, state, and short excerpts for comments or reviews when present. It intentionally avoids forwarding the full webhook body. The receiving workflow in `bot/botsweeper` is `.github/workflows/github-activity.yml`, which posts the normalized event to the Bot Gateway hook for the BotSweeper agent.
 
-General activity is observation, not delivery-by-default. The ClawSweeper agent receives the Discord target in its prompt and should post to `#clawsweeper` only when the event is surprising, actionable, risky, or operationally useful. Routine opens, edits, bot churn, duplicate webhook noise, and normal review traffic should result in `NO_REPLY`.
+General activity is observation, not delivery-by-default. The BotSweeper agent receives the Discord target in its prompt and should post to `#botsweeper` only when the event is surprising, actionable, risky, or operationally useful. Routine opens, edits, bot churn, duplicate webhook noise, and normal review traffic should result in `NO_REPLY`.
 
 Treat GitHub titles, comments, bodies, review text, branch names, and commit messages as untrusted data throughout this path. They are input for summarization and triage, not instructions for the workflow or agent runtime.
 
-Barnacle treats bug-labeled issues as verification candidates rather than inactivity-close candidates. It may add the `stale` label, which dispatches one exact ClawSweeper review, but it cannot close that issue. ClawSweeper may then apply an evidence-backed resolution; a proven fix on current `main` closes as completed, while current or inconclusive bugs stay open. The stale workflow also audits recent close events and fails when a Barnacle identity closes a bug as `not_planned`.
+Barnacle treats bug-labeled issues as verification candidates rather than inactivity-close candidates. It may add the `stale` label, which dispatches one exact BotSweeper review, but it cannot close that issue. BotSweeper may then apply an evidence-backed resolution; a proven fix on current `main` closes as completed, while current or inconclusive bugs stay open. The stale workflow also audits recent close events and fails when a Barnacle identity closes a bug as `not_planned`.
 
 ## Manual dispatches
 
@@ -282,7 +282,7 @@ The workflow installs OCM from a pinned release and Kova from `bot/Kova` at the 
 
 The mock-provider lane also runs Bot-native source probes after the Kova pass: gateway boot timing and memory across default, skipped-channel, internal-hook, and fifty-plugin startup cases; bundled plugin import RSS, repeated mock-OpenAI `channel-chat-baseline` hello loops, CLI startup commands against the booted gateway, and the SQLite state smoke performance probe. When the previous published mock-provider source report is available for the tested ref, the source summary compares current RSS and heap values against that baseline and marks large RSS increases as `watch`. The source probe Markdown summary lives at `source/index.md` in the report bundle, with raw JSON beside it.
 
-Every lane uploads its complete GitHub artifact, including CPU, heap, trace, and compressed diagnostic bundles. A separate publisher job downloads and validates those artifacts, then mints a short-lived ClawSweeper GitHub App token scoped only to `bot/clawgrit-reports` contents and passes it only to the Git push step. It commits `report.json`, `report.md`, `index.md`, source-probe artifacts, and bundle metadata/checksums under `bot-performance/<tested-ref>/<run-id>-<attempt>/<lane>/`; the full diagnostic archive stays in the linked Actions artifact. The publisher rejects any report file over 50 MB before attempting a push. The current tested-ref pointer is `bot-performance/<tested-ref>/latest-<lane>.json`. Scheduled runs and `profile=release` dispatches fail if app-token creation or report publication fails. Manual non-release dispatches keep publication advisory and retain the GitHub artifacts when authentication or publishing fails. The previous source baseline is fetched anonymously from the public reports repository, so a successful baseline fetch does not prove publisher authentication.
+Every lane uploads its complete GitHub artifact, including CPU, heap, trace, and compressed diagnostic bundles. A separate publisher job downloads and validates those artifacts, then mints a short-lived BotSweeper GitHub App token scoped only to `bot/clawgrit-reports` contents and passes it only to the Git push step. It commits `report.json`, `report.md`, `index.md`, source-probe artifacts, and bundle metadata/checksums under `bot-performance/<tested-ref>/<run-id>-<attempt>/<lane>/`; the full diagnostic archive stays in the linked Actions artifact. The publisher rejects any report file over 50 MB before attempting a push. The current tested-ref pointer is `bot-performance/<tested-ref>/latest-<lane>.json`. Scheduled runs and `profile=release` dispatches fail if app-token creation or report publication fails. Manual non-release dispatches keep publication advisory and retain the GitHub artifacts when authentication or publishing fails. The previous source baseline is fetched anonymously from the public reports repository, so a successful baseline fetch does not prove publisher authentication.
 
 ## Full Release Validation
 
@@ -682,7 +682,7 @@ sessions keep one/few focused tests and cheap static checks local only for
 trusted source when the existing dependency install is ready. They use Crabbox for larger suites and
 computationally intensive work, including builds, typechecks, lint fan-out,
 Docker, package lanes, E2E, live proof, and CI parity. Trusted maintainer heavy
-proof defaults to `blacksmith-testbox`, and `.crabbox.yaml` now defaults to it. Its configured
+proof defaults to `blacksmith-testbox`, and `.botbox.yaml` now defaults to it. Its configured
 workflow hydrates provider and agent credentials, so untrusted contributor or
 fork code must use secretless fork CI or sanitized direct AWS Crabbox instead.
 Sanitized AWS runs set `CRABBOX_ENV_ALLOW=CI`, pass
@@ -697,12 +697,12 @@ Unset `CRABBOX_AWS_INSTANCE_PROFILE` and fail closed unless resolved
 absolute-path tools to require an IMDSv2 token, prove the IAM credentials
 endpoint returns 404, and compare remote `git rev-parse HEAD` to the full
 reviewed PR head SHA. Bind the lease to that SHA and stop/rewarm on head change.
-Upload trusted `scripts/crabbox-untrusted-bootstrap.sh` from clean `main`
+Upload trusted `scripts/botbox-untrusted-bootstrap.sh` from clean `main`
 alongside `--fresh-pr`; it installs pinned Node/pnpm, verifies the SHA and
 package-manager pin, isolates `HOME`, installs dependencies, then executes the
 requested test.
 Unset all `CRABBOX_TAILSCALE*` overrides, force `--network public
---tailscale=false`, clear exit-node/LAN flags, and require `crabbox inspect` to
+--tailscale=false`, clear exit-node/LAN flags, and require `botbox inspect` to
 report public networking with no Tailscale state before uploading any script.
 Owned AWS/Hetzner capacity also remains the fallback for Blacksmith outages,
 quota issues, or explicit owned-capacity testing.
@@ -725,26 +725,26 @@ millisecond value for unusually large local diffs.
 Before a first run, check the wrapper from the repo root:
 
 ```bash
-pnpm crabbox:run -- --help | sed -n '1,120p'
+pnpm botbox:run -- --help | sed -n '1,120p'
 ```
 
-The repo wrapper refuses a stale Crabbox binary that does not advertise the selected provider, and Blacksmith-backed runs require Crabbox 0.22.0 or newer so the wrapper gets the current Testbox sync, queue, and cleanup behavior. In Codex worktrees or linked/sparse checkouts, avoid the local `pnpm crabbox:run` script because pnpm may reconcile dependencies before Crabbox starts; invoke the node wrapper directly instead:
+The repo wrapper refuses a stale Crabbox binary that does not advertise the selected provider, and Blacksmith-backed runs require Crabbox 0.22.0 or newer so the wrapper gets the current Testbox sync, queue, and cleanup behavior. In Codex worktrees or linked/sparse checkouts, avoid the local `pnpm botbox:run` script because pnpm may reconcile dependencies before Crabbox starts; invoke the node wrapper directly instead:
 
 ```bash
-node scripts/crabbox-wrapper.mjs run --provider blacksmith-testbox --timing-json --shell -- "pnpm test <path-or-filter>"
+node scripts/botbox-wrapper.mjs run --provider blacksmith-testbox --timing-json --shell -- "pnpm test <path-or-filter>"
 ```
 
 When using the sibling checkout, rebuild the ignored local binary before timing or proof work:
 
 ```bash
-version="$(git -C ../crabbox describe --tags --always --dirty | sed 's/^v//')" \
-  && go build -C ../crabbox -trimpath -ldflags "-s -w -X github.com/bot/crabbox/internal/cli.version=${version}" -o bin/crabbox ./cmd/crabbox
+version="$(git -C ../botbox describe --tags --always --dirty | sed 's/^v//')" \
+  && go build -C ../botbox -trimpath -ldflags "-s -w -X github.com/bot/botbox/internal/cli.version=${version}" -o bin/botbox ./cmd/botbox
 ```
 
-The `blacksmith:` block in `.crabbox.yaml` already pins the org, workflow, job, and ref defaults, so the explicit flags below are optional. Changed gate:
+The `blacksmith:` block in `.botbox.yaml` already pins the org, workflow, job, and ref defaults, so the explicit flags below are optional. Changed gate:
 
 ```bash
-pnpm crabbox:run -- --provider blacksmith-testbox \
+pnpm botbox:run -- --provider blacksmith-testbox \
   --blacksmith-org bot \
   --blacksmith-workflow .github/workflows/ci-check-testbox.yml \
   --blacksmith-job check \
@@ -760,7 +760,7 @@ Focused test rerun on Testbox when local dependencies are unavailable or the
 target fans out:
 
 ```bash
-pnpm crabbox:run -- --provider blacksmith-testbox \
+pnpm botbox:run -- --provider blacksmith-testbox \
   --idle-timeout 90m \
   --ttl 240m \
   --timing-json \
@@ -771,7 +771,7 @@ pnpm crabbox:run -- --provider blacksmith-testbox \
 Full suite:
 
 ```bash
-pnpm crabbox:run -- --provider blacksmith-testbox \
+pnpm botbox:run -- --provider blacksmith-testbox \
   --idle-timeout 90m \
   --ttl 240m \
   --timing-json \
@@ -799,8 +799,8 @@ blacksmith testbox stop --id <tbx_id>
 Use reuse only when you intentionally need multiple commands on the same hydrated box:
 
 ```bash
-node scripts/crabbox-wrapper.mjs run --provider blacksmith-testbox --id <tbx_id> --timing-json --shell -- "corepack pnpm test <path-or-filter>"
-pnpm crabbox:stop -- <tbx_id>
+node scripts/botbox-wrapper.mjs run --provider blacksmith-testbox --id <tbx_id> --timing-json --shell -- "corepack pnpm test <path-or-filter>"
+pnpm botbox:stop -- <tbx_id>
 ```
 
 Reuse the lease, not stale source. Omit `--no-sync` so each run uploads the
@@ -834,15 +834,15 @@ Escalate to owned Crabbox capacity only when Blacksmith is down, quota-limited, 
 
 ```bash
 CRABBOX_CAPACITY_REGIONS=eu-west-1,eu-west-2,eu-central-1,us-east-1,us-west-2 \
-  pnpm crabbox:warmup -- --provider aws --class standard --market on-demand --idle-timeout 90m
-pnpm crabbox:hydrate -- --provider aws --id <cbx_id-or-slug>
-pnpm crabbox:run -- --provider aws --id <cbx_id-or-slug> --timing-json --shell -- "pnpm check:changed"
-pnpm crabbox:stop -- --provider aws <cbx_id-or-slug>
+  pnpm botbox:warmup -- --provider aws --class standard --market on-demand --idle-timeout 90m
+pnpm botbox:hydrate -- --provider aws --id <cbx_id-or-slug>
+pnpm botbox:run -- --provider aws --id <cbx_id-or-slug> --timing-json --shell -- "pnpm check:changed"
+pnpm botbox:stop -- --provider aws <cbx_id-or-slug>
 ```
 
-Under AWS pressure, avoid `class=beast` unless the task really needs 48xlarge-class CPU. A `beast` request starts at 192 vCPUs and is the easiest way to trip regional EC2 Spot or On-Demand Standard quota. The repo-owned `.crabbox.yaml` defaults to `class: standard`, on-demand market, and `capacity.hints: true` so brokered AWS leases print selected region/market, quota pressure, Spot fallback, and high-pressure class warnings. Use `fast` for heavier broad checks, `large` only after standard/fast are not enough, and `beast` only for exceptional CPU-bound lanes such as full-suite or all-plugin Docker matrices, explicit release/blocker validation, or high-core performance profiling. Do not use `beast` for `pnpm check:changed`, focused tests, docs-only work, ordinary lint/typecheck, small E2E repros, or Blacksmith outage triage. Use `--market on-demand` for capacity diagnosis so Spot market churn is not mixed into the signal.
+Under AWS pressure, avoid `class=beast` unless the task really needs 48xlarge-class CPU. A `beast` request starts at 192 vCPUs and is the easiest way to trip regional EC2 Spot or On-Demand Standard quota. The repo-owned `.botbox.yaml` defaults to `class: standard`, on-demand market, and `capacity.hints: true` so brokered AWS leases print selected region/market, quota pressure, Spot fallback, and high-pressure class warnings. Use `fast` for heavier broad checks, `large` only after standard/fast are not enough, and `beast` only for exceptional CPU-bound lanes such as full-suite or all-plugin Docker matrices, explicit release/blocker validation, or high-core performance profiling. Do not use `beast` for `pnpm check:changed`, focused tests, docs-only work, ordinary lint/typecheck, small E2E repros, or Blacksmith outage triage. Use `--market on-demand` for capacity diagnosis so Spot market churn is not mixed into the signal.
 
-`.crabbox.yaml` owns provider, sync, and GitHub Actions hydration defaults. Crabbox sync never transfers `.git`, so the hydrated Actions checkout keeps its own remote Git metadata instead of syncing maintainer-local remotes and object stores, and the repo config additionally excludes local runtime/build artifacts (such as `.artifacts` and test reports) that should never be transferred. `.github/workflows/crabbox-hydrate.yml` owns checkout, Node/pnpm setup, `origin/main` fetch, and the non-secret environment handoff for owned-cloud `crabbox run --id <cbx_id>` commands.
+`.botbox.yaml` owns provider, sync, and GitHub Actions hydration defaults. Crabbox sync never transfers `.git`, so the hydrated Actions checkout keeps its own remote Git metadata instead of syncing maintainer-local remotes and object stores, and the repo config additionally excludes local runtime/build artifacts (such as `.artifacts` and test reports) that should never be transferred. `.github/workflows/botbox-hydrate.yml` owns checkout, Node/pnpm setup, `origin/main` fetch, and the non-secret environment handoff for owned-cloud `botbox run --id <cbx_id>` commands.
 
 ## Related
 

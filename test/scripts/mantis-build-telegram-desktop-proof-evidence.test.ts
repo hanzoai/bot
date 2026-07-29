@@ -22,16 +22,16 @@ function makeLane(name: "baseline" | "candidate", sha: string) {
   tempDirs.push(repo);
   const outputDir = path.join(repo, ".artifacts", "qa-e2e", name);
   mkdirSync(outputDir, { recursive: true });
-  const gif = path.join(outputDir, "telegram-user-crabbox-session-motion-telegram-window.gif");
-  const mp4 = path.join(outputDir, "telegram-user-crabbox-session-motion-telegram-window.mp4");
-  const screenshot = path.join(outputDir, "telegram-user-crabbox-session.png");
-  const report = path.join(outputDir, "telegram-user-crabbox-session-report.md");
+  const gif = path.join(outputDir, "telegram-user-botbox-session-motion-telegram-window.gif");
+  const mp4 = path.join(outputDir, "telegram-user-botbox-session-motion-telegram-window.mp4");
+  const screenshot = path.join(outputDir, "telegram-user-botbox-session.png");
+  const report = path.join(outputDir, "telegram-user-botbox-session-report.md");
   writeFileSync(gif, `${name} gif`);
   writeFileSync(mp4, `${name} mp4`);
   writeFileSync(screenshot, `${name} png`);
   writeFileSync(report, `${name} report`);
   writeFileSync(
-    path.join(outputDir, "telegram-user-crabbox-session-summary.json"),
+    path.join(outputDir, "telegram-user-botbox-session-summary.json"),
     JSON.stringify({
       artifacts: {
         previewGifCropped: path.relative(repo, gif),

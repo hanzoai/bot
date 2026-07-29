@@ -91,7 +91,7 @@ type MantisDesktopBrowserSmokeCommanderOptions = {
   browserProfileDir?: string;
   browserUrl?: string;
   class?: string;
-  crabboxBin?: string;
+  botboxBin?: string;
   htmlFile?: string;
   idleTimeout?: string;
   keepLease?: boolean;
@@ -108,7 +108,7 @@ type MantisSlackDesktopSmokeCommanderOptions = {
   altModel?: string;
   approvalCheckpoints?: boolean;
   class?: string;
-  crabboxBin?: string;
+  botboxBin?: string;
   credentialRole?: string;
   credentialSource?: string;
   fast?: boolean;
@@ -133,7 +133,7 @@ type MantisSlackDesktopSmokeCommanderOptions = {
 
 type MantisTelegramDesktopBuilderCommanderOptions = {
   class?: string;
-  crabboxBin?: string;
+  botboxBin?: string;
   credentialRole?: string;
   credentialSource?: string;
   gatewaySetup?: boolean;
@@ -153,7 +153,7 @@ type MantisTelegramDesktopBuilderCommanderOptions = {
 type MantisVisualTaskCommanderOptions = {
   browserUrl?: string;
   class?: string;
-  crabboxBin?: string;
+  botboxBin?: string;
   duration?: string;
   expectText?: string;
   idleTimeout?: string;
@@ -173,7 +173,7 @@ type MantisVisualTaskCommanderOptions = {
 
 type MantisVisualDriverCommanderOptions = {
   browserUrl?: string;
-  crabboxBin?: string;
+  botboxBin?: string;
   expectText?: string;
   leaseId?: string;
   outputDir?: string;
@@ -281,7 +281,7 @@ export function registerMantisCli(qa: Command) {
       "Remote Chrome user-data-dir path to reuse for browser login state",
     )
     .option("--html-file <path>", "Repo-local HTML file to render in the visible browser")
-    .option("--crabbox-bin <path>", "Crabbox binary path")
+    .option("--botbox-bin <path>", "Crabbox binary path")
     .option("--provider <provider>", "Crabbox provider")
     .option("--machine-class <class>", "Crabbox machine class")
     .option("--class <class>", "Alias for --machine-class")
@@ -295,7 +295,7 @@ export function registerMantisCli(qa: Command) {
         browserProfileArchiveEnv: opts.browserProfileArchiveEnv,
         browserProfileDir: opts.browserProfileDir,
         browserUrl: opts.browserUrl,
-        crabboxBin: opts.crabboxBin,
+        botboxBin: opts.botboxBin,
         htmlFile: opts.htmlFile,
         idleTimeout: opts.idleTimeout,
         keepLease: opts.keepLease,
@@ -316,7 +316,7 @@ export function registerMantisCli(qa: Command) {
     )
     .option("--repo-root <path>", "Repository root to target when running from a neutral cwd")
     .option("--output-dir <path>", "Mantis Slack desktop artifact directory")
-    .option("--crabbox-bin <path>", "Crabbox binary path")
+    .option("--botbox-bin <path>", "Crabbox binary path")
     .option("--provider <provider>", "Crabbox provider")
     .option("--machine-class <class>", "Crabbox machine class")
     .option("--class <class>", "Alias for --machine-class")
@@ -354,7 +354,7 @@ export function registerMantisCli(qa: Command) {
       await runSlackDesktopSmoke({
         alternateModel: opts.altModel,
         approvalCheckpoints: opts.approvalCheckpoints,
-        crabboxBin: opts.crabboxBin,
+        botboxBin: opts.botboxBin,
         credentialRole: opts.credentialRole,
         credentialSource: opts.credentialSource,
         fastMode: opts.fast,
@@ -385,7 +385,7 @@ export function registerMantisCli(qa: Command) {
     )
     .option("--repo-root <path>", "Repository root to target when running from a neutral cwd")
     .option("--output-dir <path>", "Mantis Telegram desktop builder artifact directory")
-    .option("--crabbox-bin <path>", "Crabbox binary path")
+    .option("--botbox-bin <path>", "Crabbox binary path")
     .option("--provider <provider>", "Crabbox provider")
     .option("--machine-class <class>", "Crabbox machine class")
     .option("--class <class>", "Alias for --machine-class")
@@ -408,7 +408,7 @@ export function registerMantisCli(qa: Command) {
     )
     .action(async (opts: MantisTelegramDesktopBuilderCommanderOptions) => {
       await runTelegramDesktopBuilder({
-        crabboxBin: opts.crabboxBin,
+        botboxBin: opts.botboxBin,
         credentialRole: opts.credentialRole,
         credentialSource: opts.credentialSource,
         gatewaySetup: opts.gatewaySetup,
@@ -433,7 +433,7 @@ export function registerMantisCli(qa: Command) {
     )
     .option("--repo-root <path>", "Repository root to target when running from a neutral cwd")
     .option("--output-dir <path>", "Mantis visual-task artifact directory")
-    .option("--crabbox-bin <path>", "Crabbox binary path")
+    .option("--botbox-bin <path>", "Crabbox binary path")
     .option("--provider <provider>", "Crabbox provider")
     .option("--machine-class <class>", "Crabbox machine class")
     .option("--class <class>", "Alias for --machine-class")
@@ -452,7 +452,7 @@ export function registerMantisCli(qa: Command) {
     .action(async (opts: MantisVisualTaskCommanderOptions) => {
       await runVisualTask({
         browserUrl: opts.browserUrl,
-        crabboxBin: opts.crabboxBin,
+        botboxBin: opts.botboxBin,
         duration: opts.duration,
         expectText: opts.expectText,
         idleTimeout: opts.idleTimeout,
@@ -478,7 +478,7 @@ export function registerMantisCli(qa: Command) {
     )
     .option("--repo-root <path>", "Repository root to target when running from a neutral cwd")
     .option("--output-dir <path>", "Mantis visual-task artifact directory")
-    .option("--crabbox-bin <path>", "Crabbox binary path")
+    .option("--botbox-bin <path>", "Crabbox binary path")
     .option("--provider <provider>", "Crabbox provider")
     .option("--lease-id <id>", "Crabbox lease id")
     .option("--browser-url <url>", "URL to open in the visible browser")
@@ -491,7 +491,7 @@ export function registerMantisCli(qa: Command) {
     .action(async (opts: MantisVisualDriverCommanderOptions) => {
       await runVisualDriver({
         browserUrl: opts.browserUrl,
-        crabboxBin: opts.crabboxBin,
+        botboxBin: opts.botboxBin,
         expectText: opts.expectText,
         leaseId: opts.leaseId,
         outputDir: opts.outputDir,

@@ -310,7 +310,7 @@ describe("detectChangedScope", () => {
       runUiTests: false,
     });
 
-    expect(detectChangedScope([".crabbox.yaml"])).toEqual({
+    expect(detectChangedScope([".botbox.yaml"])).toEqual({
       runNode: true,
       runMacos: false,
       runIosBuild: false,

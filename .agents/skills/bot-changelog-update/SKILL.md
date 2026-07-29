@@ -164,7 +164,7 @@ every human `Thanks @...` attribution.
      untyped title is not automatically editorial
    - do not add GHSA references, advisory IDs, or security advisory slugs to
      changelog entries or GitHub release-note text unless explicitly requested
-   - never thank bots, `@claude`, `@bot`, `@clawsweeper`, or `@steipete`
+   - never thank bots, `@claude`, `@bot`, `@botsweeper`, or `@steipete`
    - do not use GitHub's release contributor count as the source of truth; the
      changelog must carry the complete human credit set itself
 7. Sorting preference:

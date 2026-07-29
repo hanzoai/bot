@@ -5,6 +5,6 @@ import { LEGACY_MANIFEST_KEYS, MANIFEST_KEY } from "./legacy-names.js";
 describe("compat/legacy-names", () => {
   it("keeps the current manifest key primary while exposing legacy fallbacks", () => {
     expect(MANIFEST_KEY).toBe("bot");
-    expect(LEGACY_MANIFEST_KEYS).toEqual(["clawdbot"]);
+    expect(LEGACY_MANIFEST_KEYS).toEqual(["bot"]);
   });
 });

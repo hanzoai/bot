@@ -56,7 +56,7 @@ export function createTlonApprovalRuntime(params: {
         mark: "settings-event",
         json: {
           "put-entry": {
-            desk: "moltbot",
+            desk: "bot",
             "bucket-key": "tlon",
             "entry-key": "pendingApprovals",
             value: JSON.stringify(getPendingApprovals()),
@@ -80,7 +80,7 @@ export function createTlonApprovalRuntime(params: {
         mark: "settings-event",
         json: {
           "put-entry": {
-            desk: "moltbot",
+            desk: "bot",
             "bucket-key": "tlon",
             "entry-key": "dmAllowlist",
             value: nextAllowlist,
@@ -116,7 +116,7 @@ export function createTlonApprovalRuntime(params: {
         mark: "settings-event",
         json: {
           "put-entry": {
-            desk: "moltbot",
+            desk: "bot",
             "bucket-key": "tlon",
             "entry-key": "channelRules",
             value: JSON.stringify(updatedRules),

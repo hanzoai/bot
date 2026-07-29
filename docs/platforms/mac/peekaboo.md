@@ -31,7 +31,7 @@ Use Peekaboo for the broad macOS automation surface via Bot.app's permission-awa
 
 In the macOS app: **Settings -> Enable Peekaboo Bridge**. The toggle requires **Allow Computer Control** to be on, since both grant local UI automation; with Computer Control off the toggle is disabled and the host does not run. To drive Peekaboo without Computer Control, run Peekaboo's own Mac app as the host instead.
 
-When enabled (and Computer Control is on), Bot starts a local UNIX socket server at `~/Library/Application Support/Bot/<socket-name>`. If disabled, the host stops and `peekaboo` falls back to other available hosts. The coordinator also maintains legacy socket symlinks (`clawdbot`, `clawdis`, `moltbot` under Application Support) pointing at the current socket for older `peekaboo` installs.
+When enabled (and Computer Control is on), Bot starts a local UNIX socket server at `~/Library/Application Support/Bot/<socket-name>`. If disabled, the host stops and `peekaboo` falls back to other available hosts. The coordinator also maintains legacy socket symlinks (`bot`, `clawdis`, `bot` under Application Support) pointing at the current socket for older `peekaboo` installs.
 
 ## Client discovery order
 

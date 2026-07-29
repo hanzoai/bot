@@ -183,7 +183,7 @@ run_remote_testbox_full_test_gate() {
   # own wrapper syncs this prep tree (the canonical copy would sync the primary
   # checkout instead).
   run_quiet_logged "$label" "$log_file" \
-    node scripts/crabbox-wrapper.mjs run \
+    node scripts/botbox-wrapper.mjs run \
     --provider blacksmith-testbox \
     --blacksmith-org bot \
     --blacksmith-workflow .github/workflows/ci-check-testbox.yml \
@@ -197,7 +197,7 @@ run_remote_testbox_full_test_gate() {
 }
 
 read_remote_testbox_gate_stamp() {
-  # crabbox --timing-json emits one single-line JSON report on stderr; pick the
+  # botbox --timing-json emits one single-line JSON report on stderr; pick the
   # last successful blacksmith-testbox report in the gate log as the stamp.
   local log_file="$1"
   jq -c -R '

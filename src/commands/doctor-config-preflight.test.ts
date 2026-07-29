@@ -31,7 +31,7 @@ function readConfigHealthRow(env: NodeJS.ProcessEnv, configPath: string) {
 }
 
 async function writeLegacyConfig(home: string): Promise<string> {
-  const legacyPath = path.join(home, ".clawdbot", "clawdbot.json");
+  const legacyPath = path.join(home, ".bot", "bot.json");
   await fs.mkdir(path.dirname(legacyPath), { recursive: true });
   await fs.writeFile(legacyPath, '{"gateway":{"mode":"local"}}\n', "utf-8");
   return legacyPath;

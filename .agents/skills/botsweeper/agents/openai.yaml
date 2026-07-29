@@ -1,0 +1,4 @@
+interface:
+  display_name: "BotSweeper"
+  short_description: "Inspect BotSweeper commit review reports and Actions runs."
+  default_prompt: "Review recent BotSweeper commit reports and summarize findings."

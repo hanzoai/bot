@@ -3106,16 +3106,16 @@ has_bot_config() {
     if [[ -n "${BOT_STATE_DIR:-}" ]]; then
         local state_dir
         state_dir="$(resolve_bot_user_path "$BOT_STATE_DIR")"
-        if [[ -f "$state_dir/bot.json" || -f "$state_dir/clawdbot.json" ]]; then
+        if [[ -f "$state_dir/bot.json" || -f "$state_dir/bot.json" ]]; then
             return 0
         fi
         return 1
     fi
 
     if [[ -f "$effective_home/.hanzoai/bot.json" ||
-        -f "$effective_home/.bot/clawdbot.json" ||
-        -f "$effective_home/.clawdbot/bot.json" ||
-        -f "$effective_home/.clawdbot/clawdbot.json" ]]; then
+        -f "$effective_home/.bot/bot.json" ||
+        -f "$effective_home/.bot/bot.json" ||
+        -f "$effective_home/.bot/bot.json" ]]; then
         return 0
     fi
     return 1

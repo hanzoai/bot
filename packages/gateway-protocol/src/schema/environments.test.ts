@@ -100,13 +100,13 @@ describe("worker environment protocol schemas", () => {
     expect(
       Value.Check(EnvironmentsListResultSchema, {
         environments: [],
-        profiles: [{ id: "aws", providerId: "crabbox" }],
+        profiles: [{ id: "aws", providerId: "botbox" }],
       }),
     ).toBe(true);
     expect(
       Value.Check(EnvironmentsListResultSchema, {
         environments: [],
-        profiles: [{ id: "aws", providerId: "crabbox", settings: { token: "hidden" } }],
+        profiles: [{ id: "aws", providerId: "botbox", settings: { token: "hidden" } }],
       }),
     ).toBe(false);
   });

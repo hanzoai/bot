@@ -8,7 +8,7 @@ export const DEFAULT_TIMEOUT_MS = 5000;
 
 export const PROVIDER_LABELS = {
   anthropic: "Claude",
-  clawrouter: "ClawRouter",
+  botrouter: "BotRouter",
   deepseek: "DeepSeek",
   "github-copilot": "Copilot",
   "google-gemini-cli": "Gemini",

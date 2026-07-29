@@ -182,7 +182,7 @@ const STRIPE_FILE_SECONDS_HINTS = new Map([
   ["test/scripts/bundled-plugin-install-uninstall-probe.test.ts", 4],
   ["test/scripts/changed-lanes.test.ts", 5],
   ["test/scripts/ci-workflow-guards.test.ts", 12],
-  ["test/scripts/crabbox-wrapper.test.ts", 19],
+  ["test/scripts/botbox-wrapper.test.ts", 19],
   ["test/scripts/find-reusable-release-validation.test.ts", 8],
   ["test/scripts/install-sh.test.ts", 6],
   ["test/scripts/kitchen-sink-rpc-walk.test.ts", 5],

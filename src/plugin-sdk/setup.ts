@@ -3,7 +3,7 @@
 export type { BotConfig } from "../config/config.js";
 export type { DmPolicy } from "../config/types.js";
 // Registry readers (2026-07-22): @nodeskai/feishu, bot-channel-whatsapp-official,
-// bot-vk, bot-ndr, moltbot-channel-feishu, @kagura-agent/bot-zulip,
+// bot-vk, bot-ndr, bot-channel-feishu, @kagura-agent/bot-zulip,
 // @jeik/dingtalk-connector, @xzq-xu/feishu, @dingtalk-real-ai/dingtalk-connector,
 // @bot-vk/vk, yzw-dingtalk-connector, and bot-channel-zulip.
 export type { GroupPolicy } from "../config/types.js";

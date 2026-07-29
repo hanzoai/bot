@@ -475,7 +475,7 @@ suite.define(() => {
           withWork
             ? {
                 execNode: nodeHash,
-                worktree: { branch: "bot/wt-1", repoRoot: "/Users/dev/Projects/clawdbot" },
+                worktree: { branch: "bot/wt-1", repoRoot: "/Users/dev/Projects/bot" },
               }
             : {},
         ),
@@ -520,12 +520,12 @@ suite.define(() => {
       const namesLocator = page.locator(".sidebar-recent-session__name");
       await expect
         .poll(() => trimmedTextContents(namesLocator))
-        .toContain("clawdbot ⎇ wt-1 · …0357");
+        .toContain("bot ⎇ wt-1 · …0357");
 
       // Names and subtitles never show raw node ids or raw agent keys.
       const names = await trimmedTextContents(page.locator(".sidebar-recent-session__name"));
       expect(names).toContain("New thread");
-      expect(names).toContain("clawdbot ⎇ wt-1 · …0357");
+      expect(names).toContain("bot ⎇ wt-1 · …0357");
       expect(names).toContain("node-mcp-debug-…8b2e");
       const subtitles = await trimmedTextContents(
         page.locator(".sidebar-recent-session__subtitle"),
@@ -568,7 +568,7 @@ suite.define(() => {
     const rows = [
       ...Array.from({ length: 8 }, (_, index) =>
         sessionRow(`agent:main:work-${index}`, `Work session ${index}`, baseTime - index * 60_000, {
-          worktree: { branch: `bot/wt-${index}`, repoRoot: "/Users/dev/Projects/clawdbot" },
+          worktree: { branch: `bot/wt-${index}`, repoRoot: "/Users/dev/Projects/bot" },
         }),
       ),
       ...Array.from({ length: 30 }, (_, index) =>

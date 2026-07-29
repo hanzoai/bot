@@ -3334,10 +3334,10 @@ describe("doctor health contributions", () => {
     const legacyConfig = {
       models: {
         providers: {
-          clawrouter: {
+          botrouter: {
             api: "openai-completions",
             apiKey: testApiKey,
-            baseUrl: "https://clawrouter.example/v1",
+            baseUrl: "https://botrouter.example/v1",
             models: [
               {
                 id: "test-model",
@@ -3355,7 +3355,7 @@ describe("doctor health contributions", () => {
     } as BotConfig;
     const migrated = migrateLegacySecretRefEnvMarkers(legacyConfig);
     expect(migrated.changes).toEqual([
-      `Moved models.providers.clawrouter.apiKey ${legacyMarker} marker → structured env SecretRef.`,
+      `Moved models.providers.botrouter.apiKey ${legacyMarker} marker → structured env SecretRef.`,
     ]);
     const ctx = {
       cfg: migrated.config,
@@ -3375,7 +3375,7 @@ describe("doctor health contributions", () => {
     expect(mocks.replaceConfigFile).toHaveBeenCalledWith(
       expect.objectContaining({ nextConfig: migrated.config }),
     );
-    expect(migrated.config.models?.providers?.clawrouter?.apiKey).toEqual({
+    expect(migrated.config.models?.providers?.botrouter?.apiKey).toEqual({
       id: "TEST_ENV_REF",
       provider: "default",
       source: "env",

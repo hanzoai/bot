@@ -239,7 +239,7 @@ describe("imessageApprovalNativeRuntime", () => {
     };
 
     it("refuses to bind when the bridge returns only a numeric ROWID", async () => {
-      // Regression for ClawSweeper P1: native deliverPending must require a
+      // Regression for BotSweeper P1: native deliverPending must require a
       // GUID for the binding because inbound `reacted_to_guid` is always a
       // GUID — never the numeric ROWID. A bridge that returns just
       // { message_id: 12345 } has no usable approval-reaction id.

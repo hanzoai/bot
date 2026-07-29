@@ -360,7 +360,7 @@ Use `agent` mode for cross-service correlation evidence. For an authoritative
 ClickClack message id in its canonical `msg_<ulid>` shape, the channel derives
 the deterministic Bot run id `clickclack:<message-id>`. Each model call is
 then visible in diagnostics as `clickclack:<message-id>:model:<n>`; when that
-turn uses ClawRouter, the same model-call id is sent as `X-Request-ID`.
+turn uses BotRouter, the same model-call id is sent as `X-Request-ID`.
 `model` mode bypasses the normal agent run/session diagnostics and is therefore
 not suitable for this evidence path.
 

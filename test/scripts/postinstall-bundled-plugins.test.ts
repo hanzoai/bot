@@ -529,7 +529,7 @@ describe("bundled plugin postinstall", () => {
     const stateOverride = path.join(home, "custom-state");
     const systemState = path.join(home, "system-state");
     const defaultLegacyRoot = path.join(home, ".bot", "plugin-runtime-deps");
-    const oldBrandLegacyRoot = path.join(home, ".clawdbot", "plugin-runtime-deps");
+    const oldBrandLegacyRoot = path.join(home, ".bot", "plugin-runtime-deps");
     const overrideLegacyRoot = path.join(stateOverride, "plugin-runtime-deps");
     const systemLegacyRoot = path.join(systemState, "plugin-runtime-deps");
     const thirdPartyNodeModules = path.join(
@@ -650,7 +650,7 @@ describe("bundled plugin postinstall", () => {
     expect(warn).toHaveBeenCalledTimes(2);
     expect(warn).toHaveBeenNthCalledWith(
       1,
-      "[postinstall] could not prune legacy plugin runtime deps /home/alice/.clawdbot/plugin-runtime-deps: Error: locked",
+      "[postinstall] could not prune legacy plugin runtime deps /home/alice/.bot/plugin-runtime-deps: Error: locked",
     );
     expect(warn).toHaveBeenNthCalledWith(
       2,
@@ -671,7 +671,7 @@ describe("bundled plugin postinstall", () => {
         homedir: () => "/users/alice",
       }),
     ).toEqual([
-      "/srv/bot-home/.clawdbot/plugin-runtime-deps",
+      "/srv/bot-home/.bot/plugin-runtime-deps",
       "/srv/bot-home/.bot/plugin-runtime-deps",
       "/srv/bot-home/profile/plugin-runtime-deps",
       "/srv/bot-home/state/plugin-runtime-deps",

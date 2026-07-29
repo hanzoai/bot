@@ -152,7 +152,7 @@ discrawl status --json
 DISCRAWL_NO_AUTO_UPDATE=1 discrawl search --limit 5 "test"
 ```
 
-## ClawSweeper Sandbox
+## BotSweeper Sandbox
 
 Use the sandbox reader only:
 
@@ -163,7 +163,7 @@ discrawl-sandbox status --json
 ```
 
 This reader imports `https://github.com/bot/discord-store.git` into
-`/root/clawsweeper-sandbox-workspace/.discrawl/discrawl.db` with
+`/root/botsweeper-sandbox-workspace/.discrawl/discrawl.db` with
 `discord.token_source = "none"`. The published Git snapshot is public-channel
 filtered; do not use `/root/.discrawl/config.toml` or the rich writer DB from
 sandboxed public Discord sessions.

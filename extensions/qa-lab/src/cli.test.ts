@@ -482,8 +482,8 @@ describe("qa cli registration", () => {
       "https://bot.ai/docs",
       "--html-file",
       "qa-artifacts/timeline.html",
-      "--crabbox-bin",
-      "/tmp/crabbox",
+      "--botbox-bin",
+      "/tmp/botbox",
       "--provider",
       "hetzner",
       "--class",
@@ -499,7 +499,7 @@ describe("qa cli registration", () => {
 
     expect(runMantisDesktopBrowserSmokeCommand).toHaveBeenCalledWith({
       browserUrl: "https://bot.ai/docs",
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       htmlFile: "qa-artifacts/timeline.html",
       idleTimeout: "30m",
       keepLease: true,
@@ -525,7 +525,7 @@ describe("qa cli registration", () => {
 
     expect(runMantisDesktopBrowserSmokeCommand).toHaveBeenCalledWith({
       browserUrl: undefined,
-      crabboxBin: undefined,
+      botboxBin: undefined,
       htmlFile: undefined,
       idleTimeout: undefined,
       keepLease: undefined,
@@ -549,8 +549,8 @@ describe("qa cli registration", () => {
       "/tmp/bot-repo",
       "--output-dir",
       ".artifacts/qa-e2e/mantis/slack-desktop",
-      "--crabbox-bin",
-      "/tmp/crabbox",
+      "--botbox-bin",
+      "/tmp/botbox",
       "--provider",
       "hetzner",
       "--market",
@@ -585,7 +585,7 @@ describe("qa cli registration", () => {
 
     expect(runMantisSlackDesktopSmokeCommand).toHaveBeenCalledWith({
       alternateModel: "openai/gpt-5.6-luna",
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       credentialRole: "maintainer",
       credentialSource: "env",
       fastMode: true,
@@ -619,8 +619,8 @@ describe("qa cli registration", () => {
       "/tmp/bot-repo",
       "--output-dir",
       ".artifacts/qa-e2e/mantis/telegram-desktop",
-      "--crabbox-bin",
-      "/tmp/crabbox",
+      "--botbox-bin",
+      "/tmp/botbox",
       "--provider",
       "hetzner",
       "--machine-class",
@@ -640,13 +640,13 @@ describe("qa cli registration", () => {
       "--telegram-profile-archive-env",
       "TELEGRAM_PROFILE_TGZ_B64",
       "--telegram-profile-dir",
-      "/home/crabbox/.local/share/TelegramDesktop",
+      "/home/botbox/.local/share/TelegramDesktop",
       "--no-gateway-setup",
       "--keep-lease",
     ]);
 
     expect(runMantisTelegramDesktopBuilderCommand).toHaveBeenCalledWith({
-      crabboxBin: "/tmp/crabbox",
+      botboxBin: "/tmp/botbox",
       credentialRole: "ci",
       credentialSource: "convex",
       gatewaySetup: false,
@@ -659,7 +659,7 @@ describe("qa cli registration", () => {
       provider: "hetzner",
       repoRoot: "/tmp/bot-repo",
       telegramProfileArchiveEnv: "TELEGRAM_PROFILE_TGZ_B64",
-      telegramProfileDir: "/home/crabbox/.local/share/TelegramDesktop",
+      telegramProfileDir: "/home/botbox/.local/share/TelegramDesktop",
       ttl: "120m",
     });
   });

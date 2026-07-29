@@ -1,7 +1,7 @@
 // Feishu plugin module implements monitor.account behavior.
 import * as crypto from "node:crypto";
 import type * as Lark from "@larksuiteoapi/node-sdk";
-import type { ClawdbotConfig, PluginRuntime, RuntimeEnv, HistoryEntry } from "../runtime-api.js";
+import type { BotConfig, PluginRuntime, RuntimeEnv, HistoryEntry } from "../runtime-api.js";
 import { raceWithTimeoutAndAbort } from "./async.js";
 import {
   handleFeishuMessage,
@@ -49,7 +49,7 @@ type FeishuReactionDeletedEvent = FeishuReactionCreatedEvent & {
 };
 
 type ResolveReactionSyntheticEventParams = {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   accountId: string;
   event: FeishuReactionCreatedEvent;
   botOpenId?: string;
@@ -163,7 +163,7 @@ function normalizeFeishuChatType(value: unknown): FeishuChatType | undefined {
 }
 
 type RegisterEventHandlersContext = {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   accountId: string;
   channelRuntime: PluginRuntime["channel"];
   runtime?: RuntimeEnv;
@@ -468,7 +468,7 @@ type BotOpenIdSource =
   | { kind: "fetch" };
 
 type MonitorSingleAccountParams = {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   account: ResolvedFeishuAccount;
   channelRuntime?: PluginRuntime["channel"];
   runtime?: RuntimeEnv;

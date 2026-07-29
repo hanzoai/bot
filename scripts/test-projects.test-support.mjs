@@ -535,7 +535,7 @@ const GITHUB_WORKFLOW_OWNER_TEST_TARGETS = new Map([
       "test/scripts/verify-pr-hosted-gates.test.ts",
     ],
   ],
-  [".github/workflows/crabbox-hydrate.yml", ["test/scripts/package-acceptance-workflow.test.ts"]],
+  [".github/workflows/botbox-hydrate.yml", ["test/scripts/package-acceptance-workflow.test.ts"]],
   [".github/workflows/dependency-guard.yml", ["test/scripts/dependency-guard-workflow.test.ts"]],
   [".github/workflows/docker-release.yml", ["src/dockerfile.test.ts"]],
   [
@@ -740,7 +740,7 @@ const TOOLING_SOURCE_TEST_TARGETS = new Map([
     ".agents/skills/bot-changelog-update/scripts/verify-release-notes.mjs",
     ["test/scripts/release-notes-ledger.test.ts", "test/scripts/verify-release-notes.test.ts"],
   ],
-  [".crabbox.yaml", ["test/scripts/package-acceptance-workflow.test.ts"]],
+  [".botbox.yaml", ["test/scripts/package-acceptance-workflow.test.ts"]],
   [".github/actions/detect-docs-changes/action.yml", ["test/scripts/ci-workflow-guards.test.ts"]],
   [
     ".github/actions/create-generated-pr-tokens/action.yml",
@@ -783,7 +783,7 @@ const TOOLING_SOURCE_TEST_TARGETS = new Map([
   [".github/images/live-media-runner/Dockerfile", LIVE_MEDIA_RUNNER_IMAGE_TEST_TARGETS],
   [".github/workflows/auto-response.yml", ["test/scripts/ci-workflow-guards.test.ts"]],
   [".github/workflows/ci.yml", ["test/scripts/ci-workflow-guards.test.ts"]],
-  [".github/workflows/clawsweeper-dispatch.yml", ["test/scripts/ci-workflow-guards.test.ts"]],
+  [".github/workflows/botsweeper-dispatch.yml", ["test/scripts/ci-workflow-guards.test.ts"]],
   [".github/workflows/labeler.yml", ["test/scripts/ci-workflow-guards.test.ts"]],
   [".github/workflows/real-behavior-proof.yml", ["test/scripts/ci-workflow-guards.test.ts"]],
   [".github/workflows/stale.yml", ["test/scripts/ci-workflow-guards.test.ts"]],
@@ -800,7 +800,7 @@ const TOOLING_SOURCE_TEST_TARGETS = new Map([
     ["test/scripts/ci-workflow-guards.test.ts", "test/scripts/package-acceptance-workflow.test.ts"],
   ],
   [
-    ".github/workflows/crabbox-hydrate.yml",
+    ".github/workflows/botbox-hydrate.yml",
     ["test/scripts/ci-workflow-guards.test.ts", "test/scripts/package-acceptance-workflow.test.ts"],
   ],
   [
@@ -823,8 +823,8 @@ const TOOLING_SOURCE_TEST_TARGETS = new Map([
   ],
   ["scripts/build-all.mjs", ["test/scripts/build-all.test.ts"]],
   ["scripts/build-stamp.mjs", ["src/infra/build-stamp.test.ts"]],
-  ["scripts/crabbox-wrapper-providers.mjs", ["test/scripts/crabbox-wrapper.test.ts"]],
-  ["scripts/crabbox-wrapper.mjs", ["test/scripts/crabbox-wrapper.test.ts"]],
+  ["scripts/botbox-wrapper-providers.mjs", ["test/scripts/botbox-wrapper.test.ts"]],
+  ["scripts/botbox-wrapper.mjs", ["test/scripts/botbox-wrapper.test.ts"]],
   ["scripts/github/barnacle-auto-response.mjs", ["test/scripts/barnacle-auto-response.test.ts"]],
   ["scripts/changed-lanes.mjs", ["test/scripts/changed-lanes.test.ts"]],
   [
@@ -1782,8 +1782,8 @@ const TOOLING_SOURCE_TEST_TARGETS = new Map([
     ],
   ],
   [
-    "scripts/e2e/telegram-user-crabbox-proof.ts",
-    ["test/scripts/telegram-user-crabbox-proof.test.ts"],
+    "scripts/e2e/telegram-user-botbox-proof.ts",
+    ["test/scripts/telegram-user-botbox-proof.test.ts"],
   ],
   ["scripts/e2e/telegram-user-credential.ts", ["test/scripts/telegram-user-credential.test.ts"]],
   ["scripts/e2e/telegram-user-credential-io.ts", ["test/scripts/telegram-user-credential.test.ts"]],

@@ -1,5 +1,5 @@
 // Feishu plugin module implements typing behavior.
-import type { ClawdbotConfig, RuntimeEnv } from "../runtime-api.js";
+import type { BotConfig, RuntimeEnv } from "../runtime-api.js";
 import { resolveFeishuRuntimeAccount } from "./accounts.js";
 import { createFeishuClient } from "./client.js";
 import { getFeishuRuntime } from "./runtime.js";
@@ -33,7 +33,7 @@ type FeishuMessageReactionCreateResponse = Awaited<
  * Also checks for backoff codes in non-throwing SDK responses (#28157).
  */
 export async function addTypingIndicator(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   messageId: string;
   accountId?: string;
   runtime?: RuntimeEnv;
@@ -90,7 +90,7 @@ export async function addTypingIndicator(params: {
  * Rate-limit and quota errors are re-thrown for the same reason as above.
  */
 export async function removeTypingIndicator(params: {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   state: TypingIndicatorState;
   accountId?: string;
   runtime?: RuntimeEnv;

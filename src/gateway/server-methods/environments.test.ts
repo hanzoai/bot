@@ -67,7 +67,7 @@ function mockContext(
             cloudWorkers: {
               profiles: {
                 zeta: { provider: "static-ssh", settings: {} },
-                aws: { provider: "crabbox", settings: {} },
+                aws: { provider: "botbox", settings: {} },
               },
             },
           }),
@@ -216,7 +216,7 @@ describe("environment gateway methods", () => {
     expect(ok).toBe(true);
     expect(payload).toMatchObject({
       profiles: [
-        { id: "aws", providerId: "crabbox" },
+        { id: "aws", providerId: "botbox" },
         { id: "zeta", providerId: "static-ssh" },
       ],
       environments: [

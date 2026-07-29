@@ -2,7 +2,7 @@
 import "./lifecycle.test-support.js";
 import { createRuntimeEnv } from "bot/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ClawdbotConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import {
   getFeishuLifecycleTestMocks,
   resetFeishuLifecycleTestMocks,
@@ -52,7 +52,7 @@ const { cfg: lifecycleConfig, account: lifecycleAccount } = createFeishuLifecycl
     session: { mainKey: "main", scope: "per-sender" },
   },
 }) as {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   account: ResolvedFeishuAccount;
 };
 

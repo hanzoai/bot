@@ -248,7 +248,7 @@ describe("ClickClack account resolution", () => {
           token: "test-token-placeholder",
           accounts: {
             bridge: {
-              token: "clawrouter-e2e-secret",
+              token: "botrouter-e2e-secret",
               agentActivity: true,
             },
           },

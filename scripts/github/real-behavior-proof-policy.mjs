@@ -2,7 +2,7 @@
 import { readBoundedResponseText } from "../lib/bounded-response.mjs";
 import { escapeRegExp } from "../lib/regexp.mjs";
 
-/** ClawSweeper-owned labels that Bot preserves but does not mutate. */
+/** BotSweeper-owned labels that Bot preserves but does not mutate. */
 export const PROOF_OVERRIDE_LABEL = "proof: override";
 export const PROOF_SUFFICIENT_LABEL = "proof: sufficient";
 export const NEEDS_PR_CONTEXT_LABEL = "triage: needs-pr-context";
@@ -10,8 +10,8 @@ const MAINTAINER_TEAM_SLUG = "maintainer";
 const DEFAULT_GITHUB_API_TIMEOUT_MS = 30_000;
 const GITHUB_API_RESPONSE_BODY_MAX_BYTES = 1024 * 1024;
 
-const CLAWSWEEPER_PROOF_VERDICT_STATUS = "clawsweeper_exact_head_pass";
-const CLAWSWEEPER_BOT_LOGINS = new Set(["clawsweeper[bot]", "bot-clawsweeper[bot]"]);
+const CLAWSWEEPER_PROOF_VERDICT_STATUS = "botsweeper_exact_head_pass";
+const CLAWSWEEPER_BOT_LOGINS = new Set(["botsweeper[bot]", "bot-botsweeper[bot]"]);
 
 const privilegedAuthorAssociations = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
 
@@ -376,21 +376,21 @@ function extractMarkerField(marker, name) {
   return match?.[1] ?? "";
 }
 
-function isTrustedClawSweeperComment(comment) {
+function isTrustedBotSweeperComment(comment) {
   const appSlug = String(
     comment?.performed_via_github_app?.slug ?? comment?.performedViaGithubApp?.slug ?? "",
   ).toLowerCase();
-  if (appSlug === "clawsweeper") {
+  if (appSlug === "botsweeper") {
     return true;
   }
   // GitHub can omit performed_via_github_app on issue comments while still
-  // returning a reserved ClawSweeper App bot identity.
+  // returning a reserved BotSweeper App bot identity.
   const login = String(comment?.user?.login ?? "").toLowerCase();
   const userType = String(comment?.user?.type ?? "");
   return CLAWSWEEPER_BOT_LOGINS.has(login) && userType === "Bot";
 }
 
-export function hasClawSweeperExactHeadProof({ pullRequest, comments = [] } = {}) {
+export function hasBotSweeperExactHeadProof({ pullRequest, comments = [] } = {}) {
   const pullNumber = String(pullRequest?.number ?? "");
   const headSha = String(pullRequest?.head?.sha ?? pullRequest?.head_sha ?? "").toLowerCase();
   if (!pullNumber || !/^[0-9a-f]{40}$/i.test(headSha)) {
@@ -398,11 +398,11 @@ export function hasClawSweeperExactHeadProof({ pullRequest, comments = [] } = {}
   }
 
   for (const comment of comments) {
-    if (!isTrustedClawSweeperComment(comment)) {
+    if (!isTrustedBotSweeperComment(comment)) {
       continue;
     }
     const body = String(comment?.body ?? "");
-    const markers = body.match(/<!--\s*clawsweeper-verdict:pass\b[\s\S]*?-->/gi) ?? [];
+    const markers = body.match(/<!--\s*botsweeper-verdict:pass\b[\s\S]*?-->/gi) ?? [];
     for (const marker of markers) {
       const item = extractMarkerField(marker, "item");
       const sha = extractMarkerField(marker, "sha").toLowerCase();
@@ -414,14 +414,14 @@ export function hasClawSweeperExactHeadProof({ pullRequest, comments = [] } = {}
   return false;
 }
 
-export function evaluateClawSweeperExactHeadProof({ pullRequest, comments = [] } = {}) {
-  if (hasClawSweeperExactHeadProof({ pullRequest, comments })) {
+export function evaluateBotSweeperExactHeadProof({ pullRequest, comments = [] } = {}) {
+  if (hasBotSweeperExactHeadProof({ pullRequest, comments })) {
     return result(
       CLAWSWEEPER_PROOF_VERDICT_STATUS,
-      "ClawSweeper accepted the PR evidence for the exact PR head.",
+      "BotSweeper accepted the PR evidence for the exact PR head.",
     );
   }
-  return result("insufficient", "No exact-head ClawSweeper proof verdict was found.");
+  return result("insufficient", "No exact-head BotSweeper proof verdict was found.");
 }
 
 export function evaluatePullRequestContext({ pullRequest } = {}) {

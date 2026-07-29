@@ -8,7 +8,7 @@ import { createFeishuClient } from "./client.js";
 import { createFeishuCommentReplyDispatcher } from "./comment-dispatcher.js";
 import {
   createChannelPairingController,
-  type ClawdbotConfig,
+  type BotConfig,
   type RuntimeEnv,
 } from "./comment-handler-runtime-api.js";
 import { buildFeishuCommentTarget } from "./comment-target.js";
@@ -23,7 +23,7 @@ import { resolveFeishuDmIngressAccess } from "./policy.js";
 import { getFeishuRuntime } from "./runtime.js";
 
 type HandleFeishuCommentEventParams = {
-  cfg: ClawdbotConfig;
+  cfg: BotConfig;
   accountId: string;
   runtime?: RuntimeEnv;
   event: FeishuDriveCommentNoticeEvent;
@@ -89,7 +89,7 @@ export async function handleFeishuCommentEvent(
     channel: "feishu",
     accountId: account.accountId,
   });
-  const resolveCommentAuthorization = async (candidateCfg: ClawdbotConfig, mayPair: boolean) => {
+  const resolveCommentAuthorization = async (candidateCfg: BotConfig, mayPair: boolean) => {
     const candidateAccount = resolveFeishuRuntimeAccount({
       cfg: candidateCfg,
       accountId: account.accountId,
@@ -151,7 +151,7 @@ export async function handleFeishuCommentEvent(
   }
 
   let effectiveCfg = params.cfg;
-  const currentCfg = core.config.current() as ClawdbotConfig;
+  const currentCfg = core.config.current() as BotConfig;
   if (currentCfg !== effectiveCfg) {
     const currentAuthorization = await resolveCommentAuthorization(currentCfg, true);
     if (currentAuthorization.ingress.ingress.admission !== "dispatch") {

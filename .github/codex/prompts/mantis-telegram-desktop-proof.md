@@ -42,7 +42,7 @@ Inputs are provided as environment variables:
 
 Required workflow:
 
-1. Read `.agents/skills/telegram-crabbox-e2e-proof/SKILL.md`.
+1. Read `.agents/skills/telegram-botbox-e2e-proof/SKILL.md`.
 2. Inspect the PR with `gh pr view "$MANTIS_PR_NUMBER"` and
    `gh pr diff "$MANTIS_PR_NUMBER"`.
 3. Decide whether the PR has a visibly reproducible Telegram Desktop
@@ -119,7 +119,7 @@ than Telegram-visible behavior`. Use this manifest shape and do not create
    model key needed for this isolated proof.
 6. In each worktree, run the real-user Telegram Crabbox proof flow from the
    skill with `$BOT_TELEGRAM_USER_PROOF_CMD`; do not run
-   `pnpm qa:telegram-user:crabbox` directly. Run it from the trusted workflow
+   `pnpm qa:telegram-user:botbox` directly. Run it from the trusted workflow
    checkout and pass
    `--sut-container --sut-lane baseline --sut-repo-root "$MANTIS_BASELINE_ROOT"`
    for main and
@@ -129,7 +129,7 @@ than Telegram-visible behavior`. Use this manifest shape and do not create
    the root-owned wrapper is the only process allowed to mount it. This keeps
    candidate code away from the host Codex proxy and workflow filesystem while
    preserving real Telegram network behavior. Use
-   `$BOT_TELEGRAM_USER_DRIVER_SCRIPT`, the workflow-provided `crabbox`
+   `$BOT_TELEGRAM_USER_DRIVER_SCRIPT`, the workflow-provided `botbox`
    binary, and the workflow-provided local `ffmpeg`/`ffprobe`; do not generate,
    install, or patch replacement proof tooling during the run. Use the same
    proof idea for baseline and candidate. Let `start` return or fail on its

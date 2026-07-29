@@ -125,7 +125,7 @@ Other surfaces:
 - **TUI/Web TUI:** `/status` and `/usage` are supported.
 - **CLI:** `bot status --usage` and `bot channels list` show
   normalized provider quota windows (`X% left`, not per-response costs).
-  Current usage-window providers: Claude (Anthropic), ClawRouter, Copilot
+  Current usage-window providers: Claude (Anthropic), BotRouter, Copilot
   (GitHub), DeepSeek, Gemini (Google Gemini CLI), MiniMax, OpenAI, Xiaomi,
   Xiaomi Token Plan, and z.ai.
 

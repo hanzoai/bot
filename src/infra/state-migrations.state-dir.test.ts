@@ -26,7 +26,7 @@ async function withStateDirFixture(run: (root: string) => Promise<void>): Promis
 describe("legacy state dir auto-migration", () => {
   it("skips a legacy symlinked state dir when it points outside supported legacy roots", async () => {
     await withStateDirFixture(async (root) => {
-      const legacySymlink = path.join(root, ".clawdbot");
+      const legacySymlink = path.join(root, ".bot");
       const legacyDir = path.join(root, "legacy-state-source");
 
       fs.mkdirSync(legacyDir, { recursive: true });
@@ -47,13 +47,13 @@ describe("legacy state dir auto-migration", () => {
       expect(fs.readFileSync(path.join(root, "legacy-state-source", "marker.txt"), "utf-8")).toBe(
         "ok",
       );
-      expect(fs.readFileSync(path.join(root, ".clawdbot", "marker.txt"), "utf-8")).toBe("ok");
+      expect(fs.readFileSync(path.join(root, ".bot", "marker.txt"), "utf-8")).toBe("ok");
     });
   });
 
   it("skips state-dir migration when BOT_STATE_DIR is explicitly set", async () => {
     await withStateDirFixture(async (root) => {
-      const legacyDir = path.join(root, ".clawdbot");
+      const legacyDir = path.join(root, ".bot");
       fs.mkdirSync(legacyDir, { recursive: true });
 
       const result = await autoMigrateLegacyStateDir({
@@ -73,7 +73,7 @@ describe("legacy state dir auto-migration", () => {
 
   it("migrates the legacy plugin install index from an explicit state dir", async () => {
     await withStateDirFixture(async (root) => {
-      const legacyDir = path.join(root, ".clawdbot");
+      const legacyDir = path.join(root, ".bot");
       const stateDir = path.join(root, "custom-state");
       const sourcePath = path.join(stateDir, "plugins", "installs.json");
       fs.mkdirSync(legacyDir, { recursive: true });
@@ -264,7 +264,7 @@ describe("legacy state dir auto-migration", () => {
 
   it("only runs once per process until reset", async () => {
     await withStateDirFixture(async (root) => {
-      const legacyDir = path.join(root, ".clawdbot");
+      const legacyDir = path.join(root, ".bot");
       fs.mkdirSync(legacyDir, { recursive: true });
       fs.writeFileSync(path.join(legacyDir, "marker.txt"), "ok", "utf-8");
 
