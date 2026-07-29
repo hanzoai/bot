@@ -95,12 +95,16 @@ describe("bot-github-link-hovercard-provider", () => {
     expect(card?.textContent).toContain("5m ago");
     expect(anchor.href).toBe(href);
     expect(anchor.getAttribute("aria-describedby")).toBe(card?.id);
-    expect(request).toHaveBeenCalledWith("controlUi.githubPreview", {
-      kind: "pull",
-      number: 99816,
-      owner: "bot",
-      repo: "bot",
-    });
+    expect(request).toHaveBeenCalledWith(
+      "controlUi.githubPreview",
+      {
+        kind: "pull",
+        number: 99816,
+        owner: "bot",
+        repo: "bot",
+      },
+      { signal: expect.any(AbortSignal) },
+    );
 
     leave(anchor);
     expect(document.querySelector(".github-link-hovercard")).toBeNull();

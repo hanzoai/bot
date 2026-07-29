@@ -40,6 +40,12 @@ let canvasEnabledKey = "bot.canvasEnabled"
 let quickChatEnabledKey = "bot.quickChatEnabled"
 let cameraEnabledKey = "bot.cameraEnabled"
 let computerControlEnabledKey = "bot.computerControlEnabled"
+
+func isComputerControlEnabled(defaults: UserDefaults = .standard) -> Bool {
+    // object(forKey:) preserves an explicit false; bool(forKey:) would conflate it with an unset default.
+    defaults.object(forKey: computerControlEnabledKey) as? Bool ?? true
+}
+
 let activeComputerPresenceEnabledKey = "bot.activeComputerPresenceEnabled"
 let locationModeKey = "bot.locationMode"
 let locationPreciseKey = "bot.locationPreciseEnabled"

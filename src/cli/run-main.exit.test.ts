@@ -2212,6 +2212,52 @@ describe("runCli exit behavior", () => {
   });
 
   it.each([
+    {
+      name: "version-pinned skill install",
+      argv: ["node", "bot", "skills", "install", "@owner/weather", "--version", "1.2.3"],
+    },
+    {
+      name: "version-pinned skill verification",
+      argv: ["node", "bot", "skills", "verify", "@owner/weather", "--version", "1.2.3"],
+    },
+    {
+      name: "equals-form version-pinned skill install",
+      argv: ["node", "bot", "skills", "install", "@owner/weather", "--version=1.2.3"],
+    },
+    {
+      name: "profiled version-pinned skill verification",
+      argv: [
+        "node",
+        "bot",
+        "--profile",
+        "work",
+        "skills",
+        "verify",
+        "@owner/weather",
+        "--version",
+        "1.2.3",
+      ],
+    },
+  ])("starts the managed proxy for $name", async ({ argv }) => {
+    await withEnvAsync(
+      {
+        BOT_PROFILE: undefined,
+        BOT_STATE_DIR: undefined,
+        BOT_CONFIG_PATH: undefined,
+      },
+      async () => {
+        hasEnvHttpProxyAgentConfiguredMock.mockReturnValue(true);
+        tryRouteCliMock.mockResolvedValueOnce(true);
+
+        await runCli(argv);
+
+        expect(startProxyMock).toHaveBeenCalledWith(undefined);
+        expect(ensureGlobalUndiciEnvProxyDispatcherMock).toHaveBeenCalledOnce();
+      },
+    );
+  });
+
+  it.each([
     ["JSON flag", ["node", "bot", "plugins", "marketplace", "list", "--json"]],
     ["models status JSON alias", ["node", "bot", "models", "--status-json"]],
   ])("routes managed-proxy startup logs away for the %s", async (_name, argv) => {

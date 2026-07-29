@@ -3,7 +3,8 @@ import { createActionGate } from "bot/plugin-sdk/channel-actions";
 import type { ChannelMessageActionName } from "bot/plugin-sdk/channel-contract";
 import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { extractToolSend, type ChannelToolSend } from "bot/plugin-sdk/tool-send";
-import { listEnabledSlackAccounts, resolveSlackAccount } from "./accounts.js";
+import { inspectSlackAccount } from "./account-inspect.js";
+import { listSlackAccountIds } from "./accounts.js";
 import { normalizeSlackThreadTsCandidate, resolveSlackThreadTsValue } from "./thread-ts.js";
 
 export function listSlackMessageActions(
@@ -11,13 +12,17 @@ export function listSlackMessageActions(
   accountId?: string | null,
 ): ChannelMessageActionName[] {
   const accounts = (
-    accountId ? [resolveSlackAccount({ cfg, accountId })] : listEnabledSlackAccounts(cfg)
+    accountId
+      ? [inspectSlackAccount({ cfg, accountId })]
+      : listSlackAccountIds(cfg).map((listedAccountId) =>
+          inspectSlackAccount({ cfg, accountId: listedAccountId }),
+        )
   ).filter(
     (account) =>
       account.enabled &&
       (account.identity === "user"
-        ? account.userTokenSource !== "none"
-        : account.botTokenSource !== "none"),
+        ? account.userTokenStatus === "available"
+        : account.botTokenStatus === "available"),
   );
   if (accounts.length === 0) {
     return [];

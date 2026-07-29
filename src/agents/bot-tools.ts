@@ -12,6 +12,8 @@ import { selectApplicableRuntimeConfig } from "../config/config.js";
 import type { BotConfig } from "../config/types.bot.js";
 import { callGateway } from "../gateway/call.js";
 import { isEmbeddedMode } from "../infra/embedded-mode.js";
+import { formatErrorMessage } from "../infra/errors.js";
+import { createSubsystemLogger } from "../logging/subsystem.js";
 import { getActiveSecretsRuntimeConfigSnapshot } from "../secrets/runtime-state.js";
 import { getActiveRuntimeWebToolsMetadata } from "../secrets/runtime-web-tools-state.js";
 import { isCronRunSessionKey } from "../sessions/session-key-utils.js";
@@ -93,6 +95,9 @@ import { createUpdatePlanTool } from "./tools/update-plan-tool.js";
 import { createVideoGenerateTool } from "./tools/video-generate-tool.js";
 import { createWebFetchTool, createWebSearchTool } from "./tools/web-tools.js";
 import { resolveWorkspaceRoot } from "./workspace-dir.js";
+
+const mediaGenerationYieldLog = createSubsystemLogger("agents/tools/media-generation-yield");
+
 export { filterToolsByClientCaps } from "./bot-tools.client-caps.js";
 export function createBotTools(
   options?: {
@@ -271,10 +276,21 @@ export function createBotTools(
     trimmedRunSessionKey && isCronRunSessionKey(trimmedRunSessionKey)
       ? trimmedRunSessionKey
       : options?.agentSessionKey;
+  const yieldMediaGenerationTurn = options?.onYield;
   const mediaGenerationAsyncStartCallback =
-    mediaGenerationAgentSessionKey && isCronRunSessionKey(mediaGenerationAgentSessionKey)
+    !yieldMediaGenerationTurn ||
+    (mediaGenerationAgentSessionKey && isCronRunSessionKey(mediaGenerationAgentSessionKey))
       ? undefined
-      : options?.onYield;
+      : (message: string) => {
+          // Commit the start before yielding; handle teardown failures outside the owner turn.
+          setImmediate(() => {
+            void (async () => yieldMediaGenerationTurn(message))().catch((error: unknown) => {
+              mediaGenerationYieldLog.warn("Failed to yield foreground media generation turn", {
+                error: formatErrorMessage(error),
+              });
+            });
+          });
+        };
   const taskKey = normalizeOptionalString(options?.runSessionKey ?? options?.agentSessionKey);
   const { agentSessionKey: requesterSessionKey, runId: requesterTurnRunId } = options ?? {};
   const imageTool =
@@ -304,49 +320,28 @@ export function createBotTools(
         })
       : null;
   options?.recordToolPrepStage?.("bot-tools:image-tool");
+  const mediaGenerationToolOptions = {
+    config: options?.config,
+    agentDir: options?.agentDir,
+    authProfileStore: options?.authProfileStore,
+    agentSessionKey: mediaGenerationAgentSessionKey,
+    requesterOrigin: deliveryContext ?? undefined,
+    workspaceDir,
+    preparedModelRuntime: options?.preparedModelRuntime,
+    sandbox,
+    fsPolicy: options?.fsPolicy,
+    onAsyncTaskStarted: mediaGenerationAsyncStartCallback,
+  };
   const imageGenerateTool = optionalMediaTools.imageGenerate
-    ? createImageGenerateTool({
-        config: options?.config,
-        agentDir: options?.agentDir,
-        authProfileStore: options?.authProfileStore,
-        agentSessionKey: mediaGenerationAgentSessionKey,
-        requesterOrigin: deliveryContext ?? undefined,
-        workspaceDir,
-        preparedModelRuntime: options?.preparedModelRuntime,
-        sandbox,
-        fsPolicy: options?.fsPolicy,
-        onAsyncTaskStarted: mediaGenerationAsyncStartCallback,
-      })
+    ? createImageGenerateTool(mediaGenerationToolOptions)
     : null;
   options?.recordToolPrepStage?.("bot-tools:image-generate-tool");
   const videoGenerateTool = optionalMediaTools.videoGenerate
-    ? createVideoGenerateTool({
-        config: options?.config,
-        agentDir: options?.agentDir,
-        authProfileStore: options?.authProfileStore,
-        agentSessionKey: mediaGenerationAgentSessionKey,
-        requesterOrigin: deliveryContext ?? undefined,
-        workspaceDir,
-        preparedModelRuntime: options?.preparedModelRuntime,
-        sandbox,
-        fsPolicy: options?.fsPolicy,
-        onAsyncTaskStarted: mediaGenerationAsyncStartCallback,
-      })
+    ? createVideoGenerateTool(mediaGenerationToolOptions)
     : null;
   options?.recordToolPrepStage?.("bot-tools:video-generate-tool");
   const musicGenerateTool = optionalMediaTools.musicGenerate
-    ? createMusicGenerateTool({
-        config: options?.config,
-        agentDir: options?.agentDir,
-        authProfileStore: options?.authProfileStore,
-        agentSessionKey: mediaGenerationAgentSessionKey,
-        requesterOrigin: deliveryContext ?? undefined,
-        workspaceDir,
-        preparedModelRuntime: options?.preparedModelRuntime,
-        sandbox,
-        fsPolicy: options?.fsPolicy,
-        onAsyncTaskStarted: mediaGenerationAsyncStartCallback,
-      })
+    ? createMusicGenerateTool(mediaGenerationToolOptions)
     : null;
   options?.recordToolPrepStage?.("bot-tools:music-generate-tool");
   const pdfTool =
@@ -384,6 +379,7 @@ export function createBotTools(
     : createMessageTool({
         agentAccountId: options?.agentAccountId,
         agentSessionKey: options?.agentSessionKey,
+        runSessionKey: options?.runSessionKey,
         runId: options?.runId,
         agentId: sessionAgentId,
         sessionId: options?.sessionId,

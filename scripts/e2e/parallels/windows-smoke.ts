@@ -696,11 +696,12 @@ Invoke-Bot update status --json`,
   }
 
   private gatewayAction(action: "restart" | "stop"): Promise<void> {
+    const forceFlag = action === "stop" ? " --force" : "";
     return this.guestPowerShellBackground(
       `gateway-${action}`,
       `$ErrorActionPreference = 'Continue'
 $PSNativeCommandUseErrorActionPreference = $false
-Invoke-Bot gateway ${action}
+Invoke-Bot gateway ${action}${forceFlag}
 if ($LASTEXITCODE -ne 0) { throw "gateway ${action} failed with exit code $LASTEXITCODE" }`,
       420_000,
     );

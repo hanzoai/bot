@@ -681,6 +681,12 @@ export function buildQaRuntimeParityReport(params: {
         runtimeParityUsage.expectation === "not-applicable"
           ? null
           : summarizeRuntimeParityCacheUsage(codexCell.usage),
+      ...(botCell.cacheDiagnostics === undefined
+        ? {}
+        : { botCacheDiagnostics: botCell.cacheDiagnostics }),
+      ...(codexCell.cacheDiagnostics === undefined
+        ? {}
+        : { codexCacheDiagnostics: codexCell.cacheDiagnostics }),
       botToolCalls: botCell.toolCalls.length,
       codexToolCalls: codexCell.toolCalls.length,
       botWallClockMs: botCell.wallClockMs,

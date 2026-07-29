@@ -468,6 +468,11 @@ For local media read policy, import `getAgentScopedMediaLocalRoots(...)` or
     | Process-local async lock | `bot/plugin-sdk/async-lock-runtime` |
     | File locks | `bot/plugin-sdk/file-lock` |
 
+    File-lock nesting is owner-scoped. Pass the same `reentrantOwner` only for
+    nested acquisitions in one logical operation; omit it for ordinary locking.
+    Never use a process-wide constant, because unrelated work would incorrectly
+    share the critical section.
+
     Bundled plugins are scanner-guarded against `infra-runtime`, so repo code
     cannot regress to the broad barrel.
 

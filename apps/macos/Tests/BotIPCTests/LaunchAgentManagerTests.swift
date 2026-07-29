@@ -27,4 +27,44 @@ struct LaunchAgentManagerTests {
         let args = try #require(object["ProgramArguments"] as? [String])
         #expect(args == ["/Applications/Bot.app/Contents/MacOS/Bot"])
     }
+
+    @MainActor
+    @Test func `launch at login plist preserves normalized profile environment once`() async throws {
+        try await TestIsolation.withEnvValues([
+            "BOT_CONFIG_PATH": "  /tmp/custom&<bot>\"'.json  ",
+            "BOT_STATE_DIR": "/tmp/bot-state",
+        ]) {
+            let plist = LaunchAgentManager.plistContents(
+                bundlePath: "/Applications/Bot.app",
+                preferredPaths: ["/tmp/custom&<bin>", "/usr/bin"])
+            let data = try #require(plist.data(using: .utf8))
+            let object = try #require(
+                PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any])
+
+            let environment = try #require(object["EnvironmentVariables"] as? [String: String])
+            #expect(environment["BOT_CONFIG_PATH"] == "/tmp/custom&<bot>\"'.json")
+            #expect(environment["BOT_STATE_DIR"] == "/tmp/bot-state")
+            #expect(environment["PATH"]?.contains("/tmp/custom&<bin>") == true)
+            #expect(plist.components(separatedBy: "<key>BOT_CONFIG_PATH</key>").count == 2)
+            #expect(plist.components(separatedBy: "<key>BOT_STATE_DIR</key>").count == 2)
+        }
+    }
+
+    @MainActor
+    @Test func `launch at login plist omits unset and blank profile environment`() async throws {
+        try await TestIsolation.withEnvValues([
+            "BOT_CONFIG_PATH": nil,
+            "BOT_STATE_DIR": " \n ",
+        ]) {
+            let plist = LaunchAgentManager.plistContents(bundlePath: "/Applications/Bot.app")
+            let data = try #require(plist.data(using: .utf8))
+            let object = try #require(
+                PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any])
+
+            let environment = try #require(object["EnvironmentVariables"] as? [String: String])
+            #expect(environment.keys.sorted() == ["PATH"])
+            #expect(!plist.contains("BOT_CONFIG_PATH"))
+            #expect(!plist.contains("BOT_STATE_DIR"))
+        }
+    }
 }

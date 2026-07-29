@@ -9,6 +9,7 @@ import {
 } from "bot/plugin-sdk/agent-harness-runtime";
 import {
   buildCodexBotPromptContext,
+  buildCodexWatchedSessionsContext,
   buildCodexWorkspaceBootstrapContext,
   getCodexWorkspaceMemoryToolNames,
   readMirroredSessionHistoryMessages,
@@ -147,6 +148,12 @@ export async function prepareCodexAttemptContext(
   const botPromptContext = buildCodexBotPromptContext({
     params: runtimeParams,
     workspacePromptContext: workspaceBootstrapContext.promptContext,
+    watchedSessionsContext: buildCodexWatchedSessionsContext({
+      attempt: runtimeParams,
+      dynamicTools: toolBridge.availableSpecs,
+      sessionKey: contextSessionKey,
+      sandboxed: sandbox?.enabled === true,
+    }),
   });
   const skillsCollaborationInstructions = renderCodexSkillsCollaborationInstructions({
     attempt: runtimeParams,

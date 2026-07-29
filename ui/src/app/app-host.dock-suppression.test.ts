@@ -21,7 +21,7 @@ afterEach(() => {
 });
 
 describe("Bot shell dock suppression", () => {
-  it("suppresses docked panels only while a settings route owns the viewport", () => {
+  it("keeps Ask Bot on settings pages and suppresses it only on its full page", () => {
     vi.stubGlobal("localStorage", createStorageMock());
     vi.stubGlobal(
       "matchMedia",
@@ -38,7 +38,7 @@ describe("Bot shell dock suppression", () => {
           assistantAgentId: "main",
           hello: {
             auth: { role: "operator", scopes: ["operator.admin"] },
-            features: { methods: ["terminal.open", "browser.request"] },
+            features: { methods: ["terminal.open", "browser.request", "bot.chat"] },
           },
           lastError: null,
           offlineStable: false,
@@ -97,6 +97,23 @@ describe("Bot shell dock suppression", () => {
     expect(
       (
         container.querySelector("bot-terminal-panel") as HTMLElement & {
+          suppressed: boolean;
+        }
+      ).suppressed,
+    ).toBe(true);
+    expect(
+      (
+        container.querySelector("bot-custodian-panel") as HTMLElement & {
+          suppressed: boolean;
+        }
+      ).suppressed,
+    ).toBe(false);
+
+    shell.routeState = { routeId: "custodian" };
+    renderLit(shell.render(), container);
+    expect(
+      (
+        container.querySelector("bot-custodian-panel") as HTMLElement & {
           suppressed: boolean;
         }
       ).suppressed,

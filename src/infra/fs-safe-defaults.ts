@@ -1,11 +1,14 @@
 // Applies Bot's default fs-safe runtime configuration.
-import { configureFsSafePython } from "@openclaw/fs-safe/config";
+import { configureFsSafeNative } from "@openclaw/fs-safe/config";
 
-// Bot does not rely on Python helpers for normal filesystem safety. Tests
+// Bot does not rely on native helpers for normal filesystem safety. Tests
 // and operators can still opt in with fs-safe's documented env override.
-const hasPythonModeOverride =
-  process.env.FS_SAFE_PYTHON_MODE != null || process.env.BOT_FS_SAFE_PYTHON_MODE != null;
+const hasModeOverride = Object.keys(process.env).some((key) =>
+  /^(?:BOT_)?FS_SAFE_(?:NATIVE|PYTHON)_MODE$/u.test(
+    process.platform === "win32" ? key.toUpperCase() : key,
+  ),
+);
 
-if (!hasPythonModeOverride) {
-  configureFsSafePython({ mode: "off" });
+if (!hasModeOverride) {
+  configureFsSafeNative({ mode: "off" });
 }

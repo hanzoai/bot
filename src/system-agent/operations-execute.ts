@@ -251,6 +251,42 @@ export async function executeSystemAgentOperation(
         ].join("\n"),
       );
       return { applied: false };
+    case "skills-setup":
+      runtime.log(
+        [
+          "Skills setup needs an interactive session.",
+          "Run `bot setup` and say `configure skills`,",
+          "or run `bot configure --section skills` for the terminal wizard.",
+        ].join("\n"),
+      );
+      return { applied: false };
+    case "search-setup":
+      runtime.log(
+        [
+          "Web search setup needs an interactive session.",
+          "Run `bot setup` and say `configure search`,",
+          "or run `bot configure --section web` for the masked terminal wizard.",
+        ].join("\n"),
+      );
+      return { applied: false };
+    case "gateway-config-setup":
+      runtime.log(
+        [
+          "Gateway configuration needs an interactive session.",
+          "Run `bot setup` and say `configure gateway`,",
+          "or run `bot configure --section gateway` for the masked terminal wizard.",
+        ].join("\n"),
+      );
+      return { applied: false };
+    case "memory-import":
+      runtime.log(
+        [
+          "Memory import needs an interactive session.",
+          "Open the Memory page in the Control UI,",
+          "or run `bot onboard` for the terminal wizard.",
+        ].join("\n"),
+      );
+      return { applied: false };
     case "model-setup":
       runtime.log(
         [
@@ -265,7 +301,11 @@ export async function executeSystemAgentOperation(
           ? "bot onboard"
           : operation.target === "classic"
             ? "bot onboard --classic"
-            : `bot channels add${operation.channel ? ` --channel ${operation.channel}` : ""}`;
+            : operation.target === "channels"
+              ? `bot channels add${operation.channel ? ` --channel ${operation.channel}` : ""}`
+              : operation.target === "search"
+                ? "bot configure --section web"
+                : "bot configure --section gateway";
       runtime.log(
         `One-shot mode cannot open an interactive wizard. Run \`${command}\` in a terminal.`,
       );

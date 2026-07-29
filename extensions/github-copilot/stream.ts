@@ -2,13 +2,13 @@
 import type { StreamFn } from "bot/plugin-sdk/agent-core";
 import type { Context } from "bot/plugin-sdk/llm";
 import type { ProviderWrapStreamFnContext } from "bot/plugin-sdk/plugin-entry";
-import { buildCopilotIdeHeaders, COPILOT_INTEGRATION_ID } from "bot/plugin-sdk/provider-auth";
 import {
   applyAnthropicEphemeralCacheControlMarkers,
   streamWithPayloadPatch,
 } from "bot/plugin-sdk/provider-stream-shared";
 import { sanitizeCopilotReplayResponsePayload } from "./connection-bound-ids.js";
 import { stripCopilotAssistantThinkingMessages } from "./replay-policy.js";
+import { buildCopilotRuntimeHeaders } from "./runtime-identity.js";
 
 type StreamOptions = Parameters<StreamFn>[2];
 
@@ -51,9 +51,7 @@ function buildCopilotDynamicHeaders(params: {
   hasImages: boolean;
 }): Record<string, string> {
   return {
-    ...buildCopilotIdeHeaders(),
-    "Copilot-Integration-Id": COPILOT_INTEGRATION_ID,
-    "Openai-Organization": "github-copilot",
+    ...buildCopilotRuntimeHeaders(),
     "x-initiator": inferCopilotInitiator(params.messages),
     ...(params.hasImages ? { "Copilot-Vision-Request": "true" } : {}),
   };

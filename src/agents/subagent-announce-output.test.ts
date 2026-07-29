@@ -208,7 +208,7 @@ describe("readSubagentOutput", () => {
     await expect(readSubagentOutput("agent:main:subagent:child")).resolves.toBeUndefined();
   });
 
-  it("reads recovered output from the private transcript before gateway history", async () => {
+  it("reads recovered output from the private SQLite transcript before gateway history", async () => {
     const deps = installOutputDeps({
       messages: [
         {
@@ -229,13 +229,20 @@ describe("readSubagentOutput", () => {
     // stale gateway-visible history after an internal completion is persisted.
     await expect(
       readSubagentOutput("agent:main:subagent:child", undefined, {
-        sessionFile: "/tmp/bot-internal-run.jsonl",
+        sessionTarget: {
+          agentId: "main",
+          sessionId: "child-session",
+          sessionKey: "agent:main:subagent:child",
+          storePath: "/tmp/bot/agents/main/sessions/sessions.json",
+        },
       }),
     ).resolves.toBe("fresh recovered output");
     expect(deps.readSessionMessagesAsync).toHaveBeenCalledWith(
       {
-        sessionFile: "/tmp/bot-internal-run.jsonl",
-        sessionId: "agent:main:subagent:child",
+        agentId: "main",
+        sessionId: "child-session",
+        sessionKey: "agent:main:subagent:child",
+        storePath: "/tmp/bot/agents/main/sessions/sessions.json",
       },
       { mode: "recent", maxMessages: 100, maxBytes: 1024 * 1024 },
     );
@@ -255,7 +262,12 @@ describe("readSubagentOutput", () => {
 
     await expect(
       readSubagentOutput("agent:main:subagent:child", undefined, {
-        sessionFile: "/tmp/bot-empty-internal-run.jsonl",
+        sessionTarget: {
+          agentId: "main",
+          sessionId: "child-session",
+          sessionKey: "agent:main:subagent:child",
+          storePath: "/tmp/bot/agents/main/sessions/sessions.json",
+        },
       }),
     ).resolves.toBeUndefined();
     expect(deps.callGateway).not.toHaveBeenCalled();

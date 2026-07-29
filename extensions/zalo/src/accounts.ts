@@ -3,6 +3,7 @@ import { createAccountListHelpers } from "bot/plugin-sdk/account-helpers";
 import { normalizeAccountId } from "bot/plugin-sdk/account-id";
 import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
+import type { SecretInputStringResolutionMode } from "./secret-input.js";
 import { resolveZaloToken } from "./token.js";
 import type { ResolvedZaloAccount, ZaloAccountConfig, ZaloConfig } from "./types.js";
 
@@ -21,10 +22,10 @@ const {
 });
 export { listZaloAccountIds, resolveDefaultZaloAccountId };
 
-export function resolveZaloAccount(params: {
+function resolveZaloAccountWithMode(params: {
   cfg: BotConfig;
   accountId?: string | null;
-  allowUnresolvedSecretRef?: boolean;
+  mode: SecretInputStringResolutionMode;
 }): ResolvedZaloAccount {
   const accountId = normalizeAccountId(
     params.accountId ?? (params.cfg.channels?.zalo as ZaloConfig | undefined)?.defaultAccount,
@@ -36,7 +37,7 @@ export function resolveZaloAccount(params: {
   const tokenResolution = resolveZaloToken(
     params.cfg.channels?.zalo as ZaloConfig | undefined,
     accountId,
-    { allowUnresolvedSecretRef: params.allowUnresolvedSecretRef },
+    { mode: params.mode },
   );
 
   return {
@@ -45,12 +46,21 @@ export function resolveZaloAccount(params: {
     enabled,
     token: tokenResolution.token,
     tokenSource: tokenResolution.source,
+    tokenStatus: tokenResolution.status,
     config: merged,
   };
 }
 
-export function listEnabledZaloAccounts(cfg: BotConfig): ResolvedZaloAccount[] {
-  return listZaloAccountIds(cfg)
-    .map((accountId) => resolveZaloAccount({ cfg, accountId }))
-    .filter((account) => account.enabled);
+export function resolveZaloAccount(params: {
+  cfg: BotConfig;
+  accountId?: string | null;
+}): ResolvedZaloAccount {
+  return resolveZaloAccountWithMode({ ...params, mode: "strict" });
+}
+
+export function inspectZaloAccount(params: {
+  cfg: BotConfig;
+  accountId?: string | null;
+}): ResolvedZaloAccount {
+  return resolveZaloAccountWithMode({ ...params, mode: "inspect" });
 }

@@ -13,7 +13,7 @@ import {
 } from "bot/plugin-sdk/setup";
 import { createSetupInputPresenceValidator } from "bot/plugin-sdk/setup-runtime";
 import {
-  resolveMattermostAccount,
+  inspectMattermostAccount,
   type ResolvedMattermostAccount,
 } from "./setup.accounts.runtime.js";
 import { normalizeMattermostBaseUrl } from "./setup.client.runtime.js";
@@ -33,11 +33,7 @@ export function isMattermostConfigured(account: ResolvedMattermostAccount): bool
 }
 
 export function resolveMattermostAccountWithSecrets(cfg: BotConfig, accountId: string) {
-  return resolveMattermostAccount({
-    cfg,
-    accountId,
-    allowUnresolvedSecretRef: true,
-  });
+  return inspectMattermostAccount({ cfg, accountId });
 }
 
 export function applyMattermostSetupConfigPatch(params: {

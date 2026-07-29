@@ -7,7 +7,7 @@ import type {
 import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { createLazyRuntimeNamedExport } from "bot/plugin-sdk/lazy-runtime";
 import { extractToolSend } from "bot/plugin-sdk/tool-send";
-import { listEnabledZaloAccounts, resolveZaloAccount } from "./accounts.js";
+import { inspectZaloAccount, listZaloAccountIds } from "./accounts.js";
 
 const loadZaloActionsRuntime = createLazyRuntimeNamedExport(
   () => import("./actions.runtime.js"),
@@ -19,8 +19,12 @@ const ZALO_ACTIONS = new Set<ChannelMessageActionName>(["send"]);
 
 function listEnabledAccounts(cfg: BotConfig, accountId?: string | null) {
   return (
-    accountId ? [resolveZaloAccount({ cfg, accountId })] : listEnabledZaloAccounts(cfg)
-  ).filter((account) => account.enabled && account.tokenSource !== "none");
+    accountId
+      ? [inspectZaloAccount({ cfg, accountId })]
+      : listZaloAccountIds(cfg).map((listedAccountId) =>
+          inspectZaloAccount({ cfg, accountId: listedAccountId }),
+        )
+  ).filter((account) => account.enabled && account.tokenStatus === "available");
 }
 
 export const zaloMessageActions: ChannelMessageActionAdapter = {

@@ -1,3 +1,8 @@
+import { BOT_DATABASE_SCHEMA_DOCS_URL } from "../state/bot-state-db-contract.js";
+import { VERSION } from "../version.js";
+import { resolveCommitHash } from "./git-commit.js";
+import { resolveBotPackageRootSync } from "./bot-root.js";
+
 type SqliteUserVersionReader = {
   prepare: (sql: string) => { get: () => unknown };
 };
@@ -7,6 +12,20 @@ export function readSqliteUserVersion(db: SqliteUserVersionReader): number {
   return Number(row?.user_version ?? 0);
 }
 
+/**
+ * Name the refusing install the way `--version` does, plus the root it runs from.
+ * The path is the only part an operator can always act on: one release version
+ * string spans many commits, and a linked source checkout reports its git HEAD
+ * even when the built output actually executing is older.
+ */
+export function describeRunningBotBuild(): string {
+  const moduleUrl = import.meta.url;
+  const commit = resolveCommitHash({ moduleUrl });
+  const root = resolveBotPackageRootSync({ moduleUrl });
+  const identity = commit ? `Bot ${VERSION} (${commit})` : `Bot ${VERSION}`;
+  return root ? `${identity} installed at ${root}` : identity;
+}
+
 export function createNewerSqliteSchemaVersionError(
   databaseLabel: string,
   pathname: string,
@@ -14,7 +33,11 @@ export function createNewerSqliteSchemaVersionError(
   supportedVersion: number,
 ): Error {
   const error = new Error(
-    `${databaseLabel} ${pathname} uses newer schema version ${schemaVersion}; this Bot build supports ${supportedVersion}. Upgrade Bot before opening this database. Do not downgrade Bot or modify the database. To run this older build, use a separate state directory or restore a compatible backup. See https://docs.bot.ai/reference/database-schemas.`,
+    `${databaseLabel} ${pathname} uses newer schema version ${schemaVersion}; this build supports ${supportedVersion}. ` +
+      `Refused by ${describeRunningBotBuild()}. ` +
+      "Identify installs by that path: one version string spans many builds, and a linked source checkout reports its git HEAD even when its built output is older. " +
+      `Run a build that supports schema ${schemaVersion} or newer against this state directory — rebuild or update the install above — or point this build at a different BOT_STATE_DIR. ` +
+      `See ${BOT_DATABASE_SCHEMA_DOCS_URL}.`,
   );
   error.name = "SqliteSchemaVersionError";
   return error;

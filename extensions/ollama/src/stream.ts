@@ -30,12 +30,8 @@ import {
   streamWithPayloadPatch,
 } from "bot/plugin-sdk/provider-stream-shared";
 import { createSubsystemLogger } from "bot/plugin-sdk/runtime-env";
-import { fetchWithSsrFGuard } from "bot/plugin-sdk/ssrf-runtime";
-import {
-  isRecord,
-  normalizeLowercaseStringOrEmpty,
-  readStringValue,
-} from "bot/plugin-sdk/string-coerce-runtime";
+import { fetchWithSsrFGuard, isLoopbackHost } from "bot/plugin-sdk/ssrf-runtime";
+import { isRecord, readStringValue } from "bot/plugin-sdk/string-coerce-runtime";
 import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { OLLAMA_CLOUD_BASE_URL, OLLAMA_DEFAULT_BASE_URL } from "./defaults.js";
 import { shouldWrapOllamaCompatMoonshotThinking } from "./model-behavior.js";
@@ -196,13 +192,7 @@ export function isOllamaCompatProvider(model: {
   }
   try {
     const parsed = new URL(model.baseUrl);
-    const hostname = normalizeLowercaseStringOrEmpty(parsed.hostname);
-    const isLocalhost =
-      hostname === "localhost" ||
-      hostname === "127.0.0.1" ||
-      hostname === "::1" ||
-      hostname === "[::1]";
-    if (isLocalhost && parsed.port === "11434") {
+    if (isLoopbackHost(parsed.hostname) && parsed.port === "11434") {
       return true;
     }
 

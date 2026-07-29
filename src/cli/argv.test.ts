@@ -293,6 +293,75 @@ describe("argv helpers", () => {
       argv: ["node", "bot", "nodes", "invoke", "--", "--version"],
       expected: false,
     },
+    {
+      name: "root version flag",
+      argv: ["node", "bot", "--version"],
+      expected: true,
+    },
+    {
+      name: "root short version flag",
+      argv: ["node", "bot", "-V"],
+      expected: true,
+    },
+    {
+      name: "root version alias after profile",
+      argv: ["node", "bot", "--profile", "work", "-v"],
+      expected: true,
+    },
+    {
+      name: "root version flag after profile",
+      argv: ["node", "bot", "--profile", "work", "--version"],
+      expected: true,
+    },
+    {
+      name: "version-pinned skill install",
+      argv: ["node", "bot", "skills", "install", "@owner/weather", "--version", "1.2.3"],
+      expected: false,
+    },
+    {
+      name: "version-pinned skill verification",
+      argv: ["node", "bot", "skills", "verify", "@owner/weather", "--version", "1.2.3"],
+      expected: false,
+    },
+    {
+      name: "equals-form version-pinned skill install",
+      argv: ["node", "bot", "skills", "install", "@owner/weather", "--version=1.2.3"],
+      expected: false,
+    },
+    {
+      name: "profiled version-pinned skill verification",
+      argv: [
+        "node",
+        "bot",
+        "--profile",
+        "work",
+        "skills",
+        "verify",
+        "@owner/weather",
+        "--version",
+        "1.2.3",
+      ],
+      expected: false,
+    },
+    {
+      name: "help for a version-pinned skill command",
+      argv: [
+        "node",
+        "bot",
+        "skills",
+        "verify",
+        "@owner/weather",
+        "--version",
+        "1.2.3",
+        "--help",
+      ],
+      expected: true,
+    },
+    {
+      name: "unknown root option does not turn version into root help",
+      argv: ["node", "bot", "--unknown", "--version"],
+      expected: false,
+    },
   ])("detects help/version invocations: $name", ({ argv, expected }) => {
     expect(isHelpOrVersionInvocation(argv)).toBe(expected);
   });

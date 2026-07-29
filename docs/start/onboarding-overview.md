@@ -16,13 +16,13 @@ detailed setup.
 
 ## Which path should I use?
 
-|                | CLI onboarding                         | macOS app onboarding           |
-| -------------- | -------------------------------------- | ------------------------------ |
-| **Platforms**  | macOS, Linux, Windows (native or WSL2) | macOS only                     |
-| **Interface**  | Inference setup, then Bot         | Inference setup, then Bot |
-| **Best for**   | Servers, headless, full control        | Desktop Mac, visual setup      |
-| **Automation** | `--non-interactive` for scripts        | Manual only                    |
-| **Command**    | `bot onboard`                     | Launch the app                 |
+|                | CLI onboarding                         | macOS app onboarding                                          |
+| -------------- | -------------------------------------- | ------------------------------------------------------------- |
+| **Platforms**  | macOS, Linux, Windows (native or WSL2) | macOS only                                                    |
+| **Interface**  | Inference setup, then Bot         | Inference setup, then Bot                                |
+| **Best for**   | Servers, headless, full control        | Desktop Mac, visual setup                                     |
+| **Automation** | `--non-interactive` for scripts        | Manual only                                                   |
+| **Command**    | `bot onboard`                     | [Download the app](/platforms/macos#download), then launch it |
 
 Most users should start with **CLI onboarding** — it works everywhere and gives
 you the most control.
@@ -81,7 +81,8 @@ CLI command docs: [`bot onboard`](/cli/onboard)
 
 ## macOS app onboarding
 
-Open the Bot app. If its configured local or remote Gateway is reachable
+[Download the macOS app](/platforms/macos#download), then open it. If its
+configured local or remote Gateway is reachable
 and the default agent already has a configured model, the app skips onboarding
 and Bot and opens the normal agent UI immediately.
 

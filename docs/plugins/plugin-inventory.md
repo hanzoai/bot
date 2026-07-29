@@ -197,7 +197,7 @@ Each entry lists the package, distribution route, and description.
 
 ## Official external packages
 
-72 plugins
+73 plugins
 
 - **[acpx](/plugins/reference/acpx)** (`@hanzo/bot-acpx`) - npm; ClawHub. Bot ACP runtime backend with plugin-owned session and transport management.
 
@@ -212,6 +212,8 @@ Each entry lists the package, distribution route, and description.
 - **[baseten](/plugins/reference/baseten)** (`@hanzo/bot-baseten-provider`) - npm; ClawHub: `clawhub:@hanzo/bot-baseten-provider`. Bot Baseten provider plugin.
 
 - **[brave](/plugins/reference/brave)** (`@hanzo/bot-brave-plugin`) - npm; ClawHub. Bot Brave Search provider plugin for web search.
+
+- **[buzz](/plugins/reference/buzz)** (`@hanzo/bot-buzz`) - npm; ClawHub: `clawhub:@hanzo/bot-buzz`. Connect Bot agents to Buzz rooms.
 
 - **[cerebras](/plugins/reference/cerebras)** (`@hanzo/bot-cerebras-provider`) - npm; ClawHub: `clawhub:@hanzo/bot-cerebras-provider`. Adds Cerebras model provider support to Bot.
 

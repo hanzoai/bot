@@ -1,12 +1,33 @@
 // Qa Lab plugin module implements token efficiency report behavior.
+import type { RuntimeParityCacheMiss } from "./runtime-parity-cache-diagnostics.js";
 import type { RuntimeId, RuntimeParityCell, RuntimeParityResult } from "./runtime-parity.js";
 import { resolveRuntimeParityUsagePolicy } from "./runtime-parity.js";
+
+type ProcessedTokenEvidence = "measured" | "derived" | "unavailable";
 
 type TokenEfficiencyRuntimeUsage = {
   inputTokens: number;
   outputTokens: number;
   totalTokens: number;
+  processedTokens: number;
+  processedTokenEvidence: ProcessedTokenEvidence;
+  cacheReadTokens: number | null;
+  cacheWriteTokens: number | null;
+  cacheMisses: RuntimeParityCacheMiss[] | null;
+  unmeasuredPostWarmTurns: number[] | null;
   toolCallCount: number;
+};
+
+type TokenEfficiencyAggregateRuntimeUsage = {
+  totalTokens: number;
+  processedTokens: number;
+  processedTokenEvidence: ProcessedTokenEvidence;
+  cacheReadTokens: number | null;
+  cacheWriteTokens: number | null;
+  cacheMissCount: number | null;
+  cacheMissInputTokens: number | null;
+  p50PerScenario: number | null;
+  p90PerScenario: number | null;
 };
 
 type TokenEfficiencyRow = {
@@ -29,8 +50,8 @@ type TokenEfficiencyReport = {
   rows: TokenEfficiencyRow[];
   notApplicableScenarios: Array<{ scenarioId: string; reason: string }>;
   aggregate: {
-    bot: { totalTokens: number; p50PerScenario: number; p90PerScenario: number };
-    codex: { totalTokens: number; p50PerScenario: number; p90PerScenario: number };
+    bot: TokenEfficiencyAggregateRuntimeUsage;
+    codex: TokenEfficiencyAggregateRuntimeUsage;
     deltaPercent: number;
     flaggedScenarios: string[];
     savingsScenarios: string[];
@@ -60,9 +81,20 @@ type BuildTokenEfficiencyReportParams = {
 };
 
 const DEFAULT_THRESHOLD_PERCENT = 15;
+const ZERO_AGGREGATE_RUNTIME: TokenEfficiencyAggregateRuntimeUsage = {
+  totalTokens: 0,
+  processedTokens: 0,
+  processedTokenEvidence: "unavailable",
+  cacheReadTokens: null,
+  cacheWriteTokens: null,
+  cacheMissCount: null,
+  cacheMissInputTokens: null,
+  p50PerScenario: 0,
+  p90PerScenario: 0,
+};
 const ZERO_AGGREGATE: TokenEfficiencyReport["aggregate"] = {
-  bot: { totalTokens: 0, p50PerScenario: 0, p90PerScenario: 0 },
-  codex: { totalTokens: 0, p50PerScenario: 0, p90PerScenario: 0 },
+  bot: { ...ZERO_AGGREGATE_RUNTIME },
+  codex: { ...ZERO_AGGREGATE_RUNTIME },
   deltaPercent: 0,
   flaggedScenarios: [],
   savingsScenarios: [],
@@ -106,11 +138,97 @@ function formatPercent(value: number) {
   return `${sign}${value.toFixed(1)}%`;
 }
 
+function formatOptionalCount(value: number | null): string {
+  return value === null ? "N/A" : String(value);
+}
+
+function formatProcessedCount(
+  usage: Pick<TokenEfficiencyRuntimeUsage, "processedTokens" | "processedTokenEvidence">,
+): string {
+  return usage.processedTokenEvidence === "unavailable" ? "N/A" : String(usage.processedTokens);
+}
+
+function formatProcessedDelta(params: {
+  deltaPercent: number;
+  bot: Pick<TokenEfficiencyRuntimeUsage, "processedTokenEvidence">;
+  codex: Pick<TokenEfficiencyRuntimeUsage, "processedTokenEvidence">;
+}): string {
+  return params.bot.processedTokenEvidence === "unavailable" ||
+    params.codex.processedTokenEvidence === "unavailable"
+    ? "N/A"
+    : formatPercent(params.deltaPercent);
+}
+
+function formatCacheMisses(
+  misses: readonly RuntimeParityCacheMiss[] | null,
+  unmeasuredPostWarmTurns: readonly number[] | null,
+): string {
+  if (misses === null) {
+    return unmeasuredPostWarmTurns?.length
+      ? `N/A (unmeasured turns ${unmeasuredPostWarmTurns.join(", ")})`
+      : "N/A";
+  }
+  const measuredMisses =
+    misses.length === 0
+      ? "none"
+      : misses.map((miss) => `turn ${miss.turn} (${miss.inputTokens} input)`).join(", ");
+  if (!unmeasuredPostWarmTurns?.length) {
+    return measuredMisses;
+  }
+  const unknownTurns = `unmeasured turns ${unmeasuredPostWarmTurns.join(", ")}`;
+  return measuredMisses === "none" ? `N/A (${unknownTurns})` : `${measuredMisses}; ${unknownTurns}`;
+}
+
 function runtimeUsage(cell: RuntimeParityCell): TokenEfficiencyRuntimeUsage {
+  const inputTokens = normalizeTokenCount(cell.usage.inputTokens);
+  const outputTokens = normalizeTokenCount(cell.usage.outputTokens);
+  const totalTokens = normalizeTokenCount(cell.usage.totalTokens);
+  const cacheReadTokens =
+    cell.usage.cacheRead === undefined ? null : normalizeTokenCount(cell.usage.cacheRead);
+  const cacheWriteTokens =
+    cell.usage.cacheWrite === undefined ? null : normalizeTokenCount(cell.usage.cacheWrite);
+  const cacheDiagnostics = cell.cacheDiagnostics;
+  const baseProcessedTokens = inputTokens + outputTokens;
+  const completeCacheTelemetry =
+    cacheDiagnostics === undefined ||
+    cacheDiagnostics.cacheTelemetryTurns === cacheDiagnostics.assistantTurns;
+  const unaccountedCacheTokens =
+    totalTokens - baseProcessedTokens - (cacheReadTokens ?? 0) - (cacheWriteTokens ?? 0);
+  let processedTokens = baseProcessedTokens;
+  let processedTokenEvidence: ProcessedTokenEvidence = "unavailable";
+  // Aggregate counters can omit an unmeasured turn. Only exact accounting
+  // proves that omitted nonnegative cache reads and writes were both zero.
+  if (
+    cacheWriteTokens !== null &&
+    unaccountedCacheTokens >= 0 &&
+    (cacheReadTokens === null || unaccountedCacheTokens === 0) &&
+    (completeCacheTelemetry || unaccountedCacheTokens === 0)
+  ) {
+    processedTokens += cacheWriteTokens;
+    processedTokenEvidence = "measured";
+  } else if (cacheReadTokens !== null && cacheWriteTokens === null && completeCacheTelemetry) {
+    const derivedCacheWriteTokens = totalTokens - baseProcessedTokens - cacheReadTokens;
+    if (derivedCacheWriteTokens >= 0) {
+      processedTokens += derivedCacheWriteTokens;
+      processedTokenEvidence = "derived";
+    }
+  } else if (totalTokens === baseProcessedTokens) {
+    // Nonnegative usage components prove both missing cache counters are zero.
+    processedTokenEvidence = "derived";
+  }
   return {
-    inputTokens: normalizeTokenCount(cell.usage.inputTokens),
-    outputTokens: normalizeTokenCount(cell.usage.outputTokens),
-    totalTokens: normalizeTokenCount(cell.usage.totalTokens),
+    inputTokens,
+    outputTokens,
+    totalTokens,
+    processedTokens,
+    processedTokenEvidence,
+    cacheReadTokens,
+    cacheWriteTokens,
+    cacheMisses:
+      cacheDiagnostics && cacheDiagnostics.cacheTelemetryTurns > 0
+        ? cacheDiagnostics.cacheMisses
+        : null,
+    unmeasuredPostWarmTurns: cacheDiagnostics?.unmeasuredPostWarmTurns ?? null,
     toolCallCount: cell.toolCalls.length,
   };
 }
@@ -128,7 +246,10 @@ function buildRow(params: {
 }): TokenEfficiencyRow {
   const bot = runtimeUsage(params.result.cells.bot);
   const codex = runtimeUsage(params.result.cells.codex);
-  const delta = deltaPercent(bot.totalTokens, codex.totalTokens);
+  const comparable =
+    bot.processedTokenEvidence !== "unavailable" &&
+    codex.processedTokenEvidence !== "unavailable";
+  const delta = comparable ? deltaPercent(bot.processedTokens, codex.processedTokens) : 0;
   const flagged = params.usageSource === "live-usage" && delta > params.thresholdPercent;
   const classification =
     delta > params.thresholdPercent
@@ -148,23 +269,65 @@ function buildRow(params: {
   };
 }
 
-function buildAggregate(rows: readonly TokenEfficiencyRow[]): TokenEfficiencyReport["aggregate"] {
-  const botTotals = rows.map((row) => row.bot.totalTokens);
-  const codexTotals = rows.map((row) => row.codex.totalTokens);
-  const botTotalTokens = botTotals.reduce((sum, value) => sum + value, 0);
-  const codexTotalTokens = codexTotals.reduce((sum, value) => sum + value, 0);
+function sumKnownCounts(values: readonly (number | null)[]): number | null {
+  let total = 0;
+  for (const value of values) {
+    if (value === null) {
+      return null;
+    }
+    total += value;
+  }
+  return total;
+}
+
+function buildAggregateRuntime(
+  rows: readonly TokenEfficiencyRow[],
+  runtime: RuntimeId,
+): TokenEfficiencyAggregateRuntimeUsage {
+  const usages = rows.map((row) => row[runtime]);
+  const processedTotals = usages.map((usage) => usage.processedTokens);
+  const processedTokenEvidence: ProcessedTokenEvidence = usages.some(
+    (usage) => usage.processedTokenEvidence === "unavailable",
+  )
+    ? "unavailable"
+    : usages.some((usage) => usage.processedTokenEvidence === "derived")
+      ? "derived"
+      : "measured";
   return {
-    bot: {
-      totalTokens: botTotalTokens,
-      p50PerScenario: percentile(botTotals, 50),
-      p90PerScenario: percentile(botTotals, 90),
-    },
-    codex: {
-      totalTokens: codexTotalTokens,
-      p50PerScenario: percentile(codexTotals, 50),
-      p90PerScenario: percentile(codexTotals, 90),
-    },
-    deltaPercent: deltaPercent(botTotalTokens, codexTotalTokens),
+    totalTokens: usages.reduce((sum, usage) => sum + usage.totalTokens, 0),
+    processedTokens: processedTotals.reduce((sum, value) => sum + value, 0),
+    processedTokenEvidence,
+    cacheReadTokens: sumKnownCounts(usages.map((usage) => usage.cacheReadTokens)),
+    cacheWriteTokens: sumKnownCounts(usages.map((usage) => usage.cacheWriteTokens)),
+    cacheMissCount: sumKnownCounts(
+      usages.map((usage) =>
+        usage.unmeasuredPostWarmTurns?.length ? null : (usage.cacheMisses?.length ?? null),
+      ),
+    ),
+    cacheMissInputTokens: sumKnownCounts(
+      usages.map((usage) =>
+        usage.unmeasuredPostWarmTurns?.length
+          ? null
+          : (usage.cacheMisses?.reduce((sum, cacheMiss) => sum + cacheMiss.inputTokens, 0) ?? null),
+      ),
+    ),
+    p50PerScenario:
+      processedTokenEvidence === "unavailable" ? null : percentile(processedTotals, 50),
+    p90PerScenario:
+      processedTokenEvidence === "unavailable" ? null : percentile(processedTotals, 90),
+  };
+}
+
+function buildAggregate(rows: readonly TokenEfficiencyRow[]): TokenEfficiencyReport["aggregate"] {
+  const bot = buildAggregateRuntime(rows, "bot");
+  const codex = buildAggregateRuntime(rows, "codex");
+  const comparable =
+    bot.processedTokenEvidence !== "unavailable" &&
+    codex.processedTokenEvidence !== "unavailable";
+  return {
+    bot,
+    codex,
+    deltaPercent: comparable ? deltaPercent(bot.processedTokens, codex.processedTokens) : 0,
     flaggedScenarios: rows.filter((row) => row.flagged).map((row) => row.scenarioId),
     savingsScenarios: rows
       .filter((row) => row.classification === "savings")
@@ -179,6 +342,13 @@ function liveEvidenceFailures(row: TokenEfficiencyRow): string[] {
   }
   if (row.codex.totalTokens <= 0) {
     failures.push(`${row.scenarioId} codex live usage totalTokens=${row.codex.totalTokens}`);
+  }
+  for (const runtime of ["bot", "codex"] as const) {
+    if (row[runtime].processedTokenEvidence === "unavailable") {
+      failures.push(
+        `${row.scenarioId} ${runtime} live processed-token usage cannot be verified from cache-write telemetry or coherent cache-read totals`,
+      );
+    }
   }
   return failures;
 }
@@ -302,6 +472,9 @@ export function buildTokenEfficiencyReport(
     failures,
     notes: [
       "Token totals are read from RuntimeParityCell.usage, which is captured from normalized AssistantMessage.usage.",
+      "Efficiency deltas and percentiles compare newly processed uncached input, cache-write input, and output; reused cached input remains separately reported and never masks a regression.",
+      "Missing cache-write counts are derived only when measured cache reads and coherent usage totals prove the exact processed input; otherwise live efficiency proof fails.",
+      "Post-warm cache misses require measured zero cache reads and newly processed input after the same conversation has already established a cache; cache rewrites are included and unavailable telemetry is N/A.",
       "Codex savings are reported as savings and do not fail the gate; only positive Codex-over-Bot live deltas exceed the threshold.",
       usageSource === "mock-estimate"
         ? "Mock-provider token totals are labeled as estimates and do not block the token-efficiency gate."
@@ -318,7 +491,7 @@ export function renderTokenEfficiencyMarkdownReport(report: TokenEfficiencyRepor
     ...(report.providerMode ? [`- Provider mode: ${report.providerMode}`] : []),
     `- Verdict: ${report.status === "skipped" ? "skipped" : report.pass ? "pass" : "fail"}`,
     `- Usage source: ${report.rows[0]?.usageSource ?? "none"}`,
-    `- Threshold: Codex token increase > ${report.thresholdPercent.toFixed(1)}%`,
+    `- Threshold: Codex processed-token increase > ${report.thresholdPercent.toFixed(1)}%`,
     "",
   ];
 
@@ -329,11 +502,11 @@ export function renderTokenEfficiencyMarkdownReport(report: TokenEfficiencyRepor
   lines.push(
     "## Aggregate Metrics",
     "",
-    "| Runtime | Total tokens | p50 per scenario | p90 per scenario |",
-    "| --- | ---: | ---: | ---: |",
-    `| bot | ${report.aggregate.bot.totalTokens} | ${report.aggregate.bot.p50PerScenario} | ${report.aggregate.bot.p90PerScenario} |`,
-    `| codex | ${report.aggregate.codex.totalTokens} | ${report.aggregate.codex.p50PerScenario} | ${report.aggregate.codex.p90PerScenario} |`,
-    `| delta | ${formatPercent(report.aggregate.deltaPercent)} |  |  |`,
+    "| Runtime | Processed tokens | Total tokens | Cached input | Cache writes | Post-warm cache misses | p50 per scenario | p90 per scenario |",
+    "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    `| bot | ${formatProcessedCount(report.aggregate.bot)} | ${report.aggregate.bot.totalTokens} | ${formatOptionalCount(report.aggregate.bot.cacheReadTokens)} | ${formatOptionalCount(report.aggregate.bot.cacheWriteTokens)} | ${formatOptionalCount(report.aggregate.bot.cacheMissCount)} | ${formatOptionalCount(report.aggregate.bot.p50PerScenario)} | ${formatOptionalCount(report.aggregate.bot.p90PerScenario)} |`,
+    `| codex | ${formatProcessedCount(report.aggregate.codex)} | ${report.aggregate.codex.totalTokens} | ${formatOptionalCount(report.aggregate.codex.cacheReadTokens)} | ${formatOptionalCount(report.aggregate.codex.cacheWriteTokens)} | ${formatOptionalCount(report.aggregate.codex.cacheMissCount)} | ${formatOptionalCount(report.aggregate.codex.p50PerScenario)} | ${formatOptionalCount(report.aggregate.codex.p90PerScenario)} |`,
+    `| delta | ${formatProcessedDelta({ deltaPercent: report.aggregate.deltaPercent, bot: report.aggregate.bot, codex: report.aggregate.codex })} |  |  |  |  |  |  |`,
     "",
   );
 
@@ -341,12 +514,12 @@ export function renderTokenEfficiencyMarkdownReport(report: TokenEfficiencyRepor
     lines.push(
       "## Scenario Efficiency",
       "",
-      "| Scenario | Source | Bot in/out/total/tools | Codex in/out/total/tools | Token delta | Classification | Flagged | Tools used |",
-      "| --- | --- | ---: | ---: | ---: | --- | --- | --- |",
+      "| Scenario | Source | Bot processed/in/out/cached/written/total/tools | Codex processed/in/out/cached/written/total/tools | Processed-token delta | Classification | Flagged | Bot cache misses | Codex cache misses | Tools used |",
+      "| --- | --- | ---: | ---: | ---: | --- | --- | --- | --- | --- |",
     );
     for (const row of report.rows) {
       lines.push(
-        `| ${row.scenarioId} | ${row.usageSource} | ${row.bot.inputTokens}/${row.bot.outputTokens}/${row.bot.totalTokens}/${row.bot.toolCallCount} | ${row.codex.inputTokens}/${row.codex.outputTokens}/${row.codex.totalTokens}/${row.codex.toolCallCount} | ${formatPercent(row.deltaPercent)} | ${row.classification} | ${row.flagged ? "yes" : "no"} | ${row.toolsUsed.join(", ")} |`,
+        `| ${row.scenarioId} | ${row.usageSource} | ${formatProcessedCount(row.bot)}/${row.bot.inputTokens}/${row.bot.outputTokens}/${formatOptionalCount(row.bot.cacheReadTokens)}/${formatOptionalCount(row.bot.cacheWriteTokens)}/${row.bot.totalTokens}/${row.bot.toolCallCount} | ${formatProcessedCount(row.codex)}/${row.codex.inputTokens}/${row.codex.outputTokens}/${formatOptionalCount(row.codex.cacheReadTokens)}/${formatOptionalCount(row.codex.cacheWriteTokens)}/${row.codex.totalTokens}/${row.codex.toolCallCount} | ${formatProcessedDelta({ deltaPercent: row.deltaPercent, bot: row.bot, codex: row.codex })} | ${row.classification} | ${row.flagged ? "yes" : "no"} | ${formatCacheMisses(row.bot.cacheMisses, row.bot.unmeasuredPostWarmTurns)} | ${formatCacheMisses(row.codex.cacheMisses, row.codex.unmeasuredPostWarmTurns)} | ${row.toolsUsed.join(", ")} |`,
       );
     }
     lines.push("");

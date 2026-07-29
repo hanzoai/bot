@@ -4,6 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import chokidar, { type FSWatcher } from "chokidar";
+import { isDefaultStateDir } from "../../config/paths.js";
 import type { BotConfig } from "../../config/types.bot.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { CONFIG_DIR, resolveUserPath } from "../../utils.js";
@@ -99,10 +100,12 @@ function resolveWatchTargets(workspaceDir: string, config?: BotConfig): WatchTar
     });
   }
   baseRoots.push({ path: path.join(CONFIG_DIR, "skills"), source: "bot-managed" });
-  baseRoots.push({
-    path: path.join(os.homedir(), ".agents", "skills"),
-    source: "agents-skills-personal",
-  });
+  if (isDefaultStateDir()) {
+    baseRoots.push({
+      path: path.join(os.homedir(), ".agents", "skills"),
+      source: "agents-skills-personal",
+    });
+  }
   const extraDirsRaw = config?.skills?.load?.extraDirs ?? [];
   const extraDirs = extraDirsRaw
     .map((d) => normalizeOptionalString(d) ?? "")

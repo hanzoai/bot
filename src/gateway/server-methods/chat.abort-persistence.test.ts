@@ -6,12 +6,12 @@ import os from "node:os";
 import path from "node:path";
 import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { formatSqliteSessionFileMarker } from "../../config/sessions/legacy-sqlite-marker.js";
 import {
   appendTranscriptMessageSync,
   loadTranscriptEvents,
   replaceSessionEntry,
 } from "../../config/sessions/session-accessor.js";
-import { formatSqliteSessionFileMarker } from "../../config/sessions/sqlite-marker.js";
 import { onAgentEvent, resetAgentEventsForTest } from "../../infra/agent-events.js";
 import { closeBotAgentDatabasesForTest } from "../../state/bot-agent-db.js";
 import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";

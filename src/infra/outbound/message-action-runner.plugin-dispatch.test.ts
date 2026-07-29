@@ -890,6 +890,70 @@ describe("runMessageAction plugin dispatch", () => {
       },
     );
 
+    it("rejects directory-only external aliases before resolver or plugin code", async () => {
+      const looksLikeId = vi.fn(() => false);
+      const resolveTarget = vi.fn(async () => ({
+        to: "actionhub:current",
+        kind: "group" as const,
+      }));
+      const listGroups = vi.fn(async () => [
+        { kind: "group" as const, id: "actionhub:current", name: "current-room" },
+      ]);
+      const listGroupsLive = vi.fn(async () => [
+        { kind: "group" as const, id: "actionhub:current", name: "current-room" },
+      ]);
+      setActivePluginRegistry(
+        createTestRegistry([
+          {
+            pluginId: "actionhub",
+            source: "test",
+            origin: "config",
+            plugin: {
+              ...actionHubPlugin,
+              messaging: {
+                ...actionHubPlugin.messaging,
+                targetResolver: { looksLikeId, resolveTarget },
+              },
+              directory: { listGroups, listGroupsLive },
+            },
+          },
+        ]),
+      );
+
+      await expect(
+        runMessageAction({
+          cfg: {
+            channels: {
+              actionhub: {
+                enabled: true,
+              },
+            },
+          } as BotConfig,
+          action: "pin",
+          params: {
+            channel: "actionhub",
+            target: "current-room",
+            messageId: "om_123",
+          },
+          defaultAccountId: "default",
+          requesterAccountId: "default",
+          conversationReadOrigin: "delegated",
+          toolContext: {
+            currentChannelId: "actionhub:current",
+            currentChannelProvider: "actionhub",
+            currentChatType: "group",
+          },
+          dryRun: false,
+        }),
+      ).rejects.toThrow("requires the exact current conversation and account");
+
+      expect(looksLikeId).not.toHaveBeenCalled();
+      expect(resolveTarget).not.toHaveBeenCalled();
+      expect(listGroups).not.toHaveBeenCalled();
+      expect(listGroupsLive).not.toHaveBeenCalled();
+      expect(handleAction).not.toHaveBeenCalled();
+    });
+
     it("preserves no-context owner Discord admin actions through the shared runner", async () => {
       const handleDiscordAction = vi.fn(async (ctx: ChannelMessageActionContext) => {
         const currentProvider = ctx.toolContext?.currentChannelProvider?.trim().toLowerCase();
@@ -1605,6 +1669,7 @@ describe("runMessageAction plugin dispatch", () => {
       const deliveredPayload = { ok: true, messageId: "gw-send-1" };
       mocks.callGatewayLeastPrivilege.mockResolvedValue(deliveredPayload);
       const resolveAgentRuntimeIdentityToken = vi.fn(async () => undefined);
+      const policySessionKey = "agent:main:gatewaychat:policy:user-123";
 
       await runMessageAction({
         cfg: {
@@ -1630,7 +1695,8 @@ describe("runMessageAction plugin dispatch", () => {
         sourceReplyDeliveryMode: "message_tool_only",
         sourceReplyFinal: true,
         sourceReplyToolCallId: "message-call-1",
-        sessionKey: receipt.sessionKey,
+        sessionKey: policySessionKey,
+        sourceReplySessionKey: receipt.sessionKey,
         sessionId: receipt.sessionId,
         agentId: "main",
         gateway: {

@@ -1,0 +1,129 @@
+services:
+  bot-gateway:
+    image: ${BOT_IMAGE:-bot:local}
+    build: .
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      HOME: /home/node
+      BOT_HOME: /home/node
+      TERM: xterm-256color
+      # Pin container-side state, workspace, and config paths so host values written to
+      # `.env` (used by Compose for the bind-mount source below) cannot leak
+      # into runtime code that resolves these env vars inside the container.
+      # Without this override, a macOS host path like /Users/<you>/.bot/...
+      # imported from .env caused first-reply `mkdir '/Users'` EACCES failures
+      # in Linux Docker (#77436).
+      BOT_STATE_DIR: /home/node/.bot
+      BOT_CONFIG_PATH: /home/node/.hanzoai/bot.json
+      BOT_CONFIG_DIR: /home/node/.bot
+      BOT_WORKSPACE_DIR: /home/node/.bot/workspace
+      BOT_GATEWAY_TOKEN: ${BOT_GATEWAY_TOKEN:-}
+      BOT_ALLOW_INSECURE_PRIVATE_WS: ${BOT_ALLOW_INSECURE_PRIVATE_WS:-}
+      # Empty means auto: Bonjour disables itself in detected containers.
+      # Set 0 only on host/macvlan/mDNS-capable networks; set 1 to force off.
+      BOT_DISABLE_BONJOUR: ${BOT_DISABLE_BONJOUR:-}
+      # OpenTelemetry export is outbound OTLP/HTTP from the Gateway. Prometheus
+      # uses the existing authenticated Gateway route; it does not need a port.
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: ${OTEL_EXPORTER_OTLP_METRICS_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: ${OTEL_EXPORTER_OTLP_LOGS_ENDPOINT:-}
+      OTEL_EXPORTER_OTLP_PROTOCOL: ${OTEL_EXPORTER_OTLP_PROTOCOL:-http/protobuf}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-}
+      OTEL_SEMCONV_STABILITY_OPT_IN: ${OTEL_SEMCONV_STABILITY_OPT_IN:-}
+      BOT_OTEL_PRELOADED: ${BOT_OTEL_PRELOADED:-}
+      CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY:-}
+      CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
+      CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
+      TZ: ${BOT_TZ:-UTC}
+    volumes:
+      - "${BOT_CONFIG_DIR:-${HOME:-/tmp}/.bot}:/home/node/.bot"
+      - "${BOT_WORKSPACE_DIR:-${HOME:-/tmp}/.bot/workspace}:/home/node/.bot/workspace"
+      - "${BOT_AUTH_PROFILE_SECRET_DIR:-${HOME:-/tmp}/.bot-auth-profile-secrets}:/home/node/.config/bot"
+      ## Uncomment the lines below to enable sandbox isolation
+      ## (agents.defaults.sandbox). Requires Docker CLI in the image
+      ## (build with --build-arg BOT_INSTALL_DOCKER_CLI=1) or use
+      ## scripts/docker/setup.sh with BOT_SANDBOX=1 for automated setup.
+      ## Set DOCKER_GID to the host's docker group GID (run: stat -c '%g' /var/run/docker.sock).
+      # - /var/run/docker.sock:/var/run/docker.sock
+    # group_add:
+    #   - "${DOCKER_GID:-999}"
+    # Let bundled local-model providers reach host-side LM Studio/Ollama via
+    # http://host.docker.internal:<port>. Docker Desktop usually provides this
+    # alias; the host-gateway mapping makes it work on Linux Docker Engine too.
+    cap_drop:
+      - NET_RAW
+      - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "${BOT_GATEWAY_PORT:-18789}:18789"
+      - "${BOT_BRIDGE_PORT:-18790}:18790"
+      - "${BOT_MSTEAMS_PORT:-3978}:3978"
+    init: true
+    restart: unless-stopped
+    command:
+      [
+        "node",
+        "dist/index.js",
+        "gateway",
+        "--bind",
+        "${BOT_GATEWAY_BIND:-lan}",
+        "--port",
+        "18789",
+      ]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  bot-cli:
+    image: ${BOT_IMAGE:-bot:local}
+    network_mode: "service:bot-gateway"
+    env_file:
+      - path: .env
+        required: false
+    cap_drop:
+      - NET_RAW
+      - NET_ADMIN
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      HOME: /home/node
+      BOT_HOME: /home/node
+      TERM: xterm-256color
+      # Pin container-side state, workspace, and config paths so host values written to
+      # `.env` cannot leak into runtime code via the env_file import (#77436).
+      BOT_STATE_DIR: /home/node/.bot
+      BOT_CONFIG_PATH: /home/node/.hanzoai/bot.json
+      BOT_CONFIG_DIR: /home/node/.bot
+      BOT_WORKSPACE_DIR: /home/node/.bot/workspace
+      BOT_GATEWAY_TOKEN: ${BOT_GATEWAY_TOKEN:-}
+      BOT_ALLOW_INSECURE_PRIVATE_WS: ${BOT_ALLOW_INSECURE_PRIVATE_WS:-}
+      BROWSER: echo
+      CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY:-}
+      CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY:-}
+      CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE:-}
+      TZ: ${BOT_TZ:-UTC}
+    volumes:
+      - "${BOT_CONFIG_DIR:-${HOME:-/tmp}/.bot}:/home/node/.bot"
+      - "${BOT_WORKSPACE_DIR:-${HOME:-/tmp}/.bot/workspace}:/home/node/.bot/workspace"
+      - "${BOT_AUTH_PROFILE_SECRET_DIR:-${HOME:-/tmp}/.bot-auth-profile-secrets}:/home/node/.config/bot"
+    stdin_open: true
+    tty: true
+    init: true
+    entrypoint: ["node", "dist/index.js"]
+    depends_on:
+      - bot-gateway

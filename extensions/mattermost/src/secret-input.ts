@@ -3,6 +3,6 @@ export type { SecretInput } from "bot/plugin-sdk/secret-input";
 export {
   buildSecretInputSchema,
   hasConfiguredSecretInput,
-  normalizeResolvedSecretInputString,
-  normalizeSecretInputString,
+  resolveSecretInputString,
 } from "bot/plugin-sdk/secret-input";
+export type { SecretInputStringResolutionMode } from "bot/plugin-sdk/secret-input";

@@ -10,8 +10,8 @@ import { createMockPluginRegistry } from "bot/plugin-sdk/plugin-test-runtime";
 import { castAgentMessage } from "bot/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it } from "vitest";
 import { runAgentHarnessBeforeMessageWriteHook } from "../agents/harness/hook-helpers.js";
+import { formatSqliteSessionFileMarker } from "../config/sessions/legacy-sqlite-marker.js";
 import { loadTranscriptEvents } from "../config/sessions/session-accessor.js";
-import { formatSqliteSessionFileMarker } from "../config/sessions/sqlite-marker.js";
 import { persistUserTurnTranscript } from "./user-turn-transcript.test-support.js";
 
 describe("persistUserTurnTranscript", () => {

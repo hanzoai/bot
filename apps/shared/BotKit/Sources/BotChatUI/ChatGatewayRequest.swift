@@ -80,6 +80,22 @@ public enum BotChatGatewayRequests {
         BotChatGatewayRequest(method: "models.list", timeoutMs: self.defaultTimeoutMs)
     }
 
+    public static func artifactDownload(
+        sessionKey: String,
+        agentID: String?,
+        artifactId: String) -> BotChatGatewayRequest
+    {
+        var params: [String: AnyCodable] = [
+            "sessionKey": AnyCodable(sessionKey),
+            "artifactId": AnyCodable(artifactId),
+        ]
+        self.add(agentID, to: &params, key: "agentId")
+        return BotChatGatewayRequest(
+            method: "artifacts.download",
+            params: params,
+            timeoutMs: self.defaultTimeoutMs)
+    }
+
     public static func chatMetadata(
         sessionKey: String,
         fallbackAgentID: String?) -> BotChatGatewayRequest
