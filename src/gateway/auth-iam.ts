@@ -228,16 +228,16 @@ export async function validateIamToken(
     return { ok: false, reason: sdkResult.reason };
   }
 
-  // Extract org/role info from claims (Casdoor-specific)
+  // Extract org/role info from the IAM claims
   const claims = sdkResult.claims;
   const orgIds: string[] = [];
 
-  // Casdoor groups may contain org membership
+  // The "groups" claim may contain org membership
   if (Array.isArray(claims.groups)) {
     orgIds.push(...claims.groups.filter((g): g is string => typeof g === "string"));
   }
 
-  // The "owner" field from Casdoor sub "org/username" split
+  // The "owner" field from the sub "org/username" split
   if (sdkResult.owner && !orgIds.includes(sdkResult.owner)) {
     orgIds.push(sdkResult.owner);
   }
