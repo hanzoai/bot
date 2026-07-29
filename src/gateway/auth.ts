@@ -449,7 +449,7 @@ export async function authorizeGatewayConnect(
   }
 
   // IAM (OIDC JWT) authentication — validate the provided token as a JWT
-  // issued by the configured IAM provider (e.g. hanzo.id / Casdoor).
+  // issued by the configured IAM provider (e.g. hanzo.id).
   // Falls back to shared gateway-token comparison so cloud-provisioned pods
   // that authenticate with BOT_GATEWAY_TOKEN still work alongside IAM users.
   if (auth.mode === "iam") {

@@ -224,8 +224,7 @@ async function handleRefresh(
 // ---------------------------------------------------------------------------
 
 function handleLogout(_req: IncomingMessage, res: ServerResponse): boolean {
-  // Server-side: nothing to revoke currently (Casdoor doesn't support
-  // standard token revocation out of the box). Client clears tokens.
+  // Server-side: no revocation endpoint is called. Client clears tokens.
   sendJson(res, 200, { ok: true });
   return true;
 }
