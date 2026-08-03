@@ -1,6 +1,6 @@
 ---
 name: hanzo-s3
-description: "Manage object storage with Hanzo S3. Upload, download, list, and manage files in S3-compatible buckets via the hanzo-s3 Python SDK (MinIO-compatible)."
+description: "Manage object storage with Hanzo S3. List, stat, delete, and presign objects in S3-compatible buckets via the hanzo-s3 Python SDK."
 metadata:
   {
     "bot":
@@ -23,7 +23,11 @@ metadata:
 
 `pip install hanzo-s3`
 
-Thin wrapper around MinIO Python client with Hanzo branding. Fully S3-compatible.
+Thin native adapter over `boto3` for [hanzoai/s3](https://github.com/hanzoai/s3)
+— a SeaweedFS fork (Apache-2.0). It exposes a small, stable surface: buckets,
+object listing, stat, delete, and presigned reads. Anything beyond that surface
+(uploads, streaming reads, bulk delete) is plain `boto3` — see the
+`hanzo-storage` skill.
 
 ## Quick Start
 
@@ -31,83 +35,51 @@ Thin wrapper around MinIO Python client with Hanzo branding. Fully S3-compatible
 from hanzo_s3 import S3Client
 
 client = S3Client(
-    "s3.hanzo.space",
-    access_key="your-access-key",
-    secret_key="your-secret-key"
+    "s3.hanzo.ai",              # in-cluster: "s3.hanzo.svc:9000" with secure=False
+    access_key="YOUR-ACCESS-KEY",
+    secret_key="YOUR-SECRET-KEY",
 )
 ```
+
+Constructor: `S3Client(endpoint, access_key, secret_key, secure=True, region="us-east-1")`.
+A bare `host:port` endpoint gets an `http://`/`https://` scheme from `secure`.
+Credentials come from KMS — never store them in plaintext.
 
 ## Bucket Operations
 
 ```python
-# List all buckets
-buckets = client.list_buckets()
-for b in buckets:
+# List all buckets -> list[Bucket(name, creation_date)]
+for b in client.list_buckets():
     print(b.name, b.creation_date)
 
 # Create bucket
 client.make_bucket("my-bucket")
 
-# Check if bucket exists
-exists = client.bucket_exists("my-bucket")
-
 # Remove bucket (must be empty)
 client.remove_bucket("my-bucket")
-```
-
-## Upload Files
-
-```python
-# Upload from local file
-client.fput_object("my-bucket", "remote/path.txt", "/local/path.txt")
-
-# Upload from bytes/stream
-from io import BytesIO
-data = BytesIO(b"file content here")
-client.put_object("my-bucket", "remote/path.txt", data, length=len(data.getvalue()))
-
-# Upload with metadata
-client.fput_object(
-    "my-bucket", "image.png", "/local/image.png",
-    content_type="image/png",
-    metadata={"x-amz-meta-author": "hanzo"}
-)
-```
-
-## Download Files
-
-```python
-# Download to local file
-client.fget_object("my-bucket", "remote/path.txt", "/local/download.txt")
-
-# Download as stream
-response = client.get_object("my-bucket", "remote/path.txt")
-data = response.read()
-response.close()
-response.release_conn()
 ```
 
 ## List Objects
 
 ```python
-# List objects in bucket
-objects = client.list_objects("my-bucket", prefix="data/", recursive=True)
-for obj in objects:
+# Returns list[Object(object_name, size, last_modified, is_dir)], fully paginated.
+for obj in client.list_objects("my-bucket", prefix="data/", recursive=True):
     print(obj.object_name, obj.size, obj.last_modified)
+
+# Non-recursive: one level, with pseudo-directories flagged is_dir=True
+for obj in client.list_objects("my-bucket", prefix="data/"):
+    print(obj.object_name, "dir" if obj.is_dir else obj.size)
 ```
 
-## Delete Objects
+## Stat & Delete
 
 ```python
-# Delete single object
-client.remove_object("my-bucket", "remote/path.txt")
+# Stat(size, etag, content_type, last_modified)
+stat = client.stat_object("my-bucket", "remote/path.txt")
+print(stat.size, stat.content_type, stat.etag)
 
-# Delete multiple objects
-from hanzo_s3 import DeleteObject
-objects = [DeleteObject("file1.txt"), DeleteObject("file2.txt")]
-errors = client.remove_objects("my-bucket", objects)
-for err in errors:
-    print(f"Error deleting {err.name}: {err.message}")
+# Delete a single object
+client.remove_object("my-bucket", "remote/path.txt")
 ```
 
 ## Presigned URLs
@@ -115,34 +87,32 @@ for err in errors:
 ```python
 from datetime import timedelta
 
-# Generate presigned download URL (valid 1 hour)
-url = client.presigned_get_object("my-bucket", "file.pdf", expires=timedelta(hours=1))
-
-# Generate presigned upload URL
-url = client.presigned_put_object("my-bucket", "upload.txt", expires=timedelta(hours=1))
+url = client.presigned_get_object(
+    "my-bucket", "file.pdf", expires=timedelta(hours=1)
+)
 ```
 
-## Admin Operations
+## Errors
 
 ```python
-from hanzo_s3 import S3Admin
+from hanzo_s3 import S3Error   # botocore ClientError; aliased Error / S3Exception
 
-admin = S3Admin(
-    "s3.hanzo.space",
-    credentials=("admin-key", "admin-secret")
-)
-
-# Get server info
-info = admin.info()
+try:
+    client.stat_object("my-bucket", "missing.txt")
+except S3Error as err:
+    print(err.response["Error"]["Code"])
 ```
 
-## Class Aliases
+## Exports
 
-| Hanzo                 | MinIO            |
-| --------------------- | ---------------- |
-| `S3Client` / `Client` | `Minio`          |
-| `S3Admin` / `Admin`   | `MinioAdmin`     |
-| `S3Error`             | `S3Error`        |
-| `S3Exception`         | `MinioException` |
+| Name                                | Purpose                                                                                                   |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `S3Client` / `Client`               | `list_buckets`, `make_bucket`, `remove_bucket`, `list_objects`, `stat_object`, `remove_object`, `presigned_get_object` |
+| `Bucket` / `Object` / `Stat`        | Frozen dataclass result types                                                                              |
+| `S3Error` / `Error` / `S3Exception` | Errors (`botocore.exceptions.ClientError`)                                                                 |
 
-All MinIO Python client methods are available. See [MinIO Python docs](https://min.io/docs/minio/linux/developers/python/API.html).
+## Uploads and downloads
+
+The SDK deliberately has no upload/download methods. Use `boto3` against the
+same endpoint — `upload_file`, `download_file`, `put_object`, `get_object`,
+`delete_objects`. See the `hanzo-storage` skill.
