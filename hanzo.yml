@@ -1,0 +1,61 @@
+# Canonical CI config for hanzoai/bot — read by the hanzoai/ci reusable
+# (.github/workflows/cicd.yml) and by platform.hanzo.ai.
+#
+# This repo has never had one, and that — not a missing recipe — is why no box
+# image exists anywhere in the org. Dockerfile.sandbox and its two siblings have
+# been correct and unbuilt for months, reachable only through
+# scripts/sandbox-*-setup.sh on somebody's laptop. A recipe nobody builds is a
+# recipe nobody can deploy.
+
+# ONE Dockerfile, THREE tags, one chain: exec -> dev -> desktop.
+#
+# hanzoai/ci's image lane has no `target:` field — it runs
+# `docker buildx build -f "$df" "$ctx"`, which builds the LAST stage. So
+# Dockerfile.box ends with `FROM ${STAGE} AS final`, an alias, and the class is
+# selected here. BuildKit only builds the stages the target depends on, so
+# STAGE=exec never pulls chromium, and the local builder passes the same arg —
+# one selection mechanism, not one for CI and one for a laptop.
+#
+# `tag-suffix` is what makes three entries share one repo: the tags come out as
+# box:sha-<short>-exec / -dev / -desktop, and a deployment pins the digest.
+#
+# amd64 ONLY, and not by omission — by the constraint one layer down. This image
+# does `COPY --from=<cloud release> /boxd`, and hanzoai/cloud's own image lane
+# (.hanzo/workflows/cicd.yml:552) declares `platforms: linux/amd64`. There is no
+# arm64 manifest to copy from, so declaring arm64 here would not produce an
+# arm64 box — it would produce a red build. DOKS has no arm64 nodes either, so
+# nothing is being given up today. When cloud publishes arm64, this is one line
+# in two files, in that order.
+images:
+  - name: box-exec
+    context: .
+    dockerfile: Dockerfile.box
+    repo: registry.hanzo.ai/hanzoai/box
+    tag-suffix: exec
+    args: { STAGE: exec }
+
+  - name: box-dev
+    context: .
+    dockerfile: Dockerfile.box
+    repo: registry.hanzo.ai/hanzoai/box
+    tag-suffix: dev
+    args: { STAGE: dev }
+
+  - name: box-desktop
+    context: .
+    dockerfile: Dockerfile.box
+    repo: registry.hanzo.ai/hanzoai/box
+    tag-suffix: desktop
+    args: { STAGE: desktop }
+
+# The gate for THIS lane, and deliberately not a second copy of ci.yml.
+#
+# `.hanzo/workflows/ci.yml` already runs `pnpm check`, the build, the docs check
+# and the full vitest matrix on every push. Repeating any of it here would double
+# the wall time of every commit to buy nothing. What ci.yml does NOT know about
+# is the image this lane exists to publish, so the gate is exactly the assertion
+# that guards it: the box's bases stay pinned, and every FROM in Dockerfile.box
+# resolves to a stage or an ARG declared in the same file.
+test:
+  - pnpm install --frozen-lockfile
+  - pnpm exec vitest run src/docker-image-digests.test.ts
