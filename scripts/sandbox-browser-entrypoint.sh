@@ -130,8 +130,29 @@ fi
 # that CMD, so without this line the desktop class would be the one image in the
 # chain nothing can schedule.
 #
-# Guarded on the binary rather than assumed: this script also runs from bot's
-# local docker path, where an older image may predate boxd entirely.
-command -v boxd >/dev/null 2>&1 && boxd &
+# It is REQUIRED, not best-effort. The old line was
+#
+#   command -v boxd >/dev/null 2>&1 && boxd &
+#
+# which is fail-open twice over: an image built without boxd starts anyway, and
+# a boxd that dies leaves the desktop's other children holding `wait -n` open.
+# Either way the pod stays Ready and 502s every fs/proc/git call, which is the
+# failure the rest of this image is built to avoid — the exec stage's `CMD
+# ["boxd"]` under tini means a dead boxd is a dead container and the scheduler
+# replaces it. The desktop class replaces that CMD, so it has to say the same
+# thing itself instead of inheriting it.
+#
+# "But it also runs from bot's local docker path" was the reason for the guard.
+# An image with no boxd is not a box, locally or otherwise; refusing at startup
+# is how that gets noticed at build time rather than on the first tool call.
+if ! command -v boxd >/dev/null 2>&1; then
+  echo "boxd not found in PATH — this image is not a box; every /v1/box call would 502" >&2
+  exit 1
+fi
+boxd &
 
+# `wait -n` returns when the FIRST child exits, and every child here is
+# load-bearing: Xvfb, the VNC pair, boxd. Whichever dies takes the container
+# with it, so the pod goes NotReady and gets replaced rather than lingering as a
+# Ready pod that cannot answer.
 wait -n
