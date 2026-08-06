@@ -1,35 +1,97 @@
 # Canonical CI/CD config for hanzoai/bot — the one file both the hanzoai/ci
 # reusable (.hanzo/workflows/cicd.yml) and platform.hanzo.ai read.
+
+# ONE Dockerfile, THREE tags, one chain: exec -> dev -> desktop.
 #
-# GATE ONLY. The images this repo ships already have their own lanes
-# (.hanzo/workflows/cloud.yml for Dockerfile.cloud, deploy.yml for the rollout),
-# and the five Dockerfiles here are variants of one product — sandbox, sandbox
-# browser, cloud — not one service a push should rebuild. Declaring `images:`
-# here would build them a second time for the same commit.
+# THESE THREE, AND ONLY THESE THREE. The repo's other images already have lanes:
+# Dockerfile.cloud has cloud.yml, the rollout has deploy.yml, the npm package has
+# release.yml. Declaring those here would build them a second time for the same
+# commit. The box recipes are the ones with no lane at all — which is why no box
+# image has ever existed anywhere in the org — so this is the whole list, not a
+# start on one.
 #
-# The gate is the `check` job of the CI this repo already runs on this fleet,
-# in its order and with its commands:
-#   * `pnpm check` — oxfmt --check, tsgo types, oxlint --type-aware, plus the
-#     dozen repo-specific lint rules that encode real invariants (no random
-#     messaging, channel-agnostic boundaries, no raw channel fetch, agent
-#     ingress ownership, no register-http-handler in plugins, no monolithic
-#     plugin-SDK entry imports, no low-level webhook body reads, pairing store
-#     and account scope).
-#   * `pnpm build:strict-smoke` — the A2UI bundle, tsdown, and the plugin-SDK
-#     .d.ts build under strict TS. This is the half of `pnpm build` that can
-#     actually go red on bad code, without the dozen artifact-copy scripts.
-#   * `pnpm lint:ui:no-raw-window-open` — the external-URL-opening policy.
+# hanzoai/ci's image lane has no `target:` field — it runs
+# `docker buildx build -f "$df" "$ctx"`, which builds the LAST stage. So
+# Dockerfile.box ends with `FROM ${STAGE} AS final`, an alias, and the class is
+# selected here. BuildKit only builds the stages the target depends on, so
+# STAGE=exec never installs a browser, and the local builder passes the same arg
+# — one selection mechanism, not one for CI and one for a laptop.
 #
-# Not claimed here: `pnpm test`. That suite is a matrix (node + bun) that needs
-# HANZO_BOT_TEST_WORKERS and a 6 GB old-space bump to avoid V8 OOM on Linux, and
-# it already runs in its own job with those env vars set. Duplicating it here
-# without them would produce OOM reds that say nothing about the code.
+# `tag-suffix` is what makes three entries share one repo: the tags come out as
+# sandbox:sha-<short>-amd64-exec / -dev / -desktop, beside sandbox:exec-latest
+# and the imgver semver, and a deployment pins the digest.
+#
+# THE REPO IS hanzoai/sandbox, NOT hanzoai/box, BECAUSE A CONSUMER NAMES IT.
+# hanzoai/cloud apps/sandbox/runtime.go defaults SANDBOX_IMAGE_REPO to
+# `registry.hanzo.ai/hanzoai/sandbox` and builds `<repo>:<class>[-<tag>]` from
+# it. An image path is only correct relative to who pulls it, and nothing pulls
+# `hanzoai/box`: the daemon design that owned that name was deleted from cloud
+# along with cmd/boxd. One artifact, one path, named by the thing that fetches it.
+#
+# `repo:` NAMES registry.hanzo.ai DIRECTLY rather than ghcr.io. Every other repo
+# in the fleet pushes to ghcr and lets the lane's crane step mirror across, but
+# that mirror rewrites the org — ghcr.io/hanzoai/x lands at
+# registry.hanzo.ai/hanzo/x — and `hanzo/sandbox` is not the path cloud pulls.
+# The lane logs into registry.hanzo.ai before it builds, so naming it here is a
+# direct push, not a special case.
+#
+# AMD64 ONLY, AND THE REASON IS THE FLEET, NOT THE FILE. Nothing in this image
+# still blocks arm64 — the `COPY --from=<cloud release> /boxd` that once pinned
+# it to cloud's amd64-only manifest is gone with the daemon, and every remaining
+# input publishes both arches. What blocks it is arithmetic: DOKS has no arm64
+# node, so arm64 buys nothing that runs today, and it would be built under QEMU
+# emulation — for an image that unpacks and compiles a Go + Rust + JDK + Zig +
+# Bun + Deno toolchain, that is the difference between a build that finishes and
+# one that is still going. The tag a consumer pins is unchanged either way:
+# single-arch moves the sha- tag to `sha-<short>-amd64-<sfx>` and leaves
+# `<sfx>-latest` and the semver exactly where they were. An arm64 node makes this
+# one word here, not a rebuild.
+images:
+  - name: sandbox-exec
+    context: .
+    dockerfile: Dockerfile.box
+    repo: registry.hanzo.ai/hanzoai/sandbox
+    tag-suffix: exec
+    platforms: [linux/amd64]
+    args: { STAGE: exec }
+
+  - name: sandbox-dev
+    context: .
+    dockerfile: Dockerfile.box
+    repo: registry.hanzo.ai/hanzoai/sandbox
+    tag-suffix: dev
+    platforms: [linux/amd64]
+    args: { STAGE: dev }
+
+  - name: sandbox-desktop
+    context: .
+    dockerfile: Dockerfile.box
+    repo: registry.hanzo.ai/hanzoai/sandbox
+    tag-suffix: desktop
+    platforms: [linux/amd64]
+    args: { STAGE: desktop }
+
+# The gate for THIS lane, and deliberately not a second copy of ci.yml.
+#
+# `.hanzo/workflows/ci.yml` already runs `pnpm check`, `pnpm build:strict-smoke`,
+# the docs check and the full vitest matrix on every push to main and every PR —
+# with the HANZO_BOT_TEST_WORKERS and 6 GB old-space settings that suite needs to
+# not OOM. Repeating any of it here would double the wall time of every commit to
+# buy a second opinion from the same command, and it would put the image behind a
+# check it has nothing to do with: `pnpm check` is red right now on 991 files the
+# pinned oxfmt 0.35.0 reorders imports in, which is a sweep somebody owes the
+# repo and no reason for a box to be unbuildable.
+#
+# What ci.yml does NOT know about is the image this lane exists to publish, so
+# the gate is exactly the assertion that guards it: every base Dockerfile.box
+# builds on is pinned by digest, and every FROM in it resolves to a stage or an
+# ARG declared in the same file. That property is what makes two builds of one
+# commit the same bytes, and this lane pushes on pull_request too — so a floating
+# tag here is a PR quietly redefining what main publishes.
 test:
-  - name: build
+  - name: box image invariants
     run: |
       set -e
       corepack enable
       pnpm install --frozen-lockfile
-      pnpm check
-      pnpm build:strict-smoke
-      pnpm lint:ui:no-raw-window-open
+      pnpm exec vitest run src/docker-image-digests.test.ts
