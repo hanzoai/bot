@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import type { CodingEvent, CodingRuntime } from "./coding-task.js";
+import type { CodingEvent, CodingRuntime, RuntimeSpec } from "./coding-task.js";
 
 // Mock the pod-boundary auth to pass and config to be empty, so this test isolates
 // the handler's OWN concerns: auth-mode gate, host pin + org-match isolation, body
@@ -21,6 +21,7 @@ const { handleCodingTasksHttpRequest } = await import("./coding-tasks-http.js");
 // it can't be created.)
 function stubRuntime() {
   const cleanup = vi.fn(async () => {});
+  const specs: RuntimeSpec[] = [];
   const exec = async (argv: string[]) => {
     const sub = argv[1] === "-c" ? argv[3] : argv[1];
     if (sub === "status") {
@@ -34,17 +35,20 @@ function stubRuntime() {
     }
     return { stdout: "", stderr: "", code: 0 };
   };
-  const runAgent = async (_a: unknown, emit: (e: CodingEvent) => void) => {
+  const tools: string[] = [];
+  const runAgent = async (a: { tool: string }, emit: (e: CodingEvent) => void) => {
+    tools.push(a.tool);
     emit({ type: "log", message: "stub agent edited" });
     return { ok: true, logTail: "stub" };
   };
   return {
-    make: async (_timeoutSec: number): Promise<CodingRuntime> => ({
-      workdir: "/tmp/coding-stub",
-      deps: { exec, runAgent },
-      cleanup,
-    }),
+    make: async (spec: RuntimeSpec): Promise<CodingRuntime> => {
+      specs.push(spec);
+      return { workdir: "/tmp/coding-stub", deps: { exec, runAgent }, cleanup };
+    },
     cleanup,
+    specs,
+    tools,
   };
 }
 
@@ -52,7 +56,7 @@ let server: ReturnType<typeof createServer>;
 let port = 0;
 let currentRuntime = stubRuntime();
 let currentAuth: unknown = { mode: "token", token: "t", allowTailscale: false };
-let currentMake: (timeoutSec: number) => Promise<CodingRuntime> = currentRuntime.make;
+let currentMake: (spec: RuntimeSpec) => Promise<CodingRuntime> = currentRuntime.make;
 
 beforeAll(async () => {
   server = createServer((req, res) => {
@@ -219,5 +223,58 @@ describe("POST /v1/coding-tasks", () => {
     } finally {
       delete process.env.HANZO_CODING_ORG_CONCURRENCY;
     }
+  });
+});
+
+// ── the wire fields: tool, desktop, and a repo that may simply not be there ──
+
+describe("POST /v1/coding-tasks — a sandbox is a computer", () => {
+  it("runs with NO repo: no clone URL, no branch, no credential, still a result", async () => {
+    setRuntime();
+    const { status, text } = await post({ prompt: "just think about it", tool: "python" });
+    expect(status).toBe(200);
+    const lines = text
+      .trim()
+      .split("\n")
+      .map((l) => JSON.parse(l));
+    const result = lines.find((l) => l.type === "result");
+    expect(result?.ok).toBe(true);
+    // No git vocabulary anywhere in the stream.
+    expect(lines.some((l) => l.step === "clone" || l.step === "push")).toBe(false);
+    expect(currentRuntime.tools).toEqual(["python"]);
+  });
+
+  it("REFUSES a credential with no repo — a token that cannot be used only leaks", async () => {
+    setRuntime();
+    const { status, text } = await post({
+      prompt: "x",
+      credential: { username: "x-access-token", token: "hk-secret" },
+    });
+    expect(status).toBe(400);
+    expect(text).toContain("require a cloneUrl");
+    expect(currentRuntime.cleanup).not.toHaveBeenCalled();
+  });
+
+  it("defaults tool to dev and rejects a tool the table does not have", async () => {
+    setRuntime();
+    expect((await post({ ...okBody })).status).toBe(200);
+    expect(currentRuntime.tools).toEqual(["dev"]);
+
+    setRuntime();
+    const bad = await post({ ...okBody, tool: "rm-rf" });
+    expect(bad.status).toBe(400);
+    expect(bad.text).toContain("tool must be one of");
+    // A bad tool never boots a sandbox.
+    expect(currentRuntime.specs).toEqual([]);
+  });
+
+  it("passes desktop through to the runtime spec — it selects a TAG, nothing else", async () => {
+    setRuntime();
+    await post({ ...okBody, desktop: true });
+    expect(currentRuntime.specs.map((s) => s.desktop)).toEqual([true]);
+
+    setRuntime();
+    await post({ ...okBody });
+    expect(currentRuntime.specs.map((s) => s.desktop)).toEqual([false]);
   });
 });
