@@ -1,0 +1,31 @@
+# The canonical fleet pipeline, driven by this repo's root hanzo.yml. Every real
+# detail lives there; this file is the trigger set and nothing else.
+#
+# It lives in `.hanzo/workflows/` because the runners are the FORGE's. The pool
+# that answers `hanzo-build-linux-amd64` is registered to git.hanzo.ai;
+# github.com has zero runners at any level. The forge reads BOTH `.hanzo/workflows`
+# and `.github/workflows`, so a caller left under `.github/` runs twice — once
+# here, and once on GitHub where nothing can pick it up and the job simply queues.
+#
+# WHY THIS FILE IS NEW HERE, AND WHY IT IS NOT A FOURTH BUILDER. The repo already
+# has deploy.yml (ghcr.io/hanzoai/bot), cloud.yml (bot-cloud) and release.yml
+# (@hanzo/bot) — three hand-rolled workflows, each owning one artifact, none of
+# which touches the sandbox recipes. Those recipes have therefore NEVER been
+# built: `Dockerfile.sandbox` and its siblings are reachable only through
+# scripts/sandbox-*-setup.sh, on a laptop. That is the actual reason no box image
+# exists anywhere in the org — not a missing recipe, a missing lane.
+#
+# The box images take the canonical lane instead of a fourth hand-rolled one
+# because they need exactly what it already does: multi-image `images:` entries
+# off one Dockerfile with per-image `args`, the shared imgver version derivation,
+# and the GHCR + registry.hanzo.ai dual push. Rewriting that here would be a
+# second copy of the fleet's build logic in the one repo that had none.
+name: CI/CD
+on:
+  push: { branches: [main], tags: ['v*'] }
+  pull_request:
+  workflow_dispatch:
+jobs:
+  cicd:
+    uses: hanzoai/ci/.github/workflows/build.yml@v1
+    secrets: inherit

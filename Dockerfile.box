@@ -1,0 +1,281 @@
+# syntax=docker/dockerfile:1
+#
+# The box: the image a coding agent actually works in.
+#
+# ONE recipe, three published tags, one chain:
+#
+#   exec  ──▶  dev  ──▶  desktop
+#
+# Each tag is a CLASS from docs/sandbox.md §3 (`class = exec | dev | desktop`),
+# and the class is the pod label the NetworkPolicy selects on. One vocabulary for
+# the three things, so the tag, the label and the API field are the same word.
+#
+# WHY ONE FILE AND NOT THREE. The three images share a base, a user and a package
+# set. Written as three Dockerfiles they are three copies of that agreement, and
+# the copies drift silently — nothing fails when `desktop` is built on a base the
+# `dev` file has since moved off. Here `desktop` cannot be built on anything but
+# `dev`, because it says `FROM dev`.
+#
+# HOW CI SELECTS A STAGE. hanzoai/ci's image lane has no `target:` field — it
+# runs `docker buildx build ... -f "$df" "$ctx"`, which builds the LAST stage.
+# So the last stage is `FROM ${STAGE}`, an alias, and hanzo.yml picks the class
+# with `args: {STAGE: exec|dev|desktop}`. BuildKit only builds the stages the
+# target depends on, so `STAGE=exec` never pulls chromium. The local builder
+# (scripts/sandbox-*-setup.sh) passes the SAME arg, so there is one selection
+# mechanism, not one for CI and one for a laptop.
+#
+# EVERY BASE IS PINNED BY DIGEST. A floating tag means two builds of one commit
+# are two different images, and the lane pushes on pull_request too — so a
+# mutable name here is a PR silently redefining what main builds on.
+
+ARG STAGE=desktop
+
+# node:22-bookworm-slim, NOT debian:bookworm-slim + a hand-rolled node install.
+# bot's own Dockerfile already pins `node:22-bookworm@sha256:cd7bcd…`, so this is
+# the same decision the repo already made, one line instead of a tarball fetch, a
+# checksum and a PATH edit. `-slim` is the same Debian bookworm userland the
+# previous Dockerfile.sandbox pinned; bookworm's own `nodejs` is 18.20, which is
+# below bot's own `engines.node >= 22.12`, so apt was never an option.
+# Verified multi-arch: linux/amd64 + linux/arm64.
+ARG NODE_BASE=docker.io/library/node:22-bookworm-slim@sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172dc3cc6436
+
+# uv is the ONE Python installer/venv manager we use. Taken as a static binary
+# out of the upstream image rather than piped from an install script: the image
+# is digest-pinnable and the script is not. Verified multi-arch (amd64, arm64).
+ARG UV_IMAGE=ghcr.io/astral-sh/uv:0.12.2@sha256:069a51314a7bb6031777a9273205fe1b0b19e914ef418207d1338b268df641dd
+
+# boxd — the agent inside the box, lifted out of a cloud release.
+#
+# WHY A PIN AND NOT A BUILD. boxd's request/response types ARE the types
+# hanzoai/cloud's apps/sandbox marshals: one Go package, apps/sandbox/wire,
+# imported by both. Compiling boxd here would put the two halves of that wire in
+# two repos on two release cadences, and a field rename would then compile clean
+# on both sides and fail only in production — the single failure the wire package
+# exists to make inexpressible. So cloud builds it, its release image carries it,
+# and this line is the reviewed pin that says WHICH cloud a box is speaking to.
+#
+# NOT digest-pinned like the bases above, and that is not an oversight: this
+# input is versioned by us and moves every time the wire does, so a `v` tag is
+# the reviewable unit. The bases are third-party and immutable-or-nothing.
+#
+# WHY ghcr AND NOT registry.hanzo.ai. registry.hanzo.ai is where our CI pushes,
+# but the fleet's live cloud pin — universe charts/app/values/hanzo/cloud.yaml,
+# `repository: ghcr.io/hanzoai/cloud`, `tag: v1.801.484` — is the copy that is
+# demonstrably there today, and a build input has to be one you can actually
+# pull. It is an ARG so the move is one `--build-arg`, not an edit.
+#
+# Until a cloud release built from a tree containing cmd/boxd exists, this COPY
+# fails with "/boxd: not found". That is the correct failure: loud, in CI, at
+# build time, naming the missing thing — not a box that starts and answers
+# nothing.
+ARG CLOUD_IMAGE=ghcr.io/hanzoai/cloud:v1.801.484
+
+FROM ${UV_IMAGE} AS uvsrc
+FROM ${CLOUD_IMAGE} AS cloudsrc
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# exec — the class that runs an untrusted snippet and is thrown away.
+#
+# It is the bottom of the chain AND a published tag, because docs/sandbox.md §7
+# pins the exec warm pool at `box:exec-<digest>`. There is no fourth "base" tag
+# that nothing runs: the bottom layer IS the exec image.
+#
+# Deliberately has NO compiler and NO package manager beyond what node ships. An
+# /exec box is reached by hanzo.chat's execute_code tool over a DNS-only
+# NetworkPolicy (§4) — it cannot fetch a dependency, so shipping the tooling to
+# fetch one is dead weight on every concurrent box.
+# ─────────────────────────────────────────────────────────────────────────────
+FROM ${NODE_BASE} AS exec
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    NPM_CONFIG_FUND=false \
+    NPM_CONFIG_AUDIT=false \
+    NPM_CONFIG_UPDATE_NOTIFIER=false
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    bash \
+    ca-certificates \
+    curl \
+    git \
+    jq \
+    procps \
+    python3 \
+    ripgrep \
+    tini \
+  && rm -rf /var/lib/apt/lists/*
+
+# uid/gid 1000, named `sandbox`.
+#
+# The node image already owns 1000:1000 as `node`, and the pod runs
+# `runAsNonRoot: true, runAsUser: 1000` (§4) — so the choice is which NAME wears
+# 1000, not whether to add a second user. Renaming keeps one uid; a `useradd`
+# beside it would put the agent on 1001 and quietly break the securityContext.
+RUN groupmod -n sandbox node \
+  && usermod -l sandbox -d /home/sandbox -m sandbox
+
+# /work is where the per-(org,project) PVC mounts (§5b) — the checkout and the
+# caches. Created here so an empty volume inherits the right owner instead of
+# arriving root-owned and read-only to the agent.
+RUN mkdir -p /work && chown sandbox:sandbox /work
+
+# THE PIECE THAT MAKES THIS A BOX AND NOT A TOOLCHAIN.
+#
+# Without boxd the image is a container full of compilers that nothing can
+# reach: hanzo.chat's execute_code, /v1/functions invoke, apps/coding's Runner
+# and hanzo.app's ProjectFs all terminate on an HTTP surface, and this is the
+# process that serves it — /v1/box/{health,proc,fs,git,agent} plus the frozen
+# LibreChat family (/v1/exec, /v1/upload, /v1/download/{id}, /v1/files/{sid}).
+#
+# It goes in `exec`, the BOTTOM of the chain, so every class inherits it. An
+# exec-class box needs it for hanzo.chat; a dev-class box needs it for the
+# filesystem the agent edits. There is no class that wants a box it cannot talk
+# to.
+COPY --from=cloudsrc /boxd /usr/local/bin/boxd
+
+USER sandbox
+WORKDIR /home/sandbox
+
+# tini reaps. A box is a long-lived PID 1 that spawns compilers, language servers
+# and browsers; without a reaper the zombies accumulate for the life of the pod.
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+# boxd, not `sleep infinity`.
+#
+# The warm pool (§5a) still works exactly as it did — the pod is already running
+# and claiming it is a label patch, not a pod create and an image pull — but a
+# warm pod that sleeps can answer nothing, so claiming one would be followed by
+# waiting for a process to start. boxd is up from boot, it fails CLOSED without
+# CODE_EXEC_API_KEY (503, never "open to anyone"), and §6's registration with
+# /v1/agents happens on ITS boot, which is what puts a box in /v1/fleet beside
+# the laptops and GPUs.
+CMD ["boxd"]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# dev — the coding agent's box. THIS IS THE PIECE THAT HAS NEVER EXISTED:
+# no image anywhere in the org installs @hanzo/dev.
+# ─────────────────────────────────────────────────────────────────────────────
+FROM exec AS dev
+
+USER root
+
+# Pinned, never floating. @hanzo/dev@0.6.91 is the newest published version
+# (npm dist-tags.latest, 2026-04-01).
+ARG DEV_VERSION=0.6.91
+# Matches bot's own `packageManager: pnpm@10.23.0` — one pnpm version per repo.
+ARG PNPM_VERSION=10.23.0
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    build-essential \
+    file \
+    less \
+    openssh-client \
+    pkg-config \
+    python3-venv \
+    unzip \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY --from=uvsrc /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
+
+# @hanzo/dev is a thin launcher; the real binary arrives as a platform-specific
+# optionalDependency (@hanzo/dev-linux-{x64,arm64}-musl). npm filters those by
+# os/cpu, so each arch of this image gets exactly one ~50 MB binary, not five.
+#
+# The musl build on a glibc base is correct, not a mismatch: the artifact is a
+# fully static ELF (verified: "statically linked, stripped") and runs on Debian.
+# There is no -gnu variant published.
+#
+# The cache is dropped in the SAME layer — npm keeps a second copy of every
+# tarball it unpacked, and a `RUN npm cache clean` of its own would land after
+# the layer that already carries the weight.
+RUN npm install -g "pnpm@${PNPM_VERSION}" "@hanzo/dev@${DEV_VERSION}" \
+  && npm cache clean --force \
+  && rm -rf /root/.npm /tmp/*
+
+# Prove the three things this stage exists for are on PATH and executable. A
+# `RUN` that fails here fails the build, which is the only place this can be
+# caught before a box is scheduled and an agent finds no agent.
+RUN dev --version && hanzo --version && pnpm --version && uv --version \
+  && node --version && python3 --version && git --version
+
+USER sandbox
+WORKDIR /work
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# desktop — the computer-use variant. dev + an X display it can see and click.
+#
+# LAYERED ON dev, NOT BESIDE IT. bot's tree built `sandbox-browser` as a sibling
+# of `sandbox`, which gives a computer-use box a browser and no toolchain — it
+# can drive a page but not edit the code that serves it.
+#
+# WHAT IS CARRIED OVER FROM hanzoai/operative, AND WHAT IS NOT.
+#
+# Carried: the X/VNC recipe and, specifically, its ONE hard-won bug fix.
+# operative's docker/image/.operative/x11vnc_startup.sh says it in full —
+#
+#     x11vnc (LibVNCServer 0.9.13) has a MSG_PEEK deadlock bug: on new
+#     connections it peeks at the first byte to detect WebSocket vs RFB, but in
+#     RFB the server speaks first, so both sides wait forever.
+#
+# — and switches to TigerVNC's x0vncserver. bot's browser entrypoint runs
+# x11vnc behind websockify, which is exactly the pair that deadlocks. That fix
+# is the reason to read operative's work rather than start over, and it is now
+# in scripts/sandbox-browser-entrypoint.sh.
+#
+# NOT carried: operative's docker/Dockerfile.xvfb itself, because layering on it
+# would import mongodb-org, postgresql, mariadb-server and redis-server (three
+# storage directives broken at once), docker.io + colima (a container runtime
+# INSIDE the thing that is supposed to BE the containment boundary), VS Code,
+# Emacs, LibreOffice, .NET, Julia, Dart and Scala — and it has no USER, so it
+# runs as root. That image stays where it is for operative's own computer-use
+# work; this is the same X stack without the workstation.
+# ─────────────────────────────────────────────────────────────────────────────
+FROM dev AS desktop
+
+USER root
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    chromium \
+    dbus-x11 \
+    fonts-dejavu-core \
+    fonts-liberation \
+    fonts-noto-color-emoji \
+    novnc \
+    openbox \
+    scrot \
+    socat \
+    tigervnc-common \
+    tigervnc-scraping-server \
+    websockify \
+    x11-utils \
+    xauth \
+    xdotool \
+    xvfb \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY scripts/sandbox-browser-entrypoint.sh /usr/local/bin/hanzo-bot-sandbox-browser
+RUN chmod 0755 /usr/local/bin/hanzo-bot-sandbox-browser
+
+USER sandbox
+WORKDIR /work
+
+# 9222 CDP · 5900 RFB · 6080 noVNC. All bound to loopback by the entrypoint
+# except the ones it deliberately proxies — see the script.
+EXPOSE 9222 5900 6080
+
+CMD ["hanzo-bot-sandbox-browser"]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The selector. Last stage, so it is what `docker build` produces by default;
+# `FROM ${STAGE}` is an alias, so the published image IS the named stage —
+# same layers, same config, no extra layer.
+# ─────────────────────────────────────────────────────────────────────────────
+FROM ${STAGE} AS final
