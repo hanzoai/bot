@@ -1,218 +1,350 @@
 # syntax=docker/dockerfile:1
 #
-# The box: the image a coding agent actually works in.
+# The sandbox image: the toolchain a coding agent actually works in.
+#
+# Published as registry.hanzo.ai/hanzoai/sandbox — the repo hanzoai/cloud's
+# apps/sandbox/runtime.go names by default (SANDBOX_IMAGE_REPO). The FILE is
+# still Dockerfile.box because `Dockerfile.sandbox` in this repo is TAKEN, by a
+# live and unrelated feature: bot's own Docker sandbox
+# (src/agents/sandbox/constants.ts pins `bot-sandbox-common:bookworm-slim`,
+# scripts/sandbox-common-setup.sh builds it, doctor-sandbox.ts checks it).
+# "box" is this repo's local word for the artifact; `hanzoai/sandbox` is the
+# name the fleet pulls it by, and the registry path is the one that has to
+# match a consumer.
 #
 # ONE recipe, three published tags, one chain:
 #
 #   exec  ──▶  dev  ──▶  desktop
 #
-# Each tag is a CLASS from docs/sandbox.md §3 (`class = exec | dev | desktop`),
-# and the class is the pod label the NetworkPolicy selects on. One vocabulary for
-# the three things, so the tag, the label and the API field are the same word.
+# Each tag is a CLASS in apps/sandbox/runtime.go's imageFor(), and the class is
+# also the pod label. One vocabulary for the three things.
 #
-# WHY ONE FILE AND NOT THREE. The three images share a base, a user and a package
-# set. Written as three Dockerfiles they are three copies of that agreement, and
-# the copies drift silently — nothing fails when `desktop` is built on a base the
-# `dev` file has since moved off. Here `desktop` cannot be built on anything but
-# `dev`, because it says `FROM dev`.
+# WHERE THE THREE ARE CUT, AND WHY IT IS NOT WHERE YOU WOULD GUESS.
+# Not on disk. Image layers are shared per NODE, so `exec` being a strict layer
+# subset of `dev` means a node that has ever pulled `dev` already has every byte
+# `exec` needs — shrinking `exec` by moving compilers out of it would save
+# nothing on that node and cost a second, unshared toolchain layer everywhere
+# else. The cut is on RUNTIME cost, which is the thing that is actually paid per
+# pod:
+#
+#   exec     full toolchain, `sleep infinity`, nothing running.
+#   dev      the same, plus the agent CLI. Still nothing running.
+#   desktop  plus Xvfb + a window manager + a VNC server + noVNC — four
+#            processes on EVERY desktop pod, whether or not anyone looks at the
+#            screen. That is the only difference here that costs at runtime, so
+#            it is the only place a class boundary earns its keep.
+#
+# THERE IS NO DAEMON IN THIS IMAGE AND THERE MUST NEVER BE ONE AGAIN.
+# The command is `sleep infinity`; work arrives through the Kubernetes exec
+# subresource. The previous design shipped `cmd/boxd` here and had the cloud
+# talk to it over HTTP — that daemon was deleted from hanzoai/cloud (commit
+# cab8ff9d, "there is no box daemon, so the build stops trying to compile one")
+# along with the ~2000 lines that served it, and this file's `COPY --from=cloud
+# /boxd` went with it. The desktop stage starts X, which is a DISPLAY, not a
+# control plane: nothing in this image accepts a command from outside.
 #
 # HOW CI SELECTS A STAGE. hanzoai/ci's image lane has no `target:` field — it
 # runs `docker buildx build ... -f "$df" "$ctx"`, which builds the LAST stage.
 # So the last stage is `FROM ${STAGE}`, an alias, and hanzo.yml picks the class
 # with `args: {STAGE: exec|dev|desktop}`. BuildKit only builds the stages the
-# target depends on, so `STAGE=exec` never pulls chromium. The local builder
-# (scripts/sandbox-*-setup.sh) passes the SAME arg, so there is one selection
-# mechanism, not one for CI and one for a laptop.
+# target depends on, so `STAGE=exec` never pulls chromium.
 #
-# EVERY BASE IS PINNED BY DIGEST. A floating tag means two builds of one commit
-# are two different images, and the lane pushes on pull_request too — so a
-# mutable name here is a PR silently redefining what main builds on.
+# EVERY THIRD-PARTY INPUT IS PINNED BY DIGEST OR CHECKSUM, AND EVERY VERSION IS
+# A LITERAL. A floating tag means two builds of one commit are two different
+# images, and this lane pushes on pull_request too — so a mutable name here is a
+# PR silently redefining what main builds on. Base images carry an @sha256;
+# tarballs carry the publisher's SHA-256, verified before anything is unpacked.
+# Every number below was read from the publisher on 2026-08-06, not remembered.
 
 ARG STAGE=desktop
 
-# node:22-bookworm-slim, NOT debian:bookworm-slim + a hand-rolled node install.
-# bot's own Dockerfile already pins `node:22-bookworm@sha256:cd7bcd…`, so this is
-# the same decision the repo already made, one line instead of a tarball fetch, a
-# checksum and a PATH edit. `-slim` is the same Debian bookworm userland the
-# previous Dockerfile.sandbox pinned; bookworm's own `nodejs` is 18.20, which is
-# below bot's own `engines.node >= 22.12`, so apt was never an option.
-# Verified multi-arch: linux/amd64 + linux/arm64.
-ARG NODE_BASE=docker.io/library/node:22-bookworm-slim@sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172dc3cc6436
+# Ubuntu 26.04 LTS "Resolute Raccoon". Same base hanzoai/operative moved its
+# xvfb image to, so the two computer-use images share a userland instead of
+# drifting apart on two distros.
+ARG UBUNTU_BASE=docker.io/library/ubuntu:26.04@sha256:678c6550cc43645e08669028bc177f50be4e7c5b8cca677067b1914d4afc7a03
 
 # uv is the ONE Python installer/venv manager we use. Taken as a static binary
-# out of the upstream image rather than piped from an install script: the image
-# is digest-pinnable and the script is not. Verified multi-arch (amd64, arm64).
+# out of the upstream image rather than piped from an install script: an image
+# is digest-pinnable and a shell script is not.
 ARG UV_IMAGE=ghcr.io/astral-sh/uv:0.12.2@sha256:069a51314a7bb6031777a9273205fe1b0b19e914ef418207d1338b268df641dd
 
-# boxd — the agent inside the box, lifted out of a cloud release.
-#
-# WHY A PIN AND NOT A BUILD. boxd's request/response types ARE the types
-# hanzoai/cloud's apps/sandbox marshals: one Go package, apps/sandbox/wire,
-# imported by both. Compiling boxd here would put the two halves of that wire in
-# two repos on two release cadences, and a field rename would then compile clean
-# on both sides and fail only in production — the single failure the wire package
-# exists to make inexpressible. So cloud builds it, its release image carries it,
-# and this line is the reviewed pin that says WHICH cloud a box is speaking to.
-#
-# NOT digest-pinned like the bases above, and that is not an oversight: this
-# input is versioned by us and moves every time the wire does, so a `v` tag is
-# the reviewable unit. The bases are third-party and immutable-or-nothing.
-#
-# WHY ghcr AND NOT registry.hanzo.ai. registry.hanzo.ai is where our CI pushes,
-# but the fleet's live cloud pin — universe charts/app/values/hanzo/cloud.yaml,
-# `repository: ghcr.io/hanzoai/cloud`, `tag: v1.801.484` — is the copy that is
-# demonstrably there today, and a build input has to be one you can actually
-# pull. It is an ARG so the move is one `--build-arg`, not an edit.
-#
-# Until a cloud release built from a tree containing cmd/boxd exists, this COPY
-# fails with "/boxd: not found". That is the correct failure: loud, in CI, at
-# build time, naming the missing thing — not a box that starts and answers
-# nothing.
-ARG CLOUD_IMAGE=ghcr.io/hanzoai/cloud:v1.801.484
-
 FROM ${UV_IMAGE} AS uvsrc
-FROM ${CLOUD_IMAGE} AS cloudsrc
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# exec — the class that runs an untrusted snippet and is thrown away.
-#
-# It is the bottom of the chain AND a published tag, because docs/sandbox.md §7
-# pins the exec warm pool at `box:exec-<digest>`. There is no fourth "base" tag
-# that nothing runs: the bottom layer IS the exec image.
-#
-# Deliberately has NO compiler and NO package manager beyond what node ships. An
-# /exec box is reached by hanzo.chat's execute_code tool over a DNS-only
-# NetworkPolicy (§4) — it cannot fetch a dependency, so shipping the tooling to
-# fetch one is dead weight on every concurrent box.
+# exec — the full toolchain. Also the class that runs a snippet and is thrown
+# away, which is why it is the BOTTOM of the chain rather than a fourth "base"
+# tag that nothing ever runs.
 # ─────────────────────────────────────────────────────────────────────────────
-FROM ${NODE_BASE} AS exec
+FROM ${UBUNTU_BASE} AS exec
+
+ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    TZ=UTC \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_ROOT_USER_ACTION=ignore \
     NPM_CONFIG_FUND=false \
     NPM_CONFIG_AUDIT=false \
     NPM_CONFIG_UPDATE_NOTIFIER=false
 
+# The things a coding agent reaches for, plus the headers a native build needs.
+# Ubuntu 26.04 ships python3 3.14.3, ruby 3.3 and php 8.5 — current stable of
+# all three — so those three languages come from apt and stay on the distro's
+# security-update track instead of being frozen into a hand-fetched tarball.
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    bash \
-    ca-certificates \
-    curl \
-    git \
-    jq \
-    procps \
-    python3 \
-    ripgrep \
-    tini \
+    autoconf automake bash bat bc build-essential ca-certificates cmake curl \
+    dnsutils fd-find file fzf gettext git git-lfs gnupg gpg htop iproute2 \
+    iputils-ping jq less libbz2-dev libffi-dev libncurses-dev libreadline-dev \
+    liblzma-dev libsqlite3-dev libssl-dev libxml2-dev libxslt1-dev libyaml-dev \
+    libzip-dev locales make man-db ncdu netcat-openbsd ninja-build openssh-client \
+    patch pkg-config procps psmisc python3 python3-dev python3-venv rsync \
+    ripgrep socat sqlite3 strace tar tini tmux tree tzdata unzip vim wget \
+    xz-utils zip zlib1g-dev zstd \
+    php php-cli php-common php-curl php-mbstring php-mysql php-xml php-zip composer \
+    ruby ruby-dev \
+  && ln -sf /usr/share/zoneinfo/UTC /etc/localtime \
+  && ln -sf /usr/bin/fdfind /usr/local/bin/fd \
+  && ln -sf /usr/bin/batcat /usr/local/bin/bat \
+  && ln -sf /usr/bin/python3 /usr/local/bin/python \
   && rm -rf /var/lib/apt/lists/*
 
-# uid/gid 1000, named `sandbox`.
+# ---- Node.js ---------------------------------------------------------------
+# 24.19.0 is the ACTIVE LTS line ("Krypton"). Node 26.7.0 is newer and is NOT
+# LTS until October, and a sandbox is where other people's projects build — the
+# line their CI targets is the one to ship. Taken as the official tarball rather
+# than NodeSource because `setup_24.x` resolves to whatever 24.x is current on
+# build day, which is precisely the unreproducibility this file is avoiding.
+ARG NODE_VERSION=24.19.0
+ARG NODE_SHA256_AMD64=14b342e71204f811bde6153be8e04b62aef63c236fef92b55f9c83154b409647
+ARG NODE_SHA256_ARM64=01443c1e1a29e531ccad5a46fefa6df490d2189c49f7955904aecdbb0fe86fdc
+# pnpm 11.20.0 is current, installed with npm -g.
 #
-# The node image already owns 1000:1000 as `node`, and the pod runs
-# `runAsNonRoot: true, runAsUser: 1000` (§4) — so the choice is which NAME wears
-# 1000, not whether to add a second user. Renaming keeps one uid; a `useradd`
-# beside it would put the agent on 1001 and quietly break the securityContext.
-RUN groupmod -n sandbox node \
-  && usermod -l sandbox -d /home/sandbox -m sandbox
+# DELIBERATELY NOT `corepack enable`, for two reasons that both bite in a
+# sandbox. It would collide: corepack's shims and `npm -g` both claim
+# /usr/local/bin/pnpm and /usr/local/bin/yarn, and the second one to run either
+# fails EEXIST or silently wins. And a corepack shim resolves the package
+# manager by DOWNLOADING it on first use, so the first `pnpm install` in a pod
+# with restricted egress fails on the package manager rather than the packages.
+# A sandbox has to work with the network turned down. Projects that pin
+# `packageManager:` can still opt in explicitly with `corepack use`.
+ARG PNPM_VERSION=11.20.0
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      amd64) narch=x64;   nsha="${NODE_SHA256_AMD64}" ;; \
+      arm64) narch=arm64; nsha="${NODE_SHA256_ARM64}" ;; \
+      *) echo "unsupported TARGETARCH=${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSLo /tmp/node.tar.xz "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${narch}.tar.xz"; \
+    echo "${nsha}  /tmp/node.tar.xz" | sha256sum -c -; \
+    tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 --no-same-owner \
+      --exclude='*/CHANGELOG.md' --exclude='*/README.md' --exclude='*/LICENSE'; \
+    rm -f /tmp/node.tar.xz; \
+    npm install -g "pnpm@${PNPM_VERSION}" yarn typescript; \
+    npm cache clean --force; \
+    rm -rf /root/.npm; \
+    node --version; npm --version; pnpm --version
 
-# /work is where the per-(org,project) PVC mounts (§5b) — the checkout and the
-# caches. Created here so an empty volume inherits the right owner instead of
-# arriving root-owned and read-only to the agent.
-RUN mkdir -p /work && chown sandbox:sandbox /work
+# ---- Python: uv ------------------------------------------------------------
+# The interpreter is the distro's 3.14.3 (above); uv is how anything gets
+# installed into it. `pip` stays available through `uv pip` and python3-venv.
+COPY --from=uvsrc /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
 
-# THE PIECE THAT MAKES THIS A BOX AND NOT A TOOLCHAIN.
+# ---- Go --------------------------------------------------------------------
+ARG GO_VERSION=1.26.5
+ARG GO_SHA256_AMD64=5c2c3b16caefa1d968a94c1daca04a7ca301a496d9b086e17ad77bb81393f053
+ARG GO_SHA256_ARM64=fe4789e92b1f33358680864bbe8704289e7bb5fc207d80623c308935bd696d49
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      amd64) gsha="${GO_SHA256_AMD64}" ;; \
+      arm64) gsha="${GO_SHA256_ARM64}" ;; \
+      *) echo "unsupported TARGETARCH=${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSLo /tmp/go.tar.gz "https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH}.tar.gz"; \
+    echo "${gsha}  /tmp/go.tar.gz" | sha256sum -c -; \
+    tar -C /usr/local -xzf /tmp/go.tar.gz; \
+    rm -f /tmp/go.tar.gz; \
+    /usr/local/go/bin/go version
+ENV PATH=/usr/local/go/bin:/usr/local/cargo/bin:$PATH \
+    GOPATH=/home/sandbox/go \
+    GOTOOLCHAIN=auto
+
+# ---- Rust ------------------------------------------------------------------
+# System-wide RUSTUP_HOME/CARGO_HOME so the toolchain is a shared read-only
+# layer rather than a per-user copy in a home directory that a PVC will shadow.
+ARG RUST_VERSION=1.97.1
+ENV RUSTUP_HOME=/usr/local/rustup CARGO_HOME=/usr/local/cargo
+RUN set -eux; \
+    curl -fsSL --proto '=https' --tlsv1.2 https://sh.rustup.rs -o /tmp/rustup.sh; \
+    sh /tmp/rustup.sh -y --no-modify-path --profile minimal \
+      --default-toolchain "${RUST_VERSION}" --component rustfmt --component clippy; \
+    rm -f /tmp/rustup.sh; \
+    chmod -R a+rX "${RUSTUP_HOME}" "${CARGO_HOME}"; \
+    rustc --version; cargo --version
+# The INSTALL went to /usr/local, world-READABLE (a+rX, not a+w — the official
+# rust images use a+w, but this one runs submitted code and a toolchain every
+# process can rewrite is a toolchain the next process cannot trust). Cargo still
+# needs somewhere to write its registry and build cache, so CARGO_HOME moves to
+# the user's home for RUNTIME while the binaries stay on PATH at
+# /usr/local/cargo/bin. Read-only shared layer, writable per-user cache.
+ENV CARGO_HOME=/home/sandbox/.cargo
+
+# ---- Bun -------------------------------------------------------------------
+ARG BUN_VERSION=1.3.14
+ARG BUN_SHA256_AMD64=951ee2aee855f08595aeec6225226a298d3fea83a3dcd6465c09cbccdf7e848f
+ARG BUN_SHA256_ARM64=a27ffb63a8310375836e0d6f668ae17fa8d8d18b88c37c821c65331973a19a3b
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      amd64) barch=x64;      bsha="${BUN_SHA256_AMD64}" ;; \
+      arm64) barch=aarch64;  bsha="${BUN_SHA256_ARM64}" ;; \
+    esac; \
+    curl -fsSLo /tmp/bun.zip "https://github.com/oven-sh/bun/releases/download/bun-v${BUN_VERSION}/bun-linux-${barch}.zip"; \
+    echo "${bsha}  /tmp/bun.zip" | sha256sum -c -; \
+    unzip -q /tmp/bun.zip -d /tmp/bun; \
+    install -m 0755 "/tmp/bun/bun-linux-${barch}/bun" /usr/local/bin/bun; \
+    ln -sf /usr/local/bin/bun /usr/local/bin/bunx; \
+    rm -rf /tmp/bun /tmp/bun.zip; \
+    bun --version
+
+# ---- Deno ------------------------------------------------------------------
+ARG DENO_VERSION=2.9.5
+ARG DENO_SHA256_AMD64=8b010a3b1a4a0188a67cdb8a7a27348b2a501af78aec7fc74f2ace167368d530
+ARG DENO_SHA256_ARM64=6b7cae3a8fc4385a59dea3146fcb8bad7fea4230e0ad36a8c692afacbc254be0
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      amd64) darch=x86_64;   dsha="${DENO_SHA256_AMD64}" ;; \
+      arm64) darch=aarch64;  dsha="${DENO_SHA256_ARM64}" ;; \
+    esac; \
+    curl -fsSLo /tmp/deno.zip "https://github.com/denoland/deno/releases/download/v${DENO_VERSION}/deno-${darch}-unknown-linux-gnu.zip"; \
+    echo "${dsha}  /tmp/deno.zip" | sha256sum -c -; \
+    unzip -q /tmp/deno.zip -d /tmp/deno; \
+    install -m 0755 /tmp/deno/deno /usr/local/bin/deno; \
+    rm -rf /tmp/deno /tmp/deno.zip; \
+    deno --version
+
+# ---- Zig -------------------------------------------------------------------
+ARG ZIG_VERSION=0.16.0
+ARG ZIG_SHA256_AMD64=70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00
+ARG ZIG_SHA256_ARM64=ea4b09bfb22ec6f6c6ceac57ab63efb6b46e17ab08d21f69f3a48b38e1534f17
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      amd64) zarch=x86_64;   zsha="${ZIG_SHA256_AMD64}" ;; \
+      arm64) zarch=aarch64;  zsha="${ZIG_SHA256_ARM64}" ;; \
+    esac; \
+    curl -fsSLo /tmp/zig.tar.xz "https://ziglang.org/download/${ZIG_VERSION}/zig-${zarch}-linux-${ZIG_VERSION}.tar.xz"; \
+    echo "${zsha}  /tmp/zig.tar.xz" | sha256sum -c -; \
+    mkdir -p /opt/zig; \
+    tar -xJf /tmp/zig.tar.xz -C /opt/zig --strip-components=1; \
+    rm -f /tmp/zig.tar.xz; \
+    ln -sf /opt/zig/zig /usr/local/bin/zig; \
+    zig version
+
+# ---- Java ------------------------------------------------------------------
+# JDK 25 is the current LTS (Sept 2025) and is what Ubuntu 26.04 ships as
+# openjdk-25-jdk 25.0.3. hanzoai/operative's image is still on 21; this is the
+# newer LTS, and both are in the archive if a project pins the older one.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openjdk-25-jdk-headless maven \
+  && rm -rf /var/lib/apt/lists/* \
+  && javac --version && java --version && mvn --version | head -1
+
+# ---- Ruby / PHP finishing --------------------------------------------------
+# The interpreters came from apt above; these are the package managers a
+# checkout expects to already be there.
+RUN set -eux; \
+    gem install --no-document bundler; \
+    ruby --version; bundler --version; php --version | head -1; composer --version
+
+# uid/gid 1000, named `sandbox`. The pod runs runAsNonRoot with runAsUser 1000,
+# so the uid is fixed by the securityContext and only the NAME is a choice here.
 #
-# Without boxd the image is a container full of compilers that nothing can
-# reach: hanzo.chat's execute_code, /v1/functions invoke, apps/coding's Runner
-# and hanzo.app's ProjectFs all terminate on an HTTP surface, and this is the
-# process that serves it — /v1/box/{health,proc,fs,git,agent} plus the frozen
-# LibreChat family (/v1/exec, /v1/upload, /v1/download/{id}, /v1/files/{sid}).
-#
-# It goes in `exec`, the BOTTOM of the chain, so every class inherits it. An
-# exec-class box needs it for hanzo.chat; a dev-class box needs it for the
-# filesystem the agent edits. There is no class that wants a box it cannot talk
-# to.
-COPY --from=cloudsrc /boxd /usr/local/bin/boxd
+# THE BASE ALREADY OWNS 1000. Ubuntu's image has shipped a default `ubuntu`
+# user at uid/gid 1000 since 24.04, so a bare `groupadd -g 1000` exits 4
+# ("GID 1000 already exists") and takes the build with it. Whatever holds 1000
+# is removed first — by ID, not by the name `ubuntu`, so this keeps working if
+# the base renames it. Claiming a free uid instead would be worse than a broken
+# build: the pod's securityContext pins runAsUser 1000, so the agent would run
+# as a uid with no passwd entry, no home and no ownership of /work.
+RUN set -eux; \
+    if u=$(getent passwd 1000 | cut -d: -f1) && [ -n "$u" ]; then userdel -r "$u" 2>/dev/null || userdel "$u"; fi; \
+    if g=$(getent group 1000 | cut -d: -f1) && [ -n "$g" ]; then groupdel "$g" || true; fi; \
+    groupadd -g 1000 sandbox; \
+    useradd -u 1000 -g 1000 -m -s /bin/bash -d /home/sandbox sandbox; \
+    id sandbox
+
+# /work is where the per-(org,project) PVC mounts — the checkout and the caches.
+# Created here so an empty volume inherits the right owner instead of arriving
+# root-owned and read-only to the agent.
+RUN mkdir -p /work /home/sandbox/go /home/sandbox/.cargo \
+  && chown -R sandbox:sandbox /work /home/sandbox
 
 USER sandbox
-WORKDIR /home/sandbox
+WORKDIR /work
 
-# tini reaps. A box is a long-lived PID 1 that spawns compilers, language servers
-# and browsers; without a reaper the zombies accumulate for the life of the pod.
+# tini reaps. A sandbox is a long-lived PID 1 whose children are compilers,
+# language servers and test runners started by `kubectl exec`; without a reaper
+# their zombies accumulate for the life of the pod.
 ENTRYPOINT ["/usr/bin/tini", "--"]
 
-# boxd, not `sleep infinity`.
-#
-# The warm pool (§5a) still works exactly as it did — the pod is already running
-# and claiming it is a label patch, not a pod create and an image pull — but a
-# warm pod that sleeps can answer nothing, so claiming one would be followed by
-# waiting for a process to start. boxd is up from boot, it fails CLOSED without
-# CODE_EXEC_API_KEY (503, never "open to anyone"), and §6's registration with
-# /v1/agents happens on ITS boot, which is what puts a box in /v1/fleet beside
-# the laptops and GPUs.
-CMD ["boxd"]
+# `sleep infinity`, and this is the whole design. The pod is the sandbox; every
+# command arrives through the Kubernetes exec subresource. Nothing in here
+# listens, so there is no in-pod surface to authenticate, rate-limit or forget
+# to authenticate.
+CMD ["sleep", "infinity"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# dev — the coding agent's box. THIS IS THE PIECE THAT HAS NEVER EXISTED:
-# no image anywhere in the org installs @hanzo/dev.
+# dev — exec plus the agent that does the work and the tools it shells out to.
 # ─────────────────────────────────────────────────────────────────────────────
 FROM exec AS dev
 
 USER root
 
-# Pinned, never floating. @hanzo/dev@0.6.91 is the newest published version
-# (npm dist-tags.latest, 2026-04-01).
+# Re-declared: an ARG is scoped to the stage that declares it, and `exec`'s
+# TARGETARCH does not survive into this one. Without this line ${TARGETARCH}
+# below expands to the empty string and the gh download 404s.
+ARG TARGETARCH
+
+# Pinned, never floating. 0.6.91 is npm dist-tags.latest as of 2026-08-06.
 ARG DEV_VERSION=0.6.91
-# Matches bot's own `packageManager: pnpm@10.23.0` — one pnpm version per repo.
-ARG PNPM_VERSION=10.23.0
+ARG GH_VERSION=2.97.0
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends \
-    build-essential \
-    file \
-    less \
-    openssh-client \
-    pkg-config \
-    python3-venv \
-    unzip \
-  && rm -rf /var/lib/apt/lists/*
+RUN set -eux; \
+    npm install -g "@hanzo/dev@${DEV_VERSION}"; \
+    npm cache clean --force; \
+    rm -rf /root/.npm /tmp/*
 
-COPY --from=uvsrc /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
+# gh, for the forge and for GitHub. `git` alone cannot open a PR, and an agent
+# that can commit but not propose is half a workflow.
+RUN set -eux; \
+    curl -fsSLo /tmp/gh.tar.gz "https://github.com/cli/cli/releases/download/v${GH_VERSION}/gh_${GH_VERSION}_linux_${TARGETARCH}.tar.gz"; \
+    tar -xzf /tmp/gh.tar.gz -C /tmp; \
+    install -m 0755 "/tmp/gh_${GH_VERSION}_linux_${TARGETARCH}/bin/gh" /usr/local/bin/gh; \
+    rm -rf /tmp/gh.tar.gz "/tmp/gh_${GH_VERSION}_linux_${TARGETARCH}"; \
+    gh --version | head -1
 
-# @hanzo/dev is a thin launcher; the real binary arrives as a platform-specific
-# optionalDependency (@hanzo/dev-linux-{x64,arm64}-musl). npm filters those by
-# os/cpu, so each arch of this image gets exactly one ~50 MB binary, not five.
-#
-# The musl build on a glibc base is correct, not a mismatch: the artifact is a
-# fully static ELF (verified: "statically linked, stripped") and runs on Debian.
-# There is no -gnu variant published.
-#
-# The cache is dropped in the SAME layer — npm keeps a second copy of every
-# tarball it unpacked, and a `RUN npm cache clean` of its own would land after
-# the layer that already carries the weight.
-RUN npm install -g "pnpm@${PNPM_VERSION}" "@hanzo/dev@${DEV_VERSION}" \
-  && npm cache clean --force \
-  && rm -rf /root/.npm /tmp/*
-
-# Prove the three things this stage exists for are on PATH and executable. A
-# `RUN` that fails here fails the build, which is the only place this can be
-# caught before a box is scheduled and an agent finds no agent.
-RUN dev --version && hanzo --version && pnpm --version && uv --version \
-  && node --version && python3 --version && git --version
-
+# Prove the toolchain is on PATH and executable, as the user that will run it.
+# A `RUN` that fails here fails the BUILD, which is the only place this can be
+# caught before a pod is scheduled and an agent finds no compiler.
 USER sandbox
+RUN set -eux; \
+    dev --version; node --version; npm --version; pnpm --version; bun --version; \
+    deno --version; python3 --version; uv --version; go version; rustc --version; \
+    cargo --version; zig version; java --version; ruby --version; php --version | head -1; \
+    git --version; rg --version | head -1; jq --version; gh --version | head -1
+
 WORKDIR /work
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# desktop — the computer-use variant. dev + an X display it can see and click.
+# desktop — dev plus a virtual display it can see and click.
 #
-# LAYERED ON dev, NOT BESIDE IT. bot's tree built `sandbox-browser` as a sibling
-# of `sandbox`, which gives a computer-use box a browser and no toolchain — it
-# can drive a page but not edit the code that serves it.
+# LAYERED ON dev, NOT BESIDE IT. This repo's older `sandbox-browser` recipe was
+# a sibling of `sandbox`, which gives a computer-use pod a browser and no
+# toolchain — it can drive a page but not edit the code that serves it.
 #
 # WHAT IS CARRIED OVER FROM hanzoai/operative, AND WHAT IS NOT.
 #
@@ -223,18 +355,17 @@ WORKDIR /work
 #     connections it peeks at the first byte to detect WebSocket vs RFB, but in
 #     RFB the server speaks first, so both sides wait forever.
 #
-# — and switches to TigerVNC's x0vncserver. bot's browser entrypoint runs
-# x11vnc behind websockify, which is exactly the pair that deadlocks. That fix
-# is the reason to read operative's work rather than start over, and it is now
-# in scripts/sandbox-browser-entrypoint.sh.
+# — and switches to TigerVNC's x0vncserver. That fix is the reason to read
+# operative's work rather than start over, and it is why the entrypoint below
+# runs x0vncserver and not x11vnc.
 #
-# NOT carried: operative's docker/Dockerfile.xvfb itself, because layering on it
-# would import mongodb-org, postgresql, mariadb-server and redis-server (three
+# NOT carried: operative's docker/Dockerfile.xvfb itself. Layering on it would
+# import mongodb-org, postgresql, mariadb-server and redis-server (three
 # storage directives broken at once), docker.io + colima (a container runtime
-# INSIDE the thing that is supposed to BE the containment boundary), VS Code,
-# Emacs, LibreOffice, .NET, Julia, Dart and Scala — and it has no USER, so it
-# runs as root. That image stays where it is for operative's own computer-use
-# work; this is the same X stack without the workstation.
+# INSIDE the thing that is meant to BE the containment boundary), plus VS Code,
+# Emacs, LibreOffice, .NET, Julia, Dart and Scala — and it never drops root.
+# That image stays where it is for operative's own work; this is the same X
+# stack without the workstation.
 # ─────────────────────────────────────────────────────────────────────────────
 FROM dev AS desktop
 
@@ -242,7 +373,6 @@ USER root
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    chromium \
     dbus-x11 \
     fonts-dejavu-core \
     fonts-liberation \
@@ -250,27 +380,57 @@ RUN apt-get update \
     novnc \
     openbox \
     scrot \
-    socat \
     tigervnc-common \
     tigervnc-scraping-server \
     websockify \
     x11-utils \
+    x11-xserver-utils \
     xauth \
     xdotool \
     xvfb \
   && rm -rf /var/lib/apt/lists/*
 
-COPY scripts/sandbox-browser-entrypoint.sh /usr/local/bin/hanzo-bot-sandbox-browser
-RUN chmod 0755 /usr/local/bin/hanzo-bot-sandbox-browser
+# THE BROWSER DOES NOT COME FROM APT, AND THAT IS NOT A PREFERENCE.
+# Ubuntu has no chromium deb. `chromium` is absent from the archive entirely and
+# `chromium-browser` is version `2:1snap1-0ubuntu4` — a transitional stub whose
+# only job is to install the SNAP. There is no snapd in a container, so an
+# `apt-get install chromium-browser` here produces a package that installs
+# cleanly and a browser that cannot start. (Debian ships a real chromium deb,
+# which is why the recipe this replaces got away with it on bookworm.)
+#
+# Playwright's build is a real Chromium, published for linux x64 AND arm64
+# (verified: revision 1234 for 1.62.1), pinned by the playwright version, and it
+# is the same browser our e2e suites drive — so a computer-use sandbox and a
+# test run are looking at one browser instead of two. Installed to a system path
+# rather than a home directory, so it is a shared read-only layer that a mounted
+# /work PVC cannot shadow.
+ARG PLAYWRIGHT_VERSION=1.62.1
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright
+RUN set -eux; \
+    npx --yes "playwright@${PLAYWRIGHT_VERSION}" install --with-deps chromium; \
+    chmod -R a+rX "${PLAYWRIGHT_BROWSERS_PATH}"; \
+    npm cache clean --force; \
+    rm -rf /root/.npm /var/lib/apt/lists/*; \
+    test -n "$(find "${PLAYWRIGHT_BROWSERS_PATH}" -type f -name chrome -print -quit)"
+
+COPY scripts/sandbox-desktop.sh /usr/local/bin/sandbox-desktop
+RUN chmod 0755 /usr/local/bin/sandbox-desktop
 
 USER sandbox
 WORKDIR /work
 
-# 9222 CDP · 5900 RFB · 6080 noVNC. All bound to loopback by the entrypoint
-# except the ones it deliberately proxies — see the script.
-EXPOSE 9222 5900 6080
+ENV DISPLAY=:1 \
+    SANDBOX_SCREEN=1280x800x24
 
-CMD ["hanzo-bot-sandbox-browser"]
+# 5900 RFB · 6080 noVNC. Bound to loopback unless the entrypoint is told
+# otherwise — see the script.
+EXPOSE 5900 6080
+
+# Starts the display, then becomes `sleep infinity`. The X server, the window
+# manager and the VNC bridge are a SCREEN, not a control plane: none of them
+# accepts a command that runs code, and work still arrives only through the
+# Kubernetes exec subresource, exactly as it does for the other two classes.
+CMD ["sandbox-desktop"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
