@@ -151,7 +151,16 @@ RUN set -eux; \
 # ---- Python: uv ------------------------------------------------------------
 # The interpreter is the distro's 3.14.3 (above); uv is how anything gets
 # installed into it. `pip` stays available through `uv pip` and python3-venv.
-COPY --from=uvsrc /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
+#
+# SOURCE PATH IS `/uv`, NOT `/usr/local/bin/uv`. The plain `uv:<version>` tag is
+# DISTROLESS and ships both binaries at the root — that is the layout upstream's
+# own copy line documents. The Debian-flavoured tags (uv:python3.12-bookworm and
+# friends) are the ones with /usr/local/bin, and borrowing their path here is
+# what made every build of this file die at "/usr/local/bin/uvx: not found"
+# before it reached a single toolchain. Verified against the pinned digest, not
+# remembered: `/uv --version` and `/uvx --version` both answer 0.12.2, and
+# `/usr/local/bin/uv` does not stat.
+COPY --from=uvsrc /uv /uvx /usr/local/bin/
 
 # ---- Go --------------------------------------------------------------------
 ARG GO_VERSION=1.26.5
