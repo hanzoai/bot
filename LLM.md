@@ -265,22 +265,36 @@ wrong by construction: deep research and bare exec want the same sandbox and
 neither is coding. `apps/bots/transport.go` keeps `BOT_GATEWAY_URL` for actual
 bot traffic; that name is right for what it does.
 
-`SANDBOX_IMAGE` names the **repo**; the tag is the **class**, matching cloud's
-`apps/sandbox/runtime.go` `imageFor()` and the pod label. One vocabulary end to
-end.
+`SANDBOX_IMAGE` names the **repo**. `SANDBOX_IMAGE_TAG` optionally pins a
+version. What `imageFor` composes from those is dictated by the producer, and
+the producer's shape is not the obvious guess — see below.
 
 ### Known gaps, measured 2026-08-06
 
-- **The class tags in the registry are not our image.** `oci.hanzo.ai/hanzoai/sandbox`
-  `:exec`, `:dev`, `:desktop` and all three `*-latest` resolve to ONE digest —
-  `sha256:0557ac14…`, a stock `node:22` (entrypoint `docker-entrypoint.sh`, cmd
-  `node`, Debian 12, root). The real builds exist only as
-  `sha-d190451-amd64-<class>` and `2026.6.7-<class>`, with three correct distinct
-  digests. Cloud's `apps/sandbox` composes `<repo>:<class>`, so **every sandbox
-  pod in production is a bare node:22** — no toolchain, no `dev`, no browser. A
-  container that starts, reads EOF and exits 0 looks like a run that "worked".
-  This is why `createDockerRuntime` now names the command EXPLICITLY for both
-  classes instead of relying on the image's CMD: a wrong image fails loudly.
+- **A bare `:<class>` tag is a name no build can create.** hanzoai/ci's image
+  lane composes every tag from `tag-suffix` and emits exactly three:
+  `sha-<short>-amd64-<class>`, `<class>-latest`, `<version>-<class>`. **The
+  order flips** — the floating tag is class-FIRST (`${sfx:+$sfx-}latest`), the
+  pinned one class-LAST (`${sfx:+-$sfx}`) — and nothing in those 1837 lines emits
+  `<class>` alone. So `imageFor` here composes `<class>-latest` unpinned and
+  `<version>-<class>` pinned, and a test asserts it never produces the bare form.
+- **The moving tags in the registry are not our image.** `:exec`, `:dev`,
+  `:desktop` and all three `*-latest` resolve to ONE digest — `sha256:0557ac14…`,
+  a stock `node:22` (entrypoint `docker-entrypoint.sh`, cmd `node`, Debian 12,
+  root). The real builds exist only as `sha-d190451-amd64-<class>` and
+  `2026.6.7-<class>`, three correct distinct digests. The build lane cannot have
+  done this — it has no placeholder push, and its `crane` step only mirrors refs
+  already in its own tag list — so six moving tags were overwritten out of band.
+  Meanwhile cloud's `apps/sandbox` asks for the bare `<repo>:<class>`, so **every
+  sandbox pod in production is a bare node:22**: no toolchain, no `dev`, no
+  browser, running as root. A container that starts, reads EOF and exits 0 looks
+  like a run that "worked". This is why `createDockerRuntime` now names the
+  command EXPLICITLY for both classes instead of relying on the image's CMD — a
+  wrong image fails loudly instead of quietly.
+- **hanzoai/ci's mirror step copies this image into the wrong org.** It rewrites
+  `hanzoai` → `hanzo` on the way out, so a `repo:` that already names
+  `registry.hanzo.ai/hanzoai/sandbox` gets crane-copied to
+  `registry.hanzo.ai/hanzo/sandbox` as well — a second repo nothing pulls.
 - **Egress from a sandbox is unrestricted**, and a browser makes that matter more
   — see the security note below.
 

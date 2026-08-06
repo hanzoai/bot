@@ -467,10 +467,29 @@ export function sandboxEnv(name: string, legacy: string): string {
 }
 
 /**
- * imageFor resolves one class to a ref. A configured value MAY still carry a
- * tag (an old HANZO_CODING_SANDBOX_IMAGE did) — that tag names a class, so the
- * requested class replaces it. The scan starts after the last "/" so a registry
- * port (`host:5000/org/img`) is not mistaken for a tag.
+ * imageFor resolves one class to a ref THE BUILD LANE ACTUALLY PUBLISHES, which
+ * is the whole difficulty and is worth writing down because guessing it wrong is
+ * invisible until a pod cannot pull.
+ *
+ * hanzoai/ci `.hanzo/workflows/build.yml` composes every tag from an image
+ * entry's `tag-suffix` and emits exactly three per build:
+ *
+ *     sha-<short>-amd64-<class>      <class>-latest       <version>-<class>
+ *
+ * Note the ORDER FLIPS: the floating tag is `<class>-latest` (class first) and
+ * the pinned one is `<version>-<class>` (class last). That asymmetry is the
+ * producer's, not ours — `${sfx:+$sfx-}latest` vs `${sfx:+-$sfx}` — and there is
+ * no code path in that lane that emits a BARE `<class>` tag at all. So
+ * `<repo>:dev`, the obvious-looking name, is a tag nothing can ever create; ours
+ * exists in the registry today only because something pushed it out of band, and
+ * what it contains is a stock node:22.
+ *
+ * Hence: pin a version with SANDBOX_IMAGE_TAG and get `<version>-<class>`;
+ * leave it unset and get `<class>-latest`. Both are names the lane publishes.
+ *
+ * A configured value MAY still carry a tag (an old HANZO_CODING_SANDBOX_IMAGE
+ * did); it named a class, so it is replaced. The scan starts after the last "/"
+ * so a registry port (`host:5000/org/img`) is not mistaken for a tag.
  *
  * A DIGEST PIN IS REFUSED FOR A NON-DEFAULT CLASS, and that is not pedantry: a
  * digest names exactly one image, so "this exact image, but the desktop one" is
@@ -478,9 +497,8 @@ export function sandboxEnv(name: string, legacy: string): string {
  * screen it was promised and does not have, and the model would spend its whole
  * budget wondering why the window never opened.
  */
-export function imageFor(configured: string, cls: string): string {
-  const at = configured.indexOf("@");
-  if (at >= 0) {
+export function imageFor(configured: string, cls: string, version = ""): string {
+  if (configured.includes("@")) {
     if (cls !== DEFAULT_CLASS) {
       throw new Error(`sandbox image is digest-pinned, so class ${cls} cannot be selected`);
     }
@@ -489,7 +507,8 @@ export function imageFor(configured: string, cls: string): string {
   const slash = configured.lastIndexOf("/");
   const colon = configured.indexOf(":", slash + 1);
   const repo = colon >= 0 ? configured.slice(0, colon) : configured;
-  return `${repo}:${cls}`;
+  const v = version.trim();
+  return v ? `${repo}:${v}-${cls}` : `${repo}:${cls}-latest`;
 }
 
 /** The two classes a run can ask for. `desktop` is a TAG, never a code path. */
@@ -537,7 +556,11 @@ export async function createDockerRuntime(spec: RuntimeSpec): Promise<CodingRunt
   if (!configured) {
     throw new Error("sandbox image is not configured (SANDBOX_IMAGE)");
   }
-  const image = imageFor(configured, spec.desktop ? DESKTOP_CLASS : DEFAULT_CLASS);
+  const image = imageFor(
+    configured,
+    spec.desktop ? DESKTOP_CLASS : DEFAULT_CLASS,
+    process.env.SANDBOX_IMAGE_TAG ?? "",
+  );
   const ver = await docker(["version", "--format", "{{.Server.Version}}"], 10_000);
   if (ver.code !== 0) {
     throw new Error("container runtime unavailable");
