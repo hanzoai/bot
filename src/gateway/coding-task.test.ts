@@ -291,24 +291,42 @@ describe("TOOLS", () => {
 // ── desktop is a TAG ─────────────────────────────────────────────────────────
 
 describe("imageFor", () => {
-  it("makes the class the tag", () => {
+  // These are the ONLY class-bearing shapes hanzoai/ci publishes. A bare
+  // `<repo>:dev` is not one of them, which is why it is asserted against.
+  it("unpinned resolves to <class>-latest, the lane's floating tag", () => {
     expect(imageFor("oci.hanzo.ai/hanzoai/sandbox", "dev")).toBe(
-      "oci.hanzo.ai/hanzoai/sandbox:dev",
+      "oci.hanzo.ai/hanzoai/sandbox:dev-latest",
     );
     expect(imageFor("oci.hanzo.ai/hanzoai/sandbox", "desktop")).toBe(
-      "oci.hanzo.ai/hanzoai/sandbox:desktop",
+      "oci.hanzo.ai/hanzoai/sandbox:desktop-latest",
     );
+  });
+
+  it("pinned resolves to <version>-<class> — the order flips, and that is the lane's", () => {
+    expect(imageFor("oci.hanzo.ai/hanzoai/sandbox", "desktop", "2026.6.7")).toBe(
+      "oci.hanzo.ai/hanzoai/sandbox:2026.6.7-desktop",
+    );
+  });
+
+  it("NEVER composes a bare <repo>:<class> — no build can publish that tag", () => {
+    for (const v of ["", "2026.6.7"]) {
+      for (const cls of ["dev", "desktop"]) {
+        expect(imageFor("oci.hanzo.ai/hanzoai/sandbox", cls, v)).not.toBe(
+          `oci.hanzo.ai/hanzoai/sandbox:${cls}`,
+        );
+      }
+    }
   });
 
   it("replaces a tag that is already there, because that tag WAS a class", () => {
     expect(imageFor("oci.hanzo.ai/hanzoai/sandbox:dev", "desktop")).toBe(
-      "oci.hanzo.ai/hanzoai/sandbox:desktop",
+      "oci.hanzo.ai/hanzoai/sandbox:desktop-latest",
     );
   });
 
   it("does not mistake a registry port for a tag", () => {
     expect(imageFor("localhost:5000/hanzoai/sandbox", "desktop")).toBe(
-      "localhost:5000/hanzoai/sandbox:desktop",
+      "localhost:5000/hanzoai/sandbox:desktop-latest",
     );
   });
 
