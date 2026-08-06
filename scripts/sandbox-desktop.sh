@@ -61,4 +61,11 @@ if [ "${ENABLE_NOVNC}" = "1" ]; then
 fi
 
 # The pod's command, same as every other class.
-exec sleep infinity
+#
+# SANDBOX_TTL_SECONDS is the run's budget, and honouring it here is what lets a
+# desktop container self-destruct exactly like a headless one — where the runner
+# passes `sleep <ttl>` as the command outright. Unset means `infinity`, which is
+# the Kubernetes case: there the pod's lifetime is the control plane's business
+# and a container that outlives its own timer would just be a second, disagreeing
+# opinion about when the run ends.
+exec sleep "${SANDBOX_TTL_SECONDS:-infinity}"

@@ -143,12 +143,12 @@ Tags: a `v*` tag publishes `:X.Y.Z` and `:latest`; a push to `main` publishes
 
 ### Required forge secrets
 
-| Secret | Used by | Without it |
-|---|---|---|
-| `GIT_TOKEN` | `sync.yml` (on GitHub) | refs never reach the forge, so nothing runs at all |
-| `GH_PAT` | `deploy.yml` | the private admin SPA cannot be cloned; the build fails loud |
-| `GHCR_USER` / `GHCR_TOKEN` | `deploy.yml`, `cloud.yml` | the registry 403s the push |
-| `NPM_TOKEN` | `release.yml` | `@hanzo/bot` cannot be published |
+| Secret                     | Used by                   | Without it                                                   |
+| -------------------------- | ------------------------- | ------------------------------------------------------------ |
+| `GIT_TOKEN`                | `sync.yml` (on GitHub)    | refs never reach the forge, so nothing runs at all           |
+| `GH_PAT`                   | `deploy.yml`              | the private admin SPA cannot be cloned; the build fails loud |
+| `GHCR_USER` / `GHCR_TOKEN` | `deploy.yml`, `cloud.yml` | the registry 403s the push                                   |
+| `NPM_TOKEN`                | `release.yml`             | `@hanzo/bot` cannot be published                             |
 
 ### Known gaps, written down rather than hidden
 
@@ -189,3 +189,128 @@ Tags: a `v*` tag publishes `:X.Y.Z` and `:latest`; a push to `main` publishes
   after this move it would lint an empty directory and pass. Its useful half
   (auditing changed workflows with zizmor) lives in `ci.yml`, now pointed at
   both directories.
+
+## The sandbox: a run is a computer
+
+`POST /v1/coding-tasks` (`src/gateway/coding-tasks-http.ts`) takes four things
+that matter, and everything else is derived from them:
+
+| field                               | meaning                                                                                                                                                                                    |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `prompt`                            | the task                                                                                                                                                                                   |
+| `tool`                              | `dev \| claude \| codex \| python \| node` — default `dev`                                                                                                                                 |
+| `cloneUrl` (+`branch`,`credential`) | **OPTIONAL.** Present ⇒ a git grant rides with it. Absent ⇒ no clone, no push, and **no credential exists in the run at all** — a credential sent without one is a 400, not a silent drop. |
+| `desktop`                           | **OPTIONAL.** Selects the xvfb image variant.                                                                                                                                              |
+
+Three things about that table are load-bearing.
+
+**`tool` is a data table, not a switch.** `TOOLS` in `coding-task.ts` maps a name
+to an argv, and every runner — host seam and docker — reads that one map. There
+is no second place where "what does `claude` run" could answer differently. Each
+agent entry passes its own "stop asking me" flag (`--dangerously-skip-permissions`
+and friends), which is honest _here and only here_: the container is the
+boundary, and a second in-process approval prompt inside a box that has already
+dropped every capability just hangs a non-interactive run forever.
+
+**`repo` is optional because git is a capability of a run, not the shape of one.**
+`runCodingTask` is `[clone] → run the tool → [commit, push]`; the brackets are
+the repo. Deep research and a bare `python` snippet want the same computer with
+nothing checked out into it.
+
+**`desktop` is a TAG.** Headless and xvfb are two tags of one image and the flag
+picks the tag (`imageFor`). Nothing downstream branches on it. If the
+orchestrator reasoned about it instead, there would be two code paths to keep in
+step, and they would drift.
+
+### The image: one browser, two ways to run it
+
+`Dockerfile.box` → `registry.hanzo.ai/hanzoai/sandbox`, three tags on one chain
+`exec → dev → desktop`.
+
+**The browser lives in `exec`, at the bottom.** It used to be in `desktop`, which
+meant the DEFAULT class for an agent run could not open a web page. The class
+boundary is cut on RUNTIME cost — `desktop` earns its tag because Xvfb, openbox,
+x0vncserver and websockify are four processes running forever on every desktop
+pod. A browser binary nobody launched costs nothing at runtime, and layers are
+shared per node. So `desktop` does not add a browser; it adds a **screen** for
+the browser that is already there.
+
+The half that was missing was not the browser but the **library**. `npx playwright
+install` fetches the chromium build to `PLAYWRIGHT_BROWSERS_PATH` and leaves the
+npm package in an npx cache that the next line deletes — a real chromium at
+`/opt/playwright` that nothing in the image could drive (`require("playwright")`
+threw MODULE_NOT_FOUND, measured on the built image). It is now `npm install -g
+playwright` + `NODE_PATH=/usr/local/lib/node_modules`, so `require("playwright")`
+resolves from any cwd **with the network turned all the way down** — which is the
+state a confined sandbox is supposed to run in.
+
+Measured on the published amd64 images (compressed): `exec` 1.09 GB · `dev`
+1.18 GB · `desktop` 1.69 GB. Moving the browser down adds ~0.4 GB to `exec` and
+`dev` and leaves `desktop` where it was.
+
+Chromium runs as uid 1000 **with its own sandbox left on** — no `--no-sandbox`
+needed. What it does need comes from the container, not the image, and
+`createDockerRuntime` sets both: `--shm-size=1g` (Docker's default 64 MiB
+/dev/shm makes Chromium die mid-page-load as a renderer crash, which reads like a
+flaky site) and `--init` (a browser forks a tree of zygote and renderer
+processes; `docker exec` children are not under the image's tini).
+
+### Env names
+
+`SANDBOX_IMAGE`, `SANDBOX_NETWORK`, `SANDBOX_RUNTIME_CLASS`. The old
+`HANZO_CODING_SANDBOX_*` names are accepted for ONE release so a deploy cannot
+half-land, then they are deleted — they are not permanent aliases, because two
+live names for one knob is how nobody can say which value won. The prefix was
+wrong by construction: deep research and bare exec want the same sandbox and
+neither is coding. `apps/bots/transport.go` keeps `BOT_GATEWAY_URL` for actual
+bot traffic; that name is right for what it does.
+
+`SANDBOX_IMAGE` names the **repo**; the tag is the **class**, matching cloud's
+`apps/sandbox/runtime.go` `imageFor()` and the pod label. One vocabulary end to
+end.
+
+### Known gaps, measured 2026-08-06
+
+- **The class tags in the registry are not our image.** `oci.hanzo.ai/hanzoai/sandbox`
+  `:exec`, `:dev`, `:desktop` and all three `*-latest` resolve to ONE digest —
+  `sha256:0557ac14…`, a stock `node:22` (entrypoint `docker-entrypoint.sh`, cmd
+  `node`, Debian 12, root). The real builds exist only as
+  `sha-d190451-amd64-<class>` and `2026.6.7-<class>`, with three correct distinct
+  digests. Cloud's `apps/sandbox` composes `<repo>:<class>`, so **every sandbox
+  pod in production is a bare node:22** — no toolchain, no `dev`, no browser. A
+  container that starts, reads EOF and exits 0 looks like a run that "worked".
+  This is why `createDockerRuntime` now names the command EXPLICITLY for both
+  classes instead of relying on the image's CMD: a wrong image fails loudly.
+- **Egress from a sandbox is unrestricted**, and a browser makes that matter more
+  — see the security note below.
+
+### Security: what a prompt-injected run can reach
+
+Measured from a live pod in `hanzo-sandboxes` on hanzo-k8s, not inferred:
+
+| target                                                     | result                                                                                                                        |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| arbitrary internet (`example.com`, `1.1.1.1`, npm, GitHub) | **reachable**                                                                                                                 |
+| `bot-gateway.hanzo.svc`, `kubernetes.default.svc`          | **reachable**                                                                                                                 |
+| `cloud.hanzo.svc`, `kms.hanzo.svc`                         | blocked                                                                                                                       |
+| kubelet on the node IP `:10250`                            | blocked                                                                                                                       |
+| **DO droplet metadata `169.254.169.254`**                  | **reachable — `/metadata/v1/user-data` is 6005 bytes containing an RSA PRIVATE KEY, a bootstrap token and `k8saas` material** |
+| pod service-account token                                  | not mounted (`automountServiceAccountToken: false`)                                                                           |
+
+No NetworkPolicy selects these pods and no `runtimeClassName` is set, so they run
+under `runc` on the default network. The metadata row is the serious one: one
+`curl` from untrusted model output reads node bootstrap credentials. A browser
+does not create that hole, but it is an egress channel by definition — and with
+indirect prompt injection the _page being read_ becomes the instruction source,
+so "fetch this, then POST it there" needs no operator in the loop.
+
+What confines it, in the order the reward/effort ratio says to do it:
+
+1. A NetworkPolicy on `hanzo-sandboxes` denying `169.254.169.254/32` and RFC1918
+   on egress. This is the single highest-value change and it is one manifest.
+2. `SANDBOX_NETWORK` set (docker path) — today unset means the default bridge,
+   which is the whole internet.
+3. `SANDBOX_RUNTIME_CLASS`. It is ONE FIELD and a deployment value — never a fork
+   in code. The benchmark on this fleet: Firecracker beat gVisor on both latency
+   and memory (git status 82 ms vs 980 ms; start 294 ms vs 881 ms; ~57 MiB both);
+   runc is fastest and weakest.
