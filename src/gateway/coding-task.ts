@@ -35,6 +35,70 @@ export type ExecFn = (
 
 export type Credential = { username: string; token: string };
 
+/**
+ * TOOLS is the whole of what `tool` means: a name from the wire, an argv inside
+ * the sandbox. A DATA TABLE, not a switch — every runner (host, docker) reads
+ * this one map, so there is no second place where "what does `claude` run"
+ * could answer differently.
+ *
+ * All five say "you are already confined, stop asking":
+ *   dev/codex  — `--sandbox workspace-write` / `--dangerously-bypass-approvals-and-sandbox`
+ *   claude     — `--dangerously-skip-permissions`
+ * That is honest here and ONLY here. The container is the boundary; a second,
+ * in-process approval prompt inside a box that has already dropped every
+ * capability buys nothing and hangs a non-interactive run forever.
+ *
+ * `python` and `node` are not agents. They run the prompt AS A PROGRAM — the
+ * bare-exec case, same sandbox, no model in the loop.
+ */
+export const TOOLS = {
+  dev: (prompt: string) => [
+    "dev",
+    "exec",
+    "--sandbox",
+    "workspace-write",
+    "--json",
+    "--skip-git-repo-check",
+    prompt,
+  ],
+  claude: (prompt: string) => [
+    "claude",
+    "--print",
+    "--dangerously-skip-permissions",
+    "--output-format",
+    "stream-json",
+    "--verbose",
+    prompt,
+  ],
+  codex: (prompt: string) => [
+    "codex",
+    "exec",
+    "--dangerously-bypass-approvals-and-sandbox",
+    "--skip-git-repo-check",
+    "--json",
+    prompt,
+  ],
+  python: (prompt: string) => ["python3", "-c", prompt],
+  node: (prompt: string) => ["node", "-e", prompt],
+} satisfies Record<string, (prompt: string) => string[]>;
+
+export type Tool = keyof typeof TOOLS;
+export const DEFAULT_TOOL: Tool = "dev";
+export const TOOL_NAMES = Object.keys(TOOLS) as Tool[];
+
+/** isTool narrows an untrusted wire string to a name the table actually has. */
+export function isTool(v: unknown): v is Tool {
+  return typeof v === "string" && Object.hasOwn(TOOLS, v);
+}
+
+/** A run's git half. Absent => the run has no repo and NO CREDENTIAL EXISTS. */
+export type RepoGrant = {
+  cloneUrl: string;
+  baseBranch: string;
+  branch: string;
+  credential: Credential;
+};
+
 export type CodingEvent = {
   type: "step" | "log" | "result" | "error";
   step?: string;
@@ -49,18 +113,21 @@ export type CodingEvent = {
 };
 
 export type CodingTaskParams = {
-  cloneUrl: string;
-  baseBranch: string;
-  branch: string;
   prompt: string;
-  credential: Credential;
+  tool: Tool;
   workdir: string;
   runTimeoutSeconds: number;
+  /**
+   * repo is OPTIONAL, and its absence is the point: with no repo there is no
+   * clone, no branch, no push — and no credential anywhere in the run, because
+   * the only field that could carry one lives inside this object.
+   */
+  repo?: RepoGrant;
 };
 
-/** Runs the coding agent in cwd against prompt, streaming log lines via emit. */
+/** Runs one tool in cwd against prompt, streaming log lines via emit. */
 export type AgentRunner = (
-  args: { cwd: string; prompt: string; timeoutMs: number },
+  args: { cwd: string; prompt: string; tool: Tool; timeoutMs: number },
   emit: (e: CodingEvent) => void,
 ) => Promise<{ ok: boolean; logTail: string }>;
 
@@ -155,9 +222,16 @@ function fail(emit: (e: CodingEvent) => void, message: string, logTail = ""): Co
 }
 
 /**
- * runCodingTask executes one coding job and returns the terminal event. The git
- * credential env is applied ONLY to the two network commands (clone, push); the
- * agent and local git run under a minimal, credential-free env.
+ * runCodingTask executes one run and returns the terminal event.
+ *
+ * THE SHAPE IS: [clone] → run the tool → [commit, push]. The brackets are the
+ * repo, and it is optional. A run with no repo is not a lesser coding task; it
+ * is the same computer with nothing checked out into it — which is what deep
+ * research and a bare `python` snippet want. Git is a CAPABILITY of a run, not
+ * the shape of one, so it wraps the tool step instead of being braided through it.
+ *
+ * The git credential env is applied ONLY to the two network commands (clone,
+ * push); the tool and local git run under a minimal, credential-free env.
  */
 export async function runCodingTask(
   params: CodingTaskParams,
@@ -165,37 +239,54 @@ export async function runCodingTask(
   emit: (e: CodingEvent) => void,
 ): Promise<CodingEvent> {
   const { exec, runAgent } = deps;
-  const repoDir = join(params.workdir, "repo");
-  const netEnv = buildGitEnv(params.credential);
+  const repo = params.repo;
   const localEnv = buildGitEnv();
   const timeoutMs = Math.max(60, params.runTimeoutSeconds) * 1000;
 
-  // 1. shallow clone (secret via env http.extraHeader; redirects disabled).
-  emit({ type: "step", step: "clone", status: "start" });
-  const cloneArgs = ["git", ...GIT_NET_HARDENING, "clone", "--depth", "1", "--single-branch"];
-  if (params.baseBranch) {
-    cloneArgs.push("--branch", params.baseBranch);
-  }
-  cloneArgs.push(params.cloneUrl, repoDir);
-  const clone = await exec(cloneArgs, { cwd: params.workdir, env: netEnv, timeoutMs });
-  if (clone.code !== 0) {
-    return fail(emit, "clone failed", tail(clone.stderr));
-  }
-  emit({ type: "step", step: "clone", status: "ok" });
+  // Where the tool runs: the checkout when there is a repo, the bare workdir
+  // when there is not.
+  let cwd = params.workdir;
 
-  // 2. fresh working branch (never reuses/forces an existing ref).
-  const co = await exec(["git", "checkout", "-b", params.branch], { cwd: repoDir, env: localEnv });
-  if (co.code !== 0) {
-    return fail(emit, "could not create branch", tail(co.stderr));
+  if (repo) {
+    const repoDir = join(params.workdir, "repo");
+    const netEnv = buildGitEnv(repo.credential);
+
+    // 1. shallow clone (secret via env http.extraHeader; redirects disabled).
+    emit({ type: "step", step: "clone", status: "start" });
+    const cloneArgs = ["git", ...GIT_NET_HARDENING, "clone", "--depth", "1", "--single-branch"];
+    if (repo.baseBranch) {
+      cloneArgs.push("--branch", repo.baseBranch);
+    }
+    cloneArgs.push(repo.cloneUrl, repoDir);
+    const clone = await exec(cloneArgs, { cwd: params.workdir, env: netEnv, timeoutMs });
+    if (clone.code !== 0) {
+      return fail(emit, "clone failed", tail(clone.stderr));
+    }
+    emit({ type: "step", step: "clone", status: "ok" });
+
+    // 2. fresh working branch (never reuses/forces an existing ref).
+    const co = await exec(["git", "checkout", "-b", repo.branch], { cwd: repoDir, env: localEnv });
+    if (co.code !== 0) {
+      return fail(emit, "could not create branch", tail(co.stderr));
+    }
+    cwd = repoDir;
   }
 
-  // 3. the coding agent edits the tree (workspace-write) under a minimal env.
+  // 3. the tool does the work under a minimal env.
   emit({ type: "step", step: "code", status: "start" });
-  const agent = await runAgent({ cwd: repoDir, prompt: params.prompt, timeoutMs }, emit);
+  const agent = await runAgent({ cwd, prompt: params.prompt, tool: params.tool, timeoutMs }, emit);
   emit({ type: "step", step: "code", status: agent.ok ? "ok" : "error" });
   if (!agent.ok) {
     return fail(emit, "coding step failed", agent.logTail);
   }
+
+  // No repo: the tool's output IS the result. Nothing to diff, nothing to push.
+  if (!repo) {
+    const ev: CodingEvent = { type: "result", ok: true, changed: false, logTail: agent.logTail };
+    emit(ev);
+    return ev;
+  }
+  const repoDir = cwd;
 
   // 4. stage + detect changes. No changes is a clean, non-error outcome.
   await exec(["git", "add", "-A"], { cwd: repoDir, env: localEnv });
@@ -205,7 +296,7 @@ export async function runCodingTask(
       type: "result",
       ok: true,
       changed: false,
-      branch: params.branch,
+      branch: repo.branch,
       logTail: agent.logTail,
     };
     emit(ev);
@@ -239,8 +330,8 @@ export async function runCodingTask(
   // 6. push the new branch (plain, fresh ref; never --force, never a delete).
   emit({ type: "step", step: "push", status: "start" });
   const push = await exec(
-    ["git", ...GIT_NET_HARDENING, "push", "origin", `HEAD:refs/heads/${params.branch}`],
-    { cwd: repoDir, env: netEnv, timeoutMs },
+    ["git", ...GIT_NET_HARDENING, "push", "origin", `HEAD:refs/heads/${repo.branch}`],
+    { cwd: repoDir, env: buildGitEnv(repo.credential), timeoutMs },
   );
   if (push.code !== 0) {
     return fail(emit, "push failed", tail(push.stderr));
@@ -251,7 +342,7 @@ export async function runCodingTask(
     type: "result",
     ok: true,
     changed: true,
-    branch: params.branch,
+    branch: repo.branch,
     commitSha: sha,
     diffstat,
     logTail: agent.logTail,
@@ -337,19 +428,15 @@ export function hostExecFn(): ExecFn {
 }
 
 /**
- * devAgentRunner runs `dev exec --sandbox workspace-write --json <prompt>` in cwd
- * under a MINIMAL, secret-free env (buildAgentEnv). command defaults to "dev".
+ * devAgentRunner runs the run's tool (TOOLS) in cwd under a MINIMAL, secret-free
+ * env (buildAgentEnv). `override` replaces argv[0] — the seam a test uses to
+ * point `dev` at a stub binary without inventing a second argv shape.
  */
-export function devAgentRunner(command = "dev"): AgentRunner {
-  return ({ cwd, prompt, timeoutMs }, emit) =>
-    spawnStreaming(
-      command,
-      ["exec", "--sandbox", "workspace-write", "--json", "--skip-git-repo-check", prompt],
-      buildAgentEnv(),
-      cwd,
-      timeoutMs,
-      emit,
-    );
+export function devAgentRunner(override?: string): AgentRunner {
+  return ({ cwd, prompt, tool, timeoutMs }, emit) => {
+    const [cmd, ...args] = TOOLS[tool](prompt);
+    return spawnStreaming(override ?? cmd, args, buildAgentEnv(), cwd, timeoutMs, emit);
+  };
 }
 
 /** makeHostWorkdir creates a fresh unique temp dir + a recursive disposer. */
@@ -365,8 +452,59 @@ async function docker(args: string[], timeoutMs = 30_000): Promise<ExecResult> {
 }
 
 /**
+ * SANDBOX_IMAGE names the image REPO. The tag is the CLASS, and that is the one
+ * mechanism — cloud's apps/sandbox composes `<repo>:<class>` the same way, and
+ * the class is also the pod label, so there is one vocabulary end to end.
+ *
+ * OLD NAMES ARE ACCEPTED FOR ONE RELEASE AND THEN DELETED. They are not
+ * permanent aliases: two live names for one knob is how a deployment half-lands
+ * and nobody can say which value won. `HANZO_CODING_*` is wrong by
+ * construction anyway — deep research and bare exec want the same sandbox, and
+ * neither is coding.
+ */
+export function sandboxEnv(name: string, legacy: string): string {
+  return (process.env[name] ?? process.env[legacy] ?? "").trim();
+}
+
+/**
+ * imageFor resolves one class to a ref. A configured value MAY still carry a
+ * tag (an old HANZO_CODING_SANDBOX_IMAGE did) — that tag names a class, so the
+ * requested class replaces it. The scan starts after the last "/" so a registry
+ * port (`host:5000/org/img`) is not mistaken for a tag.
+ *
+ * A DIGEST PIN IS REFUSED FOR A NON-DEFAULT CLASS, and that is not pedantry: a
+ * digest names exactly one image, so "this exact image, but the desktop one" is
+ * two answers to one question. Running it headless anyway would hand a run a
+ * screen it was promised and does not have, and the model would spend its whole
+ * budget wondering why the window never opened.
+ */
+export function imageFor(configured: string, cls: string): string {
+  const at = configured.indexOf("@");
+  if (at >= 0) {
+    if (cls !== DEFAULT_CLASS) {
+      throw new Error(`sandbox image is digest-pinned, so class ${cls} cannot be selected`);
+    }
+    return configured;
+  }
+  const slash = configured.lastIndexOf("/");
+  const colon = configured.indexOf(":", slash + 1);
+  const repo = colon >= 0 ? configured.slice(0, colon) : configured;
+  return `${repo}:${cls}`;
+}
+
+/** The two classes a run can ask for. `desktop` is a TAG, never a code path. */
+const DEFAULT_CLASS = "dev";
+const DESKTOP_CLASS = "desktop";
+
+export type RuntimeSpec = {
+  timeoutSec: number;
+  /** desktop selects the xvfb image variant — the tag, and nothing else. */
+  desktop: boolean;
+};
+
+/**
  * createDockerRuntime boots a per-task container that is the real isolation
- * boundary: the model-driven `dev` process cannot see the pod env, the pod
+ * boundary: the model-driven tool cannot see the pod env, the pod
  * service-account token (never mounted), or another tenant's clone.
  *
  *   - MINIMAL env: only the allowlisted names cross into the container (`-e`);
@@ -375,25 +513,43 @@ async function docker(args: string[], timeoutMs = 30_000): Promise<ExecResult> {
  *     never visible to another task and vanishes on teardown.
  *   - NO service-account token: a fresh `docker run` does not mount the pod's
  *     /var/run/secrets, so the SA token is unreachable.
- *   - EGRESS: pinned to HANZO_CODING_SANDBOX_NETWORK when set (a git-only network).
+ *   - EGRESS: pinned to SANDBOX_NETWORK when set. UNSET MEANS THE DEFAULT
+ *     BRIDGE, WHICH IS THE WHOLE INTERNET. A browser is an egress channel by
+ *     definition, so this is the field that decides whether a prompt-injected
+ *     run can post what it read to an attacker. It is a deployment value, not a
+ *     code path — see LLM.md.
+ *
+ * WHAT THE BROWSER NEEDS, AND WHY IT IS HERE RATHER THAN IN THE IMAGE:
+ *   - `--shm-size=1g`. Docker's default /dev/shm is 64 MiB. Chromium maps its
+ *     renderer heaps there and dies part-way through a page load when it runs
+ *     out — as a renderer crash, not an out-of-space error, so it reads like a
+ *     flaky site. This is the single most common containerised-Chromium bug and
+ *     it cannot be fixed from inside the image.
+ *   - `--init`. A browser forks a tree of zygote and renderer processes; without
+ *     a reaper at PID 1 their zombies accumulate for the life of the container.
+ *     (The image has tini for its own CMD; `docker exec` children are not under it.)
  *
  * FAIL CLOSED: an unavailable docker daemon OR an unset sandbox image throws — the
  * handler refuses the run rather than falling back to the shared host.
  */
-export async function createDockerRuntime(timeoutSec: number): Promise<CodingRuntime> {
-  const image = (process.env.HANZO_CODING_SANDBOX_IMAGE ?? "").trim();
-  if (!image) {
-    throw new Error("coding sandbox image is not configured (HANZO_CODING_SANDBOX_IMAGE)");
+export async function createDockerRuntime(spec: RuntimeSpec): Promise<CodingRuntime> {
+  const configured = sandboxEnv("SANDBOX_IMAGE", "HANZO_CODING_SANDBOX_IMAGE");
+  if (!configured) {
+    throw new Error("sandbox image is not configured (SANDBOX_IMAGE)");
   }
+  const image = imageFor(configured, spec.desktop ? DESKTOP_CLASS : DEFAULT_CLASS);
   const ver = await docker(["version", "--format", "{{.Server.Version}}"], 10_000);
   if (ver.code !== 0) {
     throw new Error("container runtime unavailable");
   }
 
+  const ttl = Math.max(120, spec.timeoutSec + 120);
   const runArgs = [
     "run",
     "-d",
     "--rm",
+    "--init",
+    "--shm-size=1g",
     "--workdir",
     "/work",
     "--tmpfs",
@@ -406,10 +562,19 @@ export async function createDockerRuntime(timeoutSec: number): Promise<CodingRun
     "no-new-privileges",
     "-e",
     "HOME=/work",
+    "-e",
+    `SANDBOX_TTL_SECONDS=${ttl}`,
   ];
-  const net = (process.env.HANZO_CODING_SANDBOX_NETWORK ?? "").trim();
+  const net = sandboxEnv("SANDBOX_NETWORK", "HANZO_CODING_SANDBOX_NETWORK");
   if (net) {
     runArgs.push("--network", net);
+  }
+  const runtimeClass = (process.env.SANDBOX_RUNTIME_CLASS ?? "").trim();
+  if (runtimeClass) {
+    // ONE FIELD, and it is the only thing that decides how hard the boundary is:
+    // runc (fastest, weakest), gvisor, or a Firecracker/Kata class. A deployment
+    // value — there is no fork in code here and there must never be one.
+    runArgs.push("--runtime", runtimeClass);
   }
   for (const [k, v] of Object.entries(buildAgentEnv())) {
     if (k === "HOME") {
@@ -419,11 +584,16 @@ export async function createDockerRuntime(timeoutSec: number): Promise<CodingRun
       runArgs.push("-e", `${k}=${v}`);
     }
   }
-  runArgs.push(image, "sleep", String(Math.max(120, timeoutSec + 120)));
+  // The command is EXPLICIT for both classes rather than the image's CMD. A tag
+  // is a mutable name: `sandbox:dev` in our own registry once resolved to a
+  // stock `node:22` whose CMD is `node`, which starts, reads EOF and exits 0 —
+  // a container that "ran fine" and did nothing. Naming the command means a
+  // wrong image fails loudly instead of quietly.
+  runArgs.push(image, ...(spec.desktop ? ["sandbox-desktop"] : ["sleep", String(ttl)]));
 
-  const created = await docker(runArgs, 60_000);
+  const created = await docker(runArgs, 120_000);
   if (created.code !== 0) {
-    throw new Error("could not start coding sandbox");
+    throw new Error("could not start sandbox");
   }
   const id = created.stdout.trim();
 
@@ -442,22 +612,10 @@ export async function createDockerRuntime(timeoutSec: number): Promise<CodingRun
     }
     return docker(["exec", "-w", opts.cwd, ...eflags, id, ...argv], opts.timeoutMs ?? 60_000);
   };
-  const runAgent: AgentRunner = ({ cwd, prompt, timeoutMs }, emit) =>
+  const runAgent: AgentRunner = ({ cwd, prompt, tool, timeoutMs }, emit) =>
     spawnStreaming(
       "docker",
-      [
-        "exec",
-        "-w",
-        cwd,
-        id,
-        "dev",
-        "exec",
-        "--sandbox",
-        "workspace-write",
-        "--json",
-        "--skip-git-repo-check",
-        prompt,
-      ],
+      ["exec", "-w", cwd, id, ...TOOLS[tool](prompt)],
       { ...process.env }, // env of the `docker` CLI on the host — NOT the in-container agent env
       process.cwd(),
       timeoutMs,

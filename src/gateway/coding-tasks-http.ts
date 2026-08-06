@@ -7,7 +7,13 @@ import {
   type CodingEvent,
   type CodingRuntime,
   createDockerRuntime,
+  DEFAULT_TOOL,
+  isTool,
+  type RepoGrant,
+  type RuntimeSpec,
   runCodingTask,
+  TOOL_NAMES,
+  type Tool,
 } from "./coding-task.js";
 import {
   readJsonBodyOrError,
@@ -20,11 +26,23 @@ import { getBearerToken } from "./http-utils.js";
 import { getIamIdentity } from "./iam-identity.js";
 
 /**
- * coding-tasks-http.ts — POST /v1/coding-tasks: the native coding-task runner the
- * cloud control plane drives to turn @hanzo into an engineer. Cloud clones a
- * native /v1/git repo, runs the agent, commits, pushes a branch, and streams
- * NDJSON progress + a terminal result back so cloud mirrors it into the agent
- * session and reports to Slack.
+ * coding-tasks-http.ts — POST /v1/coding-tasks: the sandbox runner the cloud
+ * control plane drives. It streams NDJSON progress + a terminal result back so
+ * cloud mirrors it into the agent session and reports to Slack.
+ *
+ * A SANDBOX IS A COMPUTER, AND EVERYTHING ELSE IS A PROPERTY OF ONE RUN:
+ *
+ *   prompt    the task
+ *   tool      dev | claude | codex | python | node   (default dev)
+ *   cloneUrl  OPTIONAL — present => a git grant rides with it; absent => NO
+ *             credential exists in the run at all
+ *   desktop   OPTIONAL — selects the xvfb IMAGE VARIANT
+ *
+ * `desktop` is a TAG, not a branch in this file. Headless and xvfb are two tags
+ * of one image and the flag picks the tag; if the orchestrator reasoned about it
+ * instead, there would be two code paths to keep in step and they would drift.
+ * Every class can already drive a headless browser — the desktop variant adds a
+ * SCREEN, so a real window exists to click and watch over VNC.
  *
  * AUTH (fail-closed): the gateway service auth mode must be token|iam — a "none"
  * mode would make the pod-boundary gate a no-op and let any in-cluster caller / SSRF
@@ -92,13 +110,13 @@ function release(org: string): void {
 }
 
 type CodingTaskBody = {
-  cloneUrl: string;
-  baseBranch: string;
-  branch: string;
   prompt: string;
+  tool: Tool;
+  desktop: boolean;
   sessionId: string;
   runTimeoutSeconds: number;
-  credential: { username: string; token: string };
+  /** Absent when the run has no repo — and then no credential exists at all. */
+  repo?: RepoGrant;
 };
 
 /**
@@ -129,7 +147,7 @@ export async function handleCodingTasksHttpRequest(
     allowRealIpFallback?: boolean;
     rateLimiter?: AuthRateLimiter;
   },
-  makeRuntime: (timeoutSec: number) => Promise<CodingRuntime> = createDockerRuntime,
+  makeRuntime: (spec: RuntimeSpec) => Promise<CodingRuntime> = createDockerRuntime,
 ): Promise<boolean> {
   const url = new URL(req.url ?? "/", "http://localhost");
   if (url.pathname !== CODING_PATH) {
@@ -196,7 +214,7 @@ export async function handleCodingTasksHttpRequest(
   // created (no container runtime / no image), REFUSE — never run on the host.
   let runtime: CodingRuntime;
   try {
-    runtime = await makeRuntime(body.runTimeoutSeconds);
+    runtime = await makeRuntime({ timeoutSec: body.runTimeoutSeconds, desktop: body.desktop });
   } catch (err) {
     release(orgId);
     logWarn(`coding-task: runtime unavailable: ${errText(err)}`);
@@ -217,11 +235,9 @@ export async function handleCodingTasksHttpRequest(
   try {
     await runCodingTask(
       {
-        cloneUrl: body.cloneUrl,
-        baseBranch: body.baseBranch,
-        branch: body.branch,
         prompt: body.prompt,
-        credential: body.credential,
+        tool: body.tool,
+        repo: body.repo,
         workdir: runtime.workdir,
         runTimeoutSeconds: body.runTimeoutSeconds,
       },
@@ -244,63 +260,88 @@ export async function handleCodingTasksHttpRequest(
 type ParseResult = { ok: true; value: CodingTaskBody } | { ok: false; error: string };
 
 /**
- * parseBody validates the request and — critically — enforces (a) the clone URL is
- * https on an ALLOWLISTED git host, and (b) its org segment matches the
- * authenticated org. A forged body pointing the sandbox at another org's repo or an
- * attacker host is refused here (defense in depth; the org-scoped credential would
- * also fail at the git edge, and followRedirects=false blocks a redirect bounce).
+ * parseBody validates the request. Two things are load-bearing here.
+ *
+ * THE REPO IS OPTIONAL, AND THE CREDENTIAL RIDES WITH IT. With a repo, the
+ * clone URL must be https on an ALLOWLISTED git host and its org segment must
+ * equal the authenticated org — a forged body aiming the sandbox at another
+ * org's repo or an attacker host is refused here (defense in depth; the
+ * org-scoped credential would also fail at the git edge, and
+ * followRedirects=false blocks a redirect bounce). WITHOUT a repo there is no
+ * clone, no branch, no push, and a credential is REFUSED rather than ignored:
+ * a token in a run that can never use it is a token that only exists to leak,
+ * and silently dropping it would hide a caller bug that is worth seeing.
+ *
+ * THE TOOL MUST BE A NAME THE TABLE HAS. An unknown tool is a 400 here, not a
+ * "command not found" forty minutes into a scheduled run.
  */
 function parseBody(raw: unknown, orgId: string): ParseResult {
   if (typeof raw !== "object" || raw === null) {
     return { ok: false, error: "body must be an object" };
   }
   const b = raw as Record<string, unknown>;
-  const cloneUrl = str(b.cloneUrl);
-  const branch = str(b.branch);
   const prompt = str(b.prompt);
-  const cred = b.credential as Record<string, unknown> | undefined;
-  const token = str(cred?.token);
-
-  let parsedUrl: URL;
-  try {
-    parsedUrl = new URL(cloneUrl);
-  } catch {
-    return { ok: false, error: "invalid cloneUrl" };
-  }
-  if (parsedUrl.protocol !== "https:") {
-    return { ok: false, error: "cloneUrl must be https" };
-  }
-  if (!gitHostAllow().includes(parsedUrl.hostname.toLowerCase())) {
-    return { ok: false, error: "cloneUrl host is not an allowed git host" };
-  }
-  const orgInUrl = cloneOrg(parsedUrl);
-  if (!orgInUrl) {
-    return { ok: false, error: "cloneUrl is not a /v1/git URL" };
-  }
-  if (orgInUrl !== orgId) {
-    return { ok: false, error: "cloneUrl org does not match authenticated org" };
-  }
-  if (!branch || !BRANCH_RE.test(branch)) {
-    return { ok: false, error: "invalid branch" };
-  }
   if (!prompt.trim()) {
     return { ok: false, error: "empty prompt" };
   }
-  if (!token) {
-    return { ok: false, error: "missing credential" };
+
+  const toolRaw = str(b.tool) || DEFAULT_TOOL;
+  if (!isTool(toolRaw)) {
+    return { ok: false, error: `tool must be one of ${TOOL_NAMES.join(", ")}` };
+  }
+
+  const cred = b.credential as Record<string, unknown> | undefined;
+  const token = str(cred?.token);
+  const cloneUrl = str(b.cloneUrl);
+  const branch = str(b.branch);
+
+  let repo: RepoGrant | undefined;
+  if (cloneUrl) {
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(cloneUrl);
+    } catch {
+      return { ok: false, error: "invalid cloneUrl" };
+    }
+    if (parsedUrl.protocol !== "https:") {
+      return { ok: false, error: "cloneUrl must be https" };
+    }
+    if (!gitHostAllow().includes(parsedUrl.hostname.toLowerCase())) {
+      return { ok: false, error: "cloneUrl host is not an allowed git host" };
+    }
+    const orgInUrl = cloneOrg(parsedUrl);
+    if (!orgInUrl) {
+      return { ok: false, error: "cloneUrl is not a /v1/git URL" };
+    }
+    if (orgInUrl !== orgId) {
+      return { ok: false, error: "cloneUrl org does not match authenticated org" };
+    }
+    if (!branch || !BRANCH_RE.test(branch)) {
+      return { ok: false, error: "invalid branch" };
+    }
+    if (!token) {
+      return { ok: false, error: "missing credential" };
+    }
+    repo = {
+      cloneUrl,
+      baseBranch: str(b.baseBranch),
+      branch,
+      credential: { username: str(cred?.username) || "x-access-token", token },
+    };
+  } else if (token || branch) {
+    return { ok: false, error: "credential and branch require a cloneUrl" };
   }
 
   const requested = num(b.runTimeoutSeconds, DEFAULT_TIMEOUT_SECONDS);
   return {
     ok: true,
     value: {
-      cloneUrl,
-      baseBranch: str(b.baseBranch),
-      branch,
       prompt,
+      tool: toolRaw,
+      desktop: b.desktop === true,
       sessionId: str(b.sessionId),
       runTimeoutSeconds: Math.min(Math.max(requested, 60), MAX_TIMEOUT_SECONDS),
-      credential: { username: str(cred?.username) || "x-access-token", token },
+      repo,
     },
   };
 }

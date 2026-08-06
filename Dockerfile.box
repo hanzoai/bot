@@ -27,12 +27,18 @@
 # else. The cut is on RUNTIME cost, which is the thing that is actually paid per
 # pod:
 #
-#   exec     full toolchain, `sleep infinity`, nothing running.
-#   dev      the same, plus the agent CLI. Still nothing running.
+#   exec     full toolchain AND a headless browser, `sleep infinity`, nothing
+#            running.
+#   dev      the same, plus the agent CLIs `tool` can name. Still nothing running.
 #   desktop  plus Xvfb + a window manager + a VNC server + noVNC — four
 #            processes on EVERY desktop pod, whether or not anyone looks at the
 #            screen. That is the only difference here that costs at runtime, so
 #            it is the only place a class boundary earns its keep.
+#
+# THE BROWSER IS IN `exec`, NOT IN `desktop`, and that follows from the same
+# rule. `desktop` does not ADD a browser; it adds a SCREEN for the browser that
+# is already there. Headless works in all three classes; headful works where
+# there is an X server to draw on. One browser, one install, two ways to run it.
 #
 # THERE IS NO DAEMON IN THIS IMAGE AND THERE MUST NEVER BE ONE AGAIN.
 # The command is `sleep infinity`; work arrives through the Kubernetes exec
@@ -47,7 +53,7 @@
 # runs `docker buildx build ... -f "$df" "$ctx"`, which builds the LAST stage.
 # So the last stage is `FROM ${STAGE}`, an alias, and hanzo.yml picks the class
 # with `args: {STAGE: exec|dev|desktop}`. BuildKit only builds the stages the
-# target depends on, so `STAGE=exec` never pulls chromium.
+# target depends on, so `STAGE=exec` never pulls the X stack.
 #
 # EVERY THIRD-PARTY INPUT IS PINNED BY DIGEST OR CHECKSUM, AND EVERY VERSION IS
 # A LITERAL. A floating tag means two builds of one commit are two different
@@ -267,6 +273,49 @@ RUN set -eux; \
     gem install --no-document bundler; \
     ruby --version; bundler --version; php --version | head -1; composer --version
 
+# ---- Browser ---------------------------------------------------------------
+# A SANDBOX IS A COMPUTER, AND A COMPUTER HAS A BROWSER. This sits in `exec`,
+# the BOTTOM of the chain, so all three classes have one — not in `desktop`,
+# where it started out.
+#
+# The move is the file's own rule applied honestly. The class boundary is cut on
+# RUNTIME cost (see the header): `desktop` earns its tag because Xvfb, openbox,
+# x0vncserver and websockify are four processes running on every desktop pod
+# forever. A browser BINARY that nobody launched costs nothing at runtime — it
+# is disk, and image layers are shared per node, so the node that pulled
+# `desktop` already had these bytes. Keeping the browser up in `desktop` did not
+# save `dev` anything; it just meant the DEFAULT class for an agent run could
+# not open a web page. Measured on the built images before this change: `dev`
+# had no browser at all and no way to install one without egress.
+#
+# THE npm PACKAGE, NOT JUST THE BROWSER, AND THAT IS THE HALF THAT WAS MISSING.
+# `npx playwright install` downloads the chromium BUILD to
+# PLAYWRIGHT_BROWSERS_PATH and leaves the LIBRARY in an npx cache that the next
+# line deletes. That is what the desktop stage did, and the result was a real
+# chromium at /opt/playwright that nothing in the image could drive:
+# `require("playwright")` threw MODULE_NOT_FOUND. Installing the package
+# globally and putting the global root on NODE_PATH means `require("playwright")`
+# resolves from ANY cwd with the network turned all the way down — which is the
+# state a confined sandbox is supposed to run in.
+#
+# ONE browser for the whole fleet: this is the same pinned build our e2e suites
+# drive, so a computer-use run and a test run look at one chromium. Installed to
+# a system path so it is a shared read-only layer a mounted /work PVC cannot
+# shadow. Chromium is NOT available from apt on Ubuntu — `chromium` is absent
+# from the archive and `chromium-browser` is a transitional stub that installs a
+# snap, and there is no snapd in a container.
+ARG PLAYWRIGHT_VERSION=1.62.1
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright \
+    NODE_PATH=/usr/local/lib/node_modules
+RUN set -eux; \
+    npm install -g "playwright@${PLAYWRIGHT_VERSION}"; \
+    playwright install --with-deps chromium; \
+    chmod -R a+rX "${PLAYWRIGHT_BROWSERS_PATH}"; \
+    npm cache clean --force; \
+    rm -rf /root/.npm /var/lib/apt/lists/*; \
+    test -n "$(find "${PLAYWRIGHT_BROWSERS_PATH}" -type f -name chrome -print -quit)"; \
+    node -e 'require("playwright"); console.log("playwright " + require("playwright/package.json").version + " resolvable from " + process.cwd())'
+
 # uid/gid 1000, named `sandbox`. The pod runs runAsNonRoot with runAsUser 1000,
 # so the uid is fixed by the securityContext and only the NAME is a choice here.
 #
@@ -317,12 +366,25 @@ USER root
 # below expands to the empty string and the gh download 404s.
 ARG TARGETARCH
 
-# Pinned, never floating. 0.6.91 is npm dist-tags.latest as of 2026-08-06.
+# Pinned, never floating. All four are npm dist-tags.latest as of 2026-08-06.
 ARG DEV_VERSION=0.6.91
 ARG GH_VERSION=2.97.0
 
+# THE THREE AGENT CLIs ARE ONE INSTALL BECAUSE `tool` IS ONE FIELD.
+# A run names its tool — dev | claude | codex | python | node — and the runner
+# turns that name into an argv. `python` and `node` are already here from the
+# exec stage. If `claude` and `codex` were not, the enum would be three values
+# that work and two that answer "command not found" at the far end of a
+# scheduled pod, which is a worse failure than not offering them: the caller
+# gets a run that starts, burns its timeout and produces nothing.
+ARG CLAUDE_VERSION=2.1.223
+ARG CODEX_VERSION=0.146.1
+
 RUN set -eux; \
-    npm install -g "@hanzo/dev@${DEV_VERSION}"; \
+    npm install -g \
+      "@hanzo/dev@${DEV_VERSION}" \
+      "@anthropic-ai/claude-code@${CLAUDE_VERSION}" \
+      "@openai/codex@${CODEX_VERSION}"; \
     npm cache clean --force; \
     rm -rf /root/.npm /tmp/*
 
@@ -340,10 +402,12 @@ RUN set -eux; \
 # caught before a pod is scheduled and an agent finds no compiler.
 USER sandbox
 RUN set -eux; \
-    dev --version; node --version; npm --version; pnpm --version; bun --version; \
+    dev --version; claude --version; codex --version; \
+    node --version; npm --version; pnpm --version; bun --version; \
     deno --version; python3 --version; uv --version; go version; rustc --version; \
     cargo --version; zig version; java --version; ruby --version; php --version | head -1; \
-    git --version; rg --version | head -1; jq --version; gh --version | head -1
+    git --version; rg --version | head -1; jq --version; gh --version | head -1; \
+    node -e 'require("playwright")' && echo "playwright: resolvable as sandbox"
 
 WORKDIR /work
 
@@ -399,29 +463,11 @@ RUN apt-get update \
     xvfb \
   && rm -rf /var/lib/apt/lists/*
 
-# THE BROWSER DOES NOT COME FROM APT, AND THAT IS NOT A PREFERENCE.
-# Ubuntu has no chromium deb. `chromium` is absent from the archive entirely and
-# `chromium-browser` is version `2:1snap1-0ubuntu4` — a transitional stub whose
-# only job is to install the SNAP. There is no snapd in a container, so an
-# `apt-get install chromium-browser` here produces a package that installs
-# cleanly and a browser that cannot start. (Debian ships a real chromium deb,
-# which is why the recipe this replaces got away with it on bookworm.)
-#
-# Playwright's build is a real Chromium, published for linux x64 AND arm64
-# (verified: revision 1234 for 1.62.1), pinned by the playwright version, and it
-# is the same browser our e2e suites drive — so a computer-use sandbox and a
-# test run are looking at one browser instead of two. Installed to a system path
-# rather than a home directory, so it is a shared read-only layer that a mounted
-# /work PVC cannot shadow.
-ARG PLAYWRIGHT_VERSION=1.62.1
-ENV PLAYWRIGHT_BROWSERS_PATH=/opt/playwright
-RUN set -eux; \
-    npx --yes "playwright@${PLAYWRIGHT_VERSION}" install --with-deps chromium; \
-    chmod -R a+rX "${PLAYWRIGHT_BROWSERS_PATH}"; \
-    npm cache clean --force; \
-    rm -rf /root/.npm /var/lib/apt/lists/*; \
-    test -n "$(find "${PLAYWRIGHT_BROWSERS_PATH}" -type f -name chrome -print -quit)"
-
+# THE BROWSER IS NOT INSTALLED HERE — it is in `exec`, at the bottom of the
+# chain, so `dev` has one too. What this stage adds is a SCREEN for it: with
+# DISPLAY set, the same chromium launches headful into a real window that can be
+# clicked, screenshotted and watched over VNC. Headless and headful are one
+# browser and one install; the difference is whether an X server exists.
 COPY scripts/sandbox-desktop.sh /usr/local/bin/sandbox-desktop
 RUN chmod 0755 /usr/local/bin/sandbox-desktop
 
