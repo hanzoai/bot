@@ -1,7 +1,30 @@
-# Canonical caller — every knob lives in /hanzo.yml, none here.
-# Runs on the git-runner fleet at git.hanzo.ai, the only pool serving these
-# labels. github.com resolves only .github/workflows and has no runner for
-# them, so a caller placed there is a gate that cannot be scheduled.
+# The canonical fleet pipeline, driven by this repo's root hanzo.yml. Every real
+# detail lives there; this file is the trigger set and nothing else.
+#
+# It lives in `.hanzo/workflows/` because the runners are the FORGE's. The pool
+# that answers `hanzo-build-linux-amd64` is registered to git.hanzo.ai;
+# github.com has zero runners at any level. The forge reads BOTH `.hanzo/workflows`
+# and `.github/workflows`, so a caller left under `.github/` runs twice — once
+# here, and once on GitHub where nothing can pick it up and the job simply queues.
+#
+# The reusable is named by its `.hanzo/` path for the same reason, and that is
+# the path this forge has actually resolved (run #40). hanzoai/ci carries the
+# file at both paths, byte-identical, so the two are one workflow — but only one
+# of them is the one we have watched a runner fetch.
+#
+# WHY THIS FILE IS NOT A FOURTH BUILDER. The repo already has deploy.yml
+# (ghcr.io/hanzoai/bot), cloud.yml (bot-cloud) and release.yml (@hanzo/bot) —
+# three hand-rolled workflows, each owning one artifact, none of which touches
+# the sandbox recipes. Those recipes have therefore NEVER been built:
+# `Dockerfile.sandbox` and its siblings are reachable only through
+# scripts/sandbox-*-setup.sh, on a laptop. That is the actual reason no box image
+# exists anywhere in the org — not a missing recipe, a missing lane.
+#
+# The box images take the canonical lane instead of a fourth hand-rolled one
+# because they need exactly what it already does: multi-image `images:` entries
+# off one Dockerfile with per-image `args`, the shared imgver version derivation,
+# and the push to registry.hanzo.ai. Rewriting that here would be a second copy
+# of the fleet's build logic in the one repo that had none.
 name: CI/CD
 on:
   push:
