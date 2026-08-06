@@ -124,4 +124,14 @@ if [[ "${ENABLE_NOVNC}" == "1" && "${HEADLESS}" != "1" ]]; then
   websockify --web /usr/share/novnc/ "${NOVNC_PORT}" "localhost:${VNC_PORT}" &
 fi
 
+# A desktop box is still a box: the display is what makes it computer-use, but
+# the agent that serves /v1/box (files, exec, git) is the same boxd every other
+# class runs. The exec stage sets `CMD ["boxd"]` and this entrypoint replaces
+# that CMD, so without this line the desktop class would be the one image in the
+# chain nothing can schedule.
+#
+# Guarded on the binary rather than assumed: this script also runs from bot's
+# local docker path, where an older image may predate boxd entirely.
+command -v boxd >/dev/null 2>&1 && boxd &
+
 wait -n
