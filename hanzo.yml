@@ -46,6 +46,31 @@
 # single-arch moves the sha- tag to `sha-<short>-amd64-<sfx>` and leaves
 # `<sfx>-latest` and the semver exactly where they were. An arm64 node makes this
 # one word here, not a rebuild.
+
+# THE IMAGE'S OWN VERSION, AND THE REASON IT NEEDS ONE.
+#
+# hanzoai/ci derives every published version with bin/imgver, which reads
+# `$IMGVER_VERSION` — this key — and falls back to the build context's manifest.
+# The context is the repo root, so the fallback was package.json: BOT's version,
+# 2026.6.7, last bumped 2026-06-07. Today's rebuild therefore republished
+# `2026.6.7-desktop` from source two months newer, and `2026.6.7-desktop` and
+# `sha-d190451-amd64-desktop` are now literally one digest (sha256:7a41f69f…).
+# A tag that gets rewritten is not a pin. One that LOOKS pinned is worse than
+# `latest`, because `latest` at least admits what it is — which is exactly why
+# hanzoai/cloud had to fall back to pinning sandbox images by digest.
+#
+# So the number comes from docker/sandbox.version: a file whose only subject is
+# this image, changed in the same commit that changes the image.
+# `<file>:<command printing it>` is imgver's own shape — hanzoai/cli's hanzo.yml
+# reads Cargo.toml the same way. Dockerfile.box COPYs that same file to
+# /etc/sandbox-version, so a running pod can be asked what it is and cannot
+# disagree with its own tag.
+#
+# It starts at 1.0.0 rather than continuing 2026.6.x, because 2026.6.7 was never
+# this artifact's number — it was another package's, borrowed. The old tags stay
+# in the registry; nothing that pins a digest notices either way.
+version: "docker/sandbox.version:cat docker/sandbox.version"
+
 images:
   - name: sandbox-exec
     context: .

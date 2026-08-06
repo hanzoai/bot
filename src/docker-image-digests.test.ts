@@ -88,6 +88,39 @@ describe("docker base image pinning", () => {
     }
   });
 
+  it("pins every hand-fetched tarball in Dockerfile.box by sha256", async () => {
+    // The file's own rule: a tarball is verified before anything is unpacked.
+    // It held for node/go/bun/deno/zig and had to keep holding when the three
+    // Hanzo binaries joined them — a GitHub release asset can be replaced under
+    // a tag that never moves, which is the one way a "pinned" version lies.
+    const dockerfile = await readFile(resolve(repoRoot, "Dockerfile.box"), "utf8");
+    const sums = [...dockerfile.matchAll(/^ARG\s+(\w*_SHA256\w*)=(\S+)$/gm)];
+    expect(sums.length, "Dockerfile.box should pin its tarballs by checksum").toBeGreaterThan(0);
+    for (const [, name, value] of sums) {
+      expect(value, `ARG ${name} must be a sha256`).toMatch(/^[a-f0-9]{64}$/);
+    }
+  });
+
+  it("gives the sandbox image a version of its own, in one place", async () => {
+    // The tag and the image's contents come from ONE file. Inheriting bot's
+    // package.json is what let `2026.6.7-desktop` be republished from source two
+    // months newer than the number, so the number now belongs to the image.
+    const version = (await readFile(resolve(repoRoot, "docker/sandbox.version"), "utf8")).trim();
+    expect(version, "docker/sandbox.version must be a bare semver").toMatch(/^\d+\.\d+\.\d+$/);
+
+    const hanzoYml = parse(await readFile(resolve(repoRoot, "hanzo.yml"), "utf8")) as {
+      version?: string;
+    };
+    expect(hanzoYml.version, "hanzo.yml must derive the image version from that file").toContain(
+      "docker/sandbox.version",
+    );
+
+    const dockerfile = await readFile(resolve(repoRoot, "Dockerfile.box"), "utf8");
+    expect(dockerfile, "Dockerfile.box must stamp the version into the image it tags").toContain(
+      "COPY docker/sandbox.version /etc/sandbox-version",
+    );
+  });
+
   it("keeps Dependabot Docker updates enabled for root Dockerfiles", async () => {
     const raw = await readFile(resolve(repoRoot, ".github/dependabot.yml"), "utf8");
     const config = parse(raw) as DependabotConfig;

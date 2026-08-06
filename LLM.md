@@ -255,6 +255,71 @@ needed. What it does need comes from the container, not the image, and
 flaky site) and `--init` (a browser forks a tree of zygote and renderer
 processes; `docker exec` children are not under the image's tini).
 
+**The browser also has a NAME now.** Playwright unpacks it to
+`/opt/playwright/chromium-1234/chrome-linux64/chrome` — a path a library resolves
+and a person never types — so an agent that shelled out to `chromium` got
+"command not found" for a browser three directories away. One symlink,
+`/usr/local/bin/chromium`, is the single fact; `chromium-browser` and
+`google-chrome` link to it, and `CHROME_BIN` / `CHROME_PATH` /
+`PUPPETEER_EXECUTABLE_PATH` name it for the three tools that ask in three
+different spellings. Nothing repeats the versioned path, so a playwright bump
+moves one target. A symlink is enough because chromium finds its resource bundle
+from the realpath of `/proc/self/exe`; the build proves it with `chromium
+--version`.
+
+### Three products, three binaries
+
+`hanzo`, `dev` and `hanzo-mcp` are **native Rust binaries** fetched from GitHub
+release assets, not npm packages:
+
+| binary      | from                       | what it is                                          |
+| ----------- | -------------------------- | --------------------------------------------------- |
+| `hanzo`     | `hanzoai/cli` v1.9.37      | the cloud CLI — auth, billing, every product        |
+| `dev`       | `hanzoai/dev` v0.6.91      | the coding agent; `dev exec …` is what TOOLS spells |
+| `hanzo-mcp` | `hanzoai/mcp` rust-v1.1.15 | the MCP server, 13 HIP-0300 tools over JSON-RPC     |
+
+What this replaced was `npm install -g @hanzo/dev`, and it was wrong three ways
+at once. It put a **Node shim** at `/usr/local/bin/dev` that spawns a native
+binary nested in its own `node_modules`, so launching the agent needed a working
+node. That package also claims the bin name `hanzo`, which is why the CLOUD CLI
+was a symlink to the AGENT and no `hanzo` command existed at all. And the MCP
+server has no package on that path, so it was simply **absent** — measured in a
+live pod: `hanzo` and `dev` were the same `dev.js`, `command -v hanzo-mcp` was
+empty. A build-time assert now refuses an image where `hanzo` and `dev` resolve
+to one file again.
+
+One fetch rule, which is the publisher's own (`hanzoai/cli` `install.sh`): every
+Hanzo binary is a release asset named `<BIN>-<os>-<arch>.tar.gz` unpacking to a
+single file named `<BIN>`. So the Dockerfile has one loop over `(repo, tag, bin,
+sha256)` and a fourth binary costs one line. Checksums are **literals**, read
+from the publisher, not the `.sha256` beside the asset — a digest fetched from
+the same host proves the transport, not the bytes we agreed to ship, and a
+release asset can be replaced under a tag that never moves.
+
+**`hanzo` is pinned at 1.9.37, not at latest, and that is a gap.**
+`hanzoai/cli`'s newest release is v1.9.40 and its release matrix declares a
+`linux-amd64` target, but v1.9.40 published only darwin-amd64, darwin-arm64,
+linux-arm64 and windows-amd64. There is no linux-amd64 asset to fetch and this
+image is linux-amd64; 1.9.37 is the newest release that has one. When that
+matrix publishes linux-amd64 again this is one version and one checksum.
+
+### The version is the image's own
+
+`docker/sandbox.version` — one file, read twice. `hanzo.yml`'s `version:` key
+turns it into the published `<version>-<class>` tag through `hanzoai/ci`'s
+`imgver`, and `Dockerfile.box` COPYs the same file to `/etc/sandbox-version`, so
+a running pod can be asked what it is and cannot disagree with its own tag.
+
+Before this, `imgver` fell back to the build context's manifest — the repo root's
+`package.json`, which is **bot's** version, `2026.6.7`, last bumped 2026-06-07.
+So today's rebuild republished `2026.6.7-desktop` from source two months newer:
+`2026.6.7-desktop` and `sha-d190451-amd64-desktop` are one digest,
+`sha256:7a41f69f…`. A tag that gets rewritten is not a pin, and one that LOOKS
+pinned is worse than `latest`, which at least admits what it is — which is
+precisely why `hanzoai/cloud` had to pin these images by digest. The series
+starts at `1.0.0` because `2026.6.7` was never this artifact's number; the old
+tags stay in the registry as archaeology.
+
 ### Env names
 
 `SANDBOX_IMAGE`, `SANDBOX_NETWORK`, `SANDBOX_RUNTIME_CLASS`. The old
@@ -271,6 +336,19 @@ the producer's shape is not the obvious guess — see below.
 
 ### Known gaps, measured 2026-08-06
 
+- **The desktop class serves nothing, and the missing piece was never in this
+  image.** `command -v x11vnc` is empty and that is deliberate — the VNC server
+  here is TigerVNC's `x0vncserver`, from `tigervnc-scraping-server`, chosen over
+  x11vnc for the MSG_PEEK deadlock (see `Dockerfile.box`). What kept port 5900
+  unserved was `hanzoai/cloud` `apps/sandbox/runtime.go` setting
+  `command: ["sleep","infinity"]` on every pod: a k8s `command` with no `args`
+  replaces the image's ENTRYPOINT **and** CMD, so `sandbox-desktop` never ran and
+  tini was never PID 1. Proven in a live desktop pod — `/proc/1/cmdline` was
+  `sleep infinity` and `ss -ltn` was empty; running the script by hand brought X
+  up on `:1` with `127.0.0.1:5900` and `127.0.0.1:6080` LISTENing, nothing
+  installed. The override is removed on cloud's side; the image now asserts
+  Xvfb/openbox/x0vncserver/websockify/xdpyinfo at build time so the natural wrong
+  diagnosis is answered by the build.
 - **A bare `:<class>` tag is a name no build can create.** hanzoai/ci's image
   lane composes every tag from `tag-suffix` and emits exactly three:
   `sha-<short>-amd64-<class>`, `<class>-latest`, `<version>-<class>`. **The
