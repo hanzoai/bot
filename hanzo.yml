@@ -1,0 +1,35 @@
+# Canonical CI/CD config for hanzoai/bot — the one file both the hanzoai/ci
+# reusable (.hanzo/workflows/cicd.yml) and platform.hanzo.ai read.
+#
+# GATE ONLY. The images this repo ships already have their own lanes
+# (.hanzo/workflows/cloud.yml for Dockerfile.cloud, deploy.yml for the rollout),
+# and the five Dockerfiles here are variants of one product — sandbox, sandbox
+# browser, cloud — not one service a push should rebuild. Declaring `images:`
+# here would build them a second time for the same commit.
+#
+# The gate is the `check` job of the CI this repo already runs on this fleet,
+# in its order and with its commands:
+#   * `pnpm check` — oxfmt --check, tsgo types, oxlint --type-aware, plus the
+#     dozen repo-specific lint rules that encode real invariants (no random
+#     messaging, channel-agnostic boundaries, no raw channel fetch, agent
+#     ingress ownership, no register-http-handler in plugins, no monolithic
+#     plugin-SDK entry imports, no low-level webhook body reads, pairing store
+#     and account scope).
+#   * `pnpm build:strict-smoke` — the A2UI bundle, tsdown, and the plugin-SDK
+#     .d.ts build under strict TS. This is the half of `pnpm build` that can
+#     actually go red on bad code, without the dozen artifact-copy scripts.
+#   * `pnpm lint:ui:no-raw-window-open` — the external-URL-opening policy.
+#
+# Not claimed here: `pnpm test`. That suite is a matrix (node + bun) that needs
+# HANZO_BOT_TEST_WORKERS and a 6 GB old-space bump to avoid V8 OOM on Linux, and
+# it already runs in its own job with those env vars set. Duplicating it here
+# without them would produce OOM reds that say nothing about the code.
+test:
+  - name: build
+    run: |
+      set -e
+      corepack enable
+      pnpm install --frozen-lockfile
+      pnpm check
+      pnpm build:strict-smoke
+      pnpm lint:ui:no-raw-window-open
