@@ -2,6 +2,7 @@ import { execFile, spawn } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { getBlockedNetworkModeReason } from "../agents/sandbox/network-mode.js";
 
 /**
  * coding-task.ts — the native coding-task runner: clone a native /v1/git repo,
@@ -467,6 +468,52 @@ export function sandboxEnv(name: string, legacy: string): string {
 }
 
 /**
+ * The network a sandbox joins. REQUIRED, because the alternative is not "no
+ * network" — it is the default bridge, which routes to the host, and the host
+ * answers at 169.254.169.254.
+ *
+ * That address is the cloud metadata service. Measured on hanzo-k8s 2026-08-06:
+ * `GET http://169.254.169.254/metadata/v1/user-data` returned 200 with 5983
+ * bytes of node bootstrap material — a node private key, a bootstrap token, and
+ * the cluster join material. The control run in the same shell reached
+ * example.com (200) and was refused the node's own 10.124.0.38:10250, so the
+ * link-local reach was not a broken probe. A sandbox runs untrusted model
+ * output; one curl is the whole distance from a prompt injection to the node.
+ *
+ * WHY REQUIRED RATHER THAN DEFAULTED. There is no docker network that is
+ * confined by construction: docker has no per-network egress ACL, a
+ * user-defined bridge reaches link-local exactly like the default one, and a
+ * container without NET_ADMIN cannot blackhole the route itself. Confinement
+ * has to come from the host's DOCKER-USER chain, which is host state this
+ * process cannot see. So the honest contract is that the OPERATOR names a
+ * network they have confined, and an unnamed one is refused rather than
+ * guessed. Kubernetes is the other way to run this — there a NetworkPolicy
+ * states the same rule declaratively, which is why cloud's apps/sandbox is the
+ * path production actually uses.
+ *
+ * `host` and `container:<id>` are refused through the same guard the agent
+ * sandbox uses, because joining a namespace is not joining a network.
+ */
+export function sandboxNetwork(): string {
+  const net = sandboxEnv("SANDBOX_NETWORK", "HANZO_CODING_SANDBOX_NETWORK");
+  if (!net) {
+    throw new Error(
+      "SANDBOX_NETWORK is not set, so this run would join the default bridge and " +
+        "reach 169.254.169.254 (cloud metadata). Name a network whose egress is " +
+        "confined, or run the sandbox on Kubernetes where the NetworkPolicy states it.",
+    );
+  }
+  const blocked = getBlockedNetworkModeReason({ network: net });
+  if (blocked) {
+    throw new Error(
+      `SANDBOX_NETWORK=${net} is refused (${blocked}): sharing the host's or another ` +
+        "container's network namespace is not confinement, it is the absence of it.",
+    );
+  }
+  return net;
+}
+
+/**
  * imageFor resolves one class to a ref THE BUILD LANE ACTUALLY PUBLISHES, which
  * is the whole difficulty and is worth writing down because guessing it wrong is
  * invisible until a pod cannot pull.
@@ -532,11 +579,15 @@ export type RuntimeSpec = {
  *     never visible to another task and vanishes on teardown.
  *   - NO service-account token: a fresh `docker run` does not mount the pod's
  *     /var/run/secrets, so the SA token is unreachable.
- *   - EGRESS: pinned to SANDBOX_NETWORK when set. UNSET MEANS THE DEFAULT
- *     BRIDGE, WHICH IS THE WHOLE INTERNET. A browser is an egress channel by
- *     definition, so this is the field that decides whether a prompt-injected
- *     run can post what it read to an attacker. It is a deployment value, not a
- *     code path — see LLM.md.
+ *   - EGRESS: SANDBOX_NETWORK is REQUIRED, and unset is a refusal. It used to be
+ *     optional, and unset meant the default bridge — which is the whole internet
+ *     AND 169.254.169.254, the cloud metadata service. On our nodes that address
+ *     serves the node's cloud-init user-data: measured 2026-08-06 from a pod on
+ *     hanzo-k8s, `GET /metadata/v1/user-data` answered 200 with 5983 bytes of
+ *     node bootstrap material. One curl from prompt-injected model output is the
+ *     whole distance. A browser is an egress channel by definition, so this is
+ *     also the field that decides whether an injected run can post what it read.
+ *     It stays a deployment value with no code path behind it — see LLM.md.
  *
  * WHAT THE BROWSER NEEDS, AND WHY IT IS HERE RATHER THAN IN THE IMAGE:
  *   - `--shm-size=1g`. Docker's default /dev/shm is 64 MiB. Chromium maps its
@@ -548,8 +599,11 @@ export type RuntimeSpec = {
  *     a reaper at PID 1 their zombies accumulate for the life of the container.
  *     (The image has tini for its own CMD; `docker exec` children are not under it.)
  *
- * FAIL CLOSED: an unavailable docker daemon OR an unset sandbox image throws — the
- * handler refuses the run rather than falling back to the shared host.
+ * FAIL CLOSED: an unset sandbox image, an unset SANDBOX_NETWORK, or an
+ * unavailable docker daemon all throw — the handler refuses the run rather than
+ * falling back to the shared host. The two config refusals are checked BEFORE
+ * the daemon, so a machine with no docker still reports the real
+ * misconfiguration instead of hiding it behind "container runtime unavailable".
  */
 export async function createDockerRuntime(spec: RuntimeSpec): Promise<CodingRuntime> {
   const configured = sandboxEnv("SANDBOX_IMAGE", "HANZO_CODING_SANDBOX_IMAGE");
@@ -561,6 +615,7 @@ export async function createDockerRuntime(spec: RuntimeSpec): Promise<CodingRunt
     spec.desktop ? DESKTOP_CLASS : DEFAULT_CLASS,
     process.env.SANDBOX_IMAGE_TAG ?? "",
   );
+  const network = sandboxNetwork();
   const ver = await docker(["version", "--format", "{{.Server.Version}}"], 10_000);
   if (ver.code !== 0) {
     throw new Error("container runtime unavailable");
@@ -588,10 +643,7 @@ export async function createDockerRuntime(spec: RuntimeSpec): Promise<CodingRunt
     "-e",
     `SANDBOX_TTL_SECONDS=${ttl}`,
   ];
-  const net = sandboxEnv("SANDBOX_NETWORK", "HANZO_CODING_SANDBOX_NETWORK");
-  if (net) {
-    runArgs.push("--network", net);
-  }
+  runArgs.push("--network", network);
   const runtimeClass = (process.env.SANDBOX_RUNTIME_CLASS ?? "").trim();
   if (runtimeClass) {
     // ONE FIELD, and it is the only thing that decides how hard the boundary is:

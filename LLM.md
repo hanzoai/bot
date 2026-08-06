@@ -373,36 +373,67 @@ the producer's shape is not the obvious guess — see below.
   `hanzoai` → `hanzo` on the way out, so a `repo:` that already names
   `registry.hanzo.ai/hanzoai/sandbox` gets crane-copied to
   `registry.hanzo.ai/hanzo/sandbox` as well — a second repo nothing pulls.
-- **Egress from a sandbox is unrestricted**, and a browser makes that matter more
-  — see the security note below.
 
 ### Security: what a prompt-injected run can reach
 
-Measured from a live pod in `hanzo-sandboxes` on hanzo-k8s, not inferred:
+Re-measured 2026-08-06 **after** the NetworkPolicy landed, from a labelled pod in
+`hanzo-sandboxes` on hanzo-k8s. Every row has a control in the same shell, because
+a probe that returns nothing proves nothing on its own — it looks identical
+whether the target is blocked or the tool is missing.
 
-| target                                                     | result                                                                                                                        |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| arbitrary internet (`example.com`, `1.1.1.1`, npm, GitHub) | **reachable**                                                                                                                 |
-| `bot-gateway.hanzo.svc`, `kubernetes.default.svc`          | **reachable**                                                                                                                 |
-| `cloud.hanzo.svc`, `kms.hanzo.svc`                         | blocked                                                                                                                       |
-| kubelet on the node IP `:10250`                            | blocked                                                                                                                       |
-| **DO droplet metadata `169.254.169.254`**                  | **reachable — `/metadata/v1/user-data` is 6005 bytes containing an RSA PRIVATE KEY, a bootstrap token and `k8saas` material** |
-| pod service-account token                                  | not mounted (`automountServiceAccountToken: false`)                                                                           |
+| target                                               | result                                                                     |
+| ---------------------------------------------------- | -------------------------------------------------------------------------- |
+| arbitrary internet (`example.com`) — the CONTROL     | **reachable**, 200, 559 bytes                                              |
+| **DO droplet metadata `169.254.169.254`**            | **blocked** — `/metadata/v1/id` and `/metadata/v1/user-data` both time out |
+| `cloud.hanzo.svc`, `kms.hanzo.svc`, kubelet `:10250` | blocked                                                                    |
+| pod service-account token                            | not mounted (`automountServiceAccountToken: false`)                        |
 
-No NetworkPolicy selects these pods and no `runtimeClassName` is set, so they run
-under `runc` on the default network. The metadata row is the serious one: one
-`curl` from untrusted model output reads node bootstrap credentials. A browser
-does not create that hole, but it is an egress channel by definition — and with
-indirect prompt injection the _page being read_ becomes the instruction source,
-so "fetch this, then POST it there" needs no operator in the loop.
+`sandbox-isolation` in `hanzo-sandboxes` selects `hanzo.ai/sandbox-class` (Exists)
+and its egress ipBlock is `0.0.0.0/0` except `10.0.0.0/8`, `172.16.0.0/12`,
+`192.168.0.0/16`, **`169.254.0.0/16`**. That last entry is the metadata one, and
+it is not RFC1918 — writing "the private ranges" from memory leaves it out, which
+is exactly how it was left out everywhere else.
 
-What confines it, in the order the reward/effort ratio says to do it:
+**The hole was NOT the sandbox namespace, and the fix there did not close it.**
+The same probe from `bot-gateway` in namespace `hanzo` answered 200 with 5983
+bytes of `/metadata/v1/user-data` — the node's cloud-init: a private key, a
+bootstrap token, `k8saas` join material. Status and length only; the body was
+never read. The negative control is what makes that finding solid: from the same
+shell the node's own `10.124.0.38:10250` timed out, so the except-list WAS being
+enforced and link-local was simply not in it. `hanzo/policy` is a `podSelector: {}`
+blanket, and NetworkPolicy allows are ADDITIVE — `hanzo/lsp` already carried the
+correct four-entry list and its pod reached the metadata service anyway, because
+the blanket rule granted what the tight one withheld. Fixed in universe
+`charts/app/values/hanzo/policy.yaml`.
 
-1. A NetworkPolicy on `hanzo-sandboxes` denying `169.254.169.254/32` and RFC1918
-   on egress. This is the single highest-value change and it is one manifest.
-2. `SANDBOX_NETWORK` set (docker path) — today unset means the default bridge,
-   which is the whole internet.
-3. `SANDBOX_RUNTIME_CLASS`. It is ONE FIELD and a deployment value — never a fork
-   in code. The benchmark on this fleet: Firecracker beat gVisor on both latency
-   and memory (git status 82 ms vs 980 ms; start 294 ms vs 881 ms; ~57 MiB both);
-   runc is fastest and weakest.
+A browser does not create any of this, but it is an egress channel by definition
+— and with indirect prompt injection the _page being read_ becomes the
+instruction source, so "fetch this, then POST it there" needs no operator.
+
+What confines a run, in reward/effort order:
+
+1. **A NetworkPolicy** — done, in both namespaces. This is the load-bearing
+   control and it is declarative, which is the reason the Kubernetes path is the
+   one production uses.
+2. **`SANDBOX_NETWORK` (docker path) — now REQUIRED; unset is a refusal.** It used
+   to be optional, and unset meant docker's default bridge, which routes through
+   the host and therefore reaches `169.254.169.254`. Docker has no per-network
+   egress ACL — a user-defined bridge reaches link-local exactly like the default
+   one, and a container without `NET_ADMIN` cannot blackhole the route itself — so
+   confinement there has to come from the host's `DOCKER-USER` chain, which is
+   host state this process cannot see. What `sandboxNetwork()` can honestly check
+   is that an operator NAMED a network, and that the name is not `host` or
+   `container:<id>`; those are the absence of a network, not a choice of one.
+3. **`SANDBOX_RUNTIME_CLASS`.** ONE FIELD, a deployment value, never a fork in
+   code. `gvisor` is live on `code-exec-pool`. The benchmark on this fleet:
+   Firecracker beat gVisor on both latency and memory (git status 82 ms vs
+   980 ms; start 294 ms vs 881 ms; ~57 MiB both), but firecracker-containerd has
+   never cut a release — so that is a deployment choice, not something to encode.
+
+**There are two sandbox execution paths and only one of them runs in
+production.** Kubernetes (cloud `apps/sandbox`) is deployed, confined and
+verified. The docker path has no docker endpoint on `bot-gateway` — no CLI, no
+socket — so `POST /v1/coding-tasks` refuses there rather than running unconfined.
+It exists for the single-binary local case, where docker is the only runtime
+available. Point 2 is what keeps it from ever silently becoming a second
+production path.

@@ -11,6 +11,7 @@ import {
   imageFor,
   runCodingTask,
   sandboxEnv,
+  sandboxNetwork,
   TOOLS,
 } from "./coding-task.js";
 
@@ -360,5 +361,68 @@ describe("sandboxEnv", () => {
 
   it("is empty when neither is set, which is what makes the runtime fail closed", () => {
     expect(sandboxEnv(NEW, OLD)).toBe("");
+  });
+});
+
+// ── the network is required, and unset is a refusal ──────────────────────────
+//
+// It used to be optional. Unset meant docker's default bridge, which routes to
+// the host, and the host answers at 169.254.169.254 — the cloud metadata
+// service. Measured on hanzo-k8s 2026-08-06, `GET /metadata/v1/user-data` there
+// returns 200 with 5983 bytes of node bootstrap material. A sandbox runs
+// untrusted model output, so an optional confinement is no confinement.
+//
+// There is no docker network that is safe by construction: docker has no
+// per-network egress ACL and a user-defined bridge reaches link-local exactly
+// like the default one. So what this can honestly check is that an OPERATOR
+// named a network, and that the named one is not a namespace join — which is
+// the absence of a network, not a choice of one.
+
+describe("sandboxNetwork", () => {
+  const NAMES = ["SANDBOX_NETWORK", "HANZO_CODING_SANDBOX_NETWORK"] as const;
+  const saved: Record<string, string | undefined> = {};
+
+  beforeAll(() => {
+    for (const n of NAMES) {
+      saved[n] = process.env[n];
+    }
+  });
+  afterEach(() => {
+    for (const n of NAMES) {
+      delete process.env[n];
+    }
+  });
+  afterAll(() => {
+    for (const n of NAMES) {
+      if (saved[n] === undefined) {
+        delete process.env[n];
+      } else {
+        process.env[n] = saved[n];
+      }
+    }
+  });
+
+  it("REFUSES when unset — the default bridge reaches cloud metadata", () => {
+    expect(() => sandboxNetwork()).toThrow(/169\.254\.169\.254/);
+  });
+
+  it("refuses the host namespace, which is not a network but the lack of one", () => {
+    process.env.SANDBOX_NETWORK = "host";
+    expect(() => sandboxNetwork()).toThrow(/refused \(host\)/);
+    process.env.SANDBOX_NETWORK = "HOST";
+    expect(() => sandboxNetwork()).toThrow(/refused \(host\)/);
+  });
+
+  it("refuses joining another container's namespace", () => {
+    process.env.SANDBOX_NETWORK = "container:deadbeef";
+    expect(() => sandboxNetwork()).toThrow(/refused \(container_namespace_join\)/);
+  });
+
+  it("accepts a named network, and still accepts the old env name for one release", () => {
+    process.env.SANDBOX_NETWORK = "hanzo-sandbox";
+    expect(sandboxNetwork()).toBe("hanzo-sandbox");
+    delete process.env.SANDBOX_NETWORK;
+    process.env.HANZO_CODING_SANDBOX_NETWORK = "hanzo-sandbox";
+    expect(sandboxNetwork()).toBe("hanzo-sandbox");
   });
 });
