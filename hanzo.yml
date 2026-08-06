@@ -13,39 +13,52 @@
 # `docker buildx build -f "$df" "$ctx"`, which builds the LAST stage. So
 # Dockerfile.box ends with `FROM ${STAGE} AS final`, an alias, and the class is
 # selected here. BuildKit only builds the stages the target depends on, so
-# STAGE=exec never pulls chromium, and the local builder passes the same arg —
-# one selection mechanism, not one for CI and one for a laptop.
+# STAGE=exec never installs a browser, and the local builder passes the same arg
+# — one selection mechanism, not one for CI and one for a laptop.
 #
 # `tag-suffix` is what makes three entries share one repo: the tags come out as
-# box:sha-<short>-exec / -dev / -desktop, and a deployment pins the digest.
+# sandbox:sha-<short>-exec / -dev / -desktop, and a deployment pins the digest.
 #
-# amd64 ONLY, and not by omission — by the constraint one layer down. This image
-# does `COPY --from=<cloud release> /boxd`, and hanzoai/cloud's own image lane
-# (.hanzo/workflows/cicd.yml:552) declares `platforms: linux/amd64`. There is no
-# arm64 manifest to copy from, so declaring arm64 here would not produce an
-# arm64 box — it would produce a red build. DOKS has no arm64 nodes either, so
-# nothing is being given up today. When cloud publishes arm64, this is one line
-# in two files, in that order.
+# THE REPO IS hanzoai/sandbox, NOT hanzoai/box, BECAUSE A CONSUMER NAMES IT.
+# hanzoai/cloud apps/sandbox/runtime.go defaults SANDBOX_IMAGE_REPO to
+# `registry.hanzo.ai/hanzoai/sandbox` and builds `<repo>:<class>[-<tag>]` from
+# it. An image path is only correct relative to who pulls it, and nothing pulls
+# `hanzoai/box`: the daemon design that owned that name was deleted from cloud
+# along with cmd/boxd. One artifact, one path, named by the thing that fetches it.
+#
+# MULTI-ARCH NOW, AND THE BLOCKER IS GONE RATHER THAN WAIVED. This lane was
+# amd64-only for a specific reason, written here: the image did
+# `COPY --from=<cloud release> /boxd`, and cloud's image lane publishes
+# linux/amd64 only, so there was no arm64 manifest to copy a binary out of.
+# That COPY no longer exists — there is no daemon to carry — so this image's
+# inputs are now its own base and its own tarballs, every one of which
+# publishes both arches (verified). DOKS still has no arm64 node, so this buys
+# nothing on the current fleet; it costs a QEMU-emulated second build and it
+# means an arm64 node (or a developer's laptop) is a scheduling decision rather
+# than a rebuild.
 images:
-  - name: box-exec
+  - name: sandbox-exec
     context: .
     dockerfile: Dockerfile.box
-    repo: registry.hanzo.ai/hanzoai/box
+    repo: registry.hanzo.ai/hanzoai/sandbox
     tag-suffix: exec
+    platforms: [linux/amd64, linux/arm64]
     args: { STAGE: exec }
 
-  - name: box-dev
+  - name: sandbox-dev
     context: .
     dockerfile: Dockerfile.box
-    repo: registry.hanzo.ai/hanzoai/box
+    repo: registry.hanzo.ai/hanzoai/sandbox
     tag-suffix: dev
+    platforms: [linux/amd64, linux/arm64]
     args: { STAGE: dev }
 
-  - name: box-desktop
+  - name: sandbox-desktop
     context: .
     dockerfile: Dockerfile.box
-    repo: registry.hanzo.ai/hanzoai/box
+    repo: registry.hanzo.ai/hanzoai/sandbox
     tag-suffix: desktop
+    platforms: [linux/amd64, linux/arm64]
     args: { STAGE: desktop }
 
 # The gate for THIS lane, and deliberately not a second copy of ci.yml.
