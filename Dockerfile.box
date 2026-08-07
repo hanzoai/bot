@@ -455,9 +455,9 @@ ARG HANZO_DEV_SHA256_ARM64=de5c027c7d2eda2afaca3eb92ec06f688ae08b06245c27b620442
 # hanzoai/mcp tags its Rust server `rust-vX.Y.Z` — the repo also ships a
 # TypeScript server under plain `vX.Y.Z`, and the prefix is how the two lineages
 # stay apart in one tag namespace.
-ARG HANZO_MCP_VERSION=1.1.15
-ARG HANZO_MCP_SHA256_AMD64=706231915b5c9d3eaeb6fd3c44588980c3fb794d58db00fbb8a581a11c551e74
-ARG HANZO_MCP_SHA256_ARM64=39cc31f33c3c64259e9f1a8bbfcdcfe886a4ce140e3218f27b386f50dd8d66b2
+ARG HANZO_MCP_VERSION=1.1.23
+ARG HANZO_MCP_SHA256_AMD64=aa2c7b9706ed8f0ffc5a8e3ee5edcf3cc37fa5cbb4bcc2af96fcb68dab14a37d
+ARG HANZO_MCP_SHA256_ARM64=bfe23aed3952a1f02cf45a673426a19248ced84276a9387fefb7933c75183d51
 RUN set -eux; \
     case "${TARGETARCH}" in \
       amd64) csha="${HANZO_CLI_SHA256_AMD64}"; dsha="${HANZO_DEV_SHA256_AMD64}"; msha="${HANZO_MCP_SHA256_AMD64}" ;; \
@@ -620,17 +620,83 @@ RUN set -eux; \
 # to reach from outside. The pod's one channel out stays the Kubernetes exec
 # stream. (The 1.1.12 source still says HTTP on 127.0.0.1; the shipped binary
 # is stdio, and the binary is what runs.)
+#
+# THE CHECK IS `dev` STARTING THE SERVER, not a handshake we write ourselves.
+# The previous version of this block sent its own initialize with
+# protocolVersion "2024-11-05" — the revision the server happens to answer — and
+# asserted tools came back. It could not fail. It passed on an image where `dev`
+# refused the server outright: dev asks for 2025-06-18, hanzo-mcp replied
+# 2024-11-05 to every request whatever was asked, and dev reported `MCP server
+# hanzo failed to start`. Registered, on PATH, 29 tools to a hand probe, and
+# unusable by the only thing that was ever going to use it.
+#
+# A test that picks both sides of a negotiation tests neither. So this runs the
+# agent and reads what the AGENT says about the server. The prompt is never
+# answered — there is no credential in a build, and there must not be — but the
+# MCP servers are started before the model is called, so the pairing has already
+# succeeded or failed by the time the auth error appears. Auth failure is
+# expected and ignored; a server that would not start is the build failing.
 RUN set -eux; \
     dev mcp add hanzo -- hanzo-mcp; \
     dev mcp list | grep -q hanzo-mcp \
       || { echo "dev does not see hanzo-mcp after adding it" >&2; exit 1; }; \
-    printf '%s\n%s\n' \
-      '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"build","version":"1"}}}' \
-      '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
-      | timeout 30 hanzo-mcp > /tmp/mcp.out 2>/dev/null; \
-    grep -q '"tools"' /tmp/mcp.out \
-      || { echo "hanzo-mcp does not answer tools/list over stdio" >&2; exit 1; }; \
-    rm -f /tmp/mcp.out
+    timeout 120 dev exec "reply with the single word ok" >/tmp/pair.out 2>&1 || true; \
+    if grep -q 'MCP server .*failed to start' /tmp/pair.out; then \
+      echo "dev cannot start hanzo-mcp — the agent and the server disagree:" >&2; \
+      grep 'MCP server .*failed to start' /tmp/pair.out >&2; \
+      exit 1; \
+    fi; \
+    rm -f /tmp/pair.out
+
+# ---- The box asks OUR gateway ----------------------------------------------
+# Out of the box `dev` reports `provider: openai, model: gpt-5.3-codex`: a
+# sandbox we ship, running our agent, sending our customers' code to somebody
+# else's endpoint by default. api.hanzo.ai is the one door, so the box names it.
+#
+# NO CREDENTIAL IS BAKED, and none can be. What is written here is the NAME of
+# the variable to read — `env_key` — so the key arrives at run time on the
+# process env and never exists in a layer. An image is a public artifact; a
+# secret in one is published, not configured.
+#
+# `dev mcp add` wrote the MCP entry to this same store, so this appends rather
+# than replaces: the file is dev's and both facts belong in it.
+# The store is found by its CONTENT, not by a path spelled out here. `dev mcp
+# add` has just written the `[mcp_servers.hanzo]` block, so the file holding it
+# is dev's real config wherever dev decided that is — the CLI advertises
+# `~/.code/config.toml` in its help and writes `~/.hanzo/dev/config.toml`, and a
+# path pinned here would survive exactly until one of those changed and then
+# append to a file nothing reads.
+#
+# ORDER IS LOAD-BEARING, and getting it wrong is silent. `model_provider` and
+# `model` are TOP-LEVEL keys; in TOML a bare key written after a `[table]`
+# header belongs to THAT TABLE. Appending them to the end of a file that already
+# contains `[mcp_servers.hanzo]` makes them `mcp_servers.hanzo.model_provider`,
+# which nothing reads — the file looks exactly right and `dev` still reports
+# `provider: openai`. So the bare keys go first and every table after them.
+#
+# The assertion is dev's OWN report, not a grep of the file we just wrote:
+# reading back your own write proves the disk works, not that the program
+# agrees with you.
+RUN set -eux; \
+    cfg="$(grep -rl '^\[mcp_servers\.hanzo\]' "${HOME}" --include=config.toml 2>/dev/null | head -1)"; \
+    [ -n "$cfg" ] || { echo "cannot find the config dev mcp add just wrote" >&2; exit 1; }; \
+    tmp="$(mktemp)"; \
+    { \
+      echo 'model_provider = "hanzo"'; \
+      echo 'model = "zen5-coder"'; \
+      echo ''; \
+      cat "$cfg"; \
+      echo ''; \
+      echo '[model_providers.hanzo]'; \
+      echo 'name = "Hanzo"'; \
+      echo 'base_url = "https://api.hanzo.ai/v1"'; \
+      echo 'env_key = "HANZO_API_KEY"'; \
+    } > "$tmp"; \
+    mv "$tmp" "$cfg"; \
+    timeout 120 dev exec "say ok" > /tmp/prov.out 2>&1 || true; \
+    grep -q '^provider: hanzo' /tmp/prov.out \
+      || { echo "dev still does not name our gateway:" >&2; grep -E '^provider:|^model:' /tmp/prov.out >&2; exit 1; }; \
+    rm -f /tmp/prov.out
 
 WORKDIR /work
 
