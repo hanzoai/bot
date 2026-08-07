@@ -22,7 +22,7 @@
 #
 # hanzoai/ci's image lane has no `target:` field — it runs
 # `docker buildx build -f "$df" "$ctx"`, which builds the LAST stage. So
-# Dockerfile.box ends with `FROM ${STAGE} AS final`, an alias, and the class is
+# Dockerfile.sandbox ends with `FROM ${STAGE} AS final`, an alias, and the class is
 # selected here. BuildKit only builds the stages the target depends on, so
 # STAGE=exec never installs a browser, and the local builder passes the same arg
 # — one selection mechanism, not one for CI and one for a laptop.
@@ -72,7 +72,7 @@
 # So the number comes from docker/sandbox.version: a file whose only subject is
 # this image, changed in the same commit that changes the image.
 # `<file>:<command printing it>` is imgver's own shape — hanzoai/cli's hanzo.yml
-# reads Cargo.toml the same way. Dockerfile.box COPYs that same file to
+# reads Cargo.toml the same way. Dockerfile.sandbox COPYs that same file to
 # /etc/sandbox-version, so a running pod can be asked what it is and cannot
 # disagree with its own tag.
 #
@@ -84,7 +84,7 @@ version: "docker/sandbox.version:cat docker/sandbox.version"
 images:
   - name: sandbox-exec
     context: .
-    dockerfile: Dockerfile.box
+    dockerfile: Dockerfile.sandbox
     repo: registry.hanzo.ai/hanzoai/sandbox
     tag-suffix: exec
     platforms: [linux/amd64]
@@ -92,7 +92,7 @@ images:
 
   - name: sandbox-dev
     context: .
-    dockerfile: Dockerfile.box
+    dockerfile: Dockerfile.sandbox
     repo: registry.hanzo.ai/hanzoai/sandbox
     tag-suffix: dev
     platforms: [linux/amd64]
@@ -100,7 +100,7 @@ images:
 
   - name: sandbox-desktop
     context: .
-    dockerfile: Dockerfile.box
+    dockerfile: Dockerfile.sandbox
     repo: registry.hanzo.ai/hanzoai/sandbox
     tag-suffix: desktop
     platforms: [linux/amd64]
@@ -108,7 +108,7 @@ images:
 
   - name: sandbox-admin
     context: .
-    dockerfile: Dockerfile.box
+    dockerfile: Dockerfile.sandbox
     repo: registry.hanzo.ai/hanzoai/sandbox
     tag-suffix: admin
     platforms: [linux/amd64]
@@ -126,7 +126,7 @@ images:
 # repo and no reason for a box to be unbuildable.
 #
 # What ci.yml does NOT know about is the image this lane exists to publish, so
-# the gate is exactly the assertion that guards it: every base Dockerfile.box
+# the gate is exactly the assertion that guards it: every base Dockerfile.sandbox
 # builds on is pinned by digest, and every FROM in it resolves to a stage or an
 # ARG declared in the same file. That property is what makes two builds of one
 # commit the same bytes, and this lane pushes on pull_request too — so a floating

@@ -234,7 +234,7 @@ step, and they would drift.
 
 ### The image: one browser, two ways to run it
 
-`Dockerfile.box` → `registry.hanzo.ai/hanzoai/sandbox`, four tags on one chain
+`Dockerfile.sandbox` → `registry.hanzo.ai/hanzoai/sandbox`, four tags on one chain
 that forks once: `exec → dev → {desktop, admin}`.
 
 **`admin` is a tag that is NOT a class.** The other three are words a caller puts
@@ -345,7 +345,7 @@ matrix publishes linux-amd64 again this is one version and one checksum.
 
 `docker/sandbox.version` — one file, read twice. `hanzo.yml`'s `version:` key
 turns it into the published `<version>-<class>` tag through `hanzoai/ci`'s
-`imgver`, and `Dockerfile.box` COPYs the same file to `/etc/sandbox-version`, so
+`imgver`, and `Dockerfile.sandbox` COPYs the same file to `/etc/sandbox-version`, so
 a running pod can be asked what it is and cannot disagree with its own tag.
 
 Before this, `imgver` fell back to the build context's manifest — the repo root's
@@ -377,7 +377,7 @@ the producer's shape is not the obvious guess — see below.
 - **The desktop class serves nothing, and the missing piece was never in this
   image.** `command -v x11vnc` is empty and that is deliberate — the VNC server
   here is TigerVNC's `x0vncserver`, from `tigervnc-scraping-server`, chosen over
-  x11vnc for the MSG_PEEK deadlock (see `Dockerfile.box`). What kept port 5900
+  x11vnc for the MSG_PEEK deadlock (see `Dockerfile.sandbox`). What kept port 5900
   unserved was `hanzoai/cloud` `apps/sandbox/runtime.go` setting
   `command: ["sleep","infinity"]` on every pod: a k8s `command` with no `args`
   replaces the image's ENTRYPOINT **and** CMD, so `sandbox-desktop` never ran and
