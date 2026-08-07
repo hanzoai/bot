@@ -538,6 +538,43 @@ RUN set -eux; \
     [ "$(readlink -f "$(command -v hanzo)")" != "$(readlink -f "$(command -v dev)")" ] \
       || { echo "hanzo and dev are the same file again" >&2; exit 1; }
 
+# ---- The agent gets tools, not a shell and a hope --------------------------
+# Both binaries were already here and neither knew about the other. `dev` ran
+# with its own built-ins; `hanzo-mcp` — fetch, browser, git, exec, fs, search —
+# sat on PATH and nothing ever launched it. Measured in a live pod before this:
+# `dev mcp list` said "No MCP servers configured yet."
+#
+# One line of config is the whole fix, and it belongs HERE rather than in an
+# orchestrator. A run that has to be told where its tools are is a run that has
+# them only when the caller remembers; putting it in the image means every
+# sandbox of this class has them, on both execution paths, with no code in
+# either. The dev and desktop classes carry both binaries, so this is exactly
+# the layer where the fact is true.
+#
+# `dev mcp add` AND NOT A HAND-WRITTEN FILE. The store is dev's, so dev names
+# it: the CLI's help text advertises `~/.code/config.toml` and it actually
+# writes `~/.hanzo/dev/config.toml` — a file written to the documented path is
+# silently ignored, which is how this looked configured while being empty. Ask
+# the tool and the path cannot be wrong or go stale under a rename.
+#
+# STDIO, because that is what the server speaks. hanzo-mcp 1.1.15 is JSON-RPC
+# over stdin/stdout — it binds no port and listens on nothing, so the tool
+# channel is a pipe between two processes in one pod and there is nothing on it
+# to reach from outside. The pod's one channel out stays the Kubernetes exec
+# stream. (The 1.1.12 source still says HTTP on 127.0.0.1; the shipped binary
+# is stdio, and the binary is what runs.)
+RUN set -eux; \
+    dev mcp add hanzo -- hanzo-mcp; \
+    dev mcp list | grep -q hanzo-mcp \
+      || { echo "dev does not see hanzo-mcp after adding it" >&2; exit 1; }; \
+    printf '%s\n%s\n' \
+      '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"build","version":"1"}}}' \
+      '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
+      | timeout 30 hanzo-mcp > /tmp/mcp.out 2>/dev/null; \
+    grep -q '"tools"' /tmp/mcp.out \
+      || { echo "hanzo-mcp does not answer tools/list over stdio" >&2; exit 1; }; \
+    rm -f /tmp/mcp.out
+
 WORKDIR /work
 
 
