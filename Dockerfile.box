@@ -27,9 +27,10 @@
 # else. The cut is on RUNTIME cost, which is the thing that is actually paid per
 # pod:
 #
-#   exec     full toolchain AND a headless browser, `sleep infinity`, nothing
-#            running.
-#   dev      the same, plus the agent CLIs `tool` can name. Still nothing running.
+#   exec     full toolchain, a headless browser AND the three Hanzo binaries
+#            (hanzo, dev, hanzo-mcp), `sleep infinity`, nothing running.
+#   dev      the same, plus the THIRD-PARTY agent CLIs `tool` can name — claude
+#            and codex — and gh. Still nothing running.
 #   desktop  plus Xvfb + a window manager + a VNC server + noVNC — four
 #            processes on EVERY desktop pod, whether or not anyone looks at the
 #            screen. That is the only difference here that costs at runtime, so
@@ -368,79 +369,33 @@ RUN set -eux; \
 RUN mkdir -p /work /home/sandbox/go /home/sandbox/.cargo \
   && chown -R sandbox:sandbox /work /home/sandbox
 
-# THE IMAGE SAYS ITS OWN VERSION, and it is the SAME file the tag comes from.
-# docker/sandbox.version is read twice — by hanzoai/ci's imgver, which turns it
-# into the published `<version>-<class>` tag, and by this COPY, which puts it
-# where a running pod can be asked. One number, one file, two readers; there is
-# no second place for the tag and the contents to disagree.
-#
-# WHY THE IMAGE NEEDED ITS OWN NUMBER AT ALL. It used to inherit this repo's
-# package.json — bot's version, 2026.6.7, last bumped 2026-06-07 — so a rebuild
-# on 2026-08-06 republished `2026.6.7-desktop` from source two months newer.
-# Measured: `2026.6.7-desktop` and `sha-d190451-amd64-desktop` are one digest,
-# sha256:7a41f69f…. A tag that gets rewritten is not a pin, and one that LOOKS
-# pinned is worse than `latest`, which at least admits what it is. This number
-# belongs to the IMAGE and moves when the image does — so 1.0.0 is a fresh
-# series, deliberately not a continuation of a number that was never ours. The
-# old 2026.6.7-* tags stay in the registry as archaeology.
-COPY docker/sandbox.version /etc/sandbox-version
-
-USER sandbox
-WORKDIR /work
-
-# tini reaps. A sandbox is a long-lived PID 1 whose children are compilers,
-# language servers and test runners started by `kubectl exec`; without a reaper
-# their zombies accumulate for the life of the pod.
-#
-# IT ONLY REAPS IF IT IS PID 1, and that is decided OUTSIDE this file: a
-# Kubernetes container `command:` replaces ENTRYPOINT *and* CMD together, so a
-# pod spec that names `sleep infinity` gets sleep as PID 1 and no reaper at all.
-# hanzoai/cloud apps/sandbox/runtime.go therefore names neither, and lets the
-# image below say what each class runs. Measured before that change: `cat
-# /proc/1/cmdline` in a live desktop pod answered `sleep infinity`.
-ENTRYPOINT ["/usr/bin/tini", "--"]
-
-# `sleep infinity`, and this is the whole design. The pod is the sandbox; every
-# command arrives through the Kubernetes exec subresource. Nothing in here
-# listens, so there is no in-pod surface to authenticate, rate-limit or forget
-# to authenticate.
-CMD ["sleep", "infinity"]
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# dev — exec plus the agent that does the work and the tools it shells out to.
-# ─────────────────────────────────────────────────────────────────────────────
-FROM exec AS dev
-
-USER root
-
-# Re-declared: an ARG is scoped to the stage that declares it, and `exec`'s
-# TARGETARCH does not survive into this one. Without this line ${TARGETARCH}
-# below expands to the empty string and the gh download 404s.
-ARG TARGETARCH
-
-# Pinned, never floating. npm dist-tags.latest as of 2026-08-06.
-ARG GH_VERSION=2.97.0
-
-# THE TWO npm AGENT CLIs ARE ONE INSTALL BECAUSE `tool` IS ONE FIELD.
-# A run names its tool — dev | claude | codex | python | node — and the runner
-# turns that name into an argv. `python` and `node` are already here from the
-# exec stage; `dev` is the native binary below. If `claude` and `codex` were not
-# here, the enum would be values that work and values that answer "command not
-# found" at the far end of a scheduled pod, which is a worse failure than not
-# offering them: the caller gets a run that starts, burns its timeout and
-# produces nothing. These two are npm products; ours are not.
-ARG CLAUDE_VERSION=2.1.223
-ARG CODEX_VERSION=0.146.1
-
-RUN set -eux; \
-    npm install -g \
-      "@anthropic-ai/claude-code@${CLAUDE_VERSION}" \
-      "@openai/codex@${CODEX_VERSION}"; \
-    npm cache clean --force; \
-    rm -rf /root/.npm /tmp/*
-
 # ---- The three Hanzo binaries ----------------------------------------------
+# THEY LIVE IN `exec`, WHICH IS THE CLASS EVERY CALLER GETS BY DEFAULT.
+# hanzoai/cloud apps/sandbox/api.go defaults an unnamed class to `exec`, and
+# these were in `dev` — so the sandbox a caller actually got had no agent in it.
+# Measured in a live production pod: `command -v hanzo`, `dev` and `hanzo-mcp`
+# were all empty, while node, go, rustc, bun, deno and zig were all present. A
+# box with six compilers and no agent is not an agentic sandbox.
+#
+# THE OTHER REPAIR — defaulting the class to `dev` — COSTS 8x MORE AND IS WRONG.
+# `exec` is not the small fast class; nothing here is small. Measured from
+# kubelet's own image accounting on the live nodes:
+#
+#   exec  1,509,851,245 B      dev  1,791,506,510 B      delta 281,655,265 B
+#
+# Of that 282 MB delta, these three binaries are 36 MB — 4.7 MB hanzo,
+# 24.9 MB dev, 6.6 MB hanzo-mcp, as published (linux-amd64, already gzipped).
+# The other 246 MB is claude-code and codex, which unpack to 290 MB and 366 MB
+# and are third-party CLIs the `tool` enum names. So putting OUR agent in the
+# default class costs +2.4% on a 1.5 GB image, and moving the default to `dev`
+# would have made every short function invoke pull the two npm agents as well.
+# The cheap half of the delta is the half that makes the box agentic; the
+# expensive half stays in `dev`, where a caller asks for it by name.
+#
+# It is also the LAST layer of `exec` on purpose: the agents version far faster
+# than the toolchain, so an agent bump rebuilds and re-pulls ~36 MB instead of
+# invalidating the 1.5 GB of compilers beneath it.
+#
 # THREE PRODUCTS, THREE BINARIES, ONE FETCH RULE. They are not three spellings
 # of one thing:
 #
@@ -512,6 +467,95 @@ RUN set -eux; \
       rm -f /tmp/h.tar.gz "/tmp/${bin}"; \
     done; \
     hanzo --version; dev --version; hanzo-mcp --version
+
+# THE IMAGE SAYS ITS OWN VERSION, and it is the SAME file the tag comes from.
+# docker/sandbox.version is read twice — by hanzoai/ci's imgver, which turns it
+# into the published `<version>-<class>` tag, and by this COPY, which puts it
+# where a running pod can be asked. One number, one file, two readers; there is
+# no second place for the tag and the contents to disagree.
+#
+# WHY THE IMAGE NEEDED ITS OWN NUMBER AT ALL. It used to inherit this repo's
+# package.json — bot's version, 2026.6.7, last bumped 2026-06-07 — so a rebuild
+# on 2026-08-06 republished `2026.6.7-desktop` from source two months newer.
+# Measured: `2026.6.7-desktop` and `sha-d190451-amd64-desktop` are one digest,
+# sha256:7a41f69f…. A tag that gets rewritten is not a pin, and one that LOOKS
+# pinned is worse than `latest`, which at least admits what it is. This number
+# belongs to the IMAGE and moves when the image does — so 1.0.0 is a fresh
+# series, deliberately not a continuation of a number that was never ours. The
+# old 2026.6.7-* tags stay in the registry as archaeology.
+COPY docker/sandbox.version /etc/sandbox-version
+
+USER sandbox
+
+# The agent is on PATH for the user that will actually run it, and `hanzo` is
+# not `dev`. Checked HERE, in the default class, because this is the class a
+# caller gets without asking — the `dev` stage repeats it over its own larger
+# surface. The symlink check is the specific regression it catches: installing
+# the agent from npm put one dev.js at both names, so the cloud CLI silently
+# became the coding agent and no `hanzo` command existed at all.
+RUN set -eux; \
+    hanzo --version; dev --version; hanzo-mcp --version; \
+    [ "$(readlink -f "$(command -v hanzo)")" != "$(readlink -f "$(command -v dev)")" ] \
+      || { echo "hanzo and dev are the same file again" >&2; exit 1; }
+
+WORKDIR /work
+
+# tini reaps. A sandbox is a long-lived PID 1 whose children are compilers,
+# language servers and test runners started by `kubectl exec`; without a reaper
+# their zombies accumulate for the life of the pod.
+#
+# IT ONLY REAPS IF IT IS PID 1, and that is decided OUTSIDE this file: a
+# Kubernetes container `command:` replaces ENTRYPOINT *and* CMD together, so a
+# pod spec that names `sleep infinity` gets sleep as PID 1 and no reaper at all.
+# hanzoai/cloud apps/sandbox/runtime.go therefore names neither, and lets the
+# image below say what each class runs. Measured before that change: `cat
+# /proc/1/cmdline` in a live desktop pod answered `sleep infinity`.
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+# `sleep infinity`, and this is the whole design. The pod is the sandbox; every
+# command arrives through the Kubernetes exec subresource. Nothing in here
+# listens, so there is no in-pod surface to authenticate, rate-limit or forget
+# to authenticate.
+CMD ["sleep", "infinity"]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# dev — exec plus the THIRD-PARTY agents, and gh to propose the work.
+#
+# Our own agent is not here; it is in `exec`, because `exec` is what a caller
+# gets by default and a default sandbox with no agent is the whole defect this
+# stage boundary used to cause. What is left here is the 246 MB that is somebody
+# else's product — claude and codex — which a caller asks for by naming `dev`.
+# ─────────────────────────────────────────────────────────────────────────────
+FROM exec AS dev
+
+USER root
+
+# Re-declared: an ARG is scoped to the stage that declares it, and `exec`'s
+# TARGETARCH does not survive into this one. Without this line ${TARGETARCH}
+# below expands to the empty string and the gh download 404s.
+ARG TARGETARCH
+
+# Pinned, never floating. npm dist-tags.latest as of 2026-08-06.
+ARG GH_VERSION=2.97.0
+
+# THE TWO npm AGENT CLIs ARE ONE INSTALL BECAUSE `tool` IS ONE FIELD.
+# A run names its tool — dev | claude | codex | python | node — and the runner
+# turns that name into an argv. `python` and `node` are already here from the
+# exec stage; `dev` is the native binary below. If `claude` and `codex` were not
+# here, the enum would be values that work and values that answer "command not
+# found" at the far end of a scheduled pod, which is a worse failure than not
+# offering them: the caller gets a run that starts, burns its timeout and
+# produces nothing. These two are npm products; ours are not.
+ARG CLAUDE_VERSION=2.1.223
+ARG CODEX_VERSION=0.146.1
+
+RUN set -eux; \
+    npm install -g \
+      "@anthropic-ai/claude-code@${CLAUDE_VERSION}" \
+      "@openai/codex@${CODEX_VERSION}"; \
+    npm cache clean --force; \
+    rm -rf /root/.npm /tmp/*
 
 # gh, for the forge and for GitHub. `git` alone cannot open a PR, and an agent
 # that can commit but not propose is half a workflow.
