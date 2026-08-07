@@ -12,12 +12,20 @@
 # name the fleet pulls it by, and the registry path is the one that has to
 # match a consumer.
 #
-# ONE recipe, three published tags, one chain:
+# ONE recipe, four published tags, one chain that forks once:
 #
-#   exec  ──▶  dev  ──▶  desktop
+#   exec  ──▶  dev  ──┬──▶  desktop
+#                     └──▶  admin
 #
-# Each tag is a CLASS in apps/sandbox/runtime.go's imageFor(), and the class is
-# also the pod label. One vocabulary for the three things.
+# Three of them are a CLASS in apps/sandbox/runtime.go's imageFor() — the word a
+# caller asks for, the pod label and the tag, all one vocabulary.
+#
+# `admin` IS A TAG AND NOT A CLASS, and that difference is the whole point of it.
+# Nobody asks for it: a SuperAdmin's `dev` sandbox runs it and everybody else's
+# `dev` sandbox runs `dev`. Which bytes you get is a fact about WHO IS ASKING,
+# and a fact about the asker has no business being a word in the request — a
+# fourth class would be a field every caller could set, which is the opposite of
+# what this image is for.
 #
 # WHERE THE THREE ARE CUT, AND WHY IT IS NOT WHERE YOU WOULD GUESS.
 # Not on disk. Image layers are shared per NODE, so `exec` being a strict layer
@@ -35,6 +43,11 @@
 #            processes on EVERY desktop pod, whether or not anyone looks at the
 #            screen. That is the only difference here that costs at runtime, so
 #            it is the only place a class boundary earns its keep.
+#   admin    plus zsh, kubectl and doctl. Still nothing running, and still
+#            nothing PRIVILEGED: three binaries with no credential between them.
+#            It is a separate tag rather than three more packages in `dev`
+#            because a fleet client on every tenant's box is a tool nobody there
+#            asked for, not because the tools are dangerous on their own.
 #
 # THE BROWSER IS IN `exec`, NOT IN `desktop`, and that follows from the same
 # rule. `desktop` does not ADD a browser; it adds a SCREEN for the browser that
@@ -711,6 +724,107 @@ EXPOSE 5900 6080
 # accepts a command that runs code, and work still arrives only through the
 # Kubernetes exec subresource, exactly as it does for the other two classes.
 CMD ["sandbox-desktop"]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# admin — the operator's box. dev, plus the two clients that talk to the fleet
+# and a shell worth sitting in.
+#
+# LAYERED ON dev AND NOT ON desktop, so `dev` is the one class it substitutes
+# for. That is not a preference: hanzoai/cloud swaps this image in for a
+# SuperAdmin's `dev` sandbox and leaves `exec` and `desktop` alone, and a
+# substitute has to be a superset of the thing it replaces or the swap changes
+# what the class MEANS. exec stays the throwaway; desktop keeps its screen.
+#
+# IT SHIPS THE CLIENTS AND NOT THE CREDENTIALS, and that is the property that
+# makes the rest of this simple. kubectl with no kubeconfig and doctl with no
+# token reach nothing at all — they are argument parsers until something hands
+# the POD a credential, and what a pod is handed is decided at runtime by the
+# identity that leased it. So this image confers no authority over anything, and
+# "who may pull it" is a question about bandwidth rather than about access.
+#
+# THAT INVARIANT IS LOAD-BEARING AND MUST NOT BE TRADED AWAY. A kubeconfig or a
+# DO token baked in here would be a credential published to a registry, readable
+# by anyone who can pull one layer, and it would move the boundary from an
+# identity check to an image name — where there is no identity to check.
+# ─────────────────────────────────────────────────────────────────────────────
+FROM dev AS admin
+
+USER root
+
+# Re-declared: an ARG is scoped to the stage that declares it, the same reason
+# `dev` re-declares it for the gh download two stages up.
+ARG TARGETARCH
+
+# kubectl ON THE 1.35 LINE, WHICH IS NOT `stable`. kubectl is supported within
+# one minor of the apiserver it talks to, and the fleet runs 1.34 — measured on
+# do-sfo3-hanzo-k8s: v1.34.1. Today's `stable.txt` says 1.36, which is two
+# minors out and would be unsupported against every cluster this box exists to
+# reach. `stable.txt` is also a moving name, and this file resolves no moving
+# names by design. When DOKS moves, this is one version and two checksums.
+ARG KUBECTL_VERSION=1.35.7
+ARG KUBECTL_SHA256_AMD64=12e97f9d23a9f6cbb87b89becd6bd291e1a858a3379a4e11e2c822c4c1530052
+ARG KUBECTL_SHA256_ARM64=5103d45b8881434d417694057b8ccb5ae79fd310a5c5c13e403c5e62e15909be
+
+# doctl, for the parts of the fleet that are not in a cluster — registries,
+# databases, spaces, the load balancers in front of all three.
+ARG DOCTL_VERSION=1.166.0
+ARG DOCTL_SHA256_AMD64=1596424b64091a7939bde561daf2402ca8a141966429928e688d20d17091ec89
+ARG DOCTL_SHA256_ARM64=a9857d2ef4498f6affb9baae2b37b890ccc4ddda9ec01e58b63a2e99e47eb363
+
+# Two publishers, two shapes, one rule: verify the bytes before running them.
+# kubectl is a bare binary with its checksum published beside it; doctl is a
+# tarball. Neither checksum is fetched from the host that serves the artifact —
+# that would prove the transport and not the bytes we agreed to ship. Both were
+# read from the publisher on 2026-08-07.
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      amd64) ksha="${KUBECTL_SHA256_AMD64}"; dsha="${DOCTL_SHA256_AMD64}" ;; \
+      arm64) ksha="${KUBECTL_SHA256_ARM64}"; dsha="${DOCTL_SHA256_ARM64}" ;; \
+      *) echo "unsupported TARGETARCH=${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSLo /tmp/kubectl \
+      "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl"; \
+    echo "${ksha}  /tmp/kubectl" | sha256sum -c -; \
+    install -m 0755 /tmp/kubectl /usr/local/bin/kubectl; \
+    curl -fsSLo /tmp/doctl.tar.gz \
+      "https://github.com/digitalocean/doctl/releases/download/v${DOCTL_VERSION}/doctl-${DOCTL_VERSION}-linux-${TARGETARCH}.tar.gz"; \
+    echo "${dsha}  /tmp/doctl.tar.gz" | sha256sum -c -; \
+    tar -xzf /tmp/doctl.tar.gz -C /tmp doctl; \
+    install -m 0755 /tmp/doctl /usr/local/bin/doctl; \
+    rm -f /tmp/kubectl /tmp/doctl /tmp/doctl.tar.gz; \
+    kubectl version --client=true; doctl version
+
+# zsh, from apt, on the distro's security-update track — the same reason python,
+# ruby and php come from apt down in `exec` rather than from a hand-fetched
+# tarball. tmux is already here from that stage: one multiplexer, installed
+# once, and a terminal in ANY class can name a session.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends zsh \
+  && rm -rf /var/lib/apt/lists/*
+
+# The shell's config is SYSTEM-WIDE, at the path zsh reads for every interactive
+# shell. A ~/.zshrc would be the same file somewhere a fresh home directory, a
+# `su` or a HOME override stops reading — and the only volume a sandbox mounts
+# is /work, so a home directory here is the image's own. See docker/zshrc for
+# what is in it and, more to the point, what is not: there is no framework.
+COPY docker/zshrc /etc/zsh/zshrc
+
+USER sandbox
+
+# Prove it, as the user that will run it. The last line is the one that matters:
+# it asserts /etc/zsh/zshrc was actually READ, not merely that zsh runs — a
+# system rc with a syntax error is a file zsh skips with a warning nobody sees
+# until every terminal in the fleet has no history and no completion.
+#
+# Running it here also builds the completion dump into the layer, so the first
+# prompt in a live pod does not pay to compile one.
+RUN set -eux; \
+    for b in zsh tmux kubectl doctl hanzo dev hanzo-mcp gh git; do command -v "$b"; done; \
+    [ "$(zsh -ic 'print -rn -- ${HISTSIZE}')" = "100000" ]; \
+    [ -s "${HOME}/.zcompdump" ]
+
+WORKDIR /work
 
 
 # ─────────────────────────────────────────────────────────────────────────────

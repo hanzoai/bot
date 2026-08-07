@@ -121,6 +121,46 @@ describe("docker base image pinning", () => {
     );
   });
 
+  it("builds every stage hanzo.yml selects, under its own tag", async () => {
+    // The lane and the recipe agree, or they fail apart SILENTLY. hanzoai/ci
+    // passes `args.STAGE` to `FROM ${STAGE} AS final` and tags the result with
+    // `tag-suffix`; nothing checks that the two words are the same word, and
+    // nothing checks that the stage exists. A typo in either place publishes a
+    // real image under a name that means something else — `admin` built from
+    // `desktop`, or a `STAGE` BuildKit resolves to nothing at all.
+    //
+    // It matters most for `admin`, which is the one tag no caller can ask for:
+    // hanzoai/cloud substitutes it in for one identity, so a wrong image here
+    // reaches exactly the person with the fewest reasons to double-check it.
+    const dockerfile = await readFile(resolve(repoRoot, "Dockerfile.box"), "utf8");
+    const stages = new Set(
+      [...dockerfile.matchAll(/^FROM\s+\S+\s+AS\s+(\w+)$/gm)].map(([, s]) => s),
+    );
+
+    const hanzoYml = parse(await readFile(resolve(repoRoot, "hanzo.yml"), "utf8")) as {
+      images?: { name?: string; dockerfile?: string; "tag-suffix"?: string; args?: { STAGE?: string } }[];
+    };
+    const box = (hanzoYml.images ?? []).filter((i) => i.dockerfile === "Dockerfile.box");
+    expect(box.length, "hanzo.yml should publish the box image").toBeGreaterThan(0);
+
+    for (const image of box) {
+      const stage = image.args?.STAGE;
+      expect(stage, `${image.name} must select a stage`).toBeDefined();
+      expect(stages.has(stage as string), `STAGE ${stage} is not a stage in Dockerfile.box`).toBe(
+        true,
+      );
+      expect(image["tag-suffix"], `${image.name} must publish the stage it builds`).toBe(stage);
+    }
+
+    // The operator's box is published, or the substitution in hanzoai/cloud
+    // resolves to a tag nothing ever pushed and a SuperAdmin's `dev` sandbox is
+    // an ImagePullBackOff.
+    expect(
+      box.map((i) => i.args?.STAGE),
+      "the admin image has a consumer (cloud apps/sandbox/runtime.go imageFor)",
+    ).toContain("admin");
+  });
+
   it("keeps Dependabot Docker updates enabled for root Dockerfiles", async () => {
     const raw = await readFile(resolve(repoRoot, ".github/dependabot.yml"), "utf8");
     const config = parse(raw) as DependabotConfig;
