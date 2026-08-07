@@ -61,7 +61,13 @@ services:
       HANZO_AGENTS_IAM_CLIENT_ID: hanzo-bot
       HANZO_AGENTS_IAM_ORGANIZATION: hanzo
       HANZO_AGENTS_IAM_APPLICATION: app-hanzobot
-      IAM_CLIENT_SECRET: 0de7acbc7b9fd070dc7f514e12dafa708b35d70f
+      # Never inline a value here: this repo is public. This is the CONFIDENTIAL
+      # half of the hanzo-bot registration on production hanzo.id — whoever holds
+      # it can redeem an auth code as this app, so a literal here is a live
+      # credential published to anyone who reads the file. It can only arrive
+      # from the environment. Source of truth is KMS: project hanzo, env prod,
+      # path /bot, key IAM_CLIENT_SECRET.
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET:-}
       # CORS — allow local dev origins
       AGENTS_API_CORS_ALLOWED_ORIGINS: "http://localhost:8080,http://localhost:3000,http://localhost:18789,http://localhost:8000"
     ports:
