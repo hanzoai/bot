@@ -91,21 +91,31 @@ type ChannelPlugin = {
 
 One way, and it runs on our own stack:
 
-    push  ->  github.com/hanzoai/bot            (a mirror)
-              .github/workflows/sync.yml         carries refs onward
-      ->  git.hanzo.ai/hanzoai/bot               CANONICAL
+    push  ->  github.com/hanzoai/bot            the ONLY ref you can write
+      ->  git.hanzo.ai/hanzoai/bot               CANONICAL, and read-only
               .hanzo/workflows/ci.yml            the checks
               .hanzo/workflows/deploy.yml        builds ghcr.io/hanzoai/bot
               .hanzo/workflows/cloud.yml         builds ghcr.io/hanzoai/bot-cloud
+              .hanzo/workflows/cicd.yml          builds registry.hanzo.ai/hanzoai/sandbox
               .hanzo/workflows/release.yml       publishes npm @hanzo/bot
       ->  hanzoai/universe crs/bot-gateway.yaml  names the tag that is live
       ->  hanzoai/operator                       reconciles the App
       ->  hanzoai/ingress serves bot.hanzo.ai, gw.hanzo.bot, market.hanzo.bot
 
-**git.hanzo.ai is canonical; GitHub is a mirror.** `.github/workflows/` holds
-exactly one file, `sync.yml`, and its only job is getting refs to the forge.
-Every build, check and release is a workflow under `.hanzo/workflows/`, which the
-forge reads. `.hanzo/workflows` uses GitHub Actions syntax, so a workflow moves
+**git.hanzo.ai is canonical; GitHub is a mirror.** Every build, check and release
+is a workflow under `.hanzo/workflows/`, which the forge reads.
+
+PUSH TO GITHUB. THE FORGE PULLS, AND IT WILL REFUSE YOU IF YOU TRY.
+`git push forge main` answers `Mirror Repository hanzoai/bot is read-only`,
+because the forge side is a PULL mirror: it fetches from GitHub on its own clock
+and no one writes to it. So "canonical" here means the forge is what the fleet
+reads and where every check runs — not that it is where a commit lands first.
+
+There is no `sync.yml` and there never needs to be one; `.github/workflows/` is
+EMPTY. Nothing in this repo carries refs onward because the mirror is configured
+on the forge, against the repository, where no file here can describe it. Confirm
+a push arrived with `git ls-remote forge main` rather than by looking for a
+workflow that was never written. `.hanzo/workflows` uses GitHub Actions syntax, so a workflow moves
 between the two by changing directory and nothing else — `runs-on` included: the
 git-runner advertises `hanzo-build-linux-amd64` alongside `ubuntu-latest`,
 `self-hosted`, `linux` and `amd64`.
