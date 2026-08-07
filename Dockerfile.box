@@ -630,23 +630,15 @@ RUN set -eux; \
 # hanzo failed to start`. Registered, on PATH, 29 tools to a hand probe, and
 # unusable by the only thing that was ever going to use it.
 #
-# A test that picks both sides of a negotiation tests neither. So this runs the
-# agent and reads what the AGENT says about the server. The prompt is never
-# answered — there is no credential in a build, and there must not be — but the
-# MCP servers are started before the model is called, so the pairing has already
-# succeeded or failed by the time the auth error appears. Auth failure is
-# expected and ignored; a server that would not start is the build failing.
+# A test that picks both sides of a negotiation tests neither. The real check —
+# running the agent and reading what the AGENT says about the server — lives in
+# the probe below, together with the provider assertion, because both facts come
+# from one `dev` run and splitting them would run the agent twice to learn two
+# halves of one answer. Registering is all that happens here.
 RUN set -eux; \
     dev mcp add hanzo -- hanzo-mcp; \
     dev mcp list | grep -q hanzo-mcp \
-      || { echo "dev does not see hanzo-mcp after adding it" >&2; exit 1; }; \
-    timeout 120 dev exec "reply with the single word ok" >/tmp/pair.out 2>&1 || true; \
-    if grep -q 'MCP server .*failed to start' /tmp/pair.out; then \
-      echo "dev cannot start hanzo-mcp — the agent and the server disagree:" >&2; \
-      grep 'MCP server .*failed to start' /tmp/pair.out >&2; \
-      exit 1; \
-    fi; \
-    rm -f /tmp/pair.out
+      || { echo "dev does not see hanzo-mcp after adding it" >&2; exit 1; }
 
 # ---- The box asks OUR gateway ----------------------------------------------
 # Out of the box `dev` reports `provider: openai, model: gpt-5.3-codex`: a
@@ -677,6 +669,15 @@ RUN set -eux; \
 # The assertion is dev's OWN report, not a grep of the file we just wrote:
 # reading back your own write proves the disk works, not that the program
 # agrees with you.
+#
+# `--skip-git-repo-check`, AND WITHOUT IT THIS PROBE TESTS NOTHING. `dev exec`
+# refuses to run outside a git repo — "Not inside a trusted directory" — and
+# exits before it prints a banner or starts a single MCP server. WORKDIR here is
+# /work, which is empty. A probe that only greps for a FAILURE string therefore
+# passes on that refusal, having tested nothing at all; that is the same shape of
+# can't-fail check as the hand-written handshake this replaced. So the provider
+# line is asserted POSITIVELY first: if dev did not get far enough to name a
+# provider, nothing after it was exercised and the build says so.
 RUN set -eux; \
     cfg="$(grep -rl '^\[mcp_servers\.hanzo\]' "${HOME}" --include=config.toml 2>/dev/null | head -1)"; \
     [ -n "$cfg" ] || { echo "cannot find the config dev mcp add just wrote" >&2; exit 1; }; \
@@ -693,10 +694,18 @@ RUN set -eux; \
       echo 'env_key = "HANZO_API_KEY"'; \
     } > "$tmp"; \
     mv "$tmp" "$cfg"; \
-    timeout 120 dev exec "say ok" > /tmp/prov.out 2>&1 || true; \
-    grep -q '^provider: hanzo' /tmp/prov.out \
-      || { echo "dev still does not name our gateway:" >&2; grep -E '^provider:|^model:' /tmp/prov.out >&2; exit 1; }; \
-    rm -f /tmp/prov.out
+    timeout 120 dev exec --skip-git-repo-check "say ok" > /tmp/probe.out 2>&1 || true; \
+    grep -q '^provider: hanzo' /tmp/probe.out \
+      || { echo "dev did not get far enough to name a provider, so nothing below was tested:" >&2; \
+           head -20 /tmp/probe.out >&2; exit 1; }; \
+    grep -q '^model: zen5-coder' /tmp/probe.out \
+      || { echo "dev names a model that is not ours:" >&2; grep '^model:' /tmp/probe.out >&2; exit 1; }; \
+    if grep -q 'MCP server .*failed to start' /tmp/probe.out; then \
+      echo "dev cannot start hanzo-mcp — the agent and the server disagree:" >&2; \
+      grep 'MCP server .*failed to start' /tmp/probe.out >&2; \
+      exit 1; \
+    fi; \
+    rm -f /tmp/probe.out
 
 WORKDIR /work
 
