@@ -1,0 +1,54 @@
+# The interactive shell every terminal in the admin box gets.
+#
+# SYSTEM-WIDE AND NOT A DOTFILE. zsh reads this for every interactive shell
+# whatever $HOME turns out to be, and $HOME here is the image's own
+# /home/sandbox — the only volume a sandbox mounts is /work. A ~/.zshrc would
+# be the same file at a path that one `su`, one HOME override or one fresh home
+# directory silently stops reading.
+#
+# NO FRAMEWORK. oh-my-zsh is a git clone and three hundred files to arrive at a
+# prompt, a completion call and some history options. Every line below is zsh's
+# own — vcs_info and compinit ship with the shell — and the whole thing is
+# shorter than the framework's installer.
+
+# History. Terminals here are reattachable and there can be several at once
+# (tmux, one session per pane), so the file is shared and APPENDED: the last
+# shell to exit adds to the history rather than becoming it.
+HISTFILE=${HOME}/.zsh_history
+HISTSIZE=100000
+SAVEHIST=100000
+setopt append_history share_history extended_history \
+       hist_ignore_dups hist_ignore_space hist_reduce_blanks
+
+setopt interactive_comments   # `# note` at a prompt is a comment, not a command
+setopt no_beep
+unsetopt flow_control         # ^S and ^Q are keys, not a way to freeze the terminal
+
+# Completion. compinit is zsh's own; the dump is generated at build time so the
+# first prompt in a pod does not pay to build it.
+autoload -Uz compinit && compinit
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+
+# The prompt says who, WHERE — the pod's own name, which is the fact an operator
+# with four terminals open actually needs — and the branch when the directory is
+# a checkout. vcs_info is the shell's; a framework would add a git process per
+# prompt to answer the same question.
+autoload -Uz vcs_info add-zsh-hook
+zstyle ':vcs_info:git:*' formats ' %F{yellow}%b%f'
+add-zsh-hook precmd vcs_info
+setopt prompt_subst
+PROMPT='%F{cyan}%n@%m%f %F{blue}%~%f${vcs_info_msg_0_} %(?..%F{red})%#%f '
+
+# emacs keys, and Up/Down search the history for what is already typed rather
+# than walking every command ever run.
+bindkey -e
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey '^[[A' up-line-or-beginning-search
+bindkey '^[[B' down-line-or-beginning-search
+
+# Colour from the tools that already have it.
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
