@@ -234,8 +234,36 @@ step, and they would drift.
 
 ### The image: one browser, two ways to run it
 
-`Dockerfile.box` → `registry.hanzo.ai/hanzoai/sandbox`, three tags on one chain
-`exec → dev → desktop`.
+`Dockerfile.box` → `registry.hanzo.ai/hanzoai/sandbox`, four tags on one chain
+that forks once: `exec → dev → {desktop, admin}`.
+
+**`admin` is a tag that is NOT a class.** The other three are words a caller puts
+in a request; `admin` is one nobody can ask for. hanzoai/cloud substitutes it for
+a **SuperAdmin's** `dev` sandbox (`apps/sandbox/runtime.go` `imageFor(class,
+super)`, predicate `principal.IsSuperAdmin`) and leaves every other caller's
+`dev` exactly as it was. Which bytes you get is a fact about the caller, so a
+fourth class would be the one thing it must not be: a field every caller can set.
+
+It adds zsh, kubectl and doctl to `dev`. **It adds no credential, and that is
+load-bearing** — kubectl with no kubeconfig and doctl with no token are argument
+parsers, so the image confers no authority and "who may pull it" is a bandwidth
+question rather than an access one. Any future credential must reach the **pod**
+from the identity that leased it, never a layer in a registry.
+
+Layered on `dev` because a substitute has to be a superset of what it replaces:
+`exec` stays the throwaway a tool call spends fifteen minutes in, and `desktop`
+keeps the screen `admin` has no X server for. kubectl is pinned on the **1.35**
+line, not `stable` — DOKS runs 1.34 and kubectl is supported within one minor of
+its apiserver, so today's stable 1.36 is out of skew with every cluster this box
+exists to reach.
+
+zsh's config is `docker/zshrc` → `/etc/zsh/zshrc`, system-wide and framework-free
+(a dotfile is the same file somewhere a fresh home, a `su` or a HOME override
+stops reading, and the only volume a sandbox mounts is `/work`). The build
+asserts the rc was **read**, not merely that zsh runs.
+
+The terminal picks it up on its own: cloud's `shell()` is a preference chain,
+`zsh → bash → sh`, so an image without zsh costs a caller nothing.
 
 **The browser lives in `exec`, at the bottom.** It used to be in `desktop`, which
 meant the DEFAULT class for an agent run could not open a web page. The class
