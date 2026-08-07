@@ -1,9 +1,19 @@
 # Canonical CI/CD config for hanzoai/bot — the one file both the hanzoai/ci
 # reusable (.hanzo/workflows/cicd.yml) and platform.hanzo.ai read.
 
-# ONE Dockerfile, THREE tags, one chain: exec -> dev -> desktop.
+# ONE Dockerfile, FOUR tags, one chain that forks once:
 #
-# THESE THREE, AND ONLY THESE THREE. The repo's other images already have lanes:
+#   exec -> dev -> desktop
+#           dev -> admin
+#
+# Three of the four are a sandbox CLASS a caller can ask for. `admin` is not:
+# hanzoai/cloud hands it to a SuperAdmin's `dev` sandbox and nobody else's, so
+# it is a tag with no word in the request. It is built and published exactly
+# like its siblings — same file, same repo, one more `tag-suffix` — because
+# which identity receives an image is a decision for the consumer, not for a
+# build lane.
+#
+# THESE FOUR, AND ONLY THESE FOUR. The repo's other images already have lanes:
 # Dockerfile.cloud has cloud.yml, the rollout has deploy.yml, the npm package has
 # release.yml. Declaring those here would build them a second time for the same
 # commit. The box recipes are the ones with no lane at all — which is why no box
@@ -95,6 +105,14 @@ images:
     tag-suffix: desktop
     platforms: [linux/amd64]
     args: { STAGE: desktop }
+
+  - name: sandbox-admin
+    context: .
+    dockerfile: Dockerfile.box
+    repo: registry.hanzo.ai/hanzoai/sandbox
+    tag-suffix: admin
+    platforms: [linux/amd64]
+    args: { STAGE: admin }
 
 # The gate for THIS lane, and deliberately not a second copy of ci.yml.
 #
