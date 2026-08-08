@@ -468,22 +468,25 @@ ARG HANZO_CLI_SHA256_ARM64=63523a2c015ba5490caf1909a5b927cc1944638fa368f70d07604
 ARG HANZO_DEV_VERSION=0.6.94
 ARG HANZO_DEV_SHA256_AMD64=35f1539bd8a04e753fa213f9552f7bcc2a44350f2db0e32cdfb5b780fc0bb8f4
 ARG HANZO_DEV_SHA256_ARM64=d2db0c22596f4d50270f65dd83a623d7c7677acab501d0bdac189152aabaa645
-# hanzoai/mcp tags its Rust server `rust-vX.Y.Z` — the repo also ships a
-# TypeScript server under plain `vX.Y.Z`, and the prefix is how the two lineages
-# stay apart in one tag namespace.
-ARG HANZO_MCP_VERSION=1.1.23
-ARG HANZO_MCP_SHA256_AMD64=aa2c7b9706ed8f0ffc5a8e3ee5edcf3cc37fa5cbb4bcc2af96fcb68dab14a37d
-ARG HANZO_MCP_SHA256_ARM64=bfe23aed3952a1f02cf45a673426a19248ced84276a9387fefb7933c75183d51
+# hanzo-mcp comes from npm `@hanzo/mcp`, which is the canonical server. It ships
+# bins `hanzo-mcp` and `mcp` from one package, so the name `dev` launches
+# (mcp_servers.hanzo.command) resolves to it with no shim.
+#
+# It used to install hanzoai/mcp's `rust-vX.Y.Z` release asset. That lineage sits
+# at 1.1.x while npm is at 2.4.x — the pods were running 1.1.15 — so the sandbox
+# was several majors behind the server everything else speaks. npm verifies the
+# tarball against the registry integrity hash, which is the same guarantee the
+# sha256sum below gives the other two.
+ARG HANZO_MCP_VERSION=2.4.4
 RUN set -eux; \
     case "${TARGETARCH}" in \
-      amd64) csha="${HANZO_CLI_SHA256_AMD64}"; dsha="${HANZO_DEV_SHA256_AMD64}"; msha="${HANZO_MCP_SHA256_AMD64}" ;; \
-      arm64) csha="${HANZO_CLI_SHA256_ARM64}"; dsha="${HANZO_DEV_SHA256_ARM64}"; msha="${HANZO_MCP_SHA256_ARM64}" ;; \
+      amd64) csha="${HANZO_CLI_SHA256_AMD64}"; dsha="${HANZO_DEV_SHA256_AMD64}" ;; \
+      arm64) csha="${HANZO_CLI_SHA256_ARM64}"; dsha="${HANZO_DEV_SHA256_ARM64}" ;; \
       *) echo "unsupported TARGETARCH=${TARGETARCH}" >&2; exit 1 ;; \
     esac; \
     for spec in \
       "hanzoai/cli:v${HANZO_CLI_VERSION}:hanzo:${csha}" \
       "hanzoai/dev:v${HANZO_DEV_VERSION}:dev:${dsha}" \
-      "hanzoai/mcp:rust-v${HANZO_MCP_VERSION}:hanzo-mcp:${msha}" \
     ; do \
       repo="${spec%%:*}"; rest="${spec#*:}"; \
       tag="${rest%%:*}"; rest="${rest#*:}"; \
@@ -495,6 +498,7 @@ RUN set -eux; \
       install -m 0755 "/tmp/${bin}" "/usr/local/bin/${bin}"; \
       rm -f /tmp/h.tar.gz "/tmp/${bin}"; \
     done; \
+    npm install -g "@hanzo/mcp@${HANZO_MCP_VERSION}"; \
     hanzo --version; dev --version; hanzo-mcp --version
 
 # THE IMAGE SAYS ITS OWN VERSION, and it is the SAME file the tag comes from.
