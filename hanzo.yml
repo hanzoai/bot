@@ -33,17 +33,24 @@
 #
 # THE REPO IS hanzoai/sandbox, NOT hanzoai/box, BECAUSE A CONSUMER NAMES IT.
 # hanzoai/cloud apps/sandbox/runtime.go defaults SANDBOX_IMAGE_REPO to
-# `registry.hanzo.ai/hanzoai/sandbox` and builds `<repo>:<class>[-<tag>]` from
-# it. An image path is only correct relative to who pulls it, and nothing pulls
+# `oci.hanzo.ai/hanzoai/sandbox` and builds `<repo>:<class>[-<tag>]` from it. An
+# image path is only correct relative to who pulls it, and nothing pulls
 # `hanzoai/box`: the daemon design that owned that name was deleted from cloud
 # along with cmd/boxd. One artifact, one path, named by the thing that fetches it.
 #
-# `repo:` NAMES registry.hanzo.ai DIRECTLY rather than ghcr.io. Every other repo
-# in the fleet pushes to ghcr and lets the lane's crane step mirror across, but
-# that mirror rewrites the org — ghcr.io/hanzoai/x lands at
-# registry.hanzo.ai/hanzo/x — and `hanzo/sandbox` is not the path cloud pulls.
-# The lane logs into registry.hanzo.ai before it builds, so naming it here is a
-# direct push, not a special case.
+# THE HOST IS oci.hanzo.ai, AND registry.hanzo.ai IS GONE. It was documented as a
+# deprecated alias for the same store, served by one Traefik file router. That
+# router no longer answers: `https://registry.hanzo.ai/v2/` returns 404 where
+# `https://oci.hanzo.ai/v2/` returns 401, which is the difference between "no
+# registry here" and "a registry that wants credentials". Every build since the
+# alias died has built the whole image, pushed every layer, and failed on the
+# manifest — the reason the pod still runs bytes from an older recipe.
+#
+# `repo:` NAMES THE REGISTRY DIRECTLY rather than ghcr.io. Every other repo in
+# the fleet pushes to ghcr and lets the lane's crane step mirror across, but that
+# mirror rewrites the org — ghcr.io/hanzoai/x lands at <registry>/hanzo/x — and
+# `hanzo/sandbox` is not the path cloud pulls. The lane logs into the host named
+# here before it builds, so this is a direct push, not a special case.
 #
 # AMD64 ONLY, AND THE REASON IS THE FLEET, NOT THE FILE. Nothing in this image
 # still blocks arm64 — the `COPY --from=<cloud release> /boxd` that once pinned
@@ -85,7 +92,7 @@ images:
   - name: sandbox-exec
     context: .
     dockerfile: Dockerfile.sandbox
-    repo: registry.hanzo.ai/hanzoai/sandbox
+    repo: oci.hanzo.ai/hanzoai/sandbox
     tag-suffix: exec
     platforms: [linux/amd64]
     args: { STAGE: exec }
@@ -93,7 +100,7 @@ images:
   - name: sandbox-dev
     context: .
     dockerfile: Dockerfile.sandbox
-    repo: registry.hanzo.ai/hanzoai/sandbox
+    repo: oci.hanzo.ai/hanzoai/sandbox
     tag-suffix: dev
     platforms: [linux/amd64]
     args: { STAGE: dev }
@@ -101,7 +108,7 @@ images:
   - name: sandbox-desktop
     context: .
     dockerfile: Dockerfile.sandbox
-    repo: registry.hanzo.ai/hanzoai/sandbox
+    repo: oci.hanzo.ai/hanzoai/sandbox
     tag-suffix: desktop
     platforms: [linux/amd64]
     args: { STAGE: desktop }
@@ -109,7 +116,7 @@ images:
   - name: sandbox-admin
     context: .
     dockerfile: Dockerfile.sandbox
-    repo: registry.hanzo.ai/hanzoai/sandbox
+    repo: oci.hanzo.ai/hanzoai/sandbox
     tag-suffix: admin
     platforms: [linux/amd64]
     args: { STAGE: admin }
