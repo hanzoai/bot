@@ -449,28 +449,25 @@ RUN mkdir -p /work /home/sandbox/go /home/sandbox/.cargo \
 ARG HANZO_CLI_VERSION=1.9.45
 ARG HANZO_CLI_SHA256_AMD64=4e04dfd99eb551215c8c484e87c704b67180b4d2c420558e30e26a251a1200d2
 ARG HANZO_CLI_SHA256_ARM64=63523a2c015ba5490caf1909a5b927cc1944638fa368f70d07604647135e9f56
-# DEV STAYS AT 0.6.91 ON PURPOSE — DO NOT BUMP TO 0.6.93.
+# 0.6.94 IS THE RELEASE THE OLD PIN WAS WAITING FOR.
 #
-# 0.6.91 predates hanzoai/dev 8a4de1f45b, which introduced
-# HANZO_ENV_KEY="HANZO_USER_KEY" as the ONLY credential the Hanzo provider reads.
-# Measured against a live pod running 0.6.91, one variable at a time:
+# The note this replaces held dev at 0.6.91 and said: bump to the first release
+# that contains create_hanzo_provider's alt_env_keys (HANZO_API_KEY,
+# HANZO_MACHINE_TOKEN, tried before the human session), 0.6.94 or later, and not
+# before. 0.6.94 is that release — bc20e6af40 is an ancestor of v0.6.94 and NOT
+# of v0.6.93, so the condition is met exactly, not approximately.
 #
-#   nothing set          no request attempted
-#   HANZO_API_KEY only   request goes out; IAM rejects the sentinel (400)
-#   HANZO_USER_KEY only  no request attempted
+# Why it mattered: 0.6.92 and 0.6.93 read HANZO_USER_KEY and nothing else, and no
+# pod holds a human's login. A sandbox agent on either would have gone out
+# silently unauthenticated. That is also why cloud minting a per-lease inference
+# grant is only half the fix — the grant arrives on the machine variables, and
+# 0.6.91 was pinned precisely because it happened to read one of them.
 #
-# So this build authenticates on the MACHINE variable, which is the only one a
-# service has — no pod holds a human's login. 0.6.92 and 0.6.93 read the human
-# one instead, so bumping to either would take every service caller in the fleet
-# from working to silently unauthenticated, and a missing credential looks
-# exactly like an unread one from outside.
-#
-# hanzoai/dev main restores it (create_hanzo_provider alt_env_keys: HANZO_API_KEY
-# and HANZO_MACHINE_TOKEN, tried before the human session). Bump to the first
-# release that CONTAINS that commit — 0.6.94 or later — and not before.
-ARG HANZO_DEV_VERSION=0.6.91
-ARG HANZO_DEV_SHA256_AMD64=4bfab06560e63c9b969148250efe2c3481c369b31252e420d4427d2db9e16206
-ARG HANZO_DEV_SHA256_ARM64=de5c027c7d2eda2afaca3eb92ec06f688ae08b06245c27b620442ec65dc36e63
+# Checksums verified against the bytes, not the .sha256 beside them: downloaded
+# both tarballs and sha256sum'd them, and they agree with the published files.
+ARG HANZO_DEV_VERSION=0.6.94
+ARG HANZO_DEV_SHA256_AMD64=35f1539bd8a04e753fa213f9552f7bcc2a44350f2db0e32cdfb5b780fc0bb8f4
+ARG HANZO_DEV_SHA256_ARM64=d2db0c22596f4d50270f65dd83a623d7c7677acab501d0bdac189152aabaa645
 # hanzoai/mcp tags its Rust server `rust-vX.Y.Z` — the repo also ships a
 # TypeScript server under plain `vX.Y.Z`, and the prefix is how the two lineages
 # stay apart in one tag namespace.
