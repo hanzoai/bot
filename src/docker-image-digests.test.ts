@@ -6,10 +6,16 @@ import { parse } from "yaml";
 
 const repoRoot = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 
+// Dockerfile.sandbox is NOT here, and Dockerfile.sandbox-browser no longer
+// exists. The rename that gave the sandbox recipe its right name moved the
+// 910-line ARG-based file into `Dockerfile.sandbox` and deleted the two small
+// digest-pinned ones that used to wear those names. This list checks a LITERAL
+// `FROM image@sha256:…` on the first line, which that recipe cannot have — its
+// bases arrive as `ARG UV_IMAGE=…`, so its first FROM reads `FROM ${UV_IMAGE}`.
+// The property still holds for it; it is proven by the dedicated tests below,
+// which follow the ARG to the value it resolves to.
 const DIGEST_PINNED_DOCKERFILES = [
   "Dockerfile",
-  "Dockerfile.sandbox",
-  "Dockerfile.sandbox-browser",
   "scripts/docker/cleanup-smoke/Dockerfile",
   "scripts/docker/install-sh-e2e/Dockerfile",
   "scripts/docker/install-sh-nonroot/Dockerfile",
@@ -47,21 +53,21 @@ describe("docker base image pinning", () => {
     }
   });
 
-  it("pins Dockerfile.box's third-party bases by digest, ARG-declared or not", async () => {
-    // Dockerfile.box cannot join the list above: its bases arrive through
+  it("pins Dockerfile.sandbox's third-party bases by digest, ARG-declared or not", async () => {
+    // Dockerfile.sandbox cannot join the list above: its bases arrive through
     // `ARG NODE_BASE=…` / `ARG UV_IMAGE=…` so its first FROM line reads
     // `FROM ${UV_IMAGE} AS uvsrc`, which is not a literal image reference. The
     // property still has to hold — this is the image that runs untrusted code,
     // and a floating tag means two builds of one commit are two different
     // images while the lane pushes on pull_request.
-    const dockerfile = await readFile(resolve(repoRoot, "Dockerfile.box"), "utf8");
+    const dockerfile = await readFile(resolve(repoRoot, "Dockerfile.sandbox"), "utf8");
     const args = [...dockerfile.matchAll(/^ARG\s+(\w+)=(\S+)$/gm)].map(([, name, value]) => ({
       name,
       value,
     }));
 
     const bases = args.filter(({ name }) => /_(BASE|IMAGE)$/.test(name));
-    expect(bases.length, "Dockerfile.box should declare its bases as ARGs").toBeGreaterThan(0);
+    expect(bases.length, "Dockerfile.sandbox should declare its bases as ARGs").toBeGreaterThan(0);
 
     for (const { name, value } of bases) {
       // CLOUD_IMAGE is OURS and versioned by us: it moves every time the
@@ -88,14 +94,14 @@ describe("docker base image pinning", () => {
     }
   });
 
-  it("pins every hand-fetched tarball in Dockerfile.box by sha256", async () => {
+  it("pins every hand-fetched tarball in Dockerfile.sandbox by sha256", async () => {
     // The file's own rule: a tarball is verified before anything is unpacked.
     // It held for node/go/bun/deno/zig and had to keep holding when the three
     // Hanzo binaries joined them — a GitHub release asset can be replaced under
     // a tag that never moves, which is the one way a "pinned" version lies.
-    const dockerfile = await readFile(resolve(repoRoot, "Dockerfile.box"), "utf8");
+    const dockerfile = await readFile(resolve(repoRoot, "Dockerfile.sandbox"), "utf8");
     const sums = [...dockerfile.matchAll(/^ARG\s+(\w*_SHA256\w*)=(\S+)$/gm)];
-    expect(sums.length, "Dockerfile.box should pin its tarballs by checksum").toBeGreaterThan(0);
+    expect(sums.length, "Dockerfile.sandbox should pin its tarballs by checksum").toBeGreaterThan(0);
     for (const [, name, value] of sums) {
       expect(value, `ARG ${name} must be a sha256`).toMatch(/^[a-f0-9]{64}$/);
     }
@@ -115,8 +121,8 @@ describe("docker base image pinning", () => {
       "docker/sandbox.version",
     );
 
-    const dockerfile = await readFile(resolve(repoRoot, "Dockerfile.box"), "utf8");
-    expect(dockerfile, "Dockerfile.box must stamp the version into the image it tags").toContain(
+    const dockerfile = await readFile(resolve(repoRoot, "Dockerfile.sandbox"), "utf8");
+    expect(dockerfile, "Dockerfile.sandbox must stamp the version into the image it tags").toContain(
       "COPY docker/sandbox.version /etc/sandbox-version",
     );
   });
@@ -132,7 +138,7 @@ describe("docker base image pinning", () => {
     // It matters most for `admin`, which is the one tag no caller can ask for:
     // hanzoai/cloud substitutes it in for one identity, so a wrong image here
     // reaches exactly the person with the fewest reasons to double-check it.
-    const dockerfile = await readFile(resolve(repoRoot, "Dockerfile.box"), "utf8");
+    const dockerfile = await readFile(resolve(repoRoot, "Dockerfile.sandbox"), "utf8");
     const stages = new Set(
       [...dockerfile.matchAll(/^FROM\s+\S+\s+AS\s+(\w+)$/gm)].map(([, s]) => s),
     );
@@ -140,13 +146,13 @@ describe("docker base image pinning", () => {
     const hanzoYml = parse(await readFile(resolve(repoRoot, "hanzo.yml"), "utf8")) as {
       images?: { name?: string; dockerfile?: string; "tag-suffix"?: string; args?: { STAGE?: string } }[];
     };
-    const box = (hanzoYml.images ?? []).filter((i) => i.dockerfile === "Dockerfile.box");
+    const box = (hanzoYml.images ?? []).filter((i) => i.dockerfile === "Dockerfile.sandbox");
     expect(box.length, "hanzo.yml should publish the box image").toBeGreaterThan(0);
 
     for (const image of box) {
       const stage = image.args?.STAGE;
       expect(stage, `${image.name} must select a stage`).toBeDefined();
-      expect(stages.has(stage as string), `STAGE ${stage} is not a stage in Dockerfile.box`).toBe(
+      expect(stages.has(stage as string), `STAGE ${stage} is not a stage in Dockerfile.sandbox`).toBe(
         true,
       );
       expect(image["tag-suffix"], `${image.name} must publish the stage it builds`).toBe(stage);
