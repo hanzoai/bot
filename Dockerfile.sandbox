@@ -446,9 +446,28 @@ RUN mkdir -p /work /home/sandbox/go /home/sandbox/.cargo \
 # linux-arm64 and windows-amd64. There is no linux-amd64 asset to fetch, and
 # this image is linux-amd64. 1.9.37 is the newest release that has one. When the
 # matrix publishes linux-amd64 again, this is one version + one checksum.
-ARG HANZO_CLI_VERSION=1.9.37
-ARG HANZO_CLI_SHA256_AMD64=798efad24d578048d288202c8cbf6ac349f8cf86f351283a967002c35edd7009
-ARG HANZO_CLI_SHA256_ARM64=ae54ab9933a5b171ec14e9cad632f8fcd52243310d9bec2498dd90077765f734
+ARG HANZO_CLI_VERSION=1.9.45
+ARG HANZO_CLI_SHA256_AMD64=4e04dfd99eb551215c8c484e87c704b67180b4d2c420558e30e26a251a1200d2
+ARG HANZO_CLI_SHA256_ARM64=63523a2c015ba5490caf1909a5b927cc1944638fa368f70d07604647135e9f56
+# DEV STAYS AT 0.6.91 ON PURPOSE — DO NOT BUMP TO 0.6.93.
+#
+# 0.6.91 predates hanzoai/dev 8a4de1f45b, which introduced
+# HANZO_ENV_KEY="HANZO_USER_KEY" as the ONLY credential the Hanzo provider reads.
+# Measured against a live pod running 0.6.91, one variable at a time:
+#
+#   nothing set          no request attempted
+#   HANZO_API_KEY only   request goes out; IAM rejects the sentinel (400)
+#   HANZO_USER_KEY only  no request attempted
+#
+# So this build authenticates on the MACHINE variable, which is the only one a
+# service has — no pod holds a human's login. 0.6.92 and 0.6.93 read the human
+# one instead, so bumping to either would take every service caller in the fleet
+# from working to silently unauthenticated, and a missing credential looks
+# exactly like an unread one from outside.
+#
+# hanzoai/dev main restores it (create_hanzo_provider alt_env_keys: HANZO_API_KEY
+# and HANZO_MACHINE_TOKEN, tried before the human session). Bump to the first
+# release that CONTAINS that commit — 0.6.94 or later — and not before.
 ARG HANZO_DEV_VERSION=0.6.91
 ARG HANZO_DEV_SHA256_AMD64=4bfab06560e63c9b969148250efe2c3481c369b31252e420d4427d2db9e16206
 ARG HANZO_DEV_SHA256_ARM64=de5c027c7d2eda2afaca3eb92ec06f688ae08b06245c27b620442ec65dc36e63
