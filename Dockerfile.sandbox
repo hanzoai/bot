@@ -43,7 +43,7 @@
 #            processes on EVERY desktop pod, whether or not anyone looks at the
 #            screen. That is the only difference here that costs at runtime, so
 #            it is the only place a class boundary earns its keep.
-#   admin    plus zsh, kubectl and doctl. Still nothing running, and still
+#   admin    plus kubectl and doctl. Still nothing running, and still
 #            nothing PRIVILEGED: three binaries with no credential between them.
 #            It is a separate tag rather than three more packages in `dev`
 #            because a fleet client on every tenant's box is a tool nobody there
@@ -286,6 +286,32 @@ RUN apt-get update \
 RUN set -eux; \
     gem install --no-document bundler; \
     ruby --version; bundler --version; php --version | head -1; composer --version
+
+# ---- Browser ---------------------------------------------------------------
+# A SANDBOX IS A COMPUTER, AND A COMPUTER HAS A SHELL — this one, in `exec`, so
+# all three classes have it. It started out in `admin`, beside kubectl and doctl,
+# and that was a shell filed under administration.
+#
+# The terminal has asked for it in every class all along: cloud's shell command
+# is `exec zsh -l || exec bash -l || exec sh -l`, so a `dev` sandbox answered the
+# first line by falling past it, and the prompt a person got was not the prompt
+# the product asks for. A class is cut on RUNTIME cost (see the header) and an
+# uninvoked shell costs nothing — it is disk, and layers are shared per node.
+# The same argument the browser below is here on.
+#
+# From apt, on the distro's security-update track, for the same reason python,
+# ruby and php are. tmux is already here: one multiplexer, one shell, installed
+# once, and a terminal in ANY class can name a session and get its own prompt.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends zsh \
+  && rm -rf /var/lib/apt/lists/*
+
+# The shell's config is SYSTEM-WIDE, at the path zsh reads for every interactive
+# shell. A ~/.zshrc would be the same file somewhere a fresh home directory, a
+# `su` or a HOME override stops reading — and the only volume a sandbox mounts
+# is /work, so a home directory here is the image's own. See docker/zshrc for
+# what is in it and, more to the point, what is not: there is no framework.
+COPY docker/zshrc /etc/zsh/zshrc
 
 # ---- Browser ---------------------------------------------------------------
 # A SANDBOX IS A COMPUTER, AND A COMPUTER HAS A BROWSER. This sits in `exec`,
@@ -889,21 +915,6 @@ RUN set -eux; \
     install -m 0755 /tmp/doctl /usr/local/bin/doctl; \
     rm -f /tmp/kubectl /tmp/doctl /tmp/doctl.tar.gz; \
     kubectl version --client=true; doctl version
-
-# zsh, from apt, on the distro's security-update track — the same reason python,
-# ruby and php come from apt down in `exec` rather than from a hand-fetched
-# tarball. tmux is already here from that stage: one multiplexer, installed
-# once, and a terminal in ANY class can name a session.
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends zsh \
-  && rm -rf /var/lib/apt/lists/*
-
-# The shell's config is SYSTEM-WIDE, at the path zsh reads for every interactive
-# shell. A ~/.zshrc would be the same file somewhere a fresh home directory, a
-# `su` or a HOME override stops reading — and the only volume a sandbox mounts
-# is /work, so a home directory here is the image's own. See docker/zshrc for
-# what is in it and, more to the point, what is not: there is no framework.
-COPY docker/zshrc /etc/zsh/zshrc
 
 USER sandbox
 
