@@ -313,6 +313,14 @@ RUN apt-get update \
 # what is in it and, more to the point, what is not: there is no framework.
 COPY docker/zshrc /etc/zsh/zshrc
 
+# INSTALLING IT IS NOT GETTING IT. The user's LOGIN SHELL is set where the user
+# is created, further down, and it stayed /bin/bash after this — so zsh was on
+# the disk of every class and was the prompt of none. tmux asks passwd what to
+# run and gets bash; cloud's `exec zsh -l || exec bash -l` fallback never runs,
+# because tmux is present in every class and takes over before it. One fact,
+# read by everything: passwd says zsh, and tmux, `su -` and the fallback all
+# agree without a second setting anywhere.
+
 # ---- Browser ---------------------------------------------------------------
 # A SANDBOX IS A COMPUTER, AND A COMPUTER HAS A BROWSER. This sits in `exec`,
 # the BOTTOM of the chain, so all three classes have one — not in `desktop`,
@@ -399,8 +407,9 @@ RUN set -eux; \
     if u=$(getent passwd 1000 | cut -d: -f1) && [ -n "$u" ]; then userdel -r "$u" 2>/dev/null || userdel "$u"; fi; \
     if g=$(getent group 1000 | cut -d: -f1) && [ -n "$g" ]; then groupdel "$g" || true; fi; \
     groupadd -g 1000 sandbox; \
-    useradd -u 1000 -g 1000 -m -s /bin/bash -d /home/sandbox sandbox; \
-    id sandbox
+    useradd -u 1000 -g 1000 -m -s /usr/bin/zsh -d /home/sandbox sandbox; \
+    id sandbox; \
+    [ "$(getent passwd sandbox | cut -d: -f7)" = "$(command -v zsh)" ]
 
 # /work is where the per-(org,project) PVC mounts — the checkout and the caches.
 # Created here so an empty volume inherits the right owner instead of arriving
