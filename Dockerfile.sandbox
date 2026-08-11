@@ -807,20 +807,21 @@ RUN apt-get update \
     xvfb \
   && rm -rf /var/lib/apt/lists/*
 
-# THE VNC SERVER IS x0vncserver, AND IT IS ALREADY HERE — there is no x11vnc in
+# THE VNC SERVER IS X0tigervnc, AND IT IS ALREADY HERE — there is no x11vnc in
 # this image and there must not be one. `tigervnc-scraping-server` above is the
-# package that carries /usr/bin/x0vncserver, which is what
-# scripts/sandbox-desktop starts and what the MSG_PEEK note two screens up says
-# to use. Reading `command -v x11vnc` -> empty and concluding the port EXPOSEd
-# below is unserved is the natural mistake, and it costs an afternoon; this line
-# asserts the four things that actually serve it, at build time, so the mistake
-# is answered by the build instead of by a person.
+# package that carries it, and also carries /usr/bin/x0vncserver, which is NOT
+# the server but the session manager that starts it. The script calls the server;
+# see the reason written where it is called. Reading `command -v x11vnc` -> empty
+# and concluding the port EXPOSEd below is unserved is the natural mistake, and
+# it costs an afternoon; this line asserts what actually serves the screen, at
+# build time, so the mistake is answered by the build instead of by a person.
 #
-# What made 5900 unserved in production was not a missing package: it was the pod
-# spec overriding CMD, so sandbox-desktop never ran. Proven by hand in a live
-# desktop pod on 2026-08-06 — running the script by hand brought X up on :1 and
-# left 127.0.0.1:5900 and 127.0.0.1:6080 LISTENing, with nothing installed.
-RUN set -eux; for b in Xvfb openbox x0vncserver websockify xdpyinfo; do command -v "$b"; done
+# socat is asserted with them because the screen is READ over it: cloud runs
+# `socat - TCP:127.0.0.1:5900` through the exec channel and carries RFB out to a
+# browser on that stream. It is installed at the bottom of the chain for every
+# class, so a package list somebody trims one day would take the desktop's only
+# way out with it and nothing else in this image would notice.
+RUN set -eux; for b in Xvfb openbox X0tigervnc socat xdpyinfo; do command -v "$b"; done
 
 # THE BROWSER IS NOT INSTALLED HERE — it is in `exec`, at the bottom of the
 # chain, so `dev` has one too. What this stage adds is a SCREEN for it: with

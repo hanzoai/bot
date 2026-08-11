@@ -4,10 +4,10 @@
 #
 # This is NOT a daemon in the sense the sandbox design forbids. Nothing started
 # here accepts a command that runs code: X draws, openbox decorates,
-# x0vncserver mirrors pixels and websockify carries RFB over WebSocket. Work
+# X0tigervnc mirrors pixels and websockify carries RFB over WebSocket. Work
 # still arrives only through the Kubernetes exec subresource.
 #
-# x0vncserver, NOT x11vnc, AND THE REASON IS A REAL BUG.
+# TigerVNC, NOT x11vnc, AND THE REASON IS A REAL BUG.
 # hanzoai/operative found it and wrote it down in
 # docker/image/.operative/x11vnc_startup.sh: x11vnc (LibVNCServer 0.9.13) peeks
 # at the first byte of a new connection to tell WebSocket from RFB — but in RFB
@@ -50,8 +50,26 @@ log "X up on ${DISPLAY} (${SCREEN})"
 
 openbox &
 
-x0vncserver -display "${DISPLAY}" -rfbport "${VNC_PORT}" \
-  -SecurityTypes None -localhost "$([ "${LISTEN_HOST}" = "localhost" ] && echo yes || echo no)" &
+# X0tigervnc IS the scraping server. `x0vncserver` on PATH is TigerVNC's session
+# manager — a perl wrapper that starts the server, waits for it, and kills it if
+# it does not appear — and ITS READINESS TEST CANNOT SEE A LOOPBACK LISTENER.
+# Wrapper.pm checks the port by binding INADDR_ANY with SO_REUSEADDR and calling
+# a bind that FAILS proof that the server is up; a server bound to 127.0.0.1
+# leaves 0.0.0.0 free, so the bind keeps succeeding, and after 300 tries at 100ms
+# the wrapper reports "X0tigervnc did not start up" and kills a server that had
+# been serving the whole time.
+#
+# That is exactly this arrangement — `-localhost yes` is the line above this one,
+# and it is not negotiable — so every desktop pod's screen died THIRTY SECONDS
+# after boot, and nothing downstream could tell that from a screen that never
+# existed: the pod is Running, exec answers, X and openbox are up, and only a VNC
+# client ever finds out. Calling the server directly removes the supervisor that
+# was the entire failure. Nothing is lost with it: the wrapper's job is desktop
+# sessions, log rotation and pid files for a machine with many users, and this
+# container has one screen and tini for a parent.
+X0tigervnc -display "${DISPLAY}" -rfbport "${VNC_PORT}" \
+  -SecurityTypes None -localhost="$([ "${LISTEN_HOST}" = "localhost" ] && echo 1 || echo 0)" \
+  -desktop "sandbox" &
 log "vnc on ${LISTEN_HOST}:${VNC_PORT}"
 
 if [ "${ENABLE_NOVNC}" = "1" ]; then
