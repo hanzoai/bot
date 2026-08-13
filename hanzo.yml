@@ -113,6 +113,17 @@ images:
     platforms: [linux/amd64]
     args: { STAGE: desktop }
 
+  # android is the one entry whose `platforms:` is the IMAGE's limit rather than
+  # the fleet's — Google publishes no linux-aarch64 emulator, so this stage could
+  # not be built for arm64 even on a cluster that wanted it.
+  - name: sandbox-android
+    context: .
+    dockerfile: Dockerfile.sandbox
+    repo: oci.hanzo.ai/hanzoai/sandbox
+    tag-suffix: android
+    platforms: [linux/amd64]
+    args: { STAGE: android }
+
   - name: sandbox-admin
     context: .
     dockerfile: Dockerfile.sandbox

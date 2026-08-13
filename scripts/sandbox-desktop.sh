@@ -78,6 +78,22 @@ if [ "${ENABLE_NOVNC}" = "1" ]; then
   log "novnc on ${LISTEN_HOST}:${NOVNC_PORT}"
 fi
 
+# THEN THE CLASS'S OWN PROGRAM, IF IT HAS ONE. `sandbox-desktop avd` is the
+# android class: this same screen, with a phone drawn on it. A class that wants
+# something running on the display does not want a second X server, a second
+# window manager and a second VNC pair — and the way it gets them is somebody
+# copying this file to add three lines at the bottom, after which the two copies
+# drift and only one of them gets the next fix.
+#
+# So the screen takes an argument. Everything above is the display; everything
+# a class adds is argv. That also keeps the promise the other classes make: the
+# argument runs INSTEAD of the sleep, so there is still exactly one process this
+# container waits on, and the pod still ends when it does.
+if [ "$#" -gt 0 ]; then
+  log "running $*"
+  exec "$@"
+fi
+
 # The pod's command, same as every other class.
 #
 # SANDBOX_TTL_SECONDS is the run's budget, and honouring it here is what lets a
