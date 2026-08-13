@@ -858,6 +858,109 @@ CMD ["sandbox-desktop"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# android — desktop, plus a phone drawn on its screen.
+#
+# THIS ADDS NO WAY TO LOOK AT ANYTHING, and that is the whole design. An Android
+# emulator is qemu with an X window; the display it draws on is the one `desktop`
+# already starts and hanzoai/cloud already serves. So the class is an SDK, an AVD
+# and one more argument to sandbox-desktop — not a stream, not a port, not a
+# client. Anything here that ended up looking like a second way to watch a screen
+# would be a bug wearing a feature's clothes.
+#
+# IT NEEDS /dev/kvm AND THAT IS A SCHEDULING FACT, NOT A BUILD ONE. qemu without
+# KVM emulates the guest CPU instruction by instruction, and a cold Android 15
+# boot never finishes in a time anyone waits through. The device reaches a pod
+# through the KVM device plugin (hanzoai/universe infra/k8s/kvm), the pod asks
+# for it by resource name, and `avd` refuses at startup where it is absent —
+# because the alternative is a phone that boots forever and looks busy.
+#
+# amd64 ONLY, and for once that is the image's own limit rather than the fleet's:
+# Google publishes no linux-aarch64 emulator. The arm64 answer is Cuttlefish,
+# which is a different program and would be a different stage.
+#
+# THE SDK IS PINNED WHERE PINNING EXISTS AND NOT WHERE IT DOES NOT, said plainly
+# rather than papered over. commandlinetools is a zip at a URL and carries a
+# sha256 like every other third-party input in this file. The packages
+# sdkmanager then installs are named `emulator`, `platform-tools` and
+# `system-images;android-35;google_apis;x86_64` — a package PATH has no revision
+# field, so those float on Google's stable channel and two builds a month apart
+# can differ. That is a real gap in this file's reproducibility rule, and the
+# honest fix is not a comment claiming otherwise: it is the digest hanzoai/cloud
+# already pins the running image by (SANDBOX_IMAGE_DIGEST_ANDROID), which names
+# bytes no matter what produced them.
+# ─────────────────────────────────────────────────────────────────────────────
+FROM desktop AS android
+
+USER root
+
+ENV ANDROID_HOME=/opt/android \
+    ANDROID_SDK_ROOT=/opt/android \
+    ANDROID_AVD_HOME=/opt/android/avd
+
+# What qemu and the emulator's own UI link against. The JDK the SDK tools need is
+# already at the bottom of the chain (openjdk-25, `exec` stage), and so is every
+# X library the desktop stage brought.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    libnss3 \
+    libpulse0 \
+    libxcursor1 \
+    libxdamage1 \
+    libxi6 \
+    libxrandr2 \
+    libxtst6 \
+    mesa-utils \
+  && rm -rf /var/lib/apt/lists/*
+
+# 13114758 is the current stable commandlinetools build; the sha256 is of the
+# published zip, read from the bytes this image was proven against.
+ARG ANDROID_TOOLS=commandlinetools-linux-13114758_latest.zip
+ARG ANDROID_TOOLS_SHA256=7ec965280a073311c339e571cd5de778b9975026cfcbe79f2b1cdcb1e15317ee
+RUN set -eux; \
+    curl -fsSL -o /tmp/tools.zip "https://dl.google.com/android/repository/${ANDROID_TOOLS}"; \
+    echo "${ANDROID_TOOLS_SHA256}  /tmp/tools.zip" | sha256sum -c -; \
+    mkdir -p "${ANDROID_HOME}/cmdline-tools"; \
+    unzip -q /tmp/tools.zip -d /tmp/clt; \
+    mv /tmp/clt/cmdline-tools "${ANDROID_HOME}/cmdline-tools/latest"; \
+    rm -rf /tmp/tools.zip /tmp/clt
+
+ENV PATH=/opt/android/cmdline-tools/latest/bin:/opt/android/platform-tools:/opt/android/emulator:$PATH
+
+# The AVD is created HERE and not on first boot. Creating it costs a few seconds
+# and writing it into the layer is what makes a lease fast; doing it at startup
+# would also mean every pod's first boot is the one that discovers the SDK is
+# incomplete, in a place nobody is reading the log.
+RUN set -eux; \
+    yes | sdkmanager --licenses >/dev/null; \
+    sdkmanager --install \
+      "platform-tools" \
+      "emulator" \
+      "platforms;android-35" \
+      "system-images;android-35;google_apis;x86_64"; \
+    mkdir -p "${ANDROID_AVD_HOME}"; \
+    echo no | avdmanager create avd -n hanzo \
+      -k "system-images;android-35;google_apis;x86_64" -d pixel_6 --force; \
+    chown -R sandbox:sandbox "${ANDROID_HOME}"
+
+COPY scripts/avd.sh /usr/local/bin/avd
+RUN chmod 0755 /usr/local/bin/avd
+
+# Assert the four things a phone needs, at build time, for the same reason the
+# desktop stage asserts its five: each of them fails at runtime as a pod that
+# looks perfectly healthy and shows an empty screen.
+RUN set -eux; \
+    for b in avd emulator adb avdmanager; do command -v "$b"; done; \
+    avdmanager list avd | grep -q 'Name: hanzo'
+
+USER sandbox
+WORKDIR /work
+
+# The screen, then the phone. One argument, and everything the desktop class
+# does still happens exactly once.
+CMD ["sandbox-desktop", "avd"]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # admin — the operator's box. dev, plus the two clients that talk to the fleet
 # and a shell worth sitting in.
 #
