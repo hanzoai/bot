@@ -69,10 +69,16 @@ jobs:
 
       # The gateway serves the @hanzo/bot-admin SPA out of dist/control-ui/, and
       # the Dockerfile fails the build when it is absent. The SPA source lives in
-      # the private hanzoai/admin bun workspace (apps/admin-bot), so it is built
+      # the private hanzoai/admin bun workspace (apps/bot), so it is built
       # here and synced into the context before buildx reads it. GH_PAT is what
       # reaches that private repo; without it this step fails loudly rather than
       # producing an image with every admin route 404ing.
+      #
+      # apps/bot, not apps/admin-bot: hanzoai/admin 56bc1990 dropped the
+      # redundant prefix from every directory under apps/ — the workspace is
+      # already the admin — and this path was left pointing at the old name.
+      # bun install succeeded, the cd did not, and no image has been built
+      # since.
       - name: build the admin-bot SPA into dist/control-ui
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
@@ -91,10 +97,10 @@ jobs:
           fi
           cd /tmp/hanzoai-admin
           bun install --frozen-lockfile
-          cd apps/admin-bot
+          cd apps/bot
           bun run build
           cd "${GITHUB_WORKSPACE}"
-          ADMIN_BOT_DIR=/tmp/hanzoai-admin/apps/admin-bot bash scripts/sync-admin-ui.sh
+          ADMIN_BOT_DIR=/tmp/hanzoai-admin/apps/bot bash scripts/sync-admin-ui.sh
           test -f dist/control-ui/index.html
 
       - uses: docker/setup-buildx-action@v3
