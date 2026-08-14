@@ -41,13 +41,30 @@ function resolveUpstreamBaseUrl(): string {
 
 /**
  * Whether a caller-presented bearer token is the caller's OWN per-tenant
- * upstream credential — an `hk-` Hanzo Cloud API key, or an IAM-issued JWT
+ * upstream credential — an `sk-` Hanzo Cloud API key, or an IAM-issued JWT
  * (three JWS segments) — as opposed to the shared gateway token (an opaque
  * secret the caller authenticated WITH, which is not an upstream credential and
  * must never be forwarded to the LLM provider).
+ *
+ * It used to match `hk-`, a prefix nothing mints any more, so a caller holding a
+ * CURRENT key failed this test, fell through to the shared gateway key, and had
+ * its usage metered against that key's org — the multi-tenancy this function
+ * exists to provide, silently off.
+ *
+ * A bare `sk-` cannot replace it: that is ALSO OpenAI's and Anthropic's shape,
+ * and the shared provider key in `OPENAI_API_KEY` is exactly the thing that must
+ * not be mistaken for the caller's own. What separates them is the environment
+ * segment — IAM mints `<prefix>-<live|test>-<hex>` (keys.Mint), so `sk-live-` and
+ * `sk-test-` are Hanzo's and `sk-proj-`, `sk-ant-` and bare-random are not.
+ *
+ * `pk-` is deliberately excluded: a publishable key never becomes a principal
+ * upstream, so forwarding one buys a 401 where falling back to the shared key at
+ * least completes the call.
  */
+const HANZO_CLOUD_KEY = /^sk-(live|test)-/;
+
 export function isPerTenantUpstreamCredential(token: string): boolean {
-  return token.startsWith("hk-") || token.split(".").length === 3;
+  return HANZO_CLOUD_KEY.test(token) || token.split(".").length === 3;
 }
 
 /**

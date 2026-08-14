@@ -238,8 +238,8 @@ describe("LLM Proxy HTTP handler (upstream integration)", () => {
     }
   });
 
-  it("forwards the caller's OWN hk- credential upstream, NOT the shared env key (multi-tenant billing)", async () => {
-    // The bot authenticated with its own hk- Cloud API key; the gateway also has
+  it("forwards the caller's OWN sk- credential upstream, NOT the shared env key (multi-tenant billing)", async () => {
+    // The bot authenticated with its own sk- Cloud API key; the gateway also has
     // a shared OPENAI_API_KEY. The caller's per-tenant key MUST win so the
     // upstream meter bills the bot's own org — not the shared, single-org key.
     let receivedAuth: string | string[] | undefined;
@@ -264,10 +264,10 @@ describe("LLM Proxy HTTP handler (upstream integration)", () => {
 
     try {
       await fetch(`http://127.0.0.1:${gatewayPort}/v1/models`, {
-        headers: { authorization: "Bearer hk-bot-tenant-key" },
+        headers: { authorization: "Bearer sk-live-b07b07b07b07b07b07b07b07b07b07b0" },
       });
       // Per-tenant key forwarded — billed to the bot's org, not the shared key.
-      expect(receivedAuth).toBe("Bearer hk-bot-tenant-key");
+      expect(receivedAuth).toBe("Bearer sk-live-b07b07b07b07b07b07b07b07b07b07b0");
     } finally {
       await new Promise<void>((resolve) => gateway.close(() => resolve()));
     }
@@ -334,8 +334,31 @@ describe("LLM Proxy HTTP handler (upstream integration)", () => {
 });
 
 describe("isPerTenantUpstreamCredential", () => {
-  it("treats an hk- Cloud API key as a per-tenant credential", () => {
-    expect(isPerTenantUpstreamCredential("hk-abc123")).toBe(true);
+  // IAM mints <prefix>-<live|test>-<hex>, so the environment segment is what
+  // makes a key Hanzo's rather than some other vendor's sk-.
+  it("treats a Hanzo sk-live- Cloud API key as a per-tenant credential", () => {
+    expect(isPerTenantUpstreamCredential("sk-live-0123456789abcdef0123456789abcdef")).toBe(true);
+    expect(isPerTenantUpstreamCredential("sk-test-0123456789abcdef0123456789abcdef")).toBe(true);
+  });
+
+  // The retired prefix. Matching it meant a caller holding a CURRENT key was not
+  // recognised, fell through to the shared gateway key, and had its usage metered
+  // against that key's org — multi-tenancy off, silently.
+  it("does NOT treat the retired hk- prefix as a per-tenant credential", () => {
+    expect(isPerTenantUpstreamCredential("hk-live-abc123")).toBe(false);
+  });
+
+  // sk- alone is OpenAI's and Anthropic's shape too, and forwarding a shared
+  // provider key as if it were the caller's own is the mis-billing this guards.
+  it("does NOT treat another vendor's sk- key as a per-tenant credential", () => {
+    expect(isPerTenantUpstreamCredential("sk-proj-abc123")).toBe(false);
+    expect(isPerTenantUpstreamCredential("sk-ant-api03-abc123")).toBe(false);
+  });
+
+  // Publishable by construction: it never becomes a principal upstream, so
+  // forwarding one buys a 401 where the shared key would have completed the call.
+  it("does NOT treat a publishable pk- key as a per-tenant credential", () => {
+    expect(isPerTenantUpstreamCredential("pk-live-0123456789abcdef0123456789abcdef")).toBe(false);
   });
 
   it("treats an IAM JWT (three JWS segments) as a per-tenant credential", () => {
