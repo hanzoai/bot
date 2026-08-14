@@ -208,19 +208,19 @@
         white-space: pre-wrap;
         overflow-wrap: anywhere;
       }
-      hanzo-bot-a2ui-host {
+      bot-a2ui-host {
         display: block;
         height: 100%;
         position: fixed;
         inset: 0;
         z-index: 4;
-        --hanzo-bot-a2ui-inset-top: 28px;
-        --hanzo-bot-a2ui-inset-right: 0px;
-        --hanzo-bot-a2ui-inset-bottom: 0px;
-        --hanzo-bot-a2ui-inset-left: 0px;
-        --hanzo-bot-a2ui-scroll-pad-bottom: 0px;
-        --hanzo-bot-a2ui-status-top: calc(50% - 18px);
-        --hanzo-bot-a2ui-empty-top: 18px;
+        --bot-a2ui-inset-top: 28px;
+        --bot-a2ui-inset-right: 0px;
+        --bot-a2ui-inset-bottom: 0px;
+        --bot-a2ui-inset-left: 0px;
+        --bot-a2ui-scroll-pad-bottom: 0px;
+        --bot-a2ui-status-top: calc(50% - 18px);
+        --bot-a2ui-empty-top: 18px;
       }
     </style>
   </head>
@@ -232,7 +232,7 @@
         <div class="subtitle" id="hanzo-bot-status-subtitle">Waiting for agent</div>
       </section>
     </div>
-    <hanzo-bot-a2ui-host></hanzo-bot-a2ui-host>
+    <bot-a2ui-host></bot-a2ui-host>
     <script src="a2ui.bundle.js"></script>
     <script>
       (() => {
@@ -278,7 +278,7 @@
           statusEl.style.display = "none";
         }
 
-        window.__hanzo-bot = {
+        window.__bot = {
           canvas,
           ctx,
           setDebugStatusEnabled,
