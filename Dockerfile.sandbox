@@ -197,7 +197,13 @@ RUN set -eux; \
     tar -C /usr/local -xzf /tmp/go.tar.gz; \
     rm -f /tmp/go.tar.gz; \
     /usr/local/go/bin/go version
-ENV PATH=/usr/local/go/bin:/usr/local/cargo/bin:$PATH \
+# THE USER'S OWN bin IS FIRST, and that ordering is what lets an agent CLI
+# update itself. npm's per-user prefix installs into ~/.local/bin (see the dev
+# stage) and `claude install latest` writes the self-updating binary there; a
+# copy under /usr/local/bin earlier on PATH would shadow every update with the
+# version frozen into a layer. Written out rather than $HOME because ENV is
+# evaluated while this stage still runs as root.
+ENV PATH=/home/sandbox/.local/bin:/usr/local/go/bin:/usr/local/cargo/bin:$PATH \
     GOPATH=/home/sandbox/go \
     GOTOOLCHAIN=auto
 
@@ -306,12 +312,9 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends zsh \
   && rm -rf /var/lib/apt/lists/*
 
-# The shell's config is SYSTEM-WIDE, at the path zsh reads for every interactive
-# shell. A ~/.zshrc would be the same file somewhere a fresh home directory, a
-# `su` or a HOME override stops reading — and the only volume a sandbox mounts
-# is /work, so a home directory here is the image's own. See docker/zshrc for
-# what is in it and, more to the point, what is not: there is no framework.
-COPY docker/zshrc /etc/zsh/zshrc
+# Its config is installed further down, as the user who reads it — see the
+# ellipsis block after `USER sandbox`. Nothing lands in /etc/zsh, because the
+# dotfiles set no_global_rcs and zsh would skip it.
 
 # INSTALLING IT IS NOT GETTING IT. The user's LOGIN SHELL is set where the user
 # is created, further down, and it stayed /bin/bash after this — so zsh was on
@@ -555,6 +558,43 @@ COPY docker/sandbox.version /etc/sandbox-version
 
 USER sandbox
 
+# ---- The shell's config ----------------------------------------------------
+# ellipsis.sh, and three packages it installs from their own repos: zsh (zeesh),
+# vim and files. At BUILD time and as the user who reads them, so a fresh pod
+# opens on a configured shell and fetches nothing at the first prompt.
+#
+# `ellipsis install zeekay/zsh` resolves to https://github.com/zeekay/dot-zsh —
+# the `dot-` is ELLIPSIS_PREFIX and https is ELLIPSIS_PROTO, both its defaults,
+# so the three names below are the names the packages are known by.
+#
+# THE PLATFORM IS THE PACKAGE'S CHOICE, NOT OURS. dot-zsh's pkg.link switches on
+# os.platform() and links platform/linux/zshrc where a Mac gets platform/osx.
+# The assert names the linux path: a package that quietly linked the other one
+# is a shell that half works, and no prompt would say so.
+#
+# ~/.zshenv SETS no_global_rcs, which is why nothing is installed in /etc/zsh —
+# zsh skips the global rc files entirely once it reads that. It also stops
+# `zsh -l` from sourcing /etc/profile back over the PATH set above.
+#
+# ~/.zshenv also sources $CARGO_HOME/env. CARGO_HOME moved to the home directory
+# for a writable cache while rustup wrote its env file beside the toolchain, so
+# one symlink makes the file rustup wrote the file the shell reads.
+#
+# ellipsis runs its hooks without set -e, so `install` exiting 0 is not evidence.
+# The asserts are: one link per package, and a completion dump that only exists
+# if an interactive shell actually READ the rc — which also builds the dump into
+# this layer, so the first prompt in a pod does not pay to compile one.
+RUN set -eux; \
+    ln -s /usr/local/cargo/env "${HOME}/.cargo/env"; \
+    [ -f "${HOME}/.cargo/env" ]; \
+    git clone --depth 1 https://github.com/ellipsis/ellipsis "${HOME}/.ellipsis"; \
+    "${HOME}/.ellipsis/bin/ellipsis" install zeekay/zsh zeekay/vim zeekay/files; \
+    [ "$(readlink -f "${HOME}/.zshrc")" = "${HOME}/.ellipsis/packages/zsh/platform/linux/zshrc" ]; \
+    [ -f "${HOME}/.vimrc" ]; \
+    [ -f "${HOME}/.tmux.conf" ]; \
+    zsh -ic true; \
+    [ -s "${HOME}/.zsh/cache/zcompdump" ]
+
 # The agent is on PATH for the user that will actually run it, and `hanzo` is
 # not `dev`. Checked HERE, in the default class, because this is the class a
 # caller gets without asking — the `dev` stage repeats it over its own larger
@@ -618,13 +658,6 @@ ARG GH_VERSION=2.97.0
 ARG CLAUDE_VERSION=2.1.223
 ARG CODEX_VERSION=0.146.1
 
-RUN set -eux; \
-    npm install -g \
-      "@anthropic-ai/claude-code@${CLAUDE_VERSION}" \
-      "@openai/codex@${CODEX_VERSION}"; \
-    npm cache clean --force; \
-    rm -rf /root/.npm /tmp/*
-
 # gh, for the forge and for GitHub. `git` alone cannot open a PR, and an agent
 # that can commit but not propose is half a workflow.
 RUN set -eux; \
@@ -634,13 +667,35 @@ RUN set -eux; \
     rm -rf /tmp/gh.tar.gz "/tmp/gh_${GH_VERSION}_linux_${TARGETARCH}"; \
     gh --version | head -1
 
+USER sandbox
+
+# THEY BELONG TO THE USER THAT RUNS THEM, and that is what makes them
+# updatable. Installed root-owned under /usr/local/lib/node_modules, claude
+# greets every shell with "Auto-update failed: no write permission to npm
+# prefix" and then stays on the version baked into the layer for the life of the
+# image. The prefix here is the user's own ~/.local, which PATH puts ahead of
+# /usr/local/bin: one claude on the box, uid 1000 owns it, and both its own
+# updater and `claude install latest` write beside it rather than failing.
+RUN set -eux; \
+    npm config set prefix /home/sandbox/.local; \
+    npm install -g \
+      "@anthropic-ai/claude-code@${CLAUDE_VERSION}" \
+      "@openai/codex@${CODEX_VERSION}"; \
+    npm cache clean --force
+
 # Prove the toolchain is on PATH and executable, as the user that will run it.
 # A `RUN` that fails here fails the BUILD, which is the only place this can be
 # caught before a pod is scheduled and an agent finds no compiler.
-USER sandbox
+#
+# `claude` RESOLVING TO THE USER'S COPY is asserted by path, not by version,
+# because that is the fact the version cannot report: a root-owned copy on an
+# earlier PATH entry answers `--version` exactly as happily and then cannot
+# update itself. Both halves — the prefix and the PATH order — have to hold for
+# this line to pass, and neither is visible from the other's file.
 RUN set -eux; \
     hanzo --version; dev --version; hanzo-mcp --version; \
     claude --version; codex --version; \
+    [ "$(command -v claude)" = "${HOME}/.local/bin/claude" ]; \
     node --version; npm --version; pnpm --version; bun --version; \
     deno --version; python3 --version; uv --version; go version; rustc --version; \
     cargo --version; zig version; java --version; ruby --version; php --version | head -1; \
@@ -1032,16 +1087,14 @@ RUN set -eux; \
 USER sandbox
 
 # Prove it, as the user that will run it. The last line is the one that matters:
-# it asserts /etc/zsh/zshrc was actually READ, not merely that zsh runs — a
-# system rc with a syntax error is a file zsh skips with a warning nobody sees
-# until every terminal in the fleet has no history and no completion.
-#
-# Running it here also builds the completion dump into the layer, so the first
-# prompt in a live pod does not pay to compile one.
+# it asserts the rc was actually READ, not merely that zsh runs — an rc with a
+# syntax error is a file zsh skips with a warning nobody sees until every
+# terminal in the fleet has no history and no completion. The dump is written by
+# the rc's own compinit, so its presence is the reading, and it carries down
+# from `exec` where the dotfiles were installed.
 RUN set -eux; \
     for b in zsh tmux kubectl doctl hanzo dev hanzo-mcp gh git; do command -v "$b"; done; \
-    [ "$(zsh -ic 'print -rn -- ${HISTSIZE}')" = "100000" ]; \
-    [ -s "${HOME}/.zcompdump" ]
+    [ -s "${HOME}/.zsh/cache/zcompdump" ]
 
 WORKDIR /work
 
