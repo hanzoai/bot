@@ -91,12 +91,12 @@ type ChannelPlugin = {
 
 One way, and it runs on our own stack:
 
-    push  ->  github.com/hanzoai/bot            the ONLY ref you can write
-      ->  git.hanzo.ai/hanzoai/bot               CANONICAL, and read-only
+    push  ->  github.com/hanzoai/bot            push here
+      ->  git.hanzo.ai/hanzoai/bot               CANONICAL; push here too
               .hanzo/workflows/ci.yml            the checks
               .hanzo/workflows/deploy.yml        builds ghcr.io/hanzoai/bot
               .hanzo/workflows/cloud.yml         builds ghcr.io/hanzoai/bot-cloud
-              .hanzo/workflows/cicd.yml          builds registry.hanzo.ai/hanzoai/sandbox
+              .hanzo/workflows/cicd.yml          builds oci.hanzo.ai/hanzoai/sandbox
               .hanzo/workflows/release.yml       publishes npm @hanzo/bot
       ->  hanzoai/universe crs/bot-gateway.yaml  names the tag that is live
       ->  hanzoai/operator                       reconciles the App
@@ -105,11 +105,12 @@ One way, and it runs on our own stack:
 **git.hanzo.ai is canonical; GitHub is a mirror.** Every build, check and release
 is a workflow under `.hanzo/workflows/`, which the forge reads.
 
-PUSH TO GITHUB. THE FORGE PULLS, AND IT WILL REFUSE YOU IF YOU TRY.
-`git push forge main` answers `Mirror Repository hanzoai/bot is read-only`,
-because the forge side is a PULL mirror: it fetches from GitHub on its own clock
-and no one writes to it. So "canonical" here means the forge is what the fleet
-reads and where every check runs — not that it is where a commit lands first.
+PUSH TO BOTH. `git push origin main && git push forge main` both succeed — the
+forge accepts a write, so the mirror's own clock is not the only way a ref gets
+there. It once answered `Mirror Repository hanzoai/bot is read-only`; it no
+longer does. "Canonical" means the forge is what the fleet reads and where every
+check runs, not that a commit has to land on GitHub first. Confirm both with
+`git ls-remote origin main` and `git ls-remote forge main` and compare the shas.
 
 There is no `sync.yml` and there never needs to be one; `.github/workflows/` is
 EMPTY. Nothing in this repo carries refs onward because the mirror is configured
@@ -234,7 +235,7 @@ step, and they would drift.
 
 ### The image: one browser, two ways to run it
 
-`Dockerfile.sandbox` → `registry.hanzo.ai/hanzoai/sandbox`, four tags on one chain
+`Dockerfile.sandbox` → `oci.hanzo.ai/hanzoai/sandbox`, four tags on one chain
 that forks once: `exec → dev → {desktop, admin}`.
 
 **`admin` is a tag that is NOT a class.** The other three are words a caller puts
@@ -432,8 +433,8 @@ the producer's shape is not the obvious guess — see below.
   wrong image fails loudly instead of quietly.
 - **hanzoai/ci's mirror step copies this image into the wrong org.** It rewrites
   `hanzoai` → `hanzo` on the way out, so a `repo:` that already names
-  `registry.hanzo.ai/hanzoai/sandbox` gets crane-copied to
-  `registry.hanzo.ai/hanzo/sandbox` as well — a second repo nothing pulls.
+  `oci.hanzo.ai/hanzoai/sandbox` gets crane-copied to
+  `oci.hanzo.ai/hanzo/sandbox` as well — a second repo nothing pulls.
 
 ### Security: what a prompt-injected run can reach
 
