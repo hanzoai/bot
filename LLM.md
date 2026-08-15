@@ -257,13 +257,36 @@ line, not `stable` — DOKS runs 1.34 and kubectl is supported within one minor 
 its apiserver, so today's stable 1.36 is out of skew with every cluster this box
 exists to reach.
 
-zsh's config is `docker/zshrc` → `/etc/zsh/zshrc`, system-wide and framework-free
-(a dotfile is the same file somewhere a fresh home, a `su` or a HOME override
-stops reading, and the only volume a sandbox mounts is `/work`). The build
-asserts the rc was **read**, not merely that zsh runs.
+zsh's config is **dotfiles, installed at build time by ellipsis.sh** as uid 1000:
+`zeekay/zsh` (zeesh), `zeekay/vim`, `zeekay/files`. `ellipsis install zeekay/zsh`
+resolves to `github.com/zeekay/dot-zsh` over https — the `dot-` is
+ELLIPSIS_PREFIX and https is ELLIPSIS_PROTO, both its defaults — and the
+package's own `pkg.link` picks `platform/linux/zshrc` by `os.platform()`, which
+is why the assert names that path rather than trusting the switch.
+
+**There is no `/etc/zsh/zshrc` any more, and there cannot be one.** `~/.zshenv`
+sets `no_global_rcs`, so zsh skips every global rc file; a system-wide config
+would be a file nothing reads. The same option stops `zsh -l` sourcing
+`/etc/profile` back over the image's `PATH`. `~/.zshenv` also sources
+`$CARGO_HOME/env`, and CARGO_HOME moved to the home directory for a writable
+cache while rustup wrote its env file beside the toolchain — hence the symlink.
+
+ellipsis runs its hooks without `set -e`, so `install` exiting 0 proves nothing.
+The build asserts one link per package plus `~/.zsh/cache/zcompdump`, which only
+exists once an interactive shell has **read** the rc.
 
 The terminal picks it up on its own: cloud's `shell()` is a preference chain,
 `zsh → bash → sh`, so an image without zsh costs a caller nothing.
+
+**The third-party agent CLIs install as uid 1000, into `~/.local`.** `claude` and
+`codex` are `npm install -g` with the prefix set to the user's own `~/.local`,
+run under `USER sandbox` rather than root. Root-owned in `/usr/local/lib/node_modules`
+they cannot rewrite themselves, so claude opened every shell with `Auto-update
+failed: no write permission to npm prefix` and stayed on the version in the layer.
+`ENV PATH` puts `/home/sandbox/.local/bin` **first** — ahead of `/usr/local/bin` —
+so the copy that can update itself is also the copy that runs, and `claude install
+latest` writes beside it. The build asserts `command -v claude` by PATH, not by
+`--version`: a shadowed root copy answers `--version` just as happily.
 
 **The browser lives in `exec`, at the bottom.** It used to be in `desktop`, which
 meant the DEFAULT class for an agent run could not open a web page. The class
