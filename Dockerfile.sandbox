@@ -2,15 +2,15 @@
 #
 # The sandbox image: the toolchain a coding agent actually works in.
 #
-# Published as registry.hanzo.ai/hanzoai/sandbox — the repo hanzoai/cloud's
-# apps/sandbox/runtime.go names by default (SANDBOX_IMAGE_REPO). The FILE is
-# still Dockerfile.box because `Dockerfile.sandbox` in this repo is TAKEN, by a
-# live and unrelated feature: bot's own Docker sandbox
-# (src/agents/sandbox/constants.ts pins `bot-sandbox-common:bookworm-slim`,
-# scripts/sandbox-common-setup.sh builds it, doctor-sandbox.ts checks it).
-# "box" is this repo's local word for the artifact; `hanzoai/sandbox` is the
-# name the fleet pulls it by, and the registry path is the one that has to
-# match a consumer.
+# Published as oci.hanzo.ai/hanzoai/sandbox — the repo hanzoai/cloud's
+# apps/sandbox/runtime.go names by default (SANDBOX_IMAGE_REPO), and the one
+# hanzo.yml's five image entries spell. The registry path is the one that has to
+# match a consumer, so it is read from hanzo.yml rather than remembered.
+#
+# Not to be confused with bot's OWN docker sandbox, which is a live and
+# unrelated feature: src/agents/sandbox/constants.ts pins
+# `bot-sandbox-common:bookworm-slim`, scripts/sandbox-common-setup.sh builds it,
+# doctor-sandbox.ts checks it.
 #
 # ONE recipe, four published tags, one chain that forks once:
 #
