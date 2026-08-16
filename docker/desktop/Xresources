@@ -1,0 +1,43 @@
+! How a terminal looks on the sandbox screen, stated once. The screen opens one
+! at startup and openbox's root menu opens more; both are xterm, so both read
+! this and the desktop stays one design instead of two.
+!
+! DejaVu Sans Mono is the image's own font — fonts-dejavu-core is installed
+! beside xterm — so this names a face that is always present rather than a
+! family X has to guess a substitute for.
+xterm*faceName:      DejaVu Sans Mono
+xterm*faceSize:      11
+xterm*termName:      xterm-256color
+xterm*saveLines:     10000
+xterm*scrollBar:     false
+xterm*internalBorder: 12
+! utf8 and metaSendsEscape are what a modern shell expects: without the first a
+! prompt drawn with box characters is mojibake, without the second Alt-b/Alt-f
+! insert bytes instead of moving the cursor.
+xterm*locale:        true
+xterm*utf8:          2
+xterm*metaSendsEscape: true
+xterm*selectToClipboard: true
+
+! Dark, low-contrast enough to read for an hour. The background is the darker
+! end of the same ramp the root window is painted with, so a window reads as a
+! layer above the desktop rather than a hole in it.
+xterm*background:    #0b0d12
+xterm*foreground:    #c8ccd4
+xterm*cursorColor:   #5b8cff
+xterm*color0:        #14171f
+xterm*color8:        #3a3f4b
+xterm*color1:        #e06c75
+xterm*color9:        #ef8b93
+xterm*color2:        #8fbf7f
+xterm*color10:       #a8d69a
+xterm*color3:        #d6b370
+xterm*color11:       #e8cf94
+xterm*color4:        #5b8cff
+xterm*color12:       #86aaff
+xterm*color5:        #b48ead
+xterm*color13:       #cfa9c9
+xterm*color6:        #6fb3c4
+xterm*color14:       #93cdda
+xterm*color7:        #c8ccd4
+xterm*color15:       #f0f2f5
