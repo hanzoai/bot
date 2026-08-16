@@ -580,6 +580,15 @@ USER sandbox
 # for a writable cache while rustup wrote its env file beside the toolchain, so
 # one symlink makes the file rustup wrote the file the shell reads.
 #
+# A LINK WHOSE TARGET THIS IMAGE DOES NOT CARRY IS NOT CONFIGURATION. dot-files
+# points several ~/.config entries — hanzo, gh, gcloud, hub — at a sibling
+# package it installs only on its author's machine, and `mkdir` on a dangling
+# link fails EEXIST rather than creating anything. A tool that makes its own
+# config directory on first use therefore cannot start: `hanzo auth login` is the
+# one that matters here, because a sandbox is handed its owner's session that
+# way. The links that RESOLVE are the configuration and they stay; the rest are
+# deleted, and the assert keeps the next package from adding more.
+#
 # ellipsis runs its hooks without set -e, so `install` exiting 0 is not evidence.
 # The asserts are: one link per package, and a completion dump that only exists
 # if an interactive shell actually READ the rc — which also builds the dump into
@@ -589,6 +598,8 @@ RUN set -eux; \
     [ -f "${HOME}/.cargo/env" ]; \
     git clone --depth 1 https://github.com/ellipsis/ellipsis "${HOME}/.ellipsis"; \
     "${HOME}/.ellipsis/bin/ellipsis" install zeekay/zsh zeekay/vim zeekay/files; \
+    find "${HOME}" -xtype l -delete; \
+    [ -z "$(find "${HOME}" -xtype l)" ]; \
     [ "$(readlink -f "${HOME}/.zshrc")" = "${HOME}/.ellipsis/packages/zsh/platform/linux/zshrc" ]; \
     [ -f "${HOME}/.vimrc" ]; \
     [ -f "${HOME}/.tmux.conf" ]; \
