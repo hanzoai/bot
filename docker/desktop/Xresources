@@ -1,27 +1,31 @@
 ! How a terminal looks on the sandbox screen, stated once. The screen opens one
-! at startup and openbox's root menu opens more; both are xterm, so both read
-! this and the desktop stays one design instead of two.
+! at startup and the root menu opens more; both are xterm, so both read this and
+! the desktop stays one design instead of two.
 !
-! DejaVu Sans Mono is the image's own font — fonts-dejavu-core is installed
-! beside xterm — so this names a face that is always present rather than a
-! family X has to guess a substitute for.
+! NO APOSTROPHES BELOW. xrdb runs this through cpp, which reads a lone ' as the
+! start of a character constant and warns about the unterminated one at every
+! boot.
+!
+! DejaVu Sans Mono ships in this image beside xterm (fonts-dejavu-core), so this
+! names a face that is always present rather than one X substitutes for.
 xterm*faceName:      DejaVu Sans Mono
 xterm*faceSize:      11
 xterm*termName:      xterm-256color
 xterm*saveLines:     10000
 xterm*scrollBar:     false
 xterm*internalBorder: 12
-! utf8 and metaSendsEscape are what a modern shell expects: without the first a
-! prompt drawn with box characters is mojibake, without the second Alt-b/Alt-f
-! insert bytes instead of moving the cursor.
+
+! What a modern shell expects: without utf8 a prompt drawn with box characters is
+! mojibake, and without metaSendsEscape Alt-b and Alt-f insert bytes instead of
+! moving the cursor.
 xterm*locale:        true
 xterm*utf8:          2
 xterm*metaSendsEscape: true
 xterm*selectToClipboard: true
 
-! Dark, low-contrast enough to read for an hour. The background is the darker
-! end of the same ramp the root window is painted with, so a window reads as a
-! layer above the desktop rather than a hole in it.
+! Dark, and low-contrast enough to read for an hour. The background is the darker
+! end of the ramp the root window is painted with, so a window reads as a layer
+! above the desktop rather than a hole in it.
 xterm*background:    #0b0d12
 xterm*foreground:    #c8ccd4
 xterm*cursorColor:   #5b8cff
