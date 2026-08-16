@@ -2,9 +2,9 @@
 ! at startup and the root menu opens more; both are xterm, so both read this and
 ! the desktop stays one design instead of two.
 !
-! NO APOSTROPHES BELOW. xrdb runs this through cpp, which reads a lone ' as the
-! start of a character constant and warns about the unterminated one at every
-! boot.
+! NO APOSTROPHES ANYWHERE IN THIS FILE, comments included. xrdb runs it through
+! cpp, which reads a lone apostrophe as the start of a character constant and
+! warns about the unterminated one at every boot.
 !
 ! DejaVu Sans Mono ships in this image beside xterm (fonts-dejavu-core), so this
 ! names a face that is always present rather than one X substitutes for.
