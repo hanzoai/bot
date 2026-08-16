@@ -57,29 +57,19 @@ log "X up on ${DISPLAY} (${SCREEN})"
 
 openbox &
 
-# THE DESKTOP ITSELF. Everything above is plumbing that produces a managed root
-# window; without these three the screen connects, draws nothing, and is
-# indistinguishable from a screen that never came up.
+# HOW THE SCREEN LOOKS. Xvfb and openbox together produce a managed root window
+# with nothing on it, which a client cannot tell from a screen that never came
+# up. These two are what it looks like, so they run for every class — the phone
+# the android class draws sits on this background too.
 #
-# Each is a BACKGROUND launch, and that is the difference between a desktop and
-# a program with a display. The foreground process at the bottom of this file is
-# what the container waits on, so anything started there would end the pod when
-# the user closed it — a terminal you can only close once.
-#
-# xrdb loads the terminal's look before the terminal exists, so the first window
-# is already styled and so is every one openbox's root menu opens later.
+# xrdb loads the terminal's look before any terminal exists, so the window opened
+# below is already styled and so is every one openbox's root menu opens later.
 xrdb -merge /etc/X11/Xresources/sandbox
 
 # The root window, painted dark bottom-left to slightly lighter top-right. It is
-# the first thing a client sees, so it is painted BEFORE the server starts
-# serving: a frame of the X default stipple is the whole first impression.
+# painted BEFORE the server starts serving, because the first frame a client
+# receives is the whole first impression.
 hsetroot -add '#0a0c11' -add '#161b26' -gradient 20
-
-# One terminal, open and waiting. It runs the user's own login shell — the
-# configured zsh, with the dotfiles this image builds — because the point of the
-# screen is to be somewhere work happens, and an empty desktop asks the person
-# who opened it to already know openbox's menu is on the right mouse button.
-xterm -geometry 104x30+48+40 &
 
 # X0tigervnc IS the scraping server. `x0vncserver` on PATH is TigerVNC's session
 # manager — a perl wrapper that starts the server, waits for it, and kills it if
@@ -124,6 +114,17 @@ if [ "$#" -gt 0 ]; then
   log "running $*"
   exec "$@"
 fi
+
+# NOTHING ELSE IS GOING TO BE ON THIS SCREEN, so put a terminal on it. A class
+# that brought its own program has already taken the branch above; this is the
+# plain desktop, and a plain desktop with an empty root asks the person who
+# opened it to already know openbox's menu is on the right mouse button.
+#
+# BACKGROUND, and that is the difference between a desktop and a program with a
+# display: the line below is the one process this container waits on, so a
+# terminal started there would end the pod the first time it was closed. xterm
+# runs the user's own shell — the configured zsh this image builds.
+xterm -geometry 104x30+48+40 &
 
 # The pod's command, same as every other class.
 #
