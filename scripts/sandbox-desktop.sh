@@ -2,10 +2,17 @@
 # The desktop class's display. Starts a virtual screen, then becomes the same
 # `sleep infinity` every other sandbox class runs.
 #
-# This is NOT a daemon in the sense the sandbox design forbids. Nothing started
-# here accepts a command that runs code: X draws, openbox decorates,
-# X0tigervnc mirrors pixels and websockify carries RFB over WebSocket. Work
-# still arrives only through the Kubernetes exec subresource.
+# NOTHING STARTED HERE LISTENS FOR WORK, which is the property the sandbox
+# design asks for. X draws, openbox decorates, hsetroot paints, X0tigervnc
+# mirrors pixels and websockify carries RFB over WebSocket — and every one of
+# them binds loopback, so the only route to any of it is the exec subresource
+# hanzoai/cloud reads the screen over.
+#
+# The terminal is a shell and a shell runs code, so it is worth saying whose:
+# it is reachable only by drawing on this display, and the caller who can do
+# that is the one holding a ticket for this sandbox's screen — who can already
+# run anything here through the exec channel. A desktop with a terminal on it
+# grants no authority a desktop without one withholds.
 #
 # TigerVNC, NOT x11vnc, AND THE REASON IS A REAL BUG.
 # hanzoai/operative found it and wrote it down in
@@ -49,6 +56,30 @@ fi
 log "X up on ${DISPLAY} (${SCREEN})"
 
 openbox &
+
+# THE DESKTOP ITSELF. Everything above is plumbing that produces a managed root
+# window; without these three the screen connects, draws nothing, and is
+# indistinguishable from a screen that never came up.
+#
+# Each is a BACKGROUND launch, and that is the difference between a desktop and
+# a program with a display. The foreground process at the bottom of this file is
+# what the container waits on, so anything started there would end the pod when
+# the user closed it — a terminal you can only close once.
+#
+# xrdb loads the terminal's look before the terminal exists, so the first window
+# is already styled and so is every one openbox's root menu opens later.
+xrdb -merge /etc/X11/Xresources/sandbox
+
+# The root window, painted dark bottom-left to slightly lighter top-right. It is
+# the first thing a client sees, so it is painted BEFORE the server starts
+# serving: a frame of the X default stipple is the whole first impression.
+hsetroot -add '#0a0c11' -add '#161b26' -gradient 20
+
+# One terminal, open and waiting. It runs the user's own login shell — the
+# configured zsh, with the dotfiles this image builds — because the point of the
+# screen is to be somewhere work happens, and an empty desktop asks the person
+# who opened it to already know openbox's menu is on the right mouse button.
+xterm -geometry 104x30+48+40 &
 
 # X0tigervnc IS the scraping server. `x0vncserver` on PATH is TigerVNC's session
 # manager — a perl wrapper that starts the server, waits for it, and kills it if

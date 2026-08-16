@@ -869,6 +869,7 @@ RUN apt-get update \
     fonts-dejavu-core \
     fonts-liberation \
     fonts-noto-color-emoji \
+    hsetroot \
     novnc \
     openbox \
     scrot \
@@ -879,8 +880,34 @@ RUN apt-get update \
     x11-xserver-utils \
     xauth \
     xdotool \
+    xterm \
     xvfb \
   && rm -rf /var/lib/apt/lists/*
+
+# THE SCREEN NEEDS SOMETHING THAT DRAWS, and these two are it. Xvfb and openbox
+# together produce a managed root window with nothing on it, which is a working
+# desktop and an unusable one: openbox's own root menu offers a terminal through
+# the x-terminal-emulator alternative, and until something registers that
+# alternative the entry runs nothing.
+#
+#   xterm    registers it, and is the terminal the screen opens. It draws
+#            through plain X11, so it renders on a software Xvfb where a
+#            GPU-accelerated terminal has no GL context to ask for.
+#   hsetroot paints the root window. The alternative in x11-xserver-utils,
+#            xsetroot, paints one flat colour; a gradient is the whole
+#            difference between a background and an unlit screen.
+#
+# Onyx is openbox's own dark theme, shipped in the openbox package, so the
+# window decorations match what is behind them without carrying a theme of our
+# own. It is set by editing the SYSTEM rc.xml rather than by shipping a user one:
+# a user rc.xml replaces that file wholesale and openbox falls back to its
+# compiled-in defaults for every element absent from it, which is a desktop with
+# no alt-tab. Changing the one element leaves every other default standing.
+COPY docker/desktop/Xresources /etc/X11/Xresources/sandbox
+RUN set -eux; \
+    sed -i 's|<name>Clearlooks</name>|<name>Onyx</name>|' /etc/xdg/openbox/rc.xml; \
+    grep -q '<name>Onyx</name>' /etc/xdg/openbox/rc.xml; \
+    [ -d /usr/share/themes/Onyx/openbox-3 ]
 
 # THE VNC SERVER IS X0tigervnc, AND IT IS ALREADY HERE — there is no x11vnc in
 # this image and there must not be one. `tigervnc-scraping-server` above is the
@@ -896,7 +923,7 @@ RUN apt-get update \
 # browser on that stream. It is installed at the bottom of the chain for every
 # class, so a package list somebody trims one day would take the desktop's only
 # way out with it and nothing else in this image would notice.
-RUN set -eux; for b in Xvfb openbox X0tigervnc socat xdpyinfo; do command -v "$b"; done
+RUN set -eux; for b in Xvfb openbox X0tigervnc socat xdpyinfo xterm hsetroot xrdb; do command -v "$b"; done
 
 # THE BROWSER IS NOT INSTALLED HERE — it is in `exec`, at the bottom of the
 # chain, so `dev` has one too. What this stage adds is a SCREEN for it: with
