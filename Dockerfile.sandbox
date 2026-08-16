@@ -899,15 +899,22 @@ RUN apt-get update \
 #
 # Onyx is openbox's own dark theme, shipped in the openbox package, so the
 # window decorations match what is behind them without carrying a theme of our
-# own. It is set by editing the SYSTEM rc.xml rather than by shipping a user one:
-# a user rc.xml replaces that file wholesale and openbox falls back to its
-# compiled-in defaults for every element absent from it, which is a desktop with
-# no alt-tab. Changing the one element leaves every other default standing.
+# own. It is set by EDITING the system rc.xml, while the menu is REPLACED — the
+# two configs differ in kind. A menu is data with no compiled-in default to lose,
+# but a partial rc.xml drops openbox back to its built-in bindings for every
+# element it omits, which is a desktop with no alt-tab.
+#
+# The stock menu names x-www-browser, obconf and a /Debian submenu built from a
+# file no minimal install carries, so three of its entries run nothing and
+# openbox logs a missing-menu error at every boot. Ours names the two programs
+# that are here, and the asserts below are what keep that true.
 COPY docker/desktop/Xresources /etc/X11/Xresources/sandbox
+COPY docker/desktop/menu.xml /etc/xdg/openbox/menu.xml
 RUN set -eux; \
     sed -i 's|<name>Clearlooks</name>|<name>Onyx</name>|' /etc/xdg/openbox/rc.xml; \
     grep -q '<name>Onyx</name>' /etc/xdg/openbox/rc.xml; \
-    [ -d /usr/share/themes/Onyx/openbox-3 ]
+    [ -d /usr/share/themes/Onyx/openbox-3 ]; \
+    for p in $(sed -n 's|.*<execute>\(.*\)</execute>.*|\1|p' /etc/xdg/openbox/menu.xml); do command -v "$p"; done
 
 # THE VNC SERVER IS X0tigervnc, AND IT IS ALREADY HERE — there is no x11vnc in
 # this image and there must not be one. `tigervnc-scraping-server` above is the
