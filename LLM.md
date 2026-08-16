@@ -292,10 +292,32 @@ latest` writes beside it. The build asserts `command -v claude` by PATH, not by
 **The browser lives in `exec`, at the bottom.** It used to be in `desktop`, which
 meant the DEFAULT class for an agent run could not open a web page. The class
 boundary is cut on RUNTIME cost — `desktop` earns its tag because Xvfb, openbox,
-x0vncserver and websockify are four processes running forever on every desktop
+X0tigervnc and websockify are four processes running forever on every desktop
 pod. A browser binary nobody launched costs nothing at runtime, and layers are
 shared per node. So `desktop` does not add a browser; it adds a **screen** for
 the browser that is already there.
+
+**A screen has to draw something.** Xvfb plus openbox is a managed root window
+with nothing on it, and a client that connects to it cannot tell it from a screen
+that never came up. `scripts/sandbox-desktop.sh` therefore paints the root
+(`hsetroot`, a dark gradient), loads the terminal's look
+(`xrdb -merge /etc/X11/Xresources/sandbox`) and opens one `xterm` on the user's
+own zsh — each as a BACKGROUND launch, because the foreground process at the
+bottom of that script is the one the container waits on and a desktop started
+there would end its own pod the first time somebody closed the window. Window
+decorations come from openbox's own dark theme, set by editing the system
+`rc.xml`: a user `rc.xml` replaces that file wholesale and openbox falls back to
+compiled-in defaults for every element absent from it, which is a desktop with no
+alt-tab. Installing `xterm` also registers the `x-terminal-emulator` alternative
+openbox's root menu points at, so the right-mouse menu works too.
+
+**`$HOME` carries no dangling links, and that is load-bearing.** `ellipsis
+install zeekay/files` links several `~/.config` entries at a sibling package it
+installs only on its author's machine. `mkdir` on a dangling symlink fails
+EEXIST, so any tool that creates its own config directory on first use cannot
+start there — `hanzo auth login` among them, which is how hanzoai/cloud
+(`apps/sandbox/cred.go`) hands a fresh pod its owner's session. The image deletes
+the links that do not resolve and asserts none are left.
 
 The half that was missing was not the browser but the **library**. `npx playwright
 install` fetches the chromium build to `PLAYWRIGHT_BROWSERS_PATH` and leaves the
