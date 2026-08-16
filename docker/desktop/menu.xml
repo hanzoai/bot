@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- The root menu, on the right mouse button.
+
+     EVERY ENTRY RUNS SOMETHING THIS IMAGE HAS. The stock Debian menu offers
+     x-www-browser, obconf and a /Debian submenu built from a file no minimal
+     install carries, so three of its entries do nothing and openbox logs a
+     missing-menu error on every boot. This names the two programs that are
+     here.
+
+     Replacing the file wholesale is right for a MENU and wrong for rc.xml: a
+     menu is data with no compiled-in default to lose, while a partial rc.xml
+     drops openbox back to its built-in bindings for everything it omits.
+
+     THERE IS NO EXIT. Openbox is this desktop; quitting it leaves a screen with
+     windows that cannot be moved, raised or closed, and nothing inside the pod
+     can start it again. The lease is what ends a sandbox. -->
+<openbox_menu xmlns="http://openbox.org/">
+
+<menu id="root-menu" label="sandbox">
+  <item label="Terminal">
+    <action name="Execute"><execute>x-terminal-emulator</execute></action>
+  </item>
+  <item label="Browser">
+    <action name="Execute"><execute>chromium</execute></action>
+  </item>
+  <separator />
+  <item label="Restart window manager">
+    <action name="Restart" />
+  </item>
+</menu>
+
+</openbox_menu>
