@@ -23,7 +23,7 @@
 # The box images take the canonical lane instead of a fourth hand-rolled one
 # because they need exactly what it already does: multi-image `images:` entries
 # off one Dockerfile with per-image `args`, the shared imgver version derivation,
-# and the push to registry.hanzo.ai. Rewriting that here would be a second copy
+# and the push to oci.hanzo.ai. Rewriting that here would be a second copy
 # of the fleet's build logic in the one repo that had none.
 name: CI/CD
 on:
