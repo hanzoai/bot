@@ -38,14 +38,6 @@
 # `hanzoai/box`: the daemon design that owned that name was deleted from cloud
 # along with cmd/boxd. One artifact, one path, named by the thing that fetches it.
 #
-# THE HOST IS oci.hanzo.ai, AND registry.hanzo.ai IS GONE. It was documented as a
-# deprecated alias for the same store, served by one Traefik file router. That
-# router no longer answers: `https://registry.hanzo.ai/v2/` returns 404 where
-# `https://oci.hanzo.ai/v2/` returns 401, which is the difference between "no
-# registry here" and "a registry that wants credentials". Every build since the
-# alias died has built the whole image, pushed every layer, and failed on the
-# manifest — the reason the pod still runs bytes from an older recipe.
-#
 # `repo:` NAMES THE REGISTRY DIRECTLY rather than ghcr.io. Every other repo in
 # the fleet pushes to ghcr and lets the lane's crane step mirror across, but that
 # mirror rewrites the org — ghcr.io/hanzoai/x lands at <registry>/hanzo/x — and
