@@ -175,7 +175,7 @@ function parseSkillMd(slug: string, filePath: string): SkillData | null {
 
 function sharedCss(): string {
   return `*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--brand:#fd4444;--brand-secondary:#ff6b6b;--bg:#000;--bg-card:rgba(255,255,255,0.04);--bg-hover:#1a1a1a;--border:rgba(255,255,255,0.08);--border-hover:rgba(255,255,255,0.16);--text:#fff;--muted:#888;--subtle:#555;--max-w:1200px;--ease:cubic-bezier(0.4,0,0.2,1);--ease-bounce:cubic-bezier(0.34,1.56,0.64,1);--font:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--font-mono:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace}
+:root{--brand:#fd4444;--brand-secondary:#ff6b6b;--bg:#000;--bg-card:rgba(255,255,255,0.04);--bg-hover:#1a1a1a;--border:rgba(255,255,255,0.08);--border-hover:rgba(255,255,255,0.16);--text:#fff;--muted:#888;--subtle:#555;--max-w:1200px;--ease:cubic-bezier(0.4,0,0.2,1);--ease-bounce:cubic-bezier(0.34,1.56,0.64,1);--font:'Zen',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--font-mono:'SF Mono',SFMono-Regular,Menlo,Consolas,monospace}
 html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased;position:relative}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:64px 64px;pointer-events:none;z-index:0}
@@ -365,9 +365,6 @@ ${JSON.stringify(
 )}
 </script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥷</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 ${sharedCss()}
 
