@@ -131,6 +131,23 @@ images:
     platforms: [linux/amd64]
     args: { STAGE: android }
 
+  # The BOUNDARY image is the estate's other half: the sandbox images above are
+  # what runs INSIDE a boundary, this is what a NODE needs to offer one. It ships
+  # here rather than in a repo of its own because the two are one artifact set —
+  # a node that cannot hold a boundary cannot run any of them — and because this
+  # lane already builds both arches.
+  #
+  # It therefore SHARES `version:` with them, which is the sandbox's number. That
+  # is a deliberate estate-wide release number and not the borrowed one this file
+  # warns about above: docker/sandbox.version changes when any of these images
+  # change, and a deployment pins a digest regardless. Give it a file of its own
+  # the day the two need to move independently.
+  - name: boundary
+    context: .
+    dockerfile: Dockerfile.boundary
+    repo: oci.hanzo.ai/hanzoai/boundary
+    platforms: [linux/amd64, linux/arm64]
+
   - name: sandbox-admin
     context: .
     dockerfile: Dockerfile.sandbox
