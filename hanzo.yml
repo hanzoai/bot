@@ -44,17 +44,32 @@
 # `hanzo/sandbox` is not the path cloud pulls. The lane logs into the host named
 # here before it builds, so this is a direct push, not a special case.
 #
-# AMD64 ONLY, AND THE REASON IS THE FLEET, NOT THE FILE. Nothing in this image
-# still blocks arm64 — the `COPY --from=<cloud release> /boxd` that once pinned
-# it to cloud's amd64-only manifest is gone with the daemon, and every remaining
-# input publishes both arches. What blocks it is arithmetic: DOKS has no arm64
-# node, so arm64 buys nothing that runs today, and it would be built under QEMU
-# emulation — for an image that unpacks and compiles a Go + Rust + JDK + Zig +
-# Bun + Deno toolchain, that is the difference between a build that finishes and
-# one that is still going. The tag a consumer pins is unchanged either way:
-# single-arch moves the sha- tag to `sha-<short>-amd64-<sfx>` and leaves
-# `<sfx>-latest` and the semver exactly where they were. An arm64 node makes this
-# one word here, not a rebuild.
+# BOTH ARCHES, BECAUSE THE FLEET NOW HAS BOTH. This entry read amd64-only, and
+# the reason it gave was arithmetic rather than anything in the file: DOKS had no
+# arm64 node, so arm64 bought nothing that runs. It also promised its own remedy —
+# "an arm64 node makes this one word here, not a rebuild" — and that is what this
+# is. The fleet's first arm64 node (spark, GB10, 20 cores) is registered and
+# carries the `hanzo-build-linux-arm64` label hanzoai/ci's build lane names.
+#
+# Nothing in the image ever blocked it. Every toolchain here RESOLVES its own
+# arch and downloads a prebuilt binary — node, go, bun, deno, zig, gh each carry
+# an `arm64)` case with its own pinned sha256 — so the old note's "unpacks and
+# compiles a Go + Rust + JDK + Zig + Bun + Deno toolchain" overstated the cost of
+# emulating it: what QEMU actually runs here is apt, curl and tar, not a compiler.
+# A stage that genuinely could not cross is `android`, and it says so on its own
+# entry rather than holding the other three back.
+#
+# The consumer's tag does not move. A multi-arch entry emits ONE manifest list
+# per tag and containerd picks the native manifest per node, so `<sfx>-latest`,
+# the semver and every pinned digest mean what they meant — with the digest now
+# naming an index rather than one image, which is the whole point: spark could
+# pull the old digest and then answer `exec format error`, a pod that starts and
+# cannot run its own shell.
+#
+# QEMU is the FLOOR, not the ceiling. The lane installs binfmt and runs one
+# `buildx build --platform`, so today's arm64 half is emulated on the amd64
+# runner. Native is a buildx builder with an arm64 NODE appended — ci's own
+# comment names that as the next step and its precondition is already met.
 
 # THE IMAGE'S OWN VERSION, AND THE REASON IT NEEDS ONE.
 #
@@ -86,7 +101,7 @@ images:
     dockerfile: Dockerfile.sandbox
     repo: oci.hanzo.ai/hanzoai/sandbox
     tag-suffix: exec
-    platforms: [linux/amd64]
+    platforms: [linux/amd64, linux/arm64]
     args: { STAGE: exec }
 
   - name: sandbox-dev
@@ -94,7 +109,7 @@ images:
     dockerfile: Dockerfile.sandbox
     repo: oci.hanzo.ai/hanzoai/sandbox
     tag-suffix: dev
-    platforms: [linux/amd64]
+    platforms: [linux/amd64, linux/arm64]
     args: { STAGE: dev }
 
   - name: sandbox-desktop
@@ -102,7 +117,7 @@ images:
     dockerfile: Dockerfile.sandbox
     repo: oci.hanzo.ai/hanzoai/sandbox
     tag-suffix: desktop
-    platforms: [linux/amd64]
+    platforms: [linux/amd64, linux/arm64]
     args: { STAGE: desktop }
 
   # android is the one entry whose `platforms:` is the IMAGE's limit rather than
@@ -121,7 +136,7 @@ images:
     dockerfile: Dockerfile.sandbox
     repo: oci.hanzo.ai/hanzoai/sandbox
     tag-suffix: admin
-    platforms: [linux/amd64]
+    platforms: [linux/amd64, linux/arm64]
     args: { STAGE: admin }
 
 # The gate for THIS lane, and deliberately not a second copy of ci.yml.
