@@ -1,0 +1,137 @@
+# The BOUNDARY image: everything a machine needs to OFFER a sandbox, as opposed
+# to the sandbox images beside it, which are what runs INSIDE one.
+#
+# WHY AN IMAGE AND NOT A DOWNLOAD. `hanzo cluster up` fetched its boundaries from
+# four hosts at install time — get.k3s.io, storage.googleapis.com, and github.com
+# twice — so a node came up only if all four were reachable, only if none had
+# moved an asset, and with whatever those hosts served that minute. Each of those
+# is a real failure we hit: kata renamed its asset from .tar.xz to .tar.zst, and
+# github's API answers 60 requests an hour per address, which a busy machine
+# spends before lunch. A registry we run answers all of it, and the digest a node
+# pulls is one we published.
+#
+# WHAT IT CARRIES, and every one is a name a node already looks for:
+#   /usr/local/bin/runsc + containerd-shim-runsc-v1   the gVisor boundary
+#   /opt/kata/**                                      the kata runtime and shims
+#   /opt/kata/bin/firecracker + jailer                the microVM kata omits on arm64
+#   /usr/local/bin/hanzo                              our own tooling, last layer
+#
+# FIRECRACKER COMES FROM FIRECRACKER, NOT FROM KATA. kata-static ships a
+# firecracker for amd64 and none for arm64 at 4.1.0, while still shipping
+# configuration-rs-fc.toml naming /opt/kata/bin/firecracker — a config with no
+# binary, which reads as supported and is not. Firecracker itself publishes both
+# arches, so this takes it from the project that builds it and the boundary is
+# native on both.
+#
+# EVERY VERSION IS PINNED AND EVERY DOWNLOAD IS CHECKED. A mirror that fetches
+# `latest` has moved the moving target rather than removed it.
+
+ARG DEBIAN=debian:12-slim
+
+# ---------------------------------------------------------------------------
+# gVisor. Upstream publishes per-arch binaries beside their sha512s; both are
+# read, so a corrupted or substituted download fails here and not on a node.
+# ---------------------------------------------------------------------------
+FROM ${DEBIAN} AS gvisor
+ARG TARGETARCH
+ARG GVISOR_RELEASE=20260817
+RUN set -eux; \
+    apt-get update && apt-get install -y --no-install-recommends ca-certificates wget; \
+    case "${TARGETARCH}" in \
+      amd64) garch=x86_64 ;; \
+      arm64) garch=aarch64 ;; \
+      *) echo "gvisor publishes nothing for TARGETARCH=${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    base="https://storage.googleapis.com/gvisor/releases/release/${GVISOR_RELEASE}/${garch}"; \
+    mkdir -p /out/usr/local/bin; cd /out/usr/local/bin; \
+    for b in runsc containerd-shim-runsc-v1; do \
+      wget -q "${base}/${b}" "${base}/${b}.sha512"; \
+      sha512sum -c "${b}.sha512"; \
+      rm -f "${b}.sha512"; chmod 0755 "${b}"; \
+    done
+
+# ---------------------------------------------------------------------------
+# kata-containers. The 4.x shim lives under runtime-rs/bin; the per-hypervisor
+# shim NAMES are what containerd resolves (`io.containerd.kata-fc.v2` ->
+# containerd-shim-kata-fc-v2), so they are linked here rather than on the node.
+# ---------------------------------------------------------------------------
+FROM ${DEBIAN} AS kata
+ARG TARGETARCH
+ARG KATA_VERSION=4.1.0
+RUN set -eux; \
+    apt-get update && apt-get install -y --no-install-recommends ca-certificates curl xz-utils zstd; \
+    f="kata-static-${KATA_VERSION}-${TARGETARCH}.tar.zst"; \
+    curl -sfLO "https://github.com/kata-containers/kata-containers/releases/download/${KATA_VERSION}/${f}"; \
+    mkdir -p /out; tar --zstd -xf "$f" -C /out; \
+    shim=""; \
+    for c in /out/opt/kata/runtime-rs/bin/containerd-shim-kata-v2 /out/opt/kata/bin/containerd-shim-kata-v2; do \
+      [ -x "$c" ] && { shim="${c#/out}"; break; }; \
+    done; \
+    [ -n "$shim" ] || { echo "kata ${KATA_VERSION} unpacked no containerd-shim-kata-v2" >&2; exit 1; }; \
+    mkdir -p /out/usr/local/bin; \
+    for h in fc clh; do ln -sf "$shim" "/out/usr/local/bin/containerd-shim-kata-${h}-v2"; done
+
+# ---------------------------------------------------------------------------
+# Firecracker, from the project that builds it. jailer rides along: kata treats
+# it as optional (unset means no jail) and a node that wants one should not have
+# to fetch it separately.
+# ---------------------------------------------------------------------------
+FROM ${DEBIAN} AS firecracker
+ARG TARGETARCH
+ARG FIRECRACKER_VERSION=v1.16.1
+RUN set -eux; \
+    apt-get update && apt-get install -y --no-install-recommends ca-certificates curl; \
+    case "${TARGETARCH}" in \
+      amd64) farch=x86_64 ;; \
+      arm64) farch=aarch64 ;; \
+      *) echo "firecracker publishes nothing for TARGETARCH=${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    curl -sfLo /tmp/fc.tgz \
+      "https://github.com/firecracker-microvm/firecracker/releases/download/${FIRECRACKER_VERSION}/firecracker-${FIRECRACKER_VERSION}-${farch}.tgz"; \
+    mkdir -p /tmp/fc /out/opt/kata/bin; tar -xzf /tmp/fc.tgz -C /tmp/fc; \
+    for n in firecracker jailer; do \
+      b=$(find /tmp/fc -type f -name "${n}-${FIRECRACKER_VERSION}-${farch}" | head -1); \
+      [ -n "$b" ] && install -m 0755 "$b" "/out/opt/kata/bin/${n}"; \
+    done; \
+    test -x /out/opt/kata/bin/firecracker
+
+# ---------------------------------------------------------------------------
+# The image a node pulls. Nothing is installed at run time and nothing is
+# fetched: `hanzo cluster up` copies these paths onto the host, so what a node
+# runs is exactly what this build published under one digest.
+# ---------------------------------------------------------------------------
+# OUR TOOLING, in a stage of its own so the COPY always has something to copy —
+# a glob that matches nothing is a build failure, not an omission. Empty by
+# default, because a boundary image that will not build without the CLI would
+# make the node installer depend on the thing it installs. Pass the URL to carry
+# it: --build-arg HANZO_CLI_URL=https://...
+FROM ${DEBIAN} AS tooling
+ARG HANZO_CLI_URL=""
+RUN set -eux; \
+    mkdir -p /out/usr/local/bin; \
+    if [ -n "${HANZO_CLI_URL}" ]; then \
+      apt-get update && apt-get install -y --no-install-recommends ca-certificates curl; \
+      curl -sfLo /out/usr/local/bin/hanzo "${HANZO_CLI_URL}"; \
+      chmod 0755 /out/usr/local/bin/hanzo; \
+    fi
+
+FROM ${DEBIAN} AS final
+COPY --from=gvisor       /out/ /
+COPY --from=kata         /out/ /
+COPY --from=firecracker  /out/ /
+COPY --from=tooling      /out/ /
+
+# Re-declared because an ARG is scoped to the stage that names it, and a LABEL
+# reading one from another stage renders empty rather than failing — a version
+# label that silently says nothing is worse than no label.
+ARG GVISOR_RELEASE=20260817
+ARG KATA_VERSION=4.1.0
+ARG FIRECRACKER_VERSION=v1.16.1
+ARG BOUNDARY_VERSION=dev
+RUN printf '%s\n' "${BOUNDARY_VERSION}" > /etc/boundary-version
+
+# A node reads these to know what it is about to install, and the image can be
+# asked the same question a running host is.
+LABEL ai.hanzo.boundary.gvisor="${GVISOR_RELEASE}" \
+      ai.hanzo.boundary.kata="${KATA_VERSION}" \
+      ai.hanzo.boundary.firecracker="${FIRECRACKER_VERSION}"
