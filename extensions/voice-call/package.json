@@ -4,10 +4,10 @@
   "description": "HanzoBot voice-call plugin",
   "type": "module",
   "dependencies": {
-    "@sinclair/typebox": "0.34.48",
-    "commander": "^14.0.3",
-    "ws": "^8.19.0",
-    "zod": "^4.3.6"
+    "@sinclair/typebox": "catalog:",
+    "commander": "catalog:",
+    "ws": "catalog:",
+    "zod": "catalog:"
   },
   "hanzo-bot": {
     "extensions": [
