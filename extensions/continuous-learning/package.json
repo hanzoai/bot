@@ -8,7 +8,7 @@
     "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "@hanzo/bot": ">=2026.1.26"
+    "@hanzo/bot": ">=2026.6.5"
   },
   "bot": {
     "extensions": [
