@@ -756,10 +756,6 @@
       "destination": "/tools/plugin"
     },
     {
-      "source": "/railway",
-      "destination": "/install/railway"
-    },
-    {
       "source": "/northflank",
       "destination": "/install/northflank"
     },
@@ -790,10 +786,6 @@
     {
       "source": "/platforms/exe-dev",
       "destination": "/install/exe-dev"
-    },
-    {
-      "source": "/platforms/railway",
-      "destination": "/install/railway"
     },
     {
       "source": "/platforms/render",
@@ -877,7 +869,6 @@
                   "install/gcp",
                   "install/macos-vm",
                   "install/exe-dev",
-                  "install/railway",
                   "install/render",
                   "install/northflank"
                 ]
@@ -1476,7 +1467,6 @@
                   "zh-CN/install/gcp",
                   "zh-CN/install/macos-vm",
                   "zh-CN/install/exe-dev",
-                  "zh-CN/install/railway",
                   "zh-CN/install/render",
                   "zh-CN/install/northflank"
                 ]
