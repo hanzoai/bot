@@ -41,7 +41,12 @@ jobs:
     # hanzo-build-linux-amd64; a label nothing offers does not fail, it queues
     # until the 24h timeout — silence, not an error.
     runs-on: [hanzo-build-linux-amd64]
-    timeout-minutes: 60
+    # 180, not 60. This publishes both architectures now, and the arm64 half is
+    # emulated on this amd64 pool, so the wall time roughly triples. The old cap
+    # would have killed the run after the amd64 half had already been built and
+    # thrown away -- build-push-action pushes nothing until every platform is
+    # done, so a timeout here costs the amd64 image too.
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
 
@@ -103,6 +108,11 @@ jobs:
           ADMIN_BOT_DIR=/tmp/hanzoai-admin/apps/bot bash scripts/sync-admin-ui.sh
           test -f dist/control-ui/index.html
 
+      # binfmt, so an aarch64 RUN can execute on this x86 host. Every layer of
+      # this Dockerfile is a RUN -- apt, corepack, pnpm install, pnpm build --
+      # so without it the arm64 half dies on the first one.
+      - uses: docker/setup-qemu-action@v3
+
       - uses: docker/setup-buildx-action@v3
         with: { driver: docker-container, driver-opts: network=host }
 
@@ -120,7 +130,11 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64
+          # The lab runs amd64 (evo) and arm64 (spark), so a single-arch image
+          # deploys on half of it. The base is pinned by digest --
+          # node:22-bookworm@sha256:cd7bcd2e... -- and that digest is an index
+          # carrying linux/arm64v8, so both halves resolve from the one pin.
+          platforms: linux/amd64,linux/arm64
           push: true
           provenance: false
           tags: ${{ steps.tags.outputs.list }}
