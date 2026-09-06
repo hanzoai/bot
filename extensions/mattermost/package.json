@@ -4,8 +4,8 @@
   "description": "HanzoBot Mattermost channel plugin",
   "type": "module",
   "dependencies": {
-    "ws": "^8.19.0",
-    "zod": "^4.3.6"
+    "ws": "catalog:",
+    "zod": "catalog:"
   },
   "hanzo-bot": {
     "extensions": [
