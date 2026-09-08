@@ -38,9 +38,9 @@ permissions:
 jobs:
   build:
     # Must name a label a runner ACTUALLY advertises. The git-runners offer
-    # hanzo-build-linux-amd64; a label nothing offers does not fail, it queues
+    # linux-amd64; a label nothing offers does not fail, it queues
     # until the 24h timeout — silence, not an error.
-    runs-on: [hanzo-build-linux-amd64]
+    runs-on: [linux-amd64]
     # 180, not 60. This publishes both architectures now, and the arm64 half is
     # emulated on this amd64 pool, so the wall time roughly triples. The old cap
     # would have killed the run after the amd64 half had already been built and
