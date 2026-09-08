@@ -49,7 +49,7 @@
 # arm64 node, so arm64 bought nothing that runs. It also promised its own remedy —
 # "an arm64 node makes this one word here, not a rebuild" — and that is what this
 # is. The fleet's first arm64 node (spark, GB10, 20 cores) is registered and
-# carries the `hanzo-build-linux-arm64` label hanzoai/ci's build lane names.
+# carries the `linux-arm64` label hanzoai/ci's build lane names.
 #
 # Nothing in the image ever blocked it. Every toolchain here RESOLVES its own
 # arch and downloads a prebuilt binary — node, go, bun, deno, zig, gh each carry

@@ -34,9 +34,9 @@ permissions:
 jobs:
   build:
     # The old runner-amd64 input asked for ["self-hosted","linux","amd64"]. The
-    # forge's git-runner advertises all three, and hanzo-build-linux-amd64, and
+    # forge's git-runner advertises all three, and linux-amd64, and
     # maps them to the same job image — so this label answers either way.
-    runs-on: [hanzo-build-linux-amd64]
+    runs-on: [linux-amd64]
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
