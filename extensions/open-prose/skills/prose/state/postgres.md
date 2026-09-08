@@ -193,7 +193,6 @@ For team collaboration or production:
 | ------------ | ---------------------- | ---------- | ----------------------------- |
 | **Neon**     | 0.5GB, auto-suspend    | 1-3s       | Development, testing          |
 | **Supabase** | 500MB, no auto-suspend | None       | Projects needing auth/storage |
-| **Railway**  | $5/mo credit           | None       | Simple production deploys     |
 
 ```bash
 # Example: Neon
