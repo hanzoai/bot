@@ -296,7 +296,7 @@ jobs:
           # .github/workflows still holds sync.yml. Auditing only the old path
           # would report "no workflow changes" forever and pass silently.
           mapfile -t workflow_files < <(git diff --name-only "$BASE" HEAD -- \
-            '.hanzo/workflows/*.yml' '.hanzo/workflows/*.yaml' \
+            '.github/workflows/*.yml' '.github/workflows/*.yaml' \
             '.github/workflows/*.yml' '.github/workflows/*.yaml')
           if [ "${#workflow_files[@]}" -eq 0 ]; then
             echo "No workflow changes detected; skipping zizmor."
