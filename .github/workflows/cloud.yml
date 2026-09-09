@@ -20,7 +20,7 @@ on:
     paths:
       - Dockerfile.cloud
       - docker/cloud-entrypoint.sh
-      - .hanzo/workflows/cloud.yml
+      - .github/workflows/cloud.yml
   workflow_dispatch:
 
 concurrency:
