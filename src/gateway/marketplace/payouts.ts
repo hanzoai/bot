@@ -1,10 +1,10 @@
 /**
  * Marketplace payout processing — automated seller payouts.
  *
- * Hybrid settlement model:
- *   USD:      Hanzo Commerce affiliate payout system
- *   $AI token: On-chain ERC-20 transfer on Hanzo chain (36963) with 10% bonus,
- *              plus Commerce ledger recording for audit trail
+ * Settlement:
+ *   USD:       refused — the commerce API serves no affiliate payouts
+ *   $AI token: On-chain ERC-20 transfer on Hanzo chain (36963) with 10% bonus;
+ *              the commerce API serves no token distribution to record it in
  *
  * Payout schedule:
  *   - Minimum threshold: configurable (default $10)
@@ -44,8 +44,8 @@ export type PayoutResult = {
  *
  * For each seller:
  * 1. Verify accumulated earnings meet minimum threshold
- * 2. For USD: POST to Hanzo Commerce affiliate payout endpoint
- * 3. For $AI: On-chain ERC-20 transfer + Commerce ledger recording
+ * 2. For USD: refuse (not served by the commerce API)
+ * 3. For $AI: On-chain ERC-20 transfer
  * 4. Record payout result
  */
 export async function processPayouts(
@@ -73,7 +73,7 @@ export async function processPayouts(
       const result = await processAiTokenPayout(req, aiTokenBonusPct, config.chain);
       results.push(result);
     } else {
-      const result = await processUsdPayout(req);
+      const result = processUsdPayout(req);
       results.push(result);
     }
   }
@@ -81,88 +81,25 @@ export async function processPayouts(
   return results;
 }
 
-function getCommerceHeaders(): Record<string, string> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
+/**
+ * The commerce API serves no affiliate payouts, so a USD payout is refused
+ * before anything is sent.
+ */
+function processUsdPayout(req: PayoutRequest): PayoutResult {
+  return {
+    sellerUserId: req.sellerUserId,
+    amountCents: req.amountCents,
+    bonusCents: 0,
+    totalCents: req.amountCents,
+    preference: "usd",
+    status: "failed",
+    error: "USD payouts are not served by the commerce API; nothing was sent",
   };
-  if (process.env.COMMERCE_SERVICE_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.COMMERCE_SERVICE_TOKEN}`;
-  }
-  return headers;
-}
-
-function getCommerceBaseUrl(): string {
-  return (process.env.COMMERCE_API_URL ?? "http://commerce.hanzo.svc.cluster.local:8001").replace(
-    /\/+$/,
-    "",
-  );
-}
-
-async function processUsdPayout(req: PayoutRequest): Promise<PayoutResult> {
-  const baseUrl = getCommerceBaseUrl();
-  const headers = getCommerceHeaders();
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15_000);
-
-  try {
-    const response = await fetch(`${baseUrl}/api/v1/affiliates/payouts`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        userId: req.sellerUserId,
-        amountCents: req.amountCents,
-        currency: "usd",
-        source: "marketplace",
-        periodStart: new Date(req.periodStart).toISOString(),
-        periodEnd: new Date(req.periodEnd).toISOString(),
-        nodeId: req.sellerNodeId,
-      }),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      const errText = await response.text().catch(() => "");
-      return {
-        sellerUserId: req.sellerUserId,
-        amountCents: req.amountCents,
-        bonusCents: 0,
-        totalCents: req.amountCents,
-        preference: "usd",
-        status: "failed",
-        error: `Commerce API ${response.status}: ${errText.substring(0, 200)}`,
-      };
-    }
-
-    const data = (await response.json()) as { transactionId?: string };
-    return {
-      sellerUserId: req.sellerUserId,
-      amountCents: req.amountCents,
-      bonusCents: 0,
-      totalCents: req.amountCents,
-      preference: "usd",
-      status: "paid",
-      transactionId: data.transactionId,
-    };
-  } catch (err) {
-    return {
-      sellerUserId: req.sellerUserId,
-      amountCents: req.amountCents,
-      bonusCents: 0,
-      totalCents: req.amountCents,
-      preference: "usd",
-      status: "failed",
-      error: `payout request failed: ${String(err)}`,
-    };
-  } finally {
-    clearTimeout(timer);
-  }
 }
 
 /**
- * Process an $AI token payout:
- * 1. Send on-chain ERC-20 transfer via JSON-RPC if chain config is available
- * 2. Record in Commerce ledger for audit trail
+ * Process an $AI token payout: an on-chain ERC-20 transfer via JSON-RPC when
+ * chain config and a wallet address are available.
  */
 async function processAiTokenPayout(
   req: PayoutRequest,
@@ -190,75 +127,31 @@ async function processAiTokenPayout(
     }
   }
 
-  // Step 2: Record in Commerce ledger for audit trail.
-  const baseUrl = getCommerceBaseUrl();
-  const headers = getCommerceHeaders();
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15_000);
-
-  try {
-    const response = await fetch(`${baseUrl}/api/v1/tokens/distribute`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        userId: req.sellerUserId,
-        amountCents: totalCents,
-        currency: "ai_token",
-        source: "marketplace",
-        baseCents: req.amountCents,
-        bonusCents,
-        bonusPct,
-        periodStart: new Date(req.periodStart).toISOString(),
-        periodEnd: new Date(req.periodEnd).toISOString(),
-        nodeId: req.sellerNodeId,
-        txHash,
-        chainId: chainConfig?.chainId ?? 36963,
-        walletAddress: req.walletAddress,
-      }),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      const errText = await response.text().catch(() => "");
-      return {
-        sellerUserId: req.sellerUserId,
-        amountCents: req.amountCents,
-        bonusCents,
-        totalCents,
-        preference: "ai_token",
-        status: txHash ? "paid" : "failed",
-        error: txHash
-          ? undefined
-          : `Commerce ledger ${response.status}: ${errText.substring(0, 200)}`,
-        txHash,
-      };
-    }
-
-    const data = (await response.json()) as { transactionId?: string };
+  // The commerce API serves no token distribution, so nothing records it there:
+  // a payout is paid only when the on-chain transfer went out.
+  if (!txHash) {
     return {
       sellerUserId: req.sellerUserId,
       amountCents: req.amountCents,
       bonusCents,
       totalCents,
       preference: "ai_token",
-      status: "paid",
-      transactionId: data.transactionId,
-      txHash,
+      status: "failed",
+      error: "token distribution is not served by the commerce API; nothing was sent",
     };
-  } catch (err) {
-    return {
-      sellerUserId: req.sellerUserId,
-      amountCents: req.amountCents,
-      bonusCents,
-      totalCents,
-      preference: "ai_token",
-      status: txHash ? "paid" : "failed",
-      error: txHash ? undefined : `token payout request failed: ${String(err)}`,
-      txHash,
-    };
-  } finally {
-    clearTimeout(timer);
   }
+  console.warn(
+    `[payouts] ${req.sellerUserId}: on-chain payout ${txHash} not recorded: token distribution is not served by the commerce API`,
+  );
+  return {
+    sellerUserId: req.sellerUserId,
+    amountCents: req.amountCents,
+    bonusCents,
+    totalCents,
+    preference: "ai_token",
+    status: "paid",
+    txHash,
+  };
 }
 
 /**

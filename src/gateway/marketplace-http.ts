@@ -446,15 +446,6 @@ function reportMarketplaceUsage(
   const sellerUserId = sellerNodeId;
   const sellerPayoutPref = sellerSession?.marketplacePayoutPreference ?? "usd";
 
-  // Deposit seller earnings into their Hanzo Commerce wallet.
-  void depositSellerEarnings(sellerUserId, sellerNodeId, pricing.sellerEarningsCents, done).catch(
-    (err) =>
-      // eslint-disable-next-line no-console
-      console.error(
-        `[marketplace] CRITICAL: Failed to deposit seller earnings for ${sellerNodeId}: ${err instanceof Error ? err.message : String(err)}`,
-      ),
-  );
-
   // Log transaction for audit trail.
   const tx: MarketplaceTransaction = {
     requestId,
@@ -477,11 +468,10 @@ function reportMarketplaceUsage(
     transactionLog.splice(0, transactionLog.length - MAX_TX_LOG);
   }
 
-  // Persist transaction to Commerce API (fire-and-forget; in-memory is the hot cache).
-  void persistTransaction(tx).catch((err) =>
-    console.error(
-      `[marketplace] Failed to persist transaction ${tx.requestId}: ${err instanceof Error ? err.message : String(err)}`,
-    ),
+  // The commerce API serves neither seller deposits nor marketplace transactions,
+  // so nothing is sent: the in-memory log is the only record of both.
+  console.error(
+    `[marketplace] ${tx.requestId}: seller ${sellerNodeId} earnings ${tx.sellerEarningsCents}c not deposited and transaction not persisted: not served by the commerce API`,
   );
 }
 
@@ -489,150 +479,7 @@ function reportMarketplaceUsage(
 const transactionLog: MarketplaceTransaction[] = [];
 const MAX_TX_LOG = 10_000;
 
-/** Read the in-memory transaction log (hot cache; Commerce API is source of truth). */
+/** Read the in-memory transaction log, the only record of marketplace transactions. */
 export function getTransactionLog(): readonly MarketplaceTransaction[] {
   return transactionLog;
-}
-
-/**
- * Persist a marketplace transaction to Commerce API for durable storage.
- * Commerce is the source of truth; the in-memory log is a hot cache only.
- */
-export async function persistTransaction(tx: MarketplaceTransaction): Promise<void> {
-  const baseUrl = getCommerceBaseUrl();
-  const headers = getCommerceHeaders();
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 10_000);
-  try {
-    const response = await fetch(`${baseUrl}/api/v1/marketplace/transactions`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        requestId: tx.requestId,
-        buyerUserId: tx.buyerUserId,
-        buyerOrgId: tx.buyerOrgId,
-        sellerNodeId: tx.sellerNodeId,
-        sellerUserId: tx.sellerUserId,
-        model: tx.model,
-        inputTokens: tx.inputTokens,
-        outputTokens: tx.outputTokens,
-        buyerCostCents: tx.buyerCostCents,
-        sellerEarningsCents: tx.sellerEarningsCents,
-        platformFeeCents: tx.platformFeeCents,
-        aiTokenPayout: tx.aiTokenPayout,
-        timestamp: tx.timestamp,
-        durationMs: tx.durationMs,
-      }),
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      const errText = await response.text().catch(() => "");
-      throw new Error(`Commerce API ${response.status}: ${errText.substring(0, 200)}`);
-    }
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-/**
- * Fetch recent transactions from Commerce API (source of truth).
- * Used by the marketplace.transactions WS method and payout processing.
- * Falls back to empty array on failure (Commerce unavailable at startup is acceptable).
- */
-export async function fetchTransactionsFromCommerce(
-  limit = 1000,
-): Promise<MarketplaceTransaction[]> {
-  const baseUrl = getCommerceBaseUrl();
-  const headers = getCommerceHeaders();
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 10_000);
-  try {
-    const response = await fetch(`${baseUrl}/api/v1/marketplace/transactions?limit=${limit}`, {
-      method: "GET",
-      headers,
-      signal: controller.signal,
-    });
-
-    if (!response.ok) {
-      console.warn(`[marketplace] Failed to fetch transactions from Commerce: ${response.status}`);
-      return [];
-    }
-
-    const data = (await response.json()) as { transactions?: MarketplaceTransaction[] };
-    return data.transactions ?? [];
-  } catch (err) {
-    console.warn(
-      `[marketplace] Failed to fetch transactions from Commerce: ${err instanceof Error ? err.message : String(err)}`,
-    );
-    return [];
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-function getCommerceBaseUrl(): string {
-  return (process.env.COMMERCE_API_URL ?? "http://commerce.hanzo.svc.cluster.local:8001").replace(
-    /\/+$/,
-    "",
-  );
-}
-
-function getCommerceHeaders(): Record<string, string> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  };
-  if (process.env.COMMERCE_SERVICE_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.COMMERCE_SERVICE_TOKEN}`;
-  }
-  return headers;
-}
-
-/** Deposit seller earnings into their Commerce wallet via billing/deposit. */
-async function depositSellerEarnings(
-  sellerUserId: string,
-  sellerNodeId: string,
-  amountCents: number,
-  done: MarketplaceProxyDonePayload,
-): Promise<void> {
-  if (amountCents <= 0) {
-    return;
-  }
-  const baseUrl = (
-    process.env.COMMERCE_API_URL ?? "http://commerce.hanzo.svc.cluster.local:8001"
-  ).replace(/\/+$/, "");
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  };
-  if (process.env.COMMERCE_SERVICE_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.COMMERCE_SERVICE_TOKEN}`;
-  }
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 10_000);
-  try {
-    await fetch(`${baseUrl}/api/v1/billing/deposit`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        user: sellerUserId,
-        currency: "usd",
-        amount: amountCents,
-        notes: `Marketplace earnings: ${done.model} (${done.inputTokens + done.outputTokens} tokens)`,
-        tags: "marketplace-earning",
-      }),
-      signal: controller.signal,
-    });
-  } catch (err) {
-    console.warn(
-      `[marketplace] Failed to deposit seller earnings for ${sellerNodeId}: ${err instanceof Error ? err.message : String(err)}`,
-    );
-  } finally {
-    clearTimeout(timer);
-  }
 }

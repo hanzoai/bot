@@ -1,3 +1,6 @@
+import { loadConfig } from "../../config/config.js";
+import { getTransactionLog } from "../marketplace-http.js";
+import { processPayouts, type PayoutRequest } from "../marketplace/payouts.js";
 import type { MarketplaceScheduler } from "../marketplace/scheduler.js";
 /**
  * Marketplace WebSocket method handlers for the Control UI.
@@ -12,9 +15,6 @@ import type { MarketplaceScheduler } from "../marketplace/scheduler.js";
  *   marketplace.transactions     — list recent marketplace transactions
  */
 import type { GatewayRequestHandlers } from "./types.js";
-import { loadConfig } from "../../config/config.js";
-import { getTransactionLog, fetchTransactionsFromCommerce } from "../marketplace-http.js";
-import { processPayouts, type PayoutRequest } from "../marketplace/payouts.js";
 
 let schedulerRef: MarketplaceScheduler | null = null;
 
@@ -174,13 +174,8 @@ export const marketplaceHandlers: GatewayRequestHandlers = {
   "marketplace.transactions": async ({ params, respond }) => {
     const limit = typeof params.limit === "number" ? Math.min(params.limit, 1000) : 100;
 
-    // Query Commerce API as the source of truth; fall back to in-memory cache.
-    let transactions = await fetchTransactionsFromCommerce(limit);
-    if (transactions.length === 0) {
-      // Commerce unavailable or empty -- fall back to in-memory hot cache.
-      const txLog = getTransactionLog();
-      transactions = txLog.slice(-limit);
-    }
+    // The in-memory log is the only record: the commerce API serves no marketplace transactions.
+    const transactions = getTransactionLog().slice(-limit);
 
     respond(true, {
       count: transactions.length,
@@ -210,12 +205,9 @@ export const marketplaceHandlers: GatewayRequestHandlers = {
       return;
     }
 
-    // Aggregate earnings from Commerce API (source of truth); fall back to in-memory.
+    // Aggregate earnings from the in-memory log, the only record of them.
     const now = Date.now();
-    let txLog = await fetchTransactionsFromCommerce(10_000);
-    if (txLog.length === 0) {
-      txLog = getTransactionLog() as typeof txLog;
-    }
+    const txLog = getTransactionLog();
     const earningsBySeller = new Map<
       string,
       { amountCents: number; nodeId: string; preference: "usd" | "ai_token" }
