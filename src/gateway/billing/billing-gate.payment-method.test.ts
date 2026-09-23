@@ -29,11 +29,11 @@ function mockBalance(cents: number) {
   vi.spyOn(client, "getBalance").mockResolvedValue(cents);
 }
 
-function mockSubscription(active: boolean, planSlug?: string) {
-  vi.spyOn(client, "getSubscriptionStatus").mockResolvedValue({
+function mockSubscription(active: boolean) {
+  return vi.spyOn(client, "getSubscriptionStatus").mockResolvedValue({
     active,
     subscription: active ? { id: "sub-1", status: "active" } : null,
-    plan: planSlug ? { slug: planSlug } : null,
+    plan: active ? { id: "plan-pro", name: "Pro" } : null,
   });
 }
 
@@ -68,26 +68,38 @@ describe("checkBillingAllowance — free tier with starter credit", () => {
 
   it("allows paid subscribers even with zero credit balance", async () => {
     mockBalance(0);
-    mockSubscription(true, "pro");
+    mockSubscription(true);
 
     const result = await checkBillingAllowance({ iamConfig: IAM_CONFIG, tenant: TENANT });
 
     expect(result.allowed).toBe(true);
-    if (result.allowed) {
-      expect(result.tier).toBe("pro");
-    }
   });
 
-  it("resolves tier from plan slug", async () => {
+  it("reads the tenant org's balance and skips subscriptions when funded", async () => {
     mockBalance(100);
-    mockSubscription(true, "team");
+    const subs = mockSubscription(true);
+
+    const result = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: { ...TENANT, orgId: "acme" },
+      token: "user-jwt",
+    });
+
+    expect(result.allowed).toBe(true);
+    expect(client.getBalance).toHaveBeenCalledWith(IAM_CONFIG, "acme", "user-jwt");
+    expect(subs).not.toHaveBeenCalled();
+  });
+
+  it("refuses an org the gateway is not granted, even in warn mode", async () => {
+    vi.stubEnv("BILLING_GATE_MODE", "warn");
+    vi.spyOn(client, "getBalance").mockRejectedValue(
+      new client.OrgNotGrantedError("user-test-1", "hanzo"),
+    );
 
     const result = await checkBillingAllowance({ iamConfig: IAM_CONFIG, tenant: TENANT });
 
-    expect(result.allowed).toBe(true);
-    if (result.allowed) {
-      expect(result.tier).toBe("team");
-    }
+    expect(result.allowed).toBe(false);
+    expect((result as { reason: string }).reason).toMatch(/not authorized/i);
   });
 
   it("super admins bypass all checks", async () => {

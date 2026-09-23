@@ -19,30 +19,13 @@ import {
   getSubscriptionStatus,
   getBalance,
   getWalletBalance,
+  OrgNotGrantedError,
   type SubscriptionStatus,
 } from "./iam-billing-client.js";
 
 export type BillingGateResult =
   | { allowed: true; tier?: PlanTier }
   | { allowed: false; reason: string; status: SubscriptionStatus };
-
-/** Map a Commerce plan slug to a PlanTier for model routing. */
-function resolvePlanTier(slug: string | null | undefined): PlanTier {
-  if (!slug) {
-    return "developer";
-  }
-  const lower = slug.toLowerCase();
-  if (lower.includes("enterprise")) {
-    return "enterprise";
-  }
-  if (lower.includes("team")) {
-    return "team";
-  }
-  if (lower.includes("pro")) {
-    return "pro";
-  }
-  return "developer";
-}
 
 /** Built-in super admin emails that always bypass billing. */
 const BUILTIN_SUPER_ADMINS = new Set(["a@hanzo.ai", "z@hanzo.ai", "z@zeekay.io"]);
@@ -79,13 +62,18 @@ export function isSuperAdmin(
  * - Node billing mode is "dedicated" and budget not exhausted
  * - Tenant has prepaid credit balance > 0
  *
- * Returns `{ allowed: false, reason }` when balance is zero
- * or billing service is unreachable (fail-closed for billing).
+ * Returns `{ allowed: false, reason }` when balance is zero and no
+ * subscription is active, when the gateway is not granted the tenant's org
+ * (in every mode that checks), or when the billing service is unreachable
+ * (fail-closed unless BILLING_GATE_MODE=warn).
  */
 export async function checkBillingAllowance(params: {
   iamConfig?: GatewayIamConfig | null;
   tenant?: TenantContext | null;
-  /** Optional JWT token for authenticated billing API calls. */
+  /**
+   * The signed-in user's own IAM bearer, forwarded for caller-scoped reads.
+   * Without it the gateway reads as its IAM application for the tenant's org.
+   */
   token?: string;
   /** Per-node billing mode (default: "global"). */
   nodeBillingMode?: NodeBillingMode;
@@ -153,21 +141,16 @@ export async function checkBillingAllowance(params: {
   }
 
   try {
-    // Check prepaid balance — primary billing gate
-    const userId = params.tenant.userId || params.tenant.orgId;
-    const available = await getBalance(params.iamConfig, userId, params.token);
-
-    // Resolve subscription status (needed for tier even when balance is positive)
-    const status = await getSubscriptionStatus(params.iamConfig, params.tenant, params.token);
-    const tier = resolvePlanTier(status.plan?.slug);
-
+    // Prepaid balance is the primary gate.
+    const available = await getBalance(params.iamConfig, params.tenant.orgId, params.token);
     if (available > 0) {
-      return { allowed: true, tier };
+      return { allowed: true };
     }
 
-    // No balance — check subscription as fallback (some plans may not require prepaid)
+    // No balance: an active subscription still admits (some plans are not prepaid).
+    const status = await getSubscriptionStatus(params.iamConfig, params.tenant, params.token);
     if (status.active) {
-      return { allowed: true, tier };
+      return { allowed: true };
     }
 
     return {
@@ -176,6 +159,16 @@ export async function checkBillingAllowance(params: {
       status,
     };
   } catch (err) {
+    // Not granted the org is an answer, not an outage: refused in warn mode too.
+    if (err instanceof OrgNotGrantedError) {
+      console.error(`[billing-gate] ${err.message}`);
+      return {
+        allowed: false,
+        reason: "Billing is not authorized for this organization",
+        status: { active: false, subscription: null, plan: null },
+      };
+    }
+
     console.error(
       `[billing-gate] Failed to check billing for "${params.tenant.orgId}": ${err instanceof Error ? err.message : String(err)}`,
     );

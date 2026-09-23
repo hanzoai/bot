@@ -128,11 +128,14 @@ export async function handleMarketplaceHttpRequest(
 
   // Resolve tenant context for billing.
   // If IAM config is present and we have a bearer token, validate it to get IAM claims.
+  // Only a validated IAM bearer is forwarded to billing, never a gateway token.
   let tenant: import("./tenant-context.js").TenantContext | undefined;
+  let userToken: string | undefined;
   if (opts.iamConfig && rawToken) {
     const iamResult = await validateIamToken(rawToken, opts.iamConfig);
     if (iamResult.ok) {
       tenant = resolveTenantContext({ iamResult }) ?? undefined;
+      userToken = tenant ? rawToken : undefined;
     }
   }
 
@@ -155,7 +158,7 @@ export async function handleMarketplaceHttpRequest(
   const billingResult = await checkBillingAllowance({
     iamConfig: opts.iamConfig,
     tenant,
-    token: rawToken,
+    token: userToken,
   });
   if (!billingResult.allowed) {
     sendJson(res, 402, {
@@ -306,7 +309,7 @@ async function handleStreamingRelay(
         completed = true;
         unsubscribe();
         trust?.recordSuccess(sellerNodeId, done.durationMs, done.inputTokens, done.outputTokens);
-        reportMarketplaceUsage(done, sellerNodeId, tenant, opts);
+        reportMarketplaceUsage(requestId, done, sellerNodeId, tenant, opts);
         opts.scheduler.releaseSeller(sellerNodeId, true, done.durationMs);
         resolve();
       } else if (evt.kind === "error") {
@@ -395,7 +398,7 @@ async function handleNonStreamingRelay(
         completed = true;
         unsubscribe();
         trust?.recordSuccess(sellerNodeId, done.durationMs, done.inputTokens, done.outputTokens);
-        reportMarketplaceUsage(done, sellerNodeId, tenant, opts);
+        reportMarketplaceUsage(requestId, done, sellerNodeId, tenant, opts);
         opts.scheduler.releaseSeller(sellerNodeId, true, done.durationMs);
         resolve();
       } else if (evt.kind === "error") {
@@ -415,7 +418,9 @@ async function handleNonStreamingRelay(
   });
 }
 
+/** `requestId` is the gateway's own, never the seller's echo of it: it names the buyer's debit. */
 function reportMarketplaceUsage(
+  requestId: string,
   done: MarketplaceProxyDonePayload,
   sellerNodeId: string,
   tenant: { orgId: string; userId: string },
@@ -428,16 +433,11 @@ function reportMarketplaceUsage(
     config: opts.marketplaceConfig,
   });
 
-  // Report buyer debit — charge the buyer's account at marketplace price.
+  // Report buyer debit — charge the buyer's org at marketplace price, once per request.
   reportUsage({
+    id: requestId,
     tenant: { orgId: tenant.orgId, userId: tenant.userId },
     model: done.model,
-    provider: "marketplace",
-    inputTokens: done.inputTokens,
-    outputTokens: done.outputTokens,
-    totalTokens: done.inputTokens + done.outputTokens,
-    timestamp: Date.now(),
-    nodeId: sellerNodeId,
     amountCents: pricing.buyerCostCents,
   });
 
@@ -457,7 +457,7 @@ function reportMarketplaceUsage(
 
   // Log transaction for audit trail.
   const tx: MarketplaceTransaction = {
-    requestId: done.requestId,
+    requestId,
     buyerUserId: tenant.userId,
     buyerOrgId: tenant.orgId,
     sellerNodeId,
