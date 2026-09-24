@@ -22,7 +22,7 @@ const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-runs-"));
 process.env.BOT_STATE_DIR = stateDir;
 
 const { handleBotsHttpRequest } = await import("./bots-http.js");
-const { BotRuns, MAX_LIVE_RUNS_PER_ORG } = await import("./bot-runs.js");
+const { BotRuns, MAX_LIVE_RUNS_PER_ORG, busUrl, DEFAULT_BUS_URL } = await import("./bot-runs.js");
 const { TOOLS } = await import("./coding-task.js");
 const { updateSessionStore } = await import("../config/sessions.js");
 
@@ -367,19 +367,6 @@ describe("POST /v1/bots — launch", () => {
     signIn("globex");
     expect((await req("POST", "/v1/bots", { task: "t" })).status).toBe(201);
   });
-
-  it("with no bus it refuses to launch — a run is not started unannounced — and still lists", async () => {
-    runs = new BotRuns({
-      sandboxes: sb.sandboxes,
-      bus: null,
-      busMissing: "no bus: PUBSUB_URL is unset",
-    });
-    const r = await req("POST", "/v1/bots", { task: "t" });
-    expect(r.status).toBe(503);
-    expect(r.json.error).toContain("PUBSUB_URL");
-    expect(sb.leases).toEqual([]);
-    expect(await list()).toEqual([]);
-  });
 });
 
 describe("POST /v1/bots/:runId/stop", () => {
@@ -506,5 +493,19 @@ describe("GET /v1/bots", () => {
     const r = await req("PUT", "/v1/bots", {});
     expect(r.status).toBe(405);
     expect(r.allow).toBe("GET, POST");
+  });
+});
+
+describe("the bus address", () => {
+  it("is the cluster's unless PUBSUB_URL names another, and a malformed one is said and not used", () => {
+    const logged: string[] = [];
+    const log = (m: string) => logged.push(m);
+    expect(busUrl({}, log)).toBe("nats://cloud.hanzo.svc:4222");
+    expect(DEFAULT_BUS_URL).toBe("nats://cloud.hanzo.svc:4222");
+    expect(busUrl({ PUBSUB_URL: "  " }, log)).toBe(DEFAULT_BUS_URL);
+    expect(busUrl({ PUBSUB_URL: "nats://127.0.0.1:4333" }, log)).toBe("nats://127.0.0.1:4333");
+    expect(logged).toEqual([]);
+    expect(busUrl({ PUBSUB_URL: "http://cloud:4222" }, log)).toBe(DEFAULT_BUS_URL);
+    expect(logged[0]).toContain("not a nats:// address");
   });
 });

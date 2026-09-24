@@ -37,7 +37,6 @@ import {
   BOT_RUN_SURFACES,
   type BotRuns,
   BotRunsBusy,
-  BotRunsUnavailable,
   type BotRunSurface,
   botRuns,
   MAX_RUN_SECONDS,
@@ -225,8 +224,6 @@ async function launch(
   } catch (err) {
     if (err instanceof BotRunsBusy) {
       sendJson(res, 429, { error: err.message });
-    } else if (err instanceof BotRunsUnavailable) {
-      sendJson(res, 503, { error: err.message });
     } else {
       sendJson(res, 500, { error: "the run could not be recorded, so nothing was started" });
     }

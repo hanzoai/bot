@@ -33,7 +33,7 @@ import path from "node:path";
 import { loadSessionStore, updateSessionStore } from "../config/sessions.js";
 import type { SessionEntry, SessionRun } from "../config/sessions/types.js";
 import { resolveTenantSessionStorePath, resolveTenantStateDir } from "../config/tenant-paths.js";
-import { type Bus, connectBus } from "../infra/bus.js";
+import { type Bus, connectBus, parseBusUrl } from "../infra/bus.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { isCronRunSessionKey } from "../sessions/session-key-utils.js";
 import { cloudSandboxes, type SandboxCaller, type Sandboxes } from "./cloud-sandbox.js";
@@ -108,15 +108,9 @@ export type LaunchRequest = {
 /** The org already holds MAX_LIVE_RUNS_PER_ORG live runs. */
 export class BotRunsBusy extends Error {}
 
-/** This runtime cannot launch a run at all, and says why. */
-export class BotRunsUnavailable extends Error {}
-
 export type BotRunsDeps = {
   sandboxes: Sandboxes;
-  /** Null when no bus is configured: launching refuses rather than running unannounced. */
-  bus: Bus | null;
-  /** Why there is no bus, for the refusal. */
-  busMissing?: string;
+  bus: Bus;
   log?: (message: string) => void;
   env?: NodeJS.ProcessEnv;
 };
@@ -137,11 +131,6 @@ export class BotRuns {
    * waits for the sandbox. What happens next arrives as events.
    */
   async launch(req: LaunchRequest): Promise<BotRunView> {
-    if (!this.deps.bus) {
-      throw new BotRunsUnavailable(
-        `bot runs are unavailable: ${this.deps.busMissing ?? "no bus is configured"}`,
-      );
-    }
     const org = req.caller.org;
     let held = 0;
     for (const l of this.live.values()) {
@@ -287,7 +276,7 @@ export class BotRuns {
       .catch(() => {})
       .then(() => record(evt, this.deps.env))
       .then(() => {
-        this.deps.bus?.publish(`bot.run.${evt.status}`, published(evt));
+        this.deps.bus.publish(`bot.run.${evt.status}`, published(evt));
       });
     this.chains.set(k, next);
     const forget = () => {
@@ -305,33 +294,36 @@ export class BotRuns {
 
 let shared: BotRuns | null = null;
 
+/** The bus in cluster: cloud's embedded Hanzo PubSub. PUBSUB_URL overrides it. */
+export const DEFAULT_BUS_URL = "nats://cloud.hanzo.svc:4222";
+
 /**
- * botRuns is this process's run plane: cloud's sandboxes, and the bus at
- * PUBSUB_URL (nats://cloud.hanzo.svc:4222 in cluster). With no bus configured it
- * still lists and stops; it refuses to launch, and says so.
+ * busUrl is PUBSUB_URL when it names a bus, else the cluster's. An override that
+ * is not a nats:// address is said out loud and not used.
  */
+export function busUrl(env: NodeJS.ProcessEnv, log: (m: string) => void): string {
+  const url = env.PUBSUB_URL?.trim();
+  if (!url) {
+    return DEFAULT_BUS_URL;
+  }
+  try {
+    parseBusUrl(url);
+    return url;
+  } catch (err) {
+    log(`${errText(err)}; publishing to ${DEFAULT_BUS_URL}`);
+    return DEFAULT_BUS_URL;
+  }
+}
+
+/** botRuns is this process's run plane: cloud's sandboxes and the platform bus. */
 export function botRuns(): BotRuns {
   if (shared) {
     return shared;
   }
   const logger = createSubsystemLogger("gateway/bot-runs");
   const log = (m: string) => logger.warn(m);
-  const url = process.env.PUBSUB_URL?.trim();
-  let bus: Bus | null = null;
-  let busMissing: string | undefined;
-  if (!url) {
-    busMissing = "no bus: PUBSUB_URL is unset";
-  } else {
-    try {
-      bus = connectBus(url, { name: "bot-gateway", log });
-    } catch (err) {
-      busMissing = errText(err);
-    }
-  }
-  if (busMissing) {
-    log(`bot runs will not launch: ${busMissing}`);
-  }
-  shared = new BotRuns({ sandboxes: cloudSandboxes(), bus, busMissing, log });
+  const bus = connectBus(busUrl(process.env, log), { name: "bot-gateway", log });
+  shared = new BotRuns({ sandboxes: cloudSandboxes(), bus, log });
   return shared;
 }
 
