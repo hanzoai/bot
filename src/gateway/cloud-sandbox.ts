@@ -15,6 +15,12 @@
  * which is how the bot inside reaches models as its owner. This file mints no
  * credential and stores none.
  *
+ * THE BEARER STAYS ON A SECURE HOP. It crosses plain http only to a host that
+ * cannot leave the cluster — loopback or a Kubernetes service name (*.svc,
+ * *.svc.cluster.local), which is how CLOUD_API_URL names cloud in cluster — and
+ * https everywhere else; any other base is refused before a byte is sent. The
+ * same rule cloud applies to the hop that brought the bearer here.
+ *
  * Plain node:http, not fetch: one exec can hold its request for the whole run,
  * and fetch's dispatcher cuts a response whose headers take longer than five
  * minutes. Every call here carries its own bound instead.
@@ -111,6 +117,27 @@ function seg(id: string): string {
 
 type Answer = Record<string, unknown> | null;
 
+/** secureHop reports whether a credential may travel to url (see the file header). */
+export function secureHop(url: URL): boolean {
+  if (url.protocol === "https:") {
+    return true;
+  }
+  if (url.protocol !== "http:") {
+    return false;
+  }
+  const host = url.hostname
+    .toLowerCase()
+    .replace(/\.$/, "")
+    .replace(/^\[|\]$/g, "");
+  return (
+    host === "localhost" ||
+    host === "::1" ||
+    /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host) ||
+    host.endsWith(".svc") ||
+    host.endsWith(".svc.cluster.local")
+  );
+}
+
 function call(
   base: string,
   caller: SandboxCaller,
@@ -120,6 +147,14 @@ function call(
   opts: { body?: unknown; timeoutMs: number; signal?: AbortSignal },
 ): Promise<Answer> {
   const url = new URL(base + path);
+  if (!secureHop(url)) {
+    return Promise.reject(
+      new Error(
+        `sandbox ${op}: refusing to send the caller's bearer over cleartext to ${url.host}: ` +
+          "plain http is for a cluster-local host (*.svc, *.svc.cluster.local, loopback); use https",
+      ),
+    );
+  }
   const payload = opts.body === undefined ? undefined : JSON.stringify(opts.body);
   const headers: Record<string, string> = {
     Accept: "application/json",

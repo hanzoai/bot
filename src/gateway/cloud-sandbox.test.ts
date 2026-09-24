@@ -1,7 +1,7 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { cloudSandboxes, SandboxRefused } from "./cloud-sandbox.js";
+import { cloudSandboxes, SandboxRefused, secureHop } from "./cloud-sandbox.js";
 
 // The client against a server that answers the way cloud's /v1/sandbox does: 201
 // with the sandbox on a lease, 200 with {exitCode,stdout,stderr} on an exec, and a
@@ -124,5 +124,35 @@ describe("cloud sandbox client", () => {
     await new Promise((r) => setTimeout(r, 20));
     halt.abort();
     await expect(pending).rejects.toThrow();
+  });
+});
+
+describe("the hop the bearer takes", () => {
+  it("is https, or plain http only to a cluster-local host", () => {
+    for (const [u, want] of [
+      ["https://api.hanzo.ai", true],
+      ["https://10.0.0.7:8000", true],
+      ["http://cloud.hanzo.svc:8000", true],
+      ["http://cloud.hanzo.svc.cluster.local:8000", true],
+      ["http://CLOUD.HANZO.SVC.", true],
+      ["http://localhost:8000", true],
+      ["http://127.0.0.1:8000", true],
+      ["http://[::1]:8000", true],
+      ["http://api.hanzo.ai", false],
+      ["http://10.0.0.7:8000", false],
+      ["http://cloud", false],
+      ["http://cloud.svc.example.com", false],
+      ["http://cloud.hanzo.svc.cluster.local.evil", false],
+    ] as const) {
+      expect(secureHop(new URL(u)), u).toBe(want);
+    }
+  });
+
+  it("refuses a public http base before a byte is sent", async () => {
+    seen = [];
+    await expect(
+      cloudSandboxes("http://api.hanzo.test").lease(caller, { cls: "dev", ttlSec: 60 }),
+    ).rejects.toThrow(/cleartext/);
+    expect(seen).toEqual([]);
   });
 });
