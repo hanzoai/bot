@@ -11,12 +11,11 @@
  * so no header is trusted until the gate has said who is asking.
  *
  * WHICH ORG is decided by WHAT the gate proved (callerOrg), and nothing else:
- *   - an IAM token: the org the token belongs to — its `owner` claim, cloud's own
- *     scoping key. X-Org-Id may repeat it and may not name any other org, so a
- *     signed-in caller cannot reach a stranger's tenant.
- *   - the shared service bearer: only cloud holds it, and cloud mints X-Org-Id
- *     from its own validated principal, so the header is the org.
- *   - anything else: no tenant — an empty list, a 404 stop, a refused launch.
+ *   - an IAM login: its home org, or another org of its signed membership that
+ *     X-Org-Id names — IAM's org switch. Any other org is refused.
+ *   - anything else — the shared gateway token included, which nodes running
+ *     tenant code also hold — has no tenant: an empty list, a 404 stop, a refused
+ *     launch. Cloud reaches these routes with its caller's own bearer.
  *
  * A LAUNCH RUNS AS ITS CALLER. The run's sandbox is leased from cloud with the
  * caller's own bearer, so it is billed to and signed in as the caller; a request
@@ -56,16 +55,13 @@ const MAX_TASK_BYTES = 32 * 1024;
  * header for the rule; null means no tenant.
  */
 export function callerOrg(auth: GatewayAuthResult, header: string | null): string | null {
-  if (auth.method === "iam") {
-    if (!auth.owner) {
-      return null;
-    }
-    return !header || header === auth.owner ? auth.owner : null;
+  if (auth.method !== "iam" || !auth.owner) {
+    return null;
   }
-  if (auth.method === "token") {
-    return header;
+  if (!header) {
+    return auth.owner;
   }
-  return null;
+  return (auth.orgs ?? [auth.owner]).includes(header) ? header : null;
 }
 
 type Launch = { bot: string; task: string; surface: BotRunSurface; timeoutSec: number };

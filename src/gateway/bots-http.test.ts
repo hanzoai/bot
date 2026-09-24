@@ -99,12 +99,17 @@ let runs = new BotRuns({ sandboxes: sb.sandboxes, bus: bus.bus });
 
 beforeAll(async () => {
   server = createServer((req, res) => {
-    void handleBotsHttpRequest(req, res, { auth: { mode: "iam" } as never, runs }).then(
+    handleBotsHttpRequest(req, res, { auth: { mode: "iam" } as never, runs }).then(
       (handled) => {
         if (!handled) {
           res.statusCode = 404;
           res.end("not found");
         }
+      },
+      (err: unknown) => {
+        // A handler that throws must fail the test, not hang it.
+        res.statusCode = 599;
+        res.end(String(err instanceof Error ? err.stack : err));
       },
     );
   });
@@ -419,15 +424,36 @@ describe("POST /v1/bots/:runId/stop", () => {
     expect(sb.execs[0].signal.aborted).toBe(false);
   });
 
-  it("the service bearer acts in the org cloud names", async () => {
+  it("the shared gateway token names no tenant, whatever X-Org-Id says", async () => {
+    // Nodes running tenant code hold that token too; cloud calls as its caller.
     const r = await req("POST", "/v1/bots", { task: "t" });
     gate = { ok: true, method: "token" };
-    expect(await list({ "x-org-id": "acme" })).toHaveLength(1);
-    expect(await list({ "x-org-id": "globex" })).toEqual([]);
+    expect(await list({ "x-org-id": "acme" })).toEqual([]);
     expect(
       (await req("POST", `/v1/bots/${r.json.runId}/stop`, undefined, { "x-org-id": "acme" }))
         .status,
-    ).toBe(200);
+    ).toBe(404);
+    signIn("acme");
+    expect(await statusOf(r.json.runId)).toBe("booting");
+  });
+
+  it("an IAM login may act in another org of its signed membership, and in no other", async () => {
+    gate = {
+      ok: true,
+      method: "iam",
+      user: "u",
+      orgId: "alice",
+      owner: "alice",
+      orgs: ["alice", "acme"],
+      bearer: "jwt-alice",
+    };
+    const r = await req("POST", "/v1/bots", { task: "t" }, { "x-org-id": "acme" });
+    expect(r.status).toBe(201);
+    expect(sb.leases[0].caller).toEqual({ org: "acme", bearer: "jwt-alice" });
+    expect((await req("POST", "/v1/bots", { task: "t" }, { "x-org-id": "globex" })).status).toBe(
+      403,
+    );
+    expect(await list({ "x-org-id": "globex" })).toEqual([]);
   });
 
   it("an unknown id, a reserved key and a prototype name are all absent", async () => {

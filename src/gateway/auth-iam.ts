@@ -1,17 +1,14 @@
 /**
  * IAM (OIDC) Authentication for the Gateway.
  *
- * Thin wrapper around @hanzo/iam SDK — validates JWTs issued by
- * iam.hanzo.ai using OIDC/JWKS discovery and extracts user identity.
+ * validateIamToken verifies a hanzo.id JWT and says who it is and which orgs it
+ * may act in. The OAuth flows (iam-oauth-http.ts) use the @hanzo/iam client.
  */
 
 // The SDK names its server-side types Config/AuthResult/JwtClaims; they are aliased
-// to the Iam* names this wrapper exposes. Config is the one validateToken and
-// IamClient accept — not the similarly named IAMConfig, which configures the SDK's
-// browser entrypoint.
+// to the Iam* names this wrapper exposes. Config is the one IamClient accepts — not
+// the similarly named IAMConfig, which configures the SDK's browser entrypoint.
 import {
-  validateToken,
-  clearJwksCache as clearSdkJwksCache,
   IamClient,
   type Config as IamConfig,
   type AuthResult as IamAuthResult,
@@ -37,7 +34,13 @@ export type GatewayIamAuthResult =
       email?: string;
       name?: string;
       avatar?: string;
-      owner: string;
+      /**
+       * The org the token acts in by default: a person's home org (the first of
+       * the signed `orgs` membership), or an application token's own org. Absent
+       * when the token names neither — it then acts in no org.
+       */
+      owner?: string;
+      /** Every org the token may act in — the signed membership, home first. */
       orgIds: string[];
       currentOrgId?: string;
       roles: string[];
@@ -79,176 +82,95 @@ export function getIamClient(config: GatewayIamConfig): IamClient {
 }
 
 // ---------------------------------------------------------------------------
-// JWKS URL rewriting (bypass Cloudflare/WAF on external JWKS endpoint)
-// ---------------------------------------------------------------------------
-
-/**
- * When `jwksUrl` is configured, the OIDC discovery response's `jwks_uri` points
- * to the external URL (e.g. `https://hanzo.id/v1/iam/.well-known/jwks`) which
- * may be blocked by Cloudflare. We intercept `fetch` calls to rewrite the JWKS
- * URL to the internal K8s service URL during token validation.
- */
-function withJwksRewrite<T>(
-  jwksUrl: string,
-  externalHost: string,
-  fn: () => Promise<T>,
-): Promise<T> {
-  const originalFetch = globalThis.fetch;
-  const externalJwksUrl = `${externalHost.replace(/\/+$/, "")}${IAM_JWKS_PATH}`;
-
-  globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-    if (url === externalJwksUrl || url.endsWith("/.well-known/jwks")) {
-      return originalFetch(jwksUrl, init);
-    }
-    return originalFetch(input, init);
-  };
-
-  return fn().finally(() => {
-    globalThis.fetch = originalFetch;
-  });
-}
-
-// ---------------------------------------------------------------------------
 // Token validation
 // ---------------------------------------------------------------------------
 
+/** One remote key set per JWKS URL, so keys are fetched once and rotated by jose. */
+const keySets = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
+
+function keySetFor(url: string) {
+  let set = keySets.get(url);
+  if (!set) {
+    set = createRemoteJWKSet(new URL(url));
+    keySets.set(url, set);
+  }
+  return set;
+}
+
+/** IAM's identity class for a client_credentials token (hanzoai/iam schema.Program). */
+const APPLICATION = "application";
+
 /**
- * Validate a JWT access token against IAM JWKS and extract user claims.
+ * Validate a hanzo.id JWT: its signature against IAM's JWKS (config.jwksUrl, the
+ * in-cluster address, or the issuer's own), its issuer against config.serverUrl
+ * — pinned, one brand per gateway — and its expiry.
  *
- * When `config.jwksUrl` is set, rewrites the JWKS fetch URL to bypass
- * Cloudflare/WAF blocking. Otherwise uses the @hanzo/iam SDK directly.
+ * The audience is not a gate, as in cloud (TestValidate_AudienceIsNotAGate): IAM
+ * stamps `aud` with the app that minted the token, and a request cloud relays as
+ * its caller carries the console's token, not this gateway's.
  *
- * If the SDK rejects the token due to an issuer mismatch (e.g. the OIDC
- * discovery endpoint advertises issuer "https://hanzo.id" but the IAM server
- * stamps JWTs with iss "https://iam.hanzo.ai"), retries verification using
- * jose directly — bypassing SDK OIDC discovery (which would try to reach
- * the unreachable issuer) while using the reachable JWKS endpoint.
+ * WHICH ORG. IAM's `owner` claim is the org of the APPLICATION a person signed in
+ * through, not the person's; the person's tenancy is the signed `orgs` membership,
+ * home org first (hanzoai/iam internal/oidc/jwt.go). So a person acts in
+ * orgs[0], or any org of `orgs` it names; an application token (type
+ * "application", no membership) acts in its own org, `owner`; a token that states
+ * neither acts in no org. Nothing is inferred from `sub` and nothing falls back to
+ * config.orgName.
  */
 export async function validateIamToken(
   token: string,
   config: GatewayIamConfig,
 ): Promise<GatewayIamAuthResult> {
-  const validate = () => validateToken(token, toIamConfig(config));
-
-  // When jwksUrl is configured, intercept JWKS fetches to use the internal URL.
-  let sdkResult = config.jwksUrl
-    ? await withJwksRewrite(config.jwksUrl, config.serverUrl, validate)
-    : await validate();
-
-  // When the SDK returns iam_signature_invalid, it may be due to an
-  // issuer or audience mismatch (jose groups these under the same error).
-  // Retry using jose directly — bypassing the SDK's OIDC discovery which
-  // would try to reach the token's issuer (potentially unreachable).
-  if (!sdkResult.ok && sdkResult.reason === "iam_signature_invalid") {
-    try {
-      const parts = token.split(".");
-      if (parts.length === 3) {
-        const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString());
-        const tokenIssuer = typeof payload.iss === "string" ? payload.iss : null;
-        const configIssuer = config.serverUrl.replace(/\/+$/, "");
-
-        if (tokenIssuer && tokenIssuer !== configIssuer) {
-          // The token's issuer differs from the configured server URL.
-          // Use jose directly with the reachable JWKS endpoint (from config)
-          // but accept the token's actual issuer claim.
-          const jwksUrl = config.jwksUrl ?? `${configIssuer}${IAM_JWKS_PATH}`;
-          const keySet = createRemoteJWKSet(new URL(jwksUrl));
-
-          // Try with audience check first, then without
-          let verified;
-          try {
-            verified = await jwtVerify(token, keySet, {
-              issuer: tokenIssuer,
-              audience: config.clientId,
-              clockTolerance: 30,
-            });
-          } catch {
-            // Audience may not match — retry without audience check
-            verified = await jwtVerify(token, keySet, {
-              issuer: tokenIssuer,
-              clockTolerance: 30,
-            });
-          }
-
-          const claims = verified.payload as unknown as IamJwtClaims;
-          const sub =
-            claims.sub ||
-            (typeof claims.owner === "string" && typeof claims.name === "string"
-              ? `${claims.owner}/${claims.name}`
-              : undefined);
-
-          if (sub) {
-            const ownerParts = sub.split("/");
-            const owner = ownerParts.length > 1 ? ownerParts[0] : (config.orgName ?? "unknown");
-            sdkResult = {
-              ok: true,
-              userId: sub,
-              email: typeof claims.email === "string" ? claims.email : undefined,
-              name: typeof claims.name === "string" ? claims.name : undefined,
-              avatar: typeof claims.picture === "string" ? claims.picture : undefined,
-              owner,
-              claims,
-            };
-          }
-        }
-      }
-    } catch {
-      // Fall through to original error
-    }
+  if (!token) {
+    return { ok: false, reason: "iam_token_missing" };
+  }
+  const issuer = config.serverUrl.replace(/\/+$/, "");
+  let claims: IamJwtClaims & Record<string, unknown>;
+  try {
+    const verified = await jwtVerify(
+      token,
+      keySetFor(config.jwksUrl ?? `${issuer}${IAM_JWKS_PATH}`),
+      {
+        issuer,
+        clockTolerance: 30,
+      },
+    );
+    claims = verified.payload as IamJwtClaims & Record<string, unknown>;
+  } catch (err) {
+    const code = (err as { code?: string }).code;
+    return {
+      ok: false,
+      reason: code === "ERR_JWT_EXPIRED" ? "iam_token_expired" : "iam_signature_invalid",
+    };
   }
 
-  // Application tokens may lack a standard `sub` claim but carry `owner`/`name`
-  // (e.g. "admin/app-hanzobot").  Construct sub from those fields so the token
-  // is still accepted after signature verification passed.
-  if (!sdkResult.ok && sdkResult.reason === "iam_subject_missing") {
-    try {
-      const parts = token.split(".");
-      if (parts.length === 3) {
-        const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString());
-        if (typeof payload.owner === "string" && typeof payload.name === "string") {
-          const sub = `${payload.owner}/${payload.name}`;
-          sdkResult = {
-            ok: true,
-            userId: sub,
-            email: typeof payload.email === "string" ? payload.email : undefined,
-            name: payload.name,
-            avatar: typeof payload.picture === "string" ? payload.picture : undefined,
-            owner: payload.owner,
-            claims: payload as IamJwtClaims,
-          };
-        }
-      }
-    } catch {
-      // Fall through to error return below
-    }
+  const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+  const application = claims.type === APPLICATION;
+  const appOrg = application ? str(claims.owner) : undefined;
+  const appName = application ? str(claims.name) : undefined;
+  const sub = str(claims.sub) ?? (appOrg && appName ? `${appOrg}/${appName}` : undefined);
+  if (!sub) {
+    return { ok: false, reason: "iam_subject_missing" };
   }
-
-  if (!sdkResult.ok) {
-    return { ok: false, reason: sdkResult.reason };
-  }
-
-  // Extract org/role info from the IAM claims
-  const claims = sdkResult.claims;
   const orgIds: string[] = [];
-
-  // The "groups" claim may contain org membership
-  if (Array.isArray(claims.groups)) {
-    orgIds.push(...claims.groups.filter((g): g is string => typeof g === "string"));
+  if (Array.isArray(claims.orgs)) {
+    for (const ref of claims.orgs as unknown[]) {
+      const org = str((ref as { org?: unknown } | null)?.org);
+      if (org && !orgIds.includes(org)) {
+        orgIds.push(org);
+      }
+    }
   }
-
-  // The "owner" field from the sub "org/username" split
-  if (sdkResult.owner && !orgIds.includes(sdkResult.owner)) {
-    orgIds.push(sdkResult.owner);
+  if (orgIds.length === 0 && appOrg) {
+    orgIds.push(appOrg);
   }
-
   return {
     ok: true,
-    userId: sdkResult.userId,
-    email: sdkResult.email,
-    name: sdkResult.name,
-    avatar: sdkResult.avatar,
-    owner: sdkResult.owner,
+    userId: sub,
+    email: str(claims.email),
+    name: str(claims.name),
+    avatar: str(claims.picture),
+    owner: orgIds[0],
     orgIds,
     currentOrgId: orgIds[0],
     roles: Array.isArray(claims.roles)
@@ -260,5 +182,5 @@ export async function validateIamToken(
 
 /** Force-clear the JWKS cache (for testing or key rotation). */
 export function clearJwksCache(): void {
-  clearSdkJwksCache();
+  keySets.clear();
 }
