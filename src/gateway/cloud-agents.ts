@@ -52,14 +52,15 @@ export function resetCloudAgentsCache(): void {
   cacheByOrg.clear();
 }
 
+/** Base URL of the cloud data plane (CLOUD_API_URL), no trailing slash. */
+export function cloudApiUrl(): string {
+  return (process.env.CLOUD_API_URL ?? DEFAULT_CLOUD_API_URL).trim().replace(/\/+$/, "");
+}
+
 /** Base URL of the cloud data plane hosting `/v1/agents` (org-neutral). */
 function resolveCloudApiUrl(): string {
-  const raw = (
-    process.env.CLOUD_AGENTS_URL ??
-    process.env.CLOUD_API_URL ??
-    DEFAULT_CLOUD_API_URL
-  ).trim();
-  return raw.replace(/\/+$/, "");
+  const agents = process.env.CLOUD_AGENTS_URL?.trim();
+  return agents ? agents.replace(/\/+$/, "") : cloudApiUrl();
 }
 
 function normalizeCloudAgents(agents: CloudAgentDto[]): GatewayAgentRow[] {
