@@ -119,7 +119,7 @@ function open(
 ): Promise<{ status: number; ws?: WebSocket }> {
   return new Promise((resolve) => {
     const ws = new WebSocket(`ws://127.0.0.1:${port}/vnc${query}`, {
-      headers: origin ? { origin } : {},
+      headers: origin ? { origin, host: "evil.example" } : { host: "evil.example" },
     });
     ws.on("unexpected-response", (_req, res) => {
       resolve({ status: res.statusCode ?? 0 });
@@ -165,6 +165,8 @@ describe("/vnc upgrade", () => {
     expect(first.status).toBe(101);
     await until(() => invokes.length === 1);
     expect(invokes[0]).toMatchObject({ nodeId: "acme-mac", command: "vnc.tunnel.open" });
+    // The node calls back to the allowed origin, never to a Host the viewer wrote.
+    expect(invokes[0].params.tunnelUrl).toMatch(/^wss:\/\/gw\.hanzo\.bot\/vnc-tunnel\?tunnelId=/);
     first.ws!.close();
     // Replayed: refused.
     expect((await open(`?ticket=${encodeURIComponent(minted.payload!.ticket)}`)).status).toBe(401);

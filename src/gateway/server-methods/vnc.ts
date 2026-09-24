@@ -248,6 +248,12 @@ export function createVncProxy(opts: {
 
   // --- Upgrade handlers ---
 
+  /** The gateway's WebSocket origin, from a viewer Origin handleUpgrade allowed. */
+  function tunnelBase(req: IncomingMessage): string {
+    const origin = new URL(String(req.headers.origin));
+    return `${origin.protocol === "https:" ? "wss" : "ws"}://${origin.host}`;
+  }
+
   /** Refuse an upgrade before it becomes a WebSocket: an HTTP status, then close. */
   function refuse(socket: Duplex, status: 401 | 403, reason: string) {
     socket.write(
@@ -322,14 +328,11 @@ export function createVncProxy(opts: {
       }, TUNNEL_TIMEOUT_MS);
       pendingTunnels.set(tunnelId, { browserWs, nodeId, timer });
 
-      // Derive the WebSocket URL for the node to connect back.
-      const host = req.headers.host ?? "localhost";
-      // Use wss for any public hostname. Behind a TLS-terminating reverse
-      // proxy the X-Forwarded-Proto header may read "http" (the internal
-      // leg), so we only fall back to ws for localhost/127.x development.
-      const isLocalDev = host === "localhost" || host.startsWith("127.");
-      const isSecure = !isLocalDev;
-      const tunnelUrl = `${isSecure ? "wss" : "ws"}://${host}/vnc-tunnel?tunnelId=${signedToken}`;
+      // Where the node connects back: the viewer's ORIGIN, which handleUpgrade
+      // already held to gateway.controlUi.allowedOrigins, and never the Host
+      // header, which the requester writes. The page is served by the gateway
+      // itself, so its origin is the gateway's public address.
+      const tunnelUrl = `${tunnelBase(req)}/vnc-tunnel?tunnelId=${signedToken}`;
 
       // Invoke the node to open a VNC tunnel.
       // Handle errors so the browser WS gets closed immediately instead of
