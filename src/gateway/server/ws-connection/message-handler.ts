@@ -1076,7 +1076,12 @@ export function attachGatewayWsMessageHandler(params: {
         // and therefore local-only — never a pod-fixed cloud credential.
         const identity =
           authOk && authMethod === "iam" && authResult.orgId && authResult.bearer
-            ? { orgId: authResult.orgId, bearer: authResult.bearer, method: "iam" as const }
+            ? {
+                orgId: authResult.orgId,
+                ...(authResult.owner ? { owner: authResult.owner } : {}),
+                bearer: authResult.bearer,
+                method: "iam" as const,
+              }
             : undefined;
         const nextClient: GatewayWsClient = {
           socket,

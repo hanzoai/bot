@@ -8,6 +8,8 @@ import type { ConnectParams } from "../protocol/index.js";
  */
 export type GatewayClientIdentity = {
   orgId: string;
+  /** The token's `owner` claim: the org this connection may act in (callerOrg). */
+  owner?: string;
   bearer: string;
   method: "iam";
 };
