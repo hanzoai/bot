@@ -361,6 +361,21 @@ describe("POST /v1/bots — launch", () => {
     ).toBe(true);
   });
 
+  it("a launch whose record cannot be written leases nothing and gives its slot back", async () => {
+    const tenant = path.join(stateDir, "tenants", "acme");
+    fs.mkdirSync(tenant, { recursive: true });
+    fs.chmodSync(tenant, 0o500);
+    try {
+      expect((await req("POST", "/v1/bots", { task: "t" })).status).toBe(500);
+    } finally {
+      fs.chmodSync(tenant, 0o700);
+    }
+    expect(sb.leases).toEqual([]);
+    for (let i = 0; i < MAX_LIVE_RUNS_PER_ORG; i++) {
+      expect((await req("POST", "/v1/bots", { task: `t${i}` })).status).toBe(201);
+    }
+  });
+
   it("answers 429 past the org's live-run ceiling, before leasing", async () => {
     for (let i = 0; i < MAX_LIVE_RUNS_PER_ORG; i++) {
       expect((await req("POST", "/v1/bots", { task: `t${i}` })).status).toBe(201);

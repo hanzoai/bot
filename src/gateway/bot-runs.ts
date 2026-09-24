@@ -146,13 +146,19 @@ export class BotRuns {
     const runId = `run_${randomUUID().replaceAll("-", "")}`;
     const at = Date.now();
     const base = { org, runId, bot: req.bot, surface: req.surface };
-    // The record exists before anything is spent: a launch that cannot be
-    // written leases nothing.
-    await this.emit({ ...base, status: "booting", at, task: req.task });
-
+    // The slot is taken in the same turn as the count, before anything awaits, so
+    // launches that arrive together cannot all see room for one more.
     const halt = new AbortController();
     const live: Live = { org, halt, settled: Promise.resolve() };
     this.live.set(key(org, runId), live);
+    try {
+      // The record exists before anything is spent: a launch that cannot be
+      // written leases nothing.
+      await this.emit({ ...base, status: "booting", at, task: req.task });
+    } catch (err) {
+      this.live.delete(key(org, runId));
+      throw err;
+    }
     live.settled = this.drive(req, runId, halt.signal).finally(() => {
       this.live.delete(key(org, runId));
     });
@@ -222,6 +228,9 @@ export class BotRuns {
     let sandboxId: string | undefined;
     let outcome: Omit<BotRunEvent, keyof typeof base | "at">;
     try {
+      if (halted.aborted) {
+        throw halted.reason; // stopped before its sandbox was asked for
+      }
       // The lease is not handed the halt signal: a lease cut mid-flight may still
       // produce a sandbox we would never learn the id of, and so could never end.
       sandboxId = await this.deps.sandboxes.lease(caller, {
