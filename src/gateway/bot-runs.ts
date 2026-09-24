@@ -189,31 +189,45 @@ export class BotRuns {
 
   /**
    * Stop halts the run if this process drives it — its sandbox is released and the
-   * stopped event follows — and removes it from the org's list. False when the org
-   * holds no such run.
+   * stopped event follows — and removes it from the org's list. A live run no
+   * process drives (lost) has nobody to release its sandbox, so stop ends it, as
+   * the caller. False when the org holds no such run.
    */
-  async stop(org: string, runId: string): Promise<boolean> {
+  async stop(caller: SandboxCaller, runId: string): Promise<boolean> {
     if (!isRunKey(runId)) {
       return false;
     }
+    const { org } = caller;
     const live = this.live.get(key(org, runId));
     live?.halt.abort();
-    let removed = false;
+    let removed: SessionRun | null = null;
     for (const storePath of tenantStorePaths(org, this.deps.env)) {
       removed = await updateSessionStore(storePath, (store) => {
         // hasOwnProperty, so a run id naming an Object.prototype member cannot
         // resolve to an inherited value and report a stop for a run that never was.
-        if (!Object.prototype.hasOwnProperty.call(store, runId) || !store[runId]?.run) {
-          return false;
+        const run = Object.prototype.hasOwnProperty.call(store, runId)
+          ? store[runId]?.run
+          : undefined;
+        if (!run) {
+          return null;
         }
         delete store[runId];
-        return true;
+        return run;
       });
       if (removed) {
         break;
       }
     }
-    return removed || live !== undefined;
+    const orphan =
+      !live && removed?.sandboxId && (removed.status === "booting" || removed.status === "running");
+    if (orphan) {
+      await this.deps.sandboxes.end(caller, removed!.sandboxId!).catch((err: unknown) => {
+        this.log(
+          `bot run ${runId}: lost run's sandbox ${removed!.sandboxId} not released: ${errText(err)}`,
+        );
+      });
+    }
+    return removed !== null || live !== undefined;
   }
 
   /** Resolves once every run this process drives has settled. */

@@ -179,7 +179,7 @@ export async function handleBotsHttpRequest(
     sendJson(res, 404, { error: "no such bot for this org" });
     return true;
   }
-  if (!org || !(await runs.stop(org, runId))) {
+  if (!org || !auth.bearer || !(await runs.stop({ org, bearer: auth.bearer }, runId))) {
     sendJson(res, 404, { error: "no such bot for this org" });
     return true;
   }

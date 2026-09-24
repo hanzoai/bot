@@ -524,6 +524,46 @@ describe("GET /v1/bots", () => {
     expect(rows.find((b) => b.runId === "run_done")?.status).toBe("succeeded");
   });
 
+  it("stopping a lost run ends the sandbox nobody else will, as the caller", async () => {
+    const storePath = path.join(
+      stateDir,
+      "tenants",
+      "acme",
+      "agents",
+      "main",
+      "sessions",
+      "sessions.json",
+    );
+    await updateSessionStore(storePath, (store) => {
+      store.run_orphan = {
+        sessionId: "run_orphan",
+        updatedAt: 1,
+        label: "left behind",
+        origin: { provider: "bot", surface: "desktop" },
+        run: {
+          bot: "main",
+          status: "running",
+          boot: "a-previous-process",
+          startedAt: 1,
+          sandboxId: "m_old",
+        },
+      };
+      store.run_finished = {
+        sessionId: "run_finished",
+        updatedAt: 1,
+        label: "done",
+        origin: { provider: "bot", surface: "desktop" },
+        run: { bot: "main", status: "succeeded", boot: "x", startedAt: 1, sandboxId: "m_gone" },
+      };
+    });
+    expect((await req("POST", "/v1/bots/run_orphan/stop")).status).toBe(200);
+    expect(sb.ends).toEqual([{ caller: { org: "acme", bearer: "jwt-acme" }, id: "m_old" }]);
+    // A finished run's sandbox was released when it finished.
+    expect((await req("POST", "/v1/bots/run_finished/stop")).status).toBe(200);
+    expect(sb.ends).toHaveLength(1);
+    expect(await list()).toEqual([]);
+  });
+
   it("lists nothing for a caller with no tenant", async () => {
     await req("POST", "/v1/bots", { task: "t" });
     gate = { ok: true, method: "none" };
