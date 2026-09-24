@@ -13,12 +13,12 @@
 # which identity receives an image is a decision for the consumer, not for a
 # build lane.
 #
-# THESE FOUR, AND ONLY THESE FOUR. The repo's other images already have lanes:
-# Dockerfile.cloud has cloud.yml, the rollout has deploy.yml, the npm package has
-# release.yml. Declaring those here would build them a second time for the same
-# commit. The box recipes are the ones with no lane at all — which is why no box
-# image has ever existed anywhere in the org — so this is the whole list, not a
-# start on one.
+# THESE FOUR, AND ONLY THESE FOUR. The npm package has release.yml. The bot and
+# bot-cloud images have no lane: their buildx lanes (deploy.yml, cloud.yml) are
+# gone, and the bot Dockerfile needs dist/control-ui assembled before it builds,
+# which the build door does not do. The box recipes are the ones with no lane at
+# all — which is why no box image has ever existed anywhere in the org — so this
+# is the whole list, not a start on one.
 #
 # hanzoai/ci's image lane has no `target:` field — it runs
 # `docker buildx build -f "$df" "$ctx"`, which builds the LAST stage. So
