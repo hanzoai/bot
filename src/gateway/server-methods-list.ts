@@ -77,6 +77,7 @@ const BASE_METHODS = [
   "node.list",
   "node.describe",
   "node.invoke",
+  "vnc.ticket",
   "node.invoke.result",
   "node.event",
   "node.canvas.capability.refresh",

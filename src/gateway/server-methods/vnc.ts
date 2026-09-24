@@ -5,10 +5,16 @@
  *   1. Local: Browser → Gateway WS → Gateway localhost:5900 (original behaviour)
  *   2. Tunnel: Browser → Gateway WS ↔ Node tunnel WS → Node localhost:5900
  *
- * Tunnel mode is activated when the browser connects to /vnc?nodeId=<id>.
- * The gateway invokes `vnc.tunnel.open` on the node, which opens a dedicated
- * WebSocket back to the gateway at /vnc-tunnel?tunnelId=<uuid>. Binary VNC
- * data is then relayed between the two WebSocket connections.
+ * Tunnel mode is activated when the browser's ticket names a node. The gateway
+ * invokes `vnc.tunnel.open` on the node, which opens a dedicated WebSocket back
+ * to the gateway at /vnc-tunnel?tunnelId=<uuid>. Binary VNC data is then relayed
+ * between the two WebSocket connections.
+ *
+ * /vnc OPENS ONLY WITH A TICKET (vnc-tickets.ts) from `vnc.ticket`, which names
+ * the one screen it opens and is spent on use, and only from a page on an
+ * allowed origin — a screen is the machine, keyboard and mouse included. The
+ * node's callback at /vnc-tunnel carries the signed tunnel id it was handed over
+ * its own authenticated connection, and never an Origin: a browser is not a node.
  */
 
 import { createHmac, randomBytes, randomUUID } from "node:crypto";
@@ -16,7 +22,16 @@ import type { IncomingMessage } from "node:http";
 import { createConnection, type Socket } from "node:net";
 import type { Duplex } from "node:stream";
 import { WebSocket, WebSocketServer } from "ws";
+import { loadConfig } from "../../config/config.js";
 import type { NodeRegistry } from "../node-registry.js";
+import { ErrorCodes, errorShape } from "../protocol/index.js";
+import {
+  mayWatch,
+  mintVncTicket,
+  redeemVncTicket,
+  stillMay,
+  TICKET_TTL_MS,
+} from "../vnc-tickets.js";
 import type { GatewayRequestHandlers } from "./types.js";
 
 const DEFAULT_VNC_HOST = "127.0.0.1";
@@ -42,15 +57,19 @@ const TUNNEL_TIMEOUT_MS = 15_000;
  * Create a dedicated WebSocketServer for VNC proxying.
  * Returns an upgrade handler that can be installed on the HTTP server.
  */
-export function createVncProxy(opts?: {
+export function createVncProxy(opts: {
   vncHost?: string;
   vncPort?: number;
   nodeRegistry?: NodeRegistry;
   getNodeRegistry?: () => NodeRegistry | null | undefined;
+  /** Whether the gateway authenticates with IAM — one owner per org, not one per gateway. */
+  multiTenant: () => boolean;
+  /** Whether a viewer's upgrade comes from a page on an allowed origin. */
+  originAllowed: (req: IncomingMessage) => boolean;
 }) {
-  const vncHost = opts?.vncHost ?? process.env.BOT_VNC_HOST?.trim() ?? DEFAULT_VNC_HOST;
-  const vncPort = Number(process.env.BOT_VNC_PORT?.trim() ?? opts?.vncPort ?? DEFAULT_VNC_PORT);
-  const getRegistry = opts?.getNodeRegistry ?? (() => opts?.nodeRegistry);
+  const vncHost = opts.vncHost ?? process.env.BOT_VNC_HOST?.trim() ?? DEFAULT_VNC_HOST;
+  const vncPort = Number(process.env.BOT_VNC_PORT?.trim() ?? opts.vncPort ?? DEFAULT_VNC_PORT);
+  const getRegistry = opts.getNodeRegistry ?? (() => opts.nodeRegistry);
 
   // Per-instance HMAC-SHA256 signing key for tunnel tokens.
   // Regenerated on every gateway restart — old tokens are inherently invalidated.
@@ -134,13 +153,15 @@ export function createVncProxy(opts?: {
   const pendingTunnels = new Map<string, PendingTunnel>();
   const activeTunnels = new Map<string, ActiveTunnel>();
   const tunnelWss = new WebSocketServer({ noServer: true });
+  /** The verified tunnel id each node callback socket was upgraded for. */
+  const tunnelOf = new WeakMap<WebSocket, string>();
 
   /** Called when a node connects back at /vnc-tunnel?tunnelId=xxx */
   tunnelWss.on("connection", (nodeWs: WebSocket, _req: IncomingMessage) => {
     // The tunnelId is extracted and validated in handleTunnelUpgrade before
     // reaching this point. We stash it on the socket via a closure in
     // handleTunnelUpgrade so we can retrieve it here.
-    const tunnelId = (nodeWs as WebSocket & { __tunnelId?: string }).__tunnelId;
+    const tunnelId = tunnelOf.get(nodeWs);
     if (!tunnelId) {
       nodeWs.close(1008, "missing tunnel id");
       return;
@@ -227,29 +248,37 @@ export function createVncProxy(opts?: {
 
   // --- Upgrade handlers ---
 
+  /** Refuse an upgrade before it becomes a WebSocket: an HTTP status, then close. */
+  function refuse(socket: Duplex, status: 401 | 403, reason: string) {
+    socket.write(
+      `HTTP/1.1 ${status} ${status === 401 ? "Unauthorized" : "Forbidden"}\r\n` +
+        `Content-Type: text/plain; charset=utf-8\r\nContent-Length: ${Buffer.byteLength(reason)}\r\n` +
+        `Connection: close\r\n\r\n${reason}`,
+    );
+    socket.destroy();
+  }
+
   /** Handle an HTTP upgrade for the /vnc path. Returns true if handled. */
   function handleUpgrade(req: IncomingMessage, socket: Duplex, head: Buffer): boolean {
     const url = new URL(req.url ?? "/", "http://localhost");
     if (url.pathname !== "/vnc") {
       return false;
     }
-    const nodeId = url.searchParams.get("nodeId");
-    const registry = getRegistry();
-    // eslint-disable-next-line no-console
-    console.log(
-      `[vnc-proxy] /vnc upgrade: nodeId=${nodeId} hasRegistry=${!!registry} registrySize=${registry?.listConnected().length ?? 0}`,
-    );
-    if (nodeId && registry) {
-      const node = registry.get(nodeId);
-      // eslint-disable-next-line no-console
-      console.log(`[vnc-proxy] tunnel mode: nodeId=${nodeId} nodeFound=${!!node}`);
-      // Tunnel mode: create pending tunnel and invoke node.
-      handleTunnelBrowserUpgrade(req, socket, head, nodeId);
+    if (!opts.originAllowed(req)) {
+      refuse(socket, 403, "origin not allowed");
       return true;
     }
-    // Local mode: connect to gateway's own VNC server.
-    // eslint-disable-next-line no-console
-    console.log(`[vnc-proxy] local mode (no nodeId or no registry)`);
+    const target = redeemVncTicket(url.searchParams.get("ticket") ?? "");
+    const registry = getRegistry();
+    if (!target || !stillMay(target, registry, opts.multiTenant())) {
+      refuse(socket, 401, "a screen opens with a valid, unspent ticket from vnc.ticket");
+      return true;
+    }
+    if (target.nodeId) {
+      handleTunnelBrowserUpgrade(req, socket, head, target.nodeId);
+      return true;
+    }
+    // The gateway's own screen.
     wss.handleUpgrade(req, socket, head, (ws) => {
       wss.emit("connection", ws, req);
     });
@@ -268,7 +297,7 @@ export function createVncProxy(opts?: {
     if (!node) {
       // eslint-disable-next-line no-console
       console.log(
-        `[vnc-proxy] tunnel: node ${nodeId} not found in registry (registrySize=${registry?.size ?? 0})`,
+        `[vnc-proxy] tunnel: node ${nodeId} not found in registry (connected=${registry?.listConnected().length ?? 0})`,
       );
       // Complete the WebSocket upgrade so the browser gets a proper close
       // frame (code 4404) instead of a raw HTTP 404 that shows as code 1006.
@@ -355,6 +384,12 @@ export function createVncProxy(opts?: {
     if (url.pathname !== "/vnc-tunnel") {
       return false;
     }
+    // A node calls back from its own runtime, which sends no Origin; a browser
+    // always does. A page holding a leaked tunnel id cannot stand in for the node.
+    if (req.headers.origin) {
+      refuse(socket, 403, "the tunnel callback is a node's, not a page's");
+      return true;
+    }
     // eslint-disable-next-line no-console
     console.log(`[vnc-proxy] /vnc-tunnel upgrade received`);
     const signedToken = url.searchParams.get("tunnelId");
@@ -381,7 +416,7 @@ export function createVncProxy(opts?: {
       return true;
     }
     tunnelWss.handleUpgrade(req, socket, head, (ws) => {
-      (ws as WebSocket & { __tunnelId?: string }).__tunnelId = tunnelId;
+      tunnelOf.set(ws, tunnelId);
       tunnelWss.emit("connection", ws, req);
     });
     return true;
@@ -408,25 +443,17 @@ export function createVncProxy(opts?: {
   return { handleUpgrade, handleTunnelUpgrade, close, wss };
 }
 
-/** noVNC viewer HTML served at GET /vnc-viewer (self-contained, loads noVNC from CDN). */
-export function vncViewerHtml(
-  gatewayOrigin: string,
-  nodeId?: string,
-  token?: string,
-  nonce?: string,
-  _vncPassword?: string,
-): string {
+/**
+ * noVNC viewer HTML served at GET /vnc-viewer?ticket=<ticket>. The ticket is spent
+ * by the one connection it opens, so the page does not reconnect with it: a
+ * dropped session is reopened with a new ticket.
+ */
+export function vncViewerHtml(gatewayOrigin: string, ticket?: string, nonce?: string): string {
   const base = gatewayOrigin.replace(/^http/, "ws") + "/vnc";
-  const params = new URLSearchParams();
-  if (nodeId) {
-    params.set("nodeId", nodeId);
-  }
-  if (token) {
-    params.set("token", token);
-  }
-  const qs = params.toString();
-  const wsUrl = qs ? `${base}?${qs}` : base;
+  const wsUrl = ticket ? `${base}?${new URLSearchParams({ ticket }).toString()}` : base;
   const nonceAttr = nonce ? ` nonce="${nonce}"` : "";
+  // JSON, then the one character JSON leaves that can end a script element.
+  const wsUrlLiteral = JSON.stringify(wsUrl).replaceAll("<", "\\u003c");
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -451,60 +478,59 @@ export function vncViewerHtml(
     const status = document.getElementById("status");
     const screen = document.getElementById("screen");
     const autoPassword = new URLSearchParams(location.search).get("vncpw");
-    const wsUrl = "${wsUrl}";
-    let reconnectDelay = 1000;
-    const MAX_RECONNECT_DELAY = 10000;
-    let reconnectTimer = null;
-    let rfb = null;
-
-    function connect() {
-      if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
-      // Clear previous canvas
-      while (screen.firstChild) screen.removeChild(screen.firstChild);
+    const rfb = new RFB(screen, ${wsUrlLiteral});
+    rfb.scaleViewport = true;
+    rfb.resizeSession = true;
+    rfb.addEventListener("connect", () => {
+      status.textContent = "Connected";
+      setTimeout(() => status.style.opacity = "0", 2000);
+    });
+    rfb.addEventListener("disconnect", (e) => {
       status.style.opacity = "1";
-      status.textContent = "Connecting\\u2026";
-      rfb = new RFB(screen, wsUrl);
-      rfb.scaleViewport = true;
-      rfb.resizeSession = true;
-      rfb.addEventListener("connect", () => {
-        status.textContent = "Connected";
-        setTimeout(() => status.style.opacity = "0", 2000);
-        reconnectDelay = 1000; // reset on successful connect
-      });
-      rfb.addEventListener("disconnect", (e) => {
-        status.style.opacity = "1";
-        const label = e.detail.clean ? "Disconnected" : "Connection lost";
-        status.textContent = label + " — reconnecting in " + Math.round(reconnectDelay/1000) + "s\\u2026";
-        reconnectTimer = setTimeout(() => { connect(); }, reconnectDelay);
-        reconnectDelay = Math.min(reconnectDelay * 1.5, MAX_RECONNECT_DELAY);
-      });
-      rfb.addEventListener("credentialsrequired", () => {
-        if (autoPassword) { rfb.sendCredentials({ password: autoPassword }); return; }
-        status.textContent = "VNC password required";
-        const pw = prompt("VNC password:");
-        if (pw) rfb.sendCredentials({ password: pw });
-      });
-    }
-    connect();
+      status.textContent = (e.detail.clean ? "Disconnected" : "Connection lost") +
+        " \u2014 open the screen again for a new session";
+    });
+    rfb.addEventListener("credentialsrequired", () => {
+      if (autoPassword) { rfb.sendCredentials({ password: autoPassword }); return; }
+      status.textContent = "VNC password required";
+      const pw = prompt("VNC password:");
+      if (pw) rfb.sendCredentials({ password: pw });
+    });
   </script>
 </body>
 </html>`;
 }
 
-/** Gateway RPC handler: screen.vnc — returns connection info. */
+/**
+ * vnc.ticket mints the ticket /vnc opens with, for the screen of `nodeId` — or the
+ * gateway's own when it names none — if this connection may watch it (mayWatch).
+ */
 export const vncHandlers: GatewayRequestHandlers = {
-  "screen.vnc": async ({ respond }) => {
+  "vnc.ticket": ({ params, client, context, respond }) => {
+    const raw = params.nodeId;
+    if (raw !== undefined && (typeof raw !== "string" || !raw.trim())) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "nodeId must be a node id"));
+      return;
+    }
+    const decision = mayWatch({
+      client,
+      nodeId: typeof raw === "string" ? raw.trim() : null,
+      registry: context.nodeRegistry,
+      multiTenant: loadConfig().gateway?.auth?.mode === "iam",
+    });
+    if (!decision.ok) {
+      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, decision.message));
+      return;
+    }
+    const ticket = mintVncTicket(decision.target);
+    context.logGateway.info(
+      `vnc ticket: org=${decision.target.org || "(owner)"} node=${decision.target.nodeId ?? "(gateway)"}`,
+    );
     respond(true, {
-      available: true,
-      viewerPath: "/vnc-viewer",
-      wsPath: "/vnc",
-      vncPort: Number(process.env.BOT_VNC_PORT?.trim() ?? DEFAULT_VNC_PORT),
-      instructions: [
-        "macOS: Enable Screen Sharing in System Settings → General → Sharing",
-        "Linux: Start a VNC server (e.g. x11vnc) on port 5900",
-        "Then open /vnc-viewer in your browser or connect any noVNC client to /vnc",
-        "For remote nodes: /vnc-viewer?nodeId=<id> tunnels through the gateway",
-      ],
+      ticket,
+      expiresIn: TICKET_TTL_MS / 1000,
+      viewer: `/vnc-viewer?${new URLSearchParams({ ticket }).toString()}`,
+      ws: `/vnc?${new URLSearchParams({ ticket }).toString()}`,
     });
   },
 };

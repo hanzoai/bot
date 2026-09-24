@@ -1,22 +1,20 @@
 import type { Server as HttpServer } from "node:http";
 import { WebSocketServer } from "ws";
+import { CANVAS_HOST_PATH } from "../canvas-host/a2ui.js";
+import { type CanvasHostHandler, createCanvasHostHandler } from "../canvas-host/server.js";
 import type { CliDeps } from "../cli/deps.js";
+import { loadConfig } from "../config/config.js";
 import type { createSubsystemLogger } from "../logging/subsystem.js";
 import type { PluginRegistry } from "../plugins/registry.js";
 import type { RuntimeEnv } from "../runtime.js";
 import type { AuthRateLimiter } from "./auth-rate-limit.js";
-import type { ResolvedGatewayAuth } from "./auth.js";
+import { isLocalDirectRequest, type ResolvedGatewayAuth } from "./auth.js";
 import type { ChatAbortControllerEntry } from "./chat-abort.js";
 import type { ControlUiRootState } from "./control-ui.js";
 import type { HooksConfigResolved } from "./hooks.js";
-import type { NodeRegistry } from "./node-registry.js";
-import type { DedupeEntry } from "./server-shared.js";
-import type { GatewayTlsRuntime } from "./server/tls.js";
-import type { GatewayWsClient } from "./server/ws-types.js";
-import { CANVAS_HOST_PATH } from "../canvas-host/a2ui.js";
-import { createVncProxy, vncViewerHtml } from "./server-methods/vnc.js";
-import { type CanvasHostHandler, createCanvasHostHandler } from "../canvas-host/server.js";
 import { isLoopbackHost, resolveGatewayListenHosts } from "./net.js";
+import type { NodeRegistry } from "./node-registry.js";
+import { checkBrowserOrigin } from "./origin-check.js";
 import {
   createGatewayBroadcaster,
   type GatewayBroadcastFn,
@@ -29,6 +27,8 @@ import {
 } from "./server-chat.js";
 import { MAX_PAYLOAD_BYTES } from "./server-constants.js";
 import { attachGatewayUpgradeHandler, createGatewayHttpServer } from "./server-http.js";
+import { createVncProxy, vncViewerHtml } from "./server-methods/vnc.js";
+import type { DedupeEntry } from "./server-shared.js";
 import { createGatewayHooksRequestHandler } from "./server/hooks.js";
 import { listenGatewayHttpServer } from "./server/http-listen.js";
 import {
@@ -36,6 +36,8 @@ import {
   shouldEnforceGatewayAuthForPluginPath,
   type PluginRoutePathContext,
 } from "./server/plugins-http.js";
+import type { GatewayTlsRuntime } from "./server/tls.js";
+import type { GatewayWsClient } from "./server/ws-types.js";
 
 export async function createGatewayRuntimeState(params: {
   cfg: import("../config/config.js").BotConfig;
@@ -144,20 +146,36 @@ export async function createGatewayRuntimeState(params: {
   // Create VNC proxy with lazy nodeRegistry getter (nodeRegistry is created after this function returns).
   const vncProxy = createVncProxy({
     getNodeRegistry: params.getNodeRegistry,
+    multiTenant: () => params.resolvedAuth.mode === "iam",
+    originAllowed: (req) => {
+      const cfg = loadConfig();
+      const trustedProxies = cfg.gateway?.trustedProxies ?? [];
+      return checkBrowserOrigin({
+        requestHost: req.headers.host,
+        origin: typeof req.headers.origin === "string" ? req.headers.origin : undefined,
+        allowedOrigins: cfg.gateway?.controlUi?.allowedOrigins,
+        allowHostHeaderOriginFallback:
+          cfg.gateway?.controlUi?.dangerouslyAllowHostHeaderOriginFallback === true,
+        isLocalClient: isLocalDirectRequest(
+          req,
+          trustedProxies,
+          cfg.gateway?.allowRealIpFallback === true,
+        ),
+      }).ok;
+    },
   });
-  const handleVncViewerRequest = (req: import("node:http").IncomingMessage, res: import("node:http").ServerResponse): boolean => {
+  const handleVncViewerRequest = (
+    req: import("node:http").IncomingMessage,
+    res: import("node:http").ServerResponse,
+  ): boolean => {
     const url = new URL(req.url ?? "/", "http://localhost");
     if (url.pathname !== "/vnc-viewer") {
       return false;
     }
-    const host = req.headers["x-forwarded-host"] as string | undefined
-      ?? req.headers.host
-      ?? "gw.hanzo.bot";
-    const proto = req.headers["x-forwarded-proto"] as string | undefined ?? "https";
-    const origin = `${proto}://${host}`;
-    const nodeId = url.searchParams.get("nodeId") ?? undefined;
-    const token = url.searchParams.get("token") ?? undefined;
-    const html = vncViewerHtml(origin, nodeId, token);
+    const host =
+      (req.headers["x-forwarded-host"] as string | undefined) ?? req.headers.host ?? "gw.hanzo.bot";
+    const proto = (req.headers["x-forwarded-proto"] as string | undefined) ?? "https";
+    const html = vncViewerHtml(`${proto}://${host}`, url.searchParams.get("ticket") ?? undefined);
     res.statusCode = 200;
     res.setHeader("Content-Type", "text/html; charset=utf-8");
     res.setHeader("Cache-Control", "no-store");
