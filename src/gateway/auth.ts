@@ -49,6 +49,11 @@ export type GatewayAuthResult = {
    */
   orgId?: string;
   /**
+   * The token's `owner` claim — the org the IAM account belongs to, and cloud's
+   * own scoping key. Present only for `method: "iam"`.
+   */
+  owner?: string;
+  /**
    * The raw bearer JWT the viewer presented at handshake. Present only for
    * `method: "iam"`. cloud resolves the org server-side from its `owner` claim;
    * we never present a pod-fixed credential.
@@ -480,9 +485,17 @@ export async function authorizeGatewayConnect(
           // read-through can scope to THIS org only. `owner` is exactly cloud's
           // server-side scoping key; fall back to it when currentOrgId is absent.
           const orgId = iamResult.currentOrgId ?? iamResult.owner;
+          const owner = iamResult.owner || undefined;
           return orgId
-            ? { ok: true, method: "iam", user: iamResult.userId, orgId, bearer: connectAuth.token }
-            : { ok: true, method: "iam", user: iamResult.userId };
+            ? {
+                ok: true,
+                method: "iam",
+                user: iamResult.userId,
+                orgId,
+                owner,
+                bearer: connectAuth.token,
+              }
+            : { ok: true, method: "iam", user: iamResult.userId, owner };
         }
       } catch {
         // IAM validation threw (network error, JWKS unreachable, etc.)

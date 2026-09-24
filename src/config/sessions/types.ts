@@ -1,5 +1,5 @@
-import type { Skill } from "@mariozechner/pi-coding-agent";
 import crypto from "node:crypto";
+import type { Skill } from "@mariozechner/pi-coding-agent";
 import type { ChatType } from "../../channels/chat-type.js";
 import type { ChannelId } from "../../channels/plugins/types.js";
 import type { DeliveryContext } from "../../utils/delivery-context.js";
@@ -164,6 +164,29 @@ export type SessionEntry = {
   skillsSnapshot?: SessionSkillSnapshot;
   systemPromptReport?: SessionSystemPromptReport;
   acp?: SessionAcpMeta;
+  /** Present on an entry that is a bot run (src/gateway/bot-runs.ts). */
+  run?: SessionRun;
+};
+
+/**
+ * A bot run's state as its lifecycle events left it. The recorder in
+ * src/gateway/bot-runs.ts is its only writer: every field here is the last event
+ * applied, never a value read back from the sandbox.
+ */
+export type SessionRun = {
+  /** The org's bot the run belongs to — the agents/{bot} directory it is filed in. */
+  bot: string;
+  status: "booting" | "running" | "succeeded" | "failed" | "stopped";
+  /** The process that drives the run. A live status from another boot is a run nobody drives. */
+  boot: string;
+  /** The sandbox the run executes in, once leased. */
+  sandboxId?: string;
+  exitCode?: number;
+  /** Why a failed run failed, bounded. */
+  error?: string;
+  /** Epoch ms. */
+  startedAt: number;
+  endedAt?: number;
 };
 
 function normalizeRuntimeField(value: string | undefined): string | undefined {
