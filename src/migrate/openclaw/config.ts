@@ -32,7 +32,8 @@ export type ConfigDropReason =
   | "superseded"
   | "openclaw-only"
   | "invalid"
-  | "no-plugin";
+  | "no-plugin"
+  | "no-channel";
 
 export type ConfigReport = {
   renamed: Array<{ from: string; to: string }>;
@@ -515,7 +516,8 @@ function applyValidation(config: Json, report: ConfigReport): void {
       seen.add(label);
       const dropped = dropIssue(config, [...path]);
       if (dropped) {
-        report.dropped.push({ path: dropped, reason: "invalid" });
+        const reason = /^channels\.[^.[]+$/.test(dropped) ? "no-channel" : "invalid";
+        report.dropped.push({ path: dropped, reason });
         progressed = true;
       }
     }

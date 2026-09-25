@@ -28,6 +28,7 @@ const REASONS: Record<string, string> = {
   "openclaw-only": "no such Hanzo Bot setting",
   invalid: "value Hanzo Bot does not accept",
   "no-plugin": "no such Hanzo Bot plugin",
+  "no-channel": "Hanzo Bot has no such channel",
   locator: "points at the OpenClaw install",
   managed: "created by OpenClaw itself",
   payload: "job kind Hanzo Bot does not run",

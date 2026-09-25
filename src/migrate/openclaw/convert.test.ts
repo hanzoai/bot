@@ -212,6 +212,25 @@ describe("config", () => {
     );
   });
 
+  it("drops a channel Hanzo Bot does not have and keeps the ones it does", () => {
+    const { config, report } = convert({
+      channels: {
+        sms: { enabled: true },
+        zalo: { botToken: "t" },
+        telegram: { botToken: "1:a", notAKey: 1 },
+      },
+    });
+    expect(config).toEqual({
+      channels: { zalo: { botToken: "t" }, telegram: { botToken: "1:a" } },
+    });
+    expect(report.dropped).toEqual(
+      expect.arrayContaining([
+        { path: "channels.sms", reason: "no-channel" },
+        { path: "channels.telegram.notAKey", reason: "openclaw-only" },
+      ]),
+    );
+  });
+
   it("merges beneath an existing config without replacing what it sets", () => {
     const existing = { gateway: { port: 1, auth: { mode: "token" } }, list: [1] };
     const added = mergeBeneath(existing, {
