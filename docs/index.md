@@ -39,6 +39,9 @@ title: "HanzoBot"
   <Card title="Open the Control UI" href="/web/control-ui" icon="layout-dashboard">
     Launch the browser dashboard for chat, config, and sessions.
   </Card>
+  <Card title="Coming from OpenClaw?" href="/install/migrate-from-openclaw" icon="arrow-right-left">
+    One command moves your config, credentials, workspace, sessions, skills and cron jobs.
+  </Card>
 </Columns>
 
 ## What is HanzoBot?

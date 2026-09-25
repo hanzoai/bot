@@ -54,6 +54,7 @@ This page describes the current CLI behavior. If commands change, update this do
 - [`security`](/cli/security)
 - [`secrets`](/cli/secrets)
 - [`skills`](/cli/skills)
+- [`migrate`](/cli/migrate) (import an OpenClaw install)
 - [`daemon`](/cli/daemon) (legacy alias for gateway service commands)
 - [`clawbot`](/cli/clawbot) (legacy alias namespace)
 - [`voicecall`](/cli/voicecall) (plugin; if installed)
@@ -251,6 +252,8 @@ hanzo-bot [--dev] [--profile <name>] <command>
     list
     approve
   qr
+  migrate
+    openclaw
   clawbot
     qr
   docs

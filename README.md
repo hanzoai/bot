@@ -29,6 +29,20 @@ skills, and installs the gateway as a launchd/systemd user service so it stays u
 hanzo-bot onboard --install-daemon
 ```
 
+## Coming from OpenClaw?
+
+Hanzo Bot is a fork of [OpenClaw](https://github.com/openclaw/openclaw). One command moves an
+OpenClaw install over: config, credentials, workspace, sessions, skills and cron jobs. It shows
+what it will do first, and it never changes `~/.openclaw`:
+
+```bash
+hanzo-bot migrate openclaw           # what would move; writes nothing
+hanzo-bot migrate openclaw --apply
+```
+
+What moves, what does not, and the command, config and env var mapping:
+[Migrate from OpenClaw](docs/install/migrate-from-openclaw.md).
+
 ## First things to try
 
 ```bash
@@ -62,13 +76,13 @@ Dockerfiles in the repository if you would rather run it in a container.
 
 ## Docs
 
-The documentation lives in [`docs/`](docs/) in this repository — it is not published to a
-website yet, so read it here or with `hanzo-bot docs`.
+The documentation lives in [`docs/`](docs/) in this repository and is published at
+[docs.hanzo.bot](https://docs.hanzo.bot/docs).
 
 - [Getting started](docs/start/getting-started.md) · [Onboarding](docs/start/onboarding.md) · [Quickstart](docs/start/quickstart.md)
 - [Channels](docs/channels/) — one page per chat app, including how to connect it
 - [Concepts](docs/concepts/) — the agent loop, sessions, memory, [models](docs/concepts/models.md), [model failover](docs/concepts/model-failover.md)
-- [CLI reference](docs/cli/) · [Gateway](docs/gateway/) · [Installing and updating](docs/install/)
+- [CLI reference](docs/cli/) · [Gateway](docs/gateway/) · [Installing and updating](docs/install/) · [Migrate from OpenClaw](docs/install/migrate-from-openclaw.md)
 - [FAQ](docs/help/faq.md)
 - [`SECURITY.md`](SECURITY.md) — the trust model, and why DM access is closed by default
 - [`LLM.md`](LLM.md) — the deep reference for anyone working on the code
@@ -81,4 +95,5 @@ Stable releases are tagged `vYYYY.M.D` and published to npm as `latest`. Prerele
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). Hanzo Bot includes OpenClaw (MIT); its attribution is in
+[NOTICE](NOTICE).

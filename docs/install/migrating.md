@@ -8,6 +8,8 @@ title: "Migration Guide"
 
 # Migrating HanzoBot to a new machine
 
+Moving from OpenClaw instead? See [Migrate from OpenClaw](/install/migrate-from-openclaw).
+
 This guide migrates a HanzoBot Gateway from one machine to another **without redoing onboarding**.
 
 The migration is simple conceptually:

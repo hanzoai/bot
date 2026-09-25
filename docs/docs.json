@@ -48,6 +48,18 @@
   },
   "redirects": [
     {
+      "source": "/install/openclaw",
+      "destination": "/install/migrate-from-openclaw"
+    },
+    {
+      "source": "/migrate-from-openclaw",
+      "destination": "/install/migrate-from-openclaw"
+    },
+    {
+      "source": "/tools/hanzo-skills",
+      "destination": "/tools/clawhub"
+    },
+    {
       "source": "/messages",
       "destination": "/concepts/messages"
     },
@@ -858,7 +870,12 @@
               },
               {
                 "group": "Maintenance",
-                "pages": ["install/updating", "install/migrating", "install/uninstall"]
+                "pages": [
+                  "install/updating",
+                  "install/migrating",
+                  "install/migrate-from-openclaw",
+                  "install/uninstall"
+                ]
               },
               {
                 "group": "Hosting and deployment",
@@ -1268,6 +1285,7 @@
                   "cli/logs",
                   "cli/memory",
                   "cli/message",
+                  "cli/migrate",
                   "cli/models",
                   "cli/node",
                   "cli/nodes",
