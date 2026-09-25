@@ -1,9 +1,12 @@
+import fs from "node:fs";
+import path from "node:path";
 import { allocateColor } from "../../browser/profiles.js";
 import {
   validateConfigObjectRaw,
   validateConfigObjectRawWithPlugins,
 } from "../../config/validation.js";
 import { BotSchema } from "../../config/zod-schema.js";
+import { PLUGIN_MANIFEST_FILENAME } from "../../plugins/manifest.js";
 import { botConfigKeyTree, pruneToTree } from "./keys.js";
 import type { PathRewriter } from "./paths.js";
 
@@ -257,6 +260,9 @@ function applyRenames(config: Json, report: ConfigReport): void {
         pruneEmpty(pluginEntries, id);
       }
     }
+    const plugins = child(config, "plugins") ?? {};
+    pruneEmpty(plugins, "entries");
+    pruneEmpty(config, "plugins");
   }
 
   const profiles = child(child(config, "browser") ?? {}, "profiles");
@@ -316,14 +322,16 @@ function applyModelPolicy(defaults: Json, modelsAreCatalog: boolean, report: Con
   report.renamed.push({ from: "agents.defaults.modelPolicy.allow", to: "agents.defaults.models" });
 }
 
-function isSourceDirPath(value: unknown, sourceDirs: string[]): boolean {
-  return (
-    typeof value === "string" &&
-    sourceDirs.some((dir) => value === dir || value.startsWith(`${dir}/`))
-  );
+/** A load path is carried only when it holds a Hanzo Bot plugin; OpenClaw's plugin SDK is not this one. */
+function holdsBotPlugin(entry: unknown, home: string): boolean {
+  if (typeof entry !== "string") {
+    return false;
+  }
+  const dir = entry === "~" || entry.startsWith("~/") ? path.join(home, entry.slice(1)) : entry;
+  return path.isAbsolute(dir) && fs.existsSync(path.join(dir, PLUGIN_MANIFEST_FILENAME));
 }
 
-function applyDrops(config: Json, report: ConfigReport, pluginDirs: string[]): void {
+function applyDrops(config: Json, report: ConfigReport, home: string): void {
   const plugins = child(config, "plugins");
   if (plugins && Object.hasOwn(plugins, "installs")) {
     delete plugins.installs;
@@ -331,12 +339,21 @@ function applyDrops(config: Json, report: ConfigReport, pluginDirs: string[]): v
   }
   const load = plugins ? child(plugins, "load") : undefined;
   if (load && Array.isArray(load.paths)) {
-    const kept = load.paths.filter((entry) => !isSourceDirPath(entry, pluginDirs));
-    if (kept.length !== load.paths.length) {
-      report.dropped.push({ path: "plugins.load.paths", reason: "plugins" });
+    const paths: unknown[] = load.paths;
+    paths.forEach((entry, index) => {
+      if (!holdsBotPlugin(entry, home)) {
+        report.dropped.push({ path: `plugins.load.paths[${index}]`, reason: "plugins" });
+      }
+    });
+    const kept = paths.filter((entry) => holdsBotPlugin(entry, home));
+    if (kept.length > 0) {
       load.paths = kept;
+    } else {
+      delete load.paths;
+      pruneEmpty(plugins ?? {}, "load");
     }
   }
+  pruneEmpty(config, "plugins");
   dropSecretStoreRefs(config, "", report);
 }
 
@@ -467,8 +484,14 @@ function invalidPaths(config: Json): PropertyKey[][] {
   if (!parsed.success) {
     return parsed.error.issues.map((issue) => issue.path);
   }
-  const full = validateConfigObjectRaw(config);
-  return full.ok ? [] : full.issues.map((issue) => parseIssuePath(issue.path));
+  const raw = validateConfigObjectRaw(config);
+  if (!raw.ok) {
+    return raw.issues.map((issue) => parseIssuePath(issue.path));
+  }
+  // Plugin checks the gateway makes at startup: a load path that holds no
+  // Hanzo Bot plugin, an allow list naming a plugin it does not have.
+  const withPlugins = validateConfigObjectRawWithPlugins(config);
+  return withPlugins.ok ? [] : withPlugins.issues.map((issue) => parseIssuePath(issue.path));
 }
 
 function applyValidation(config: Json, report: ConfigReport): void {
@@ -512,13 +535,13 @@ function applyValidation(config: Json, report: ConfigReport): void {
 export function convertConfig(params: {
   source: Json;
   rewrite: PathRewriter;
-  /** Absolute OpenClaw dirs that held plugin code: extensions, npm, git. */
-  pluginDirs: string[];
+  /** Home dir, for `~/…` plugin load paths. */
+  home: string;
 }): { config: Json; report: ConfigReport } {
   const report: ConfigReport = { renamed: [], dropped: [] };
   const config = structuredClone(params.source);
   applyRenames(config, report);
-  applyDrops(config, report, params.pluginDirs);
+  applyDrops(config, report, params.home);
   const rewritten = mapStrings(config, (text) => rewriteEnvRefs(params.rewrite(text))) as Json;
   const pruned = pruneToTree(rewritten, botConfigKeyTree());
   for (const path of pruned.dropped) {

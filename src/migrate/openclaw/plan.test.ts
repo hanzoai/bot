@@ -10,16 +10,28 @@ let home: string;
 let source: string;
 let target: string;
 let closeDb: (() => void) | undefined;
+let savedEnv: { HOME?: string; BOT_HOME?: string };
 
 beforeEach(() => {
   home = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "bot-migrate-test-")));
   source = path.join(home, ".openclaw");
   target = path.join(home, ".bot");
+  // The validator expands `~` in the converted config with the process's home.
+  savedEnv = { HOME: process.env.HOME, BOT_HOME: process.env.BOT_HOME };
+  process.env.HOME = home;
+  process.env.BOT_HOME = home;
 });
 
 afterEach(() => {
   closeDb?.();
   closeDb = undefined;
+  for (const [key, value] of Object.entries(savedEnv)) {
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  }
   fs.rmSync(home, { recursive: true, force: true });
 });
 
@@ -90,7 +102,7 @@ describe("OpenClaw file layout", () => {
       defaults: { workspace: "~/.bot/workspace" },
       list: [{ id: "main" }, { id: "work", workspace: "~/.bot/workspace-work" }],
     });
-    expect(config.plugins).toMatchObject({ load: { paths: ["/opt/shared-plugins/y"] } });
+    expect(config.plugins).toEqual({ load: { paths: ["~/bot-plugins/hello"] } });
     expect(config.plugins).not.toHaveProperty("installs");
     expect(config.channels).toMatchObject({ telegram: { botToken: SECRETS.telegramToken } });
 

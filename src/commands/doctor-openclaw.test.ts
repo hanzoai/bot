@@ -1,0 +1,62 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { noteOpenClawInstall } from "./doctor-openclaw.js";
+
+let home: string;
+
+beforeEach(() => {
+  home = fs.mkdtempSync(path.join(os.tmpdir(), "bot-doctor-openclaw-"));
+});
+
+afterEach(() => {
+  fs.rmSync(home, { recursive: true, force: true });
+});
+
+function env(extra: Record<string, string> = {}): NodeJS.ProcessEnv {
+  return { HOME: home, BOT_STATE_DIR: path.join(home, ".bot"), ...extra };
+}
+
+describe("noteOpenClawInstall", () => {
+  it("says nothing when there is no OpenClaw install", () => {
+    const noteFn = vi.fn();
+    fs.mkdirSync(path.join(home, ".openclaw"));
+    noteOpenClawInstall(env(), noteFn);
+    expect(noteFn).not.toHaveBeenCalled();
+  });
+
+  it("points at the importer when ~/.openclaw has a config", () => {
+    const noteFn = vi.fn();
+    fs.mkdirSync(path.join(home, ".openclaw"));
+    fs.writeFileSync(path.join(home, ".openclaw", "openclaw.json"), "{}");
+    noteOpenClawInstall(env(), noteFn);
+    expect(noteFn).toHaveBeenCalledTimes(1);
+    const [text, title] = noteFn.mock.calls[0] as [string, string];
+    expect(title).toBe("OpenClaw");
+    expect(text).toContain("migrate openclaw");
+    expect(text).toContain("migrate openclaw --apply");
+    expect(text).toContain("/install/migrate-from-openclaw");
+    expect(text).not.toContain("gateway service");
+  });
+
+  it("finds a database-only install at $OPENCLAW_STATE_DIR and warns about its service", () => {
+    const noteFn = vi.fn();
+    const dir = path.join(home, "oc");
+    fs.mkdirSync(path.join(dir, "state"), { recursive: true });
+    fs.writeFileSync(path.join(dir, "state", "openclaw.sqlite"), "");
+    fs.mkdirSync(path.join(home, "Library", "LaunchAgents"), { recursive: true });
+    fs.writeFileSync(path.join(home, "Library", "LaunchAgents", "ai.openclaw.gateway.plist"), "");
+    noteOpenClawInstall(env({ OPENCLAW_STATE_DIR: dir }), noteFn);
+    const [text] = noteFn.mock.calls[0] as [string];
+    expect(text).toContain("openclaw gateway stop");
+  });
+
+  it("says nothing when Hanzo Bot's own state dir is the OpenClaw dir", () => {
+    const noteFn = vi.fn();
+    fs.mkdirSync(path.join(home, ".openclaw"));
+    fs.writeFileSync(path.join(home, ".openclaw", "openclaw.json"), "{}");
+    noteOpenClawInstall(env({ BOT_STATE_DIR: path.join(home, ".openclaw") }), noteFn);
+    expect(noteFn).not.toHaveBeenCalled();
+  });
+});

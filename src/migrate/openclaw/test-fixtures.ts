@@ -76,7 +76,7 @@ export function writeFileLayout(dir: string): void {
   gateway: { mode: "local", port: 18789, auth: { mode: "token", token: "\${OPENCLAW_GATEWAY_TOKEN}" } },
   plugins: {
     installs: { "voice-x": { source: "npm", spec: "voice-x@1.0.0" } },
-    load: { paths: ["~/.openclaw/extensions/voice-x", "/opt/shared-plugins/y"] },
+    load: { paths: ["~/.openclaw/extensions/voice-x", "~/bot-plugins/hello"] },
   },
   somethingOpenClawAdded: { enabled: true },
 }
@@ -149,6 +149,17 @@ export function writeFileLayout(dir: string): void {
   write(path.join(dir, "devices", "paired.json"), json({ "device-a": {}, "device-b": {} }), 0o600);
   write(path.join(dir, "identity", "device.json"), json({ id: "x" }), 0o600);
   write(path.join(dir, "extensions", "voice-x", "package.json"), json({ name: "voice-x" }));
+  write(
+    path.join(dir, "extensions", "voice-x", "openclaw.plugin.json"),
+    json({ id: "voice-x", configSchema: { type: "object" } }),
+  );
+  // A plugin the person keeps outside OpenClaw that Hanzo Bot can load.
+  const plugin = path.join(path.dirname(dir), "bot-plugins", "hello");
+  write(
+    path.join(plugin, "bot.plugin.json"),
+    json({ id: "hello", configSchema: { type: "object", additionalProperties: false } }),
+  );
+  write(path.join(plugin, "index.ts"), "export default function register() {}\n");
 }
 
 type Db = InstanceType<typeof import("node:sqlite").DatabaseSync>;

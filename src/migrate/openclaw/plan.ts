@@ -123,11 +123,7 @@ function planConfig(
       });
     }
   }
-  const pluginDirs = ["extensions", "npm", "git"].flatMap((dir) => [
-    path.join(p.source, dir),
-    homeForm(path.join(p.source, dir), p.home),
-  ]);
-  const { config, report } = convertConfig({ source, rewrite, pluginDirs });
+  const { config, report } = convertConfig({ source, rewrite, home: p.home });
   const configName = state.configFile ? path.basename(state.configFile) : "openclaw.json";
   for (const { from, to } of report.renamed) {
     items.push({ op: "rename", from: `${configName}#${from}`, to: `bot.json#${to}` });
