@@ -664,8 +664,8 @@ export async function statusCommand(
   }
 
   runtime.log("");
-  runtime.log("FAQ: https://docs.bot.ai/faq");
-  runtime.log("Troubleshooting: https://docs.bot.ai/troubleshooting");
+  runtime.log("FAQ: https://docs.hanzo.bot/docs/faq");
+  runtime.log("Troubleshooting: https://docs.hanzo.bot/docs/troubleshooting");
   runtime.log("");
   const updateHint = formatUpdateAvailableHint(update);
   if (updateHint) {

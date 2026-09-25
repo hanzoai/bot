@@ -233,8 +233,8 @@ export async function finalizeOnboardingWizard(
       await prompter.note(
         [
           "Docs:",
-          "https://docs.bot.ai/gateway/health",
-          "https://docs.bot.ai/gateway/troubleshooting",
+          "https://docs.hanzo.bot/docs/gateway/health",
+          "https://docs.hanzo.bot/docs/gateway/troubleshooting",
         ].join("\n"),
         "Health check help",
       );
@@ -296,7 +296,7 @@ export async function finalizeOnboardingWizard(
         : undefined,
       `Gateway WS: ${links.wsUrl}`,
       gatewayStatusLine,
-      "Docs: https://docs.bot.ai/web/control-ui",
+      "Docs: https://docs.hanzo.bot/docs/web/control-ui",
     ]
       .filter(Boolean)
       .join("\n"),
@@ -396,14 +396,15 @@ export async function finalizeOnboardingWizard(
   }
 
   await prompter.note(
-    ["Back up your agent workspace.", "Docs: https://docs.bot.ai/concepts/agent-workspace"].join(
-      "\n",
-    ),
+    [
+      "Back up your agent workspace.",
+      "Docs: https://docs.hanzo.bot/docs/concepts/agent-workspace",
+    ].join("\n"),
     "Workspace backup",
   );
 
   await prompter.note(
-    "Running agents on your computer is risky — harden your setup: https://docs.bot.ai/security",
+    "Running agents on your computer is risky — harden your setup: https://docs.hanzo.bot/docs/security",
     "Security",
   );
 
@@ -466,7 +467,7 @@ export async function finalizeOnboardingWizard(
           webSearchKey
             ? `API key: stored in config (tools.web.search.${webSearchProvider === "perplexity" ? "perplexity.apiKey" : "apiKey"}).`
             : `API key: provided via ${webSearchProvider === "perplexity" ? "PERPLEXITY_API_KEY" : "BRAVE_API_KEY"} env var (Gateway environment).`,
-          "Docs: https://docs.bot.ai/tools/web",
+          "Docs: https://docs.hanzo.bot/docs/tools/web",
         ].join("\n")
       : [
           "To enable web search, your agent will need an API key for either Perplexity Search or Brave Search.",
@@ -476,7 +477,7 @@ export async function finalizeOnboardingWizard(
           "- Choose a provider and paste your API key",
           "",
           "Alternative: set PERPLEXITY_API_KEY or BRAVE_API_KEY in the Gateway environment (no config changes).",
-          "Docs: https://docs.bot.ai/tools/web",
+          "Docs: https://docs.hanzo.bot/docs/tools/web",
         ].join("\n"),
     "Web search (optional)",
   );

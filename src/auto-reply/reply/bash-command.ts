@@ -192,7 +192,7 @@ export async function handleBashChatCommand(params: {
     return buildDisabledCommandReply({
       label: "bash",
       configKey: "bash",
-      docsUrl: "https://docs.bot.ai/tools/slash-commands#config",
+      docsUrl: "https://docs.hanzo.bot/docs/tools/slash-commands#config",
     });
   }
 

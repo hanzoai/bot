@@ -221,8 +221,8 @@ export function formatControlUiSshHint(params: {
     localUrl,
     authedUrl,
     "Docs:",
-    "https://docs.bot.ai/gateway/remote",
-    "https://docs.bot.ai/web/control-ui",
+    "https://docs.hanzo.bot/docs/gateway/remote",
+    "https://docs.hanzo.bot/docs/web/control-ui",
   ]
     .filter(Boolean)
     .join("\n");

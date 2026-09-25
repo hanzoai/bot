@@ -15,7 +15,7 @@ export async function setupInternalHooks(
       "Hooks let you automate actions when agent commands are issued.",
       "Example: Save session context to memory when you issue /new or /reset.",
       "",
-      "Learn more: https://docs.bot.ai/automation/hooks",
+      "Learn more: https://docs.hanzo.bot/docs/automation/hooks",
     ].join("\n"),
     "Hooks",
   );

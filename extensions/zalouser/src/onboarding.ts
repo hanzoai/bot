@@ -97,7 +97,7 @@ async function noteZalouserHelp(prompter: WizardPrompter): Promise<void> {
       "",
       "This plugin uses zca-js directly (no external CLI dependency).",
       "",
-      "Docs: https://docs.bot.ai/channels/zalouser",
+      "Docs: https://docs.hanzo.bot/docs/channels/zalouser",
     ].join("\n"),
     "Zalo Personal Setup",
   );

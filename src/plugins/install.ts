@@ -46,7 +46,7 @@ type PackageManifest = PluginPackageManifest & {
 };
 
 const MISSING_EXTENSIONS_ERROR =
-  'package.json missing bot.extensions; update the plugin package to include bot.extensions (for example ["./dist/index.js"]). See https://docs.bot.ai/help/troubleshooting#plugin-install-fails-with-missing-bot-extensions';
+  'package.json missing bot.extensions; update the plugin package to include bot.extensions (for example ["./dist/index.js"]). See https://docs.hanzo.bot/docs/help/troubleshooting#plugin-install-fails-with-missing-bot-extensions';
 
 export const PLUGIN_INSTALL_ERROR_CODE = {
   INVALID_NPM_SPEC: "invalid_npm_spec",

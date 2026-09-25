@@ -85,7 +85,7 @@ export function registerChannelsCli(program: Command) {
           ["bot channels login --channel whatsapp", "Link a WhatsApp Web account."],
         ])}\n\n${theme.muted("Docs:")} ${formatDocsLink(
           "/cli/channels",
-          "docs.bot.ai/cli/channels",
+          "docs.hanzo.bot/docs/cli/channels",
         )}\n`,
     );
 

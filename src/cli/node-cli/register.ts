@@ -30,7 +30,7 @@ export function registerNodeCli(program: Command) {
           ["bot node status", "Check node host service status."],
           ["bot node install", "Install the node host service."],
           ["bot node restart", "Restart the installed node host service."],
-        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/node", "docs.bot.ai/cli/node")}\n`,
+        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/node", "docs.hanzo.bot/docs/cli/node")}\n`,
     );
 
   node

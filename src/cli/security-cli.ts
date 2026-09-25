@@ -39,7 +39,7 @@ export function registerSecurityCli(program: Command) {
           ["bot security audit --deep", "Include best-effort live Gateway probe checks."],
           ["bot security audit --fix", "Apply safe remediations and file-permission fixes."],
           ["bot security audit --json", "Output machine-readable JSON."],
-        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/security", "docs.bot.ai/cli/security")}\n`,
+        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/security", "docs.hanzo.bot/docs/cli/security")}\n`,
     );
 
   security

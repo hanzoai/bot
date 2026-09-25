@@ -99,8 +99,8 @@ async function runGatewayHealthCheck(params: {
     note(
       [
         "Docs:",
-        "https://docs.bot.ai/gateway/health",
-        "https://docs.bot.ai/gateway/troubleshooting",
+        "https://docs.hanzo.bot/docs/gateway/health",
+        "https://docs.hanzo.bot/docs/gateway/troubleshooting",
       ].join("\n"),
       "Health check help",
     );
@@ -168,7 +168,7 @@ async function promptWebToolsConfig(
       "Web search lets your agent look things up online using the `web_search` tool.",
       "Choose a provider: Perplexity Search (recommended) or Brave Search.",
       "Both return structured results (title, URL, snippet) for fast research.",
-      "Docs: https://docs.bot.ai/tools/web",
+      "Docs: https://docs.hanzo.bot/docs/tools/web",
     ].join("\n"),
     "Web search",
   );
@@ -230,7 +230,7 @@ async function promptWebToolsConfig(
             "No key stored yet, so web_search will stay unavailable.",
             "Store a key here or set PERPLEXITY_API_KEY in the Gateway environment.",
             "Get your API key at: https://www.perplexity.ai/settings/api",
-            "Docs: https://docs.bot.ai/tools/web",
+            "Docs: https://docs.hanzo.bot/docs/tools/web",
           ].join("\n"),
           "Web search",
         );
@@ -255,7 +255,7 @@ async function promptWebToolsConfig(
             "No key stored yet, so web_search will stay unavailable.",
             "Store a key here or set BRAVE_API_KEY in the Gateway environment.",
             "Get your API key at: https://brave.com/search/api/",
-            "Docs: https://docs.bot.ai/tools/web",
+            "Docs: https://docs.hanzo.bot/docs/tools/web",
           ].join("\n"),
           "Web search",
         );
@@ -309,7 +309,7 @@ export async function runConfigureWizard(
           [
             ...snapshot.issues.map((iss) => `- ${iss.path}: ${iss.message}`),
             "",
-            "Docs: https://docs.bot.ai/gateway/configuration",
+            "Docs: https://docs.hanzo.bot/docs/gateway/configuration",
           ].join("\n"),
           "Config issues",
         );
@@ -638,7 +638,7 @@ export async function runConfigureWizard(
         `Web UI: ${links.httpUrl}`,
         `Gateway WS: ${links.wsUrl}`,
         gatewayStatusLine,
-        "Docs: https://docs.bot.ai/web/control-ui",
+        "Docs: https://docs.hanzo.bot/docs/web/control-ui",
       ].join("\n"),
       "Control UI",
     );

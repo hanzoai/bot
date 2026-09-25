@@ -183,7 +183,7 @@ export function buildGatewayConnectionDetails(
           ? undefined
           : "Break-glass (trusted private networks only): set BOT_ALLOW_INSECURE_PRIVATE_WS=1",
         "Doctor: bot doctor --fix",
-        "Docs: https://docs.bot.ai/gateway/remote",
+        "Docs: https://docs.hanzo.bot/docs/gateway/remote",
       ].join("\n"),
     );
   }

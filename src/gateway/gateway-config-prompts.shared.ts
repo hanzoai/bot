@@ -26,8 +26,8 @@ export const TAILSCALE_MISSING_BIN_NOTE_LINES = [
 
 export const TAILSCALE_DOCS_LINES = [
   "Docs:",
-  "https://docs.bot.ai/gateway/tailscale",
-  "https://docs.bot.ai/web",
+  "https://docs.hanzo.bot/docs/gateway/tailscale",
+  "https://docs.hanzo.bot/docs/web",
 ] as const;
 
 function normalizeTailnetHostForUrl(rawHost: string): string | null {

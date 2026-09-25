@@ -175,7 +175,7 @@ function buildDocsSection(params: { docsPath?: string; isMinimal: boolean; readT
   return [
     "## Documentation",
     `HanzoBot docs: ${docsPath}`,
-    "Mirror: https://docs.bot.ai",
+    "Mirror: https://docs.hanzo.bot/docs",
     "Source: https://github.com/bot/bot",
     "Community: https://discord.com/invite/clawd",
     "Find new skills: https://clawhub.com",

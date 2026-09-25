@@ -190,7 +190,7 @@ export async function setupSkills(
       runtime.log(
         `Tip: run \`${formatCliCommand("bot doctor")}\` to review skills + requirements.`,
       );
-      runtime.log("Docs: https://docs.bot.ai/skills");
+      runtime.log("Docs: https://docs.hanzo.bot/docs/skills");
     }
   }
 

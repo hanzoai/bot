@@ -510,7 +510,8 @@ export function registerHooksCli(program: Command): void {
     .description("Manage internal agent hooks")
     .addHelpText(
       "after",
-      () => `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/hooks", "docs.bot.ai/cli/hooks")}\n`,
+      () =>
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/hooks", "docs.hanzo.bot/docs/cli/hooks")}\n`,
     );
 
   hooks

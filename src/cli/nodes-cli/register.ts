@@ -24,7 +24,7 @@ export function registerNodesCli(program: Command) {
           ["bot nodes pairing pending", "Show pending node pairing requests."],
           ['bot nodes run --node <id> --raw "uname -a"', "Run a shell command on a node."],
           ["bot nodes camera snap --node <id>", "Capture a photo from a node camera."],
-        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/nodes", "docs.bot.ai/cli/nodes")}\n`,
+        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/nodes", "docs.hanzo.bot/docs/cli/nodes")}\n`,
     );
 
   registerNodesStatusCommands(nodes);

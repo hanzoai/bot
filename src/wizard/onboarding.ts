@@ -55,7 +55,7 @@ async function requireRiskAcknowledgement(params: {
       "bot security audit --deep",
       "bot security audit --fix",
       "",
-      "Must read: https://docs.bot.ai/gateway/security",
+      "Must read: https://docs.hanzo.bot/docs/gateway/security",
     ].join("\n"),
     "Security",
   );
@@ -90,7 +90,7 @@ export async function runOnboardingWizard(
         [
           ...snapshot.issues.map((iss) => `- ${iss.path}: ${iss.message}`),
           "",
-          "Docs: https://docs.bot.ai/gateway/configuration",
+          "Docs: https://docs.hanzo.bot/docs/gateway/configuration",
         ].join("\n"),
         "Config issues",
       );

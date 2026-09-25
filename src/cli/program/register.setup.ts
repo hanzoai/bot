@@ -13,7 +13,8 @@ export function registerSetupCommand(program: Command) {
     .description("Initialize ~/.bot/bot.json and the agent workspace")
     .addHelpText(
       "after",
-      () => `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/setup", "docs.bot.ai/cli/setup")}\n`,
+      () =>
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/setup", "docs.hanzo.bot/docs/cli/setup")}\n`,
     )
     .option(
       "--workspace <dir>",

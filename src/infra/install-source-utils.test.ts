@@ -242,7 +242,7 @@ describe("packNpmSpecToArchive", () => {
     if (!result.ok) {
       expect(result.error).toContain("Package not found on npm");
       expect(result.error).toContain("@hanzo/bot-whatsapp");
-      expect(result.error).toContain("docs.bot.ai/tools/plugin");
+      expect(result.error).toContain("docs.hanzo.bot/docs/tools/plugin");
     }
   });
 

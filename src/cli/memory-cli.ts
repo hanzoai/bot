@@ -585,7 +585,7 @@ export function registerMemoryCli(program: Command) {
           ["bot memory index --force", "Force a full reindex."],
           ['bot memory search --query "deployment notes"', "Search indexed memory entries."],
           ["bot memory status --json", "Output machine-readable JSON."],
-        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/memory", "docs.bot.ai/cli/memory")}\n`,
+        ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/memory", "docs.hanzo.bot/docs/cli/memory")}\n`,
     );
 
   memory

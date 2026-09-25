@@ -132,7 +132,7 @@ export async function runNonInteractiveOnboardingLocal(params: {
 
   if (!opts.json) {
     runtime.log(
-      `Tip: run \`${formatCliCommand("bot configure --section web")}\` to store your Brave API key for web_search. Docs: https://docs.bot.ai/tools/web`,
+      `Tip: run \`${formatCliCommand("bot configure --section web")}\` to store your Brave API key for web_search. Docs: https://docs.hanzo.bot/docs/tools/web`,
     );
   }
 }

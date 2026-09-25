@@ -76,7 +76,7 @@ vi.mock("../../terminal/health-style.js", () => ({
 }));
 
 vi.mock("../../terminal/links.js", () => ({
-  formatDocsLink: () => "docs.bot.ai/cli/gateway",
+  formatDocsLink: () => "docs.hanzo.bot/docs/cli/gateway",
 }));
 
 vi.mock("../../terminal/theme.js", () => ({

@@ -104,7 +104,7 @@ describe("configureProgramHelp", () => {
     const help = captureHelpOutput(program);
     expect(help).toContain("BANNER-LINE");
     expect(help).toContain("Examples:");
-    expect(help).toContain("https://docs.bot.ai/cli");
+    expect(help).toContain("https://docs.hanzo.bot/docs/cli");
   });
 
   it("prints version and exits immediately when version flags are present", () => {

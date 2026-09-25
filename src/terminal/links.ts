@@ -1,6 +1,6 @@
 import { formatTerminalLink } from "../utils.js";
 
-export const DOCS_ROOT = "https://docs.bot.ai";
+export const DOCS_ROOT = "https://docs.hanzo.bot/docs";
 
 export function formatDocsLink(
   path: string,

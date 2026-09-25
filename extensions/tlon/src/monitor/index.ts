@@ -971,7 +971,7 @@ export async function monitorTlonProvider(opts: MonitorTlonOpts = {}): Promise<v
             `This can leak conversation context between users.\n\n` +
             `Fix: Add to your HanzoBot config:\n` +
             `session:\n  dmScope: "per-channel-peer"\n\n` +
-            `Docs: https://docs.bot.ai/concepts/session#secure-dm-mode`;
+            `Docs: https://docs.hanzo.bot/docs/concepts/session#secure-dm-mode`;
 
           // Send async, don't block message processing
           sendDm({

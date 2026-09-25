@@ -99,7 +99,7 @@ export function registerGatewayCli(program: Command) {
             ["bot gateway status", "Show service status and probe reachability."],
             ["bot gateway discover", "Find local and wide-area gateway beacons."],
             ["bot gateway call health", "Call a gateway RPC method directly."],
-          ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/gateway", "docs.bot.ai/cli/gateway")}\n`,
+          ])}\n\n${theme.muted("Docs:")} ${formatDocsLink("/cli/gateway", "docs.hanzo.bot/docs/cli/gateway")}\n`,
       ),
   );
 

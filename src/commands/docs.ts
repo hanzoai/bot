@@ -160,12 +160,12 @@ async function renderMarkdown(markdown: string, runtime: RuntimeEnv) {
 export async function docsSearchCommand(queryParts: string[], runtime: RuntimeEnv) {
   const query = queryParts.join(" ").trim();
   if (!query) {
-    const docs = formatDocsLink("/", "docs.bot.ai");
+    const docs = formatDocsLink("/", "docs.hanzo.bot/docs");
     if (isRich()) {
       runtime.log(`${theme.muted("Docs:")} ${docs}`);
       runtime.log(`${theme.muted("Search:")} ${formatCliCommand('bot docs "your query"')}`);
     } else {
-      runtime.log("Docs: https://docs.bot.ai/");
+      runtime.log("Docs: https://docs.hanzo.bot/docs/");
       runtime.log(`Search: ${formatCliCommand('bot docs "your query"')}`);
     }
     return;
