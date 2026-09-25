@@ -2,8 +2,10 @@
  * Local launch — starts the bot gateway on this machine.
  *
  * Flow:
- * 1. Store IAM credentials so the embedded agent can call AI models
- * 2. Write config with gateway.mode = "local" and Hanzo API proxy
+ * 1. On a machine with no bot.json: store IAM credentials so the embedded
+ *    agent can call AI models, and write a config with gateway.mode = "local"
+ *    and the Hanzo API proxy. A bot.json that exists (set up earlier, or
+ *    imported by `migrate openclaw`) is the person's and is used as it is.
  * 3. Start the gateway server (HTTP + WS on port 18789) with no auth (loopback-only)
  * 4. Open the Control UI in the user's browser
  * 5. Keep running until Ctrl+C
@@ -16,7 +18,7 @@
 import os from "node:os";
 import path from "node:path";
 import { upsertAuthProfile } from "../agents/auth-profiles.js";
-import { writeConfigFile } from "../config/io.js";
+import { readConfigFileSnapshot, writeConfigFile } from "../config/io.js";
 import { openUrl } from "./onboard-helpers.js";
 
 /** Hanzo API proxy endpoint — accepts IAM tokens, proxies to model providers. */
@@ -25,7 +27,20 @@ const DEFAULT_PORT = 18789;
 
 export async function launchLocal(params: { accessToken: string }): Promise<void> {
   const { accessToken } = params;
+  process.env.HANZO_API_KEY = accessToken;
+  const existing = await readConfigFileSnapshot();
+  if (existing.exists) {
+    // Rewriting it would drop the person's channels, agents and workspace, and
+    // pointing their Anthropic provider at the proxy would send their own key there.
+    // eslint-disable-next-line no-console
+    console.log(`\n  Using your config at ${existing.path}\n`);
+  } else {
+    await writeHanzoCloudConfig(accessToken);
+  }
+  await startLocalGateway(accessToken, !existing.exists);
+}
 
+async function writeHanzoCloudConfig(accessToken: string): Promise<void> {
   // 1. Store IAM credentials for the embedded agent.
   //    - Write an api_key auth-profile under the "anthropic" provider so the
   //      agent's model-auth resolver picks it up when calling Claude models.
@@ -46,7 +61,6 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
     // Auth profile write failure is non-fatal — env vars provide fallback.
   }
   process.env.ANTHROPIC_API_KEY = accessToken;
-  process.env.HANZO_API_KEY = accessToken;
 
   // 2. Write config for local gateway mode.
   //    - Route Anthropic model requests through the Hanzo API proxy so the
@@ -73,7 +87,9 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
     },
   };
   await writeConfigFile(config as Parameters<typeof writeConfigFile>[0]);
+}
 
+async function startLocalGateway(accessToken: string, viaHanzoCloud: boolean): Promise<void> {
   // eslint-disable-next-line no-console
   console.log("\n  Starting local gateway...\n");
 
@@ -113,8 +129,10 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
         console.log(`  Gateway running on http://127.0.0.1:${port}/`);
         // eslint-disable-next-line no-console
         console.log(`  Control UI opened in your browser.`);
-        // eslint-disable-next-line no-console
-        console.log(`  AI models via Hanzo Cloud (api.hanzo.ai)\n`);
+        if (viaHanzoCloud) {
+          // eslint-disable-next-line no-console
+          console.log(`  AI models via Hanzo Cloud (api.hanzo.ai)\n`);
+        }
 
         // Register with Hanzo Cloud so the bot appears on app.hanzo.bot
         try {
