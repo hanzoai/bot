@@ -26,8 +26,10 @@ function sameBytes(a: string, b: string): boolean {
 }
 
 /**
- * Plan copying `fromDir` into `toDir` file by file. Symlinks are recreated
- * pointing where they pointed; they are never followed. `skip` names entries
+ * Plan copying `fromDir` into `toDir` file by file. Symlinks are recreated,
+ * never followed; `relink` may point one elsewhere (an absolute link into the
+ * OpenClaw dir is pointed at the same place in the Hanzo Bot dir, so writing
+ * through it cannot change the OpenClaw install). `skip` names entries
  * (relative to fromDir) that are not copied.
  */
 export function planCopyTree(params: {
@@ -35,6 +37,7 @@ export function planCopyTree(params: {
   toDir: string;
   actions: Action[];
   skip?: (rel: string) => boolean;
+  relink?: (target: string) => string;
 }): CopyTally {
   const tally: CopyTally = { created: 0, unchanged: 0, conflicts: [] };
   const walk = (rel: string) => {
@@ -42,7 +45,7 @@ export function planCopyTree(params: {
     const to = path.join(params.toDir, rel);
     const stat = fs.lstatSync(from);
     if (stat.isSymbolicLink()) {
-      const target = fs.readlinkSync(from);
+      const target = params.relink?.(fs.readlinkSync(from)) ?? fs.readlinkSync(from);
       if (!fs.existsSync(to) && !isLink(to)) {
         params.actions.push({ kind: "link", to, target });
         tally.created += 1;
@@ -86,6 +89,26 @@ function isLink(file: string): boolean {
   }
 }
 
+/** An absolute link target inside `sourceRoot` names the same place inside `targetRoot`. */
+export function relinkInto(sourceRoot: string, targetRoot: string): (target: string) => string {
+  return (target) => {
+    if (!path.isAbsolute(target)) {
+      return target;
+    }
+    const rel = path.relative(sourceRoot, target);
+    return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel))
+      ? path.join(targetRoot, rel)
+      : target;
+  };
+}
+
+function assertInside(targetRoot: string, file: string): void {
+  const rel = path.relative(targetRoot, path.resolve(file));
+  if (rel === "" || rel.startsWith("..") || path.isAbsolute(rel)) {
+    throw new Error(`refusing to write outside ${targetRoot}: ${file}`);
+  }
+}
+
 /** Directory mode: 0700 for the state dir itself and under credentials/ and agents/, else 0755. */
 function dirMode(targetRoot: string, dir: string): number {
   const rel = path.relative(targetRoot, dir);
@@ -104,6 +127,9 @@ function ensureDir(targetRoot: string, dir: string): void {
 export async function applyActions(targetRoot: string, actions: Action[]): Promise<void> {
   const { rotateConfigBackups } = await import("../../config/backup-rotation.js");
   for (const action of actions) {
+    assertInside(targetRoot, action.kind === "backup" ? action.file : action.to);
+  }
+  for (const action of actions) {
     if (action.kind === "backup") {
       await rotateConfigBackups(action.file, {
         unlink: (file) => fs.promises.unlink(file),
@@ -117,7 +143,7 @@ export async function applyActions(targetRoot: string, actions: Action[]): Promi
     if (action.kind === "link") {
       fs.symlinkSync(action.target, action.to);
     } else if (action.kind === "copy") {
-      fs.copyFileSync(action.from, action.to);
+      fs.copyFileSync(action.from, action.to, fs.constants.COPYFILE_EXCL);
       fs.chmodSync(action.to, action.mode);
     } else {
       const tmp = `${action.to}.migrate-${process.pid}.tmp`;

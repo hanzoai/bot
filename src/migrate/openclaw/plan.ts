@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import JSON5 from "json5";
+import { SAFE_SESSION_ID_RE } from "../../config/sessions/paths.js";
 import { convertConfig, listEnvRefs, mergeBeneath } from "./config.js";
 import {
   convertAuth,
@@ -10,7 +11,7 @@ import {
   resetArchiveName,
 } from "./convert.js";
 import { convertEnvEntries, mergeEnvText, parseEnvEntries } from "./env.js";
-import { applyActions, planCopyTree, type Action } from "./files.js";
+import { applyActions, planCopyTree, relinkInto, type Action } from "./files.js";
 import { createPathRewriter, homeForm } from "./paths.js";
 import { planSkips } from "./skips.js";
 import { readOpenClawState, type OpenClawState } from "./state.js";
@@ -18,7 +19,7 @@ import { readOpenClawState, type OpenClawState } from "./state.js";
 /**
  * `hanzo-bot migrate openclaw`: plan (always) and apply (on request). The plan
  * is computed by reading only; applying performs exactly the actions the plan
- * listed. See hanzobot/core spec.md §11 for the contract every runtime keeps.
+ * listed, and every write lands inside the target dir.
  */
 
 type Json = Record<string, unknown>;
@@ -85,7 +86,7 @@ function planWrite(
 }
 
 function readJsonText(text: string): Json {
-  const value = JSON5.parse(text) as unknown;
+  const value: unknown = JSON5.parse(text);
   return isPlainObject(value) ? value : {};
 }
 
@@ -233,6 +234,7 @@ function planEnv(p: MigrationParams, actions: Action[], items: PlanItem[]): Set<
 }
 
 function planCopies(p: MigrationParams, actions: Action[], items: PlanItem[]): void {
+  const relink = relinkInto(p.source, p.target);
   const names = fs.existsSync(p.source) ? fs.readdirSync(p.source).toSorted() : [];
   const dirs = [
     ...names.filter((name) => name === "workspace" || name.startsWith("workspace-")),
@@ -246,7 +248,7 @@ function planCopies(p: MigrationParams, actions: Action[], items: PlanItem[]): v
     const toDir = path.join(p.target, name);
     const existed = fs.existsSync(toDir);
     const skip = name === "credentials" ? (sub: string) => sub === "auth-profiles" : undefined;
-    const tally = planCopyTree({ fromDir, toDir, actions, skip });
+    const tally = planCopyTree({ fromDir, toDir, actions, skip, relink });
     items.push({
       op: "copy",
       from: name,
@@ -268,7 +270,7 @@ function planCopies(p: MigrationParams, actions: Action[], items: PlanItem[]): v
     }
     const toDir = path.join(p.target, "skills");
     const existed = fs.existsSync(toDir);
-    const tally = planCopyTree({ fromDir: workshop, toDir, actions });
+    const tally = planCopyTree({ fromDir: workshop, toDir, actions, relink });
     items.push({
       op: "copy",
       from: rel(p.source, workshop),
@@ -338,6 +340,11 @@ function planSessions(
     const dir = path.join(p.target, "agents", agentId, "sessions");
     const entries: Json = {};
     for (const [key, entry] of Object.entries(sessions.entries)) {
+      // A session id names its transcript file, so it must be a plain file name.
+      if (typeof entry.sessionId !== "string" || !SAFE_SESSION_ID_RE.test(entry.sessionId)) {
+        items.push({ op: "drop", from: `${sessions.from}/${key}`, reason: "session-id" });
+        continue;
+      }
       entries[key] = convertSessionEntry(entry);
     }
     if (Object.keys(entries).length > 0) {
@@ -355,6 +362,14 @@ function planSessions(
       items.push({ op: "write", from: sessions.from, to: rel(p.target, to), status, count });
     }
     for (const window of sessions.windows) {
+      if (!SAFE_SESSION_ID_RE.test(window.sessionId)) {
+        items.push({
+          op: "drop",
+          from: `${sessions.from.split("#")[0]}#transcript_events/${window.sessionId}`,
+          reason: "session-id",
+        });
+        continue;
+      }
       const name = window.current
         ? `${window.sessionId}.jsonl`
         : resetArchiveName(window.sessionId, window.updatedAt);
@@ -368,7 +383,9 @@ function planSessions(
         count: window.lines.length,
       });
     }
-    for (const [sessionId, file] of Object.entries(sessions.files).toSorted()) {
+    for (const [sessionId, file] of Object.entries(sessions.files).toSorted(([a], [b]) =>
+      a.localeCompare(b),
+    )) {
       const to = path.join(dir, `${sessionId}.jsonl`);
       const status = planWrite(actions, to, fs.readFileSync(file, "utf8"));
       items.push({ op: "write", from: rel(p.source, file), to: rel(p.target, to), status });

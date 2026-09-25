@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import JSON5 from "json5";
 import { resolveConfigIncludes } from "../../config/includes.js";
+import { SAFE_SESSION_ID_RE } from "../../config/sessions/paths.js";
 import { expandHomePrefix, resolveRequiredHomeDir } from "../../infra/home-dir.js";
 import { decodeTranscriptEvent, withOpenClawDb, type OpenClawDb } from "./sqlite.js";
 
@@ -94,7 +95,7 @@ function readConfig(file: string | null): Json {
   if (!file) {
     return {};
   }
-  const raw = JSON5.parse(fs.readFileSync(file, "utf8")) as unknown;
+  const raw: unknown = JSON5.parse(fs.readFileSync(file, "utf8"));
   const resolved = resolveConfigIncludes(raw, file);
   if (!isPlainObject(resolved)) {
     throw new Error(`${file} is not a JSON object`);
@@ -266,6 +267,9 @@ function readAgentFiles(dir: string, agentId: string, state: OpenClawState): voi
       continue;
     }
     sessions.entries[key] = value;
+    if (!SAFE_SESSION_ID_RE.test(value.sessionId)) {
+      continue;
+    }
     const transcript = path.join(sessionsDir, `${value.sessionId}.jsonl`);
     if (fs.existsSync(transcript)) {
       sessions.files[value.sessionId] = transcript;

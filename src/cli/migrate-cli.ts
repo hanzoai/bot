@@ -39,6 +39,7 @@ const REASONS: Record<string, string> = {
   index: "search index; rebuilt on first use",
   encrypted: "encrypted with OpenClaw's key; sign in again",
   runtime: "runtime state",
+  "session-id": "session id is not a plain file name",
 };
 
 function noteText(item: PlanItem): string {

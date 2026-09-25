@@ -1,4 +1,8 @@
-import { validateConfigObjectRawWithPlugins } from "../../config/validation.js";
+import { allocateColor } from "../../browser/profiles.js";
+import {
+  validateConfigObjectRaw,
+  validateConfigObjectRawWithPlugins,
+} from "../../config/validation.js";
 import { BotSchema } from "../../config/zod-schema.js";
 import { botConfigKeyTree, pruneToTree } from "./keys.js";
 import type { PathRewriter } from "./paths.js";
@@ -12,7 +16,7 @@ import type { PathRewriter } from "./paths.js";
  *   3. paths: strings naming the OpenClaw state dir name the Hanzo Bot one
  *   4. prune: keys bot.json does not admit are dropped
  *   5. validate: values the runtime still rejects are dropped
- * hanzobot/core spec.md §11 is normative; this file implements it.
+ * docs/install/migrate-from-openclaw.md states the mapping for people.
  */
 
 type Json = Record<string, unknown>;
@@ -256,13 +260,29 @@ function applyRenames(config: Json, report: ConfigReport): void {
   }
 
   const profiles = child(child(config, "browser") ?? {}, "profiles");
+  const usedColors = new Set(
+    Object.values(profiles ?? {})
+      .map((profile) => (isPlainObject(profile) ? profile.color : undefined))
+      .filter((color): color is string => typeof color === "string")
+      .map((color) => color.toUpperCase()),
+  );
   for (const [name, profile] of Object.entries(profiles ?? {})) {
-    if (isPlainObject(profile) && profile.driver === "openclaw") {
+    if (!isPlainObject(profile)) {
+      continue;
+    }
+    if (profile.driver === "openclaw") {
       profile.driver = "clawd";
       report.renamed.push({
         from: `browser.profiles.${name}.driver="openclaw"`,
         to: `browser.profiles.${name}.driver="clawd"`,
       });
+    }
+    // OpenClaw dropped the per-profile color; Hanzo Bot requires one and
+    // picks it from the same palette its profile command uses.
+    if (typeof profile.color !== "string") {
+      const color = allocateColor(usedColors);
+      profile.color = color;
+      usedColors.add(color.toUpperCase());
     }
   }
 }
@@ -415,31 +435,64 @@ export function formatPath(path: ReadonlyArray<PropertyKey>): string {
   return out;
 }
 
+/** "a.b.0.c" (a config issue path) back to segments; numeric segments index arrays. */
+function parseIssuePath(label: string): PropertyKey[] {
+  return label
+    .split(".")
+    .filter(Boolean)
+    .map((segment) => (/^\d+$/.test(segment) ? Number(segment) : segment));
+}
+
+/**
+ * Drop what an issue names. A value that is present goes; a required key that
+ * is missing takes its parent object with it. Returns the label dropped.
+ */
+function dropIssue(config: Json, path: PropertyKey[]): string | undefined {
+  for (let end = path.length; end > 0; end -= 1) {
+    const at = path.slice(0, end);
+    if (deleteAt(config, at)) {
+      return formatPath(at);
+    }
+  }
+  return undefined;
+}
+
 /**
  * The runtime's last word: drop values BotSchema still rejects (deepest
- * first), then plugin entries naming plugins this runtime does not ship.
+ * first), then whatever the full validator still rejects, then plugin entries
+ * naming plugins this runtime does not ship. What is written always loads.
  */
+function invalidPaths(config: Json): PropertyKey[][] {
+  const parsed = BotSchema.safeParse(config);
+  if (!parsed.success) {
+    return parsed.error.issues.map((issue) => issue.path);
+  }
+  const full = validateConfigObjectRaw(config);
+  return full.ok ? [] : full.issues.map((issue) => parseIssuePath(issue.path));
+}
+
 function applyValidation(config: Json, report: ConfigReport): void {
-  for (let round = 0; round < 32; round += 1) {
-    const parsed = BotSchema.safeParse(config);
-    if (parsed.success) {
-      break;
-    }
-    const paths = parsed.error.issues
-      .map((issue) => issue.path)
-      .toSorted((a, b) => b.length - a.length);
+  for (let paths = invalidPaths(config); paths.length > 0; paths = invalidPaths(config)) {
     let progressed = false;
     const seen = new Set<string>();
-    for (const path of paths) {
+    for (const path of paths.toSorted((a, b) => b.length - a.length)) {
       const label = formatPath(path);
-      if (!seen.has(label) && deleteAt(config, path)) {
-        report.dropped.push({ path: label, reason: "invalid" });
-        progressed = true;
+      if (seen.has(label)) {
+        continue;
       }
       seen.add(label);
+      const dropped = dropIssue(config, [...path]);
+      if (dropped) {
+        report.dropped.push({ path: dropped, reason: "invalid" });
+        progressed = true;
+      }
     }
     if (!progressed) {
-      break;
+      // Each round removes at least one key, so this ends; an issue naming
+      // nothing that can be removed is a validator this importer does not know.
+      throw new Error(
+        `the converted config does not validate (${paths.map(formatPath).join(", ")}); nothing was written`,
+      );
     }
   }
   const pluginEntries = child(child(config, "plugins") ?? {}, "entries");

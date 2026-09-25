@@ -231,7 +231,7 @@ export type CronConversion =
   | { ok: false; name: string; reason: "managed" | "payload" | "schedule" | "target" };
 
 export function convertCronJob(job: Json): CronConversion {
-  const name = typeof job.name === "string" ? job.name : String(job.id ?? "");
+  const name = typeof job.name === "string" ? job.name : typeof job.id === "string" ? job.id : "";
   if (typeof job.declarationKey === "string") {
     return { ok: false, name, reason: "managed" };
   }
