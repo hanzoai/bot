@@ -38,6 +38,7 @@ import {
 } from "./doctor-gateway-services.js";
 import { noteSourceInstallIssues } from "./doctor-install.js";
 import { noteMemorySearchHealth } from "./doctor-memory-search.js";
+import { noteOpenClawInstall } from "./doctor-openclaw.js";
 import {
   noteMacLaunchAgentOverrides,
   noteMacLaunchctlGatewayEnvOverrides,
@@ -97,6 +98,7 @@ export async function doctorCommand(
   noteSourceInstallIssues(root);
   noteDeprecatedLegacyEnvVars();
   noteStartupOptimizationHints();
+  noteOpenClawInstall();
 
   const configResult = await loadAndMaybeMigrateDoctorConfig({
     options,

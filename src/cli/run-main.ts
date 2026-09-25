@@ -89,16 +89,18 @@ export async function runCli(argv: string[] = process.argv) {
 
   // First-run cloud connect: if no config file exists, authenticate with Hanzo Cloud
   // before proceeding. Skip for help/version flags, non-default commands that don't
-  // need cloud credentials, and cloud-provisioned nodes (HANZO_PLAYGROUND_CLOUD_NODE=true)
+  // need cloud credentials, cloud-provisioned nodes (HANZO_PLAYGROUND_CLOUD_NODE=true)
   // which receive their credentials via environment variables and must not trigger
-  // interactive OAuth — there is no TTY inside K8s pods.
+  // interactive OAuth — there is no TTY inside K8s pods — and `migrate`, whose job
+  // is to write the first config from another install.
   const cloudNode = isCloudNode();
   const primaryCmd = getPrimaryCommand(normalizedArgv);
   if (
     !hasHelpOrVersion(normalizedArgv) &&
     !cloudNode &&
     primaryCmd !== "node" &&
-    primaryCmd !== "gateway"
+    primaryCmd !== "gateway" &&
+    primaryCmd !== "migrate"
   ) {
     const { readConfigFileSnapshot } = await import("../config/config.js");
     const snapshot = await readConfigFileSnapshot();

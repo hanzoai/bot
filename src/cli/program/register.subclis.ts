@@ -288,6 +288,15 @@ const entries: SubCliEntry[] = [
     },
   },
   {
+    name: "migrate",
+    description: "Import state from another assistant install (OpenClaw)",
+    hasSubcommands: true,
+    register: async (program) => {
+      const mod = await import("../migrate-cli.js");
+      mod.registerMigrateCli(program);
+    },
+  },
+  {
     name: "update",
     description: "Update HanzoBot and inspect update channel status",
     hasSubcommands: true,

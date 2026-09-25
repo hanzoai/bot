@@ -21,6 +21,10 @@ vi.mock("./doctor-memory-search.js", () => ({
   noteMemorySearchHealth: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock("./doctor-openclaw.js", () => ({
+  noteOpenClawInstall: vi.fn(),
+}));
+
 vi.mock("./doctor-platform-notes.js", () => ({
   noteDeprecatedLegacyEnvVars: vi.fn(),
   noteStartupOptimizationHints: vi.fn(),
