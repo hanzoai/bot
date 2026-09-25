@@ -3,6 +3,7 @@ import { convertConfig, listEnvRefs, mergeBeneath, rewriteEnvRefs } from "./conf
 import { convertCronJob, mergeAuth, resetArchiveName } from "./convert.js";
 import { convertEnvEntries, mergeEnvText, parseEnvEntries } from "./env.js";
 import { createPathRewriter, homeForm } from "./paths.js";
+import { resolveOpenClawStateDir } from "./state.js";
 
 const HOME = "/home/ada";
 const rewrite = createPathRewriter({
@@ -14,6 +15,18 @@ const rewrite = createPathRewriter({
 function convert(source: Record<string, unknown>) {
   return convertConfig({ source, rewrite, home: HOME });
 }
+
+describe("resolveOpenClawStateDir", () => {
+  it("follows OpenClaw's rules, not Hanzo Bot's", () => {
+    expect(resolveOpenClawStateDir({ HOME, BOT_HOME: "/elsewhere" })).toBe(`${HOME}/.openclaw`);
+    // OpenClaw's --profile flag sets OPENCLAW_STATE_DIR; the env var alone does not move it.
+    expect(resolveOpenClawStateDir({ HOME, OPENCLAW_PROFILE: "work" })).toBe(`${HOME}/.openclaw`);
+    expect(resolveOpenClawStateDir({ HOME, OPENCLAW_HOME: "/srv/oc" })).toBe("/srv/oc/.openclaw");
+    expect(resolveOpenClawStateDir({ HOME, OPENCLAW_STATE_DIR: "~/oc-state" })).toBe(
+      `${HOME}/oc-state`,
+    );
+  });
+});
 
 describe("paths", () => {
   it("writes a path under home as ~/…", () => {
@@ -84,7 +97,7 @@ describe("config", () => {
       memory: { search: { enabled: false } },
       gateway: { nodes: { commands: { allow: ["camera.snap"], deny: ["system.run"] } } },
       agents: {
-        defaults: { embeddedAgent: { projectSettingsPolicy: "ignore" } },
+        defaults: { embeddedAgent: { projectSettingsPolicy: "ignore" }, pdfMaxMb: 20 },
         list: [{ id: "ops", memory: { search: { enabled: true } } }],
       },
       plugins: {
@@ -100,6 +113,7 @@ describe("config", () => {
         defaults: {
           memorySearch: { enabled: false },
           embeddedPi: { projectSettingsPolicy: "ignore" },
+          pdfMaxBytesMb: 20,
         },
         list: [{ id: "ops", memorySearch: { enabled: true } }],
       },
@@ -113,6 +127,7 @@ describe("config", () => {
     expect(report.renamed).toEqual(
       expect.arrayContaining([
         { from: "tts", to: "messages.tts" },
+        { from: "agents.defaults.pdfMaxMb", to: "agents.defaults.pdfMaxBytesMb" },
         { from: "memory.search", to: "agents.defaults.memorySearch" },
         { from: "agents.list[0].memory.search", to: "agents.list[0].memorySearch" },
         { from: "gateway.nodes.commands.allow", to: "gateway.nodes.allowCommands" },

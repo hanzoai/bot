@@ -128,6 +128,15 @@ function applyRenames(config: Json, report: ConfigReport): void {
       move(
         report,
         defaults,
+        "pdfMaxMb",
+        "agents.defaults.pdfMaxMb",
+        () => defaults,
+        "pdfMaxBytesMb",
+        "agents.defaults.pdfMaxBytesMb",
+      );
+      move(
+        report,
+        defaults,
         "embeddedAgent",
         "agents.defaults.embeddedAgent",
         () => defaults,
