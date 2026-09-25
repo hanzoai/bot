@@ -105,7 +105,9 @@ function getCommandPathFromArgv(argv: string[]): string[] {
 
 function shouldSkipEagerContextWindowWarmup(argv: string[] = process.argv): boolean {
   const [primary, secondary] = getCommandPathFromArgv(argv);
-  return primary === "config" && secondary === "validate";
+  // `migrate` must not write model files into the state dir it is about to fill,
+  // least of all on a dry run.
+  return (primary === "config" && secondary === "validate") || primary === "migrate";
 }
 
 function primeConfiguredContextWindows(): BotConfig | undefined {
