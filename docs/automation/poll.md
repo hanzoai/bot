@@ -83,4 +83,4 @@ Use `action: "poll"` for poll creation. Poll fields passed with `action: "send"`
 
 Note: Discord has no “pick exactly N” mode; `pollMulti` maps to multi-select.
 Teams polls are rendered as Adaptive Cards and require the gateway to stay online
-to record votes in `~/.hanzo-bot/msteams-polls.json`.
+to record votes in `~/.bot/msteams-polls.json`.

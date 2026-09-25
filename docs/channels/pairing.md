@@ -40,7 +40,7 @@ Supported channels: `telegram`, `whatsapp`, `signal`, `imessage`, `discord`, `sl
 
 ### Where the state lives
 
-Stored under `~/.hanzo-bot/credentials/`:
+Stored under `~/.bot/credentials/`:
 
 - Pending requests: `<channel>-pairing.json`
 - Approved allowlist store:
@@ -86,7 +86,7 @@ hanzo-bot devices reject <requestId>
 
 ### Node pairing state storage
 
-Stored under `~/.hanzo-bot/devices/`:
+Stored under `~/.bot/devices/`:
 
 - `pending.json` (short-lived; pending requests expire)
 - `paired.json` (paired devices + tokens)

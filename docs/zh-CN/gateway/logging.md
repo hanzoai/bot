@@ -26,7 +26,7 @@ HanzoBot 有两个日志"界面"：
 
 - 默认滚动日志文件位于 `/tmp/hanzo-bot/` 下（每天一个文件）：`hanzo-bot-YYYY-MM-DD.log`
   - 日期使用 Gateway 网关主机的本地时区。
-- 日志文件路径和级别可以通过 `~/.hanzo-bot/hanzo-bot.json` 配置：
+- 日志文件路径和级别可以通过 `~/.bot/bot.json` 配置：
   - `logging.file`
   - `logging.level`
 

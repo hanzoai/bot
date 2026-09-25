@@ -16,7 +16,7 @@ provider mixes reasoning into normal text.
 
 Use `/debug` in chat to set **runtime-only** config overrides (memory, not disk).
 `/debug` is disabled by default; enable with `commands.debug: true`.
-This is handy when you need to toggle obscure settings without editing `hanzo-bot.json`.
+This is handy when you need to toggle obscure settings without editing `bot.json`.
 
 Examples:
 
@@ -51,7 +51,7 @@ on each restart.
 Use the dev profile to isolate state and spin up a safe, disposable setup for
 debugging. There are **two** `--dev` flags:
 
-- **Global `--dev` (profile):** isolates state under `~/.hanzo-bot-dev` and
+- **Global `--dev` (profile):** isolates state under `~/.bot-dev` and
   defaults the gateway port to `19001` (derived ports shift with it).
 - **`gateway --dev`: tells the Gateway to auto-create a default config +
   workspace** when missing (and skip BOOTSTRAP.md).
@@ -69,8 +69,8 @@ What this does:
 
 1. **Profile isolation** (global `--dev`)
    - `BOT_PROFILE=dev`
-   - `BOT_STATE_DIR=~/.hanzo-bot-dev`
-   - `BOT_CONFIG_PATH=~/.hanzo-bot-dev/hanzo-bot.json`
+   - `BOT_STATE_DIR=~/.bot-dev`
+   - `BOT_CONFIG_PATH=~/.bot-dev/bot.json`
    - `BOT_GATEWAY_PORT=19001` (browser/canvas shift accordingly)
 
 2. **Dev bootstrap** (`gateway --dev`)
@@ -119,19 +119,19 @@ pnpm gateway:watch --raw-stream
 Optional path override:
 
 ```bash
-pnpm gateway:watch --raw-stream --raw-stream-path ~/.hanzo-bot/logs/raw-stream.jsonl
+pnpm gateway:watch --raw-stream --raw-stream-path ~/.bot/logs/raw-stream.jsonl
 ```
 
 Equivalent env vars:
 
 ```bash
 BOT_RAW_STREAM=1
-BOT_RAW_STREAM_PATH=~/.hanzo-bot/logs/raw-stream.jsonl
+BOT_RAW_STREAM_PATH=~/.bot/logs/raw-stream.jsonl
 ```
 
 Default file:
 
-`~/.hanzo-bot/logs/raw-stream.jsonl`
+`~/.bot/logs/raw-stream.jsonl`
 
 ## Raw chunk logging (pi-mono)
 

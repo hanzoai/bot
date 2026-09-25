@@ -235,8 +235,8 @@ HanzoBot scans, in order:
 
 3. Global extensions
 
-- `~/.hanzo-bot/extensions/*.ts`
-- `~/.hanzo-bot/extensions/*/index.ts`
+- `~/.bot/extensions/*.ts`
+- `~/.bot/extensions/*/index.ts`
 
 4. Bundled extensions (shipped with HanzoBot, mostly disabled by default)
 
@@ -263,7 +263,7 @@ Hardening notes:
   - path ownership is suspicious for non-bundled plugins (POSIX owner is neither current uid nor root).
 - Loaded non-bundled plugins without install/load-path provenance emit a warning so you can pin trust (`plugins.allow`) or install tracking (`plugins.installs`).
 
-Each plugin must include a `hanzo-bot.plugin.json` file in its root. If a path
+Each plugin must include a `bot.plugin.json` file in its root. If a path
 points at a file, the plugin root is the file's directory and must contain the
 manifest.
 
@@ -331,9 +331,9 @@ Example:
 HanzoBot can also merge **external channel catalogs** (for example, an MPM
 registry export). Drop a JSON file at one of:
 
-- `~/.hanzo-bot/mpm/plugins.json`
-- `~/.hanzo-bot/mpm/catalog.json`
-- `~/.hanzo-bot/plugins/catalog.json`
+- `~/.bot/mpm/plugins.json`
+- `~/.bot/mpm/catalog.json`
+- `~/.bot/plugins/catalog.json`
 
 Or point `BOT_PLUGIN_CATALOG_PATHS` (or `BOT_MPM_CATALOG_PATHS`) at
 one or more JSON files (comma/semicolon/`PATH`-delimited). Each file should
@@ -382,7 +382,7 @@ Validation rules (strict):
 - Unknown `channels.<id>` keys are **errors** unless a plugin manifest declares
   the channel id.
 - Plugin config is validated using the JSON Schema embedded in
-  `hanzo-bot.plugin.json` (`configSchema`).
+  `bot.plugin.json` (`configSchema`).
 - If a plugin is disabled, its config is preserved and a **warning** is emitted.
 
 ## Plugin slots (exclusive categories)
@@ -457,7 +457,7 @@ Example:
 ```bash
 hanzo-bot plugins list
 hanzo-bot plugins info <id>
-hanzo-bot plugins install <path>                 # copy a local file/dir into ~/.hanzo-bot/extensions/<id>
+hanzo-bot plugins install <path>                 # copy a local file/dir into ~/.bot/extensions/<id>
 hanzo-bot plugins install ./extensions/voice-call # relative path ok
 hanzo-bot plugins install ./plugin.tgz           # install from a local tarball
 hanzo-bot plugins install ./plugin.zip           # install from a local zip
@@ -923,7 +923,7 @@ Publishing contract:
 
 - Plugin `package.json` must include `hanzo-bot.extensions` with one or more entry files.
 - Entry files can be `.js` or `.ts` (jiti loads TS at runtime).
-- `hanzo-bot plugins install <npm-spec>` uses `npm pack`, extracts into `~/.hanzo-bot/extensions/<id>/`, and enables it in config.
+- `hanzo-bot plugins install <npm-spec>` uses `npm pack`, extracts into `~/.bot/extensions/<id>/`, and enables it in config.
 - Config key stability: scoped packages are normalized to the **unscoped** id for `plugins.entries.*`.
 
 ## Example plugin: Voice Call

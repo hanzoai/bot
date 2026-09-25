@@ -60,8 +60,8 @@ This page describes the current CLI behavior. If commands change, update this do
 
 ## Global flags
 
-- `--dev`: isolate state under `~/.hanzo-bot-dev` and shift default ports.
-- `--profile <name>`: isolate state under `~/.hanzo-bot-<name>`.
+- `--dev`: isolate state under `~/.bot-dev` and shift default ports.
+- `--profile <name>`: isolate state under `~/.bot-<name>`.
 - `--no-color`: disable ANSI colors.
 - `--update`: shorthand for `hanzo-bot update` (source installs only).
 - `-V`, `--version`, `-v`: print version and exit.
@@ -312,7 +312,7 @@ Initialize config + workspace.
 
 Options:
 
-- `--workspace <dir>`: agent workspace path (default `~/.hanzo-bot/workspace`).
+- `--workspace <dir>`: agent workspace path (default `~/.bot/workspace`).
 - `--wizard`: run the onboarding wizard.
 - `--non-interactive`: run wizard without prompts.
 - `--mode <local|remote>`: wizard mode.

@@ -63,7 +63,7 @@ when no OpenAI or ElevenLabs API keys are available.
 
 ## Config
 
-TTS config lives under `messages.tts` in `hanzo-bot.json`.
+TTS config lives under `messages.tts` in `bot.json`.
 Full schema is in [Gateway configuration](/gateway/configuration).
 
 ### Minimal config (enable + provider)
@@ -162,7 +162,7 @@ Full schema is in [Gateway configuration](/gateway/configuration).
       auto: "always",
       maxTextLength: 4000,
       timeoutMs: 30000,
-      prefsPath: "~/.hanzo-bot/settings/tts.json",
+      prefsPath: "~/.bot/settings/tts.json",
     },
   },
 }
@@ -301,7 +301,7 @@ Optional allowlist (enable provider switching while keeping other knobs configur
 ## Per-user preferences
 
 Slash commands write local overrides to `prefsPath` (default:
-`~/.hanzo-bot/settings/tts.json`, override with `BOT_TTS_PREFS` or
+`~/.bot/settings/tts.json`, override with `BOT_TTS_PREFS` or
 `messages.tts.prefsPath`).
 
 Stored fields:

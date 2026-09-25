@@ -73,7 +73,7 @@ Brave provides paid plans; check the Brave API portal for the current limits and
 
 **Via config (recommended):** run `hanzo-bot configure --section web`. It stores the key under `tools.web.search.perplexity.apiKey` or `tools.web.search.apiKey`.
 
-**Via environment:** set `PERPLEXITY_API_KEY` or `BRAVE_API_KEY` in the Gateway process environment. For a gateway install, put it in `~/.hanzo-bot/.env` (or your service environment). See [Env vars](/help/faq#how-does-hanzo-bot-load-environment-variables).
+**Via environment:** set `PERPLEXITY_API_KEY` or `BRAVE_API_KEY` in the Gateway process environment. For a gateway install, put it in `~/.bot/.env` (or your service environment). See [Env vars](/help/faq#how-does-hanzo-bot-load-environment-variables).
 
 ### Config examples
 
@@ -143,7 +143,7 @@ which returns AI-synthesized answers backed by live Google Search results with c
 ```
 
 **Environment alternative:** set `GEMINI_API_KEY` in the Gateway environment.
-For a gateway install, put it in `~/.hanzo-bot/.env`.
+For a gateway install, put it in `~/.bot/.env`.
 
 ### Notes
 

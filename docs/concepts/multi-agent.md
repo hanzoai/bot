@@ -15,12 +15,12 @@ An **agent** is a fully scoped brain with its own:
 
 - **Workspace** (files, AGENTS.md/SOUL.md/USER.md, local notes, persona rules).
 - **State directory** (`agentDir`) for auth profiles, model registry, and per-agent config.
-- **Session store** (chat history + routing state) under `~/.hanzo-bot/agents/<agentId>/sessions`.
+- **Session store** (chat history + routing state) under `~/.bot/agents/<agentId>/sessions`.
 
 Auth profiles are **per-agent**. Each agent reads from its own:
 
 ```text
-~/.hanzo-bot/agents/<agentId>/agent/auth-profiles.json
+~/.bot/agents/<agentId>/agent/auth-profiles.json
 ```
 
 Main agent credentials are **not** shared automatically. Never reuse `agentDir`
@@ -28,7 +28,7 @@ across agents (it causes auth/session collisions). If you want to share creds,
 copy `auth-profiles.json` into the other agent's `agentDir`.
 
 Skills are per-agent via each workspace’s `skills/` folder, with shared skills
-available from `~/.hanzo-bot/skills`. See [Skills: per-agent vs shared](/tools/skills#per-agent-vs-shared-skills).
+available from `~/.bot/skills`. See [Skills: per-agent vs shared](/tools/skills#per-agent-vs-shared-skills).
 
 The Gateway can host **one agent** (default) or **many agents** side-by-side.
 
@@ -39,11 +39,11 @@ reach other host locations unless sandboxing is enabled. See
 
 ## Paths (quick map)
 
-- Config: `~/.hanzo-bot/hanzo-bot.json` (or `BOT_CONFIG_PATH`)
-- State dir: `~/.hanzo-bot` (or `BOT_STATE_DIR`)
-- Workspace: `~/.hanzo-bot/workspace` (or `~/.hanzo-bot/workspace-<agentId>`)
-- Agent dir: `~/.hanzo-bot/agents/<agentId>/agent` (or `agents.list[].agentDir`)
-- Sessions: `~/.hanzo-bot/agents/<agentId>/sessions`
+- Config: `~/.bot/bot.json` (or `BOT_CONFIG_PATH`)
+- State dir: `~/.bot` (or `BOT_STATE_DIR`)
+- Workspace: `~/.bot/workspace` (or `~/.bot/workspace-<agentId>`)
+- Agent dir: `~/.bot/agents/<agentId>/agent` (or `agents.list[].agentDir`)
+- Sessions: `~/.bot/agents/<agentId>/sessions`
 
 ### Single-agent mode (default)
 
@@ -51,8 +51,8 @@ If you do nothing, HanzoBot runs a single agent:
 
 - `agentId` defaults to **`main`**.
 - Sessions are keyed as `agent:main:<mainKey>`.
-- Workspace defaults to `~/.hanzo-bot/workspace` (or `~/.hanzo-bot/workspace-<profile>` when `BOT_PROFILE` is set).
-- State defaults to `~/.hanzo-bot/agents/main/agent`.
+- Workspace defaults to `~/.bot/workspace` (or `~/.bot/workspace-<profile>` when `BOT_PROFILE` is set).
+- State defaults to `~/.bot/agents/main/agent`.
 
 ## Agent helper
 
@@ -82,7 +82,7 @@ hanzo-bot agents add coding
 hanzo-bot agents add social
 ```
 
-Each agent gets its own workspace with `SOUL.md`, `AGENTS.md`, and optional `USER.md`, plus a dedicated `agentDir` and session store under `~/.hanzo-bot/agents/<agentId>`.
+Each agent gets its own workspace with `SOUL.md`, `AGENTS.md`, and optional `USER.md`, plus a dedicated `agentDir` and session store under `~/.bot/agents/<agentId>`.
 
   </Step>
 
@@ -141,8 +141,8 @@ Example:
 {
   agents: {
     list: [
-      { id: "alex", workspace: "~/.hanzo-bot/workspace-alex" },
-      { id: "mia", workspace: "~/.hanzo-bot/workspace-mia" },
+      { id: "alex", workspace: "~/.bot/workspace-alex" },
+      { id: "mia", workspace: "~/.bot/workspace-mia" },
     ],
   },
   bindings: [
@@ -224,8 +224,8 @@ Each Discord bot account maps to a unique `accountId`. Bind each account to an a
 {
   agents: {
     list: [
-      { id: "main", workspace: "~/.hanzo-bot/workspace-main" },
-      { id: "coding", workspace: "~/.hanzo-bot/workspace-coding" },
+      { id: "main", workspace: "~/.bot/workspace-main" },
+      { id: "coding", workspace: "~/.bot/workspace-coding" },
     ],
   },
   bindings: [
@@ -273,8 +273,8 @@ Notes:
 {
   agents: {
     list: [
-      { id: "main", workspace: "~/.hanzo-bot/workspace-main" },
-      { id: "alerts", workspace: "~/.hanzo-bot/workspace-alerts" },
+      { id: "main", workspace: "~/.bot/workspace-main" },
+      { id: "alerts", workspace: "~/.bot/workspace-alerts" },
     ],
   },
   bindings: [
@@ -313,7 +313,7 @@ hanzo-bot channels login --channel whatsapp --account personal
 hanzo-bot channels login --channel whatsapp --account biz
 ```
 
-`~/.hanzo-bot/hanzo-bot.json` (JSON5):
+`~/.bot/bot.json` (JSON5):
 
 ```js
 {
@@ -323,14 +323,14 @@ hanzo-bot channels login --channel whatsapp --account biz
         id: "home",
         default: true,
         name: "Home",
-        workspace: "~/.hanzo-bot/workspace-home",
-        agentDir: "~/.hanzo-bot/agents/home/agent",
+        workspace: "~/.bot/workspace-home",
+        agentDir: "~/.bot/agents/home/agent",
       },
       {
         id: "work",
         name: "Work",
-        workspace: "~/.hanzo-bot/workspace-work",
-        agentDir: "~/.hanzo-bot/agents/work/agent",
+        workspace: "~/.bot/workspace-work",
+        agentDir: "~/.bot/agents/work/agent",
       },
     ],
   },
@@ -363,12 +363,12 @@ hanzo-bot channels login --channel whatsapp --account biz
     whatsapp: {
       accounts: {
         personal: {
-          // Optional override. Default: ~/.hanzo-bot/credentials/whatsapp/personal
-          // authDir: "~/.hanzo-bot/credentials/whatsapp/personal",
+          // Optional override. Default: ~/.bot/credentials/whatsapp/personal
+          // authDir: "~/.bot/credentials/whatsapp/personal",
         },
         biz: {
-          // Optional override. Default: ~/.hanzo-bot/credentials/whatsapp/biz
-          // authDir: "~/.hanzo-bot/credentials/whatsapp/biz",
+          // Optional override. Default: ~/.bot/credentials/whatsapp/biz
+          // authDir: "~/.bot/credentials/whatsapp/biz",
         },
       },
     },
@@ -387,13 +387,13 @@ Split by channel: route WhatsApp to a fast everyday agent and Telegram to an Opu
       {
         id: "chat",
         name: "Everyday",
-        workspace: "~/.hanzo-bot/workspace-chat",
+        workspace: "~/.bot/workspace-chat",
         model: "anthropic/claude-sonnet-4-5",
       },
       {
         id: "opus",
         name: "Deep Work",
-        workspace: "~/.hanzo-bot/workspace-opus",
+        workspace: "~/.bot/workspace-opus",
         model: "anthropic/claude-opus-4-6",
       },
     ],
@@ -421,13 +421,13 @@ Keep WhatsApp on the fast agent, but route one DM to Opus:
       {
         id: "chat",
         name: "Everyday",
-        workspace: "~/.hanzo-bot/workspace-chat",
+        workspace: "~/.bot/workspace-chat",
         model: "anthropic/claude-sonnet-4-5",
       },
       {
         id: "opus",
         name: "Deep Work",
-        workspace: "~/.hanzo-bot/workspace-opus",
+        workspace: "~/.bot/workspace-opus",
         model: "anthropic/claude-opus-4-6",
       },
     ],
@@ -456,7 +456,7 @@ and a tighter tool policy:
       {
         id: "family",
         name: "Family",
-        workspace: "~/.hanzo-bot/workspace-family",
+        workspace: "~/.bot/workspace-family",
         identity: { name: "Family Bot" },
         groupChat: {
           mentionPatterns: ["@family", "@familybot", "@Family Bot"],
@@ -509,7 +509,7 @@ Starting with v2026.1.6, each agent can have its own sandbox and tool restrictio
     list: [
       {
         id: "personal",
-        workspace: "~/.hanzo-bot/workspace-personal",
+        workspace: "~/.bot/workspace-personal",
         sandbox: {
           mode: "off",  // No sandbox for personal agent
         },
@@ -517,7 +517,7 @@ Starting with v2026.1.6, each agent can have its own sandbox and tool restrictio
       },
       {
         id: "family",
-        workspace: "~/.hanzo-bot/workspace-family",
+        workspace: "~/.bot/workspace-family",
         sandbox: {
           mode: "all",     // Always sandboxed
           scope: "agent",  // One container per agent

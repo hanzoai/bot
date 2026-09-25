@@ -13,7 +13,7 @@ HanzoBot runs a single embedded agent runtime derived from **pi-mono**.
 
 HanzoBot uses a single agent workspace directory (`agents.defaults.workspace`) as the agent’s **only** working directory (`cwd`) for tools and context.
 
-Recommended: use `hanzo-bot setup` to create `~/.hanzo-bot/hanzo-bot.json` if missing and initialize the workspace files.
+Recommended: use `hanzo-bot setup` to create `~/.bot/bot.json` if missing and initialize the workspace files.
 
 Full workspace layout + backup guide: [Agent workspace](/concepts/agent-workspace)
 
@@ -58,7 +58,7 @@ guidance for how _you_ want them used.
 HanzoBot loads skills from three locations (workspace wins on name conflict):
 
 - Bundled (shipped with the install)
-- Managed/local: `~/.hanzo-bot/skills`
+- Managed/local: `~/.bot/skills`
 - Workspace: `<workspace>/skills`
 
 Skills can be gated by config/env (see `skills` in [Gateway configuration](/gateway/configuration)).
@@ -74,7 +74,7 @@ HanzoBot reuses pieces of the pi-mono codebase (models/tools), but **session man
 
 Session transcripts are stored as JSONL at:
 
-- `~/.hanzo-bot/agents/<agentId>/sessions/<SessionId>.jsonl`
+- `~/.bot/agents/<agentId>/sessions/<SessionId>.jsonl`
 
 The session ID is stable and chosen by HanzoBot.
 Legacy Pi/Tau session folders are **not** read.

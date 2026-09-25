@@ -198,13 +198,13 @@ htop
 
 All state lives in:
 
-- `~/.hanzo-bot/` — config, credentials, session data
-- `~/.hanzo-bot/workspace/` — workspace (SOUL.md, memory, etc.)
+- `~/.bot/` — config, credentials, session data
+- `~/.bot/workspace/` — workspace (SOUL.md, memory, etc.)
 
 These survive reboots. Back them up periodically:
 
 ```bash
-tar -czvf hanzo-bot-backup.tar.gz ~/.hanzo-bot ~/.hanzo-bot/workspace
+tar -czvf hanzo-bot-backup.tar.gz ~/.bot ~/.bot/workspace
 ```
 
 ---

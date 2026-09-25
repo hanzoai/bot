@@ -200,7 +200,7 @@ https://hanzo-bot.<tailnet-name>.ts.net/
 
 ### 仍然推荐
 
-- **凭证权限：** `chmod 700 ~/.hanzo-bot`
+- **凭证权限：** `chmod 700 ~/.bot`
 - **安全审计：** `hanzo-bot security audit`
 - **系统更新：** 定期 `sudo apt update && sudo apt upgrade`
 - **监控 Tailscale：** 在 [Tailscale 管理控制台](https://login.tailscale.com/admin) 中查看设备
@@ -290,13 +290,13 @@ uname -m  # 应该显示 aarch64
 
 所有状态存储在：
 
-- `~/.hanzo-bot/` — 配置、凭证、会话数据
-- `~/.hanzo-bot/workspace/` — 工作区（SOUL.md、记忆、产物）
+- `~/.bot/` — 配置、凭证、会话数据
+- `~/.bot/workspace/` — 工作区（SOUL.md、记忆、产物）
 
 定期备份：
 
 ```bash
-tar -czvf hanzo-bot-backup.tar.gz ~/.hanzo-bot ~/.hanzo-bot/workspace
+tar -czvf hanzo-bot-backup.tar.gz ~/.bot ~/.bot/workspace
 ```
 
 ---

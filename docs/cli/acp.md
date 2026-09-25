@@ -22,7 +22,7 @@ hanzo-bot acp
 hanzo-bot acp --url wss://gateway-host:18789 --token <token>
 
 # Remote Gateway (token from file)
-hanzo-bot acp --url wss://gateway-host:18789 --token-file ~/.hanzo-bot/gateway.token
+hanzo-bot acp --url wss://gateway-host:18789 --token-file ~/.bot/gateway.token
 
 # Attach to an existing session key
 hanzo-bot acp --session agent:main:main
@@ -43,7 +43,7 @@ It spawns the ACP bridge and lets you type prompts interactively.
 hanzo-bot acp client
 
 # Point the spawned bridge at a remote Gateway
-hanzo-bot acp client --server-args --url wss://gateway-host:18789 --token-file ~/.hanzo-bot/gateway.token
+hanzo-bot acp client --server-args --url wss://gateway-host:18789 --token-file ~/.bot/gateway.token
 
 # Override the server command (default: hanzo-bot)
 hanzo-bot acp client --server "node" --server-args hanzo-bot.mjs acp --url ws://127.0.0.1:19001
@@ -77,7 +77,7 @@ Example direct run (no config write):
 ```bash
 hanzo-bot acp --url wss://gateway-host:18789 --token <token>
 # preferred for local process safety
-hanzo-bot acp --url wss://gateway-host:18789 --token-file ~/.hanzo-bot/gateway.token
+hanzo-bot acp --url wss://gateway-host:18789 --token-file ~/.bot/gateway.token
 ```
 
 ## Selecting agents

@@ -21,7 +21,7 @@ HanzoBot 为 browser、canvas、nodes 和 cron 暴露**一流的智能体工具*
 
 ## 禁用工具
 
-你可以通过 `hanzo-bot.json` 中的 `tools.allow` / `tools.deny` 全局允许/拒绝工具
+你可以通过 `bot.json` 中的 `tools.allow` / `tools.deny` 全局允许/拒绝工具
 （deny 优先）。这会阻止不允许的工具被发送到模型提供商。
 
 ```json5

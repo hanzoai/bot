@@ -19,8 +19,8 @@ x-i18n:
 
 迁移在概念上很简单：
 
-- 复制**状态目录**（`$BOT_STATE_DIR`，默认：`~/.hanzo-bot/`）— 这包括配置、认证、会话和渠道状态。
-- 复制你的**工作区**（默认 `~/.hanzo-bot/workspace/`）— 这包括你的智能体文件（记忆、提示等）。
+- 复制**状态目录**（`$BOT_STATE_DIR`，默认：`~/.bot/`）— 这包括配置、认证、会话和渠道状态。
+- 复制你的**工作区**（默认 `~/.bot/workspace/`）— 这包括你的智能体文件（记忆、提示等）。
 
 但在**配置文件**、**权限**和**部分复制**方面有常见的陷阱。
 
@@ -30,11 +30,11 @@ x-i18n:
 
 大多数安装使用默认值：
 
-- **状态目录：** `~/.hanzo-bot/`
+- **状态目录：** `~/.bot/`
 
 但如果你使用以下方式，可能会不同：
 
-- `--profile <name>`（通常变成 `~/.hanzo-bot-<profile>/`）
+- `--profile <name>`（通常变成 `~/.bot-<profile>/`）
 - `BOT_STATE_DIR=/some/path`
 
 如果你不确定，在**旧**机器上运行：
@@ -49,7 +49,7 @@ hanzo-bot status
 
 常见默认值：
 
-- `~/.hanzo-bot/workspace/`（推荐的工作区）
+- `~/.bot/workspace/`（推荐的工作区）
 - 你创建的自定义文件夹
 
 你的工作区是 `MEMORY.md`、`USER.md` 和 `memory/*.md` 等文件所在的位置。
@@ -58,7 +58,7 @@ hanzo-bot status
 
 如果你复制**两者**——状态目录和工作区，你将保留：
 
-- Gateway 网关配置（`hanzo-bot.json`）
+- Gateway 网关配置（`bot.json`）
 - 认证配置文件 / API 密钥 / OAuth 令牌
 - 会话历史 + 智能体状态
 - 渠道状态（例如 WhatsApp 登录/会话）
@@ -92,7 +92,7 @@ tar -czf hanzo-bot-state.tgz .hanzo-bot
 tar -czf hanzo-bot-workspace.tgz .hanzo-bot/workspace
 ```
 
-如果你有多个配置文件/状态目录（例如 `~/.hanzo-bot-main`、`~/.hanzo-bot-work`），分别归档每个。
+如果你有多个配置文件/状态目录（例如 `~/.bot-main`、`~/.bot-work`），分别归档每个。
 
 ### 步骤 1 — 在新机器上安装 HanzoBot
 
@@ -100,14 +100,14 @@ tar -czf hanzo-bot-workspace.tgz .hanzo-bot/workspace
 
 - 参见：[安装](/install)
 
-在这个阶段，如果新手引导创建了一个新的 `~/.hanzo-bot/` 也没关系 — 你将在下一步覆盖它。
+在这个阶段，如果新手引导创建了一个新的 `~/.bot/` 也没关系 — 你将在下一步覆盖它。
 
 ### 步骤 2 — 将状态目录 + 工作区复制到新机器
 
 复制**两者**：
 
-- `$BOT_STATE_DIR`（默认 `~/.hanzo-bot/`）
-- 你的工作区（默认 `~/.hanzo-bot/workspace/`）
+- `$BOT_STATE_DIR`（默认 `~/.bot/`）
+- 你的工作区（默认 `~/.bot/workspace/`）
 
 常见方法：
 
@@ -153,9 +153,9 @@ hanzo-bot status
 hanzo-bot doctor
 ```
 
-### 陷阱：只复制 `hanzo-bot.json`
+### 陷阱：只复制 `bot.json`
 
-`hanzo-bot.json` 是不够的。许多提供商在以下位置存储状态：
+`bot.json` 是不够的。许多提供商在以下位置存储状态：
 
 - `$BOT_STATE_DIR/credentials/`
 - `$BOT_STATE_DIR/agents/<agentId>/...`

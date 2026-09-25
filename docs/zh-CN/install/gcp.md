@@ -29,7 +29,7 @@ x-i18n:
 - 创建 Compute Engine VM
 - 安装 Docker（隔离的应用运行时）
 - 在 Docker 中启动 HanzoBot Gateway 网关
-- 在主机上持久化 `~/.hanzo-bot` + `~/.hanzo-bot/workspace`（重启/重建后仍保留）
+- 在主机上持久化 `~/.bot` + `~/.bot/workspace`（重启/重建后仍保留）
 - 通过 SSH 隧道从你的笔记本电脑访问控制 UI
 
 Gateway 网关可以通过以下方式访问：
@@ -211,8 +211,8 @@ Docker 容器是临时的。
 所有长期状态必须存在于主机上。
 
 ```bash
-mkdir -p ~/.hanzo-bot
-mkdir -p ~/.hanzo-bot/workspace
+mkdir -p ~/.bot
+mkdir -p ~/.bot/workspace
 ```
 
 ---
@@ -416,7 +416,7 @@ HanzoBot 在 Docker 中运行，但 Docker 不是真实来源。
 
 | 组件             | 位置                               | 持久化机制    | 说明                        |
 | ---------------- | ---------------------------------- | ------------- | --------------------------- |
-| Gateway 网关配置 | `/home/node/.hanzo-bot/`           | 主机卷挂载    | 包括 `hanzo-bot.json`、令牌 |
+| Gateway 网关配置 | `/home/node/.hanzo-bot/`           | 主机卷挂载    | 包括 `bot.json`、令牌       |
 | 模型认证配置文件 | `/home/node/.hanzo-bot/`           | 主机卷挂载    | OAuth 令牌、API 密钥        |
 | Skill 配置       | `/home/node/.hanzo-bot/skills/`    | 主机卷挂载    | Skill 级别状态              |
 | 智能体工作区     | `/home/node/.hanzo-bot/workspace/` | 主机卷挂载    | 代码和智能体产物            |

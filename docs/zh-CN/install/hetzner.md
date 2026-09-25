@@ -29,7 +29,7 @@ Hetzner 定价会变化；选择最小的 Debian/Ubuntu VPS，如果遇到 OOM �
 - 租用一台小型 Linux 服务器（Hetzner VPS）
 - 安装 Docker（隔离的应用运行时）
 - 在 Docker 中启动 HanzoBot Gateway 网关
-- 在主机上持久化 `~/.hanzo-bot` + `~/.hanzo-bot/workspace`（重启/重建后保留）
+- 在主机上持久化 `~/.bot` + `~/.bot/workspace`（重启/重建后保留）
 - 通过 SSH 隧道从你的笔记本电脑访问控制 UI
 
 Gateway 网关可以通过以下方式访问：
@@ -325,7 +325,7 @@ HanzoBot 在 Docker 中运行，但 Docker 不是事实来源。
 
 | 组件             | 位置                               | 持久化机制    | 说明                        |
 | ---------------- | ---------------------------------- | ------------- | --------------------------- |
-| Gateway 网关配置 | `/home/node/.hanzo-bot/`           | 主机卷挂载    | 包括 `hanzo-bot.json`、令牌 |
+| Gateway 网关配置 | `/home/node/.hanzo-bot/`           | 主机卷挂载    | 包括 `bot.json`、令牌       |
 | 模型认证配置文件 | `/home/node/.hanzo-bot/`           | 主机卷挂载    | OAuth 令牌、API 密钥        |
 | Skill 配置       | `/home/node/.hanzo-bot/skills/`    | 主机卷挂载    | Skill 级别状态              |
 | 智能体工作区     | `/home/node/.hanzo-bot/workspace/` | 主机卷挂载    | 代码和智能体产物            |

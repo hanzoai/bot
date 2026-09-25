@@ -18,7 +18,7 @@ Scope intent:
 
 ## Supported credentials
 
-### `hanzo-bot.json` targets (`secrets configure` + `secrets apply` + `secrets audit`)
+### `bot.json` targets (`secrets configure` + `secrets apply` + `secrets audit`)
 
 [//]: # "secretref-supported-list-start"
 

@@ -12,8 +12,8 @@ This guide migrates a HanzoBot Gateway from one machine to another **without red
 
 The migration is simple conceptually:
 
-- Copy the **state directory** (`$BOT_STATE_DIR`, default: `~/.hanzo-bot/`) — this includes config, auth, sessions, and channel state.
-- Copy your **workspace** (`~/.hanzo-bot/workspace/` by default) — this includes your agent files (memory, prompts, etc.).
+- Copy the **state directory** (`$BOT_STATE_DIR`, default: `~/.bot/`) — this includes config, auth, sessions, and channel state.
+- Copy your **workspace** (`~/.bot/workspace/` by default) — this includes your agent files (memory, prompts, etc.).
 
 But there are common footguns around **profiles**, **permissions**, and **partial copies**.
 
@@ -23,11 +23,11 @@ But there are common footguns around **profiles**, **permissions**, and **partia
 
 Most installs use the default:
 
-- **State dir:** `~/.hanzo-bot/`
+- **State dir:** `~/.bot/`
 
 But it may be different if you use:
 
-- `--profile <name>` (often becomes `~/.hanzo-bot-<profile>/`)
+- `--profile <name>` (often becomes `~/.bot-<profile>/`)
 - `BOT_STATE_DIR=/some/path`
 
 If you’re not sure, run on the **old** machine:
@@ -42,7 +42,7 @@ Look for mentions of `BOT_STATE_DIR` / profile in the output. If you run multipl
 
 Common defaults:
 
-- `~/.hanzo-bot/workspace/` (recommended workspace)
+- `~/.bot/workspace/` (recommended workspace)
 - a custom folder you created
 
 Your workspace is where files like `MEMORY.md`, `USER.md`, and `memory/*.md` live.
@@ -51,7 +51,7 @@ Your workspace is where files like `MEMORY.md`, `USER.md`, and `memory/*.md` liv
 
 If you copy **both** the state dir and workspace, you keep:
 
-- Gateway configuration (`hanzo-bot.json`)
+- Gateway configuration (`bot.json`)
 - Auth profiles / API keys / OAuth tokens
 - Session history + agent state
 - Channel state (e.g. WhatsApp login/session)
@@ -85,7 +85,7 @@ tar -czf hanzo-bot-state.tgz .hanzo-bot
 tar -czf hanzo-bot-workspace.tgz .hanzo-bot/workspace
 ```
 
-If you have multiple profiles/state dirs (e.g. `~/.hanzo-bot-main`, `~/.hanzo-bot-work`), archive each.
+If you have multiple profiles/state dirs (e.g. `~/.bot-main`, `~/.bot-work`), archive each.
 
 ### Step 1 — Install HanzoBot on the new machine
 
@@ -93,14 +93,14 @@ On the **new** machine, install the CLI (and Node if needed):
 
 - See: [Install](/install)
 
-At this stage, it’s OK if onboarding creates a fresh `~/.hanzo-bot/` — you will overwrite it in the next step.
+At this stage, it’s OK if onboarding creates a fresh `~/.bot/` — you will overwrite it in the next step.
 
 ### Step 2 — Copy the state dir + workspace to the new machine
 
 Copy **both**:
 
-- `$BOT_STATE_DIR` (default `~/.hanzo-bot/`)
-- your workspace (default `~/.hanzo-bot/workspace/`)
+- `$BOT_STATE_DIR` (default `~/.bot/`)
+- your workspace (default `~/.bot/workspace/`)
 
 Common approaches:
 
@@ -146,9 +146,9 @@ Fix: run the gateway/service using the **same** profile/state dir you migrated, 
 hanzo-bot doctor
 ```
 
-### Footgun: copying only `hanzo-bot.json`
+### Footgun: copying only `bot.json`
 
-`hanzo-bot.json` is not enough. Many providers store state under:
+`bot.json` is not enough. Many providers store state under:
 
 - `$BOT_STATE_DIR/credentials/`
 - `$BOT_STATE_DIR/agents/<agentId>/...`

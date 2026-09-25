@@ -34,10 +34,10 @@ hanzo-bot models status
 ```
 
 3. If the Gateway runs under systemd/launchd, prefer putting the key in
-   `~/.hanzo-bot/.env` so the daemon can read it:
+   `~/.bot/.env` so the daemon can read it:
 
 ```bash
-cat >> ~/.hanzo-bot/.env <<'EOF'
+cat >> ~/.bot/.env <<'EOF'
 <PROVIDER>_API_KEY=...
 EOF
 ```
@@ -53,7 +53,7 @@ If you’d rather not manage env vars yourself, the onboarding wizard can store
 API keys for daemon use: `hanzo-bot onboard`.
 
 See [Help](/help) for details on env inheritance (`env.shellEnv`,
-`~/.hanzo-bot/.env`, systemd/launchd).
+`~/.bot/.env`, systemd/launchd).
 
 ## Anthropic: setup-token (subscription auth)
 

@@ -50,7 +50,7 @@ Then connect:
 ssh <vm-name>.exe.xyz
 ```
 
-Tip: keep this VM **stateful**. HanzoBot stores state under `~/.hanzo-bot/` and `~/.hanzo-bot/workspace/`.
+Tip: keep this VM **stateful**. HanzoBot stores state under `~/.bot/` and `~/.bot/workspace/`.
 
 ## 2) Install prerequisites (on the VM)
 

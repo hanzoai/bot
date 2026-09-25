@@ -25,7 +25,7 @@ By default, the Gateway writes a rolling log file under:
 
 The date uses the gateway host's local timezone.
 
-You can override this in `~/.hanzo-bot/hanzo-bot.json`:
+You can override this in `~/.bot/bot.json`:
 
 ```json
 {
@@ -98,7 +98,7 @@ Console formatting is controlled by `logging.consoleStyle`.
 
 ## Configuring logging
 
-All logging configuration lives under `logging` in `~/.hanzo-bot/hanzo-bot.json`.
+All logging configuration lives under `logging` in `~/.bot/bot.json`.
 
 ```json
 {
@@ -118,7 +118,7 @@ All logging configuration lives under `logging` in `~/.hanzo-bot/hanzo-bot.json`
 - `logging.level`: **file logs** (JSONL) level.
 - `logging.consoleLevel`: **console** verbosity level.
 
-You can override both via the **`BOT_LOG_LEVEL`** environment variable (e.g. `BOT_LOG_LEVEL=debug`). The env var takes precedence over the config file, so you can raise verbosity for a single run without editing `hanzo-bot.json`. You can also pass the global CLI option **`--log-level <level>`** (for example, `hanzo-bot --log-level debug gateway run`), which overrides the environment variable for that command.
+You can override both via the **`BOT_LOG_LEVEL`** environment variable (e.g. `BOT_LOG_LEVEL=debug`). The env var takes precedence over the config file, so you can raise verbosity for a single run without editing `bot.json`. You can also pass the global CLI option **`--log-level <level>`** (for example, `hanzo-bot --log-level debug gateway run`), which overrides the environment variable for that command.
 
 `--verbose` only affects console output; it does not change file log levels.
 

@@ -60,7 +60,7 @@ x-i18n:
   - 设置 `channels.discord.commands.nativeSkills`、`channels.telegram.commands.nativeSkills` 或 `channels.slack.commands.nativeSkills` 以按提供商覆盖（布尔值或 `"auto"`）。
 - `commands.bash`（默认 `false`）启用 `! <cmd>` 来运行主机 shell 命令（`/bash <cmd>` 是别名；需要 `tools.elevated` 白名单）。
 - `commands.bashForegroundMs`（默认 `2000`）控制 bash 切换到后台模式之前等待多长时间（`0` 立即后台运行）。
-- `commands.config`（默认 `false`）启用 `/config`（读写 `hanzo-bot.json`）。
+- `commands.config`（默认 `false`）启用 `/config`（读写 `bot.json`）。
 - `commands.debug`（默认 `false`）启用 `/debug`（仅运行时覆盖）。
 - `commands.useAccessGroups`（默认 `true`）对命令强制执行白名单/策略。
 
@@ -172,12 +172,12 @@ x-i18n:
 
 注意事项：
 
-- 覆盖立即应用于新的配置读取，但**不会**写入 `hanzo-bot.json`。
+- 覆盖立即应用于新的配置读取，但**不会**写入 `bot.json`。
 - 使用 `/debug reset` 清除所有覆盖并返回到磁盘上的配置。
 
 ## 配置更新
 
-`/config` 写入你的磁盘配置（`hanzo-bot.json`）。仅所有者。默认禁用；使用 `commands.config: true` 启用。
+`/config` 写入你的磁盘配置（`bot.json`）。仅所有者。默认禁用；使用 `commands.config: true` 启用。
 
 示例：
 

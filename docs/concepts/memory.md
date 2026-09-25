@@ -26,7 +26,7 @@ The default workspace layout uses two memory layers:
   - **Only load in the main, private session** (never in group contexts).
 
 These files live under the workspace (`agents.defaults.workspace`, default
-`~/.hanzo-bot/workspace`). See [Agent workspace](/concepts/agent-workspace) for the full layout.
+`~/.bot/workspace`). See [Agent workspace](/concepts/agent-workspace) for the full layout.
 
 ## Memory tools
 
@@ -141,7 +141,7 @@ out to QMD for retrieval. Key points:
 - QMD runs fully locally via Bun + `node-llama-cpp` and auto-downloads GGUF
   models from HuggingFace on first use (no separate Ollama daemon required).
 - The gateway runs QMD in a self-contained XDG home under
-  `~/.hanzo-bot/agents/<agentId>/qmd/` by setting `XDG_CONFIG_HOME` and
+  `~/.bot/agents/<agentId>/qmd/` by setting `XDG_CONFIG_HOME` and
   `XDG_CACHE_HOME`.
 - OS support: macOS and Linux work out of the box once Bun + SQLite are
   installed. Windows is best supported via WSL2.
@@ -149,7 +149,7 @@ out to QMD for retrieval. Key points:
 **How the sidecar runs**
 
 - The gateway writes a self-contained QMD home under
-  `~/.hanzo-bot/agents/<agentId>/qmd/` (config + cache + sqlite DB).
+  `~/.bot/agents/<agentId>/qmd/` (config + cache + sqlite DB).
 - Collections are created via `qmd collection add` from `memory.qmd.paths`
   (plus default workspace memory files), then `qmd update` + `qmd embed` run
   on boot and on a configurable interval (`memory.qmd.update.interval`,
@@ -172,13 +172,13 @@ out to QMD for retrieval. Key points:
   - If you want to pre-download models manually (and warm the same index HanzoBot
     uses), run a one-off query with the agent’s XDG dirs.
 
-    HanzoBot’s QMD state lives under your **state dir** (defaults to `~/.hanzo-bot`).
+    HanzoBot’s QMD state lives under your **state dir** (defaults to `~/.bot`).
     You can point `qmd` at the exact same index by exporting the same XDG vars
     HanzoBot uses:
 
     ```bash
     # Pick the same state dir HanzoBot uses
-    STATE_DIR="${BOT_STATE_DIR:-$HOME/.hanzo-bot}"
+    STATE_DIR="${BOT_STATE_DIR:-$HOME/.bot}"
 
     export XDG_CONFIG_HOME="$STATE_DIR/agents/main/qmd/xdg-config"
     export XDG_CACHE_HOME="$STATE_DIR/agents/main/qmd/xdg-cache"
@@ -222,7 +222,7 @@ out to QMD for retrieval. Key points:
   understands that prefix and reads from the configured QMD collection root.
 - When `memory.qmd.sessions.enabled = true`, HanzoBot exports sanitized session
   transcripts (User/Assistant turns) into a dedicated QMD collection under
-  `~/.hanzo-bot/agents/<id>/qmd/sessions/`, so `memory_search` can recall recent
+  `~/.bot/agents/<id>/qmd/sessions/`, so `memory_search` can recall recent
   conversations without touching the builtin SQLite index.
 - `memory_search` snippets now include a `Source: <path#line>` footer when
   `memory.citations` is `auto`/`on`; set `memory.citations = "off"` to keep
@@ -392,7 +392,7 @@ Local mode:
 ### What gets indexed (and when)
 
 - File type: Markdown only (`MEMORY.md`, `memory/**/*.md`).
-- Index storage: per-agent SQLite at `~/.hanzo-bot/memory/<agentId>.sqlite` (configurable via `agents.defaults.memorySearch.store.path`, supports `{agentId}` token).
+- Index storage: per-agent SQLite at `~/.bot/memory/<agentId>.sqlite` (configurable via `agents.defaults.memorySearch.store.path`, supports `{agentId}` token).
 - Freshness: watcher on `MEMORY.md` + `memory/` marks the index dirty (debounce 1.5s). Sync is scheduled on session start, on search, or on an interval and runs asynchronously. Session transcripts use delta thresholds to trigger background sync.
 - Reindex triggers: the index stores the embedding **provider/model + endpoint fingerprint + chunking params**. If any of those change, HanzoBot automatically resets and reindexes the entire store.
 
@@ -655,7 +655,7 @@ Notes:
 - `memory_search` never blocks on indexing; results can be slightly stale until background sync finishes.
 - Results still include snippets only; `memory_get` remains limited to memory files.
 - Session indexing is isolated per agent (only that agent’s session logs are indexed).
-- Session logs live on disk (`~/.hanzo-bot/agents/<agentId>/sessions/*.jsonl`). Any process/user with filesystem access can read them, so treat disk access as the trust boundary. For stricter isolation, run agents under separate OS users or hosts.
+- Session logs live on disk (`~/.bot/agents/<agentId>/sessions/*.jsonl`). Any process/user with filesystem access can read them, so treat disk access as the trust boundary. For stricter isolation, run agents under separate OS users or hosts.
 
 Delta thresholds (defaults shown):
 

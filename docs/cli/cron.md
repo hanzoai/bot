@@ -26,7 +26,7 @@ Note: recurring jobs now use exponential retry backoff after consecutive errors 
 Note: retention/pruning is controlled in config:
 
 - `cron.sessionRetention` (default `24h`) prunes completed isolated run sessions.
-- `cron.runLog.maxBytes` + `cron.runLog.keepLines` prune `~/.hanzo-bot/cron/runs/<jobId>.jsonl`.
+- `cron.runLog.maxBytes` + `cron.runLog.keepLines` prune `~/.bot/cron/runs/<jobId>.jsonl`.
 
 ## Common edits
 

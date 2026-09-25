@@ -25,7 +25,7 @@ The macOS app surfaces HanzoBot skills via the gateway; it does not parse skills
 
 ## Env/API keys
 
-- The app stores keys in `~/.hanzo-bot/hanzo-bot.json` under `skills.entries.<skillKey>`.
+- The app stores keys in `~/.bot/bot.json` under `skills.entries.<skillKey>`.
 - `skills.update` patches `enabled`, `apiKey`, and `env`.
 
 ## Remote mode

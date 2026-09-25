@@ -145,7 +145,7 @@ Example:
 2. Create an **Azure Bot** (App ID + secret + tenant ID).
 3. Build a **Teams app package** that references the bot and includes the RSC permissions below.
 4. Upload/install the Teams app into a team (or personal scope for DMs).
-5. Configure `msteams` in `~/.hanzo-bot/hanzo-bot.json` (or env vars) and start the gateway.
+5. Configure `msteams` in `~/.bot/bot.json` (or env vars) and start the gateway.
 6. The gateway listens for Bot Framework webhook traffic on `/api/messages` by default.
 
 ## Azure Bot Setup (Prerequisites)
@@ -604,7 +604,7 @@ Uploaded files are stored in a `/HanzoBotShared/` folder in the configured Share
 HanzoBot sends Teams polls as Adaptive Cards (there is no native Teams poll API).
 
 - CLI: `hanzo-bot message poll --channel msteams --target conversation:<id> ...`
-- Votes are recorded by the gateway in `~/.hanzo-bot/msteams-polls.json`.
+- Votes are recorded by the gateway in `~/.bot/msteams-polls.json`.
 - The gateway must stay online to record votes.
 - Polls do not auto-post result summaries yet (inspect the store file if needed).
 

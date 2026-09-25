@@ -32,7 +32,7 @@ x-i18n:
 认证是按智能体的：每个智能体从其自己的 `agentDir` 认证存储读取：
 
 ```
-~/.hanzo-bot/agents/<agentId>/agent/auth-profiles.json
+~/.bot/agents/<agentId>/agent/auth-profiles.json
 ```
 
 凭证**不会**在智能体之间共享。切勿在智能体之间重用 `agentDir`。
@@ -55,13 +55,13 @@ x-i18n:
         "id": "main",
         "default": true,
         "name": "Personal Assistant",
-        "workspace": "~/.hanzo-bot/workspace",
+        "workspace": "~/.bot/workspace",
         "sandbox": { "mode": "off" }
       },
       {
         "id": "family",
         "name": "Family Bot",
-        "workspace": "~/.hanzo-bot/workspace-family",
+        "workspace": "~/.bot/workspace-family",
         "sandbox": {
           "mode": "all",
           "scope": "agent"
@@ -104,12 +104,12 @@ x-i18n:
     "list": [
       {
         "id": "personal",
-        "workspace": "~/.hanzo-bot/workspace-personal",
+        "workspace": "~/.bot/workspace-personal",
         "sandbox": { "mode": "off" }
       },
       {
         "id": "work",
-        "workspace": "~/.hanzo-bot/workspace-work",
+        "workspace": "~/.bot/workspace-work",
         "sandbox": {
           "mode": "all",
           "scope": "shared",
@@ -164,14 +164,14 @@ x-i18n:
     "list": [
       {
         "id": "main",
-        "workspace": "~/.hanzo-bot/workspace",
+        "workspace": "~/.bot/workspace",
         "sandbox": {
           "mode": "off" // 覆盖：main 永不沙箱隔离
         }
       },
       {
         "id": "public",
-        "workspace": "~/.hanzo-bot/workspace-public",
+        "workspace": "~/.bot/workspace-public",
         "sandbox": {
           "mode": "all", // 覆盖：public 始终沙箱隔离
           "scope": "agent"
@@ -263,7 +263,7 @@ agents.list[].sandbox.prune.* > agents.defaults.sandbox.prune.*
 {
   "agents": {
     "defaults": {
-      "workspace": "~/.hanzo-bot/workspace",
+      "workspace": "~/.bot/workspace",
       "sandbox": {
         "mode": "non-main"
       }
@@ -289,7 +289,7 @@ agents.list[].sandbox.prune.* > agents.defaults.sandbox.prune.*
       {
         "id": "main",
         "default": true,
-        "workspace": "~/.hanzo-bot/workspace",
+        "workspace": "~/.bot/workspace",
         "sandbox": { "mode": "off" }
       }
     ]
@@ -369,7 +369,7 @@ agents.list[].sandbox.prune.* > agents.defaults.sandbox.prune.*
 
 4. **监控日志：**
    ```exec
-   tail -f "${BOT_STATE_DIR:-$HOME/.hanzo-bot}/logs/gateway.log" | grep -E "routing|sandbox|tools"
+   tail -f "${BOT_STATE_DIR:-$HOME/.bot}/logs/gateway.log" | grep -E "routing|sandbox|tools"
    ```
 
 ---

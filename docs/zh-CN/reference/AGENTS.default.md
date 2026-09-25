@@ -16,33 +16,33 @@ x-i18n:
 
 ## 首次运行（推荐）
 
-HanzoBot 为智能体使用专用的工作区目录。默认：`~/.hanzo-bot/workspace`（可通过 `agents.defaults.workspace` 配置）。
+HanzoBot 为智能体使用专用的工作区目录。默认：`~/.bot/workspace`（可通过 `agents.defaults.workspace` 配置）。
 
 1. 创建工作区（如果尚不存在）：
 
 ```bash
-mkdir -p ~/.hanzo-bot/workspace
+mkdir -p ~/.bot/workspace
 ```
 
 2. 将默认工作区模板复制到工作区：
 
 ```bash
-cp docs/reference/templates/AGENTS.md ~/.hanzo-bot/workspace/AGENTS.md
-cp docs/reference/templates/SOUL.md ~/.hanzo-bot/workspace/SOUL.md
-cp docs/reference/templates/TOOLS.md ~/.hanzo-bot/workspace/TOOLS.md
+cp docs/reference/templates/AGENTS.md ~/.bot/workspace/AGENTS.md
+cp docs/reference/templates/SOUL.md ~/.bot/workspace/SOUL.md
+cp docs/reference/templates/TOOLS.md ~/.bot/workspace/TOOLS.md
 ```
 
 3. 可选：如果你想要个人助手 Skills 列表，用此文件替换 AGENTS.md：
 
 ```bash
-cp docs/reference/AGENTS.default.md ~/.hanzo-bot/workspace/AGENTS.md
+cp docs/reference/AGENTS.default.md ~/.bot/workspace/AGENTS.md
 ```
 
 4. 可选：通过设置 `agents.defaults.workspace` 选择不同的工作区（支持 `~`）：
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.hanzo-bot/workspace" } },
+  agents: { defaults: { workspace: "~/.bot/workspace" } },
 }
 ```
 
@@ -86,7 +86,7 @@ cp docs/reference/AGENTS.default.md ~/.hanzo-bot/workspace/AGENTS.md
 如果你将此工作区视为 Clawd 的"记忆"，请将其设为 git 仓库（最好是私有的），这样 `AGENTS.md` 和你的记忆文件就会被备份。
 
 ```bash
-cd ~/.hanzo-bot/workspace
+cd ~/.bot/workspace
 git init
 git add AGENTS.md
 git commit -m "Add Clawd workspace"

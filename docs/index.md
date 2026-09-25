@@ -129,7 +129,7 @@ Open the browser Control UI after the Gateway starts.
 
 ## Configuration (optional)
 
-Config lives at `~/.hanzo-bot/hanzo-bot.json`.
+Config lives at `~/.bot/bot.json`.
 
 - If you **do nothing**, HanzoBot uses the bundled Pi binary in RPC mode with per-sender sessions.
 - If you want to lock it down, start with `channels.whatsapp.allowFrom` and (for groups) mention rules.

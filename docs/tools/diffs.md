@@ -177,7 +177,7 @@ Mode behavior summary:
 
 ## Plugin defaults
 
-Set plugin-wide defaults in `~/.hanzo-bot/hanzo-bot.json`:
+Set plugin-wide defaults in `~/.bot/bot.json`:
 
 ```json5
 {

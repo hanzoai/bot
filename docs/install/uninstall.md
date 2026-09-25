@@ -45,7 +45,7 @@ hanzo-bot gateway uninstall
 3. Delete state + config:
 
 ```bash
-rm -rf "${BOT_STATE_DIR:-$HOME/.hanzo-bot}"
+rm -rf "${BOT_STATE_DIR:-$HOME/.bot}"
 ```
 
 If you set `BOT_CONFIG_PATH` to a custom location outside the state dir, delete that file too.
@@ -53,7 +53,7 @@ If you set `BOT_CONFIG_PATH` to a custom location outside the state dir, delete 
 4. Delete your workspace (optional, removes agent files):
 
 ```bash
-rm -rf ~/.hanzo-bot/workspace
+rm -rf ~/.bot/workspace
 ```
 
 5. Remove the CLI install (pick the one you used):
@@ -72,7 +72,7 @@ rm -rf /Applications/HanzoBot.app
 
 Notes:
 
-- If you used profiles (`--profile` / `BOT_PROFILE`), repeat step 3 for each state dir (defaults are `~/.hanzo-bot-<profile>`).
+- If you used profiles (`--profile` / `BOT_PROFILE`), repeat step 3 for each state dir (defaults are `~/.bot-<profile>`).
 - In remote mode, the state dir lives on the **gateway host**, so run steps 1-4 there too.
 
 ## Manual service removal (CLI not installed)
@@ -107,10 +107,10 @@ The task script lives under your state dir.
 
 ```powershell
 schtasks /Delete /F /TN "HanzoBot Gateway"
-Remove-Item -Force "$env:USERPROFILE\.hanzo-bot\gateway.cmd"
+Remove-Item -Force "$env:USERPROFILE\.bot\gateway.cmd"
 ```
 
-If you used a profile, delete the matching task name and `~\.hanzo-bot-<profile>\gateway.cmd`.
+If you used a profile, delete the matching task name and `~\.bot-<profile>\gateway.cmd`.
 
 ## Normal install vs source checkout
 

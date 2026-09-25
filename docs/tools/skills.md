@@ -15,22 +15,22 @@ HanzoBot uses **[AgentSkills](https://agentskills.io)-compatible** skill folders
 Skills are loaded from **three** places:
 
 1. **Bundled skills**: shipped with the install (npm package or HanzoBot.app)
-2. **Managed/local skills**: `~/.hanzo-bot/skills`
+2. **Managed/local skills**: `~/.bot/skills`
 3. **Workspace skills**: `<workspace>/skills`
 
 If a skill name conflicts, precedence is:
 
-`<workspace>/skills` (highest) → `~/.hanzo-bot/skills` → bundled skills (lowest)
+`<workspace>/skills` (highest) → `~/.bot/skills` → bundled skills (lowest)
 
 Additionally, you can configure extra skill folders (lowest precedence) via
-`skills.load.extraDirs` in `~/.hanzo-bot/hanzo-bot.json`.
+`skills.load.extraDirs` in `~/.bot/bot.json`.
 
 ## Per-agent vs shared skills
 
 In **multi-agent** setups, each agent has its own workspace. That means:
 
 - **Per-agent skills** live in `<workspace>/skills` for that agent only.
-- **Shared skills** live in `~/.hanzo-bot/skills` (managed/local) and are visible
+- **Shared skills** live in `~/.bot/skills` (managed/local) and are visible
   to **all agents** on the same machine.
 - **Shared folders** can also be added via `skills.load.extraDirs` (lowest
   precedence) if you want a common skills pack used by multiple agents.
@@ -41,7 +41,7 @@ applies: workspace wins, then managed/local, then bundled.
 ## Plugins + skills
 
 Plugins can ship their own skills by listing `skills` directories in
-`hanzo-bot.plugin.json` (paths relative to the plugin root). Plugin skills load
+`bot.plugin.json` (paths relative to the plugin root). Plugin skills load
 when the plugin is enabled and participate in the normal skill precedence rules.
 You can gate them via `metadata.hanzo-bot.requires.config` on the plugin’s config
 entry. See [Plugins](/tools/plugin) for discovery/config and [Tools](/tools) for the
@@ -130,7 +130,7 @@ Fields under `metadata.hanzo-bot`:
 - `requires.bins` — list; each must exist on `PATH`.
 - `requires.anyBins` — list; at least one must exist on `PATH`.
 - `requires.env` — list; env var must exist **or** be provided in config.
-- `requires.config` — list of `hanzo-bot.json` paths that must be truthy.
+- `requires.config` — list of `bot.json` paths that must be truthy.
 - `primaryEnv` — env var name associated with `skills.entries.<name>.apiKey`.
 - `install` — optional array of installer specs used by the macOS Skills UI (brew/node/go/uv/download).
 
@@ -176,16 +176,16 @@ Notes:
 - If multiple installers are listed, the gateway picks a **single** preferred option (brew when available, otherwise node).
 - If all installers are `download`, HanzoBot lists each entry so you can see the available artifacts.
 - Installer specs can include `os: ["darwin"|"linux"|"win32"]` to filter options by platform.
-- Node installs honor `skills.install.nodeManager` in `hanzo-bot.json` (default: npm; options: npm/pnpm/yarn/bun).
+- Node installs honor `skills.install.nodeManager` in `bot.json` (default: npm; options: npm/pnpm/yarn/bun).
   This only affects **skill installs**; the Gateway runtime should still be Node
   (Bun is not recommended for WhatsApp/Telegram).
 - Go installs: if `go` is missing and `brew` is available, the gateway installs Go via Homebrew first and sets `GOBIN` to Homebrew’s `bin` when possible.
-- Download installs: `url` (required), `archive` (`tar.gz` | `tar.bz2` | `zip`), `extract` (default: auto when archive detected), `stripComponents`, `targetDir` (default: `~/.hanzo-bot/tools/<skillKey>`).
+- Download installs: `url` (required), `archive` (`tar.gz` | `tar.bz2` | `zip`), `extract` (default: auto when archive detected), `stripComponents`, `targetDir` (default: `~/.bot/tools/<skillKey>`).
 
 If no `metadata.hanzo-bot` is present, the skill is always eligible (unless
 disabled in config or blocked by `skills.allowBundled` for bundled skills).
 
-## Config overrides (`~/.hanzo-bot/hanzo-bot.json`)
+## Config overrides (`~/.bot/bot.json`)
 
 Bundled/managed skills can be toggled and supplied with env values:
 
@@ -286,7 +286,7 @@ Notes:
 ## Managed skills lifecycle
 
 HanzoBot ships a baseline set of skills as **bundled skills** as part of the
-install (npm package or HanzoBot.app). `~/.hanzo-bot/skills` exists for local
+install (npm package or HanzoBot.app). `~/.bot/skills` exists for local
 overrides (for example, pinning/patching a skill without changing the bundled
 copy). Workspace skills are user-owned and override both on name conflicts.
 

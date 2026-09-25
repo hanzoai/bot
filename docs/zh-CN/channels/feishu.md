@@ -181,7 +181,7 @@ hanzo-bot channels add
 
 ### 通过配置文件配置
 
-编辑 `~/.hanzo-bot/hanzo-bot.json`：
+编辑 `~/.bot/bot.json`：
 
 ```json5
 {

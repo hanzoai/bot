@@ -70,7 +70,7 @@ The wizard starts with **QuickStart** (defaults) vs **Advanced** (full control).
    For non-interactive runs, `--secret-input-mode ref` stores env-backed refs in auth profiles instead of plaintext API key values.
    In non-interactive `ref` mode, the provider env var must be set; passing inline key flags without that env var fails fast.
    In interactive runs, choosing secret reference mode lets you point at either an environment variable or a configured provider ref (`file` or `exec`), with a fast preflight validation before saving.
-2. **Workspace** — Location for agent files (default `~/.hanzo-bot/workspace`). Seeds bootstrap files.
+2. **Workspace** — Location for agent files (default `~/.bot/workspace`). Seeds bootstrap files.
 3. **Gateway** — Port, bind address, auth mode, Tailscale exposure.
    In interactive token mode, choose default plaintext token storage or opt into SecretRef.
    Non-interactive token SecretRef path: `--gateway-token-ref-env <ENV_VAR>`.
@@ -104,7 +104,7 @@ What it sets:
 
 Notes:
 
-- Default workspaces follow `~/.hanzo-bot/workspace-<agentId>`.
+- Default workspaces follow `~/.bot/workspace-<agentId>`.
 - Add `bindings` to route inbound messages (the wizard can do this).
 - Non-interactive flags: `--model`, `--agent-dir`, `--bind`, `--non-interactive`.
 

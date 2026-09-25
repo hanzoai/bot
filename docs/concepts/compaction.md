@@ -21,7 +21,7 @@ Compaction **persists** in the session’s JSONL history.
 
 ## Configuration
 
-Use the `agents.defaults.compaction` setting in your `hanzo-bot.json` to configure compaction behavior (mode, target tokens, etc.).
+Use the `agents.defaults.compaction` setting in your `bot.json` to configure compaction behavior (mode, target tokens, etc.).
 Compaction summarization preserves opaque identifiers by default (`identifierPolicy: "strict"`). You can override this with `identifierPolicy: "off"` or provide custom text with `identifierPolicy: "custom"` and `identifierInstructions`.
 
 ## Auto-compaction (default on)

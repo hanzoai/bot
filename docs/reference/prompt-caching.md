@@ -145,7 +145,7 @@ HanzoBot exposes dedicated cache-trace diagnostics for embedded agent runs.
 diagnostics:
   cacheTrace:
     enabled: true
-    filePath: "~/.hanzo-bot/logs/cache-trace.jsonl" # optional
+    filePath: "~/.bot/logs/cache-trace.jsonl" # optional
     includeMessages: false # default true
     includePrompt: false # default true
     includeSystem: false # default true

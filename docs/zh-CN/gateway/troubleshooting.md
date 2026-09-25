@@ -177,7 +177,7 @@ Gateway 网关服务使用**最小 PATH** 运行以避免 shell/管理器的干�
 
 这有意排除版本管理器（nvm/fnm/volta/asdf）和包
 管理器（pnpm/npm），因为服务不加载你的 shell 初始化。运行时
-变量如 `DISPLAY` 应该放在 `~/.hanzo-bot/.env` 中（由 Gateway 网关早期加载）。
+变量如 `DISPLAY` 应该放在 `~/.bot/.env` 中（由 Gateway 网关早期加载）。
 在 `host=gateway` 上的 Exec 运行会将你的登录 shell `PATH` 合并到 exec 环境中，
 所以缺少的工具通常意味着你的 shell 初始化没有导出它们（或设置
 `tools.exec.pathPrepend`）。参见 [/tools/exec](/tools/exec)。
@@ -269,7 +269,7 @@ hanzo-bot gateway status
 
 ### 主聊天在沙箱工作区中运行
 
-症状：`pwd` 或文件工具显示 `~/.hanzo-bot/sandboxes/...` 即使你
+症状：`pwd` 或文件工具显示 `~/.bot/sandboxes/...` 即使你
 期望的是主机工作区。
 
 **原因：** `agents.defaults.sandbox.mode: "non-main"` 基于 `session.mainKey`（默认 `"main"`）判断。
@@ -322,7 +322,7 @@ hanzo-bot status
 # 消息必须匹配 mentionPatterns 或显式提及；默认值在渠道 groups/guilds 中。
 # 多智能体：`agents.list[].groupChat.mentionPatterns` 覆盖全局模式。
 grep -n "agents\\|groupChat\\|mentionPatterns\\|channels\\.whatsapp\\.groups\\|channels\\.telegram\\.groups\\|channels\\.imessage\\.groups\\|channels\\.discord\\.guilds" \
-  "${BOT_CONFIG_PATH:-$HOME/.hanzo-bot/hanzo-bot.json}"
+  "${BOT_CONFIG_PATH:-$HOME/.bot/bot.json}"
 ```
 
 **检查 3：** 检查日志
@@ -367,7 +367,7 @@ hanzo-bot logs --follow | grep "pairing request"
 **检查 1：** 会话文件是否存在？
 
 ```bash
-ls -la ~/.hanzo-bot/agents/<agentId>/sessions/
+ls -la ~/.bot/agents/<agentId>/sessions/
 ```
 
 **检查 2：** 重置窗口是否太短？
@@ -422,7 +422,7 @@ hanzo-bot gateway --verbose
 
 ```bash
 hanzo-bot channels logout
-trash "${BOT_STATE_DIR:-$HOME/.hanzo-bot}/credentials" # 如果 logout 无法完全清除所有内容
+trash "${BOT_STATE_DIR:-$HOME/.bot}/credentials" # 如果 logout 无法完全清除所有内容
 hanzo-bot channels login --verbose       # 重新扫描二维码
 ```
 
@@ -674,7 +674,7 @@ npm install -g hanzo-bot@<version>
 
 ```bash
 # 在配置中打开跟踪日志：
-#   ${BOT_CONFIG_PATH:-$HOME/.hanzo-bot/hanzo-bot.json} -> { logging: { level: "trace" } }
+#   ${BOT_CONFIG_PATH:-$HOME/.bot/bot.json} -> { logging: { level: "trace" } }
 #
 # 然后运行详细命令将调试输出镜像到标准输出：
 hanzo-bot gateway --verbose
@@ -683,13 +683,13 @@ hanzo-bot channels login --verbose
 
 ## 日志位置
 
-| 日志                             | 位置                                                                                                                                                                                                                                                                                                                    |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Gateway 网关文件日志（结构化）   | `/tmp/hanzo-bot/hanzo-bot-YYYY-MM-DD.log`（或 `logging.file`）                                                                                                                                                                                                                                                          |
-| Gateway 网关服务日志（监管程序） | macOS：`$BOT_STATE_DIR/logs/gateway.log` + `gateway.err.log`（默认：`~/.hanzo-bot/logs/...`；配置文件使用 `~/.hanzo-bot-<profile>/logs/...`）<br />Linux：`journalctl --user -u hanzo-bot-gateway[-<profile>].service -n 200 --no-pager`<br />Windows：`schtasks /Query /TN "HanzoBot Gateway (<profile>)" /V /FO LIST` |
-| 会话文件                         | `$BOT_STATE_DIR/agents/<agentId>/sessions/`                                                                                                                                                                                                                                                                             |
-| 媒体缓存                         | `$BOT_STATE_DIR/media/`                                                                                                                                                                                                                                                                                                 |
-| 凭证                             | `$BOT_STATE_DIR/credentials/`                                                                                                                                                                                                                                                                                           |
+| 日志                             | 位置                                                                                                                                                                                                                                                                                                        |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gateway 网关文件日志（结构化）   | `/tmp/hanzo-bot/hanzo-bot-YYYY-MM-DD.log`（或 `logging.file`）                                                                                                                                                                                                                                              |
+| Gateway 网关服务日志（监管程序） | macOS：`$BOT_STATE_DIR/logs/gateway.log` + `gateway.err.log`（默认：`~/.bot/logs/...`；配置文件使用 `~/.bot-<profile>/logs/...`）<br />Linux：`journalctl --user -u hanzo-bot-gateway[-<profile>].service -n 200 --no-pager`<br />Windows：`schtasks /Query /TN "HanzoBot Gateway (<profile>)" /V /FO LIST` |
+| 会话文件                         | `$BOT_STATE_DIR/agents/<agentId>/sessions/`                                                                                                                                                                                                                                                                 |
+| 媒体缓存                         | `$BOT_STATE_DIR/media/`                                                                                                                                                                                                                                                                                     |
+| 凭证                             | `$BOT_STATE_DIR/credentials/`                                                                                                                                                                                                                                                                               |
 
 ## 健康检查
 
@@ -722,7 +722,7 @@ hanzo-bot gateway stop
 # 如果你安装了服务并想要干净安装：
 # hanzo-bot gateway uninstall
 
-trash "${BOT_STATE_DIR:-$HOME/.hanzo-bot}"
+trash "${BOT_STATE_DIR:-$HOME/.bot}"
 hanzo-bot channels login         # 重新配对 WhatsApp
 hanzo-bot gateway restart           # 或：hanzo-bot gateway
 ```

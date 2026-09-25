@@ -1,6 +1,6 @@
 ---
 title: "Configuration Reference"
-description: "Complete field-by-field reference for ~/.hanzo-bot/hanzo-bot.json"
+description: "Complete field-by-field reference for ~/.bot/bot.json"
 summary: "Complete reference for every HanzoBot config key, defaults, and channel settings"
 read_when:
   - You need exact field-level config semantics or defaults
@@ -9,7 +9,7 @@ read_when:
 
 # Configuration Reference
 
-Every field available in `~/.hanzo-bot/hanzo-bot.json`. For a task-oriented overview, see [Configuration](/gateway/configuration).
+Every field available in `~/.bot/bot.json`. For a task-oriented overview, see [Configuration](/gateway/configuration).
 
 Config format is **JSON5** (comments + trailing commas allowed). All fields are optional — HanzoBot uses safe defaults when omitted.
 
@@ -134,7 +134,7 @@ WhatsApp runs through the gateway's web channel (Baileys Web). It starts automat
         default: {},
         personal: {},
         biz: {
-          // authDir: "~/.hanzo-bot/credentials/whatsapp/biz",
+          // authDir: "~/.bot/credentials/whatsapp/biz",
         },
       },
     },
@@ -745,7 +745,7 @@ Include your own number in `allowFrom` to enable self-chat mode (ignores native 
 - Override per channel: `channels.discord.commands.native` (bool or `"auto"`). `false` clears previously registered commands.
 - `channels.telegram.customCommands` adds extra Telegram bot menu entries.
 - `bash: true` enables `! <cmd>` for host shell. Requires `tools.elevated.enabled` and sender in `tools.elevated.allowFrom.<channel>`.
-- `config: true` enables `/config` (reads/writes `hanzo-bot.json`).
+- `config: true` enables `/config` (reads/writes `bot.json`).
 - `channels.<provider>.configWrites` gates config mutations per channel (default: true).
 - `allowFrom` is per-provider. When set, it is the **only** authorization source (channel allowlists/pairing and `useAccessGroups` are ignored).
 - `useAccessGroups: false` allows commands to bypass access-group policies when `allowFrom` is not set.
@@ -758,11 +758,11 @@ Include your own number in `allowFrom` to enable self-chat mode (ignores native 
 
 ### `agents.defaults.workspace`
 
-Default: `~/.hanzo-bot/workspace`.
+Default: `~/.bot/workspace`.
 
 ```json5
 {
-  agents: { defaults: { workspace: "~/.hanzo-bot/workspace" } },
+  agents: { defaults: { workspace: "~/.bot/workspace" } },
 }
 ```
 
@@ -1116,7 +1116,7 @@ Optional **Docker sandboxing** for the embedded agent. See [Sandboxing](/gateway
         mode: "non-main", // off | non-main | all
         scope: "agent", // session | agent | shared
         workspaceAccess: "none", // none | ro | rw
-        workspaceRoot: "~/.hanzo-bot/sandboxes",
+        workspaceRoot: "~/.bot/sandboxes",
         docker: {
           image: "hanzo-bot-sandbox:bookworm-slim",
           containerPrefix: "hanzo-bot-sbx-",
@@ -1190,7 +1190,7 @@ Optional **Docker sandboxing** for the embedded agent. See [Sandboxing](/gateway
 
 **Workspace access:**
 
-- `none`: per-scope sandbox workspace under `~/.hanzo-bot/sandboxes`
+- `none`: per-scope sandbox workspace under `~/.bot/sandboxes`
 - `ro`: sandbox workspace at `/workspace`, agent workspace mounted read-only at `/agent`
 - `rw`: agent workspace mounted read/write at `/workspace`
 
@@ -1210,7 +1210,7 @@ Optional **Docker sandboxing** for the embedded agent. See [Sandboxing](/gateway
 
 **`docker.binds`** mounts additional host directories; global and per-agent binds are merged.
 
-**Sandboxed browser** (`sandbox.browser.enabled`): Chromium + CDP in a container. noVNC URL injected into system prompt. Does not require `browser.enabled` in `hanzo-bot.json`.
+**Sandboxed browser** (`sandbox.browser.enabled`): Chromium + CDP in a container. noVNC URL injected into system prompt. Does not require `browser.enabled` in `bot.json`.
 noVNC observer access uses VNC auth by default and HanzoBot emits a short-lived token URL (instead of exposing the password in the shared URL).
 
 - `allowHostControl: false` (default) blocks sandboxed sessions from targeting the host browser.
@@ -1266,8 +1266,8 @@ scripts/sandbox-browser-setup.sh   # optional browser image
         id: "main",
         default: true,
         name: "Main Agent",
-        workspace: "~/.hanzo-bot/workspace",
-        agentDir: "~/.hanzo-bot/agents/main/agent",
+        workspace: "~/.bot/workspace",
+        agentDir: "~/.bot/agents/main/agent",
         model: "anthropic/claude-opus-4-6", // or { primary, fallbacks }
         params: { cacheRetention: "none" }, // overrides matching defaults.models params by key
         identity: {
@@ -1320,8 +1320,8 @@ Run multiple isolated agents inside one Gateway. See [Multi-Agent](/concepts/mul
 {
   agents: {
     list: [
-      { id: "home", default: true, workspace: "~/.hanzo-bot/workspace-home" },
-      { id: "work", workspace: "~/.hanzo-bot/workspace-work" },
+      { id: "home", default: true, workspace: "~/.bot/workspace-home" },
+      { id: "work", workspace: "~/.bot/workspace-work" },
     ],
   },
   bindings: [
@@ -1363,7 +1363,7 @@ For `type: "acp"` entries, HanzoBot resolves by exact conversation identity (`ma
     list: [
       {
         id: "personal",
-        workspace: "~/.hanzo-bot/workspace-personal",
+        workspace: "~/.bot/workspace-personal",
         sandbox: { mode: "off" },
       },
     ],
@@ -1381,7 +1381,7 @@ For `type: "acp"` entries, HanzoBot resolves by exact conversation identity (`ma
     list: [
       {
         id: "family",
-        workspace: "~/.hanzo-bot/workspace-family",
+        workspace: "~/.bot/workspace-family",
         sandbox: { mode: "all", scope: "agent", workspaceAccess: "ro" },
         tools: {
           allow: [
@@ -1410,7 +1410,7 @@ For `type: "acp"` entries, HanzoBot resolves by exact conversation identity (`ma
     list: [
       {
         id: "public",
-        workspace: "~/.hanzo-bot/workspace-public",
+        workspace: "~/.bot/workspace-public",
         sandbox: { mode: "all", scope: "agent", workspaceAccess: "none" },
         tools: {
           allow: [
@@ -1473,7 +1473,7 @@ See [Multi-Agent Sandbox & Tools](/tools/multi-agent-sandbox-tools) for preceden
       group: { mode: "idle", idleMinutes: 120 },
     },
     resetTriggers: ["/new", "/reset"],
-    store: "~/.hanzo-bot/agents/{agentId}/sessions/sessions.json",
+    store: "~/.bot/agents/{agentId}/sessions/sessions.json",
     parentForkMaxTokens: 100000, // skip parent-thread fork above this token count (0 disables)
     maintenance: {
       mode: "warn", // warn | enforce
@@ -1604,7 +1604,7 @@ Batches rapid text-only messages from the same sender into a single agent turn. 
       modelOverrides: { enabled: true },
       maxTextLength: 4000,
       timeoutMs: 30000,
-      prefsPath: "~/.hanzo-bot/settings/tts.json",
+      prefsPath: "~/.bot/settings/tts.json",
       elevenlabs: {
         apiKey: "elevenlabs_api_key",
         baseUrl: "https://api.elevenlabs.io",
@@ -1971,7 +1971,7 @@ Notes:
 
 ## Custom providers and base URLs
 
-HanzoBot uses the pi-coding-agent model catalog. Add custom providers via `models.providers` in config or `~/.hanzo-bot/agents/<agentId>/agent/models.json`.
+HanzoBot uses the pi-coding-agent model catalog. Add custom providers via `models.providers` in config or `~/.bot/agents/<agentId>/agent/models.json`.
 
 ```json5
 {
@@ -2305,7 +2305,7 @@ See [Local Models](/gateway/local-models). TL;DR: run MiniMax M2.5 via LM Studio
 }
 ```
 
-- Loaded from `~/.hanzo-bot/extensions`, `<workspace>/.hanzo-bot/extensions`, plus `plugins.load.paths`.
+- Loaded from `~/.bot/extensions`, `<workspace>/.hanzo-bot/extensions`, plus `plugins.load.paths`.
 - **Config changes require a gateway restart.**
 - `allow`: optional allowlist (only listed plugins load). `deny` wins.
 - `plugins.entries.<id>.apiKey`: plugin-level API key convenience field (when supported by the plugin).
@@ -2481,12 +2481,12 @@ See [Plugins](/tools/plugin).
 Run multiple gateways on one host with unique ports and state dirs:
 
 ```bash
-BOT_CONFIG_PATH=~/.hanzo-bot/a.json \
-BOT_STATE_DIR=~/.hanzo-bot-a \
+BOT_CONFIG_PATH=~/.bot/a.json \
+BOT_STATE_DIR=~/.bot-a \
 hanzo-bot gateway --port 19001
 ```
 
-Convenience flags: `--dev` (uses `~/.hanzo-bot-dev` + port `19001`), `--profile <name>` (uses `~/.hanzo-bot-<name>`).
+Convenience flags: `--dev` (uses `~/.bot-dev` + port `19001`), `--profile <name>` (uses `~/.bot-<name>`).
 
 See [Multiple Gateways](/gateway/multiple-gateways).
 
@@ -2506,7 +2506,7 @@ See [Multiple Gateways](/gateway/multiple-gateways).
     allowedSessionKeyPrefixes: ["hook:"],
     allowedAgentIds: ["hooks", "main"],
     presets: ["gmail"],
-    transformsDir: "~/.hanzo-bot/hooks/transforms",
+    transformsDir: "~/.bot/hooks/transforms",
     mappings: [
       {
         match: { path: "gmail" },
@@ -2584,7 +2584,7 @@ Auth: `Authorization: Bearer <token>` or `x-hanzo-bot-token: <token>`.
 ```json5
 {
   canvasHost: {
-    root: "~/.hanzo-bot/workspace/canvas",
+    root: "~/.bot/workspace/canvas",
     liveReload: true,
     // enabled: false, // or BOT_SKIP_CANVAS_HOST=1
   },
@@ -2634,7 +2634,7 @@ Auth: `Authorization: Bearer <token>` or `x-hanzo-bot-token: <token>`.
 }
 ```
 
-Writes a unicast DNS-SD zone under `~/.hanzo-bot/dns/`. For cross-network discovery, pair with a DNS server (CoreDNS recommended) + Tailscale split DNS.
+Writes a unicast DNS-SD zone under `~/.bot/dns/`. For cross-network discovery, pair with a DNS server (CoreDNS recommended) + Tailscale split DNS.
 
 Setup: `hanzo-bot dns setup --apply`.
 
@@ -2660,7 +2660,7 @@ Setup: `hanzo-bot dns setup --apply`.
 ```
 
 - Inline env vars are only applied if the process env is missing the key.
-- `.env` files: CWD `.env` + `~/.hanzo-bot/.env` (neither overrides existing vars).
+- `.env` files: CWD `.env` + `~/.bot/.env` (neither overrides existing vars).
 - `shellEnv`: imports missing expected keys from your login shell profile.
 - See [Environment](/help/environment) for full precedence.
 
@@ -2705,7 +2705,7 @@ Validation:
 ### Supported credential surface
 
 - Canonical matrix: [SecretRef Credential Surface](/reference/secretref-credential-surface)
-- `secrets apply` targets supported `hanzo-bot.json` credential paths.
+- `secrets apply` targets supported `bot.json` credential paths.
 - `auth-profiles.json` refs are included in runtime resolution and audit coverage.
 
 ### Secret providers config
@@ -2717,7 +2717,7 @@ Validation:
       default: { source: "env" }, // optional explicit env provider
       filemain: {
         source: "file",
-        path: "~/.hanzo-bot/secrets.json",
+        path: "~/.bot/secrets.json",
         mode: "json",
         timeoutMs: 5000,
       },
@@ -2767,7 +2767,7 @@ Notes:
 - Per-agent profiles are stored at `<agentDir>/auth-profiles.json`.
 - `auth-profiles.json` supports value-level refs (`keyRef` for `api_key`, `tokenRef` for `token`).
 - Static runtime credentials come from in-memory resolved snapshots; legacy static `auth.json` entries are scrubbed when discovered.
-- Legacy OAuth imports from `~/.hanzo-bot/credentials/oauth.json`.
+- Legacy OAuth imports from `~/.bot/credentials/oauth.json`.
 - See [OAuth](/concepts/oauth).
 - Secrets runtime behavior and `audit/configure/apply` tooling: [Secrets Management](/gateway/secrets).
 
@@ -2946,7 +2946,7 @@ Template placeholders expanded in `tools.media.models[].args`:
 Split config into multiple files:
 
 ```json5
-// ~/.hanzo-bot/hanzo-bot.json
+// ~/.bot/bot.json
 {
   gateway: { port: 18789 },
   agents: { $include: "./agents.json5" },
@@ -2962,7 +2962,7 @@ Split config into multiple files:
 - Array of files: deep-merged in order (later overrides earlier).
 - Sibling keys: merged after includes (override included values).
 - Nested includes: up to 10 levels deep.
-- Paths: resolved relative to the including file, but must stay inside the top-level config directory (`dirname` of `hanzo-bot.json`). Absolute/`../` forms are allowed only when they still resolve inside that boundary.
+- Paths: resolved relative to the including file, but must stay inside the top-level config directory (`dirname` of `bot.json`). Absolute/`../` forms are allowed only when they still resolve inside that boundary.
 - Errors: clear messages for missing files, parse errors, and circular includes.
 
 ---

@@ -84,7 +84,7 @@ No writes are committed for an invalid plan.
 ## Runtime and audit scope notes
 
 - Ref-only `auth-profiles.json` entries (`keyRef`/`tokenRef`) are included in runtime resolution and audit coverage.
-- `secrets apply` writes supported `hanzo-bot.json` targets, supported `auth-profiles.json` targets, and optional scrub targets.
+- `secrets apply` writes supported `bot.json` targets, supported `auth-profiles.json` targets, and optional scrub targets.
 
 ## Operator checks
 

@@ -44,7 +44,7 @@ sudo dpkg -i google-chrome-stable_current_amd64.deb
 sudo apt --fix-broken install -y  # if there are dependency errors
 ```
 
-然后更新你的 HanzoBot 配置（`~/.hanzo-bot/hanzo-bot.json`）：
+然后更新你的 HanzoBot 配置（`~/.bot/bot.json`）：
 
 ```json
 {
@@ -79,7 +79,7 @@ sudo apt --fix-broken install -y  # if there are dependency errors
 ```bash
 chromium-browser --headless --no-sandbox --disable-gpu \
   --remote-debugging-port=18800 \
-  --user-data-dir=$HOME/.hanzo-bot/browser/hanzo-bot/user-data \
+  --user-data-dir=$HOME/.bot/browser/hanzo-bot/user-data \
   about:blank &
 ```
 

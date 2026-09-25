@@ -193,7 +193,7 @@ This setup often removes the _need_ for extra host-based firewall rules purely t
 
 ### Still Recommended
 
-- **Credential permissions:** `chmod 700 ~/.hanzo-bot`
+- **Credential permissions:** `chmod 700 ~/.bot`
 - **Security audit:** `hanzo-bot security audit`
 - **System updates:** `sudo apt update && sudo apt upgrade` regularly
 - **Monitor Tailscale:** Review devices in [Tailscale admin console](https://login.tailscale.com/admin)
@@ -283,13 +283,13 @@ Most npm packages work fine. For binaries, look for `linux-arm64` or `aarch64` r
 
 All state lives in:
 
-- `~/.hanzo-bot/` — config, credentials, session data
-- `~/.hanzo-bot/workspace/` — workspace (SOUL.md, memory, artifacts)
+- `~/.bot/` — config, credentials, session data
+- `~/.bot/workspace/` — workspace (SOUL.md, memory, artifacts)
 
 Back up periodically:
 
 ```bash
-tar -czvf hanzo-bot-backup.tar.gz ~/.hanzo-bot ~/.hanzo-bot/workspace
+tar -czvf hanzo-bot-backup.tar.gz ~/.bot ~/.bot/workspace
 ```
 
 ---

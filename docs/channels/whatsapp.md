@@ -349,9 +349,9 @@ Behavior notes:
   </Accordion>
 
   <Accordion title="Credential paths and legacy compatibility">
-    - current auth path: `~/.hanzo-bot/credentials/whatsapp/<accountId>/creds.json`
+    - current auth path: `~/.bot/credentials/whatsapp/<accountId>/creds.json`
     - backup file: `creds.json.bak`
-    - legacy default auth in `~/.hanzo-bot/credentials/` is still recognized/migrated for default-account flows
+    - legacy default auth in `~/.bot/credentials/` is still recognized/migrated for default-account flows
   </Accordion>
 
   <Accordion title="Logout behavior">
@@ -413,7 +413,7 @@ Behavior notes:
     - `groupAllowFrom` / `allowFrom`
     - `groups` allowlist entries
     - mention gating (`requireMention` + mention patterns)
-    - duplicate keys in `hanzo-bot.json` (JSON5): later entries override earlier ones, so keep a single `groupPolicy` per scope
+    - duplicate keys in `bot.json` (JSON5): later entries override earlier ones, so keep a single `groupPolicy` per scope
 
   </Accordion>
 

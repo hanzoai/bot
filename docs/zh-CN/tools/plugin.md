@@ -103,8 +103,8 @@ HanzoBot 按顺序扫描：
 
 3. 全局扩展
 
-- `~/.hanzo-bot/extensions/*.ts`
-- `~/.hanzo-bot/extensions/*/index.ts`
+- `~/.bot/extensions/*.ts`
+- `~/.bot/extensions/*/index.ts`
 
 4. 捆绑扩展（随 HanzoBot 一起发布，**默认禁用**）
 
@@ -112,7 +112,7 @@ HanzoBot 按顺序扫描：
 
 捆绑插件必须通过 `plugins.entries.<id>.enabled` 或 `hanzo-bot plugins enable <id>` 显式启用。已安装的插件默认启用，但可以用相同方式禁用。
 
-每个插件必须在其根目录中包含 `hanzo-bot.plugin.json` 文件。如果路径指向文件，则插件根目录是文件的目录，必须包含清单。
+每个插件必须在其根目录中包含 `bot.plugin.json` 文件。如果路径指向文件，则插件根目录是文件的目录，必须包含清单。
 
 如果多个插件解析到相同的 id，上述顺序中的第一个匹配项获胜，较低优先级的副本被忽略。
 
@@ -165,9 +165,9 @@ HanzoBot 按顺序扫描：
 
 HanzoBot 还可以合并**外部渠道目录**（例如，MPM 注册表导出）。将 JSON 文件放在以下位置之一：
 
-- `~/.hanzo-bot/mpm/plugins.json`
-- `~/.hanzo-bot/mpm/catalog.json`
-- `~/.hanzo-bot/plugins/catalog.json`
+- `~/.bot/mpm/plugins.json`
+- `~/.bot/mpm/catalog.json`
+- `~/.bot/plugins/catalog.json`
 
 或将 `BOT_PLUGIN_CATALOG_PATHS`（或 `BOT_MPM_CATALOG_PATHS`）指向一个或多个 JSON 文件（逗号/分号/`PATH` 分隔）。每个文件应包含 `{ "entries": [ { "name": "@scope/pkg", "hanzo-bot": { "channel": {...}, "install": {...} } } ] }`。
 
@@ -210,7 +210,7 @@ HanzoBot 还可以合并**外部渠道目录**（例如，MPM 注册表导出）
 
 - `entries`、`allow`、`deny` 或 `slots` 中的未知插件 id 是**错误**。
 - 未知的 `channels.<id>` 键是**错误**，除非插件清单声明了渠道 id。
-- 插件配置使用嵌入在 `hanzo-bot.plugin.json`（`configSchema`）中的 JSON Schema 进行验证。
+- 插件配置使用嵌入在 `bot.plugin.json`（`configSchema`）中的 JSON Schema 进行验证。
 - 如果插件被禁用，其配置会保留并发出**警告**。
 
 ## 插件槽位（独占类别）
@@ -266,7 +266,7 @@ HanzoBot 在运行时根据发现的插件增强 `uiHints`：
 ```bash
 hanzo-bot plugins list
 hanzo-bot plugins info <id>
-hanzo-bot plugins install <path>                 # copy a local file/dir into ~/.hanzo-bot/extensions/<id>
+hanzo-bot plugins install <path>                 # copy a local file/dir into ~/.bot/extensions/<id>
 hanzo-bot plugins install ./extensions/voice-call # relative path ok
 hanzo-bot plugins install ./plugin.tgz           # install from a local tarball
 hanzo-bot plugins install ./plugin.zip           # install from a local zip
@@ -606,7 +606,7 @@ export default function (api) {
 
 - 插件 `package.json` 必须包含带有一个或多个入口文件的 `hanzo-bot.extensions`。
 - 入口文件可以是 `.js` 或 `.ts`（jiti 在运行时加载 TS）。
-- `hanzo-bot plugins install <npm-spec>` 使用 `npm pack`，提取到 `~/.hanzo-bot/extensions/<id>/`，并在配置中启用它。
+- `hanzo-bot plugins install <npm-spec>` 使用 `npm pack`，提取到 `~/.bot/extensions/<id>/`，并在配置中启用它。
 - 配置键稳定性：作用域包被规范化为 `plugins.entries.*` 的**无作用域** id。
 
 ## 示例插件：Voice Call

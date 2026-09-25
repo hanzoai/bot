@@ -53,7 +53,7 @@ Set `browser.defaultProfile: "hanzo-bot"` if you want managed mode by default.
 
 ## Configuration
 
-Browser settings live in `~/.hanzo-bot/hanzo-bot.json`.
+Browser settings live in `~/.bot/bot.json`.
 
 ```json5
 {

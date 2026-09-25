@@ -30,7 +30,7 @@ Use `session.dmScope` to control how **direct messages** are grouped:
 **The fix:** Set `dmScope` to isolate sessions per user:
 
 ```json5
-// ~/.hanzo-bot/hanzo-bot.json
+// ~/.bot/bot.json
 {
   session: {
     // Secure DM mode: isolate DM context per channel + sender.
@@ -64,8 +64,8 @@ All session state is **owned by the gateway** (the “master” HanzoBot). UI cl
 ## Where state lives
 
 - On the **gateway host**:
-  - Store file: `~/.hanzo-bot/agents/<agentId>/sessions/sessions.json` (per agent).
-- Transcripts: `~/.hanzo-bot/agents/<agentId>/sessions/<SessionId>.jsonl` (Telegram topic sessions use `.../<SessionId>-topic-<threadId>.jsonl`).
+  - Store file: `~/.bot/agents/<agentId>/sessions/sessions.json` (per agent).
+- Transcripts: `~/.bot/agents/<agentId>/sessions/<SessionId>.jsonl` (Telegram topic sessions use `.../<SessionId>-topic-<threadId>.jsonl`).
 - The store is a map `sessionKey -> { sessionId, updatedAt, ... }`. Deleting entries is safe; they are recreated on demand.
 - Group entries may include `displayName`, `channel`, `subject`, `room`, and `space` to label sessions in UIs.
 - Session entries include `origin` metadata (label + routing hints) so UIs can explain where a session came from.
@@ -106,7 +106,7 @@ What increases cost most:
 
 - very high `session.maintenance.maxEntries` values
 - long `pruneAfter` windows that keep stale entries around
-- many transcript/archive artifacts in `~/.hanzo-bot/agents/<agentId>/sessions/`
+- many transcript/archive artifacts in `~/.bot/agents/<agentId>/sessions/`
 - enabling disk budgets (`maxDiskBytes`) without reasonable pruning/cap limits
 
 What to do:
@@ -246,7 +246,7 @@ Runtime override (owner only):
 ## Configuration (optional rename example)
 
 ```json5
-// ~/.hanzo-bot/hanzo-bot.json
+// ~/.bot/bot.json
 {
   session: {
     scope: "per-sender", // keep group keys separate
@@ -270,7 +270,7 @@ Runtime override (owner only):
       discord: { mode: "idle", idleMinutes: 10080 },
     },
     resetTriggers: ["/new", "/reset"],
-    store: "~/.hanzo-bot/agents/{agentId}/sessions/sessions.json",
+    store: "~/.bot/agents/{agentId}/sessions/sessions.json",
     mainKey: "main",
   },
 }

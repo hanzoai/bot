@@ -124,7 +124,7 @@ Define providers under `secrets.providers`:
       default: { source: "env" },
       filemain: {
         source: "file",
-        path: "~/.hanzo-bot/secrets.json",
+        path: "~/.bot/secrets.json",
         mode: "json", // or "singleValue"
       },
       vault: {
@@ -299,7 +299,7 @@ Runtime-minted or rotating credentials and OAuth refresh material are intentiona
 Warning and audit signals:
 
 - `SECRETS_REF_OVERRIDES_PLAINTEXT` (runtime warning)
-- `REF_SHADOWED` (audit finding when `auth-profiles.json` credentials take precedence over `hanzo-bot.json` refs)
+- `REF_SHADOWED` (audit finding when `auth-profiles.json` credentials take precedence over `bot.json` refs)
 
 Google Chat compatibility behavior:
 
@@ -372,9 +372,9 @@ hanzo-bot secrets audit --check
 
 Findings include:
 
-- plaintext values at rest (`hanzo-bot.json`, `auth-profiles.json`, `.env`)
+- plaintext values at rest (`bot.json`, `auth-profiles.json`, `.env`)
 - unresolved refs
-- precedence shadowing (`auth-profiles.json` taking priority over `hanzo-bot.json` refs)
+- precedence shadowing (`auth-profiles.json` taking priority over `bot.json` refs)
 - legacy residues (`auth.json`, OAuth reminders)
 
 ### `secrets configure`
@@ -382,7 +382,7 @@ Findings include:
 Interactive helper that:
 
 - configures `secrets.providers` first (`env`/`file`/`exec`, add/edit/remove)
-- lets you select supported secret-bearing fields in `hanzo-bot.json` plus `auth-profiles.json` for one agent scope
+- lets you select supported secret-bearing fields in `bot.json` plus `auth-profiles.json` for one agent scope
 - can create a new `auth-profiles.json` mapping directly in the target picker
 - captures SecretRef details (`source`, `provider`, `id`)
 - runs preflight resolution

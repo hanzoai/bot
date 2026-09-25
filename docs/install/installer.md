@@ -14,7 +14,7 @@ HanzoBot ships three installer scripts, served from `hanzo-bot.ai`.
 | Script                             | Platform             | What it does                                                                                 |
 | ---------------------------------- | -------------------- | -------------------------------------------------------------------------------------------- |
 | [`install.sh`](#installsh)         | macOS / Linux / WSL  | Installs Node if needed, installs HanzoBot via npm (default) or git, and can run onboarding. |
-| [`install-cli.sh`](#install-clish) | macOS / Linux / WSL  | Installs Node + HanzoBot into a local prefix (`~/.hanzo-bot`). No root required.             |
+| [`install-cli.sh`](#install-clish) | macOS / Linux / WSL  | Installs Node + HanzoBot into a local prefix (`~/.bot`). No root required.                   |
 | [`install.ps1`](#installps1)       | Windows (PowerShell) | Installs Node if needed, installs HanzoBot via npm (default) or git, and can run onboarding. |
 
 ## Quick commands
@@ -168,7 +168,7 @@ The script exits with code `2` for invalid method selection or invalid `--instal
 ## install-cli.sh
 
 <Info>
-Designed for environments where you want everything under a local prefix (default `~/.hanzo-bot`) and no system Node dependency.
+Designed for environments where you want everything under a local prefix (default `~/.bot`) and no system Node dependency.
 </Info>
 
 ### Flow (install-cli.sh)
@@ -215,7 +215,7 @@ Designed for environments where you want everything under a local prefix (defaul
 
 | Flag                   | Description                                                                     |
 | ---------------------- | ------------------------------------------------------------------------------- |
-| `--prefix <path>`      | Install prefix (default: `~/.hanzo-bot`)                                        |
+| `--prefix <path>`      | Install prefix (default: `~/.bot`)                                              |
 | `--version <ver>`      | HanzoBot version or dist-tag (default: `latest`)                                |
 | `--node-version <ver>` | Node version (default: `22.22.0`)                                               |
 | `--json`               | Emit NDJSON events                                                              |

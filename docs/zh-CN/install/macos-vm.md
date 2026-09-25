@@ -157,7 +157,7 @@ hanzo-bot onboard --install-daemon
 编辑配置文件：
 
 ```bash
-nano ~/.hanzo-bot/hanzo-bot.json
+nano ~/.bot/bot.json
 ```
 
 添加你的渠道：

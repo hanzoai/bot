@@ -58,7 +58,7 @@ Edge TTS **不**需要 API 密钥。如果没有找到 API 密钥，HanzoBot 默
 
 ## 配置
 
-TTS 配置位于 `hanzo-bot.json` 中的 `messages.tts` 下。完整 schema 在 [Gateway 网关配置](/gateway/configuration)中。
+TTS 配置位于 `bot.json` 中的 `messages.tts` 下。完整 schema 在 [Gateway 网关配置](/gateway/configuration)中。
 
 ### 最小配置（启用 + 提供商）
 
@@ -155,7 +155,7 @@ TTS 配置位于 `hanzo-bot.json` 中的 `messages.tts` 下。完整 schema 在 
       auto: "always",
       maxTextLength: 4000,
       timeoutMs: 30000,
-      prefsPath: "~/.hanzo-bot/settings/tts.json",
+      prefsPath: "~/.bot/settings/tts.json",
     },
   },
 }
@@ -282,7 +282,7 @@ Here you go.
 
 ## 单用户偏好
 
-斜杠命令将本地覆盖写入 `prefsPath`（默认：`~/.hanzo-bot/settings/tts.json`，可通过 `BOT_TTS_PREFS` 或 `messages.tts.prefsPath` 覆盖）。
+斜杠命令将本地覆盖写入 `prefsPath`（默认：`~/.bot/settings/tts.json`，可通过 `BOT_TTS_PREFS` 或 `messages.tts.prefsPath` 覆盖）。
 
 存储的字段：
 

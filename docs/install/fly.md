@@ -111,7 +111,7 @@ fly secrets set DISCORD_BOT_TOKEN=MTQ...
 
 - Non-loopback binds (`--bind lan`) require `BOT_GATEWAY_TOKEN` for security.
 - Treat these tokens like passwords.
-- **Prefer env vars over config file** for all API keys and tokens. This keeps secrets out of `hanzo-bot.json` where they could be accidentally exposed or logged.
+- **Prefer env vars over config file** for all API keys and tokens. This keeps secrets out of `bot.json` where they could be accidentally exposed or logged.
 
 ## 4) Deploy
 
@@ -147,7 +147,7 @@ Create the config directory and file:
 
 ```bash
 mkdir -p /data
-cat > /data/hanzo-bot.json << 'EOF'
+cat > /data/bot.json << 'EOF'
 {
   "agents": {
     "defaults": {
@@ -199,7 +199,7 @@ cat > /data/hanzo-bot.json << 'EOF'
 EOF
 ```
 
-**Note:** With `BOT_STATE_DIR=/data`, the config path is `/data/hanzo-bot.json`.
+**Note:** With `BOT_STATE_DIR=/data`, the config path is `/data/bot.json`.
 
 **Note:** The Discord token can come from either:
 
@@ -292,12 +292,12 @@ The lock file is at `/data/gateway.*.lock` (not in a subdirectory).
 
 ### Config Not Being Read
 
-If using `--allow-unconfigured`, the gateway creates a minimal config. Your custom config at `/data/hanzo-bot.json` should be read on restart.
+If using `--allow-unconfigured`, the gateway creates a minimal config. Your custom config at `/data/bot.json` should be read on restart.
 
 Verify the config exists:
 
 ```bash
-fly ssh console --command "cat /data/hanzo-bot.json"
+fly ssh console --command "cat /data/bot.json"
 ```
 
 ### Writing Config via SSH
@@ -306,17 +306,17 @@ The `fly ssh console -C` command doesn't support shell redirection. To write a c
 
 ```bash
 # Use echo + tee (pipe from local to remote)
-echo '{"your":"config"}' | fly ssh console -C "tee /data/hanzo-bot.json"
+echo '{"your":"config"}' | fly ssh console -C "tee /data/bot.json"
 
 # Or use sftp
 fly sftp shell
-> put /local/path/config.json /data/hanzo-bot.json
+> put /local/path/config.json /data/bot.json
 ```
 
 **Note:** `fly sftp` may fail if the file already exists. Delete first:
 
 ```bash
-fly ssh console --command "rm /data/hanzo-bot.json"
+fly ssh console --command "rm /data/bot.json"
 ```
 
 ### State Not Persisting

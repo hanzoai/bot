@@ -58,7 +58,7 @@ They run immediately, are stripped before the model sees the message, and the re
   - Set `channels.discord.commands.nativeSkills`, `channels.telegram.commands.nativeSkills`, or `channels.slack.commands.nativeSkills` to override per provider (bool or `"auto"`).
 - `commands.bash` (default `false`) enables `! <cmd>` to run host shell commands (`/bash <cmd>` is an alias; requires `tools.elevated` allowlists).
 - `commands.bashForegroundMs` (default `2000`) controls how long bash waits before switching to background mode (`0` backgrounds immediately).
-- `commands.config` (default `false`) enables `/config` (reads/writes `hanzo-bot.json`).
+- `commands.config` (default `false`) enables `/config` (reads/writes `bot.json`).
 - `commands.debug` (default `false`) enables `/debug` (runtime-only overrides).
 - `commands.allowFrom` (optional) sets a per-provider allowlist for command authorization. When configured, it is the
   only authorization source for commands and directives (channel allowlists/pairing and `commands.useAccessGroups`
@@ -188,12 +188,12 @@ Examples:
 
 Notes:
 
-- Overrides apply immediately to new config reads, but do **not** write to `hanzo-bot.json`.
+- Overrides apply immediately to new config reads, but do **not** write to `bot.json`.
 - Use `/debug reset` to clear all overrides and return to the on-disk config.
 
 ## Config updates
 
-`/config` writes to your on-disk config (`hanzo-bot.json`). Owner-only. Disabled by default; enable with `commands.config: true`.
+`/config` writes to your on-disk config (`bot.json`). Owner-only. Disabled by default; enable with `commands.config: true`.
 
 Examples:
 

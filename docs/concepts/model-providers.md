@@ -118,7 +118,7 @@ HanzoBot ships with the pi‑ai catalog. These providers require **no**
 - Gemini CLI OAuth is shipped as a bundled plugin (`google-gemini-cli-auth`, disabled by default).
   - Enable: `hanzo-bot plugins enable google-gemini-cli-auth`
   - Login: `hanzo-bot models auth login --provider google-gemini-cli --set-default`
-  - Note: you do **not** paste a client id or secret into `hanzo-bot.json`. The CLI login flow stores
+  - Note: you do **not** paste a client id or secret into `bot.json`. The CLI login flow stores
     tokens in auth profiles on the gateway host.
 
 ### Z.AI (GLM)

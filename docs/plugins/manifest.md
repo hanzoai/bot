@@ -6,9 +6,9 @@ read_when:
 title: "Plugin Manifest"
 ---
 
-# Plugin manifest (hanzo-bot.plugin.json)
+# Plugin manifest (bot.plugin.json)
 
-Every plugin **must** ship a `hanzo-bot.plugin.json` file in the **plugin root**.
+Every plugin **must** ship a `bot.plugin.json` file in the **plugin root**.
 HanzoBot uses this manifest to validate configuration **without executing plugin
 code**. Missing or invalid manifests are treated as plugin errors and block
 config validation.

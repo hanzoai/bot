@@ -50,8 +50,8 @@ hooks 系统允许你：
 
 HanzoBot 附带三个自动发现的捆绑 hooks：
 
-- **💾 session-memory**：当你发出 `/new` 时将会话上下文保存到智能体工作区（默认 `~/.hanzo-bot/workspace/memory/`）
-- **📝 command-logger**：将所有命令事件记录到 `~/.hanzo-bot/logs/commands.log`
+- **💾 session-memory**：当你发出 `/new` 时将会话上下文保存到智能体工作区（默认 `~/.bot/workspace/memory/`）
+- **📝 command-logger**：将所有命令事件记录到 `~/.bot/logs/commands.log`
 - **🚀 boot-md**：当 Gateway 网关启动时运行 `BOOT.md`（需要启用内部 hooks）
 
 列出可用的 hooks：
@@ -87,7 +87,7 @@ hanzo-bot hooks info session-memory
 Hooks 从三个目录自动发现（按优先级顺序）：
 
 1. **工作区 hooks**：`<workspace>/hooks/`（每智能体，最高优先级）
-2. **托管 hooks**：`~/.hanzo-bot/hooks/`（用户安装，跨工作区共享）
+2. **托管 hooks**：`~/.bot/hooks/`（用户安装，跨工作区共享）
 3. **捆绑 hooks**：`<hanzo-bot>/dist/hooks/bundled/`（随 HanzoBot 附带）
 
 托管 hook 目录可以是**单个 hook** 或 **hook 包**（包目录）。
@@ -121,7 +121,7 @@ hanzo-bot hooks install <path-or-spec>
 ```
 
 每个条目指向包含 `HOOK.md` 和 `handler.ts`（或 `index.ts`）的 hook 目录。
-Hook 包可以附带依赖；它们将安装在 `~/.hanzo-bot/hooks/<id>` 下。
+Hook 包可以附带依赖；它们将安装在 `~/.bot/hooks/<id>` 下。
 
 ## Hook 结构
 
@@ -266,13 +266,13 @@ export default myHandler;
 ### 1. 选择位置
 
 - **工作区 hooks**（`<workspace>/hooks/`）：每智能体，最高优先级
-- **托管 hooks**（`~/.hanzo-bot/hooks/`）：跨工作区共享
+- **托管 hooks**（`~/.bot/hooks/`）：跨工作区共享
 
 ### 2. 创建目录结构
 
 ```bash
-mkdir -p ~/.hanzo-bot/hooks/my-hook
-cd ~/.hanzo-bot/hooks/my-hook
+mkdir -p ~/.bot/hooks/my-hook
+cd ~/.bot/hooks/my-hook
 ```
 
 ### 3. 创建 HOOK.md
@@ -459,7 +459,7 @@ hanzo-bot hooks disable command-logger
 
 **要求**：必须配置 `workspace.dir`
 
-**输出**：`<workspace>/memory/YYYY-MM-DD-slug.md`（默认为 `~/.hanzo-bot/workspace`）
+**输出**：`<workspace>/memory/YYYY-MM-DD-slug.md`（默认为 `~/.bot/workspace`）
 
 **功能**：
 
@@ -498,7 +498,7 @@ hanzo-bot hooks enable session-memory
 
 **要求**：无
 
-**输出**：`~/.hanzo-bot/logs/commands.log`
+**输出**：`~/.bot/logs/commands.log`
 
 **功能**：
 
@@ -517,13 +517,13 @@ hanzo-bot hooks enable session-memory
 
 ```bash
 # View recent commands
-tail -n 20 ~/.hanzo-bot/logs/commands.log
+tail -n 20 ~/.bot/logs/commands.log
 
 # Pretty-print with jq
-cat ~/.hanzo-bot/logs/commands.log | jq .
+cat ~/.bot/logs/commands.log | jq .
 
 # Filter by action
-grep '"action":"new"' ~/.hanzo-bot/logs/commands.log | jq .
+grep '"action":"new"' ~/.bot/logs/commands.log | jq .
 ```
 
 **启用**：
@@ -668,7 +668,7 @@ hanzo-bot hooks info my-hook
 ./scripts/clawlog.sh -f
 
 # Other platforms
-tail -f ~/.hanzo-bot/gateway.log
+tail -f ~/.bot/gateway.log
 ```
 
 ### 直接测试 Hooks
@@ -744,14 +744,14 @@ Gateway 网关启动
 1. 检查目录结构：
 
    ```bash
-   ls -la ~/.hanzo-bot/hooks/my-hook/
+   ls -la ~/.bot/hooks/my-hook/
    # Should show: HOOK.md, handler.ts
    ```
 
 2. 验证 HOOK.md 格式：
 
    ```bash
-   cat ~/.hanzo-bot/hooks/my-hook/HOOK.md
+   cat ~/.bot/hooks/my-hook/HOOK.md
    # Should have YAML frontmatter with name and metadata
    ```
 
@@ -827,8 +827,8 @@ node -e "import('./path/to/handler.ts').then(console.log)"
 1. 创建 hook 目录：
 
    ```bash
-   mkdir -p ~/.hanzo-bot/hooks/my-hook
-   mv ./hooks/handlers/my-handler.ts ~/.hanzo-bot/hooks/my-hook/handler.ts
+   mkdir -p ~/.bot/hooks/my-hook
+   mv ./hooks/handlers/my-handler.ts ~/.bot/hooks/my-hook/handler.ts
    ```
 
 2. 创建 HOOK.md：

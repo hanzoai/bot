@@ -122,7 +122,7 @@ hanzo-bot onboard --auth-choice minimax-portal
 **适用于：** 使用 LM Studio 进行本地推理。
 我们在强大硬件（例如台式机/服务器）上使用 LM Studio 的本地服务器运行 MiniMax M2.1 时看到了出色的效果。
 
-通过 `hanzo-bot.json` 手动配置：
+通过 `bot.json` 手动配置：
 
 ```json5
 {

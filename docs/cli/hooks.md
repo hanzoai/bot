@@ -125,7 +125,7 @@ Not ready: 0
 hanzo-bot hooks enable <name>
 ```
 
-Enable a specific hook by adding it to your config (`~/.hanzo-bot/config.json`).
+Enable a specific hook by adding it to your config (`~/.bot/config.json`).
 
 **Note:** Hooks managed by plugins show `plugin:<id>` in `hanzo-bot hooks list` and
 can’t be enabled/disabled here. Enable/disable the plugin instead.
@@ -198,7 +198,7 @@ specs are rejected. Dependency installs run with `--ignore-scripts` for safety.
 
 **What it does:**
 
-- Copies the hook pack into `~/.hanzo-bot/hooks/<id>`
+- Copies the hook pack into `~/.bot/hooks/<id>`
 - Enables the installed hooks in `hooks.internal.entries.*`
 - Records the install under `hooks.internal.installs`
 
@@ -255,7 +255,7 @@ Saves session context to memory when you issue `/new`.
 hanzo-bot hooks enable session-memory
 ```
 
-**Output:** `~/.hanzo-bot/workspace/memory/YYYY-MM-DD-slug.md`
+**Output:** `~/.bot/workspace/memory/YYYY-MM-DD-slug.md`
 
 **See:** [session-memory documentation](/automation/hooks#session-memory)
 
@@ -281,19 +281,19 @@ Logs all command events to a centralized audit file.
 hanzo-bot hooks enable command-logger
 ```
 
-**Output:** `~/.hanzo-bot/logs/commands.log`
+**Output:** `~/.bot/logs/commands.log`
 
 **View logs:**
 
 ```bash
 # Recent commands
-tail -n 20 ~/.hanzo-bot/logs/commands.log
+tail -n 20 ~/.bot/logs/commands.log
 
 # Pretty-print
-cat ~/.hanzo-bot/logs/commands.log | jq .
+cat ~/.bot/logs/commands.log | jq .
 
 # Filter by action
-grep '"action":"new"' ~/.hanzo-bot/logs/commands.log | jq .
+grep '"action":"new"' ~/.bot/logs/commands.log | jq .
 ```
 
 **See:** [command-logger documentation](/automation/hooks#command-logger)

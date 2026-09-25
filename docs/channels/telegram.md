@@ -598,7 +598,7 @@ curl "https://api.telegram.org/bot<bot_token>/getUpdates"
 
     Sticker cache file:
 
-    - `~/.hanzo-bot/telegram/sticker-cache.json`
+    - `~/.bot/telegram/sticker-cache.json`
 
     Stickers are described once (when possible) and cached to reduce repeated vision calls.
 

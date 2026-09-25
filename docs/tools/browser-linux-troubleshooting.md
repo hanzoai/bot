@@ -37,7 +37,7 @@ sudo dpkg -i google-chrome-stable_current_amd64.deb
 sudo apt --fix-broken install -y  # if there are dependency errors
 ```
 
-Then update your HanzoBot config (`~/.hanzo-bot/hanzo-bot.json`):
+Then update your HanzoBot config (`~/.bot/bot.json`):
 
 ```json
 {
@@ -72,7 +72,7 @@ If you must use snap Chromium, configure HanzoBot to attach to a manually-starte
 ```bash
 chromium-browser --headless --no-sandbox --disable-gpu \
   --remote-debugging-port=18800 \
-  --user-data-dir=$HOME/.hanzo-bot/browser/hanzo-bot/user-data \
+  --user-data-dir=$HOME/.bot/browser/hanzo-bot/user-data \
   about:blank &
 ```
 

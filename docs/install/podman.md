@@ -22,7 +22,7 @@ Run the HanzoBot gateway in a **rootless** Podman container. Uses the same image
 ./setup-podman.sh
 ```
 
-This also creates a minimal `~hanzo-bot/.hanzo-bot/hanzo-bot.json` (sets `gateway.mode="local"`) so the gateway can start without running the wizard.
+This also creates a minimal `~hanzo-bot/.bot/bot.json` (sets `gateway.mode="local"`) so the gateway can start without running the wizard.
 
 By default the container is **not** installed as a systemd service, you start it manually (see below). For a production-style setup with auto-start and restarts, install it as a systemd Quadlet user service instead:
 
@@ -44,7 +44,7 @@ By default the container is **not** installed as a systemd service, you start it
 ./scripts/run-hanzo-bot-podman.sh launch setup
 ```
 
-Then open `http://127.0.0.1:18789/` and use the token from `~hanzo-bot/.hanzo-bot/.env` (or the value printed by setup).
+Then open `http://127.0.0.1:18789/` and use the token from `~hanzo-bot/.bot/.env` (or the value printed by setup).
 
 ## Systemd (Quadlet, optional)
 
@@ -64,7 +64,7 @@ To add quadlet **after** an initial setup that did not use it, re-run: `./setup-
 `setup-podman.sh` creates a dedicated system user `hanzo-bot`:
 
 - **Shell:** `nologin` — no interactive login; reduces attack surface.
-- **Home:** e.g. `/home/hanzo-bot` — holds `~/.hanzo-bot` (config, workspace) and the launch script `run-hanzo-bot-podman.sh`.
+- **Home:** e.g. `/home/hanzo-bot` — holds `~/.bot` (config, workspace) and the launch script `run-hanzo-bot-podman.sh`.
 - **Rootless Podman:** The user must have a **subuid** and **subgid** range. Many distros assign these automatically when the user is created. If setup prints a warning, add lines to `/etc/subuid` and `/etc/subgid`:
 
   ```text
@@ -78,15 +78,15 @@ To add quadlet **after** an initial setup that did not use it, re-run: `./setup-
   sudo -u hanzo-bot /home/hanzo-bot/run-hanzo-bot-podman.sh setup
   ```
 
-- **Config:** Only `hanzo-bot` and root can access `/home/hanzo-bot/.hanzo-bot`. To edit config: use the Control UI once the gateway is running, or `sudo -u hanzo-bot $EDITOR /home/hanzo-bot/.hanzo-bot/hanzo-bot.json`.
+- **Config:** Only `hanzo-bot` and root can access `/home/hanzo-bot/.hanzo-bot`. To edit config: use the Control UI once the gateway is running, or `sudo -u hanzo-bot $EDITOR /home/hanzo-bot/.hanzo-bot/bot.json`.
 
 ## Environment and config
 
-- **Token:** Stored in `~hanzo-bot/.hanzo-bot/.env` as `BOT_GATEWAY_TOKEN`. `setup-podman.sh` and `run-hanzo-bot-podman.sh` generate it if missing (uses `openssl`, `python3`, or `od`).
+- **Token:** Stored in `~hanzo-bot/.bot/.env` as `BOT_GATEWAY_TOKEN`. `setup-podman.sh` and `run-hanzo-bot-podman.sh` generate it if missing (uses `openssl`, `python3`, or `od`).
 - **Optional:** In that `.env` you can set provider keys (e.g. `GROQ_API_KEY`, `OLLAMA_API_KEY`) and other HanzoBot env vars.
 - **Host ports:** By default the script maps `18789` (gateway) and `18790` (bridge). Override the **host** port mapping with `BOT_PODMAN_GATEWAY_HOST_PORT` and `BOT_PODMAN_BRIDGE_HOST_PORT` when launching.
-- **Gateway bind:** By default, `run-hanzo-bot-podman.sh` starts the gateway with `--bind loopback` for safe local access. To expose on LAN, set `BOT_GATEWAY_BIND=lan` and configure `gateway.controlUi.allowedOrigins` (or explicitly enable host-header fallback) in `hanzo-bot.json`.
-- **Paths:** Host config and workspace default to `~hanzo-bot/.hanzo-bot` and `~hanzo-bot/.hanzo-bot/workspace`. Override the host paths used by the launch script with `BOT_CONFIG_DIR` and `BOT_WORKSPACE_DIR`.
+- **Gateway bind:** By default, `run-hanzo-bot-podman.sh` starts the gateway with `--bind loopback` for safe local access. To expose on LAN, set `BOT_GATEWAY_BIND=lan` and configure `gateway.controlUi.allowedOrigins` (or explicitly enable host-header fallback) in `bot.json`.
+- **Paths:** Host config and workspace default to `~hanzo-bot/.bot` and `~hanzo-bot/.bot/workspace`. Override the host paths used by the launch script with `BOT_CONFIG_DIR` and `BOT_WORKSPACE_DIR`.
 
 ## Useful commands
 
@@ -98,7 +98,7 @@ To add quadlet **after** an initial setup that did not use it, re-run: `./setup-
 ## Troubleshooting
 
 - **Permission denied (EACCES) on config or auth-profiles:** The container defaults to `--userns=keep-id` and runs as the same uid/gid as the host user running the script. Ensure your host `BOT_CONFIG_DIR` and `BOT_WORKSPACE_DIR` are owned by that user.
-- **Gateway start blocked (missing `gateway.mode=local`):** Ensure `~hanzo-bot/.hanzo-bot/hanzo-bot.json` exists and sets `gateway.mode="local"`. `setup-podman.sh` creates this file if missing.
+- **Gateway start blocked (missing `gateway.mode=local`):** Ensure `~hanzo-bot/.bot/bot.json` exists and sets `gateway.mode="local"`. `setup-podman.sh` creates this file if missing.
 - **Rootless Podman fails for user hanzo-bot:** Check `/etc/subuid` and `/etc/subgid` contain a line for `hanzo-bot` (e.g. `hanzo-bot:100000:65536`). Add it if missing and restart.
 - **Container name in use:** The launch script uses `podman run --replace`, so the existing container is replaced when you start again. To clean up manually: `podman rm -f hanzo-bot`.
 - **Script not found when running as hanzo-bot:** Ensure `setup-podman.sh` was run so that `run-hanzo-bot-podman.sh` is copied to hanzo-bot’s home (e.g. `/home/hanzo-bot/run-hanzo-bot-podman.sh`).
@@ -106,4 +106,4 @@ To add quadlet **after** an initial setup that did not use it, re-run: `./setup-
 
 ## Optional: run as your own user
 
-To run the gateway as your normal user (no dedicated hanzo-bot user): build the image, create `~/.hanzo-bot/.env` with `BOT_GATEWAY_TOKEN`, and run the container with `--userns=keep-id` and mounts to your `~/.hanzo-bot`. The launch script is designed for the hanzo-bot-user flow; for a single-user setup you can instead run the `podman run` command from the script manually, pointing config and workspace to your home. Recommended for most users: use `setup-podman.sh` and run as the hanzo-bot user so config and process are isolated.
+To run the gateway as your normal user (no dedicated hanzo-bot user): build the image, create `~/.bot/.env` with `BOT_GATEWAY_TOKEN`, and run the container with `--userns=keep-id` and mounts to your `~/.bot`. The launch script is designed for the hanzo-bot-user flow; for a single-user setup you can instead run the `podman run` command from the script manually, pointing config and workspace to your home. Recommended for most users: use `setup-podman.sh` and run as the hanzo-bot user so config and process are isolated.

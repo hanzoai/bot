@@ -150,7 +150,7 @@ Follow the onboarding prompts to set up your model provider (Anthropic, OpenAI, 
 Edit the config file:
 
 ```bash
-nano ~/.hanzo-bot/hanzo-bot.json
+nano ~/.bot/bot.json
 ```
 
 Add your channels:

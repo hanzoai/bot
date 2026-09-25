@@ -140,8 +140,8 @@ To reduce impact if the CLI process is compromised, the compose config drops
 
 It writes config/workspace on the host:
 
-- `~/.hanzo-bot/`
-- `~/.hanzo-bot/workspace`
+- `~/.bot/`
+- `~/.bot/workspace`
 
 Running on a VPS? See [Hetzner (Docker VPS)](/install/hetzner).
 
@@ -503,7 +503,7 @@ docker compose run --rm hanzo-bot-cli devices list --url ws://127.0.0.1:18789
 
 - Gateway bind defaults to `lan` for container use (`BOT_GATEWAY_BIND`).
 - Dockerfile CMD uses `--allow-unconfigured`; mounted config with `gateway.mode` not `local` will still start. Override CMD to enforce the guard.
-- The gateway container is the source of truth for sessions (`~/.hanzo-bot/agents/<agentId>/sessions/`).
+- The gateway container is the source of truth for sessions (`~/.bot/agents/<agentId>/sessions/`).
 
 ## Agent Sandbox (host gateway + Docker tools)
 
@@ -541,7 +541,7 @@ precedence, and troubleshooting.
 
 - Image: `hanzo-bot-sandbox:bookworm-slim`
 - One container per agent
-- Agent workspace access: `workspaceAccess: "none"` (default) uses `~/.hanzo-bot/sandboxes`
+- Agent workspace access: `workspaceAccess: "none"` (default) uses `~/.bot/sandboxes`
   - `"ro"` keeps the sandbox workspace at `/workspace` and mounts the agent workspace read-only at `/agent` (disables `write`/`edit`/`apply_patch`)
   - `"rw"` mounts the agent workspace read/write at `/workspace`
 - Auto-prune: idle > 24h OR age > 7d
@@ -573,7 +573,7 @@ If you plan to install packages in `setupCommand`, note:
         mode: "non-main", // off | non-main | all
         scope: "agent", // session | agent | shared (agent is default)
         workspaceAccess: "none", // none | ro | rw
-        workspaceRoot: "~/.hanzo-bot/sandboxes",
+        workspaceRoot: "~/.bot/sandboxes",
         docker: {
           image: "hanzo-bot-sandbox:bookworm-slim",
           workdir: "/workspace",

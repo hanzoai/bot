@@ -19,7 +19,7 @@ HanzoBot treats **wake words as a single global list** owned by the **Gateway**.
 
 Wake words are stored on the gateway machine at:
 
-- `~/.hanzo-bot/settings/voicewake.json`
+- `~/.bot/settings/voicewake.json`
 
 Shape:
 

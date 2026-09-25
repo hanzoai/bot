@@ -78,7 +78,7 @@ Gateway -> Node Service (WS)
 Security + ask + allowlist are stored locally on the Mac in:
 
 ```
-~/.hanzo-bot/exec-approvals.json
+~/.bot/exec-approvals.json
 ```
 
 Example:
@@ -152,7 +152,7 @@ sessions and credentials.
 Prefer a local non-synced state path such as:
 
 ```bash
-BOT_STATE_DIR=~/.hanzo-bot
+BOT_STATE_DIR=~/.bot
 ```
 
 If `hanzo-bot doctor` detects state under:

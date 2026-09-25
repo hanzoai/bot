@@ -101,12 +101,12 @@ hanzo-bot devices approve <requestId>
 ```
 
 The node host stores its node id, token, display name, and gateway connection info in
-`~/.hanzo-bot/node.json`.
+`~/.bot/node.json`.
 
 ## Exec approvals
 
 `system.run` is gated by local exec approvals:
 
-- `~/.hanzo-bot/exec-approvals.json`
+- `~/.bot/exec-approvals.json`
 - [Exec approvals](/tools/exec-approvals)
 - `hanzo-bot approvals --node <id|name|ip>` (edit from the Gateway)

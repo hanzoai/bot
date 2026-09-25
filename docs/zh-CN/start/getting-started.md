@@ -37,7 +37,7 @@ x-i18n:
   "routing": {
     "agents": {
       "main": {
-        "workspace": "~/.hanzo-bot/workspace",
+        "workspace": "~/.bot/workspace",
         "sandbox": { "mode": "off" }
       }
     }
@@ -99,8 +99,8 @@ hanzo-bot onboard --install-daemon
 
 - **推荐的 Anthropic 路径：**设置 API 密钥（向导可以为服务使用存储它）。如果你想复用 Claude Code 凭证，也支持 `claude setup-token`。
 
-- OAuth 凭证（旧版导入）：`~/.hanzo-bot/credentials/oauth.json`
-- 认证配置文件（OAuth + API 密钥）：`~/.hanzo-bot/agents/<agentId>/agent/auth-profiles.json`
+- OAuth 凭证（旧版导入）：`~/.bot/credentials/oauth.json`
+- 认证配置文件（OAuth + API 密钥）：`~/.bot/agents/<agentId>/agent/auth-profiles.json`
 
 无头/服务器提示：先在普通机器上完成 OAuth，然后将 `oauth.json` 复制到 Gateway 网关主机。
 

@@ -183,8 +183,8 @@ Checklist per instance:
 Example:
 
 ```bash
-BOT_CONFIG_PATH=~/.hanzo-bot/a.json BOT_STATE_DIR=~/.hanzo-bot-a hanzo-bot gateway --port 19001
-BOT_CONFIG_PATH=~/.hanzo-bot/b.json BOT_STATE_DIR=~/.hanzo-bot-b hanzo-bot gateway --port 19002
+BOT_CONFIG_PATH=~/.bot/a.json BOT_STATE_DIR=~/.bot-a hanzo-bot gateway --port 19001
+BOT_CONFIG_PATH=~/.bot/b.json BOT_STATE_DIR=~/.bot-b hanzo-bot gateway --port 19002
 ```
 
 See: [Multiple gateways](/gateway/multiple-gateways).

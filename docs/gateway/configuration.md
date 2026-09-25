@@ -9,7 +9,7 @@ title: "Configuration"
 
 # Configuration
 
-HanzoBot reads an optional <Tooltip tip="JSON5 supports comments and trailing commas">**JSON5**</Tooltip> config from `~/.hanzo-bot/hanzo-bot.json`.
+HanzoBot reads an optional <Tooltip tip="JSON5 supports comments and trailing commas">**JSON5**</Tooltip> config from `~/.bot/bot.json`.
 
 If the file is missing, HanzoBot uses safe defaults. Common reasons to add a config:
 
@@ -26,9 +26,9 @@ See the [full reference](/gateway/configuration-reference) for every available f
 ## Minimal config
 
 ```json5
-// ~/.hanzo-bot/hanzo-bot.json
+// ~/.bot/bot.json
 {
-  agents: { defaults: { workspace: "~/.hanzo-bot/workspace" } },
+  agents: { defaults: { workspace: "~/.bot/workspace" } },
   channels: { whatsapp: { allowFrom: ["+15555550123"] } },
 }
 ```
@@ -54,7 +54,7 @@ See the [full reference](/gateway/configuration-reference) for every available f
     The Control UI renders a form from the config schema, with a **Raw JSON** editor as an escape hatch.
   </Tab>
   <Tab title="Direct edit">
-    Edit `~/.hanzo-bot/hanzo-bot.json` directly. The Gateway watches the file and applies changes automatically (see [hot reload](#config-hot-reload)).
+    Edit `~/.bot/bot.json` directly. The Gateway watches the file and applies changes automatically (see [hot reload](#config-hot-reload)).
   </Tab>
 </Tabs>
 
@@ -307,8 +307,8 @@ When validation fails:
     {
       agents: {
         list: [
-          { id: "home", default: true, workspace: "~/.hanzo-bot/workspace-home" },
-          { id: "work", workspace: "~/.hanzo-bot/workspace-work" },
+          { id: "home", default: true, workspace: "~/.bot/workspace-home" },
+          { id: "work", workspace: "~/.bot/workspace-work" },
         ],
       },
       bindings: [
@@ -326,7 +326,7 @@ When validation fails:
     Use `$include` to organize large configs:
 
     ```json5
-    // ~/.hanzo-bot/hanzo-bot.json
+    // ~/.bot/bot.json
     {
       gateway: { port: 18789 },
       agents: { $include: "./agents.json5" },
@@ -348,7 +348,7 @@ When validation fails:
 
 ## Config hot reload
 
-The Gateway watches `~/.hanzo-bot/hanzo-bot.json` and applies changes automatically — no manual restart needed for most settings.
+The Gateway watches `~/.bot/bot.json` and applies changes automatically — no manual restart needed for most settings.
 
 ### Reload modes
 
@@ -413,7 +413,7 @@ Control-plane write RPCs (`config.apply`, `config.patch`, `update.run`) are rate
     ```bash
     hanzo-bot gateway call config.get --params '{}'  # capture payload.hash
     hanzo-bot gateway call config.apply --params '{
-      "raw": "{ agents: { defaults: { workspace: \"~/.hanzo-bot/workspace\" } } }",
+      "raw": "{ agents: { defaults: { workspace: \"~/.bot/workspace\" } } }",
       "baseHash": "<hash>",
       "sessionKey": "agent:main:whatsapp:dm:+15555550123"
     }'
@@ -451,7 +451,7 @@ Control-plane write RPCs (`config.apply`, `config.patch`, `update.run`) are rate
 HanzoBot reads env vars from the parent process plus:
 
 - `.env` from the current working directory (if present)
-- `~/.hanzo-bot/.env` (global fallback)
+- `~/.bot/.env` (global fallback)
 
 Neither file overrides existing env vars. You can also set inline env vars in config:
 

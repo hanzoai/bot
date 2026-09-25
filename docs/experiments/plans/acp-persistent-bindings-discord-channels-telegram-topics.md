@@ -68,12 +68,12 @@ Unify routing and persistent ACP binding configuration in top-level `bindings[]`
       {
         "id": "main",
         "default": true,
-        "workspace": "~/.hanzo-bot/workspace-main",
+        "workspace": "~/.bot/workspace-main",
         "runtime": { "type": "embedded" },
       },
       {
         "id": "codex",
-        "workspace": "~/.hanzo-bot/workspace-codex",
+        "workspace": "~/.bot/workspace-codex",
         "runtime": {
           "type": "acp",
           "acp": {
@@ -86,7 +86,7 @@ Unify routing and persistent ACP binding configuration in top-level `bindings[]`
       },
       {
         "id": "claude",
-        "workspace": "~/.hanzo-bot/workspace-claude",
+        "workspace": "~/.bot/workspace-claude",
         "runtime": {
           "type": "acp",
           "acp": {

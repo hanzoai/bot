@@ -61,11 +61,11 @@ For tool call behavior, prompt for a `read` or `exec` action so you can see tool
 
 ## Clean Slate Reset
 
-State lives under the HanzoBot state directory. Default is `~/.hanzo-bot`. If `BOT_STATE_DIR` is set, use that directory instead.
+State lives under the HanzoBot state directory. Default is `~/.bot`. If `BOT_STATE_DIR` is set, use that directory instead.
 
 To reset everything:
 
-- `hanzo-bot.json` for config
+- `bot.json` for config
 - `credentials/` for auth profiles and tokens
 - `agents/<agentId>/sessions/` for agent session history
 - `agents/<agentId>/sessions.json` for the session index

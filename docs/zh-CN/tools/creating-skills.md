@@ -21,10 +21,10 @@ Skill 是一个包含 `SKILL.md` 文件（为 LLM 提供指令和工具定义）
 
 ### 1. 创建目录
 
-Skills 位于你的工作区中，通常是 `~/.hanzo-bot/workspace/skills/`。为你的 Skill 创建一个新文件夹：
+Skills 位于你的工作区中，通常是 `~/.bot/workspace/skills/`。为你的 Skill 创建一个新文件夹：
 
 ```bash
-mkdir -p ~/.hanzo-bot/workspace/skills/hello-world
+mkdir -p ~/.bot/workspace/skills/hello-world
 ```
 
 ### 2. 定义 `SKILL.md`

@@ -78,7 +78,7 @@ Security notes:
 Disable/override:
 
 - `BOT_DISABLE_BONJOUR=1` disables advertising.
-- `gateway.bind` in `~/.hanzo-bot/hanzo-bot.json` controls the Gateway bind mode.
+- `gateway.bind` in `~/.bot/bot.json` controls the Gateway bind mode.
 - `BOT_SSH_PORT` overrides the SSH port advertised in TXT (defaults to 22).
 - `BOT_TAILNET_DNS` publishes a `tailnetDns` hint (MagicDNS).
 - `BOT_CLI_PATH` overrides the advertised CLI path.

@@ -37,7 +37,7 @@ hanzo-bot plugins update --all
 
 内置插件随 HanzoBot 一起发布，但默认禁用。使用 `plugins enable` 来激活它们。
 
-所有插件必须提供 `hanzo-bot.plugin.json` 文件，其中包含内联 JSON Schema（`configSchema`，即使为空）。缺少或无效的清单或模式会阻止插件加载并导致配置验证失败。
+所有插件必须提供 `bot.plugin.json` 文件，其中包含内联 JSON Schema（`configSchema`，即使为空）。缺少或无效的清单或模式会阻止插件加载并导致配置验证失败。
 
 ### 安装
 

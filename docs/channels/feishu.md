@@ -175,7 +175,7 @@ Choose **Feishu** and paste your App ID + App Secret.
 
 ### Configure via config file
 
-Edit `~/.hanzo-bot/hanzo-bot.json`:
+Edit `~/.bot/bot.json`:
 
 ```json5
 {

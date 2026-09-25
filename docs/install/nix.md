@@ -67,8 +67,8 @@ HanzoBot reads JSON5 config from `BOT_CONFIG_PATH` and stores mutable data in `B
 When needed, you can also set `BOT_HOME` to control the base home directory used for internal path resolution.
 
 - `BOT_HOME` (default precedence: `HOME` / `USERPROFILE` / `os.homedir()`)
-- `BOT_STATE_DIR` (default: `~/.hanzo-bot`)
-- `BOT_CONFIG_PATH` (default: `$BOT_STATE_DIR/hanzo-bot.json`)
+- `BOT_STATE_DIR` (default: `~/.bot`)
+- `BOT_CONFIG_PATH` (default: `$BOT_STATE_DIR/bot.json`)
 
 When running under Nix, set these explicitly to Nix-managed locations so runtime state and config
 stay out of the immutable store.

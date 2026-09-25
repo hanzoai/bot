@@ -39,9 +39,9 @@ Notes:
 - Know how you installed: **global** (npm/pnpm) vs **from source** (git clone).
 - Know how your Gateway is running: **foreground terminal** vs **supervised service** (launchd/systemd).
 - Snapshot your tailoring:
-  - Config: `~/.hanzo-bot/hanzo-bot.json`
-  - Credentials: `~/.hanzo-bot/credentials/`
-  - Workspace: `~/.hanzo-bot/workspace`
+  - Config: `~/.bot/bot.json`
+  - Credentials: `~/.bot/credentials/`
+  - Workspace: `~/.bot/workspace`
 
 ## Update (global install)
 

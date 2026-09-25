@@ -54,10 +54,10 @@ Perplexity Search returns structured results (title, URL, snippet) for fast rese
 ## Where to set the key (recommended)
 
 **Recommended:** run `hanzo-bot configure --section web`. It stores the key in
-`~/.hanzo-bot/hanzo-bot.json` under `tools.web.search.perplexity.apiKey`.
+`~/.bot/bot.json` under `tools.web.search.perplexity.apiKey`.
 
 **Environment alternative:** set `PERPLEXITY_API_KEY` in the Gateway process
-environment. For a gateway install, put it in `~/.hanzo-bot/.env` (or your
+environment. For a gateway install, put it in `~/.bot/.env` (or your
 service environment). See [Env vars](/help/faq#how-does-hanzo-bot-load-environment-variables).
 
 ## Tool parameters

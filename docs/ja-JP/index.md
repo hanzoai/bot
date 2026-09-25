@@ -123,7 +123,7 @@ Gatewayの起動後、ブラウザでControl UIを開きます。
 
 ## 設定（オプション）
 
-設定は`~/.hanzo-bot/hanzo-bot.json`にあります。
+設定は`~/.bot/bot.json`にあります。
 
 - **何もしなければ**、HanzoBotはバンドルされたPiバイナリをRPCモードで使用し、送信者ごとのセッションを作成します。
 - 制限を設けたい場合は、`channels.whatsapp.allowFrom`と（グループの場合）メンションルールから始めてください。
