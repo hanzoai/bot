@@ -49,6 +49,8 @@ export type OpenClawState = {
   hookInstalls: Json | null;
   pluginInstalls: string[];
   pairedDevices: number;
+  /** An agent's heartbeat checklist, by agent id: OpenClaw moved HEARTBEAT.md into cron_job_scratch. */
+  heartbeats: Record<string, string>;
 };
 
 export const CONFIG_FILENAMES = ["openclaw.json", "clawdbot.json"] as const;
@@ -149,6 +151,14 @@ function readStateDb(dir: string, state: OpenClawState): void {
         from: `${STATE_DB}#cron_jobs`,
         jobs: rows.map((row) => parseJson(row.job_json)).filter((job): job is Json => !!job),
       };
+    }
+    if (db.hasTable("cron_job_scratch") && db.hasTable("cron_jobs")) {
+      const rows = db.all<{ declaration_key: string; content: string }>(
+        "SELECT j.declaration_key, s.content FROM cron_job_scratch s JOIN cron_jobs j ON j.store_key = s.store_key AND j.job_id = s.job_id WHERE j.declaration_key LIKE 'heartbeat:%' AND s.content IS NOT NULL",
+      );
+      for (const row of rows) {
+        state.heartbeats[row.declaration_key.slice("heartbeat:".length)] = row.content;
+      }
     }
     if (db.hasTable("channel_pairing_allow_entries")) {
       const rows = db.all<{ channel_key: string; account_id: string; entry: string }>(
@@ -323,6 +333,7 @@ export function readOpenClawState(dir: string): OpenClawState {
     hookInstalls: null,
     pluginInstalls: [],
     pairedDevices: 0,
+    heartbeats: {},
   };
   readStateDb(dir, state);
   for (const agentId of listAgentIds(dir)) {

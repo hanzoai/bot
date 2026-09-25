@@ -285,6 +285,11 @@ describe("OpenClaw database layout", () => {
       plan.items.find((entry) => entry.from.endsWith("cron_jobs/heartbeat-main"))?.reason,
     ).toBe("managed");
 
+    // OpenClaw moved HEARTBEAT.md into its database; Hanzo Bot reads it from the workspace.
+    expect(fs.readFileSync(path.join(target, "workspace", "HEARTBEAT.md"), "utf8")).toBe(
+      "- Check the inbox\n- Water the plants\n",
+    );
+
     expect(readJson("credentials/telegram-default-allowFrom.json")).toEqual({
       version: 1,
       allowFrom: ["111"],

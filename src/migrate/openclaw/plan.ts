@@ -14,7 +14,7 @@ import { convertEnvEntries, mergeEnvText, parseEnvEntries } from "./env.js";
 import { applyActions, planCopyTree, relinkInto, type Action } from "./files.js";
 import { createPathRewriter, homeForm } from "./paths.js";
 import { planSkips } from "./skips.js";
-import { readOpenClawState, type OpenClawState } from "./state.js";
+import { readOpenClawState, STATE_DB, type OpenClawState } from "./state.js";
 
 /**
  * `hanzo-bot migrate openclaw`: plan (always) and apply (on request). The plan
@@ -432,6 +432,42 @@ function safeKey(raw: string): string {
     .replace(/\.\./g, "_");
 }
 
+/**
+ * OpenClaw keeps an agent's heartbeat checklist in its database; Hanzo Bot
+ * reads HEARTBEAT.md from the agent's workspace, where it lived before.
+ */
+function planHeartbeats(
+  p: MigrationParams,
+  state: OpenClawState,
+  actions: Action[],
+  items: PlanItem[],
+): void {
+  for (const [agentId, content] of Object.entries(state.heartbeats).toSorted(([a], [b]) =>
+    a.localeCompare(b),
+  )) {
+    const dir = agentId === "main" ? "workspace" : `workspace-${agentId}`;
+    // A HEARTBEAT.md still in the OpenClaw workspace is copied with it.
+    if (
+      !/^[a-z0-9][a-z0-9_-]*$/i.test(agentId) ||
+      fs.existsSync(path.join(p.source, dir, "HEARTBEAT.md"))
+    ) {
+      continue;
+    }
+    const to = path.join(p.target, dir, "HEARTBEAT.md");
+    const status = planWrite(actions, to, content.endsWith("\n") ? content : `${content}\n`);
+    const at = actions.at(-1);
+    if (status === "create" && at?.kind === "write") {
+      at.mode = 0o644;
+    }
+    items.push({
+      op: "write",
+      from: `${STATE_DB}#cron_job_scratch/heartbeat:${agentId}`,
+      to: `${dir}/HEARTBEAT.md`,
+      status,
+    });
+  }
+}
+
 function planPairing(
   p: MigrationParams,
   state: OpenClawState,
@@ -491,6 +527,7 @@ export function planMigration(p: MigrationParams): { plan: Plan; actions: Action
   planSessions(params, state, actions, items);
   planCron(params, state, actions, items);
   planPairing(params, state, actions, items);
+  planHeartbeats(params, state, actions, items);
   items.push(...planSkips(params, state, config));
   return {
     plan: {

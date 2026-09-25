@@ -189,6 +189,10 @@ CREATE TABLE channel_pairing_allow_entries (
   sort_order INTEGER NOT NULL, updated_at INTEGER NOT NULL,
   PRIMARY KEY (channel_key, account_id, entry)
 ) STRICT;
+CREATE TABLE cron_job_scratch (
+  store_key TEXT NOT NULL, job_id TEXT NOT NULL, content TEXT, revision INTEGER NOT NULL,
+  updated_at_ms INTEGER NOT NULL, PRIMARY KEY (store_key, job_id)
+) STRICT;
 CREATE TABLE device_pairing_paired (
   device_id TEXT NOT NULL PRIMARY KEY, public_key TEXT NOT NULL,
   created_at_ms INTEGER NOT NULL, approved_at_ms INTEGER NOT NULL
@@ -339,6 +343,11 @@ export function writeDbLayout(dir: string): () => void {
     }),
     1,
   );
+  state
+    .prepare(
+      "INSERT INTO cron_job_scratch (store_key, job_id, content, revision, updated_at_ms) VALUES ('default', 'job-heartbeat', ?, 1, 0)",
+    )
+    .run("- Check the inbox\n- Water the plants");
   const allow = state.prepare(
     "INSERT INTO channel_pairing_allow_entries (channel_key, account_id, entry, sort_order, updated_at) VALUES (?, ?, ?, ?, 0)",
   );
