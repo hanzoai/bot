@@ -73,6 +73,20 @@ describe("shared/frontmatter", () => {
     expect(resolveBotManifestBlock({ frontmatter })).toEqual({ foo: 1, bar: "baz" });
   });
 
+  test("resolveBotManifestBlock reads hanzo-bot and ClawHub blocks after bot", () => {
+    const block = (metadata: string) => resolveBotManifestBlock({ frontmatter: { metadata } });
+    expect(block('{"hanzo-bot":{"requires":{"bins":["gh"]}}}')).toEqual({
+      requires: { bins: ["gh"] },
+    });
+    expect(block('{"openclaw":{"requires":{"env":["GITHUB_TOKEN"]}}}')).toEqual({
+      requires: { env: ["GITHUB_TOKEN"] },
+    });
+    expect(block('{"clawdbot":{"os":["darwin"]}}')).toEqual({ os: ["darwin"] });
+    expect(block('{"openclaw":{"os":["linux"]},"bot":{"os":["darwin"]}}')).toEqual({
+      os: ["darwin"],
+    });
+  });
+
   test("resolveBotManifestBlock returns undefined for invalid input", () => {
     expect(resolveBotManifestBlock({ frontmatter: {} })).toBeUndefined();
     expect(resolveBotManifestBlock({ frontmatter: { metadata: "not-json5" } })).toBeUndefined();
