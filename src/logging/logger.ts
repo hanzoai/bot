@@ -42,6 +42,7 @@ export type LogTransportRecord = Record<string, unknown>;
 export type LogTransport = (logObj: LogTransportRecord) => void;
 
 const externalTransports = new Set<LogTransport>();
+let loadingConfigFallback = false;
 
 function shouldSkipLoadConfigFallback(argv: string[] = process.argv): boolean {
   const [primary, secondary] = getCommandPathWithRootOptions(argv, 2);
@@ -84,7 +85,11 @@ function resolveSettings(): ResolvedSettings {
 
   let cfg: BotConfig["logging"] | undefined =
     (loggingState.overrideSettings as LoggerSettings | null) ?? readLoggingConfig();
-  if (!cfg && !shouldSkipLoadConfigFallback()) {
+  // loadConfig warns through the console, and the console asks for this logger:
+  // a config with warnings would read itself again forever. The inner call
+  // settles on the defaults instead.
+  if (!cfg && !loadingConfigFallback && !shouldSkipLoadConfigFallback()) {
+    loadingConfigFallback = true;
     try {
       const loaded = requireConfig?.("../config/config.js") as
         | {
@@ -94,6 +99,8 @@ function resolveSettings(): ResolvedSettings {
       cfg = loaded?.loadConfig?.().logging;
     } catch {
       cfg = undefined;
+    } finally {
+      loadingConfigFallback = false;
     }
   }
   const defaultLevel =
