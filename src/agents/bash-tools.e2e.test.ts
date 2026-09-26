@@ -4,11 +4,14 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { peekSystemEvents, resetSystemEventsForTest } from "../infra/system-events.js";
 import { sleep } from "../utils.js";
 import { getFinishedSession, resetProcessRegistryForTests } from "./bash-process-registry.js";
-import { createExecTool, createProcessTool, execTool, processTool } from "./bash-tools.js";
+import { createExecTool, createProcessTool, processTool } from "./bash-tools.js";
 import { buildDockerExecArgs } from "./bash-tools.shared.js";
 import { sanitizeBinaryOutput } from "./shell-utils.js";
 
 const isWin = process.platform === "win32";
+// With no sandbox, exec is host exec held to tools.exec.security (unset is deny): these run it.
+const HOST_EXEC = { security: "full", ask: "off" } as const;
+const execTool = createExecTool(HOST_EXEC);
 const resolveShellFromPath = (name: string) => {
   const envPath = process.env.PATH ?? "";
   if (!envPath) {
@@ -158,7 +161,7 @@ describe("exec tool backgrounding", () => {
   it("uses default timeout when timeout is omitted", async () => {
     // Background commands bypass the default timeout (backgroundTimeoutBypass)
     // so an explicit timeout must be passed in the tool call params to enforce it.
-    const customBash = createExecTool({ timeoutSec: 0.2, backgroundMs: 10 });
+    const customBash = createExecTool({ ...HOST_EXEC, timeoutSec: 0.2, backgroundMs: 10 });
     const customProcess = createProcessTool();
 
     const result = await customBash.execute("call1", {
@@ -187,6 +190,7 @@ describe("exec tool backgrounding", () => {
 
   it("rejects elevated requests when not allowed", async () => {
     const customBash = createExecTool({
+      ...HOST_EXEC,
       elevated: { enabled: true, allowed: false, defaultLevel: "off" },
       messageProvider: "telegram",
       sessionKey: "agent:main:main",
@@ -202,6 +206,7 @@ describe("exec tool backgrounding", () => {
 
   it("does not default to elevated when not allowed", async () => {
     const customBash = createExecTool({
+      ...HOST_EXEC,
       elevated: { enabled: true, allowed: false, defaultLevel: "on" },
       backgroundMs: 1000,
       timeoutSec: 5,
@@ -288,9 +293,9 @@ describe("exec tool backgrounding", () => {
   });
 
   it("scopes process sessions by scopeKey", async () => {
-    const bashA = createExecTool({ backgroundMs: 10, scopeKey: "agent:alpha" });
+    const bashA = createExecTool({ ...HOST_EXEC, backgroundMs: 10, scopeKey: "agent:alpha" });
     const processA = createProcessTool({ scopeKey: "agent:alpha" });
-    const bashB = createExecTool({ backgroundMs: 10, scopeKey: "agent:beta" });
+    const bashB = createExecTool({ ...HOST_EXEC, backgroundMs: 10, scopeKey: "agent:beta" });
     const processB = createProcessTool({ scopeKey: "agent:beta" });
 
     const resultA = await bashA.execute("call1", {
@@ -321,6 +326,7 @@ describe("exec tool backgrounding", () => {
 describe("exec notifyOnExit", () => {
   it("enqueues a system event when a backgrounded exec exits", async () => {
     const tool = createExecTool({
+      ...HOST_EXEC,
       allowBackground: true,
       backgroundMs: 0,
       notifyOnExit: true,
@@ -351,6 +357,7 @@ describe("exec notifyOnExit", () => {
 
   it("skips no-op completion events when command succeeds without output", async () => {
     const tool = createExecTool({
+      ...HOST_EXEC,
       allowBackground: true,
       backgroundMs: 0,
       notifyOnExit: true,
@@ -371,6 +378,7 @@ describe("exec notifyOnExit", () => {
 
   it("can re-enable no-op completion events via notifyOnExitEmptySuccess", async () => {
     const tool = createExecTool({
+      ...HOST_EXEC,
       allowBackground: true,
       backgroundMs: 0,
       notifyOnExit: true,
@@ -415,13 +423,15 @@ describe("exec PATH handling", () => {
     const prepend = isWin ? ["C:\\custom\\bin", "C:\\oss\\bin"] : ["/custom/bin", "/opt/oss/bin"];
     process.env.PATH = basePath;
 
-    const tool = createExecTool({ pathPrepend: prepend });
+    const tool = createExecTool({ ...HOST_EXEC, pathPrepend: prepend });
     const result = await tool.execute("call1", {
       command: isWin ? "Write-Output $env:PATH" : "echo $PATH",
     });
 
     const text = normalizeText(result.content.find((c) => c.type === "text")?.text);
-    expect(text).toBe([...prepend, basePath].join(path.delimiter));
+    // Host exec also merges the login shell's PATH after the prepended entries.
+    expect(text.startsWith([...prepend, ""].join(path.delimiter))).toBe(true);
+    expect(text.split(path.delimiter)).toContain(basePath);
   });
 });
 

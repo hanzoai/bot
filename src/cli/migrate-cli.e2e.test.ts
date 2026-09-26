@@ -165,6 +165,77 @@ describe("hanzo-bot migrate openclaw", () => {
     }
   });
 
+  // RED-BOTEXEC-1: an existing agents.list with no exec, and OpenClaw's root full and a binding
+  // to its denied agent added: that agent still runs no exec, and the plan says why.
+  it("holds a kept agent to the exec OpenClaw gave it when the merge adds its binding", () => {
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "bot-migrate-merge-")));
+    try {
+      const openclaw = path.join(dir, ".openclaw");
+      writeFileLayout(openclaw);
+      const file = path.join(openclaw, "openclaw.json");
+      fs.writeFileSync(
+        file,
+        fs
+          .readFileSync(file, "utf8")
+          .replace('{ id: "work" }', '{ id: "work", tools: { exec: { mode: "deny" } } }')
+          .replace(
+            "somethingOpenClawAdded:",
+            'tools: { exec: { mode: "full" } },\n  bindings: [{ agentId: "work", match: { channel: "telegram" } }],\n  somethingOpenClawAdded:',
+          ),
+      );
+      fs.mkdirSync(path.join(dir, ".bot"), { mode: 0o700 });
+      fs.writeFileSync(
+        path.join(dir, ".bot", "bot.json"),
+        JSON.stringify({ agents: { list: [{ id: "main" }, { id: "work" }] } }),
+        { mode: 0o600 },
+      );
+      const { status, output } = cli(dir, ["migrate", "openclaw", "--apply"]);
+      expect(status, output).toBe(0);
+      expect(output).toContain(
+        'bot.json#agents.list[1].tools.exec is now security="deny": with OpenClaw\'s channels and bindings added',
+      );
+      const config = JSON.parse(fs.readFileSync(path.join(dir, ".bot", "bot.json"), "utf8")) as {
+        tools: unknown;
+        bindings: unknown;
+        agents: { list: unknown[] };
+      };
+      expect(config.tools).toEqual({ exec: { security: "full", ask: "off" } });
+      expect(config.bindings).toEqual([{ agentId: "work", match: { channel: "telegram" } }]);
+      expect(config.agents.list[1]).toEqual({ id: "work", tools: { exec: { security: "deny" } } });
+      const again = cli(dir, ["migrate", "openclaw", "--json"]);
+      expect(again.status, again.output).toBe(0);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  // RED-BOTGO-20: a roster that answers unbound messages with no agent stops the import.
+  it("stops, writing nothing, where OpenClaw answers unbound messages with no agent", () => {
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "bot-migrate-owner-")));
+    try {
+      const openclaw = path.join(dir, ".openclaw");
+      writeFileLayout(openclaw);
+      const file = path.join(openclaw, "openclaw.json");
+      fs.writeFileSync(
+        file,
+        fs
+          .readFileSync(file, "utf8")
+          .replace(
+            'list: [{ id: "main" }, { id: "work" }]',
+            'ownership: "explicit", entries: { main: {}, work: {} }',
+          ),
+      );
+      const { status, output } = cli(dir, ["migrate", "openclaw", "--apply"]);
+      expect(status).not.toBe(0);
+      expect(output).toContain(
+        'OpenClaw answers a message no binding matches with no agent (agents.ownership is "explicit" and agents.defaults.systemAgent names no agent)',
+      );
+      expect(fs.existsSync(path.join(dir, ".bot", "bot.json"))).toBe(false);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("names the dir it could not find", () => {
     const { status, output } = run("--from", path.join(home, "nope"));
     expect(status).not.toBe(0);
