@@ -29,7 +29,7 @@ const REASONS: Array<[RegExp, string]> = [
   [/^clawdbot\.json$/, "backup"],
   [/^(extensions|npm|npm-runtime|git|plugin-skills|plugins)$/, "plugins"],
   [/^(identity|devices|nodes)$/, "devices"],
-  [/^exec-approvals\.(json|sock)$/, "approvals"],
+  [/^exec-approvals\.(json|sock|json\.doctor-importing)$/, "approvals"],
   [/^(memory|qmd)$/, "index"],
 ];
 

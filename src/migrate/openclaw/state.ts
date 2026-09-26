@@ -56,9 +56,11 @@ export type OpenClawState = {
 };
 
 export type ApprovalsState = {
-  /** exec-approvals.json's text. */
+  /** exec-approvals.json's text, where it is a file that reads. */
   file: string | null;
-  /** `openclaw doctor --fix` was importing exec-approvals.json into the database. */
+  /** exec-approvals.json is there, as anything (a dangling link included). */
+  present: boolean;
+  /** `openclaw doctor --fix` was importing exec-approvals.json into the database: its claim file is there, as anything. */
   claim: boolean;
   /** state/openclaw.sqlite keeps the policy (table exec_approvals_config). */
   table: boolean;
@@ -331,10 +333,32 @@ function readFileLayout(dir: string, state: OpenClawState): void {
     state.pairedDevices += Object.keys(paired).length;
   }
   const approvals = path.join(dir, APPROVALS_FILE);
-  if (fs.existsSync(approvals)) {
-    state.approvals.file = fs.readFileSync(approvals, "utf8");
+  state.approvals.present = mayExist(approvals);
+  state.approvals.file = readFileText(approvals);
+  state.approvals.claim = mayExist(`${approvals}.doctor-importing`);
+}
+
+/**
+ * Whether anything is at `file`, as OpenClaw's pathMayExistSync decides it:
+ * lstat finds an entry, or fails for any reason other than ENOENT. A dangling
+ * link is there.
+ */
+function mayExist(file: string): boolean {
+  try {
+    fs.lstatSync(file);
+    return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code !== "ENOENT";
   }
-  state.approvals.claim = fs.existsSync(`${approvals}.doctor-importing`);
+}
+
+/** A regular file's text (through links), or null for anything else or a file that does not read. */
+function readFileText(file: string): string | null {
+  try {
+    return fs.statSync(file).isFile() ? fs.readFileSync(file, "utf8") : null;
+  } catch {
+    return null;
+  }
 }
 
 export function listAgentIds(dir: string): string[] {
@@ -364,7 +388,7 @@ export function readOpenClawState(dir: string): OpenClawState {
     pluginInstalls: [],
     pairedDevices: 0,
     heartbeats: {},
-    approvals: { file: null, claim: false, table: false, row: null },
+    approvals: { file: null, present: false, claim: false, table: false, row: null },
   };
   readStateDb(dir, state);
   for (const agentId of listAgentIds(dir)) {

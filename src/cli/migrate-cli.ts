@@ -27,6 +27,9 @@ const REASONS: Record<string, string> = {
   superseded: "the new location is already set",
   "exec-mode": "superseded by tools.exec.mode (OpenClaw lets mode win)",
   "exec-approvals": "tightened to match OpenClaw's exec-approvals.json",
+  "exec-approvals-agent":
+    "what OpenClaw's exec-approvals.json let this agent run, above the root it tightened",
+  "exec-invalid": "replaced: OpenClaw rejected a value beside it, so it ran no exec",
   "openclaw-only": "no such Hanzo Bot setting",
   invalid: "value Hanzo Bot does not accept",
   "no-plugin": "no such Hanzo Bot plugin",
@@ -79,6 +82,12 @@ function noteText(item: PlanItem): string {
       return `bot.json sends Anthropic calls to ${item.names?.[0]}, so your imported Anthropic key goes there too. To call Anthropic with it directly, remove models.providers.anthropic from bot.json.`;
     case "exec-mode-unknown":
       return `${item.from}: not a mode OpenClaw accepts (OpenClaw would not load this config), so exec is denied. Set tools.exec.security in bot.json to allow it.`;
+    case "exec-invalid":
+      return `${item.from}: not a value OpenClaw accepts (OpenClaw would not load this config), so exec is denied. Set tools.exec.security in bot.json to allow it.`;
+    case "exec-merge":
+      return `${item.from} is now ${item.names?.join(", ")}: with OpenClaw's channels and bindings added, bot.json's value would let senders run exec OpenClaw denied them. Loosen it by hand if you mean to.`;
+    case "exec-unset":
+      return `OpenClaw ran exec for ${item.names?.join(", ")} with no tools.exec.security (its default is full); Hanzo Bot denies host exec without one. Set tools.exec.security in bot.json to allow it.`;
     case "exec-approvals-closed":
       return `${item.from}: OpenClaw could not use this exec policy (unreadable, or waiting for openclaw doctor --fix), so it ran no exec; exec is denied here too. Set tools.exec.security in bot.json to allow it.`;
     case "kept":

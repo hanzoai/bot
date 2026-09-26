@@ -1,28 +1,45 @@
 import fs from "node:fs";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
+import { listAgentIds, resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import { allocateColor } from "../../browser/profiles.js";
+import type { BotConfig } from "../../config/config.js";
 import {
   validateConfigObjectRaw,
   validateConfigObjectRawWithPlugins,
 } from "../../config/validation.js";
 import { BotSchema } from "../../config/zod-schema.js";
 import { PLUGIN_MANIFEST_FILENAME } from "../../plugins/manifest.js";
-import { foldApprovals, type ApprovalsReport, type ApprovalsSource } from "./approvals.js";
+import { normalizeAgentId } from "../../routing/session-key.js";
+import {
+  EXEC_FIELDS,
+  foldApprovals,
+  looser,
+  stricter,
+  type ApprovalsReport,
+  type ApprovalsSource,
+  type ExecField,
+} from "./approvals.js";
 import { botConfigKeyTree, pruneToTree } from "./keys.js";
 import type { PathRewriter } from "./paths.js";
 
 /**
- * openclaw.json → bot.json, in five steps, each reported:
- *   1. renames: settings OpenClaw moved after Hanzo Bot forked from it go back
+ * openclaw.json → bot.json, in six steps, each reported:
+ *   1. roster: the agents OpenClaw runs and the one that answers messages no
+ *      binding matches; a roster OpenClaw would not load, or one that
+ *      answers them with no agent, stops the import
+ *   2. renames: settings OpenClaw moved after Hanzo Bot forked from it go back
  *      to where Hanzo Bot reads them; tools.exec.mode becomes the security and
  *      ask it stands for, which OpenClaw's exec approvals policy then tightens
- *   2. drops: settings that name OpenClaw-only machinery (plugin installs,
+ *   3. drops: settings that name OpenClaw-only machinery (plugin installs,
  *      secret-store refs, write stamps)
- *   3. paths: strings naming the OpenClaw state dir name the Hanzo Bot one
- *   4. prune: keys bot.json does not admit are dropped
- *   5. validate: values the runtime still rejects are dropped
- * docs/install/migrate-from-openclaw.md states the mapping for people.
+ *   4. paths: strings naming the OpenClaw state dir name the Hanzo Bot one
+ *   5. prune: keys bot.json does not admit are dropped
+ *   6. validate: values the runtime still rejects are dropped, unless that
+ *      would send messages to another agent than OpenClaw did
+ * docs/install/migrate-from-openclaw.md states the mapping for people. The Go
+ * importer (hanzobot/go pkg/migrate/openclaw) follows the same rules, item for
+ * item.
  */
 
 type Json = Record<string, unknown>;
@@ -34,6 +51,7 @@ export type ConfigDropReason =
   | "model-catalog"
   | "superseded"
   | "exec-mode"
+  | "exec-invalid"
   | "openclaw-only"
   | "invalid"
   | "no-plugin"
@@ -42,8 +60,8 @@ export type ConfigDropReason =
 export type ConfigReport = {
   renamed: Array<{ from: string; to: string }>;
   dropped: Array<{ path: string; reason: ConfigDropReason }>;
-  /** Settings the person should look at: a tools.exec.mode OpenClaw does not accept. */
-  notes: Array<{ path: string; reason: "exec-mode-unknown" }>;
+  /** Settings the person should look at: exec values OpenClaw does not accept, so it ran no exec. */
+  notes: Array<{ path: string; reason: "exec-mode-unknown" | "exec-invalid" }>;
   /** What OpenClaw's exec approvals policy tightened. */
   approvals: ApprovalsReport;
 };
@@ -105,7 +123,229 @@ const WEB_SEARCH_PROVIDERS: Array<[plugin: string, key: string]> = [
   ["moonshot", "kimi"],
 ];
 
-function applyRenames(config: Json, report: ConfigReport): void {
+/** OpenClaw 2026.9.6's agent id rule for an agents.entries key. */
+const ENTRY_KEY_RE = /^[a-z0-9_][a-z0-9_-]{0,63}$/i;
+
+function refuseRoster(at: string, why: string): never {
+  throw new Error(
+    `OpenClaw would not load ${at}: ${why}; run openclaw doctor --fix or fix it by hand, then import again; nothing was written`,
+  );
+}
+
+function refuseRoute(why: string): never {
+  throw new Error(
+    `the import would send messages to other agents than OpenClaw did (${why}); nothing was written`,
+  );
+}
+
+/**
+ * The agent that answers a message no binding matches. A legacy roster (an
+ * agents.list with no agents.entries or agents.ownership) is read as every
+ * OpenClaw before 2026.9 and Hanzo Bot read it: the first default: true
+ * entry, else the first entry, else main. A current one is read as OpenClaw
+ * 2026.9.6's config loader and router read it (readAgentRosterProperty,
+ * migratePersistedImplicitMainRoster, resolveAgentRoute): a roster its schema
+ * rejects ran no agent, and one that answers such a message with no agent
+ * (AgentSelectionRequiredError) has no Hanzo Bot equivalent, since a Hanzo Bot
+ * roster always has a default agent; both stop the import.
+ */
+function rosterOwner(config: Json): string {
+  const agents = child(config, "agents") ?? {};
+  if (!Object.hasOwn(agents, "entries") && !Object.hasOwn(agents, "ownership")) {
+    const list = Array.isArray(agents.list) ? agents.list.filter(isPlainObject) : [];
+    const chosen = list.find((entry) => entry.default === true) ?? list[0];
+    return normalizeAgentId(typeof chosen?.id === "string" ? chosen.id : undefined);
+  }
+  const explicit = agents.ownership === "explicit";
+  if (Object.hasOwn(agents, "ownership") && !explicit) {
+    refuseRoster("agents.ownership", 'not "explicit"');
+  }
+  const roster: Array<{ at: string; id: string; entry: Json }> = [];
+  const hasRoster = Object.hasOwn(agents, "entries") || Object.hasOwn(agents, "list");
+  if (Object.hasOwn(agents, "entries")) {
+    if (Object.hasOwn(agents, "list")) {
+      refuseRoster("agents.list", "beside agents.entries");
+    }
+    const entries = agents.entries;
+    if (!isPlainObject(entries)) {
+      refuseRoster("agents.entries", "not an object");
+    }
+    for (const [key, entry] of Object.entries(entries)) {
+      const at = `agents.entries.${key}`;
+      if (!isPlainObject(entry)) {
+        refuseRoster(at, "not an object");
+      }
+      if (!ENTRY_KEY_RE.test(key)) {
+        refuseRoster(at, "not an agent id");
+      }
+      const id = normalizeAgentId(key);
+      if (roster.some((other) => other.id === id)) {
+        refuseRoster(at, "the same agent as another entry");
+      }
+      if (Object.hasOwn(entry, "id")) {
+        refuseRoster(`${at}.id`, "inside agents.entries");
+      }
+      roster.push({ at, id, entry });
+    }
+  } else if (Object.hasOwn(agents, "list")) {
+    const list = agents.list;
+    if (!Array.isArray(list)) {
+      refuseRoster("agents.list", "not a list");
+    }
+    list.forEach((entry: unknown, index) => {
+      const at = `agents.list[${index}]`;
+      if (!isPlainObject(entry)) {
+        refuseRoster(at, "not an object");
+      }
+      const id = entry.id;
+      if (typeof id !== "string" || id === "" || id.trim() !== id || normalizeAgentId(id) !== id) {
+        refuseRoster(`${at}.id`, "not an agent id");
+      }
+      if (roster.some((other) => other.id === id)) {
+        refuseRoster(`${at}.id`, "the same agent as another entry");
+      }
+      roster.push({ at, id, entry });
+    });
+  }
+  const marked: Array<{ at: string; id: string }> = [];
+  for (const { at, id, entry } of roster) {
+    if (Object.hasOwn(entry, "default") && typeof entry.default !== "boolean") {
+      refuseRoster(`${at}.default`, "not true or false");
+    }
+    if (entry.default === true) {
+      marked.push({ at, id });
+    }
+  }
+  if (explicit && marked.length > 0) {
+    refuseRoster(`${marked[0]?.at}.default`, 'beside agents.ownership "explicit"');
+  }
+  if (marked.length > 1) {
+    refuseRoster(`${marked[1]?.at}.default`, "a second default agent");
+  }
+  // With no roster, or an empty one it is not told to keep empty, OpenClaw runs main.
+  const ids =
+    roster.length > 0 ? roster.map((entry) => entry.id) : explicit && hasRoster ? [] : ["main"];
+  const defaults = child(agents, "defaults");
+  let system: string | undefined;
+  if (defaults && Object.hasOwn(defaults, "systemAgent")) {
+    const systemAgent = defaults.systemAgent;
+    if (!isPlainObject(systemAgent)) {
+      refuseRoster("agents.defaults.systemAgent", "not an object");
+    }
+    if (Object.hasOwn(systemAgent, "agentId")) {
+      const raw = systemAgent.agentId;
+      if (typeof raw !== "string" || raw.trim() === "" || !ids.includes(normalizeAgentId(raw))) {
+        refuseRoster("agents.defaults.systemAgent.agentId", "not an agent in the roster");
+      }
+      system = normalizeAgentId(raw);
+    }
+  }
+  if (Object.hasOwn(config, "bindings")) {
+    const bindings = config.bindings;
+    if (!Array.isArray(bindings)) {
+      refuseRoster("bindings", "not a list");
+    }
+    bindings.forEach((binding: unknown, index) => {
+      if (!isPlainObject(binding) || typeof binding.agentId !== "string") {
+        refuseRoster(`bindings[${index}]`, "not a binding");
+      }
+      // A blank agentId routes to the owner (pickFirstExistingAgentId).
+      const agentId = binding.agentId;
+      if (hasRoster && agentId.trim() !== "" && !ids.includes(normalizeAgentId(agentId))) {
+        refuseRoster(`bindings[${index}].agentId`, "not an agent in the roster");
+      }
+    });
+  }
+  const owner = explicit
+    ? (system ?? (ids.length === 1 ? ids[0] : undefined))
+    : marked.length === 1
+      ? marked[0]?.id
+      : ids.length === 1
+        ? ids[0]
+        : undefined;
+  if (!owner) {
+    const why = !explicit
+      ? "several agents, and none is default"
+      : ids.length === 0
+        ? 'agents.ownership is "explicit" and the roster is empty'
+        : 'agents.ownership is "explicit" and agents.defaults.systemAgent names no agent';
+    throw new Error(
+      `OpenClaw answers a message no binding matches with no agent (${why}); mark one agent default: true, or name one in agents.defaults.systemAgent.agentId, then import again; nothing was written`,
+    );
+  }
+  return owner;
+}
+
+/**
+ * agents.entries becomes agents.list, each agent {id: key, ...entry}. Where
+ * agents.ownership is "explicit", the agent agents.defaults.systemAgent names
+ * answers unbound messages; in Hanzo Bot that agent is the default one.
+ */
+function applyRoster(agents: Json, owner: string, report: ConfigReport): void {
+  const explicit = agents.ownership === "explicit";
+  const entries = child(agents, "entries");
+  if (entries) {
+    agents.list = Object.entries(entries).map(([id, entry]) => ({ id, ...(entry as Json) }));
+    delete agents.entries;
+    report.renamed.push({ from: "agents.entries", to: "agents.list" });
+  }
+  if (Object.hasOwn(agents, "ownership")) {
+    delete agents.ownership;
+    report.dropped.push({ path: "agents.ownership", reason: "openclaw-only" });
+  }
+  const defaults = child(agents, "defaults");
+  const systemAgent = child(defaults ?? {}, "systemAgent");
+  const list = Array.isArray(agents.list) ? agents.list : [];
+  const index = list.findIndex(
+    (entry) => isPlainObject(entry) && normalizeAgentId(String(entry.id)) === owner,
+  );
+  if (explicit && defaults && systemAgent && Object.hasOwn(systemAgent, "agentId") && index >= 0) {
+    (list[index] as Json).default = true;
+    delete defaults.systemAgent;
+    report.renamed.push({
+      from: "agents.defaults.systemAgent.agentId",
+      to: `agents.list[${index}].default`,
+    });
+  }
+}
+
+/** A drop that changes where a binding routes: the binding, its agentId or type, or its match. */
+const ROUTE_DROP_RE = /^bindings(\[\d+\](\.(agentId|type)|\.match([.[].*)?)?)?$/;
+
+/**
+ * What is written must route as OpenClaw did: no binding lost or rewritten,
+ * none naming an agent bot.json lacks (Hanzo Bot would fall back to the
+ * default agent), and the default agent is the one OpenClaw gave unbound
+ * messages.
+ */
+function checkRoutes(config: Json, report: ConfigReport, owner: string): void {
+  for (const { path } of report.dropped) {
+    if (ROUTE_DROP_RE.test(path)) {
+      refuseRoute(`${path} was dropped`);
+    }
+  }
+  const cfg = config as BotConfig;
+  const listed = Array.isArray(cfg.agents?.list) && cfg.agents.list.length > 0;
+  const ids = listAgentIds(cfg);
+  const bindings = Array.isArray(config.bindings) ? config.bindings : [];
+  bindings.forEach((binding: unknown, index) => {
+    const agentId = isPlainObject(binding) ? binding.agentId : undefined;
+    if (
+      listed &&
+      typeof agentId === "string" &&
+      agentId.trim() !== "" &&
+      !ids.includes(normalizeAgentId(agentId))
+    ) {
+      refuseRoute(`bindings[${index}] names agent "${agentId}", which bot.json lacks`);
+    }
+  });
+  const got = resolveDefaultAgentId(cfg);
+  if (got !== owner) {
+    refuseRoute(`the default agent is "${got}", not "${owner}"`);
+  }
+}
+
+function applyRenames(config: Json, report: ConfigReport, owner: string): void {
   // The meaning of agents.defaults.models depends on OpenClaw's own migration
   // stamp, so read it before meta goes.
   const meta = child(config, "meta");
@@ -117,20 +357,7 @@ function applyRenames(config: Json, report: ConfigReport): void {
 
   const agents = child(config, "agents");
   if (agents) {
-    const entries = child(agents, "entries");
-    if (entries) {
-      const list = Array.isArray(agents.list) ? agents.list : [];
-      for (const [id, entry] of Object.entries(entries)) {
-        list.push({ id, ...(isPlainObject(entry) ? entry : {}) });
-      }
-      agents.list = list;
-      delete agents.entries;
-      report.renamed.push({ from: "agents.entries", to: "agents.list" });
-    }
-    if (Object.hasOwn(agents, "ownership")) {
-      delete agents.ownership;
-      report.dropped.push({ path: "agents.ownership", reason: "openclaw-only" });
-    }
+    applyRoster(agents, owner, report);
     const defaults = child(agents, "defaults");
     if (defaults) {
       applyModelPolicy(defaults, modelsAreCatalog, report);
@@ -324,51 +551,97 @@ const EXEC_MODES = new Map<unknown, ExecPolicy>([
 
 const EXEC_DENY: ExecPolicy = { security: "deny", ask: "off" };
 
+/** The values OpenClaw's schema admits for each exec key (ToolExecBaseShape); anything else, null included, it rejects. */
+const EXEC_VALUES: Record<ExecField | "host", ReadonlySet<unknown>> = {
+  security: new Set(["deny", "allowlist", "full"]),
+  ask: new Set(["off", "on-miss", "always"]),
+  host: new Set(["auto", "sandbox", "gateway", "node"]),
+};
+
 /**
  * Hanzo Bot has no tools.exec.mode, only the security and ask it stands for.
  * In each scope OpenClaw reads (the root, then each agents.list entry; not
  * agents.defaults) the mode becomes security and ask, replacing any beside it:
  * OpenClaw's runtime (applyExecPolicyLayer) and doctor (migrateExecMode) let
- * the mode win. A mode OpenClaw's schema rejects kept OpenClaw from loading
- * the config at all, so no exec ran: it imports as deny, with a note.
+ * the mode win. A value OpenClaw's schema rejects kept OpenClaw from loading
+ * the config at all, so no exec ran: a mode it rejects, a host it rejects, a
+ * security or ask it rejects where no mode is set, and a tools or tools.exec
+ * that is not an object each make the scope deny, with a note.
  */
-function applyExecMode(config: Json, report: ConfigReport): void {
-  const scopes: Array<[scope: Json, at: string]> = [[config, "tools.exec"]];
+function applyExecPolicy(config: Json, report: ConfigReport): void {
+  const scopes: Array<[scope: Json, prefix: string]> = [[config, ""]];
   const list = child(config, "agents")?.list;
   if (Array.isArray(list)) {
     list.forEach((entry, index) => {
       if (isPlainObject(entry)) {
-        scopes.push([entry, `agents.list[${index}].tools.exec`]);
+        scopes.push([entry, `agents.list[${index}].`]);
       }
     });
   }
   const keys = ["security", "ask"] as const;
-  for (const [scope, at] of scopes) {
-    const exec = child(child(scope, "tools") ?? {}, "exec");
-    if (!exec || !Object.hasOwn(exec, "mode")) {
+  for (const [scope, prefix] of scopes) {
+    const at = `${prefix}tools.exec`;
+    // A tools or tools.exec that is not an object: the rename names it.
+    let cause: string | undefined;
+    if (Object.hasOwn(scope, "tools") && !isPlainObject(scope.tools)) {
+      cause = `${prefix}tools=${JSON.stringify(scope.tools)}`;
+      report.notes.push({ path: `${prefix}tools`, reason: "exec-invalid" });
+      scope.tools = {};
+    }
+    const tools = child(scope, "tools");
+    if (!tools || (!cause && !Object.hasOwn(tools, "exec"))) {
       continue;
     }
-    const mode = exec.mode;
-    const known = EXEC_MODES.get(mode);
-    if (!known) {
-      report.notes.push({ path: `${at}.mode`, reason: "exec-mode-unknown" });
+    if (!cause && !isPlainObject(tools.exec)) {
+      cause = `${at}=${JSON.stringify(tools.exec)}`;
+      report.notes.push({ path: at, reason: "exec-invalid" });
     }
-    const policy = known ?? EXEC_DENY;
-    for (const key of keys) {
-      if (Object.hasOwn(exec, key)) {
-        report.dropped.push({ path: `${at}.${key}`, reason: "exec-mode" });
+    if (!isPlainObject(tools.exec)) {
+      tools.exec = {};
+    }
+    const exec = tools.exec as Json;
+    const modeSet = Object.hasOwn(exec, "mode");
+    const known = modeSet ? EXEC_MODES.get(exec.mode) : undefined;
+    // In order: mode, then (with no mode) security and ask, then host.
+    const invalid: Array<"mode" | ExecField | "host"> = [];
+    if (modeSet && !known) {
+      invalid.push("mode");
+    }
+    for (const key of modeSet ? (["host"] as const) : (["security", "ask", "host"] as const)) {
+      if (Object.hasOwn(exec, key) && !EXEC_VALUES[key].has(exec[key])) {
+        invalid.push(key);
       }
     }
+    if (!cause && !modeSet && invalid.length === 0) {
+      continue;
+    }
+    const policy = cause || invalid.length > 0 ? EXEC_DENY : (known ?? EXEC_DENY);
+    const first = invalid[0] ?? "mode";
+    const from = cause ?? `${at}.${first}=${JSON.stringify(exec[first])}`;
+    for (const key of keys) {
+      if (Object.hasOwn(exec, key) && !invalid.includes(key)) {
+        report.dropped.push({
+          path: `${at}.${key}`,
+          reason: modeSet ? "exec-mode" : "exec-invalid",
+        });
+      }
+    }
+    for (const key of invalid) {
+      report.notes.push({
+        path: `${at}.${key}`,
+        reason: key === "mode" ? "exec-mode-unknown" : "exec-invalid",
+      });
+    }
     delete exec.mode;
+    if (invalid.includes("host")) {
+      delete exec.host;
+    }
     for (const key of keys) {
       delete exec[key];
     }
     for (const key of keys) {
       exec[key] = policy[key];
-      report.renamed.push({
-        from: `${at}.mode=${JSON.stringify(mode)}`,
-        to: `${at}.${key}="${policy[key]}"`,
-      });
+      report.renamed.push({ from, to: `${at}.${key}="${policy[key]}"` });
     }
   }
 }
@@ -628,8 +901,9 @@ export function convertConfig(params: {
     notes: [],
     approvals: { tightened: [], closed: [] },
   };
-  applyRenames(config, report);
-  applyExecMode(config, report);
+  const owner = rosterOwner(config);
+  applyRenames(config, report, owner);
+  applyExecPolicy(config, report);
   report.approvals = foldApprovals(config, params.approvals ?? []);
   applyDrops(config, report, params.home);
   const rewritten = mapStrings(config, (text) => rewriteEnvRefs(params.rewrite(text))) as Json;
@@ -639,6 +913,7 @@ export function convertConfig(params: {
   }
   const result = pruned.value as Json;
   applyValidation(result, report);
+  checkRoutes(result, report, owner);
   return { config: result, report };
 }
 
@@ -676,7 +951,111 @@ export function mergeBeneath(
   return { added, kept };
 }
 
-function valueAt(root: unknown, at: KeyPath): unknown {
+/** The first agents.list entry for an agent id, as Hanzo Bot finds it (resolveAgentEntry). */
+function agentEntryIndex(config: Json, agentId: string): number {
+  const list = child(config, "agents")?.list;
+  if (!Array.isArray(list)) {
+    return -1;
+  }
+  return list.findIndex(
+    (entry) =>
+      isPlainObject(entry) &&
+      normalizeAgentId(typeof entry.id === "string" ? entry.id : undefined) === agentId,
+  );
+}
+
+/** The security or ask Hanzo Bot runs an agent with (resolveExecConfig): the agent's own, else the root's. */
+export function execValue(config: Json, agentId: string, field: ExecField): unknown {
+  const list = child(config, "agents")?.list;
+  const index = agentEntryIndex(config, agentId);
+  const entry = Array.isArray(list) && index >= 0 ? (list[index] as Json) : {};
+  const own = child(child(entry, "tools") ?? {}, "exec")?.[field];
+  return own ?? child(child(config, "tools") ?? {}, "exec")?.[field];
+}
+
+function bindingsOf(config: Json): unknown[] {
+  return Array.isArray(config.bindings) ? config.bindings : [];
+}
+
+/**
+ * A merge keeps bot.json's own values, its agents.list and exec settings
+ * included, and adds OpenClaw's channels and bindings, so OpenClaw's senders
+ * reach agents whose exec OpenClaw never gave them. Each agent the merged file
+ * runs is held, field by field, to no looser than:
+ *   - what the import alone (`fresh`) gives the same agent id, where the
+ *     import runs that agent;
+ *   - where the merged file routes otherwise than the import (other bindings,
+ *     another default agent, or an agent of the import it does not list) and
+ *     the agent is the merged default or one a binding the import lacks names:
+ *     the strictest any agent of the import runs.
+ * Unset is loosest. A looser value is replaced on the agent's first
+ * agents.list entry, or on the root where there is none. Returns what it
+ * wrote, one entry per tools.exec it changed.
+ */
+export function boundMergedExec(merged: Json, fresh: Json): Array<{ at: string; names: string[] }> {
+  const freshIds = listAgentIds(fresh as BotConfig);
+  const mergedIds = listAgentIds(merged as BotConfig);
+  const defaultId = resolveDefaultAgentId(merged as BotConfig);
+  const freshBindings = bindingsOf(fresh);
+  const mergedBindings = bindingsOf(merged);
+  const rerouted =
+    !isDeepStrictEqual(mergedBindings, freshBindings) ||
+    defaultId !== resolveDefaultAgentId(fresh as BotConfig) ||
+    freshIds.some((id) => !mergedIds.includes(id));
+  const foreign = new Set<string>();
+  for (const binding of mergedBindings) {
+    if (
+      isPlainObject(binding) &&
+      typeof binding.agentId === "string" &&
+      !freshBindings.some((other) => isDeepStrictEqual(other, binding))
+    ) {
+      foreign.add(normalizeAgentId(binding.agentId));
+    }
+  }
+  const written: Array<{ at: string; names: string[] }> = [];
+  for (const id of mergedIds) {
+    const index = agentEntryIndex(merged, id);
+    const list = child(merged, "agents")?.list;
+    const scope = Array.isArray(list) && index >= 0 ? (list[index] as Json) : merged;
+    const at = index >= 0 ? `agents.list[${index}].tools.exec` : "tools.exec";
+    const names: string[] = [];
+    for (const field of EXEC_FIELDS) {
+      let target = freshIds.includes(id) ? execValue(fresh, id, field) : undefined;
+      if (rerouted && (id === defaultId || foreign.has(id))) {
+        for (const other of freshIds) {
+          target = stricter(field, target, execValue(fresh, other, field));
+        }
+      }
+      if (target === undefined || !looser(field, execValue(merged, id, field), target)) {
+        continue;
+      }
+      const tools = child(scope, "tools") ?? {};
+      scope.tools = tools;
+      const exec = child(tools, "exec") ?? {};
+      tools.exec = exec;
+      exec[field] = target;
+      names.push(`${field}=${JSON.stringify(target)}`);
+    }
+    if (names.length > 0) {
+      written.push({ at, names });
+    }
+  }
+  return written;
+}
+
+/**
+ * The agents of the import (`fresh`) that the written bot.json runs with no
+ * tools.exec.security. OpenClaw's default is full, so OpenClaw ran exec for
+ * them; Hanzo Bot denies host exec without a security.
+ */
+export function execUnset(written: Json, fresh: Json): string[] {
+  const runs = listAgentIds(written as BotConfig);
+  return listAgentIds(fresh as BotConfig).filter(
+    (id) => runs.includes(id) && execValue(written, id, "security") === undefined,
+  );
+}
+
+export function valueAt(root: unknown, at: KeyPath): unknown {
   let cursor = root;
   for (const key of at) {
     cursor = isPlainObject(cursor) ? cursor[key] : undefined;

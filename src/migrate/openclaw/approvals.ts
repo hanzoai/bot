@@ -11,21 +11,26 @@ import { APPROVALS_FILE, STATE_DB, type ApprovalsState } from "./state.js";
  */
 
 type Json = Record<string, unknown>;
-type Field = "security" | "ask";
+export type ExecField = "security" | "ask";
 
 /** A policy document and where it came from; doc null: OpenClaw ran no exec with it. */
 export type ApprovalsSource = { label: string; doc: Json | null };
 
 export type ApprovalsReport = {
-  tightened: Array<{ from: string; to: string }>;
+  /**
+   * What the policies wrote. exec-approvals tightens a scope;
+   * exec-approvals-agent keeps a listed agent at what OpenClaw ran it with,
+   * above a root tightened for the other agents.
+   */
+  tightened: Array<{ from: string; to: string; reason: "exec-approvals" | "exec-approvals-agent" }>;
   /** Labels of documents OpenClaw could not use, so it denied exec. */
   closed: string[];
 };
 
-const FIELDS: readonly Field[] = ["security", "ask"];
+export const EXEC_FIELDS: readonly ExecField[] = ["security", "ask"];
 
 /** Lower is stricter; an unset value is the loosest, as OpenClaw's fallback is full/off. */
-const RANK: Record<Field, Map<unknown, number>> = {
+const RANK: Record<ExecField, Map<unknown, number>> = {
   security: new Map<unknown, number>([
     ["deny", 0],
     ["allowlist", 1],
@@ -46,7 +51,7 @@ function isPlainObject(value: unknown): value is Json {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
-function rank(field: Field, value: unknown): number {
+function rank(field: ExecField, value: unknown): number {
   return RANK[field].get(value) ?? LOOSEST;
 }
 
@@ -156,11 +161,12 @@ export function parseApprovals(text: string): Json | null {
  * The policies to fold, in order. Where the state database keeps the policy,
  * a leftover exec-approvals.json (or doctor's claim on it) makes OpenClaw
  * refuse exec until `openclaw doctor --fix` imports it
- * (assertNoPendingLegacyExecApprovals), so it counts as a closed policy.
+ * (assertNoPendingLegacyExecApprovals), so it counts as a closed policy. An
+ * entry OpenClaw may not read (a dangling link, a dir) counts as closed too.
  */
 export function approvalSources(approvals: ApprovalsState): ApprovalsSource[] {
   const sources: ApprovalsSource[] = [];
-  if (approvals.file !== null || approvals.claim) {
+  if (approvals.present || approvals.claim) {
     const pending = approvals.table || approvals.file === null;
     sources.push({
       label: APPROVALS_FILE,
@@ -199,7 +205,7 @@ function agentKeys(agentId: string | undefined): string[] {
 function policyField(
   doc: Json,
   agentId: string | undefined,
-  field: Field,
+  field: ExecField,
 ): { value: string; path: string } | undefined {
   const agents = isPlainObject(doc.agents) ? doc.agents : {};
   const keys = agentKeys(agentId);
@@ -232,12 +238,15 @@ function ensureExec(scope: Json): Json {
 }
 
 /**
- * Fold each policy into the config, in order: the root, then each
- * agents.list entry. With no agents.list the root is main's scope; with one it
- * is the scope of every agent not listed, which the policy's "*" entry and
- * defaults govern. A field is written only where the policy is stricter than
- * what the scope gets from the config (its own value, else the root's; unset
- * is loosest), and the value written is the policy's.
+ * Fold each policy into the config, in order. The root is tightened where the
+ * policy is stricter than its own value: with no agents.list the root is
+ * main's scope; with one it is the scope of every agent not listed, which the
+ * policy's "*" entry and defaults govern. Each listed agent then runs what
+ * OpenClaw ran it with, field by field: the stricter of its value before this
+ * policy (its own, else the root's) and the policy's value for it. That value
+ * is written on the agent wherever what it would get from the config now (its
+ * own, else the tightened root's) ranks differently, so the root tightened for
+ * unlisted agents never holds a listed agent below what OpenClaw let it run.
  */
 export function foldApprovals(config: Json, sources: ApprovalsSource[]): ApprovalsReport {
   const report: ApprovalsReport = { tightened: [], closed: [] };
@@ -255,37 +264,66 @@ export function foldApprovals(config: Json, sources: ApprovalsSource[]): Approva
     if (!source.doc) {
       report.closed.push(source.label);
     }
-    tighten(report, source, config, "tools.exec", agents.length === 0 ? "main" : undefined, {});
-    const root = execOf(config) ?? {};
-    for (const [scope, at, id] of agents) {
-      tighten(report, source, scope, at, id, root);
-    }
+    const root = () => execOf(config) ?? {};
+    const before = agents.map(([scope]) => effective(scope, root()));
+    fold(report, source, config, "tools.exec", agents.length === 0 ? "main" : undefined, {}, {});
+    agents.forEach(([scope, at, id], index) => {
+      fold(report, source, scope, at, id, before[index] ?? {}, root());
+    });
   }
   return report;
 }
 
-/** Write each field of one scope that the policy makes stricter than the scope's own, else the inherited, value. */
-function tighten(
+/** A scope's security and ask: its own, else the inherited value. */
+function effective(scope: Json, inherited: Json): Json {
+  const exec = execOf(scope) ?? {};
+  return Object.fromEntries(EXEC_FIELDS.map((field) => [field, exec[field] ?? inherited[field]]));
+}
+
+/** The stricter of two values of one field (unset is loosest); the first where they rank the same. */
+export function stricter(field: ExecField, a: unknown, b: unknown): unknown {
+  return rank(field, b) < rank(field, a) ? b : a;
+}
+
+/** Whether `value` lets more run than `than` does. */
+export function looser(field: ExecField, value: unknown, than: unknown): boolean {
+  return rank(field, value) > rank(field, than);
+}
+
+/**
+ * Write each field of one scope whose value from the config now (its own,
+ * else `inherited`) ranks differently from the stricter of `before` (what it
+ * ran with before this policy) and the policy's value. The root inherits
+ * nothing and `before` is its own value, so it is only ever tightened.
+ */
+function fold(
   report: ApprovalsReport,
   source: ApprovalsSource,
   scope: Json,
   at: string,
   agentId: string | undefined,
+  before: Json,
   inherited: Json,
 ): void {
   const doc = source.doc ?? CLOSED;
   // A database label already names its table after "#": state/openclaw.sqlite#exec_approvals_config/defaults.ask.
   const separator = source.label.includes("#") ? "/" : "#";
-  for (const field of FIELDS) {
+  for (const field of EXEC_FIELDS) {
     const policy = policyField(doc, agentId, field);
-    const current = execOf(scope)?.[field] ?? inherited[field];
-    if (!policy || rank(field, policy.value) >= rank(field, current)) {
+    if (!policy) {
       continue;
     }
-    ensureExec(scope)[field] = policy.value;
+    const own = execOf(scope)?.[field];
+    const target = stricter(field, policy.value, own ?? before[field]);
+    const now = own ?? inherited[field];
+    if (rank(field, target) === rank(field, now)) {
+      continue;
+    }
+    ensureExec(scope)[field] = target;
     report.tightened.push({
       from: source.doc ? `${source.label}${separator}${policy.path}` : source.label,
-      to: `${at}.${field}="${policy.value}"`,
+      to: `${at}.${field}="${String(target)}"`,
+      reason: looser(field, target, now) ? "exec-approvals-agent" : "exec-approvals",
     });
   }
 }

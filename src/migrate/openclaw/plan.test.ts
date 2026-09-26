@@ -676,7 +676,8 @@ describe("OpenClaw file layout", () => {
       { mode: 0o600 },
     );
     const plan = await applyMigration({ source, target, home });
-    expect(readJson("bot.json").tools).toEqual({ exec: { security: "allowlist", ask: "off" } });
+    const config = readJson("bot.json");
+    expect(config.tools).toEqual({ exec: { security: "allowlist", ask: "off" } });
     const renamed = plan.items.filter((entry) => entry.op === "rename").map((entry) => entry.to);
     expect(renamed).toContain('bot.json#tools.exec.ask="off"');
     expect(renamed).not.toContain('bot.json#tools.exec.security="deny"');
@@ -684,6 +685,114 @@ describe("OpenClaw file layout", () => {
       reason: "kept",
       names: expect.arrayContaining(["tools.exec.security"]),
     });
+    // RED-BOTEXEC-1: the agents the import adds still run no looser than OpenClaw's deny.
+    expect(
+      (config.agents as { list: Array<{ tools?: unknown }> }).list.map((a) => a.tools),
+    ).toEqual([{ exec: { security: "deny" } }, { exec: { security: "deny" } }]);
+    expect(plan.items.filter((entry) => entry.reason === "exec-merge")).toEqual([
+      {
+        op: "note",
+        from: "bot.json#agents.list[0].tools.exec",
+        reason: "exec-merge",
+        names: ['security="deny"'],
+      },
+      {
+        op: "note",
+        from: "bot.json#agents.list[1].tools.exec",
+        reason: "exec-merge",
+        names: ['security="deny"'],
+      },
+    ]);
+  });
+
+  // RED-BOTEXEC-1 / RED-BOTGO-19: an existing agents.list is kept whole, and OpenClaw's
+  // root full and bindings are added; work must still run no looser than OpenClaw's deny.
+  it("holds an agent of an existing agents.list to the exec OpenClaw gave it", async () => {
+    setOpenClawConfig('{ id: "work" }', '{ id: "work", tools: { exec: { mode: "deny" } } }');
+    setOpenClawConfig(
+      EXEC_ROOT,
+      `tools: { exec: { mode: "full" } },\n  bindings: [{ agentId: "work", match: { channel: "telegram" } }],\n  ${EXEC_ROOT}`,
+    );
+    fs.mkdirSync(target, { recursive: true, mode: 0o700 });
+    fs.writeFileSync(
+      path.join(target, "bot.json"),
+      JSON.stringify({ agents: { list: [{ id: "main" }, { id: "work" }] } }),
+      { mode: 0o600 },
+    );
+    const plan = await applyMigration({ source, target, home });
+    const config = readJson("bot.json");
+    expect(config.tools).toEqual({ exec: { security: "full", ask: "off" } });
+    expect(config.bindings).toEqual([{ agentId: "work", match: { channel: "telegram" } }]);
+    expect((config.agents as { list: unknown[] }).list).toEqual([
+      { id: "main" },
+      { id: "work", tools: { exec: { security: "deny" } } },
+    ]);
+    expect(plan.items.filter((entry) => entry.reason === "exec-merge")).toEqual([
+      {
+        op: "note",
+        from: "bot.json#agents.list[1].tools.exec",
+        reason: "exec-merge",
+        names: ['security="deny"'],
+      },
+    ]);
+    // A rename into the kept agents.list did not happen, so it is not listed.
+    expect(plan.items.filter((entry) => entry.to?.startsWith("bot.json#agents.list["))).toEqual([]);
+  });
+
+  // RED-BOTEXEC-1 (bot-kept-full): bot.json's own full gives way where OpenClaw denied.
+  it("tightens bot.json's own exec where OpenClaw's senders would reach it", async () => {
+    setOpenClawConfig('list: [{ id: "main" }, { id: "work" }],', "");
+    setOpenClawConfig(EXEC_ROOT, `tools: { exec: { mode: "deny" } },\n  ${EXEC_ROOT}`);
+    fs.mkdirSync(target, { recursive: true, mode: 0o700 });
+    fs.writeFileSync(
+      path.join(target, "bot.json"),
+      JSON.stringify({ tools: { exec: { host: "gateway", security: "full" } } }),
+      { mode: 0o600 },
+    );
+    const plan = await applyMigration({ source, target, home });
+    expect(readJson("bot.json").tools).toEqual({
+      exec: { host: "gateway", security: "deny", ask: "off" },
+    });
+    expect(plan.items).toEqual(
+      expect.arrayContaining([
+        {
+          op: "rename",
+          from: 'openclaw.json#tools.exec.mode="deny"',
+          to: 'bot.json#tools.exec.security="deny"',
+        },
+        {
+          op: "note",
+          from: "bot.json#tools.exec",
+          reason: "exec-merge",
+          names: ['security="deny"'],
+        },
+      ]),
+    );
+    expect(plan.items.find((entry) => entry.reason === "kept")).toBeUndefined();
+    // Applied twice, nothing changes.
+    expect(planMigration({ source, target, home }).actions).toEqual([]);
+  });
+
+  // RED-BOTGO-24: OpenClaw's default is full; the import leaves security unset, which Hanzo Bot denies.
+  it("names the agents OpenClaw ran exec for that bot.json leaves with no security", async () => {
+    const plan = await applyMigration({ source, target, home });
+    expect(plan.items.filter((entry) => entry.reason === "exec-unset")).toEqual([
+      {
+        op: "note",
+        from: "openclaw.json#tools.exec.security",
+        reason: "exec-unset",
+        names: ["main", "work"],
+      },
+    ]);
+  });
+
+  // RED-BOTEXEC-6: OpenClaw's gate uses lstat; a link to nothing is still a pending file.
+  it("counts an exec-approvals.json that is a link to nothing as a policy OpenClaw could not use", async () => {
+    setOpenClawConfig(EXEC_ROOT, `tools: { exec: { mode: "full" } },\n  ${EXEC_ROOT}`);
+    fs.symlinkSync(path.join(home, "gone.json"), path.join(source, "exec-approvals.json"));
+    const plan = await applyMigration({ source, target, home });
+    expect(readJson("bot.json").tools).toEqual({ exec: { security: "deny", ask: "off" } });
+    expect(item(plan, "note", "exec-approvals.json")?.reason).toBe("exec-approvals-closed");
   });
 
   it("folds exec-approvals.json into tools.exec and still leaves the file behind", async () => {
@@ -701,10 +810,15 @@ describe("OpenClaw file layout", () => {
     const plan = await applyMigration({ source, target, home });
     const config = readJson("bot.json");
     expect(config.tools).toEqual({ exec: { security: "deny", ask: "off" } });
-    // work's own allowlist would loosen the root's deny, so only its ask is carried.
-    expect(config.agents).toMatchObject({
-      list: [{ id: "main" }, { id: "work", tools: { exec: { ask: "always" } } }],
-    });
+    // OpenClaw ran work at min(full, allowlist) and max(off, always), above the root's deny.
+    expect((config.agents as { list: unknown[] }).list).toEqual([
+      { id: "main" },
+      {
+        id: "work",
+        workspace: "~/.bot/workspace-work",
+        tools: { exec: { security: "allowlist", ask: "always" } },
+      },
+    ]);
     expect(plan.items).toEqual(
       expect.arrayContaining([
         {
@@ -712,6 +826,12 @@ describe("OpenClaw file layout", () => {
           from: "exec-approvals.json#defaults.security",
           to: 'bot.json#tools.exec.security="deny"',
           reason: "exec-approvals",
+        },
+        {
+          op: "rename",
+          from: "exec-approvals.json#agents.work.security",
+          to: 'bot.json#agents.list[1].tools.exec.security="allowlist"',
+          reason: "exec-approvals-agent",
         },
         {
           op: "rename",
@@ -898,6 +1018,18 @@ describe("OpenClaw database layout", () => {
     expect(item(plan, "note", "exec-approvals.json")?.reason).toBe("exec-approvals-closed");
   });
 
+  // RED-BOTEXEC-6: a claim left as a link to nothing still blocks exec in OpenClaw.
+  it("denies exec where doctor's claim on exec-approvals.json is a link to nothing", async () => {
+    fs.symlinkSync(
+      path.join(home, "gone"),
+      path.join(source, "exec-approvals.json.doctor-importing"),
+    );
+    const plan = await applyMigration({ source, target, home });
+    expect(readJson("bot.json").tools).toMatchObject({ exec: { security: "deny" } });
+    expect(item(plan, "note", "exec-approvals.json")?.reason).toBe("exec-approvals-closed");
+    expect(item(plan, "skip", "exec-approvals.json.doctor-importing")?.reason).toBe("approvals");
+  });
+
   it("denies exec where OpenClaw's database policy is one it could not use", async () => {
     writeApprovalsRow(source, { version: 1, defaults: { security: "Full" } });
     const plan = await applyMigration({ source, target, home });
@@ -995,7 +1127,10 @@ describe("OpenClaw database layout", () => {
       agents: { defaults: Record<string, unknown>; entries?: Record<string, unknown> };
     };
     config.agents.defaults.workspace = "~/.clawdbot/workspace";
-    config.agents.entries = { main: { name: "Main" }, ops: { workspace: "~/clawd" } };
+    config.agents.entries = {
+      main: { name: "Main", default: true },
+      ops: { workspace: "~/clawd" },
+    };
     fs.writeFileSync(file, JSON.stringify(config));
     const before = snapshot(source);
     const plan = await applyMigration({ source, target, home });

@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { isDeepStrictEqual } from "node:util";
 import JSON5 from "json5";
 import { resolveAgentConfig, resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import {
@@ -12,11 +13,14 @@ import { SAFE_SESSION_ID_RE } from "../../config/sessions/paths.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 import { approvalSources } from "./approvals.js";
 import {
+  boundMergedExec,
   convertConfig,
+  execUnset,
   formatPath,
   listEnvRefs,
   mergeBeneath,
   validateMerge,
+  valueAt,
   yieldStarter,
 } from "./config.js";
 import {
@@ -223,8 +227,8 @@ function planConfig(
   for (const { path: at, reason } of report.notes) {
     items.push({ op: "note", from: `${configName}#${at}`, reason });
   }
-  for (const { from, to } of report.approvals.tightened) {
-    renames.push({ op: "rename", from, to: `bot.json#${to}`, reason: "exec-approvals" });
+  for (const { from, to, reason } of report.approvals.tightened) {
+    renames.push({ op: "rename", from, to: `bot.json#${to}`, reason });
   }
   for (const label of report.approvals.closed) {
     items.push({ op: "note", from: label, reason: "exec-approvals-closed" });
@@ -244,10 +248,14 @@ function planConfig(
     const yielded = yieldStarter(merged, hanzoCloudConfig(p.home), config, {
       anthropic: ownAnthropic,
     });
-    const { added, kept } = mergeBeneath(merged, config);
+    // A copy: the bound below writes into what the merge adds, and `config` stays the import alone.
+    const { added, kept } = mergeBeneath(merged, structuredClone(config));
     const dropped = validateMerge(merged, before, added);
+    // No agent runs exec looser than the import alone gives it.
+    const bound = boundMergedExec(merged, config);
     const applied = added.map(formatPath).filter((label) => !dropped.includes(label));
-    const status: PlanStatus = yielded.length + applied.length > 0 ? "update" : "unchanged";
+    const status: PlanStatus =
+      yielded.length + applied.length + bound.length > 0 ? "update" : "unchanged";
     if (status === "update") {
       actions.push(
         { kind: "backup", file: to },
@@ -255,8 +263,10 @@ function planConfig(
       );
       p.claimed.add(to);
     }
-    // A rename that the existing file overrules did not happen.
-    const keptLabels = kept.map(formatPath);
+    // A rename that the existing file overrules did not happen; one the exec bound made true did.
+    const keptLabels = kept
+      .filter((at) => !isDeepStrictEqual(valueAt(merged, at), valueAt(config, at)))
+      .map(formatPath);
     const overruled = (item: PlanItem) =>
       keptLabels.some((label) => {
         const at = item.to?.slice("bot.json#".length) ?? "";
@@ -278,12 +288,24 @@ function planConfig(
     if (keptLabels.length > 0) {
       items.push({ op: "note", from: "bot.json", reason: "kept", names: keptLabels });
     }
+    for (const { at, names } of bound) {
+      items.push({ op: "note", from: `bot.json#${at}`, reason: "exec-merge", names });
+    }
     // A route to the proxy that the person changed stays; their imported key then goes there too.
     if (ownAnthropic && routesAnthropicToHanzo(before) && routesAnthropicToHanzo(merged)) {
       const route = String((merged as BotConfig).models?.providers?.anthropic?.baseUrl);
       items.push({ op: "note", from: "bot.json", reason: "anthropic-route", names: [route] });
     }
     effective = merged;
+  }
+  const unset = execUnset(effective, config);
+  if (unset.length > 0) {
+    items.push({
+      op: "note",
+      from: `${configName}#tools.exec.security`,
+      reason: "exec-unset",
+      names: unset,
+    });
   }
   const missing = listEnvRefs(config).filter((key) => !envKeys.has(key));
   if (missing.length > 0) {
