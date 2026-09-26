@@ -10,7 +10,8 @@ title: "Elevated Mode"
 ## What it does
 
 - `/elevated on` runs on the gateway host and keeps exec approvals (same as `/elevated ask`).
-- `/elevated full` runs on the gateway host **and** auto-approves exec (skips exec approvals).
+- `/elevated full` runs on the gateway host and skips exec approvals where the configured policy
+  (`tools.exec.security: "full"`, `ask: "off"`, and `~/.bot/exec-approvals.json`) would ask nothing.
 - `/elevated ask` runs on the gateway host but keeps exec approvals (same as `/elevated on`).
 - `on`/`ask` do **not** force `exec.security=full`; configured security/ask policy still applies.
 - Only changes behavior when the agent is **sandboxed** (otherwise exec already runs on the host).
@@ -23,8 +24,10 @@ title: "Elevated Mode"
 - **Per-session state**: `/elevated on|off|ask|full` sets the elevated level for the current session key.
 - **Inline directive**: `/elevated on|ask|full` inside a message applies to that message only.
 - **Groups**: In group chats, elevated directives are only honored when the agent is mentioned. Command-only messages that bypass mention requirements are treated as mentioned.
-- **Host execution**: elevated forces `exec` onto the gateway host; `full` also sets `security=full`.
-- **Approvals**: `full` skips exec approvals; `on`/`ask` honor them when allowlist/ask rules require.
+- **Host execution**: elevated forces `exec` onto the gateway host. It never raises
+  `tools.exec.security`: `deny` still refuses exec, and `allowlist` still checks the allowlist.
+- **Approvals**: `full` skips exec approvals only under a `full`/`off` policy; `on`/`ask` honor
+  them when allowlist/ask rules require.
 - **Unsandboxed agents**: no-op for location; only affects gating, logging, and status.
 - **Tool policy still applies**: if `exec` is denied by tool policy, elevated cannot be used.
 - **Separate from `/exec`**: `/exec` adjusts per-session defaults for authorized senders and does not require elevated.

@@ -1,11 +1,6 @@
-import type { AgentTool, AgentToolResult } from "@mariozechner/pi-agent-core";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type {
-  ExecElevatedDefaults,
-  ExecToolDefaults,
-  ExecToolDetails,
-} from "./bash-tools.exec-types.js";
+import type { AgentTool, AgentToolResult } from "@mariozechner/pi-agent-core";
 import { type ExecHost, maxAsk, minSecurity } from "../infra/exec-approvals.js";
 import { resolveExecSafeBinRuntimePolicy } from "../infra/exec-safe-bin-runtime-policy.js";
 import {
@@ -17,6 +12,7 @@ import { parseAgentSessionKey, resolveAgentIdFromSessionKey } from "../routing/s
 import { markBackgrounded } from "./bash-process-registry.js";
 import { processGatewayAllowlist } from "./bash-tools.exec-host-gateway.js";
 import { executeNodeHostCommand } from "./bash-tools.exec-host-node.js";
+import { resolveExecHostApprovalContext } from "./bash-tools.exec-host-shared.js";
 import {
   DEFAULT_MAX_OUTPUT,
   DEFAULT_PATH,
@@ -34,6 +30,11 @@ import {
   execSchema,
   validateHostEnv,
 } from "./bash-tools.exec-runtime.js";
+import type {
+  ExecElevatedDefaults,
+  ExecToolDefaults,
+  ExecToolDetails,
+} from "./bash-tools.exec-types.js";
 import {
   buildSandboxEnv,
   clampWithDefault,
@@ -318,20 +319,6 @@ export function createExecTool(
         host = "gateway";
       }
 
-      const configuredSecurity = defaults?.security ?? (host === "sandbox" ? "deny" : "allowlist");
-      const requestedSecurity = normalizeExecSecurity(params.security);
-      let security = minSecurity(configuredSecurity, requestedSecurity ?? configuredSecurity);
-      if (elevatedRequested && elevatedMode === "full") {
-        security = "full";
-      }
-      const configuredAsk = defaults?.ask ?? "on-miss";
-      const requestedAsk = normalizeExecAsk(params.ask);
-      let ask = maxAsk(configuredAsk, requestedAsk ?? configuredAsk);
-      const bypassApprovals = elevatedRequested && elevatedMode === "full";
-      if (bypassApprovals) {
-        ask = "off";
-      }
-
       const sandbox = host === "sandbox" ? defaults?.sandbox : undefined;
       if (
         host === "sandbox" &&
@@ -344,6 +331,38 @@ export function createExecTool(
             'Enable sandbox mode (`agents.defaults.sandbox.mode="non-main"` or `"all"`) or set tools.exec.host to "gateway"/"node".',
           ].join("\n"),
         );
+      }
+      // With no sandbox, exec runs on this host: it is gateway exec, held to
+      // tools.exec.security and ask as the gateway path holds them, and with
+      // no security set it is denied (DEFAULT_SECURITY in exec-approvals.ts).
+      const unsandboxed = host === "sandbox" && !sandbox;
+      if (unsandboxed) {
+        host = "gateway";
+      }
+
+      const explicitSecurity = defaults?.security;
+      const configuredSecurity =
+        explicitSecurity ?? (host === "sandbox" || unsandboxed ? "deny" : "allowlist");
+      const requestedSecurity = normalizeExecSecurity(params.security);
+      const security = minSecurity(configuredSecurity, requestedSecurity ?? configuredSecurity);
+      const configuredAsk = defaults?.ask ?? "on-miss";
+      const requestedAsk = normalizeExecAsk(params.ask);
+      let ask = maxAsk(configuredAsk, requestedAsk ?? configuredAsk);
+      // Deny holds on every host, elevated or not. In a real sandbox only an
+      // explicit deny does: the sandbox's own default runs in the container
+      // (OpenClaw's rule, bash-tools.exec-run.ts).
+      if (security === "deny" && (host !== "sandbox" || explicitSecurity === "deny")) {
+        throw new Error(`exec denied: host=${host} security=deny`);
+      }
+      // Elevated full never raises security or lowers ask: it skips approvals
+      // only where the policy and this host's approvals file ask nothing.
+      let bypassApprovals = false;
+      if (elevatedRequested && elevatedMode === "full" && security === "full" && ask === "off") {
+        const floor = resolveExecHostApprovalContext({ agentId, security, ask, host: "gateway" });
+        bypassApprovals = floor.hostSecurity === "full" && floor.hostAsk === "off";
+      }
+      if (bypassApprovals) {
+        ask = "off";
       }
       const rawWorkdir = params.workdir?.trim() || defaults?.cwd || process.cwd();
       let workdir = rawWorkdir;
