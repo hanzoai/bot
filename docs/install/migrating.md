@@ -82,9 +82,9 @@ hanzo-bot gateway stop
 ```bash
 # Adjust paths if you use a profile or custom locations
 cd ~
-tar -czf hanzo-bot-state.tgz .hanzo-bot
+tar -czf bot-state.tgz .bot
 
-tar -czf hanzo-bot-workspace.tgz .hanzo-bot/workspace
+tar -czf bot-workspace.tgz .bot/workspace
 ```
 
 If you have multiple profiles/state dirs (e.g. `~/.bot-main`, `~/.bot-work`), archive each.
@@ -112,7 +112,7 @@ Common approaches:
 
 After copying, ensure:
 
-- Hidden directories were included (e.g. `.hanzo-bot/`)
+- Hidden directories were included (e.g. `.bot/`)
 - File ownership is correct for the user running the gateway
 
 ### Step 3 — Run Doctor (migrations + service repair)

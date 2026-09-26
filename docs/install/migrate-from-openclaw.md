@@ -256,6 +256,9 @@ To remove the import, delete `~/.bot` (or only what the plan created).
 - **WhatsApp logged out**: two gateways were connected to the same account. Stop one, then
   `hanzo-bot channels login --channel whatsapp` if needed.
 - **A channel says it has no token**: it was in OpenClaw's secret store. Set it again.
+- **`… leads into the OpenClaw install … through a link`**: a dir in `~/.bot` is a link into
+  `~/.openclaw` (a shared workspace, say), so the import would change OpenClaw's files.
+  Replace the link with a copy of what it points at, then run again.
 - **`compressed transcript events need Node 22.15 or newer`**: OpenClaw stores large
   transcript events zstd-compressed; run the import with Node 22.15+.
 - **`hanzo-bot doctor`** notices an OpenClaw install and prints the commands above; it is safe
