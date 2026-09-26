@@ -11,7 +11,15 @@ import {
   resetArchiveName,
 } from "./convert.js";
 import { convertEnvEntries, mergeEnvText, parseEnvEntries } from "./env.js";
-import { applyActions, planCopyTree, relinkInto, type Action } from "./files.js";
+import {
+  applyActions,
+  assertOutsideSource,
+  isWithin,
+  planCopyTree,
+  realPathOf,
+  relinkInto,
+  type Action,
+} from "./files.js";
 import { createPathRewriter, homeForm } from "./paths.js";
 import { planSkips } from "./skips.js";
 import { readOpenClawState, STATE_DB, type OpenClawState } from "./state.js";
@@ -504,12 +512,14 @@ function planPairing(
 export function planMigration(p: MigrationParams): { plan: Plan; actions: Action[] } {
   const source = path.resolve(p.source);
   const target = path.resolve(p.target);
-  if (
-    source === target ||
-    target.startsWith(`${source}${path.sep}`) ||
-    source.startsWith(`${target}${path.sep}`)
-  ) {
-    throw new Error("the OpenClaw and Hanzo Bot state dirs must not contain each other");
+  // As written and with links resolved: ~/.bot may be a link to ~/.openclaw.
+  for (const [a, b] of [
+    [source, target],
+    [realPathOf(source), realPathOf(target)],
+  ]) {
+    if (isWithin(a, b) || isWithin(b, a)) {
+      throw new Error("the OpenClaw and Hanzo Bot state dirs must not contain each other");
+    }
   }
   const params = { source, target, home: p.home };
   const state = readOpenClawState(source);
@@ -529,6 +539,7 @@ export function planMigration(p: MigrationParams): { plan: Plan; actions: Action
   planPairing(params, state, actions, items);
   planHeartbeats(params, state, actions, items);
   items.push(...planSkips(params, state, config));
+  assertOutsideSource(source, actions);
   return {
     plan: {
       version: 1,

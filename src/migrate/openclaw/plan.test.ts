@@ -220,6 +220,40 @@ describe("OpenClaw file layout", () => {
     expect(fs.readlinkSync(path.join(ws, "outside"))).toBe("/opt/elsewhere");
   });
 
+  it("keeps a dangling link where a file would be copied", async () => {
+    fs.mkdirSync(path.join(target, "workspace"), { recursive: true });
+    fs.symlinkSync(path.join(home, "nowhere"), path.join(target, "workspace", "AGENTS.md"));
+    const plan = await applyMigration({ source, target, home });
+    expect(item(plan, "copy", "workspace")).toMatchObject({
+      status: "conflict",
+      names: ["AGENTS.md"],
+    });
+    expect(fs.readlinkSync(path.join(target, "workspace", "AGENTS.md"))).toBe(
+      path.join(home, "nowhere"),
+    );
+    expect(fs.existsSync(path.join(home, "nowhere"))).toBe(false);
+  });
+
+  it("refuses a Hanzo Bot dir that is a link to the OpenClaw dir", () => {
+    fs.symlinkSync(source, target);
+    expect(() => planMigration({ source, target, home })).toThrow(/must not contain each other/);
+  });
+
+  it("refuses a copied link that leads back into the OpenClaw install", async () => {
+    // skills/back -> ../../.openclaw is copied as it is, so from ~/.bot/skills it
+    // names ~/.openclaw; an agent's workshop skill named back would be copied through it.
+    fs.symlinkSync(path.join("..", "..", ".openclaw"), path.join(source, "skills", "back"));
+    const workshop = path.join(source, "agents", "main", "agent", "workshop-skills", "back");
+    fs.mkdirSync(workshop, { recursive: true });
+    fs.writeFileSync(path.join(workshop, "SKILL.md"), "---\nname: back\n---\n");
+    const before = snapshot(source);
+    await expect(applyMigration({ source, target, home })).rejects.toThrow(
+      /leads into the OpenClaw install/,
+    );
+    expect(snapshot(source)).toEqual(before);
+    expect(fs.existsSync(target)).toBe(false);
+  });
+
   it("refuses dirs that contain each other and a dir with no OpenClaw install", () => {
     expect(() => planMigration({ source, target: path.join(source, "bot"), home })).toThrow(
       /must not contain each other/,
@@ -340,5 +374,19 @@ describe("OpenClaw database layout", () => {
     await applyMigration({ source, target, home });
     const { actions } = planMigration({ source, target, home });
     expect(actions).toEqual([]);
+  });
+
+  it("never writes into the OpenClaw install through a link in the Hanzo Bot dir", async () => {
+    // A workspace shared by linking ~/.bot/workspace to OpenClaw's: the
+    // heartbeat checklist would land in OpenClaw's workspace.
+    fs.mkdirSync(target, { recursive: true, mode: 0o700 });
+    fs.symlinkSync(path.join(source, "workspace"), path.join(target, "workspace"));
+    const before = snapshot(source);
+    expect(() => planMigration({ source, target, home })).toThrow(
+      /workspace\/HEARTBEAT\.md leads into the OpenClaw install/,
+    );
+    await expect(applyMigration({ source, target, home })).rejects.toThrow(/nothing was written/);
+    expect(snapshot(source)).toEqual(before);
+    expect(fs.readdirSync(target)).toEqual(["workspace"]);
   });
 });

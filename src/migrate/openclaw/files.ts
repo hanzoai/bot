@@ -68,10 +68,11 @@ export function planCopyTree(params: {
     if (!stat.isFile()) {
       return;
     }
-    if (!fs.existsSync(to)) {
+    // A dangling link at the target is there too: a copy would not replace it.
+    if (!fs.existsSync(to) && !isLink(to)) {
       params.actions.push({ kind: "copy", from, to, mode: stat.mode & 0o777 });
       tally.created += 1;
-    } else if (fs.statSync(to).isFile() && sameBytes(from, to)) {
+    } else if (fs.existsSync(to) && fs.statSync(to).isFile() && sameBytes(from, to)) {
       tally.unchanged += 1;
     } else {
       tally.conflicts.push(rel);
@@ -95,11 +96,68 @@ export function relinkInto(sourceRoot: string, targetRoot: string): (target: str
     if (!path.isAbsolute(target)) {
       return target;
     }
-    const rel = path.relative(sourceRoot, target);
-    return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel))
-      ? path.join(targetRoot, rel)
+    return isWithin(sourceRoot, target)
+      ? path.join(targetRoot, path.relative(sourceRoot, target))
       : target;
   };
+}
+
+/** Whether `file` is `root` or lies under it. */
+export function isWithin(root: string, file: string): boolean {
+  const rel = path.relative(root, file);
+  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
+}
+
+/** A path with its links resolved, for a path that may not exist yet: the nearest dir that does is resolved. */
+export function realPathOf(file: string): string {
+  let existing = path.resolve(file);
+  while (!fs.existsSync(existing) && path.dirname(existing) !== existing) {
+    existing = path.dirname(existing);
+  }
+  return path.join(fs.realpathSync(existing), path.relative(existing, path.resolve(file)));
+}
+
+/**
+ * Where writing `file` lands once the links on its way are followed: links on
+ * disk and links the plan creates. Its last component is not followed: a
+ * write replaces it and a copy or link refuses to.
+ */
+function landing(file: string, planned: Map<string, string>, depth = 0): string {
+  if (depth > 40) {
+    throw new Error(`too many links on the way to ${file}`);
+  }
+  for (let at = path.dirname(file); path.dirname(at) !== at; at = path.dirname(at)) {
+    const target = planned.get(at);
+    if (target !== undefined) {
+      const via = path.join(path.resolve(path.dirname(at), target), path.relative(at, file));
+      return landing(via, planned, depth + 1);
+    }
+  }
+  return path.join(realPathOf(path.dirname(file)), path.basename(file));
+}
+
+/**
+ * Refuse a plan that would write into the OpenClaw install through a link: a
+ * dir in the Hanzo Bot state dir that links into it, or a copied link that
+ * leads back into it.
+ */
+export function assertOutsideSource(sourceRoot: string, actions: Action[]): void {
+  const source = realPathOf(sourceRoot);
+  const planned = new Map<string, string>();
+  for (const action of actions) {
+    if (action.kind === "link") {
+      planned.set(action.to, action.target);
+    }
+  }
+  for (const action of actions) {
+    const file = action.kind === "backup" ? action.file : action.to;
+    const lands = landing(file, planned);
+    if (isWithin(source, lands)) {
+      throw new Error(
+        `${file} leads into the OpenClaw install (${lands}) through a link; nothing was written. Replace the link in the Hanzo Bot dir with a copy of what it points at, then run again.`,
+      );
+    }
+  }
 }
 
 function assertInside(targetRoot: string, file: string): void {
