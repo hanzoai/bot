@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { hanzoCloudConfig } from "../../commands/hanzo-cloud-config.js";
 import { approvalSources, parseApprovals } from "./approvals.js";
 import {
+  boundMergedExec,
   convertConfig,
   formatPath,
   listEnvRefs,
@@ -475,6 +476,29 @@ describe("tools.exec.mode", () => {
   });
 });
 
+describe("exec bound on a merge", () => {
+  // Differential finding: the import's binding sends a stranger to "ghost", which the merged
+  // agents.list lacks, so Hanzo Bot routes it to the default agent: held to the strictest
+  // agent the import runs, "ghost" (an unlisted agent on the root) included.
+  it("holds the merged default to an unlisted agent the import's binding runs", () => {
+    const bindings = [{ agentId: "ghost", match: { channel: "telegram" } }];
+    // bot.json's own root ask on-miss is kept; the import's root (main and ghost) asks always.
+    const merged = {
+      agents: { list: [{ id: "guard", tools: { exec: { security: "allowlist" } } }] },
+      bindings: structuredClone(bindings),
+      tools: { exec: { security: "allowlist", ask: "on-miss" } },
+    };
+    const fresh = { tools: { exec: { security: "allowlist", ask: "always" } }, bindings };
+    expect(boundMergedExec(merged, fresh)).toEqual([
+      { at: "agents.list[0].tools.exec", names: ['ask="always"'] },
+    ]);
+    expect(merged.agents.list[0]).toEqual({
+      id: "guard",
+      tools: { exec: { security: "allowlist", ask: "always" } },
+    });
+  });
+});
+
 describe("invalid exec values", () => {
   // RED-BOTGO-23: OpenClaw's schema rejects these, so it loaded no config and ran no exec.
   it.each([
@@ -848,6 +872,26 @@ describe("exec approvals", () => {
         from: "exec-approvals.json#agents.ops.ask",
         to: 'agents.list[1].tools.exec.ask="off"',
         reason: "exec-approvals-agent",
+      },
+    ]);
+  });
+
+  // Differential finding: with no agents.list, OpenClaw and Hanzo Bot both run an agent a
+  // binding names on the root's settings, and OpenClaw gives it "*"/defaults, not main's entry.
+  it("tightens the root for an unlisted agent a binding names, not only for main", () => {
+    const { config, report } = fold(
+      {
+        tools: { exec: { mode: "full" } },
+        bindings: [{ agentId: "ghost", match: { channel: "telegram" } }],
+      },
+      { version: 1, agents: { "*": { security: "deny" }, main: { security: "allowlist" } } },
+    );
+    expect(config.tools).toEqual({ exec: { security: "deny", ask: "off" } });
+    expect(report.approvals.tightened).toEqual([
+      {
+        from: "exec-approvals.json#agents.*.security",
+        to: 'tools.exec.security="deny"',
+        reason: "exec-approvals",
       },
     ]);
   });

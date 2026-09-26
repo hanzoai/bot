@@ -12,6 +12,7 @@ import { BotSchema } from "../../config/zod-schema.js";
 import { PLUGIN_MANIFEST_FILENAME } from "../../plugins/manifest.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 import {
+  bindingAgentIds,
   EXEC_FIELDS,
   foldApprovals,
   looser,
@@ -995,8 +996,8 @@ function bindingsOf(config: Json): unknown[] {
  * wrote, one entry per tools.exec it changed.
  */
 export function boundMergedExec(merged: Json, fresh: Json): Array<{ at: string; names: string[] }> {
-  const freshIds = listAgentIds(fresh as BotConfig);
-  const mergedIds = listAgentIds(merged as BotConfig);
+  const freshIds = runningAgentIds(fresh);
+  const mergedIds = runningAgentIds(merged);
   const defaultId = resolveDefaultAgentId(merged as BotConfig);
   const freshBindings = bindingsOf(fresh);
   const mergedBindings = bindingsOf(merged);
@@ -1038,11 +1039,28 @@ export function boundMergedExec(merged: Json, fresh: Json): Array<{ at: string; 
       exec[field] = target;
       names.push(`${field}=${JSON.stringify(target)}`);
     }
-    if (names.length > 0) {
+    const same = written.find((entry) => entry.at === at);
+    if (same) {
+      same.names.push(...names);
+    } else if (names.length > 0) {
       written.push({ at, names });
     }
   }
   return written;
+}
+
+/**
+ * The agents a config runs: its agents.list, else main and each agent a
+ * binding names, which OpenClaw and Hanzo Bot both run unlisted (on the
+ * root's settings) when there is no list.
+ */
+export function runningAgentIds(config: Json): string[] {
+  const ids = listAgentIds(config as BotConfig);
+  const list = child(config, "agents")?.list;
+  if (Array.isArray(list) && list.some(isPlainObject)) {
+    return ids;
+  }
+  return [...ids, ...bindingAgentIds(config).filter((id) => !ids.includes(id))];
 }
 
 /**
@@ -1051,8 +1069,8 @@ export function boundMergedExec(merged: Json, fresh: Json): Array<{ at: string; 
  * them; Hanzo Bot denies host exec without a security.
  */
 export function execUnset(written: Json, fresh: Json): string[] {
-  const runs = listAgentIds(written as BotConfig);
-  return listAgentIds(fresh as BotConfig).filter(
+  const runs = runningAgentIds(written);
+  return runningAgentIds(fresh).filter(
     (id) => runs.includes(id) && execValue(written, id, "security") === undefined,
   );
 }

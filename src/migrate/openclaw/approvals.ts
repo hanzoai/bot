@@ -260,18 +260,40 @@ export function foldApprovals(config: Json, sources: ApprovalsSource[]): Approva
       }
     });
   }
+  // With no agents.list the root is main's scope, and that of each agent a
+  // binding names, which OpenClaw and Hanzo Bot both run unlisted; with one
+  // it is the scope of every agent not listed, which "*" and defaults govern.
+  const rootAgentIds =
+    agents.length === 0
+      ? ["main", ...bindingAgentIds(config).filter((id) => id !== "main")]
+      : [undefined];
   for (const source of sources) {
     if (!source.doc) {
       report.closed.push(source.label);
     }
     const root = () => execOf(config) ?? {};
     const before = agents.map(([scope]) => effective(scope, root()));
-    fold(report, source, config, "tools.exec", agents.length === 0 ? "main" : undefined, {}, {});
+    fold(report, source, config, "tools.exec", rootAgentIds, {}, {});
     agents.forEach(([scope, at, id], index) => {
-      fold(report, source, scope, at, id, before[index] ?? {}, root());
+      fold(report, source, scope, at, [id], before[index] ?? {}, root());
     });
   }
   return report;
+}
+
+/** The agent ids bindings name, normalized, once each, in order; a blank one routes to the default agent. */
+export function bindingAgentIds(config: Json): string[] {
+  const ids: string[] = [];
+  for (const binding of Array.isArray(config.bindings) ? config.bindings : []) {
+    const agentId = isPlainObject(binding) ? binding.agentId : undefined;
+    if (typeof agentId === "string" && agentId.trim() !== "") {
+      const id = normalizeAgentId(agentId);
+      if (!ids.includes(id)) {
+        ids.push(id);
+      }
+    }
+  }
+  return ids;
 }
 
 /** A scope's security and ask: its own, else the inherited value. */
@@ -293,15 +315,16 @@ export function looser(field: ExecField, value: unknown, than: unknown): boolean
 /**
  * Write each field of one scope whose value from the config now (its own,
  * else `inherited`) ranks differently from the stricter of `before` (what it
- * ran with before this policy) and the policy's value. The root inherits
- * nothing and `before` is its own value, so it is only ever tightened.
+ * ran with before this policy) and the policy's value for the agents the
+ * scope serves (the strictest of them). The root inherits nothing and
+ * `before` is its own value, so it is only ever tightened.
  */
 function fold(
   report: ApprovalsReport,
   source: ApprovalsSource,
   scope: Json,
   at: string,
-  agentId: string | undefined,
+  agentIds: Array<string | undefined>,
   before: Json,
   inherited: Json,
 ): void {
@@ -309,7 +332,13 @@ function fold(
   // A database label already names its table after "#": state/openclaw.sqlite#exec_approvals_config/defaults.ask.
   const separator = source.label.includes("#") ? "/" : "#";
   for (const field of EXEC_FIELDS) {
-    const policy = policyField(doc, agentId, field);
+    let policy: { value: string; path: string } | undefined;
+    for (const agentId of agentIds) {
+      const found = policyField(doc, agentId, field);
+      if (found && (!policy || rank(field, found.value) < rank(field, policy.value))) {
+        policy = found;
+      }
+    }
     if (!policy) {
       continue;
     }
