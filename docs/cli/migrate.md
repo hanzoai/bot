@@ -31,7 +31,8 @@ Options:
 - `--json`: print the plan as JSON. It holds paths, key names and counts, never a secret value.
 
 The target is Hanzo Bot's state dir (`$BOT_STATE_DIR`, else `~/.bot`). The OpenClaw install,
-and every dir it reaches through a link, is only read. Running it again is safe: anything
+and every dir it reaches through a link, is only read; files that belong in such a dir wait in
+`~/.bot/agents/<id>/from-openclaw/`, and the plan says where they go. Running it again is safe: anything
 already in place is reported as `unchanged`, and a value or file Hanzo Bot already has is never
 replaced, except the defaults Hanzo Bot's own first run wrote (see
 [an existing bot.json](/install/migrate-from-openclaw#an-existing-botjson)).

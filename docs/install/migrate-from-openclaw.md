@@ -51,20 +51,20 @@ hanzo-bot gateway run          # or in the foreground
 
 ## What moves
 
-| OpenClaw                                                                                                    | Hanzo Bot                                        | Notes                                                                                                                                                                                   |
-| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `openclaw.json` (JSON5, `$include` resolved)                                                                | `bot.json`                                       | Converted key by key; see [config keys](#config-keys). Merged beneath an existing `bot.json`: see [an existing bot.json](#an-existing-botjson).                                         |
-| `.env`                                                                                                      | `.env`                                           | `OPENCLAW_*` keys become `BOT_*`; values are copied as written, never printed. Keys you already set are kept.                                                                           |
-| `workspace/`, `workspace-<agent>/`                                                                          | same names                                       | Every file, with its mode. Absolute symlinks into `~/.openclaw` are pointed at `~/.bot`. A dir that is itself a link elsewhere is copied as files, so the two installs stop sharing it. |
-| `skills/`, `hooks/`, `tools/`                                                                               | same names                                       | Managed skills, installed hooks and tools, as files.                                                                                                                                    |
-| Skill Workshop skills (`agents/<id>/agent/workshop-skills/`)                                                | `<agent workspace>/.agents/skills/`              | Each stays with its agent. One that a managed, workspace or personal skill of the same name hid in OpenClaw stays behind.                                                               |
-| `credentials/`                                                                                              | `credentials/`                                   | Channel logins (WhatsApp) and pairing allowlists.                                                                                                                                       |
-| Auth profiles (`state/openclaw.sqlite`, `agents/<id>/agent/openclaw-agent.sqlite`, or `auth-profiles.json`) | `agents/<id>/agent/auth-profiles.json`           | API keys and OAuth tokens, mode `0600`. Usage statistics and cooldowns start fresh.                                                                                                     |
-| Sessions (`session_nodes`, `transcript_events`, or `sessions.json` + `*.jsonl`)                             | `agents/<id>/sessions/`                          | The session index and every transcript. Earlier generations of a session become `<id>.jsonl.reset.<time>` archives.                                                                     |
-| Your cron jobs (`cron_jobs` or `cron/jobs.json`)                                                            | `cron/jobs.json`                                 | Schedule, payload and delivery. Run history starts fresh.                                                                                                                               |
-| Pairing allowlists (`channel_pairing_allow_entries`)                                                        | `credentials/<channel>-<account>-allowFrom.json` | Who may DM your bot.                                                                                                                                                                    |
-| An agent's heartbeat checklist (`cron_job_scratch`, formerly `HEARTBEAT.md`)                                | `HEARTBEAT.md` in the agent's workspace          | OpenClaw moved it into its database; Hanzo Bot reads it from the workspace.                                                                                                             |
-| `hooks.internal.installs`                                                                                   | `bot.json` `hooks.internal.installs`             |                                                                                                                                                                                         |
+| OpenClaw                                                                                                    | Hanzo Bot                                        | Notes                                                                                                                                                                                                                                                                                           |
+| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `openclaw.json` (JSON5, `$include` resolved)                                                                | `bot.json`                                       | Converted key by key; see [config keys](#config-keys). Merged beneath an existing `bot.json`: see [an existing bot.json](#an-existing-botjson).                                                                                                                                                 |
+| `.env`                                                                                                      | `.env`                                           | `OPENCLAW_*` keys become `BOT_*`; values are copied as written, never printed. Keys you already set are kept.                                                                                                                                                                                   |
+| `workspace/`, `workspace-<agent>/`                                                                          | same names                                       | Every file, with its mode. A symlink that would lead into `~/.openclaw` from its new place is pointed at `~/.bot`. A dir that is itself a link elsewhere is copied as files, so the two installs stop sharing it. A link to a dir that is not there (an unmounted drive) is listed, not copied. |
+| `skills/`, `hooks/`, `tools/`                                                                               | same names                                       | Managed skills, installed hooks and tools, as files.                                                                                                                                                                                                                                            |
+| Skill Workshop skills (`agents/<id>/agent/workshop-skills/`)                                                | `<agent workspace>/.agents/skills/`              | Each stays with its agent. One that a managed, workspace or personal skill of the same name hid in OpenClaw, or that a skill already in `~/.bot/skills` would hide, stays behind.                                                                                                               |
+| `credentials/`                                                                                              | `credentials/`                                   | Channel logins (WhatsApp) and pairing allowlists.                                                                                                                                                                                                                                               |
+| Auth profiles (`state/openclaw.sqlite`, `agents/<id>/agent/openclaw-agent.sqlite`, or `auth-profiles.json`) | `agents/<id>/agent/auth-profiles.json`           | API keys and OAuth tokens, mode `0600`. Usage statistics and cooldowns start fresh.                                                                                                                                                                                                             |
+| Sessions (`session_nodes`, `transcript_events`, or `sessions.json` + `*.jsonl`)                             | `agents/<id>/sessions/`                          | The session index and every transcript. Earlier generations of a session become `<id>.jsonl.reset.<time>` archives.                                                                                                                                                                             |
+| Your cron jobs (`cron_jobs` or `cron/jobs.json`)                                                            | `cron/jobs.json`                                 | Schedule, payload and delivery. Run history starts fresh.                                                                                                                                                                                                                                       |
+| Pairing allowlists (`channel_pairing_allow_entries`)                                                        | `credentials/<channel>-<account>-allowFrom.json` | Who may DM your bot. An allowlist file OpenClaw has not folded into its database yet is merged in, as OpenClaw's doctor would.                                                                                                                                                                  |
+| An agent's heartbeat checklist (`cron_job_scratch`, formerly `HEARTBEAT.md`)                                | `HEARTBEAT.md` in the agent's workspace          | OpenClaw moved it into its database; Hanzo Bot reads it from the workspace.                                                                                                                                                                                                                     |
+| `hooks.internal.installs`                                                                                   | `bot.json` `hooks.internal.installs`             |                                                                                                                                                                                                                                                                                                 |
 
 OpenClaw 2026.5 and later keeps most state in SQLite (`state/openclaw.sqlite` and one
 `openclaw-agent.sqlite` per agent). The importer reads copies of those databases, WAL
@@ -76,7 +76,10 @@ Everything is written inside the Hanzo Bot state dir: `bot.json`, `.env`, `crede
 Nothing is written into a dir OpenClaw uses: not `~/.openclaw`, not a dir it reaches through a
 link, not a workspace it keeps elsewhere. An agent whose workspace is outside `~/.bot` gets its
 heartbeat checklist and workshop skills in `~/.bot/agents/<id>/from-openclaw/`, and the plan
-says where to move them.
+says where to move them. So do an agent's workshop skills when its workspace keeps `.agents/`
+as a link into such a dir (your dotfiles, say). A config path spelled through Clawdbot's
+`~/.clawdbot`, or through any other link into `~/.openclaw`, is read as the `~/.openclaw` path it
+reaches, so it becomes the `~/.bot` copy.
 
 ## What does not move
 
@@ -154,7 +157,11 @@ kept as `bot.json.bak`:
   under **Do by hand**, instead of listing it as moved.
 - Values Hanzo Bot's first run wrote (from running `hanzo-bot` before the import) give way to
   OpenClaw's: the workspace, the gateway mode and bind, and, when the import brings your own
-  Anthropic key, the route that sent Anthropic calls through `api.hanzo.ai`.
+  Anthropic key (in any agent's auth profiles, in `.env`, or in the config), the route that sent
+  Anthropic calls through `api.hanzo.ai`. The sign-in token the first run stored for that route
+  is then removed from every agent, so it never goes to Anthropic.
+- A route through `api.hanzo.ai` that you changed stays; the plan then says your imported key
+  goes there too.
 - The merged file is checked again. An imported key that would stop it loading next to your
   settings is dropped and listed.
 
@@ -215,7 +222,8 @@ checked the same way they were.
 Your provider keys and your model choice move unchanged: an OpenClaw install on
 `anthropic/claude-opus-5` with an Anthropic key is a Hanzo Bot install on the same model with
 the same key. If you ran `hanzo-bot` before importing, its first-run route for Anthropic
-through `api.hanzo.ai` gives way to your key (see [an existing bot.json](#an-existing-botjson)).
+through `api.hanzo.ai` gives way to your key, wherever OpenClaw kept it (see
+[an existing bot.json](#an-existing-botjson)).
 `hanzo-bot models status` shows what it resolved.
 
 Hanzo Bot can also route every model through the Hanzo gateway at `api.hanzo.ai`: one key
@@ -264,8 +272,9 @@ it stops there.
 
 ## Going back
 
-Nothing in `~/.openclaw`, or in any dir OpenClaw reaches from it, was changed. Stop Hanzo
-Bot's gateway and start OpenClaw's:
+Nothing in `~/.openclaw`, or in any dir OpenClaw reaches from it, was changed. `hanzo-bot doctor`
+lists OpenClaw's gateway service, even one still labelled `com.clawdbot.gateway` from the
+Clawdbot days, and never removes it. Stop Hanzo Bot's gateway and start OpenClaw's:
 
 ```bash
 hanzo-bot gateway stop
@@ -285,9 +294,10 @@ To remove the import, delete `~/.bot` (or only what the plan created).
 - **WhatsApp logged out**: two gateways were connected to the same account. Stop one, then
   `hanzo-bot channels login --channel whatsapp` if needed.
 - **A channel says it has no token**: it was in OpenClaw's secret store. Set it again.
-- **`… leads into …, which OpenClaw uses, through a link`**: a dir in `~/.bot` is a link into
-  `~/.openclaw` or another dir OpenClaw uses (a shared workspace, say), so the import would
-  change OpenClaw's files. Replace the link with a copy of what it points at, then run again.
+- **`… leads into …, which OpenClaw uses, through the link …`**: a dir in `~/.bot` is a link
+  into `~/.openclaw` or another dir OpenClaw uses (a shared workspace, say), so the import would
+  change OpenClaw's files. The message names the link: replace it with a plain dir (a copy of
+  what it points at), then run again.
 - **`bot.json would not load after the merge`**: your existing `bot.json` and OpenClaw's config
   clash in a way no single imported key explains. Move `bot.json` aside, import, then copy your
   settings back.
