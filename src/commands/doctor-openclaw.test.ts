@@ -52,6 +52,25 @@ describe("noteOpenClawInstall", () => {
     expect(text).toContain("openclaw gateway stop");
   });
 
+  it("warns about OpenClaw's gateway kept under a Clawdbot-era service name, and no other", () => {
+    const noteFn = vi.fn();
+    fs.mkdirSync(path.join(home, ".openclaw"));
+    fs.writeFileSync(path.join(home, ".openclaw", "openclaw.json"), "{}");
+    const agents = path.join(home, "Library", "LaunchAgents");
+    fs.mkdirSync(agents, { recursive: true });
+    fs.writeFileSync(path.join(agents, "com.clawdbot.old.plist"), "<string>clawdbot.mjs</string>");
+    noteOpenClawInstall(env(), noteFn);
+    expect((noteFn.mock.calls[0] as [string])[0]).not.toContain("gateway service");
+    fs.writeFileSync(
+      path.join(agents, "com.clawdbot.gateway.plist"),
+      "<string>/opt/openclaw/openclaw.mjs</string>",
+    );
+    noteOpenClawInstall(env(), noteFn);
+    const [text] = noteFn.mock.calls[1] as [string];
+    expect(text).toContain("com.clawdbot.gateway.plist");
+    expect(text).not.toContain("com.clawdbot.old.plist");
+  });
+
   it("says nothing when Hanzo Bot's own state dir is the OpenClaw dir", () => {
     const noteFn = vi.fn();
     fs.mkdirSync(path.join(home, ".openclaw"));

@@ -9,12 +9,42 @@ import { formatDocsLink } from "../terminal/links.js";
 import { note } from "../terminal/note.js";
 import { shortenHomePath } from "../utils.js";
 
-/** OpenClaw's gateway service files: launchd on macOS, a systemd user unit on Linux. */
+/**
+ * OpenClaw's gateway service files: launchd on macOS, a systemd user unit on
+ * Linux. OpenClaw keeps a Clawdbot-era service's name when it runs it, so a
+ * clawdbot or moltbot service file that runs openclaw is OpenClaw's too.
+ */
 function openClawServiceFiles(home: string): string[] {
-  return [
-    path.join(home, "Library", "LaunchAgents", "ai.openclaw.gateway.plist"),
-    path.join(home, ".config", "systemd", "user", "openclaw-gateway.service"),
-  ].filter((file) => fs.existsSync(file));
+  const dirs: Array<[string, string]> = [
+    [path.join(home, "Library", "LaunchAgents"), ".plist"],
+    [path.join(home, ".config", "systemd", "user"), ".service"],
+  ];
+  return dirs.flatMap(([dir, ext]) => {
+    let names: string[];
+    try {
+      names = fs.readdirSync(dir);
+    } catch {
+      return [];
+    }
+    return names
+      .filter((name) => name.endsWith(ext))
+      .filter((name) => {
+        const lower = name.toLowerCase();
+        if (lower === `ai.openclaw.gateway${ext}` || lower === `openclaw-gateway${ext}`) {
+          return true;
+        }
+        if (!/clawdbot|moltbot/.test(lower)) {
+          return false;
+        }
+        try {
+          return fs.readFileSync(path.join(dir, name), "utf8").toLowerCase().includes("openclaw");
+        } catch {
+          return false;
+        }
+      })
+      .toSorted()
+      .map((name) => path.join(dir, name));
+  });
 }
 
 /** The OpenClaw state dir on this machine, when it holds an install that is not Hanzo Bot's own dir. */
