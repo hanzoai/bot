@@ -654,8 +654,8 @@ describe("agent roster", () => {
       /agents.entries.My Agent: not an agent id/,
     ],
     [
-      "ownership other than explicit",
-      { agents: { ownership: "implicit" } },
+      "ownership other than explicit beside agents.entries",
+      { agents: { ownership: "implicit", entries: { a: {} } } },
       /agents.ownership: not "explicit"/,
     ],
   ])("refuses a roster OpenClaw would route otherwise or not load: %s", (_what, source, error) => {

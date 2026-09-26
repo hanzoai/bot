@@ -139,8 +139,8 @@ function refuseRoute(why: string): never {
 }
 
 /**
- * The agent that answers a message no binding matches. A legacy roster (an
- * agents.list with no agents.entries or agents.ownership) is read as every
+ * The agent that answers a message no binding matches. A legacy roster (no
+ * agents.entries, and no agents.ownership "explicit") is read as every
  * OpenClaw before 2026.9 and Hanzo Bot read it: the first default: true
  * entry, else the first entry, else main. A current one is read as OpenClaw
  * 2026.9.6's config loader and router read it (readAgentRosterProperty,
@@ -151,12 +151,12 @@ function refuseRoute(why: string): never {
  */
 function rosterOwner(config: Json): string {
   const agents = child(config, "agents") ?? {};
-  if (!Object.hasOwn(agents, "entries") && !Object.hasOwn(agents, "ownership")) {
+  const explicit = agents.ownership === "explicit";
+  if (!Object.hasOwn(agents, "entries") && !explicit) {
     const list = Array.isArray(agents.list) ? agents.list.filter(isPlainObject) : [];
     const chosen = list.find((entry) => entry.default === true) ?? list[0];
     return normalizeAgentId(typeof chosen?.id === "string" ? chosen.id : undefined);
   }
-  const explicit = agents.ownership === "explicit";
   if (Object.hasOwn(agents, "ownership") && !explicit) {
     refuseRoster("agents.ownership", 'not "explicit"');
   }
@@ -297,7 +297,9 @@ function applyRoster(agents: Json, owner: string, report: ConfigReport): void {
   const systemAgent = child(defaults ?? {}, "systemAgent");
   const list = Array.isArray(agents.list) ? agents.list : [];
   const index = list.findIndex(
-    (entry) => isPlainObject(entry) && normalizeAgentId(String(entry.id)) === owner,
+    (entry) =>
+      isPlainObject(entry) &&
+      normalizeAgentId(typeof entry.id === "string" ? entry.id : undefined) === owner,
   );
   if (explicit && defaults && systemAgent && Object.hasOwn(systemAgent, "agentId") && index >= 0) {
     (list[index] as Json).default = true;
