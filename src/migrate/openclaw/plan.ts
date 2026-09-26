@@ -319,8 +319,10 @@ function setWorkspaces(p: Planning, config: Json, configName: string): PlanItem[
       owner.workspace = homeForm(path.join(p.target, path.relative(realSource, real)), p.home);
       continue;
     }
-    p.items.push({ op: "note", from: value, reason: "workspace-in-place" });
-    p.sources.add(abs);
+    if (!p.sources.has(abs)) {
+      p.items.push({ op: "note", from: value, reason: "workspace-in-place" });
+      p.sources.add(abs);
+    }
   }
   return renames;
 }

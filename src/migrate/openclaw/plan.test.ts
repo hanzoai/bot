@@ -761,10 +761,22 @@ describe("OpenClaw database layout", () => {
     fs.writeFileSync(file, JSON.stringify(config));
     fs.mkdirSync(path.join(home, "projects", "assistant"), { recursive: true });
     const plan = await applyMigration({ source, target, home });
-    expect(plan.items.find((entry) => entry.reason === "workspace-in-place")).toMatchObject({
-      from: "~/projects/assistant",
-    });
+    expect(plan.items.filter((entry) => entry.reason === "workspace-in-place")).toEqual([
+      { op: "note", from: "~/projects/assistant", reason: "workspace-in-place" },
+    ]);
     expect(fs.readdirSync(path.join(home, "projects", "assistant"))).toEqual([]);
+  });
+
+  it("names a workspace outside the OpenClaw dir once, however many settings name it", () => {
+    const file = path.join(source, "openclaw.json");
+    const config = JSON.parse(fs.readFileSync(file, "utf8")) as {
+      agents: { defaults: Record<string, unknown>; entries: Record<string, unknown> };
+    };
+    config.agents.defaults.workspace = "~/projects/assistant";
+    config.agents.entries = { main: { name: "Main", workspace: "~/projects/assistant" } };
+    fs.writeFileSync(file, JSON.stringify(config));
+    const { plan } = planMigration({ source, target, home });
+    expect(plan.items.filter((entry) => entry.reason === "workspace-in-place")).toHaveLength(1);
   });
 
   it("puts a non-default agent's heartbeat in that agent's workspace", async () => {
