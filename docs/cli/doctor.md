@@ -30,7 +30,7 @@ Notes:
 - State integrity checks now detect orphan transcript files in the sessions directory and can archive them as `.deleted.<timestamp>` to reclaim space safely.
 - Doctor includes a memory-search readiness check and can recommend `hanzo-bot configure --section model` when embedding credentials are missing.
 - If sandbox mode is enabled but Docker is unavailable, doctor reports a high-signal warning with remediation (`install Docker` or `hanzo-bot config set agents.defaults.sandbox.mode off`).
-- If an OpenClaw install is present (`~/.openclaw` or `$OPENCLAW_STATE_DIR`), doctor points at `hanzo-bot migrate openclaw` and warns when OpenClaw's gateway service is still installed. See [Migrate from OpenClaw](/install/migrate-from-openclaw).
+- If an OpenClaw install is present (`$OPENCLAW_STATE_DIR`, `~/.openclaw` or a Clawdbot-era `~/.clawdbot`), doctor points at `hanzo-bot migrate openclaw` and warns when OpenClaw's gateway service is still installed. It does this before a `bot.json` exists, too. See [Migrate from OpenClaw](/install/migrate-from-openclaw).
 
 ## macOS: `launchctl` env overrides
 

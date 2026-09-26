@@ -156,7 +156,10 @@ export function registerMigrateCli(program: Command) {
     .description(
       "Import an OpenClaw install: config, credentials, workspace, sessions, skills, cron",
     )
-    .option("--from <dir>", "OpenClaw state dir (default: $OPENCLAW_STATE_DIR or ~/.openclaw)")
+    .option(
+      "--from <dir>",
+      "OpenClaw state dir (default: $OPENCLAW_STATE_DIR, ~/.openclaw, or a Clawdbot-era ~/.clawdbot)",
+    )
     .option("--apply", "Write the changes (default: show what would change)", false)
     .option("--json", "Print the plan as JSON", false)
     .action(async (opts: { from?: string; apply?: boolean; json?: boolean }) => {

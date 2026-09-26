@@ -25,13 +25,16 @@ hanzo-bot migrate openclaw --from ~/.openclaw-work  # another OpenClaw state dir
 
 Options:
 
-- `--from <dir>`: the OpenClaw state dir. Default: `$OPENCLAW_STATE_DIR`, else `~/.openclaw`.
+- `--from <dir>`: the OpenClaw state dir. Default: `$OPENCLAW_STATE_DIR`, else `~/.openclaw`,
+  else a Clawdbot-era `~/.clawdbot`.
 - `--apply`: write the changes. Without it nothing is written.
 - `--json`: print the plan as JSON. It holds paths, key names and counts, never a secret value.
 
-The target is Hanzo Bot's state dir (`$BOT_STATE_DIR`, else `~/.bot`). The OpenClaw install
-is only read. Running it again is safe: anything already in place is reported as `unchanged`,
-and a value or file Hanzo Bot already has is never replaced.
+The target is Hanzo Bot's state dir (`$BOT_STATE_DIR`, else `~/.bot`). The OpenClaw install,
+and every dir it reaches through a link, is only read. Running it again is safe: anything
+already in place is reported as `unchanged`, and a value or file Hanzo Bot already has is never
+replaced, except the defaults Hanzo Bot's own first run wrote (see
+[an existing bot.json](/install/migrate-from-openclaw#an-existing-botjson)).
 
 The plan has four parts:
 
