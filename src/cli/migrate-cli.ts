@@ -41,6 +41,8 @@ const REASONS: Record<string, string> = {
   encrypted: "encrypted with OpenClaw's key; sign in again",
   runtime: "runtime state",
   "session-id": "session id is not a plain file name",
+  shadowed: "a skill of the same name loads before it, as in OpenClaw",
+  merge: "with your existing bot.json settings it would not load",
 };
 
 function noteText(item: PlanItem): string {
@@ -59,6 +61,14 @@ function noteText(item: PlanItem): string {
       return `bot.json reads ${item.names?.join(", ")} from the environment (renamed from OPENCLAW_*). Set them where you set the old ones.`;
     case "workspace-in-place":
       return `Workspace ${item.from} is outside the OpenClaw dir; both installs now use it.`;
+    case "linked-dir":
+      return `OpenClaw's ${item.from} is a link to ${item.to}; Hanzo Bot got a copy of its files, so the two installs no longer share it.`;
+    case "agent-outside":
+      return `Agent ${item.names?.[0]} works in ${item.from}, which the import does not write to. Its heartbeat checklist and workshop skills are in ${item.to}: move HEARTBEAT.md into ${item.from}, and skills/* into ${item.from}/.agents/skills.`;
+    case "starter":
+      return `bot.json held Hanzo Bot's first-run defaults for ${item.names?.join(", ")}; OpenClaw's settings replace them (the old file is bot.json.bak).${item.names?.includes("models.providers.anthropic") ? " Anthropic calls use your imported Anthropic key, as in OpenClaw." : ""}`;
+    case "kept":
+      return `bot.json already sets ${item.names?.join(", ")}, so OpenClaw's values for them were not applied. Change them by hand to use OpenClaw's.`;
     default:
       return item.from;
   }

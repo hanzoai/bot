@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { isDeepStrictEqual } from "node:util";
 import { allocateColor } from "../../browser/profiles.js";
 import {
   validateConfigObjectRaw,
@@ -563,15 +564,23 @@ export function convertConfig(params: {
   return { config: result, report };
 }
 
+export type KeyPath = string[];
+
 /**
  * Merge the converted config beneath an existing bot.json: every value the
  * existing file sets is kept; objects merge key by key; arrays and scalars
- * already present are never replaced. Returns the dotted paths it added.
+ * already present are never replaced. Returns the paths it added and the
+ * paths where the existing value differs and was kept.
  */
-export function mergeBeneath(existing: Json, incoming: Json, path = ""): string[] {
-  const added: string[] = [];
+export function mergeBeneath(
+  existing: Json,
+  incoming: Json,
+  at: KeyPath = [],
+): { added: KeyPath[]; kept: KeyPath[] } {
+  const added: KeyPath[] = [];
+  const kept: KeyPath[] = [];
   for (const [key, value] of Object.entries(incoming)) {
-    const sub = path ? `${path}.${key}` : key;
+    const sub = [...at, key];
     if (!Object.hasOwn(existing, key)) {
       existing[key] = value;
       added.push(sub);
@@ -579,8 +588,132 @@ export function mergeBeneath(existing: Json, incoming: Json, path = ""): string[
     }
     const current = existing[key];
     if (isPlainObject(current) && isPlainObject(value)) {
-      added.push(...mergeBeneath(current, value, sub));
+      const inner = mergeBeneath(current, value, sub);
+      added.push(...inner.added);
+      kept.push(...inner.kept);
+    } else if (!isDeepStrictEqual(current, value)) {
+      kept.push(sub);
     }
   }
-  return added;
+  return { added, kept };
+}
+
+function valueAt(root: unknown, at: KeyPath): unknown {
+  let cursor = root;
+  for (const key of at) {
+    cursor = isPlainObject(cursor) ? cursor[key] : undefined;
+  }
+  return cursor;
+}
+
+function prune(root: Json, at: KeyPath): void {
+  for (let end = at.length - 1; end > 0; end -= 1) {
+    const parent = valueAt(root, at.slice(0, end - 1));
+    const key = at[end - 1] ?? "";
+    if (
+      isPlainObject(parent) &&
+      isPlainObject(parent[key]) &&
+      Object.keys(parent[key]).length === 0
+    ) {
+      delete parent[key];
+    }
+  }
+}
+
+/**
+ * Hanzo Bot's first run writes a starter config (Run Locally's
+ * hanzoCloudConfig). A value of it still in bot.json was chosen by nobody, so
+ * the OpenClaw value for the same key replaces it. Its Anthropic route through
+ * the Hanzo proxy goes only when the import brings the person's own Anthropic
+ * key, which OpenClaw sent to Anthropic. Returns the keys given way.
+ */
+export function yieldStarter(
+  existing: Json,
+  starter: Json,
+  incoming: Json,
+  opts: { anthropic: boolean },
+): string[] {
+  const leaves: KeyPath[] = [
+    ["gateway", "mode"],
+    ["gateway", "bind"],
+    ["agents", "defaults", "workspace"],
+  ];
+  const yielded: string[] = [];
+  for (const at of leaves) {
+    const value = valueAt(existing, at);
+    if (
+      value !== undefined &&
+      isDeepStrictEqual(value, valueAt(starter, at)) &&
+      valueAt(incoming, at) !== undefined &&
+      !isDeepStrictEqual(value, valueAt(incoming, at))
+    ) {
+      deleteAt(existing, at);
+      yielded.push(formatPath(at));
+    }
+  }
+  const anthropic: KeyPath = ["models", "providers", "anthropic"];
+  if (
+    opts.anthropic &&
+    isDeepStrictEqual(valueAt(existing, anthropic), valueAt(starter, anthropic))
+  ) {
+    deleteAt(existing, anthropic);
+    prune(existing, anthropic);
+    yielded.push(formatPath(anthropic));
+  }
+  return yielded;
+}
+
+function isPrefix(prefix: readonly string[], at: readonly string[]): boolean {
+  return prefix.length <= at.length && prefix.every((key, index) => at[index] === key);
+}
+
+/**
+ * The merged bot.json must load wherever the existing one did. For an issue
+ * the merge introduced, the added keys nearest to it are candidates (those in
+ * the object it names, else in its parent, and so on); the one whose removal
+ * clears the most issues goes, or all of them when none helps alone. Returns
+ * the labels dropped; throws when nothing added is left to drop.
+ */
+export function validateMerge(merged: Json, before: Json, added: KeyPath[]): string[] {
+  const known = new Set(invalidPaths(before).map(formatPath));
+  const fresh = (config: Json) =>
+    invalidPaths(config).filter((issue) => !known.has(formatPath(issue)));
+  const dropped: string[] = [];
+  let remaining = [...added];
+  for (let issues = fresh(merged); issues.length > 0; issues = fresh(merged)) {
+    const near = new Set<KeyPath>();
+    for (const issue of issues) {
+      for (let depth = issue.length - 1; depth >= 0; depth -= 1) {
+        const scope = issue.slice(0, depth).map(String);
+        const hits = remaining.filter((at) => isPrefix(scope, at) || isPrefix(at, scope));
+        if (hits.length > 0) {
+          hits.forEach((at) => near.add(at));
+          break;
+        }
+      }
+    }
+    if (near.size === 0) {
+      throw new Error(
+        `bot.json would not load after the merge (${issues.map(formatPath).join(", ")}); nothing was written`,
+      );
+    }
+    let best: KeyPath | undefined;
+    let fewest = issues.length;
+    for (const at of near) {
+      const trial = structuredClone(merged);
+      deleteAt(trial, at);
+      const left = fresh(trial).length;
+      if (left < fewest) {
+        best = at;
+        fewest = left;
+      }
+    }
+    const drop = best ? [best] : [...near];
+    for (const at of drop) {
+      deleteAt(merged, at);
+      dropped.push(formatPath(at));
+    }
+    remaining = remaining.filter((at) => !drop.includes(at));
+  }
+  return dropped;
 }

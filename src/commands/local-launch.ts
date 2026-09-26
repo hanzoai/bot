@@ -17,41 +17,16 @@
  */
 
 import os from "node:os";
-import path from "node:path";
 import { upsertAuthProfile } from "../agents/auth-profiles.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { readConfigFileSnapshot, writeConfigFile } from "../config/io.js";
 import { resolveGatewayPort } from "../config/paths.js";
 import type { GatewayServerOptions } from "../gateway/server.js";
 import { resolveDashboardUrl } from "./dashboard.js";
+import { hanzoCloudConfig } from "./hanzo-cloud-config.js";
 import { openUrl } from "./onboard-helpers.js";
 
-/** Hanzo API proxy endpoint — accepts IAM tokens, proxies to model providers. */
-export const HANZO_API_BASE_URL = "https://api.hanzo.ai";
 const DEFAULT_PORT = 18789;
-
-/** The config Run Locally writes on a machine with no bot.json. */
-export function hanzoCloudConfig(home: string) {
-  return {
-    gateway: {
-      mode: "local" as const,
-      bind: "loopback" as const,
-    },
-    models: {
-      providers: {
-        anthropic: {
-          baseUrl: HANZO_API_BASE_URL,
-          models: [],
-        },
-      },
-    },
-    agents: {
-      defaults: {
-        workspace: path.join(home, ".hanzo", "bot", "workspace"),
-      },
-    },
-  };
-}
 
 export async function launchLocal(params: { accessToken: string }): Promise<void> {
   const { accessToken } = params;

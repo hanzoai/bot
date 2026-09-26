@@ -14,7 +14,13 @@ export type Action =
   | { kind: "link"; to: string; target: string }
   | { kind: "backup"; file: string };
 
-export type CopyTally = { created: number; unchanged: number; conflicts: string[] };
+export type CopyTally = {
+  created: number;
+  unchanged: number;
+  conflicts: string[];
+  /** Where fromDir really is, when fromDir itself is a link. */
+  linkedTo?: string;
+};
 
 function sameBytes(a: string, b: string): boolean {
   const statA = fs.statSync(a);
@@ -26,28 +32,43 @@ function sameBytes(a: string, b: string): boolean {
 }
 
 /**
- * Plan copying `fromDir` into `toDir` file by file. Symlinks are recreated,
- * never followed; `relink` may point one elsewhere (an absolute link into the
- * OpenClaw dir is pointed at the same place in the Hanzo Bot dir, so writing
- * through it cannot change the OpenClaw install). `skip` names entries
- * (relative to fromDir) that are not copied.
+ * Plan copying `fromDir` into `toDir` file by file. A fromDir that is itself
+ * a link is copied as the files it points at, so the target gets a dir of its
+ * own. Symlinks below it are recreated, never followed; `relink` may point one
+ * elsewhere (an absolute link into the OpenClaw dir is pointed at the same
+ * place in the Hanzo Bot dir, so writing through it cannot change the OpenClaw
+ * install). `reached` collects the real place of every link the walk meets,
+ * `claimed` the targets already planned (a second copy to one is a conflict).
+ * `skip` names entries (relative to fromDir) that are not copied.
  */
 export function planCopyTree(params: {
   fromDir: string;
   toDir: string;
   actions: Action[];
+  claimed: Set<string>;
+  reached: Set<string>;
   skip?: (rel: string) => boolean;
   relink?: (target: string) => string;
 }): CopyTally {
   const tally: CopyTally = { created: 0, unchanged: 0, conflicts: [] };
+  if (isLink(params.fromDir)) {
+    tally.linkedTo = realPathOf(params.fromDir);
+    params.reached.add(tally.linkedTo);
+  }
   const walk = (rel: string) => {
     const from = path.join(params.fromDir, rel);
     const to = path.join(params.toDir, rel);
-    const stat = fs.lstatSync(from);
+    const stat = rel ? fs.lstatSync(from) : fs.statSync(from);
     if (stat.isSymbolicLink()) {
+      if (fs.existsSync(from)) {
+        params.reached.add(realPathOf(from));
+      }
       const target = params.relink?.(fs.readlinkSync(from)) ?? fs.readlinkSync(from);
-      if (!fs.existsSync(to) && !isLink(to)) {
+      if (params.claimed.has(to)) {
+        tally.conflicts.push(rel);
+      } else if (!fs.existsSync(to) && !isLink(to)) {
         params.actions.push({ kind: "link", to, target });
+        params.claimed.add(to);
         tally.created += 1;
       } else if (isLink(to) && fs.readlinkSync(to) === target) {
         tally.unchanged += 1;
@@ -69,8 +90,11 @@ export function planCopyTree(params: {
       return;
     }
     // A dangling link at the target is there too: a copy would not replace it.
-    if (!fs.existsSync(to) && !isLink(to)) {
+    if (params.claimed.has(to)) {
+      tally.conflicts.push(rel);
+    } else if (!fs.existsSync(to) && !isLink(to)) {
       params.actions.push({ kind: "copy", from, to, mode: stat.mode & 0o777 });
+      params.claimed.add(to);
       tally.created += 1;
     } else if (fs.existsSync(to) && fs.statSync(to).isFile() && sameBytes(from, to)) {
       tally.unchanged += 1;
@@ -90,14 +114,22 @@ function isLink(file: string): boolean {
   }
 }
 
-/** An absolute link target inside `sourceRoot` names the same place inside `targetRoot`. */
+/**
+ * An absolute link target inside `sourceRoot` names the same place inside
+ * `targetRoot`, whether it is written as the path or reaches it through links.
+ */
 export function relinkInto(sourceRoot: string, targetRoot: string): (target: string) => string {
+  const realSource = realPathOf(sourceRoot);
   return (target) => {
     if (!path.isAbsolute(target)) {
       return target;
     }
-    return isWithin(sourceRoot, target)
-      ? path.join(targetRoot, path.relative(sourceRoot, target))
+    if (isWithin(sourceRoot, target)) {
+      return path.join(targetRoot, path.relative(sourceRoot, target));
+    }
+    const real = realPathOf(target);
+    return isWithin(realSource, real)
+      ? path.join(targetRoot, path.relative(realSource, real))
       : target;
   };
 }
@@ -108,13 +140,17 @@ export function isWithin(root: string, file: string): boolean {
   return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
 }
 
-/** A path with its links resolved, for a path that may not exist yet: the nearest dir that does is resolved. */
+/**
+ * A path with its links resolved, for a path that may not exist yet: the
+ * nearest dir that does is resolved. realpath.native spells each name as the
+ * disk does, so paths on a case-insensitive volume compare as strings.
+ */
 export function realPathOf(file: string): string {
   let existing = path.resolve(file);
   while (!fs.existsSync(existing) && path.dirname(existing) !== existing) {
     existing = path.dirname(existing);
   }
-  return path.join(fs.realpathSync(existing), path.relative(existing, path.resolve(file)));
+  return path.join(fs.realpathSync.native(existing), path.relative(existing, path.resolve(file)));
 }
 
 /**
@@ -137,26 +173,50 @@ function landing(file: string, planned: Map<string, string>, depth = 0): string 
 }
 
 /**
- * Refuse a plan that would write into the OpenClaw install through a link: a
- * dir in the Hanzo Bot state dir that links into it, or a copied link that
- * leads back into it.
+ * Refuse a plan that would write into a dir OpenClaw uses through a link: the
+ * OpenClaw install, a dir outside it that the plan reads through a link, or a
+ * workspace OpenClaw keeps outside it. A dir that holds the target (a link to
+ * home, say) guards nothing the target does not already. Each write is
+ * followed through links on disk and links the plan creates.
  */
-export function assertOutsideSource(sourceRoot: string, actions: Action[]): void {
-  const source = realPathOf(sourceRoot);
+export function assertOutsideSources(params: {
+  targetRoot: string;
+  sources: Iterable<string>;
+  actions: Action[];
+}): void {
+  const target = realPathOf(params.targetRoot);
+  const guarded = [...new Set([...params.sources].map(realPathOf))].filter(
+    (dir) => !isWithin(dir, target),
+  );
   const planned = new Map<string, string>();
-  for (const action of actions) {
+  for (const action of params.actions) {
     if (action.kind === "link") {
       planned.set(action.to, action.target);
     }
   }
-  for (const action of actions) {
+  for (const action of params.actions) {
     const file = action.kind === "backup" ? action.file : action.to;
     const lands = landing(file, planned);
-    if (isWithin(source, lands)) {
+    const dir = guarded.find((root) => isWithin(root, lands));
+    if (dir) {
       throw new Error(
-        `${file} leads into the OpenClaw install (${lands}) through a link; nothing was written. Replace the link in the Hanzo Bot dir with a copy of what it points at, then run again.`,
+        `${file} leads into ${dir}, which OpenClaw uses, through a link (it lands at ${lands}); nothing was written. Replace the link in the Hanzo Bot dir with a copy of what it points at, then run again.`,
       );
     }
+  }
+}
+
+/** Two planned writes to one file would lose one of them; the plan never makes them. */
+export function assertUniqueTargets(actions: Action[]): void {
+  const seen = new Set<string>();
+  for (const action of actions) {
+    if (action.kind === "backup") {
+      continue;
+    }
+    if (seen.has(action.to)) {
+      throw new Error(`two planned writes to ${action.to}; nothing was written`);
+    }
+    seen.add(action.to);
   }
 }
 

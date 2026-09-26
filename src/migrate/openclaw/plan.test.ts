@@ -3,6 +3,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { hanzoCloudConfig } from "../../commands/hanzo-cloud-config.js";
+import { validateConfigObjectRaw } from "../../config/validation.js";
 import { applyMigration, planMigration, type Plan } from "./plan.js";
 import { DB_SESSION_EVENTS, SECRETS, writeDbLayout, writeFileLayout } from "./test-fixtures.js";
 
@@ -207,6 +209,134 @@ describe("OpenClaw file layout", () => {
       status: "conflict",
       names: ["AGENTS.md"],
     });
+    // The workspace stays the one bot.json names: the plan says so rather than claim a move.
+    expect(item(plan, "note", "bot.json")).toMatchObject({
+      reason: "kept",
+      names: expect.arrayContaining(["gateway.port", "agents.defaults.workspace"]),
+    });
+    expect(plan.items.filter((entry) => entry.to === "bot.json#agents.defaults.workspace")).toEqual(
+      [],
+    );
+  });
+
+  it("replaces what Hanzo Bot's first run wrote with OpenClaw's settings", async () => {
+    fs.mkdirSync(path.join(target, "agents", "main", "agent"), { recursive: true, mode: 0o700 });
+    fs.writeFileSync(path.join(target, "bot.json"), JSON.stringify(hanzoCloudConfig(home)), {
+      mode: 0o600,
+    });
+    fs.writeFileSync(
+      path.join(target, "agents", "main", "agent", "auth-profiles.json"),
+      JSON.stringify({
+        version: 1,
+        profiles: {
+          "anthropic:hanzo-iam": { type: "api_key", provider: "anthropic", key: "iam-token" },
+        },
+      }),
+      { mode: 0o600 },
+    );
+    const plan = await applyMigration({ source, target, home });
+    const config = readJson("bot.json") as {
+      agents: { defaults: { workspace: string } };
+      models?: unknown;
+    };
+    expect(config.agents.defaults.workspace).toBe("~/.bot/workspace");
+    expect(config.models).toBeUndefined();
+    expect(item(plan, "note", "bot.json")).toMatchObject({
+      reason: "starter",
+      names: ["agents.defaults.workspace", "models.providers.anthropic"],
+    });
+    // The first run's IAM token is never offered to Anthropic itself.
+    const auth = readJson("agents/main/agent/auth-profiles.json") as {
+      order: Record<string, string[]>;
+    };
+    expect(auth.order.anthropic).toEqual(["anthropic:default"]);
+  });
+
+  it("drops an imported key that would stop the merged bot.json from loading", async () => {
+    const file = path.join(source, "openclaw.json");
+    const config = fs
+      .readFileSync(file, "utf8")
+      .replace('dmPolicy: "pairing"', 'dmPolicy: "open", allowFrom: ["*"]');
+    fs.writeFileSync(file, config);
+    fs.mkdirSync(target, { recursive: true, mode: 0o700 });
+    fs.writeFileSync(
+      path.join(target, "bot.json"),
+      JSON.stringify({ channels: { telegram: { allowFrom: ["123456789"] } } }),
+      { mode: 0o600 },
+    );
+    const plan = await applyMigration({ source, target, home });
+    const merged = readJson("bot.json");
+    expect(validateConfigObjectRaw(merged).ok).toBe(true);
+    // Only the key that breaks it goes; the Telegram token comes along.
+    expect(merged.channels).toMatchObject({
+      telegram: { allowFrom: ["123456789"], botToken: SECRETS.telegramToken },
+    });
+    expect(item(plan, "drop", "openclaw.json#channels.telegram.dmPolicy")?.reason).toBe("merge");
+  });
+
+  it("copies a linked OpenClaw dir as files, and never writes through the link", async () => {
+    const dotfiles = path.join(home, "dotfiles", "openclaw-skills");
+    fs.mkdirSync(path.dirname(dotfiles), { recursive: true });
+    fs.renameSync(path.join(source, "skills"), dotfiles);
+    fs.symlinkSync(dotfiles, path.join(source, "skills"));
+    const workshop = path.join(source, "agents", "main", "agent", "workshop-skills", "trip");
+    fs.mkdirSync(workshop, { recursive: true });
+    fs.writeFileSync(path.join(workshop, "SKILL.md"), "---\nname: trip\n---\n");
+    const before = snapshot(dotfiles);
+    const plan = await applyMigration({ source, target, home });
+    expect(snapshot(dotfiles)).toEqual(before);
+    expect(fs.lstatSync(path.join(target, "skills")).isDirectory()).toBe(true);
+    expect(fs.existsSync(path.join(target, "skills", "managed-one", "SKILL.md"))).toBe(true);
+    expect(item(plan, "note", "skills")).toMatchObject({
+      reason: "linked-dir",
+      to: "~/dotfiles/openclaw-skills",
+    });
+  });
+
+  it("keeps workshop skills with their agent, and a same-named one does not stop the import", async () => {
+    for (const agent of ["main", "work"]) {
+      const dir = path.join(source, "agents", agent, "agent", "workshop-skills", "daily-brief");
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, "SKILL.md"), `---\nname: daily-brief\n---\n# ${agent}\n`);
+    }
+    // OpenClaw's managed skill of the same name loaded first; this one was never used.
+    const shadowed = path.join(source, "agents", "main", "agent", "workshop-skills", "managed-one");
+    fs.mkdirSync(shadowed, { recursive: true });
+    fs.writeFileSync(path.join(shadowed, "SKILL.md"), "---\nname: managed-one\n---\n");
+    const plan = await applyMigration({ source, target, home });
+    const skill = (ws: string) =>
+      path.join(target, ws, ".agents", "skills", "daily-brief", "SKILL.md");
+    expect(fs.readFileSync(skill("workspace"), "utf8")).toContain("# main");
+    expect(fs.readFileSync(skill("workspace-work"), "utf8")).toContain("# work");
+    expect(fs.existsSync(path.join(target, "skills", "daily-brief"))).toBe(false);
+    expect(fs.existsSync(path.join(target, "workspace", ".agents", "skills", "managed-one"))).toBe(
+      false,
+    );
+    expect(item(plan, "skip", "agents/main/agent/workshop-skills")).toMatchObject({
+      reason: "shadowed",
+      names: ["managed-one"],
+    });
+  });
+
+  it("reports a second copy to one place as a conflict", async () => {
+    // Two agents working in one dir both have a workshop skill of one name.
+    const file = path.join(source, "openclaw.json");
+    fs.writeFileSync(
+      file,
+      fs
+        .readFileSync(file, "utf8")
+        .replace('{ id: "work" }', '{ id: "work", workspace: "~/.openclaw/workspace" }'),
+    );
+    for (const agent of ["main", "work"]) {
+      const dir = path.join(source, "agents", agent, "agent", "workshop-skills", "daily-brief");
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, "SKILL.md"), `---\nname: daily-brief\n---\n# ${agent}\n`);
+    }
+    const plan = await applyMigration({ source, target, home });
+    expect(item(plan, "copy", "agents/work/agent/workshop-skills")).toMatchObject({
+      status: "conflict",
+      names: [path.join("daily-brief", "SKILL.md")],
+    });
   });
 
   it("points a link into the OpenClaw dir at the same place in the Hanzo Bot dir", async () => {
@@ -240,18 +370,31 @@ describe("OpenClaw file layout", () => {
   });
 
   it("refuses a copied link that leads back into the OpenClaw install", async () => {
-    // skills/back -> ../../.openclaw is copied as it is, so from ~/.bot/skills it
-    // names ~/.openclaw; an agent's workshop skill named back would be copied through it.
-    fs.symlinkSync(path.join("..", "..", ".openclaw"), path.join(source, "skills", "back"));
+    // workspace/.agents -> ../../.openclaw is copied as it is, so from ~/.bot/workspace
+    // it names ~/.openclaw; an agent's workshop skill would be copied through it.
+    fs.symlinkSync(path.join("..", "..", ".openclaw"), path.join(source, "workspace", ".agents"));
     const workshop = path.join(source, "agents", "main", "agent", "workshop-skills", "back");
     fs.mkdirSync(workshop, { recursive: true });
     fs.writeFileSync(path.join(workshop, "SKILL.md"), "---\nname: back\n---\n");
     const before = snapshot(source);
     await expect(applyMigration({ source, target, home })).rejects.toThrow(
-      /leads into the OpenClaw install/,
+      /leads into .*\.openclaw, which OpenClaw uses/,
     );
     expect(snapshot(source)).toEqual(before);
     expect(fs.existsSync(target)).toBe(false);
+  });
+
+  it("refuses a copied link that leads to a dir OpenClaw reaches outside its install", async () => {
+    const shared = path.join(home, "shared-agents");
+    fs.mkdirSync(shared);
+    fs.symlinkSync(shared, path.join(source, "workspace", ".agents"));
+    const workshop = path.join(source, "agents", "main", "agent", "workshop-skills", "trip");
+    fs.mkdirSync(workshop, { recursive: true });
+    fs.writeFileSync(path.join(workshop, "SKILL.md"), "---\nname: trip\n---\n");
+    await expect(applyMigration({ source, target, home })).rejects.toThrow(
+      /shared-agents, which OpenClaw uses/,
+    );
+    expect(fs.readdirSync(shared)).toEqual([]);
   });
 
   it("refuses dirs that contain each other and a dir with no OpenClaw install", () => {
@@ -383,10 +526,70 @@ describe("OpenClaw database layout", () => {
     fs.symlinkSync(path.join(source, "workspace"), path.join(target, "workspace"));
     const before = snapshot(source);
     expect(() => planMigration({ source, target, home })).toThrow(
-      /workspace\/HEARTBEAT\.md leads into the OpenClaw install/,
+      /workspace\/HEARTBEAT\.md leads into .*\.openclaw, which OpenClaw uses/,
     );
     await expect(applyMigration({ source, target, home })).rejects.toThrow(/nothing was written/);
     expect(snapshot(source)).toEqual(before);
     expect(fs.readdirSync(target)).toEqual(["workspace"]);
+  });
+
+  it("follows a link spelled in another case to the OpenClaw install", async () => {
+    const upper = path.join(home, ".OpenClaw");
+    if (!fs.existsSync(upper)) {
+      return; // a case-sensitive volume: ~/.OpenClaw is another dir
+    }
+    fs.mkdirSync(target, { recursive: true, mode: 0o700 });
+    fs.symlinkSync(path.join(upper, "workspace"), path.join(target, "workspace"));
+    const before = snapshot(source);
+    await expect(applyMigration({ source, target, home })).rejects.toThrow(/which OpenClaw uses/);
+    expect(snapshot(source)).toEqual(before);
+  });
+
+  it("copies a linked workspace as files and writes the heartbeat into the copy", async () => {
+    const shared = path.join(home, "Documents", "openclaw-workspace");
+    fs.mkdirSync(path.dirname(shared), { recursive: true });
+    fs.renameSync(path.join(source, "workspace"), shared);
+    fs.symlinkSync(shared, path.join(source, "workspace"));
+    const before = snapshot(shared);
+    const plan = await applyMigration({ source, target, home });
+    expect(snapshot(shared)).toEqual(before);
+    expect(fs.lstatSync(path.join(target, "workspace")).isDirectory()).toBe(true);
+    expect(fs.readFileSync(path.join(target, "workspace", "HEARTBEAT.md"), "utf8")).toContain(
+      "Check the inbox",
+    );
+    expect(item(plan, "note", "workspace")).toMatchObject({
+      reason: "linked-dir",
+      to: "~/Documents/openclaw-workspace",
+    });
+  });
+
+  it("puts the heartbeat where the agent works, and leaves a workspace outside the target alone", async () => {
+    const file = path.join(source, "openclaw.json");
+    const config = JSON.parse(fs.readFileSync(file, "utf8")) as {
+      agents: { defaults: Record<string, unknown> };
+    };
+    config.agents.defaults.workspace = "~/projects/assistant";
+    fs.writeFileSync(file, JSON.stringify(config));
+    fs.mkdirSync(path.join(home, "projects", "assistant"), { recursive: true });
+    const plan = await applyMigration({ source, target, home });
+    expect(fs.readdirSync(path.join(home, "projects", "assistant"))).toEqual([]);
+    const saved = path.join(target, "agents", "main", "from-openclaw", "HEARTBEAT.md");
+    expect(fs.readFileSync(saved, "utf8")).toContain("Check the inbox");
+    expect(plan.items.find((entry) => entry.reason === "agent-outside")).toMatchObject({
+      from: "~/projects/assistant",
+      to: "~/.bot/agents/main/from-openclaw",
+    });
+  });
+
+  it("puts a non-default agent's heartbeat in that agent's workspace", async () => {
+    const file = path.join(source, "openclaw.json");
+    const config = JSON.parse(fs.readFileSync(file, "utf8")) as {
+      agents: { entries: Record<string, unknown> };
+    };
+    config.agents.entries = { ops: { default: true }, main: { name: "Main" } };
+    fs.writeFileSync(file, JSON.stringify(config));
+    await applyMigration({ source, target, home });
+    expect(fs.existsSync(path.join(target, "workspace-main", "HEARTBEAT.md"))).toBe(true);
+    expect(fs.existsSync(path.join(target, "workspace", "HEARTBEAT.md"))).toBe(false);
   });
 });

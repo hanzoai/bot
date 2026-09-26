@@ -2,7 +2,16 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { convertConfig, listEnvRefs, mergeBeneath, rewriteEnvRefs } from "./config.js";
+import { hanzoCloudConfig } from "../../commands/hanzo-cloud-config.js";
+import {
+  convertConfig,
+  formatPath,
+  listEnvRefs,
+  mergeBeneath,
+  rewriteEnvRefs,
+  validateMerge,
+  yieldStarter,
+} from "./config.js";
 import { convertCronJob, mergeAuth, resetArchiveName } from "./convert.js";
 import { convertEnvEntries, mergeEnvText, parseEnvEntries } from "./env.js";
 import { createPathRewriter, homeForm } from "./paths.js";
@@ -248,7 +257,7 @@ describe("config", () => {
 
   it("merges beneath an existing config without replacing what it sets", () => {
     const existing = { gateway: { port: 1, auth: { mode: "token" } }, list: [1] };
-    const added = mergeBeneath(existing, {
+    const { added, kept } = mergeBeneath(existing, {
       gateway: { port: 2, bind: "loopback", auth: { token: "t" } },
       list: [2],
       tools: {},
@@ -258,7 +267,47 @@ describe("config", () => {
       list: [1],
       tools: {},
     });
-    expect(added).toEqual(["gateway.bind", "gateway.auth.token", "tools"]);
+    expect(added.map(formatPath)).toEqual(["gateway.bind", "gateway.auth.token", "tools"]);
+    // What the existing file overrules is reported, not claimed as moved.
+    expect(kept.map(formatPath)).toEqual(["gateway.port", "list"]);
+  });
+
+  it("lets OpenClaw's settings replace what Hanzo Bot's first run wrote", () => {
+    const starter = hanzoCloudConfig(HOME);
+    const incoming = {
+      gateway: { mode: "local", bind: "lan" },
+      agents: { defaults: { workspace: "~/.bot/workspace" } },
+    };
+    const firstRun = structuredClone(starter) as Record<string, unknown>;
+    expect(yieldStarter(firstRun, starter, incoming, { anthropic: true })).toEqual([
+      "gateway.bind",
+      "agents.defaults.workspace",
+      "models.providers.anthropic",
+    ]);
+    expect(firstRun).toEqual({ gateway: { mode: "local" }, agents: { defaults: {} } });
+
+    // Without an imported Anthropic key the proxy route is the only one that works.
+    const keep = structuredClone(starter) as Record<string, unknown>;
+    expect(yieldStarter(keep, starter, incoming, { anthropic: false })).not.toContain(
+      "models.providers.anthropic",
+    );
+    // A value the person set is theirs.
+    const own = { agents: { defaults: { workspace: "~/mine" } } };
+    expect(yieldStarter(own, starter, incoming, { anthropic: true })).toEqual([]);
+  });
+
+  it("drops the added keys that would stop a merged bot.json from loading", () => {
+    const before = { channels: { telegram: { allowFrom: ["123456789"] } } };
+    const merged = structuredClone(before) as Record<string, unknown>;
+    const { added } = mergeBeneath(merged, {
+      channels: { telegram: { dmPolicy: "open", allowFrom: ["*"] } },
+      tools: { web: { search: { enabled: true } } },
+    });
+    expect(validateMerge(merged, before, added)).toEqual(["channels.telegram.dmPolicy"]);
+    expect(merged).toEqual({
+      channels: { telegram: { allowFrom: ["123456789"] } },
+      tools: { web: { search: { enabled: true } } },
+    });
   });
 });
 
