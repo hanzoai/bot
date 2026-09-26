@@ -6,7 +6,13 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { hanzoCloudConfig } from "../../commands/hanzo-cloud-config.js";
 import { validateConfigObjectRaw } from "../../config/validation.js";
 import { applyMigration, planMigration, type Plan } from "./plan.js";
-import { DB_SESSION_EVENTS, SECRETS, writeDbLayout, writeFileLayout } from "./test-fixtures.js";
+import {
+  DB_SESSION_EVENTS,
+  SECRETS,
+  writeApprovalsRow,
+  writeDbLayout,
+  writeFileLayout,
+} from "./test-fixtures.js";
 
 let home: string;
 let source: string;
@@ -604,6 +610,125 @@ describe("OpenClaw file layout", () => {
     });
   });
 
+  function setOpenClawConfig(find: string, replace: string): void {
+    const file = path.join(source, "openclaw.json");
+    const text = fs.readFileSync(file, "utf8");
+    expect(text).toContain(find);
+    fs.writeFileSync(file, text.replace(find, replace));
+  }
+
+  const EXEC_ROOT = "somethingOpenClawAdded:";
+
+  it("reads tools.exec.mode as the security and ask OpenClaw ran, letting mode win", async () => {
+    setOpenClawConfig(
+      '{ id: "work" }',
+      '{ id: "work", tools: { exec: { mode: "ask", ask: "off" } } }',
+    );
+    setOpenClawConfig(
+      EXEC_ROOT,
+      `tools: { exec: { mode: "deny", security: "full" } },\n  ${EXEC_ROOT}`,
+    );
+    const plan = await applyMigration({ source, target, home });
+    const config = readJson("bot.json");
+    expect(config.tools).toEqual({ exec: { security: "deny", ask: "off" } });
+    expect(config.agents).toMatchObject({
+      list: [
+        { id: "main" },
+        { id: "work", tools: { exec: { security: "allowlist", ask: "on-miss" } } },
+      ],
+    });
+    expect(plan.items).toEqual(
+      expect.arrayContaining([
+        {
+          op: "rename",
+          from: 'openclaw.json#tools.exec.mode="deny"',
+          to: 'bot.json#tools.exec.security="deny"',
+        },
+        {
+          op: "rename",
+          from: 'openclaw.json#tools.exec.mode="deny"',
+          to: 'bot.json#tools.exec.ask="off"',
+        },
+        { op: "drop", from: "openclaw.json#tools.exec.security", reason: "exec-mode" },
+        {
+          op: "rename",
+          from: 'openclaw.json#agents.list[1].tools.exec.mode="ask"',
+          to: 'bot.json#agents.list[1].tools.exec.security="allowlist"',
+        },
+        {
+          op: "rename",
+          from: 'openclaw.json#agents.list[1].tools.exec.mode="ask"',
+          to: 'bot.json#agents.list[1].tools.exec.ask="on-miss"',
+        },
+        { op: "drop", from: "openclaw.json#agents.list[1].tools.exec.ask", reason: "exec-mode" },
+      ]),
+    );
+    // The mode is carried as security and ask, never reported as a setting Hanzo Bot lacks.
+    expect(plan.items.filter((entry) => entry.from.endsWith("tools.exec.mode"))).toEqual([]);
+  });
+
+  it("names an exec rename the existing bot.json overrules as kept, not moved", async () => {
+    setOpenClawConfig(EXEC_ROOT, `tools: { exec: { mode: "deny" } },\n  ${EXEC_ROOT}`);
+    fs.mkdirSync(target, { recursive: true, mode: 0o700 });
+    fs.writeFileSync(
+      path.join(target, "bot.json"),
+      JSON.stringify({ tools: { exec: { security: "allowlist" } } }),
+      { mode: 0o600 },
+    );
+    const plan = await applyMigration({ source, target, home });
+    expect(readJson("bot.json").tools).toEqual({ exec: { security: "allowlist", ask: "off" } });
+    const renamed = plan.items.filter((entry) => entry.op === "rename").map((entry) => entry.to);
+    expect(renamed).toContain('bot.json#tools.exec.ask="off"');
+    expect(renamed).not.toContain('bot.json#tools.exec.security="deny"');
+    expect(item(plan, "note", "bot.json")).toMatchObject({
+      reason: "kept",
+      names: expect.arrayContaining(["tools.exec.security"]),
+    });
+  });
+
+  it("folds exec-approvals.json into tools.exec and still leaves the file behind", async () => {
+    setOpenClawConfig(EXEC_ROOT, `tools: { exec: { mode: "full" } },\n  ${EXEC_ROOT}`);
+    fs.writeFileSync(
+      path.join(source, "exec-approvals.json"),
+      JSON.stringify({
+        version: 1,
+        socket: { token: "approvals-socket-token" },
+        defaults: { security: "deny" },
+        agents: { work: { security: "allowlist", ask: "always", allowlist: ["git"] } },
+      }),
+      { mode: 0o600 },
+    );
+    const plan = await applyMigration({ source, target, home });
+    const config = readJson("bot.json");
+    expect(config.tools).toEqual({ exec: { security: "deny", ask: "off" } });
+    // work's own allowlist would loosen the root's deny, so only its ask is carried.
+    expect(config.agents).toMatchObject({
+      list: [{ id: "main" }, { id: "work", tools: { exec: { ask: "always" } } }],
+    });
+    expect(plan.items).toEqual(
+      expect.arrayContaining([
+        {
+          op: "rename",
+          from: "exec-approvals.json#defaults.security",
+          to: 'bot.json#tools.exec.security="deny"',
+          reason: "exec-approvals",
+        },
+        {
+          op: "rename",
+          from: "exec-approvals.json#agents.work.ask",
+          to: 'bot.json#agents.list[1].tools.exec.ask="always"',
+          reason: "exec-approvals",
+        },
+      ]),
+    );
+    expect(item(plan, "skip", "exec-approvals.json")?.reason).toBe("approvals");
+    expect(fs.existsSync(path.join(target, "exec-approvals.json"))).toBe(false);
+    expect(JSON.stringify(plan)).not.toContain("approvals-socket-token");
+    expect(fs.readFileSync(path.join(target, "bot.json"), "utf8")).not.toContain(
+      "approvals-socket-token",
+    );
+  });
+
   it("refuses dirs that contain each other and a dir with no OpenClaw install", () => {
     expect(() => planMigration({ source, target: path.join(source, "bot"), home })).toThrow(
       /must not contain each other/,
@@ -724,6 +849,62 @@ describe("OpenClaw database layout", () => {
     await applyMigration({ source, target, home });
     const { actions } = planMigration({ source, target, home });
     expect(actions).toEqual([]);
+  });
+
+  it("leaves tools.exec alone for a database policy that only lists approved commands", async () => {
+    const plan = await applyMigration({ source, target, home });
+    expect(readJson("bot.json").tools).not.toHaveProperty("exec");
+    expect(plan.items.filter((entry) => entry.reason?.startsWith("exec-approvals"))).toEqual([]);
+  });
+
+  it("folds the policy OpenClaw keeps in its database into tools.exec", async () => {
+    writeApprovalsRow(source, {
+      version: 1,
+      defaults: { security: "allowlist" },
+      agents: { main: { ask: "always" } },
+    });
+    const plan = await applyMigration({ source, target, home });
+    const config = readJson("bot.json");
+    expect(config.tools).toMatchObject({ exec: { security: "allowlist" } });
+    expect(config.agents).toMatchObject({
+      list: [{ id: "main", tools: { exec: { ask: "always" } } }],
+    });
+    expect(plan.items).toEqual(
+      expect.arrayContaining([
+        {
+          op: "rename",
+          from: "state/openclaw.sqlite#exec_approvals_config/defaults.security",
+          to: 'bot.json#tools.exec.security="allowlist"',
+          reason: "exec-approvals",
+        },
+        {
+          op: "rename",
+          from: "state/openclaw.sqlite#exec_approvals_config/agents.main.ask",
+          to: 'bot.json#agents.list[0].tools.exec.ask="always"',
+          reason: "exec-approvals",
+        },
+      ]),
+    );
+  });
+
+  it("denies exec where OpenClaw refused it until doctor imports a leftover exec-approvals.json", async () => {
+    fs.writeFileSync(
+      path.join(source, "exec-approvals.json"),
+      JSON.stringify({ version: 1, defaults: { security: "full" } }),
+      { mode: 0o600 },
+    );
+    const plan = await applyMigration({ source, target, home });
+    expect(readJson("bot.json").tools).toMatchObject({ exec: { security: "deny" } });
+    expect(item(plan, "note", "exec-approvals.json")?.reason).toBe("exec-approvals-closed");
+  });
+
+  it("denies exec where OpenClaw's database policy is one it could not use", async () => {
+    writeApprovalsRow(source, { version: 1, defaults: { security: "Full" } });
+    const plan = await applyMigration({ source, target, home });
+    expect(readJson("bot.json").tools).toMatchObject({ exec: { security: "deny" } });
+    expect(item(plan, "note", "state/openclaw.sqlite#exec_approvals_config")?.reason).toBe(
+      "exec-approvals-closed",
+    );
   });
 
   it("never writes into the OpenClaw install through a link in the Hanzo Bot dir", async () => {

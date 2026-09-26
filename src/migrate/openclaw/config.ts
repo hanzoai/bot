@@ -8,13 +8,15 @@ import {
 } from "../../config/validation.js";
 import { BotSchema } from "../../config/zod-schema.js";
 import { PLUGIN_MANIFEST_FILENAME } from "../../plugins/manifest.js";
+import { foldApprovals, type ApprovalsReport, type ApprovalsSource } from "./approvals.js";
 import { botConfigKeyTree, pruneToTree } from "./keys.js";
 import type { PathRewriter } from "./paths.js";
 
 /**
  * openclaw.json → bot.json, in five steps, each reported:
  *   1. renames: settings OpenClaw moved after Hanzo Bot forked from it go back
- *      to where Hanzo Bot reads them
+ *      to where Hanzo Bot reads them; tools.exec.mode becomes the security and
+ *      ask it stands for, which OpenClaw's exec approvals policy then tightens
  *   2. drops: settings that name OpenClaw-only machinery (plugin installs,
  *      secret-store refs, write stamps)
  *   3. paths: strings naming the OpenClaw state dir name the Hanzo Bot one
@@ -31,6 +33,7 @@ export type ConfigDropReason =
   | "secret-store"
   | "model-catalog"
   | "superseded"
+  | "exec-mode"
   | "openclaw-only"
   | "invalid"
   | "no-plugin"
@@ -39,6 +42,10 @@ export type ConfigDropReason =
 export type ConfigReport = {
   renamed: Array<{ from: string; to: string }>;
   dropped: Array<{ path: string; reason: ConfigDropReason }>;
+  /** Settings the person should look at: a tools.exec.mode OpenClaw does not accept. */
+  notes: Array<{ path: string; reason: "exec-mode-unknown" }>;
+  /** What OpenClaw's exec approvals policy tightened. */
+  approvals: ApprovalsReport;
 };
 
 function isPlainObject(value: unknown): value is Json {
@@ -304,6 +311,68 @@ function applyRenames(config: Json, report: ConfigReport): void {
   }
 }
 
+type ExecPolicy = { security: string; ask: string };
+
+/** The security and ask each OpenClaw exec mode stands for (its doctor's resolveConfiguredExecPolicy). */
+const EXEC_MODES = new Map<unknown, ExecPolicy>([
+  ["deny", { security: "deny", ask: "off" }],
+  ["allowlist", { security: "allowlist", ask: "off" }],
+  ["ask", { security: "allowlist", ask: "on-miss" }],
+  ["auto", { security: "allowlist", ask: "on-miss" }],
+  ["full", { security: "full", ask: "off" }],
+]);
+
+const EXEC_DENY: ExecPolicy = { security: "deny", ask: "off" };
+
+/**
+ * Hanzo Bot has no tools.exec.mode, only the security and ask it stands for.
+ * In each scope OpenClaw reads (the root, then each agents.list entry; not
+ * agents.defaults) the mode becomes security and ask, replacing any beside it:
+ * OpenClaw's runtime (applyExecPolicyLayer) and doctor (migrateExecMode) let
+ * the mode win. A mode OpenClaw's schema rejects kept OpenClaw from loading
+ * the config at all, so no exec ran: it imports as deny, with a note.
+ */
+function applyExecMode(config: Json, report: ConfigReport): void {
+  const scopes: Array<[scope: Json, at: string]> = [[config, "tools.exec"]];
+  const list = child(config, "agents")?.list;
+  if (Array.isArray(list)) {
+    list.forEach((entry, index) => {
+      if (isPlainObject(entry)) {
+        scopes.push([entry, `agents.list[${index}].tools.exec`]);
+      }
+    });
+  }
+  const keys = ["security", "ask"] as const;
+  for (const [scope, at] of scopes) {
+    const exec = child(child(scope, "tools") ?? {}, "exec");
+    if (!exec || !Object.hasOwn(exec, "mode")) {
+      continue;
+    }
+    const mode = exec.mode;
+    const known = EXEC_MODES.get(mode);
+    if (!known) {
+      report.notes.push({ path: `${at}.mode`, reason: "exec-mode-unknown" });
+    }
+    const policy = known ?? EXEC_DENY;
+    for (const key of keys) {
+      if (Object.hasOwn(exec, key)) {
+        report.dropped.push({ path: `${at}.${key}`, reason: "exec-mode" });
+      }
+    }
+    delete exec.mode;
+    for (const key of keys) {
+      delete exec[key];
+    }
+    for (const key of keys) {
+      exec[key] = policy[key];
+      report.renamed.push({
+        from: `${at}.mode=${JSON.stringify(mode)}`,
+        to: `${at}.${key}="${policy[key]}"`,
+      });
+    }
+  }
+}
+
 /**
  * OpenClaw (once meta.migrations.modelPolicyAllowlist is stamped) restricts
  * models with agents.defaults.modelPolicy.allow and uses agents.defaults.models
@@ -549,10 +618,19 @@ export function convertConfig(params: {
   rewrite: PathRewriter;
   /** Home dir, for `~/…` plugin load paths. */
   home: string;
+  /** OpenClaw's exec approvals policies, folded into tools.exec. */
+  approvals?: ApprovalsSource[];
 }): { config: Json; report: ConfigReport } {
-  const report: ConfigReport = { renamed: [], dropped: [] };
   const config = structuredClone(params.source);
+  const report: ConfigReport = {
+    renamed: [],
+    dropped: [],
+    notes: [],
+    approvals: { tightened: [], closed: [] },
+  };
   applyRenames(config, report);
+  applyExecMode(config, report);
+  report.approvals = foldApprovals(config, params.approvals ?? []);
   applyDrops(config, report, params.home);
   const rewritten = mapStrings(config, (text) => rewriteEnvRefs(params.rewrite(text))) as Json;
   const pruned = pruneToTree(rewritten, botConfigKeyTree());

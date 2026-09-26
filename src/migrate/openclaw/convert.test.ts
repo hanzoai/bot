@@ -3,6 +3,7 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { hanzoCloudConfig } from "../../commands/hanzo-cloud-config.js";
+import { approvalSources, parseApprovals } from "./approvals.js";
 import {
   convertConfig,
   formatPath,
@@ -308,6 +309,378 @@ describe("config", () => {
       channels: { telegram: { allowFrom: ["123456789"] } },
       tools: { web: { search: { enabled: true } } },
     });
+  });
+});
+
+describe("tools.exec.mode", () => {
+  // OpenClaw's doctor resolveConfiguredExecPolicy; its runtime resolveExecPolicyForMode agrees.
+  type Policy = { security: string; ask: string };
+  const POLICY: Array<[string, Policy]> = [
+    ["deny", { security: "deny", ask: "off" }],
+    ["allowlist", { security: "allowlist", ask: "off" }],
+    ["ask", { security: "allowlist", ask: "on-miss" }],
+    ["auto", { security: "allowlist", ask: "on-miss" }],
+    ["full", { security: "full", ask: "off" }],
+  ];
+
+  function renames(at: string, mode: string, policy: Policy) {
+    return [
+      { from: `${at}.mode="${mode}"`, to: `${at}.security="${policy.security}"` },
+      { from: `${at}.mode="${mode}"`, to: `${at}.ask="${policy.ask}"` },
+    ];
+  }
+
+  it.each(POLICY)(
+    "reads mode %s as the security and ask OpenClaw ran, at the root",
+    (mode, policy) => {
+      const { config, report } = convert({ tools: { exec: { mode, backgroundMs: 5000 } } });
+      expect(config).toEqual({ tools: { exec: { ...policy, backgroundMs: 5000 } } });
+      expect(report.renamed).toEqual(renames("tools.exec", mode, policy));
+      expect(report.dropped).toEqual([]);
+    },
+  );
+
+  it.each(POLICY)(
+    "reads mode %s as the security and ask OpenClaw ran, in an agent",
+    (mode, policy) => {
+      const { config, report } = convert({
+        agents: { list: [{ id: "main" }, { id: "ops", tools: { exec: { mode } } }] },
+      });
+      expect(config).toEqual({
+        agents: { list: [{ id: "main" }, { id: "ops", tools: { exec: policy } }] },
+      });
+      expect(report.renamed).toEqual(renames("agents.list[1].tools.exec", mode, policy));
+      expect(report.dropped).toEqual([]);
+    },
+  );
+
+  // OpenClaw's runtime (applyExecPolicyLayer) and doctor (migrateExecMode) let mode win.
+  const BOTH: Array<[string, Record<string, string>, Policy]> = [
+    ["deny", { security: "full" }, { security: "deny", ask: "off" }],
+    ["deny", { security: "full", ask: "off" }, { security: "deny", ask: "off" }],
+    ["deny", { ask: "always" }, { security: "deny", ask: "off" }],
+    ["allowlist", { security: "full", ask: "on-miss" }, { security: "allowlist", ask: "off" }],
+    ["ask", { ask: "off" }, { security: "allowlist", ask: "on-miss" }],
+    ["auto", { security: "full" }, { security: "allowlist", ask: "on-miss" }],
+    ["full", { security: "deny", ask: "always" }, { security: "full", ask: "off" }],
+  ];
+
+  it.each(BOTH)(
+    "lets mode %s win over %o beside it, at the root and in an agent",
+    (mode, beside, policy) => {
+      const { config, report } = convert({
+        tools: { exec: { mode, ...beside } },
+        agents: { list: [{ id: "ops", tools: { exec: { mode, ...beside } } }] },
+      });
+      expect(config).toEqual({
+        tools: { exec: policy },
+        agents: { list: [{ id: "ops", tools: { exec: policy } }] },
+      });
+      const superseded = (at: string) =>
+        Object.keys(beside).map((key) => ({ path: `${at}.${key}`, reason: "exec-mode" }));
+      expect(report.dropped).toEqual([
+        ...superseded("tools.exec"),
+        ...superseded("agents.list[0].tools.exec"),
+      ]);
+      expect(report.renamed).toEqual([
+        ...renames("tools.exec", mode, policy),
+        ...renames("agents.list[0].tools.exec", mode, policy),
+      ]);
+    },
+  );
+
+  it("leaves security and ask alone where no mode is set, as the agent inherits the root", () => {
+    // OpenClaw layers the agent's security over the root's mode; Hanzo Bot reads
+    // agent ?? root per field, so the agent runs full/off in both.
+    const { config, report } = convert({
+      tools: { exec: { mode: "deny" } },
+      agents: { list: [{ id: "ops", tools: { exec: { security: "full" } } }, { id: "main" }] },
+    });
+    expect(config).toEqual({
+      tools: { exec: { security: "deny", ask: "off" } },
+      agents: { list: [{ id: "ops", tools: { exec: { security: "full" } } }, { id: "main" }] },
+    });
+    expect(report.dropped).toEqual([]);
+    expect(report.renamed).toEqual(renames("tools.exec", "deny", { security: "deny", ask: "off" }));
+  });
+
+  it("reads the mode in an agents.entries agent under its agents.list place", () => {
+    const { config, report } = convert({
+      agents: { entries: { ops: { tools: { exec: { mode: "ask", security: "full" } } } } },
+    });
+    expect(config).toEqual({
+      agents: {
+        list: [{ id: "ops", tools: { exec: { security: "allowlist", ask: "on-miss" } } }],
+      },
+    });
+    expect(report.dropped).toEqual([
+      { path: "agents.list[0].tools.exec.security", reason: "exec-mode" },
+    ]);
+  });
+
+  // OpenClaw does not load a config whose mode its enum rejects, so that install ran no exec.
+  it.each([
+    ["yolo", '"yolo"'],
+    ["constructor", '"constructor"'],
+    ["__proto__", '"__proto__"'],
+    ["Full", '"Full"'],
+    [" full", '" full"'],
+    [1, "1"],
+    [null, "null"],
+  ])(
+    "imports a mode OpenClaw's schema rejects (%o) as deny, whatever is beside it",
+    (mode, shown) => {
+      const { config, report } = convert({
+        tools: { exec: { mode, security: "full", ask: "off" } },
+        agents: { list: [{ id: "ops", tools: { exec: { mode } } }] },
+      });
+      expect(config).toEqual({
+        tools: { exec: { security: "deny", ask: "off" } },
+        agents: { list: [{ id: "ops", tools: { exec: { security: "deny", ask: "off" } } }] },
+      });
+      expect(report.dropped).toEqual([
+        { path: "tools.exec.security", reason: "exec-mode" },
+        { path: "tools.exec.ask", reason: "exec-mode" },
+      ]);
+      expect(report.renamed).toEqual([
+        { from: `tools.exec.mode=${shown}`, to: 'tools.exec.security="deny"' },
+        { from: `tools.exec.mode=${shown}`, to: 'tools.exec.ask="off"' },
+        {
+          from: `agents.list[0].tools.exec.mode=${shown}`,
+          to: 'agents.list[0].tools.exec.security="deny"',
+        },
+        {
+          from: `agents.list[0].tools.exec.mode=${shown}`,
+          to: 'agents.list[0].tools.exec.ask="off"',
+        },
+      ]);
+      expect(report.notes).toEqual([
+        { path: "tools.exec.mode", reason: "exec-mode-unknown" },
+        { path: "agents.list[0].tools.exec.mode", reason: "exec-mode-unknown" },
+      ]);
+    },
+  );
+
+  it("writes security then ask after the other exec settings, as the Go importer does", () => {
+    const { config } = convert({
+      tools: { exec: { ask: "always", mode: "ask", backgroundMs: 5000, security: "full" } },
+    });
+    expect(Object.keys((config.tools as { exec: object }).exec)).toEqual([
+      "backgroundMs",
+      "security",
+      "ask",
+    ]);
+  });
+});
+
+describe("exec approvals", () => {
+  function fold(source: Record<string, unknown>, ...docs: unknown[]) {
+    return convertConfig({
+      source,
+      rewrite,
+      home: HOME,
+      approvals: docs.map((doc, index) => ({
+        label: index === 0 ? "exec-approvals.json" : "state/openclaw.sqlite#exec_approvals_config",
+        doc: parseApprovals(typeof doc === "string" ? doc : JSON.stringify(doc)),
+      })),
+    });
+  }
+
+  it("imports mode full under a policy whose defaults deny as deny", () => {
+    const { config, report } = fold(
+      { tools: { exec: { mode: "full" } } },
+      { version: 1, defaults: { security: "deny" } },
+    );
+    expect(config).toEqual({ tools: { exec: { security: "deny", ask: "off" } } });
+    expect(report.approvals).toEqual({
+      tightened: [
+        { from: "exec-approvals.json#defaults.security", to: 'tools.exec.security="deny"' },
+      ],
+      closed: [],
+    });
+  });
+
+  it("tightens only the agent the policy names, by its normalized id", () => {
+    const { config, report } = fold(
+      {
+        tools: { exec: { security: "full", ask: "off" } },
+        agents: { list: [{ id: "main" }, { id: "Ops" }] },
+      },
+      { version: 1, agents: { ops: { security: "allowlist" } } },
+    );
+    expect(config).toEqual({
+      tools: { exec: { security: "full", ask: "off" } },
+      agents: {
+        list: [{ id: "main" }, { id: "Ops", tools: { exec: { security: "allowlist" } } }],
+      },
+    });
+    expect(report.approvals.tightened).toEqual([
+      {
+        from: "exec-approvals.json#agents.ops.security",
+        to: 'agents.list[1].tools.exec.security="allowlist"',
+      },
+    ]);
+  });
+
+  it("changes nothing where the policy is looser than the config", () => {
+    const source = {
+      tools: { exec: { security: "allowlist", ask: "always" } },
+      agents: { list: [{ id: "ops", tools: { exec: { security: "deny" } } }] },
+    };
+    const { config, report } = fold(source, {
+      version: 1,
+      defaults: { security: "full", ask: "on-miss" },
+      agents: { ops: { security: "allowlist", ask: "off" }, "*": { security: "full" } },
+    });
+    expect(config).toEqual(source);
+    expect(report.approvals).toEqual({ tightened: [], closed: [] });
+  });
+
+  it("writes nothing for a policy that sets nothing", () => {
+    const { config, report } = fold(
+      { agents: { list: [{ id: "main" }] } },
+      { version: 1, defaults: {}, agents: { main: { allowlist: ["/usr/bin/git"] } } },
+    );
+    expect(config).toEqual({ agents: { list: [{ id: "main" }] } });
+    expect(report.approvals.tightened).toEqual([]);
+  });
+
+  it("creates tools.exec where the policy tightens a scope that has none", () => {
+    const { config, report } = fold({}, { version: 1, defaults: { ask: "always" } });
+    expect(config).toEqual({ tools: { exec: { ask: "always" } } });
+    expect(report.approvals.tightened).toEqual([
+      { from: "exec-approvals.json#defaults.ask", to: 'tools.exec.ask="always"' },
+    ]);
+  });
+
+  it("reads main's policy, legacy default entry included, for the root when there is no agents.list", () => {
+    const { config, report } = fold(
+      { tools: { exec: { security: "full" } } },
+      {
+        version: 1,
+        agents: { default: { security: "allowlist" }, "*": { security: "deny", ask: "on-miss" } },
+      },
+    );
+    expect(config).toEqual({ tools: { exec: { security: "allowlist", ask: "on-miss" } } });
+    expect(report.approvals.tightened.map((entry) => entry.from)).toEqual([
+      "exec-approvals.json#agents.default.security",
+      "exec-approvals.json#agents.*.ask",
+    ]);
+  });
+
+  it("gives the root the * entry when there is a list, and each agent its own entry over it", () => {
+    const { config } = fold(
+      { agents: { list: [{ id: "ops" }, { id: "dev" }, { id: "default" }] } },
+      {
+        version: 1,
+        defaults: { security: "full" },
+        agents: {
+          "*": { security: "allowlist" },
+          dev: { security: "deny" },
+          // OpenClaw moves this entry into main's; the agent named "default" never reads it.
+          default: { security: "deny" },
+        },
+      },
+    );
+    expect(config).toEqual({
+      tools: { exec: { security: "allowlist" } },
+      agents: {
+        list: [
+          { id: "ops" },
+          { id: "dev", tools: { exec: { security: "deny" } } },
+          { id: "default" },
+        ],
+      },
+    });
+  });
+
+  it("never loosens an agent below the root the policy tightened", () => {
+    // OpenClaw ran main with full here; the import keeps main at the root's deny, never above it.
+    const { config } = fold(
+      { agents: { list: [{ id: "main" }, { id: "ops" }] } },
+      { version: 1, defaults: { security: "deny" }, agents: { main: { security: "full" } } },
+    );
+    expect(config).toEqual({
+      tools: { exec: { security: "deny" } },
+      agents: { list: [{ id: "main" }, { id: "ops" }] },
+    });
+  });
+
+  it("folds each policy in turn, never loosening what an earlier one tightened", () => {
+    const { config, report } = fold(
+      {},
+      { version: 1, defaults: { security: "allowlist" } },
+      { version: 1, defaults: { security: "full", ask: "always" } },
+    );
+    expect(config).toEqual({ tools: { exec: { security: "allowlist", ask: "always" } } });
+    expect(report.approvals.tightened.map((entry) => entry.from)).toEqual([
+      "exec-approvals.json#defaults.security",
+      "state/openclaw.sqlite#exec_approvals_config/defaults.ask",
+    ]);
+  });
+
+  it.each([
+    ["text that is not JSON", "{"],
+    ["another version", { version: 2 }],
+    ["a security OpenClaw does not have", { version: 1, defaults: { security: "Deny" } }],
+    ["a null ask", { version: 1, agents: { ops: { ask: null } } }],
+    ["a __proto__ agent", '{"version":1,"agents":{"__proto__":{}}}'],
+    ["a blank allowlist entry", { version: 1, agents: { main: { allowlist: [" "] } } }],
+    [
+      "an MCP grant OpenClaw did not make",
+      { version: 1, agents: { main: { mcpTools: [{ server: "s", tool: "t", addedAt: 1 }] } } },
+    ],
+    ["a socket path that is not text", { version: 1, socket: { path: 1 } }],
+  ])("denies exec where OpenClaw could not use the policy: %s", (_what, doc) => {
+    const { config, report } = fold(
+      { tools: { exec: { security: "full", ask: "off" } }, agents: { list: [{ id: "ops" }] } },
+      doc,
+    );
+    expect(config).toEqual({
+      tools: { exec: { security: "deny", ask: "off" } },
+      agents: { list: [{ id: "ops" }] },
+    });
+    expect(report.approvals).toEqual({
+      tightened: [{ from: "exec-approvals.json", to: 'tools.exec.security="deny"' }],
+      closed: ["exec-approvals.json"],
+    });
+  });
+
+  it("reads a policy OpenClaw accepts, whatever else it holds", () => {
+    expect(
+      parseApprovals(
+        JSON.stringify({
+          version: 1,
+          socket: { path: "~/.openclaw/exec-approvals.sock", token: "t" },
+          defaults: { security: "allowlist", ask: "on-miss", askFallback: "deny" },
+          agents: {
+            main: {
+              autoAllowSkills: true,
+              allowlist: ["git", { pattern: "/bin/ls", lastUsedAt: 5, source: "manual" }],
+              mcpTools: [{ server: "s", tool: "t", source: "allow-always", addedAt: 0 }],
+              extra: 1,
+            },
+          },
+          extra: true,
+        }),
+      ),
+    ).not.toBeNull();
+  });
+
+  it("counts a leftover exec-approvals.json as closed where the database keeps the policy", () => {
+    const valid = JSON.stringify({ version: 1 });
+    const empty = { file: null, claim: false, table: false, row: null };
+    expect(approvalSources({ ...empty, file: valid })).toEqual([
+      { label: "exec-approvals.json", doc: { version: 1 } },
+    ]);
+    expect(approvalSources({ ...empty, file: valid, table: true, row: valid })).toEqual([
+      { label: "exec-approvals.json", doc: null },
+      { label: "state/openclaw.sqlite#exec_approvals_config", doc: { version: 1 } },
+    ]);
+    expect(approvalSources({ ...empty, claim: true, table: true })).toEqual([
+      { label: "exec-approvals.json", doc: null },
+    ]);
+    expect(approvalSources({ ...empty, table: true })).toEqual([]);
   });
 });
 

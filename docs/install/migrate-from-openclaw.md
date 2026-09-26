@@ -93,7 +93,7 @@ The plan lists each of these under **Not carried**, with the reason.
 | `credentials/auth-profiles/`                                                               | Encrypted with OpenClaw's key.                                                       | Sign in again: `hanzo-bot models auth` or `hanzo-bot configure`.                             |
 | Cron jobs OpenClaw created itself (heartbeat, memory dreaming, skill review)               | They carry a `declarationKey`; Hanzo Bot schedules its own heartbeat.                | Nothing.                                                                                     |
 | Paired devices and nodes (`devices/`, `identity/`, `nodes/`)                               | Pairing is per gateway.                                                              | `hanzo-bot qr`, then pair again.                                                             |
-| Exec approvals                                                                             | Per gateway.                                                                         | Approve again when asked.                                                                    |
+| Approved commands and the approvals socket (`exec-approvals.json`)                         | Per gateway. The policy in it moves: see [Exec policy](#exec-policy).                | Approve again when asked.                                                                    |
 | Search indexes (`memory/`, `qmd/`), caches, media, logs, `tmp/`, backups                   | Rebuilt or runtime-only.                                                             | Nothing.                                                                                     |
 | Config keys Hanzo Bot does not have                                                        | Listed one by one.                                                                   | See [what OpenClaw has that Hanzo Bot does not](#what-openclaw-has-that-hanzo-bot-does-not). |
 
@@ -140,6 +140,7 @@ OpenClaw moved after Hanzo Bot forked from it go back to where Hanzo Bot reads t
 | `plugins.entries.brave.config.webSearch.apiKey`                     | `tools.web.search.apiKey`                                                           |
 | `plugins.entries.{perplexity,google,xai,moonshot}.config.webSearch` | `tools.web.search.{perplexity,gemini,grok,kimi}`                                    |
 | `browser.profiles.<name>.driver: "openclaw"`                        | `driver: "clawd"`; a profile with no `color` gets one from Hanzo Bot's palette      |
+| `tools.exec.mode`, `agents.list[].tools.exec.mode`                  | `tools.exec.security` and `.ask`: see [Exec policy](#exec-policy)                   |
 | `"${OPENCLAW_X}"` anywhere in a value                               | `"${BOT_X}"`                                                                        |
 | `~/.openclaw/...` anywhere in a value                               | `~/.bot/...`                                                                        |
 | `meta`                                                              | dropped (OpenClaw's write stamp)                                                    |
@@ -148,6 +149,34 @@ A setting that already exists at its new place wins over the old one. Keys Hanzo
 not have are dropped and listed. The result is checked with Hanzo Bot's own validator
 (schema and plugin checks) before it is written, so `bot.json` always loads; a value it
 rejects is dropped and listed rather than written.
+
+### Exec policy
+
+Hanzo Bot has no `tools.exec.mode`. The import writes the `security` and `ask` each mode
+stands for in OpenClaw, at the root and in each agent:
+
+| `tools.exec.mode` | `tools.exec.security` | `tools.exec.ask` |
+| ----------------- | --------------------- | ---------------- |
+| `deny`            | `deny`                | `off`            |
+| `allowlist`       | `allowlist`           | `off`            |
+| `ask`, `auto`     | `allowlist`           | `on-miss`        |
+| `full`            | `full`                | `off`            |
+
+- As in OpenClaw, a mode wins over a `security` or `ask` set beside it. Those are dropped and
+  listed.
+- Hanzo Bot has no model reviewer, so a command `auto` would have sent to one asks you instead.
+- A mode OpenClaw does not accept (OpenClaw would not load that config) imports as `deny`.
+  **Do by hand** names it.
+
+OpenClaw also bounds exec with the policy in its exec approvals: `exec-approvals.json`, or
+the `exec_approvals_config` table of `state/openclaw.sqlite` in newer versions. The import
+folds that policy's `security` and `ask` (its `defaults`, its `"*"` entry, and each agent's
+own entry) into `tools.exec`, the way OpenClaw applies it to commands run on the gateway
+or a node. It only ever makes a setting stricter, and **Renamed** lists each change.
+OpenClaw ran no exec with a policy it could not read, or with an `exec-approvals.json`
+that `openclaw doctor --fix` had not yet moved into its database. For either, the import
+sets `security` to `deny` and says so under **Do by hand**. Approved commands are not
+carried; approve them again when asked.
 
 ### An existing bot.json
 

@@ -111,6 +111,60 @@ describe("hanzo-bot migrate openclaw", () => {
     }
   });
 
+  it("carries OpenClaw's exec mode and approvals policy, and says how", () => {
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "bot-migrate-exec-")));
+    try {
+      const openclaw = path.join(dir, ".openclaw");
+      writeFileLayout(openclaw);
+      const file = path.join(openclaw, "openclaw.json");
+      fs.writeFileSync(
+        file,
+        fs
+          .readFileSync(file, "utf8")
+          .replace('{ id: "work" }', '{ id: "work", tools: { exec: { mode: "yolo" } } }')
+          .replace(
+            "somethingOpenClawAdded:",
+            'tools: { exec: { mode: "full", security: "allowlist" } },\n  somethingOpenClawAdded:',
+          ),
+      );
+      fs.writeFileSync(
+        path.join(openclaw, "exec-approvals.json"),
+        JSON.stringify({ version: 1, defaults: { ask: "always" } }),
+        { mode: 0o600 },
+      );
+      const { status, output } = cli(dir, ["migrate", "openclaw", "--apply"]);
+      expect(status, output).toBe(0);
+      expect(output).toContain(
+        'openclaw.json#tools.exec.mode="full" → bot.json#tools.exec.security="full"',
+      );
+      expect(output).toMatch(
+        /openclaw\.json#tools\.exec\.security\s+superseded by tools\.exec\.mode \(OpenClaw lets mode win\)/,
+      );
+      expect(output).toMatch(
+        /exec-approvals\.json#defaults\.ask → bot\.json#tools\.exec\.ask="always"\s+tightened to match OpenClaw's exec-approvals\.json/,
+      );
+      expect(output).toContain(
+        "openclaw.json#agents.list[1].tools.exec.mode: not a mode OpenClaw accepts (OpenClaw would not load this config), so exec is denied.",
+      );
+      const config = JSON.parse(fs.readFileSync(path.join(dir, ".bot", "bot.json"), "utf8")) as {
+        tools: unknown;
+        agents: { list: unknown[] };
+      };
+      expect(config.tools).toEqual({ exec: { security: "full", ask: "always" } });
+      expect(config.agents.list[1]).toMatchObject({
+        id: "work",
+        tools: { exec: { security: "deny", ask: "always" } },
+      });
+
+      // What was written loads: a second run finds nothing left to do.
+      const again = cli(dir, ["migrate", "openclaw", "--json"]);
+      expect(again.status, again.output).toBe(0);
+      expect(again.output).not.toContain("Invalid config");
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("names the dir it could not find", () => {
     const { status, output } = run("--from", path.join(home, "nope"));
     expect(status).not.toBe(0);

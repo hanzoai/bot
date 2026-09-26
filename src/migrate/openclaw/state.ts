@@ -51,7 +51,22 @@ export type OpenClawState = {
   pairedDevices: number;
   /** An agent's heartbeat checklist, by agent id: OpenClaw moved HEARTBEAT.md into cron_job_scratch. */
   heartbeats: Record<string, string>;
+  /** OpenClaw's exec approvals policy, where each layout keeps it. */
+  approvals: ApprovalsState;
 };
+
+export type ApprovalsState = {
+  /** exec-approvals.json's text. */
+  file: string | null;
+  /** `openclaw doctor --fix` was importing exec-approvals.json into the database. */
+  claim: boolean;
+  /** state/openclaw.sqlite keeps the policy (table exec_approvals_config). */
+  table: boolean;
+  /** That table's policy document. */
+  row: string | null;
+};
+
+export const APPROVALS_FILE = "exec-approvals.json";
 
 export const CONFIG_FILENAMES = ["openclaw.json", "clawdbot.json"] as const;
 
@@ -179,6 +194,13 @@ function readStateDb(dir: string, state: OpenClawState): void {
     if (db.hasTable("device_pairing_paired")) {
       const rows = db.all<{ n: number }>("SELECT count(*) AS n FROM device_pairing_paired");
       state.pairedDevices += rows[0]?.n ?? 0;
+    }
+    if (db.hasTable("exec_approvals_config")) {
+      state.approvals.table = true;
+      const rows = db.all<{ raw_json: string | null }>(
+        "SELECT raw_json FROM exec_approvals_config WHERE config_key = 'current'",
+      );
+      state.approvals.row = rows[0]?.raw_json ?? null;
     }
   });
 }
@@ -308,6 +330,11 @@ function readFileLayout(dir: string, state: OpenClawState): void {
   if (paired) {
     state.pairedDevices += Object.keys(paired).length;
   }
+  const approvals = path.join(dir, APPROVALS_FILE);
+  if (fs.existsSync(approvals)) {
+    state.approvals.file = fs.readFileSync(approvals, "utf8");
+  }
+  state.approvals.claim = fs.existsSync(`${approvals}.doctor-importing`);
 }
 
 export function listAgentIds(dir: string): string[] {
@@ -337,6 +364,7 @@ export function readOpenClawState(dir: string): OpenClawState {
     pluginInstalls: [],
     pairedDevices: 0,
     heartbeats: {},
+    approvals: { file: null, claim: false, table: false, row: null },
   };
   readStateDb(dir, state);
   for (const agentId of listAgentIds(dir)) {

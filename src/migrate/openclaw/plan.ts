@@ -10,6 +10,7 @@ import {
 import type { BotConfig } from "../../config/config.js";
 import { SAFE_SESSION_ID_RE } from "../../config/sessions/paths.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
+import { approvalSources } from "./approvals.js";
 import {
   convertConfig,
   formatPath,
@@ -200,7 +201,12 @@ function planConfig(
       });
     }
   }
-  const { config, report } = convertConfig({ source, rewrite, home: p.home });
+  const { config, report } = convertConfig({
+    source,
+    rewrite,
+    home: p.home,
+    approvals: approvalSources(state.approvals),
+  });
   const ownAnthropic =
     profilesAnthropic ||
     ANTHROPIC_ENV_KEYS.some((key) => envKeys.has(key)) ||
@@ -213,6 +219,15 @@ function planConfig(
   }));
   for (const { path: at, reason } of report.dropped) {
     items.push({ op: "drop", from: `${configName}#${at}`, reason });
+  }
+  for (const { path: at, reason } of report.notes) {
+    items.push({ op: "note", from: `${configName}#${at}`, reason });
+  }
+  for (const { from, to } of report.approvals.tightened) {
+    renames.push({ op: "rename", from, to: `bot.json#${to}`, reason: "exec-approvals" });
+  }
+  for (const label of report.approvals.closed) {
+    items.push({ op: "note", from: label, reason: "exec-approvals-closed" });
   }
   renames.push(...setWorkspaces(p, config, configName));
 
@@ -245,7 +260,12 @@ function planConfig(
     const overruled = (item: PlanItem) =>
       keptLabels.some((label) => {
         const at = item.to?.slice("bot.json#".length) ?? "";
-        return at === label || at.startsWith(`${label}.`) || at.startsWith(`${label}[`);
+        return (
+          at === label ||
+          at.startsWith(`${label}.`) ||
+          at.startsWith(`${label}[`) ||
+          at.startsWith(`${label}=`)
+        );
       });
     items.push(...renames.filter((item) => !overruled(item)));
     items.push({ op: "write", from: configName, to: "bot.json", status, names: applied });
