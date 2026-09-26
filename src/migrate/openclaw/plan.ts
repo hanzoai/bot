@@ -339,7 +339,8 @@ function planCopies(p: Planning): void {
   ];
   for (const name of dirs) {
     const fromDir = path.join(p.source, name);
-    if (!fs.statSync(fromDir).isDirectory()) {
+    // A link to nothing has nothing to copy.
+    if (!fs.existsSync(fromDir) || !fs.statSync(fromDir).isDirectory()) {
       continue;
     }
     const toDir = path.join(p.target, name);

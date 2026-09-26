@@ -350,6 +350,14 @@ describe("OpenClaw file layout", () => {
     expect(fs.readlinkSync(path.join(ws, "outside"))).toBe("/opt/elsewhere");
   });
 
+  it("passes over an OpenClaw dir that is a link to nothing", async () => {
+    fs.rmSync(path.join(source, "skills"), { recursive: true });
+    fs.symlinkSync(path.join(home, "gone"), path.join(source, "skills"));
+    const plan = await applyMigration({ source, target, home });
+    expect(item(plan, "copy", "skills")).toBeUndefined();
+    expect(fs.existsSync(path.join(target, "skills"))).toBe(false);
+  });
+
   it("keeps a dangling link where a file would be copied", async () => {
     fs.mkdirSync(path.join(target, "workspace"), { recursive: true });
     fs.symlinkSync(path.join(home, "nowhere"), path.join(target, "workspace", "AGENTS.md"));

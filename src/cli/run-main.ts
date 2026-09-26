@@ -15,7 +15,7 @@ import { tryRouteCli } from "./route.js";
 import { normalizeWindowsArgv } from "./windows-argv.js";
 
 /** Commands that run without a config, so never start the first-run cloud connect. */
-export const FIRST_RUN_EXEMPT = new Set(["node", "gateway", "migrate", "doctor"]);
+const FIRST_RUN_EXEMPT = new Set(["node", "gateway", "migrate", "doctor"]);
 
 export function rewriteUpdateFlagArgv(argv: string[]): string[] {
   const index = argv.indexOf("--update");
