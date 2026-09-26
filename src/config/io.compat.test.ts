@@ -15,7 +15,7 @@ async function withTempHome(run: (home: string) => Promise<void>): Promise<void>
 
 async function writeConfig(
   home: string,
-  dirname: ".bot",
+  dirname: ".bot" | ".openclaw",
   port: number,
   filename: string = "bot.json",
 ) {
@@ -69,12 +69,11 @@ describe("config io paths", () => {
     });
   });
 
-  it("honors legacy CLAWDBOT_CONFIG_PATH override", async () => {
+  it("ignores CLAWDBOT_CONFIG_PATH, which names OpenClaw's config", async () => {
     await withTempHome(async (home) => {
-      const customPath = await writeConfig(home, ".bot", 20003, "legacy-custom.json");
+      const customPath = await writeConfig(home, ".openclaw", 20003, "openclaw.json");
       const io = createIoForHome(home, { CLAWDBOT_CONFIG_PATH: customPath } as NodeJS.ProcessEnv);
-      expect(io.configPath).toBe(customPath);
-      expect(io.loadConfig().gateway?.port).toBe(20003);
+      expect(io.configPath).toBe(path.join(home, ".bot", "bot.json"));
     });
   });
 

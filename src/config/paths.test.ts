@@ -85,42 +85,28 @@ describe("state + config path candidates", () => {
     const home = "/home/test";
     const resolvedHome = path.resolve(home);
     const candidates = resolveDefaultConfigCandidates({} as NodeJS.ProcessEnv, () => home);
-    const expected = [
-      path.join(resolvedHome, ".bot", "bot.json"),
-      path.join(resolvedHome, ".bot", "clawdbot.json"),
-      path.join(resolvedHome, ".bot", "moldbot.json"),
-      path.join(resolvedHome, ".bot", "moltbot.json"),
-      path.join(resolvedHome, ".clawdbot", "bot.json"),
-      path.join(resolvedHome, ".clawdbot", "clawdbot.json"),
-      path.join(resolvedHome, ".clawdbot", "moldbot.json"),
-      path.join(resolvedHome, ".clawdbot", "moltbot.json"),
-      path.join(resolvedHome, ".moldbot", "bot.json"),
-      path.join(resolvedHome, ".moldbot", "clawdbot.json"),
-      path.join(resolvedHome, ".moldbot", "moldbot.json"),
-      path.join(resolvedHome, ".moldbot", "moltbot.json"),
-      path.join(resolvedHome, ".moltbot", "bot.json"),
-      path.join(resolvedHome, ".moltbot", "clawdbot.json"),
-      path.join(resolvedHome, ".moltbot", "moldbot.json"),
-      path.join(resolvedHome, ".moltbot", "moltbot.json"),
-    ];
+    const expected = [path.join(resolvedHome, ".bot", "bot.json")];
     expect(candidates).toEqual(expected);
   });
 
-  it("prefers ~/.bot when it exists and legacy dir is missing", async () => {
+  it("is ~/.bot whether or not it exists", async () => {
     await withTempRoot("bot-state-", async (root) => {
-      const newDir = path.join(root, ".bot");
-      await fs.mkdir(newDir, { recursive: true });
-      const resolved = resolveStateDir({} as NodeJS.ProcessEnv, () => root);
-      expect(resolved).toBe(newDir);
+      expect(resolveStateDir({} as NodeJS.ProcessEnv, () => root)).toBe(path.join(root, ".bot"));
+      await fs.mkdir(path.join(root, ".bot"), { recursive: true });
+      expect(resolveStateDir({} as NodeJS.ProcessEnv, () => root)).toBe(path.join(root, ".bot"));
     });
   });
 
-  it("falls back to existing legacy state dir when ~/.bot is missing", async () => {
-    await withTempRoot("bot-state-legacy-", async (root) => {
-      const legacyDir = path.join(root, ".clawdbot");
-      await fs.mkdir(legacyDir, { recursive: true });
-      const resolved = resolveStateDir({} as NodeJS.ProcessEnv, () => root);
-      expect(resolved).toBe(legacyDir);
+  it("never adopts OpenClaw's ~/.clawdbot, which OpenClaw links to ~/.openclaw", async () => {
+    await withTempRoot("bot-state-clawdbot-", async (root) => {
+      const openclaw = path.join(root, ".openclaw");
+      await fs.mkdir(openclaw, { recursive: true });
+      await fs.writeFile(path.join(openclaw, "openclaw.json"), "{}", "utf-8");
+      await fs.symlink(openclaw, path.join(root, ".clawdbot"));
+      await fs.mkdir(path.join(root, ".moltbot"), { recursive: true });
+      const env = { CLAWDBOT_STATE_DIR: openclaw } as NodeJS.ProcessEnv;
+      expect(resolveStateDir(env, () => root)).toBe(path.join(root, ".bot"));
+      expect(resolveConfigPathCandidate(env, () => root)).toBe(path.join(root, ".bot", "bot.json"));
     });
   });
 

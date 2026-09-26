@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { convertConfig, listEnvRefs, mergeBeneath, rewriteEnvRefs } from "./config.js";
 import { convertCronJob, mergeAuth, resetArchiveName } from "./convert.js";
@@ -25,6 +28,18 @@ describe("resolveOpenClawStateDir", () => {
     expect(resolveOpenClawStateDir({ HOME, OPENCLAW_STATE_DIR: "~/oc-state" })).toBe(
       `${HOME}/oc-state`,
     );
+  });
+
+  it("falls back to a Clawdbot-era ~/.clawdbot only when ~/.openclaw is missing, as OpenClaw does", () => {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), "oc-dir-"));
+    try {
+      fs.mkdirSync(path.join(home, ".clawdbot"));
+      expect(resolveOpenClawStateDir({ HOME: home })).toBe(path.join(home, ".clawdbot"));
+      fs.mkdirSync(path.join(home, ".openclaw"));
+      expect(resolveOpenClawStateDir({ HOME: home })).toBe(path.join(home, ".openclaw"));
+    } finally {
+      fs.rmSync(home, { recursive: true, force: true });
+    }
   });
 });
 

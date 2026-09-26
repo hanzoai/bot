@@ -17,75 +17,31 @@ export function resolveIsNixMode(env: NodeJS.ProcessEnv = process.env): boolean 
 
 export const isNixMode = resolveIsNixMode();
 
-// Support historical (and occasionally misspelled) legacy state dirs.
-const LEGACY_STATE_DIRNAMES = [".clawdbot", ".moldbot", ".moltbot"] as const;
-const NEW_STATE_DIRNAME = ".bot";
+const STATE_DIRNAME = ".bot";
 const CONFIG_FILENAME = "bot.json";
-const LEGACY_CONFIG_FILENAMES = ["clawdbot.json", "moldbot.json", "moltbot.json"] as const;
-
-function resolveDefaultHomeDir(): string {
-  return resolveRequiredHomeDir(process.env, os.homedir);
-}
 
 /** Build a homedir thunk that respects BOT_HOME for the given env. */
 function envHomedir(env: NodeJS.ProcessEnv): () => string {
   return () => resolveRequiredHomeDir(env, os.homedir);
 }
 
-function legacyStateDirs(homedir: () => string = resolveDefaultHomeDir): string[] {
-  return LEGACY_STATE_DIRNAMES.map((dir) => path.join(homedir(), dir));
-}
-
-function newStateDir(homedir: () => string = resolveDefaultHomeDir): string {
-  return path.join(homedir(), NEW_STATE_DIRNAME);
-}
-
-export function resolveLegacyStateDir(homedir: () => string = resolveDefaultHomeDir): string {
-  return legacyStateDirs(homedir)[0] ?? newStateDir(homedir);
-}
-
-export function resolveLegacyStateDirs(homedir: () => string = resolveDefaultHomeDir): string[] {
-  return legacyStateDirs(homedir);
-}
-
-export function resolveNewStateDir(homedir: () => string = resolveDefaultHomeDir): string {
-  return newStateDir(homedir);
-}
-
 /**
  * State directory for mutable data (sessions, logs, caches).
  * Can be overridden via BOT_STATE_DIR.
- * Default: ~/.bot
+ * Default: ~/.bot. The Clawdbot-era dirs (~/.clawdbot and its renames) belong
+ * to OpenClaw, which links ~/.clawdbot to ~/.openclaw; `migrate openclaw`
+ * imports them.
  */
 export function resolveStateDir(
   env: NodeJS.ProcessEnv = process.env,
   homedir: () => string = envHomedir(env),
 ): string {
   const effectiveHomedir = () => resolveRequiredHomeDir(env, homedir);
-  const override = env.BOT_STATE_DIR?.trim() || env.CLAWDBOT_STATE_DIR?.trim();
+  const override = env.BOT_STATE_DIR?.trim();
   if (override) {
     return resolveUserPath(override, env, effectiveHomedir);
   }
-  const newDir = newStateDir(effectiveHomedir);
-  if (env.BOT_TEST_FAST === "1") {
-    return newDir;
-  }
-  const legacyDirs = legacyStateDirs(effectiveHomedir);
-  const hasNew = fs.existsSync(newDir);
-  if (hasNew) {
-    return newDir;
-  }
-  const existingLegacy = legacyDirs.find((dir) => {
-    try {
-      return fs.existsSync(dir);
-    } catch {
-      return false;
-    }
-  });
-  if (existingLegacy) {
-    return existingLegacy;
-  }
-  return newDir;
+  return path.join(effectiveHomedir(), STATE_DIRNAME);
 }
 
 function resolveUserPath(
@@ -119,8 +75,7 @@ export function resolveCanonicalConfigPath(
   env: NodeJS.ProcessEnv = process.env,
   stateDir: string = resolveStateDir(env, envHomedir(env)),
 ): string {
-  const override =
-    env.BOT_CONFIG_PATH?.trim() || env.BOT_CONFIG_PATH?.trim() || env.CLAWDBOT_CONFIG_PATH?.trim();
+  const override = env.BOT_CONFIG_PATH?.trim();
   if (override) {
     return resolveUserPath(override, env, envHomedir(env));
   }
@@ -153,41 +108,16 @@ export function resolveConfigPathCandidate(
 }
 
 /**
- * Active config path (prefers existing config files).
+ * Active config path: $BOT_CONFIG_PATH, else bot.json in the state dir.
  */
 export function resolveConfigPath(
   env: NodeJS.ProcessEnv = process.env,
   stateDir: string = resolveStateDir(env, envHomedir(env)),
   homedir: () => string = envHomedir(env),
 ): string {
-  const override = env.BOT_CONFIG_PATH?.trim() || env.BOT_CONFIG_PATH?.trim();
+  const override = env.BOT_CONFIG_PATH?.trim();
   if (override) {
     return resolveUserPath(override, env, homedir);
-  }
-  if (env.BOT_TEST_FAST === "1") {
-    return path.join(stateDir, CONFIG_FILENAME);
-  }
-  const stateOverride = env.BOT_STATE_DIR?.trim();
-  const candidates = [
-    path.join(stateDir, CONFIG_FILENAME),
-    ...LEGACY_CONFIG_FILENAMES.map((name) => path.join(stateDir, name)),
-  ];
-  const existing = candidates.find((candidate) => {
-    try {
-      return fs.existsSync(candidate);
-    } catch {
-      return false;
-    }
-  });
-  if (existing) {
-    return existing;
-  }
-  if (stateOverride) {
-    return path.join(stateDir, CONFIG_FILENAME);
-  }
-  const defaultStateDir = resolveStateDir(env, homedir);
-  if (path.resolve(stateDir) === path.resolve(defaultStateDir)) {
-    return resolveConfigPathCandidate(env, homedir);
   }
   return path.join(stateDir, CONFIG_FILENAME);
 }
@@ -203,25 +133,18 @@ export function resolveDefaultConfigCandidates(
   homedir: () => string = envHomedir(env),
 ): string[] {
   const effectiveHomedir = () => resolveRequiredHomeDir(env, homedir);
-  const explicit =
-    env.BOT_CONFIG_PATH?.trim() || env.BOT_CONFIG_PATH?.trim() || env.CLAWDBOT_CONFIG_PATH?.trim();
+  const explicit = env.BOT_CONFIG_PATH?.trim();
   if (explicit) {
     return [resolveUserPath(explicit, env, effectiveHomedir)];
   }
-
   const candidates: string[] = [];
-  const botStateDir = env.BOT_STATE_DIR?.trim() || env.CLAWDBOT_STATE_DIR?.trim();
+  const botStateDir = env.BOT_STATE_DIR?.trim();
   if (botStateDir) {
-    const resolved = resolveUserPath(botStateDir, env, effectiveHomedir);
-    candidates.push(path.join(resolved, CONFIG_FILENAME));
-    candidates.push(...LEGACY_CONFIG_FILENAMES.map((name) => path.join(resolved, name)));
+    candidates.push(
+      path.join(resolveUserPath(botStateDir, env, effectiveHomedir), CONFIG_FILENAME),
+    );
   }
-
-  const defaultDirs = [newStateDir(effectiveHomedir), ...legacyStateDirs(effectiveHomedir)];
-  for (const dir of defaultDirs) {
-    candidates.push(path.join(dir, CONFIG_FILENAME));
-    candidates.push(...LEGACY_CONFIG_FILENAMES.map((name) => path.join(dir, name)));
-  }
+  candidates.push(path.join(effectiveHomedir(), STATE_DIRNAME, CONFIG_FILENAME));
   return candidates;
 }
 

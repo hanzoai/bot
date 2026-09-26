@@ -103,13 +103,6 @@ export const callGateway = vi
   .fn()
   .mockRejectedValue(new Error("gateway closed")) as unknown as MockFn;
 
-export const autoMigrateLegacyStateDir = vi.fn().mockResolvedValue({
-  migrated: false,
-  skipped: false,
-  changes: [],
-  warnings: [],
-}) as unknown as MockFn;
-
 function createLegacyStateMigrationDetectionResult(params?: {
   hasLegacySessions?: boolean;
   preview?: string[];
@@ -294,7 +287,6 @@ vi.mock("./onboard-helpers.js", () => ({
 }));
 
 vi.mock("./doctor-state-migrations.js", () => ({
-  autoMigrateLegacyStateDir,
   detectLegacyStateMigrations,
   runLegacyStateMigrations,
 }));

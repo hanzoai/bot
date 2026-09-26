@@ -1,4 +1,3 @@
-import fs from "node:fs/promises";
 import path from "node:path";
 import type { ZodIssue } from "zod";
 import { normalizeChatChannelId } from "../channels/registry.js";
@@ -50,10 +49,9 @@ import {
 import { inspectTelegramAccount } from "../telegram/account-inspect.js";
 import { listTelegramAccountIds, resolveTelegramAccount } from "../telegram/accounts.js";
 import { note } from "../terminal/note.js";
-import { isRecord, resolveHomeDir } from "../utils.js";
+import { isRecord } from "../utils.js";
 import { normalizeCompatibilityConfigValues } from "./doctor-legacy-config.js";
 import type { DoctorOptions } from "./doctor-prompter.js";
-import { autoMigrateLegacyStateDir } from "./doctor-state-migrations.js";
 
 type UnrecognizedKeysIssue = ZodIssue & {
   code: "unrecognized_keys";
@@ -1747,71 +1745,11 @@ function maybeRepairLegacyToolsBySenderKeys(cfg: BotConfig): {
   return { config: next, changes };
 }
 
-async function maybeMigrateLegacyConfig(): Promise<string[]> {
-  const changes: string[] = [];
-  const home = resolveHomeDir();
-  if (!home) {
-    return changes;
-  }
-
-  const targetDir = path.join(home, ".bot");
-  const targetPath = path.join(targetDir, "bot.json");
-  try {
-    await fs.access(targetPath);
-    return changes;
-  } catch {
-    // missing config
-  }
-
-  const legacyCandidates = [
-    path.join(home, ".clawdbot", "clawdbot.json"),
-    path.join(home, ".moldbot", "moldbot.json"),
-    path.join(home, ".moltbot", "moltbot.json"),
-  ];
-
-  let legacyPath: string | null = null;
-  for (const candidate of legacyCandidates) {
-    try {
-      await fs.access(candidate);
-      legacyPath = candidate;
-      break;
-    } catch {
-      // continue
-    }
-  }
-  if (!legacyPath) {
-    return changes;
-  }
-
-  await fs.mkdir(targetDir, { recursive: true });
-  try {
-    await fs.copyFile(legacyPath, targetPath, fs.constants.COPYFILE_EXCL);
-    changes.push(`Migrated legacy config: ${legacyPath} -> ${targetPath}`);
-  } catch {
-    // If it already exists, skip silently.
-  }
-
-  return changes;
-}
-
 export async function loadAndMaybeMigrateDoctorConfig(params: {
   options: DoctorOptions;
   confirm: (p: { message: string; initialValue: boolean }) => Promise<boolean>;
 }) {
   const shouldRepair = params.options.repair === true || params.options.yes === true;
-  const stateDirResult = await autoMigrateLegacyStateDir({ env: process.env });
-  if (stateDirResult.changes.length > 0) {
-    note(stateDirResult.changes.map((entry) => `- ${entry}`).join("\n"), "Doctor changes");
-  }
-  if (stateDirResult.warnings.length > 0) {
-    note(stateDirResult.warnings.map((entry) => `- ${entry}`).join("\n"), "Doctor warnings");
-  }
-
-  const legacyConfigChanges = await maybeMigrateLegacyConfig();
-  if (legacyConfigChanges.length > 0) {
-    note(legacyConfigChanges.map((entry) => `- ${entry}`).join("\n"), "Doctor changes");
-  }
-
   let snapshot = await readConfigFileSnapshot();
   const baseCfg = snapshot.config ?? {};
   let cfg: BotConfig = baseCfg;

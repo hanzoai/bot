@@ -19,17 +19,21 @@ describe("hanzo-bot migrate openclaw", () => {
   });
 
   function run(...args: string[]) {
+    return cli(home, ["migrate", "openclaw", ...args]);
+  }
+
+  function cli(dir: string, args: string[]) {
     const env: NodeJS.ProcessEnv = {
       PATH: process.env.PATH,
-      HOME: home,
-      USERPROFILE: home,
+      HOME: dir,
+      USERPROFILE: dir,
       NO_COLOR: "1",
       BOT_HIDE_BANNER: "1",
       TERM: "dumb",
     };
     const result = spawnSync(
       process.execPath,
-      ["--import", "tsx", path.resolve("src/entry.ts"), "migrate", "openclaw", ...args],
+      ["--import", "tsx", path.resolve("src/entry.ts"), ...args],
       { cwd: process.cwd(), env, encoding: "utf8", timeout: 120_000 },
     );
     const output = `${result.stdout}${result.stderr}`;
@@ -66,6 +70,22 @@ describe("hanzo-bot migrate openclaw", () => {
     const moves = plan.items.filter((item) => item.op === "write" || item.op === "copy");
     expect(moves.length).toBeGreaterThan(0);
     expect(moves.every((item) => item.status === "unchanged")).toBe(true);
+  });
+
+  it("imports a Clawdbot-era install, whose ~/.clawdbot OpenClaw links to ~/.openclaw", () => {
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "bot-migrate-clawdbot-")));
+    try {
+      writeFileLayout(path.join(dir, ".openclaw"));
+      fs.symlinkSync(path.join(dir, ".openclaw"), path.join(dir, ".clawdbot"));
+      const before = fs.readdirSync(path.join(dir, ".openclaw")).toSorted();
+      const { status, output } = cli(dir, ["migrate", "openclaw", "--apply"]);
+      expect(status, output).toBe(0);
+      expect(output).toContain("OpenClaw → Hanzo Bot   ~/.openclaw → ~/.bot");
+      expect(fs.existsSync(path.join(dir, ".bot", "bot.json"))).toBe(true);
+      expect(fs.readdirSync(path.join(dir, ".openclaw")).toSorted()).toEqual(before);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it("names the dir it could not find", () => {

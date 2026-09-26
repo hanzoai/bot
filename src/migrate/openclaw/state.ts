@@ -57,8 +57,9 @@ export const CONFIG_FILENAMES = ["openclaw.json", "clawdbot.json"] as const;
 
 /**
  * Where OpenClaw keeps its state, by OpenClaw's own rules: $OPENCLAW_STATE_DIR,
- * else ~/.openclaw, where ~ is $OPENCLAW_HOME or the user's home ($BOT_HOME is
- * Hanzo Bot's and does not move OpenClaw). `openclaw --profile <name>` sets
+ * else ~/.openclaw, else a Clawdbot-era ~/.clawdbot that OpenClaw has not moved
+ * yet, where ~ is $OPENCLAW_HOME or the user's home ($BOT_HOME is Hanzo Bot's
+ * and does not move OpenClaw). `openclaw --profile <name>` sets
  * OPENCLAW_STATE_DIR itself; $OPENCLAW_PROFILE alone does not move the state
  * dir, so a profile install is imported with --from ~/.openclaw-<name>.
  */
@@ -68,7 +69,9 @@ export function resolveOpenClawStateDir(env: NodeJS.ProcessEnv = process.env): s
   if (explicit) {
     return path.resolve(expandHomePrefix(explicit, { home }));
   }
-  return path.join(home, ".openclaw");
+  const current = path.join(home, ".openclaw");
+  const legacy = path.join(home, ".clawdbot");
+  return !fs.existsSync(current) && fs.existsSync(legacy) ? legacy : current;
 }
 export const STATE_DB = "state/openclaw.sqlite";
 export const AGENT_DB = "openclaw-agent.sqlite";

@@ -305,7 +305,7 @@ export function resolveConfigDir(
   env: NodeJS.ProcessEnv = process.env,
   homedir: () => string = os.homedir,
 ): string {
-  const override = env.BOT_STATE_DIR?.trim() || env.CLAWDBOT_STATE_DIR?.trim();
+  const override = env.BOT_STATE_DIR?.trim();
   if (override) {
     return resolveUserPath(override);
   }
