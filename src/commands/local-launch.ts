@@ -3,12 +3,13 @@
  *
  * Flow:
  * 1. On a machine with no bot.json: store IAM credentials so the embedded
- *    agent can call AI models, and write a config with gateway.mode = "local"
- *    and the Hanzo API proxy. A bot.json that exists (set up earlier, or
- *    imported by `migrate openclaw`) is the person's and is used as it is.
- * 3. Start the gateway server (HTTP + WS on port 18789) with no auth (loopback-only)
- * 4. Open the Control UI in the user's browser
- * 5. Keep running until Ctrl+C
+ *    agent can call AI models, write a config with gateway.mode = "local" and
+ *    the Hanzo API proxy, and start the gateway on loopback with no auth and
+ *    Tailscale off.
+ * 2. A bot.json that exists (set up earlier, or imported by `migrate
+ *    openclaw`) is the person's: it is used as it is, and the gateway starts
+ *    as `gateway run` starts it, with that config's bind, auth and Tailscale.
+ * 3. Open the Control UI in the user's browser and keep running until Ctrl+C.
  *
  * The IAM access token obtained during OAuth login is used to authenticate
  * API calls to https://api.hanzo.ai which proxies to model providers
@@ -18,12 +19,39 @@
 import os from "node:os";
 import path from "node:path";
 import { upsertAuthProfile } from "../agents/auth-profiles.js";
+import { formatCliCommand } from "../cli/command-format.js";
 import { readConfigFileSnapshot, writeConfigFile } from "../config/io.js";
+import { resolveGatewayPort } from "../config/paths.js";
+import type { GatewayServerOptions } from "../gateway/server.js";
+import { resolveDashboardUrl } from "./dashboard.js";
 import { openUrl } from "./onboard-helpers.js";
 
 /** Hanzo API proxy endpoint — accepts IAM tokens, proxies to model providers. */
-const HANZO_API_BASE_URL = "https://api.hanzo.ai";
+export const HANZO_API_BASE_URL = "https://api.hanzo.ai";
 const DEFAULT_PORT = 18789;
+
+/** The config Run Locally writes on a machine with no bot.json. */
+export function hanzoCloudConfig(home: string) {
+  return {
+    gateway: {
+      mode: "local" as const,
+      bind: "loopback" as const,
+    },
+    models: {
+      providers: {
+        anthropic: {
+          baseUrl: HANZO_API_BASE_URL,
+          models: [],
+        },
+      },
+    },
+    agents: {
+      defaults: {
+        workspace: path.join(home, ".hanzo", "bot", "workspace"),
+      },
+    },
+  };
+}
 
 export async function launchLocal(params: { accessToken: string }): Promise<void> {
   const { accessToken } = params;
@@ -34,10 +62,17 @@ export async function launchLocal(params: { accessToken: string }): Promise<void
     // pointing their Anthropic provider at the proxy would send their own key there.
     // eslint-disable-next-line no-console
     console.log(`\n  Using your config at ${existing.path}\n`);
-  } else {
-    await writeHanzoCloudConfig(accessToken);
+    await startLocalGateway(accessToken, resolveGatewayPort(existing.config), {});
+    return;
   }
-  await startLocalGateway(accessToken, !existing.exists);
+  await writeHanzoCloudConfig(accessToken);
+  // Only local processes reach a loopback gateway, so it needs no token; with
+  // Tailscale off nothing forwards the tailnet to it.
+  await startLocalGateway(accessToken, DEFAULT_PORT, {
+    bind: "loopback",
+    auth: { mode: "none" },
+    tailscale: { mode: "off" },
+  });
 }
 
 async function writeHanzoCloudConfig(accessToken: string): Promise<void> {
@@ -67,68 +102,60 @@ async function writeHanzoCloudConfig(accessToken: string): Promise<void> {
   //      IAM token is accepted (Anthropic's own API would reject it).
   //    - Omit gateway.auth — auth mode is passed as a runtime override to
   //      startGatewayServer() so it doesn't persist "none" to config.
-  const config = {
-    gateway: {
-      mode: "local" as const,
-      bind: "loopback" as const,
-    },
-    models: {
-      providers: {
-        anthropic: {
-          baseUrl: HANZO_API_BASE_URL,
-          models: [],
-        },
-      },
-    },
-    agents: {
-      defaults: {
-        workspace: path.join(os.homedir(), ".hanzo", "bot", "workspace"),
-      },
-    },
-  };
+  const config = hanzoCloudConfig(os.homedir());
   await writeConfigFile(config as Parameters<typeof writeConfigFile>[0]);
 }
 
-async function startLocalGateway(accessToken: string, viaHanzoCloud: boolean): Promise<void> {
+async function startLocalGateway(
+  accessToken: string,
+  port: number,
+  overrides: GatewayServerOptions,
+): Promise<void> {
   // eslint-disable-next-line no-console
   console.log("\n  Starting local gateway...\n");
+  const viaHanzoCloud = overrides.auth?.mode === "none";
 
-  // 3. Dynamically import gateway dependencies (heavy modules)
+  // Dynamically import gateway dependencies (heavy modules)
   const [{ startGatewayServer }, { runGatewayLoop }, { defaultRuntime }] = await Promise.all([
     import("../gateway/server.js"),
     import("../cli/gateway-cli/run-loop.js"),
     import("../runtime.js"),
   ]);
 
-  const port = DEFAULT_PORT;
-
-  // 4. Start gateway loop — this is long-running.
+  // Start gateway loop — this is long-running.
   try {
     await runGatewayLoop({
       runtime: defaultRuntime,
       lockPort: port,
       start: async () => {
-        // Start the gateway with auth disabled.  We bind to loopback only,
-        // so only local processes can connect — no token needed.  The auth
-        // override is a runtime-only option and does NOT get persisted to
-        // the config file, so `bot gateway run` still defaults to
-        // token auth on subsequent invocations.
-        const server = await startGatewayServer(port, {
-          bind: "loopback",
-          auth: { mode: "none" as const },
-        });
+        // The overrides are runtime-only and never persisted, so `gateway run`
+        // still starts with the config's own auth.
+        const server = await startGatewayServer(port, overrides);
 
-        // Open Control UI in browser — no token required.
+        // Read after start: the gateway saves a token it had to generate.
+        let url = `http://127.0.0.1:${port}/`;
+        let shown = url;
+        if (!viaHanzoCloud) {
+          const snapshot = await readConfigFileSnapshot();
+          const dashboard = await resolveDashboardUrl(snapshot.valid ? snapshot.config : {});
+          url = dashboard.url;
+          shown = dashboard.httpUrl;
+        }
+        let opened = false;
         try {
-          await openUrl(`http://127.0.0.1:${port}/`);
+          opened = await openUrl(url);
         } catch {
           // Browser open may fail in headless environments — not fatal
         }
 
         // eslint-disable-next-line no-console
-        console.log(`  Gateway running on http://127.0.0.1:${port}/`);
+        console.log(`  Gateway running on ${shown}`);
         // eslint-disable-next-line no-console
-        console.log(`  Control UI opened in your browser.`);
+        console.log(
+          opened
+            ? "  Control UI opened in your browser."
+            : `  Open the Control UI: ${formatCliCommand("bot dashboard")}`,
+        );
         if (viaHanzoCloud) {
           // eslint-disable-next-line no-console
           console.log(`  AI models via Hanzo Cloud (api.hanzo.ai)\n`);

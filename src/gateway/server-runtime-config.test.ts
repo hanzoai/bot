@@ -162,6 +162,17 @@ describe("resolveGatewayRuntimeConfig", () => {
         expectedMessage: "refusing to bind gateway",
       },
       {
+        name: "tailscale serve with none auth",
+        cfg: {
+          gateway: {
+            bind: "loopback" as const,
+            auth: { mode: "none" as const },
+            tailscale: { mode: "serve" as const },
+          },
+        },
+        expectedMessage: "tailscale serve requires gateway auth",
+      },
+      {
         name: "loopback binding that resolves to non-loopback host",
         cfg: { gateway: { bind: "loopback" as const, auth: { mode: "none" as const } } },
         host: "0.0.0.0",

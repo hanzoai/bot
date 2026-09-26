@@ -124,6 +124,12 @@ export async function resolveGatewayRuntimeConfig(params: {
       "tailscale funnel requires gateway auth mode=token or iam (set gateway.auth.token or BOT_GATEWAY_TOKEN)",
     );
   }
+  // Serve puts the gateway on the tailnet; with no auth every peer could drive it.
+  if (tailscaleMode === "serve" && authMode === "none") {
+    throw new Error(
+      "tailscale serve requires gateway auth (set gateway.auth.token or BOT_GATEWAY_TOKEN), or set gateway.tailscale.mode=off",
+    );
+  }
   if (tailscaleMode !== "off" && !isLoopbackHost(bindHost)) {
     throw new Error("tailscale serve/funnel requires gateway bind=loopback (127.0.0.1)");
   }

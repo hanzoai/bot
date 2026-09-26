@@ -80,17 +80,12 @@ async function resolveDashboardToken(
   }
 }
 
-export async function dashboardCommand(
-  runtime: RuntimeEnv = defaultRuntime,
-  options: DashboardOptions = {},
-) {
-  const snapshot = await readConfigFileSnapshot();
-  const cfg = snapshot.valid ? snapshot.config : {};
-  const port = resolveGatewayPort(cfg);
+/** The Control UI address for a config, and the address that signs in with its gateway token. */
+export async function resolveDashboardUrl(cfg: BotConfig, env: NodeJS.ProcessEnv = process.env) {
+  const port = resolveGatewayPort(cfg, env);
   const bind = cfg.gateway?.bind ?? "loopback";
   const basePath = cfg.gateway?.controlUi?.basePath;
-  const customBindHost = cfg.gateway?.customBindHost;
-  const resolvedToken = await resolveDashboardToken(cfg, process.env);
+  const resolvedToken = await resolveDashboardToken(cfg, env);
   const token = resolvedToken.token ?? "";
 
   // LAN URLs fail secure-context checks in browsers.
@@ -98,15 +93,32 @@ export async function dashboardCommand(
   const links = resolveControlUiLinks({
     port,
     bind: bind === "lan" ? "loopback" : bind,
-    customBindHost,
+    customBindHost: cfg.gateway?.customBindHost,
     basePath,
   });
   // Avoid embedding externally managed SecretRef tokens in terminal/clipboard/browser args.
   const includeTokenInUrl = token.length > 0 && !resolvedToken.tokenSecretRefConfigured;
   // Prefer URL fragment to avoid leaking auth tokens via query params.
-  const dashboardUrl = includeTokenInUrl
+  const url = includeTokenInUrl
     ? `${links.httpUrl}#token=${encodeURIComponent(token)}`
     : links.httpUrl;
+  return { port, basePath, token, resolvedToken, includeTokenInUrl, httpUrl: links.httpUrl, url };
+}
+
+export async function dashboardCommand(
+  runtime: RuntimeEnv = defaultRuntime,
+  options: DashboardOptions = {},
+) {
+  const snapshot = await readConfigFileSnapshot();
+  const cfg = snapshot.valid ? snapshot.config : {};
+  const {
+    port,
+    basePath,
+    token,
+    resolvedToken,
+    includeTokenInUrl,
+    url: dashboardUrl,
+  } = await resolveDashboardUrl(cfg, process.env);
 
   runtime.log(`Dashboard URL: ${dashboardUrl}`);
   if (resolvedToken.tokenSecretRefConfigured && token) {
