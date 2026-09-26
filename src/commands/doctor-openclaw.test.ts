@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { noteOpenClawInstall } from "./doctor-openclaw.js";
+import { confirmFirstRun, noteOpenClawInstall } from "./doctor-openclaw.js";
 
 let home: string;
 
@@ -58,5 +58,21 @@ describe("noteOpenClawInstall", () => {
     fs.writeFileSync(path.join(home, ".openclaw", "openclaw.json"), "{}");
     noteOpenClawInstall(env({ BOT_STATE_DIR: path.join(home, ".openclaw") }), noteFn);
     expect(noteFn).not.toHaveBeenCalled();
+  });
+});
+
+describe("confirmFirstRun", () => {
+  it("goes ahead without asking on a machine with no OpenClaw install", async () => {
+    const ask = vi.fn();
+    expect(await confirmFirstRun(env(), ask, true)).toBe(true);
+    expect(ask).not.toHaveBeenCalled();
+  });
+
+  it("stops for an OpenClaw install unless the person asks for a fresh setup", async () => {
+    fs.mkdirSync(path.join(home, ".openclaw"));
+    fs.writeFileSync(path.join(home, ".openclaw", "openclaw.json"), "{}");
+    expect(await confirmFirstRun(env(), vi.fn(), false)).toBe(false);
+    expect(await confirmFirstRun(env(), vi.fn().mockResolvedValue(false), true)).toBe(false);
+    expect(await confirmFirstRun(env(), vi.fn().mockResolvedValue(true), true)).toBe(true);
   });
 });

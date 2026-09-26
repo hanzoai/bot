@@ -88,6 +88,29 @@ describe("hanzo-bot migrate openclaw", () => {
     }
   });
 
+  it("has doctor and a first command name the OpenClaw install before any first-run sign-in", () => {
+    const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "bot-migrate-first-")));
+    try {
+      writeFileLayout(path.join(dir, ".openclaw"));
+      const files = () =>
+        fs
+          .readdirSync(path.join(dir, ".openclaw"), { recursive: true, encoding: "utf8" })
+          .toSorted((a, b) => a.localeCompare(b));
+      const before = files();
+      const doctor = cli(dir, ["doctor", "--non-interactive"]);
+      expect(doctor.output).toContain("OpenClaw install found at ~/.openclaw");
+      expect(doctor.output).not.toContain("Connecting your machine to Hanzo Cloud");
+      const first = cli(dir, []);
+      expect(first.status, first.output).toBe(0);
+      expect(first.output).toContain("migrate openclaw --apply");
+      expect(first.output).not.toContain("Connecting your machine to Hanzo Cloud");
+      expect(fs.existsSync(path.join(dir, ".bot", "bot.json"))).toBe(false);
+      expect(files()).toEqual(before);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("names the dir it could not find", () => {
     const { status, output } = run("--from", path.join(home, "nope"));
     expect(status).not.toBe(0);

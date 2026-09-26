@@ -14,6 +14,9 @@ import { applyCliProfileEnv, parseCliProfileArgs } from "./profile.js";
 import { tryRouteCli } from "./route.js";
 import { normalizeWindowsArgv } from "./windows-argv.js";
 
+/** Commands that run without a config, so never start the first-run cloud connect. */
+export const FIRST_RUN_EXEMPT = new Set(["node", "gateway", "migrate", "doctor"]);
+
 export function rewriteUpdateFlagArgv(argv: string[]): string[] {
   const index = argv.indexOf("--update");
   if (index === -1) {
@@ -91,20 +94,20 @@ export async function runCli(argv: string[] = process.argv) {
   // before proceeding. Skip for help/version flags, non-default commands that don't
   // need cloud credentials, cloud-provisioned nodes (HANZO_PLAYGROUND_CLOUD_NODE=true)
   // which receive their credentials via environment variables and must not trigger
-  // interactive OAuth — there is no TTY inside K8s pods — and `migrate`, whose job
-  // is to write the first config from another install.
+  // interactive OAuth — there is no TTY inside K8s pods — `migrate`, whose job
+  // is to write the first config from another install, and `doctor`, which
+  // diagnoses the machine as it is (an OpenClaw install included).
   const cloudNode = isCloudNode();
   const primaryCmd = getPrimaryCommand(normalizedArgv);
-  if (
-    !hasHelpOrVersion(normalizedArgv) &&
-    !cloudNode &&
-    primaryCmd !== "node" &&
-    primaryCmd !== "gateway" &&
-    primaryCmd !== "migrate"
-  ) {
+  if (!hasHelpOrVersion(normalizedArgv) && !cloudNode && !FIRST_RUN_EXEMPT.has(primaryCmd ?? "")) {
     const { readConfigFileSnapshot } = await import("../config/config.js");
     const snapshot = await readConfigFileSnapshot();
     if (!snapshot.exists) {
+      // An OpenClaw user imports first; the first run would write a config of its own.
+      const { confirmFirstRun } = await import("../commands/doctor-openclaw.js");
+      if (!(await confirmFirstRun())) {
+        return;
+      }
       const { runFirstRunCloudConnect } = await import("../commands/cloud-connect.js");
       await runFirstRunCloudConnect();
       // runFirstRunCloudConnect now runs a long-lived process (local gateway or
