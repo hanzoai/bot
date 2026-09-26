@@ -16,6 +16,8 @@ export type ExtraGatewayService = {
   scope: "user" | "system";
   marker?: "bot" | "clawdbot" | "moltbot";
   legacy?: boolean;
+  /** Runs OpenClaw, whatever its label: another install's gateway, never ours to remove. */
+  openclaw?: boolean;
 };
 
 export type FindExtraGatewayServicesOptions = {
@@ -136,6 +138,19 @@ function isLegacyLabel(label: string): boolean {
   return lower.includes("clawdbot") || lower.includes("moltbot");
 }
 
+/**
+ * OpenClaw kept a Clawdbot-era service's label when it took the service over,
+ * so a `com.clawdbot.gateway` that runs openclaw is OpenClaw's live gateway.
+ */
+function runsOpenClaw(contents: string): boolean {
+  return contents.toLowerCase().includes("openclaw");
+}
+
+/** A service that runs OpenClaw is listed, never marked legacy. */
+function owned(svc: ExtraGatewayService, contents: string): ExtraGatewayService {
+  return runsOpenClaw(contents) ? { ...svc, legacy: false, openclaw: true } : svc;
+}
+
 async function readDirEntries(dir: string): Promise<string[]> {
   try {
     return await fs.readdir(dir);
@@ -203,14 +218,19 @@ async function scanLaunchdDir(params: {
       if (!legacyLabel) {
         continue;
       }
-      results.push({
-        platform: "darwin",
-        label,
-        detail: `plist: ${fullPath}`,
-        scope: params.scope,
-        marker: isLegacyLabel(label) ? "clawdbot" : "moltbot",
-        legacy: true,
-      });
+      results.push(
+        owned(
+          {
+            platform: "darwin",
+            label,
+            detail: `plist: ${fullPath}`,
+            scope: params.scope,
+            marker: isLegacyLabel(label) ? "clawdbot" : "moltbot",
+            legacy: true,
+          },
+          contents,
+        ),
+      );
       continue;
     }
     if (isIgnoredLaunchdLabel(label)) {
@@ -219,14 +239,19 @@ async function scanLaunchdDir(params: {
     if (marker === "bot" && isBotGatewayLaunchdService(label, contents)) {
       continue;
     }
-    results.push({
-      platform: "darwin",
-      label,
-      detail: `plist: ${fullPath}`,
-      scope: params.scope,
-      marker,
-      legacy: marker !== "bot" || isLegacyLabel(label),
-    });
+    results.push(
+      owned(
+        {
+          platform: "darwin",
+          label,
+          detail: `plist: ${fullPath}`,
+          scope: params.scope,
+          marker,
+          legacy: marker !== "bot" || isLegacyLabel(label),
+        },
+        contents,
+      ),
+    );
   }
 
   return results;
@@ -251,14 +276,19 @@ async function scanSystemdDir(params: {
     if (marker === "bot" && isBotGatewaySystemdService(name, contents)) {
       continue;
     }
-    results.push({
-      platform: "linux",
-      label: entry,
-      detail: `unit: ${fullPath}`,
-      scope: params.scope,
-      marker,
-      legacy: marker !== "bot",
-    });
+    results.push(
+      owned(
+        {
+          platform: "linux",
+          label: entry,
+          detail: `unit: ${fullPath}`,
+          scope: params.scope,
+          marker,
+          legacy: marker !== "bot",
+        },
+        contents,
+      ),
+    );
   }
 
   return results;
@@ -416,14 +446,19 @@ export async function findExtraGatewayServices(
       if (!marker) {
         continue;
       }
-      push({
-        platform: "win32",
-        label: name,
-        detail: task.taskToRun ? `task: ${name}, run: ${task.taskToRun}` : name,
-        scope: "system",
-        marker,
-        legacy: marker !== "bot",
-      });
+      push(
+        owned(
+          {
+            platform: "win32",
+            label: name,
+            detail: task.taskToRun ? `task: ${name}, run: ${task.taskToRun}` : name,
+            scope: "system",
+            marker,
+            legacy: marker !== "bot",
+          },
+          `${name} ${task.taskToRun ?? ""}`,
+        ),
+      );
     }
     return results;
   }

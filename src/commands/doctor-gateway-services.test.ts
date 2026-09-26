@@ -288,4 +288,39 @@ describe("maybeScanExtraGatewayServices", () => {
       "Legacy gateway services removed. Installing HanzoBot gateway next.",
     );
   });
+
+  it("lists OpenClaw's gateway under a Clawdbot label and never offers to remove it", async () => {
+    mocks.findExtraGatewayServices.mockResolvedValue([
+      {
+        platform: "darwin",
+        label: "com.clawdbot.gateway",
+        detail: "plist: /Users/test/Library/LaunchAgents/com.clawdbot.gateway.plist",
+        scope: "user",
+        marker: "bot",
+        legacy: false,
+        openclaw: true,
+      },
+    ]);
+    const runtime = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
+    const prompter = {
+      confirm: vi.fn(),
+      confirmRepair: vi.fn(),
+      confirmAggressive: vi.fn(),
+      confirmSkipInNonInteractive: vi.fn().mockResolvedValue(true),
+      select: vi.fn(),
+      shouldRepair: true,
+      shouldForce: false,
+    };
+
+    await maybeScanExtraGatewayServices({ deep: false, yes: true }, runtime, prompter);
+
+    expect(prompter.confirmSkipInNonInteractive).not.toHaveBeenCalled();
+    expect(mocks.uninstallLegacySystemdUnits).not.toHaveBeenCalled();
+    expect(mocks.note).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "com.clawdbot.gateway (user, plist: /Users/test/Library/LaunchAgents/com.clawdbot.gateway.plist): OpenClaw's gateway, left as it is",
+      ),
+      "Other gateway-like services detected",
+    );
+  });
 });

@@ -358,7 +358,12 @@ export async function maybeScanExtraGatewayServices(
   }
 
   note(
-    extraServices.map((svc) => `- ${svc.label} (${svc.scope}, ${svc.detail})`).join("\n"),
+    extraServices
+      .map(
+        (svc) =>
+          `- ${svc.label} (${svc.scope}, ${svc.detail})${svc.openclaw ? ": OpenClaw's gateway, left as it is" : ""}`,
+      )
+      .join("\n"),
     "Other gateway-like services detected",
   );
 

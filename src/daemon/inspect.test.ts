@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { findExtraGatewayServices } from "./inspect.js";
 
@@ -82,6 +85,67 @@ describe("findExtraGatewayServices (win32)", () => {
         marker: "moltbot",
         legacy: true,
       },
+    ]);
+  });
+});
+
+describe("findExtraGatewayServices (darwin, linux)", () => {
+  const originalPlatform = process.platform;
+  let home: string;
+
+  const plist = (label: string, program: string[]) =>
+    [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<plist version="1.0"><dict>',
+      `<key>Label</key><string>${label}</string>`,
+      "<key>ProgramArguments</key><array>",
+      ...program.map((arg) => `<string>${arg}</string>`),
+      "</array></dict></plist>",
+    ].join("\n");
+
+  beforeEach(() => {
+    home = fs.mkdtempSync(path.join(os.tmpdir(), "bot-inspect-"));
+  });
+
+  afterEach(() => {
+    Object.defineProperty(process, "platform", { configurable: true, value: originalPlatform });
+    fs.rmSync(home, { recursive: true, force: true });
+  });
+
+  it("never marks a Clawdbot-labelled launchd service that runs OpenClaw as legacy", async () => {
+    Object.defineProperty(process, "platform", { configurable: true, value: "darwin" });
+    const dir = path.join(home, "Library", "LaunchAgents");
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, "com.clawdbot.gateway.plist"),
+      plist("com.clawdbot.gateway", [
+        "/usr/local/bin/node",
+        "/opt/openclaw/openclaw.mjs",
+        "gateway",
+      ]),
+    );
+    fs.writeFileSync(
+      path.join(dir, "com.clawdbot.old.plist"),
+      plist("com.clawdbot.old", ["/usr/local/bin/node", "/opt/clawdbot/clawdbot.mjs", "gateway"]),
+    );
+    const result = await findExtraGatewayServices({ HOME: home });
+    const byLabel = Object.fromEntries(result.map((svc) => [svc.label, svc]));
+    expect(byLabel["com.clawdbot.gateway"]).toMatchObject({ legacy: false, openclaw: true });
+    expect(byLabel["com.clawdbot.old"]).toMatchObject({ legacy: true });
+    expect(byLabel["com.clawdbot.old"]).not.toHaveProperty("openclaw");
+  });
+
+  it("never marks a systemd unit that runs OpenClaw as legacy", async () => {
+    Object.defineProperty(process, "platform", { configurable: true, value: "linux" });
+    const dir = path.join(home, ".config", "systemd", "user");
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, "clawdbot-gateway.service"),
+      "[Unit]\nDescription=Clawdbot gateway\n[Service]\nExecStart=/usr/bin/node /opt/openclaw/openclaw.mjs gateway\n",
+    );
+    const result = await findExtraGatewayServices({ HOME: home });
+    expect(result).toEqual([
+      expect.objectContaining({ label: "clawdbot-gateway.service", legacy: false, openclaw: true }),
     ]);
   });
 });
