@@ -35,9 +35,10 @@ function sameBytes(a: string, b: string): boolean {
  * Plan copying `fromDir` into `toDir` file by file. A fromDir that is itself
  * a link is copied as the files it points at, so the target gets a dir of its
  * own. Symlinks below it are recreated, never followed; `relink` may point one
- * elsewhere, given the link's target and the path it is created at (a link
- * into the OpenClaw dir is pointed at the same place in the Hanzo Bot dir, so
- * writing through it cannot change the OpenClaw install). `reached` collects
+ * elsewhere, given the link's target, the path it is created at and the link
+ * it is copied from (a link into the OpenClaw dir is pointed at the same place
+ * in the Hanzo Bot dir, so writing through it cannot change the OpenClaw
+ * install). `reached` collects
  * the real place of every link the walk meets, `claimed` the targets already
  * planned (a second copy to one is a conflict). `skip` names entries
  * (relative to fromDir) that are not copied.
@@ -49,7 +50,7 @@ export function planCopyTree(params: {
   claimed: Set<string>;
   reached: Set<string>;
   skip?: (rel: string) => boolean;
-  relink?: (target: string, at: string) => string;
+  relink?: (target: string, at: string, from: string) => string;
 }): CopyTally {
   const tally: CopyTally = { created: 0, unchanged: 0, conflicts: [] };
   if (isLink(params.fromDir)) {
@@ -64,7 +65,7 @@ export function planCopyTree(params: {
       if (fs.existsSync(from)) {
         params.reached.add(realPathOf(from));
       }
-      const target = params.relink?.(fs.readlinkSync(from), to) ?? fs.readlinkSync(from);
+      const target = params.relink?.(fs.readlinkSync(from), to, from) ?? fs.readlinkSync(from);
       if (params.claimed.has(to)) {
         tally.conflicts.push(rel);
       } else if (!fs.existsSync(to) && !isLink(to)) {
@@ -116,28 +117,44 @@ function isLink(file: string): boolean {
 }
 
 /**
- * A link whose target, read from where the link is created, lies inside
- * `sourceRoot` names the same place inside `targetRoot`, whether the target
- * is written as the path or reaches it through links. A relative target that
- * stays inside `targetRoot` is kept as written.
+ * A copied link keeps pointing where it pointed in OpenClaw's tree, except
+ * that a place inside a copied dir (as written or through links) becomes the
+ * same place inside its copy. `roots` pairs each copied dir with its copy.
+ * A relative link that names that place from its new dir is kept as written;
+ * any other is written as the absolute path.
  */
 export function relinkInto(
-  sourceRoot: string,
-  targetRoot: string,
-): (target: string, at: string) => string {
-  const realSource = realPathOf(sourceRoot);
-  return (target, at) => {
-    const resolved = path.resolve(path.dirname(at), target);
-    if (!path.isAbsolute(target) && isWithin(targetRoot, resolved)) {
-      return target;
+  roots: Array<[string, string]>,
+): (target: string, at: string, from: string) => string {
+  const pairs = roots
+    .flatMap(([from, to]): Array<[string, string]> => {
+      const real = realPathOf(from);
+      return real === from
+        ? [[from, to]]
+        : [
+            [from, to],
+            [real, to],
+          ];
+    })
+    .toSorted((a, b) => b[0].length - a[0].length);
+  const inTarget = (place: string): string | undefined => {
+    for (const candidate of [place, realPathOf(place)]) {
+      const pair = pairs.find(([from]) => isWithin(from, candidate));
+      if (pair) {
+        return path.join(pair[1], path.relative(pair[0], candidate));
+      }
     }
-    if (isWithin(sourceRoot, resolved)) {
-      return path.join(targetRoot, path.relative(sourceRoot, resolved));
+    return undefined;
+  };
+  return (target, at, from) => {
+    // The OS reads a relative target from the link's real dir.
+    const place = path.resolve(realPathOf(path.dirname(from)), target);
+    const mapped = inTarget(place);
+    if (path.isAbsolute(target)) {
+      return mapped ?? target;
     }
-    const real = realPathOf(resolved);
-    return isWithin(realSource, real)
-      ? path.join(targetRoot, path.relative(realSource, real))
-      : target;
+    const meant = mapped ?? place;
+    return path.resolve(path.dirname(at), target) === meant ? target : meant;
   };
 }
 

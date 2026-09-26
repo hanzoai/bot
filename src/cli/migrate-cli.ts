@@ -72,7 +72,7 @@ function noteText(item: PlanItem): string {
     case "starter":
       return `bot.json held Hanzo Bot's first-run defaults for ${item.names?.join(", ")}; OpenClaw's settings replace them (the old file is bot.json.bak).${item.names?.includes("models.providers.anthropic") ? " Anthropic calls use your imported Anthropic key, as in OpenClaw." : ""}`;
     case "skills-linked":
-      return `${item.from} links to ${item.names?.[1]}, which the import does not write to. Agent ${item.names?.[0]}'s workshop skills are in ${item.to}; copy them into ${item.from}/skills if you want them there.`;
+      return `Agent ${item.names?.[0]}'s workshop skills belong in ${item.from}, but ${item.names?.[1]} links into ${item.names?.[2]}, which the import does not write to. They are in ${item.to}; copy them into ${item.from} yourself if you want them there.`;
     case "anthropic-route":
       return `bot.json sends Anthropic calls to ${item.names?.[0]}, so your imported Anthropic key goes there too. To call Anthropic with it directly, remove models.providers.anthropic from bot.json.`;
     case "kept":

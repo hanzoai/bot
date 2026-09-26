@@ -258,16 +258,16 @@ function planConfig(
     if (keptLabels.length > 0) {
       items.push({ op: "note", from: "bot.json", reason: "kept", names: keptLabels });
     }
+    // A route to the proxy that the person changed stays; their imported key then goes there too.
+    if (ownAnthropic && routesAnthropicToHanzo(before) && routesAnthropicToHanzo(merged)) {
+      const route = String((merged as BotConfig).models?.providers?.anthropic?.baseUrl);
+      items.push({ op: "note", from: "bot.json", reason: "anthropic-route", names: [route] });
+    }
     effective = merged;
   }
   const missing = listEnvRefs(config).filter((key) => !envKeys.has(key));
   if (missing.length > 0) {
     items.push({ op: "note", from: configName, reason: "env-ref", names: missing });
-  }
-  // A route the person changed stays; their imported key then goes there too.
-  if (ownAnthropic && routesAnthropicToHanzo(effective)) {
-    const route = String((effective as BotConfig).models?.providers?.anthropic?.baseUrl);
-    items.push({ op: "note", from: "bot.json", reason: "anthropic-route", names: [route] });
   }
   return effective;
 }
@@ -299,6 +299,7 @@ function setWorkspaces(p: Planning, config: Json, configName: string): PlanItem[
     }
   });
   const realSource = realPathOf(p.source);
+  const copied = copiedDirs(p);
   for (const { owner, dir, at } of owners) {
     if (dir && typeof owner.workspace !== "string" && fs.existsSync(path.join(p.source, dir))) {
       owner.workspace = homeForm(path.join(p.target, dir), p.home);
@@ -310,17 +311,26 @@ function setWorkspaces(p: Planning, config: Json, configName: string): PlanItem[
     if (typeof value !== "string") {
       continue;
     }
-    const abs = path.resolve(expandHome(value, p.home));
-    if (isWithin(p.target, abs)) {
-      continue;
-    }
+    let abs = path.resolve(expandHome(value, p.home));
+    // Where the workspace is inside the OpenClaw dir, by that name or another.
+    let inside = isWithin(p.target, abs) ? path.relative(p.target, abs) : undefined;
     const real = realPathOf(abs);
-    if (isWithin(realSource, real)) {
-      owner.workspace = homeForm(path.join(p.target, path.relative(realSource, real)), p.home);
-      continue;
+    if (inside === undefined && isWithin(realSource, real)) {
+      inside = path.relative(realSource, real);
+    }
+    if (inside !== undefined) {
+      const top = inside.split(path.sep)[0] ?? "";
+      const source = path.join(p.source, inside);
+      // A dir the import copies is the copy's; one it does not copy stays where it is.
+      if (inside === "" || copied.includes(top) || !fs.existsSync(source)) {
+        owner.workspace = homeForm(path.join(p.target, inside), p.home);
+        continue;
+      }
+      owner.workspace = homeForm(source, p.home);
+      abs = source;
     }
     if (!p.sources.has(abs)) {
-      p.items.push({ op: "note", from: value, reason: "workspace-in-place" });
+      p.items.push({ op: "note", from: homeForm(abs, p.home), reason: "workspace-in-place" });
       p.sources.add(abs);
     }
   }
@@ -406,13 +416,8 @@ function planEnv(p: Planning): Set<string> {
  */
 function planCopies(p: Planning, merged: Set<string>): void {
   const { actions, items, claimed, sources: reached } = p;
-  const relink = relinkInto(p.source, p.target);
-  const names = fs.existsSync(p.source) ? fs.readdirSync(p.source).toSorted() : [];
-  const dirs = [
-    ...names.filter((name) => name === "workspace" || name.startsWith("workspace-")),
-    ...DIRS_COPIED.filter((name) => names.includes(name)),
-  ];
-  for (const name of dirs) {
+  const relink = relinkInto(copyRoots(p));
+  for (const name of copiedDirs(p)) {
     const fromDir = path.join(p.source, name);
     // A link to nothing (an unmounted volume, say) has nothing to copy now.
     if (!fs.existsSync(fromDir)) {
@@ -468,7 +473,7 @@ function planCopies(p: Planning, merged: Set<string>): void {
  */
 function planWorkshopSkills(p: Planning, config: Json): void {
   const { actions, items, claimed, sources: reached } = p;
-  const relink = relinkInto(p.source, p.target);
+  const relink = relinkInto(copyRoots(p));
   // What loads before a workshop skill: the files already there or copied from OpenClaw.
   const before = [...claimed];
   for (const agentId of listDirs(path.join(p.source, "agents"))) {
@@ -477,54 +482,53 @@ function planWorkshopSkills(p: Planning, config: Json): void {
       continue;
     }
     const home = agentHome(p, config, agentId);
-    let toDir = home.inside
-      ? path.join(home.dir, ".agents", "skills")
-      : path.join(home.dir, "skills");
-    // A workspace whose .agents (or a skill dir in it) is a link into a dir
-    // OpenClaw uses, dotfiles say, is not written through; the skills wait
-    // beside the agent instead.
-    const check = guardedLanding({ targetRoot: p.target, sources: p.sources, actions });
-    const through = home.inside
-      ? fs
-          .readdirSync(workshop)
-          .map((name) => check(path.join(toDir, name, "SKILL.md")))
-          .find((hit) => hit !== undefined)
-      : undefined;
-    if (through) {
-      const dir = path.join(p.target, "agents", normalizeAgentId(agentId), "from-openclaw");
-      toDir = path.join(dir, "skills");
-      items.push({
-        op: "note",
-        from: homeForm(through.link?.at ?? home.workspace, p.home),
-        to: homeForm(toDir, p.home),
-        reason: "skills-linked",
-        names: [agentId, homeForm(through.dir, p.home)],
-      });
-    }
+    const ownDir = path.join(home.workspace, ".agents", "skills");
+    let toDir = home.inside ? ownDir : path.join(home.dir, "skills");
     // In OpenClaw a managed or workspace skill of the same name loads first;
-    // in Hanzo Bot a project skill would, so those stay behind.
+    // in Hanzo Bot a project skill would, so those stay behind. A skill
+    // already in the dir it goes to is an earlier copy, or the person's own:
+    // the copy reports it as unchanged or as a conflict.
     const higher = [
       path.join(home.workspace, "skills"),
-      path.join(home.workspace, ".agents", "skills"),
+      ownDir,
       path.join(p.home, ".agents", "skills"),
       path.join(p.source, "skills"),
       path.join(p.target, "skills"),
     ];
-    const shadowed: string[] = [];
-    const skip = (sub: string) => {
-      if (sub.includes(path.sep)) {
-        return false;
-      }
-      const hit = higher.some(
-        (dir) =>
-          fs.existsSync(path.join(dir, sub)) ||
-          before.some((file) => isWithin(path.join(dir, sub), file)),
+    const shadowed = fs
+      .readdirSync(workshop)
+      .toSorted()
+      .filter((name) =>
+        higher.some(
+          (dir) =>
+            (!(home.inside && dir === ownDir) && fs.existsSync(path.join(dir, name))) ||
+            before.some((file) => isWithin(path.join(dir, name), file)),
+        ),
       );
-      if (hit) {
-        shadowed.push(sub);
+    const skip = (sub: string) => shadowed.includes(sub);
+    // A workspace whose .agents (or a dir in it) is a link into a dir OpenClaw
+    // uses, dotfiles say, is not written through: the skills wait beside the
+    // agent instead.
+    if (home.inside) {
+      const check = guardedLanding({ targetRoot: p.target, sources: p.sources, actions });
+      const through = listFiles(workshop, skip)
+        .map((file) => check(path.join(toDir, file)))
+        .find((hit) => hit !== undefined);
+      if (through) {
+        toDir = path.join(p.target, "agents", normalizeAgentId(agentId), "from-openclaw", "skills");
+        items.push({
+          op: "note",
+          from: homeForm(ownDir, p.home),
+          to: homeForm(toDir, p.home),
+          reason: "skills-linked",
+          names: [
+            agentId,
+            homeForm(through.link?.at ?? ownDir, p.home),
+            homeForm(through.dir, p.home),
+          ],
+        });
       }
-      return hit;
-    };
+    }
     const existed = fs.existsSync(toDir);
     const tally = planCopyTree({
       fromDir: workshop,
@@ -555,6 +559,46 @@ function planWorkshopSkills(p: Planning, config: Json): void {
       });
     }
   }
+}
+
+/** Every file and link under `dir`, relative to it, except the entries `skip` names; links are not followed. */
+function listFiles(dir: string, skip: (sub: string) => boolean, sub = ""): string[] {
+  const at = path.join(dir, sub);
+  if (sub && fs.lstatSync(at).isSymbolicLink()) {
+    return [sub];
+  }
+  if (!fs.statSync(at).isDirectory()) {
+    return [sub];
+  }
+  return fs
+    .readdirSync(at)
+    .map((name) => (sub ? path.join(sub, name) : name))
+    .filter((entry) => !skip(entry))
+    .flatMap((entry) => listFiles(dir, skip, entry));
+}
+
+/**
+ * The dirs the import copies, each with its copy: the OpenClaw dir itself,
+ * and each top-level dir of it that is a link elsewhere (copied as files).
+ */
+function copyRoots(p: Planning): Array<[string, string]> {
+  const roots: Array<[string, string]> = [[p.source, p.target]];
+  for (const name of copiedDirs(p)) {
+    const dir = path.join(p.source, name);
+    if (fs.lstatSync(dir).isSymbolicLink() && fs.existsSync(dir)) {
+      roots.push([realPathOf(dir), path.join(p.target, name)]);
+    }
+  }
+  return roots;
+}
+
+/** The top-level entries of the OpenClaw dir that the import copies. */
+function copiedDirs(p: Planning): string[] {
+  const names = fs.existsSync(p.source) ? fs.readdirSync(p.source).toSorted() : [];
+  return [
+    ...names.filter((name) => name === "workspace" || name.startsWith("workspace-")),
+    ...DIRS_COPIED.filter((name) => names.includes(name)),
+  ];
 }
 
 function listDirs(dir: string): string[] {
