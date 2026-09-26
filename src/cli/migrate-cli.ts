@@ -43,6 +43,10 @@ const REASONS: Record<string, string> = {
   "session-id": "session id is not a plain file name",
   shadowed: "a skill of the same name loads before it, as in OpenClaw",
   merge: "with your existing bot.json settings it would not load",
+  "link-missing":
+    "a link to a dir that is not there now (an unmounted drive?); run again once it is",
+  "starter-token":
+    "the first-run sign-in token, which only api.hanzo.ai accepts; never sent to Anthropic",
 };
 
 function noteText(item: PlanItem): string {
@@ -67,6 +71,10 @@ function noteText(item: PlanItem): string {
       return `Agent ${item.names?.[0]} works in ${item.from}, which the import does not write to. Its heartbeat checklist and workshop skills are in ${item.to}: move HEARTBEAT.md into ${item.from}, and skills/* into ${item.from}/.agents/skills.`;
     case "starter":
       return `bot.json held Hanzo Bot's first-run defaults for ${item.names?.join(", ")}; OpenClaw's settings replace them (the old file is bot.json.bak).${item.names?.includes("models.providers.anthropic") ? " Anthropic calls use your imported Anthropic key, as in OpenClaw." : ""}`;
+    case "skills-linked":
+      return `${item.from} links to ${item.names?.[1]}, which the import does not write to. Agent ${item.names?.[0]}'s workshop skills are in ${item.to}; copy them into ${item.from}/skills if you want them there.`;
+    case "anthropic-route":
+      return `bot.json sends Anthropic calls to ${item.names?.[0]}, so your imported Anthropic key goes there too. To call Anthropic with it directly, remove models.providers.anthropic from bot.json.`;
     case "kept":
       return `bot.json already sets ${item.names?.join(", ")}, so OpenClaw's values for them were not applied. Change them by hand to use OpenClaw's.`;
     default:

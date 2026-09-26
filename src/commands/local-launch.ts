@@ -23,7 +23,7 @@ import { readConfigFileSnapshot, writeConfigFile } from "../config/io.js";
 import { resolveGatewayPort } from "../config/paths.js";
 import type { GatewayServerOptions } from "../gateway/server.js";
 import { resolveDashboardUrl } from "./dashboard.js";
-import { hanzoCloudConfig } from "./hanzo-cloud-config.js";
+import { HANZO_IAM_ANTHROPIC_PROFILE, hanzoCloudConfig } from "./hanzo-cloud-config.js";
 import { openUrl } from "./onboard-helpers.js";
 
 const DEFAULT_PORT = 18789;
@@ -60,7 +60,7 @@ async function writeHanzoCloudConfig(accessToken: string): Promise<void> {
   //      (ANTHROPIC_API_KEY) and the marketplace-proxy path (HANZO_API_KEY).
   try {
     upsertAuthProfile({
-      profileId: "anthropic:hanzo-iam",
+      profileId: HANZO_IAM_ANTHROPIC_PROFILE,
       credential: {
         type: "api_key" as const,
         provider: "anthropic",

@@ -23,17 +23,22 @@ export function homeForm(abs: string, home: string): string {
  * dir, keeping the rest of the path and its form: an absolute reference stays
  * absolute, a `~/…` reference stays `~/…` when the target is under home. A
  * reference must end at a path boundary, so `~/.openclaw-work` is not
- * mistaken for `~/.openclaw`.
+ * mistaken for `~/.openclaw`. `aliases` are other names of the state dir
+ * (Clawdbot's `~/.clawdbot`, which OpenClaw leaves as a link to it).
  */
 export function createPathRewriter(params: {
   sourceDir: string;
   targetDir: string;
   home: string;
+  aliases?: string[];
 }): PathRewriter {
-  const pairs: Array<[string, string]> = [[params.sourceDir, params.targetDir]];
-  const tilde = homeForm(params.sourceDir, params.home);
-  if (tilde !== params.sourceDir) {
-    pairs.push([tilde, homeForm(params.targetDir, params.home)]);
+  const pairs: Array<[string, string]> = [];
+  for (const dir of [params.sourceDir, ...(params.aliases ?? [])]) {
+    pairs.push([dir, params.targetDir]);
+    const tilde = homeForm(dir, params.home);
+    if (tilde !== dir) {
+      pairs.push([tilde, homeForm(params.targetDir, params.home)]);
+    }
   }
   const rules = pairs.map(
     ([from, to]) => [new RegExp(`${escapeRegExp(from)}(?=$|[/\\\\"'\\s])`, "g"), to] as const,

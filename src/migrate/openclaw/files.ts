@@ -35,11 +35,12 @@ function sameBytes(a: string, b: string): boolean {
  * Plan copying `fromDir` into `toDir` file by file. A fromDir that is itself
  * a link is copied as the files it points at, so the target gets a dir of its
  * own. Symlinks below it are recreated, never followed; `relink` may point one
- * elsewhere (an absolute link into the OpenClaw dir is pointed at the same
- * place in the Hanzo Bot dir, so writing through it cannot change the OpenClaw
- * install). `reached` collects the real place of every link the walk meets,
- * `claimed` the targets already planned (a second copy to one is a conflict).
- * `skip` names entries (relative to fromDir) that are not copied.
+ * elsewhere, given the link's target and the path it is created at (a link
+ * into the OpenClaw dir is pointed at the same place in the Hanzo Bot dir, so
+ * writing through it cannot change the OpenClaw install). `reached` collects
+ * the real place of every link the walk meets, `claimed` the targets already
+ * planned (a second copy to one is a conflict). `skip` names entries
+ * (relative to fromDir) that are not copied.
  */
 export function planCopyTree(params: {
   fromDir: string;
@@ -48,7 +49,7 @@ export function planCopyTree(params: {
   claimed: Set<string>;
   reached: Set<string>;
   skip?: (rel: string) => boolean;
-  relink?: (target: string) => string;
+  relink?: (target: string, at: string) => string;
 }): CopyTally {
   const tally: CopyTally = { created: 0, unchanged: 0, conflicts: [] };
   if (isLink(params.fromDir)) {
@@ -63,7 +64,7 @@ export function planCopyTree(params: {
       if (fs.existsSync(from)) {
         params.reached.add(realPathOf(from));
       }
-      const target = params.relink?.(fs.readlinkSync(from)) ?? fs.readlinkSync(from);
+      const target = params.relink?.(fs.readlinkSync(from), to) ?? fs.readlinkSync(from);
       if (params.claimed.has(to)) {
         tally.conflicts.push(rel);
       } else if (!fs.existsSync(to) && !isLink(to)) {
@@ -115,19 +116,25 @@ function isLink(file: string): boolean {
 }
 
 /**
- * An absolute link target inside `sourceRoot` names the same place inside
- * `targetRoot`, whether it is written as the path or reaches it through links.
+ * A link whose target, read from where the link is created, lies inside
+ * `sourceRoot` names the same place inside `targetRoot`, whether the target
+ * is written as the path or reaches it through links. A relative target that
+ * stays inside `targetRoot` is kept as written.
  */
-export function relinkInto(sourceRoot: string, targetRoot: string): (target: string) => string {
+export function relinkInto(
+  sourceRoot: string,
+  targetRoot: string,
+): (target: string, at: string) => string {
   const realSource = realPathOf(sourceRoot);
-  return (target) => {
-    if (!path.isAbsolute(target)) {
+  return (target, at) => {
+    const resolved = path.resolve(path.dirname(at), target);
+    if (!path.isAbsolute(target) && isWithin(targetRoot, resolved)) {
       return target;
     }
-    if (isWithin(sourceRoot, target)) {
-      return path.join(targetRoot, path.relative(sourceRoot, target));
+    if (isWithin(sourceRoot, resolved)) {
+      return path.join(targetRoot, path.relative(sourceRoot, resolved));
     }
-    const real = realPathOf(target);
+    const real = realPathOf(resolved);
     return isWithin(realSource, real)
       ? path.join(targetRoot, path.relative(realSource, real))
       : target;
@@ -172,37 +179,77 @@ function landing(file: string, planned: Map<string, string>, depth = 0): string 
   return path.join(realPathOf(path.dirname(file)), path.basename(file));
 }
 
+/** The first link below `root` on the way to `file`: one the plan creates or one on disk. */
+function firstLink(
+  root: string,
+  file: string,
+  planned: Map<string, string>,
+): { at: string; planned: boolean } | undefined {
+  const rel = path.relative(root, path.dirname(file));
+  if (rel.startsWith("..") || path.isAbsolute(rel)) {
+    return undefined;
+  }
+  let at = root;
+  for (const part of rel ? rel.split(path.sep) : []) {
+    at = path.join(at, part);
+    if (planned.has(at)) {
+      return { at, planned: true };
+    }
+    if (isLink(at)) {
+      return { at, planned: false };
+    }
+  }
+  return undefined;
+}
+
+type Guard = { targetRoot: string; sources: Iterable<string>; actions: Action[] };
+
+type GuardHit = { dir: string; lands: string; link?: { at: string; planned: boolean } };
+
 /**
- * Refuse a plan that would write into a dir OpenClaw uses through a link: the
- * OpenClaw install, a dir outside it that the plan reads through a link, or a
- * workspace OpenClaw keeps outside it. A dir that holds the target (a link to
- * home, say) guards nothing the target does not already. Each write is
+ * A check of where writing a file would land, for the plan so far: in a dir
+ * OpenClaw uses, or not (undefined). The dirs OpenClaw uses are the OpenClaw
+ * install, a dir outside it that the plan reads through a link, and a
+ * workspace OpenClaw keeps outside it; a dir that holds the target (a link to
+ * home, say) guards nothing the target does not already. The write is
  * followed through links on disk and links the plan creates.
  */
-export function assertOutsideSources(params: {
-  targetRoot: string;
-  sources: Iterable<string>;
-  actions: Action[];
-}): void {
-  const target = realPathOf(params.targetRoot);
-  const guarded = [...new Set([...params.sources].map(realPathOf))].filter(
+export function guardedLanding(guard: Guard): (file: string) => GuardHit | undefined {
+  const target = realPathOf(guard.targetRoot);
+  const guarded = [...new Set([...guard.sources].map(realPathOf))].filter(
     (dir) => !isWithin(dir, target),
   );
   const planned = new Map<string, string>();
-  for (const action of params.actions) {
+  for (const action of guard.actions) {
     if (action.kind === "link") {
       planned.set(action.to, action.target);
     }
   }
-  for (const action of params.actions) {
-    const file = action.kind === "backup" ? action.file : action.to;
+  return (file) => {
     const lands = landing(file, planned);
     const dir = guarded.find((root) => isWithin(root, lands));
-    if (dir) {
-      throw new Error(
-        `${file} leads into ${dir}, which OpenClaw uses, through a link (it lands at ${lands}); nothing was written. Replace the link in the Hanzo Bot dir with a copy of what it points at, then run again.`,
-      );
+    return dir ? { dir, lands, link: firstLink(guard.targetRoot, file, planned) } : undefined;
+  };
+}
+
+/** Refuse a plan that would write into a dir OpenClaw uses (see guardedLanding). */
+export function assertOutsideSources(guard: Guard): void {
+  const check = guardedLanding(guard);
+  for (const action of guard.actions) {
+    const file = action.kind === "backup" ? action.file : action.to;
+    const hit = check(file);
+    if (!hit) {
+      continue;
     }
+    const { dir, lands, link } = hit;
+    const fix = !link
+      ? "Replace the link on its way with a plain dir, then run again."
+      : link.planned
+        ? `Create ${link.at} as a plain dir first, then run again: the import writes into it instead of linking it.`
+        : `Replace the link ${link.at} with a plain dir (a copy of what it points at), then run again.`;
+    throw new Error(
+      `${file} leads into ${dir}, which OpenClaw uses, through ${link ? `the link ${link.at}` : "a link"} (it lands at ${lands}); nothing was written. ${fix}`,
+    );
   }
 }
 

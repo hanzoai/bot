@@ -245,11 +245,101 @@ describe("OpenClaw file layout", () => {
       reason: "starter",
       names: ["agents.defaults.workspace", "models.providers.anthropic"],
     });
-    // The first run's IAM token is never offered to Anthropic itself.
+    // The first run's IAM token, which only the proxy accepts, is never offered to Anthropic.
     const auth = readJson("agents/main/agent/auth-profiles.json") as {
-      order: Record<string, string[]>;
+      profiles: Record<string, unknown>;
     };
-    expect(auth.order.anthropic).toEqual(["anthropic:default"]);
+    expect(Object.keys(auth.profiles)).toEqual(["anthropic:default"]);
+    expect(
+      item(plan, "drop", "agents/main/agent/auth-profiles.json#anthropic:hanzo-iam"),
+    ).toMatchObject({ reason: "starter-token" });
+  });
+
+  /** Hanzo Bot's first run: its starter bot.json and the IAM token under the Anthropic provider. */
+  function firstRun(config: Record<string, unknown> = hanzoCloudConfig(home)): void {
+    fs.mkdirSync(path.join(target, "agents", "main", "agent"), { recursive: true, mode: 0o700 });
+    fs.writeFileSync(path.join(target, "bot.json"), JSON.stringify(config), { mode: 0o600 });
+    fs.writeFileSync(
+      path.join(target, "agents", "main", "agent", "auth-profiles.json"),
+      JSON.stringify({
+        version: 1,
+        profiles: {
+          "anthropic:hanzo-iam": { type: "api_key", provider: "anthropic", key: "iam-token" },
+        },
+        lastGood: { anthropic: "anthropic:hanzo-iam" },
+      }),
+      { mode: 0o600 },
+    );
+  }
+
+  /** Move main's Anthropic profile to `to` (another agent's store), or drop it. */
+  function moveMainAnthropicKey(to?: string): void {
+    const file = path.join(source, "agents", "main", "agent", "auth-profiles.json");
+    const store = JSON.parse(fs.readFileSync(file, "utf8")) as {
+      profiles: Record<string, unknown>;
+    };
+    const key = store.profiles["anthropic:default"];
+    fs.writeFileSync(file, JSON.stringify({ version: 1, profiles: {} }), { mode: 0o600 });
+    if (to) {
+      fs.mkdirSync(path.dirname(to), { recursive: true });
+      fs.writeFileSync(to, JSON.stringify({ version: 1, profiles: { "anthropic:work": key } }), {
+        mode: 0o600,
+      });
+    }
+  }
+
+  it("lets an Anthropic key that is only in .env replace the first-run route", async () => {
+    moveMainAnthropicKey();
+    firstRun();
+    await applyMigration({ source, target, home });
+    expect(readJson("bot.json").models).toBeUndefined();
+    expect(fs.readFileSync(path.join(target, ".env"), "utf8")).toContain("ANTHROPIC_API_KEY=");
+    // With no Anthropic profile left, the key in .env is the one used.
+    const auth = readJson("agents/main/agent/auth-profiles.json");
+    expect(auth).toEqual({ version: 1, profiles: {}, lastGood: {} });
+  });
+
+  it("lets another agent's Anthropic key replace the first-run route for every agent", async () => {
+    moveMainAnthropicKey(path.join(source, "agents", "work", "agent", "auth-profiles.json"));
+    fs.writeFileSync(path.join(source, ".env"), "OPENCLAW_GATEWAY_TOKEN=x\n", { mode: 0o600 });
+    firstRun();
+    await applyMigration({ source, target, home });
+    expect(readJson("bot.json").models).toBeUndefined();
+    // Every agent's store is main's beneath its own: the IAM token is in neither.
+    const main = readJson("agents/main/agent/auth-profiles.json");
+    const work = readJson("agents/work/agent/auth-profiles.json");
+    expect(Object.keys(main.profiles as object)).toEqual([]);
+    expect(Object.keys(work.profiles as object)).toEqual(["anthropic:work"]);
+  });
+
+  it("drops a leftover first-run token when no bot.json routes Anthropic to the proxy", async () => {
+    firstRun();
+    fs.rmSync(path.join(target, "bot.json"));
+    const plan = await applyMigration({ source, target, home });
+    expect(readJson("bot.json").models).toBeUndefined();
+    expect(
+      Object.keys(readJson("agents/main/agent/auth-profiles.json").profiles as object),
+    ).toEqual(["anthropic:default"]);
+    expect(
+      item(plan, "drop", "agents/main/agent/auth-profiles.json#anthropic:hanzo-iam"),
+    ).toBeDefined();
+  });
+
+  it("says where the imported Anthropic key goes when bot.json keeps a changed route", async () => {
+    const changed = hanzoCloudConfig(home);
+    changed.models.providers.anthropic.models = [{ id: "claude-opus-5", name: "Opus" }];
+    firstRun(changed);
+    const plan = await applyMigration({ source, target, home });
+    expect(readJson("bot.json").models).toMatchObject({
+      providers: { anthropic: { baseUrl: "https://api.hanzo.ai" } },
+    });
+    expect(plan.items.find((entry) => entry.reason === "anthropic-route")).toMatchObject({
+      names: ["https://api.hanzo.ai"],
+    });
+    // The token stays with the route that accepts it.
+    expect(readJson("agents/main/agent/auth-profiles.json").profiles).toHaveProperty(
+      "anthropic:hanzo-iam",
+    );
   });
 
   it("drops an imported key that would stop the merged bot.json from loading", async () => {
@@ -350,12 +440,16 @@ describe("OpenClaw file layout", () => {
     expect(fs.readlinkSync(path.join(ws, "outside"))).toBe("/opt/elsewhere");
   });
 
-  it("passes over an OpenClaw dir that is a link to nothing", async () => {
-    fs.rmSync(path.join(source, "skills"), { recursive: true });
-    fs.symlinkSync(path.join(home, "gone"), path.join(source, "skills"));
+  it("passes over an OpenClaw dir that is a link to nothing, and says so", async () => {
+    fs.rmSync(path.join(source, "workspace"), { recursive: true });
+    fs.symlinkSync(path.join(home, "unmounted", "workspace"), path.join(source, "workspace"));
     const plan = await applyMigration({ source, target, home });
-    expect(item(plan, "copy", "skills")).toBeUndefined();
-    expect(fs.existsSync(path.join(target, "skills"))).toBe(false);
+    expect(item(plan, "copy", "workspace")).toBeUndefined();
+    expect(item(plan, "skip", "workspace")).toMatchObject({
+      reason: "link-missing",
+      names: ["~/unmounted/workspace"],
+    });
+    expect(fs.existsSync(path.join(target, "workspace"))).toBe(false);
   });
 
   it("keeps a dangling link where a file would be copied", async () => {
@@ -377,32 +471,61 @@ describe("OpenClaw file layout", () => {
     expect(() => planMigration({ source, target, home })).toThrow(/must not contain each other/);
   });
 
-  it("refuses a copied link that leads back into the OpenClaw install", async () => {
-    // workspace/.agents -> ../../.openclaw is copied as it is, so from ~/.bot/workspace
-    // it names ~/.openclaw; an agent's workshop skill would be copied through it.
+  it("points a relative link that leads back into the OpenClaw dir at the Hanzo Bot dir", async () => {
+    // workspace/.agents -> ../../.openclaw, copied as it is, would name ~/.openclaw
+    // from ~/.bot/workspace; an agent's workshop skill would be copied through it.
     fs.symlinkSync(path.join("..", "..", ".openclaw"), path.join(source, "workspace", ".agents"));
     const workshop = path.join(source, "agents", "main", "agent", "workshop-skills", "back");
     fs.mkdirSync(workshop, { recursive: true });
     fs.writeFileSync(path.join(workshop, "SKILL.md"), "---\nname: back\n---\n");
     const before = snapshot(source);
-    await expect(applyMigration({ source, target, home })).rejects.toThrow(
-      /leads into .*\.openclaw, which OpenClaw uses/,
-    );
+    await applyMigration({ source, target, home });
     expect(snapshot(source)).toEqual(before);
-    expect(fs.existsSync(target)).toBe(false);
+    expect(fs.readlinkSync(path.join(target, "workspace", ".agents"))).toBe(target);
+    expect(fs.existsSync(path.join(target, "skills", "back", "SKILL.md"))).toBe(true);
   });
 
-  it("refuses a copied link that leads to a dir OpenClaw reaches outside its install", async () => {
+  it("keeps workshop skills out of a dir OpenClaw reaches through a link", async () => {
     const shared = path.join(home, "shared-agents");
     fs.mkdirSync(shared);
     fs.symlinkSync(shared, path.join(source, "workspace", ".agents"));
     const workshop = path.join(source, "agents", "main", "agent", "workshop-skills", "trip");
     fs.mkdirSync(workshop, { recursive: true });
     fs.writeFileSync(path.join(workshop, "SKILL.md"), "---\nname: trip\n---\n");
-    await expect(applyMigration({ source, target, home })).rejects.toThrow(
-      /shared-agents, which OpenClaw uses/,
-    );
+    const plan = await applyMigration({ source, target, home });
     expect(fs.readdirSync(shared)).toEqual([]);
+    const saved = path.join(
+      target,
+      "agents",
+      "main",
+      "from-openclaw",
+      "skills",
+      "trip",
+      "SKILL.md",
+    );
+    expect(fs.existsSync(saved)).toBe(true);
+    expect(plan.items.find((entry) => entry.reason === "skills-linked")).toMatchObject({
+      from: "~/.bot/workspace/.agents",
+      to: "~/.bot/agents/main/from-openclaw/skills",
+      names: ["main", "~/shared-agents"],
+    });
+  });
+
+  it("leaves a workshop skill behind when Hanzo Bot already has a skill of that name", async () => {
+    fs.mkdirSync(path.join(target, "skills", "daily-brief"), { recursive: true });
+    fs.writeFileSync(path.join(target, "skills", "daily-brief", "SKILL.md"), "# installed\n");
+    const workshop = path.join(source, "agents", "main", "agent", "workshop-skills", "daily-brief");
+    fs.mkdirSync(workshop, { recursive: true });
+    fs.writeFileSync(path.join(workshop, "SKILL.md"), "---\nname: daily-brief\n---\n");
+    const plan = await applyMigration({ source, target, home });
+    expect(fs.existsSync(path.join(target, "workspace", ".agents", "skills", "daily-brief"))).toBe(
+      false,
+    );
+    expect(item(plan, "copy", "agents/main/agent/workshop-skills")).toBeUndefined();
+    expect(item(plan, "skip", "agents/main/agent/workshop-skills")).toMatchObject({
+      reason: "shadowed",
+      names: ["daily-brief"],
+    });
   });
 
   it("refuses dirs that contain each other and a dir with no OpenClaw install", () => {
@@ -587,6 +710,61 @@ describe("OpenClaw database layout", () => {
       from: "~/projects/assistant",
       to: "~/.bot/agents/main/from-openclaw",
     });
+  });
+
+  it("merges an allowlist file OpenClaw left beside its database entries", async () => {
+    // OpenClaw's doctor has not folded this file into the database yet.
+    const legacy = path.join(source, "credentials", "telegram-default-allowFrom.json");
+    fs.mkdirSync(path.dirname(legacy), { recursive: true, mode: 0o700 });
+    fs.writeFileSync(legacy, JSON.stringify({ version: 1, allowFrom: ["222", "111"] }), {
+      mode: 0o600,
+    });
+    const plan = await applyMigration({ source, target, home });
+    expect(readJson("credentials/telegram-default-allowFrom.json")).toEqual({
+      version: 1,
+      allowFrom: ["111", "222"],
+    });
+    expect(item(plan, "write", "credentials/telegram-default-allowFrom.json")?.from).toContain(
+      "+ credentials/telegram-default-allowFrom.json",
+    );
+    expect(planMigration({ source, target, home }).actions).toEqual([]);
+  });
+
+  it("reads a config that spells the OpenClaw dir as Clawdbot's ~/.clawdbot", async () => {
+    fs.symlinkSync(source, path.join(home, ".clawdbot"));
+    fs.symlinkSync(path.join(source, "workspace"), path.join(home, "clawd"));
+    const file = path.join(source, "openclaw.json");
+    const config = JSON.parse(fs.readFileSync(file, "utf8")) as {
+      agents: { defaults: Record<string, unknown>; entries?: Record<string, unknown> };
+    };
+    config.agents.defaults.workspace = "~/.clawdbot/workspace";
+    config.agents.entries = { main: { name: "Main" }, ops: { workspace: "~/clawd" } };
+    fs.writeFileSync(file, JSON.stringify(config));
+    const before = snapshot(source);
+    const plan = await applyMigration({ source, target, home });
+    expect(snapshot(source)).toEqual(before);
+    const agents = readJson("bot.json").agents as {
+      defaults: { workspace: string };
+      list: Array<{ id: string; workspace?: string }>;
+    };
+    expect(agents.defaults.workspace).toBe("~/.bot/workspace");
+    expect(agents.list.find((entry) => entry.id === "ops")?.workspace).toBe("~/.bot/workspace");
+    expect(plan.items.filter((entry) => entry.reason === "workspace-in-place")).toEqual([]);
+  });
+
+  it("guards a workspace outside the OpenClaw dir that main's list entry names", async () => {
+    const file = path.join(source, "openclaw.json");
+    const config = JSON.parse(fs.readFileSync(file, "utf8")) as {
+      agents: { entries: Record<string, unknown> };
+    };
+    config.agents.entries = { main: { name: "Main", workspace: "~/projects/assistant" } };
+    fs.writeFileSync(file, JSON.stringify(config));
+    fs.mkdirSync(path.join(home, "projects", "assistant"), { recursive: true });
+    const plan = await applyMigration({ source, target, home });
+    expect(plan.items.find((entry) => entry.reason === "workspace-in-place")).toMatchObject({
+      from: "~/projects/assistant",
+    });
+    expect(fs.readdirSync(path.join(home, "projects", "assistant"))).toEqual([]);
   });
 
   it("puts a non-default agent's heartbeat in that agent's workspace", async () => {

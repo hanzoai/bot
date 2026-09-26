@@ -3,6 +3,9 @@ import path from "node:path";
 /** Hanzo API proxy endpoint — accepts IAM tokens, proxies to model providers. */
 export const HANZO_API_BASE_URL = "https://api.hanzo.ai";
 
+/** The auth profile holding the IAM token that the first-run Anthropic route sends to the proxy. */
+export const HANZO_IAM_ANTHROPIC_PROFILE = "anthropic:hanzo-iam";
+
 /**
  * The config Run Locally writes on a machine with no bot.json: a loopback
  * gateway, Anthropic through the Hanzo API proxy (the IAM token is accepted

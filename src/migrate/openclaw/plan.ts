@@ -2,7 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import JSON5 from "json5";
 import { resolveAgentConfig, resolveDefaultAgentId } from "../../agents/agent-scope.js";
-import { hanzoCloudConfig } from "../../commands/hanzo-cloud-config.js";
+import {
+  HANZO_API_BASE_URL,
+  HANZO_IAM_ANTHROPIC_PROFILE,
+  hanzoCloudConfig,
+} from "../../commands/hanzo-cloud-config.js";
 import type { BotConfig } from "../../config/config.js";
 import { SAFE_SESSION_ID_RE } from "../../config/sessions/paths.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
@@ -26,6 +30,7 @@ import {
   applyActions,
   assertOutsideSources,
   assertUniqueTargets,
+  guardedLanding,
   isWithin,
   planCopyTree,
   realPathOf,
@@ -67,12 +72,16 @@ export type MigrationParams = {
   home: string;
 };
 
-/** A plan in the making: its actions and items, the targets they claim, and the dirs OpenClaw uses that it reads. */
+/**
+ * A plan in the making: its actions and items, the targets they claim, the
+ * dirs OpenClaw uses that it reads, and the other names of the OpenClaw dir.
+ */
 type Planning = MigrationParams & {
   actions: Action[];
   items: PlanItem[];
   claimed: Set<string>;
   sources: Set<string>;
+  aliases: string[];
 };
 
 const PRIVATE = 0o600;
@@ -128,14 +137,54 @@ function copyStatus(targetExisted: boolean, created: number, conflicts: number):
   return targetExisted ? "update" : "create";
 }
 
+function rewriterFor(p: Planning) {
+  return createPathRewriter({
+    sourceDir: p.source,
+    targetDir: p.target,
+    home: p.home,
+    aliases: p.aliases,
+  });
+}
+
+const ANTHROPIC_ENV_KEYS = ["ANTHROPIC_API_KEY", "ANTHROPIC_OAUTH_TOKEN"];
+
+/** Whether bot.json sends Anthropic calls through the Hanzo proxy, the one place the IAM token works. */
+function routesAnthropicToHanzo(config: Json): boolean {
+  const baseUrl = (config as BotConfig).models?.providers?.anthropic?.baseUrl;
+  try {
+    return (
+      typeof baseUrl === "string" && new URL(baseUrl).host === new URL(HANZO_API_BASE_URL).host
+    );
+  } catch {
+    return false;
+  }
+}
+
+/** Whether the converted config carries an Anthropic key: in `env` or on the provider. */
+function configHasAnthropicKey(config: Json): boolean {
+  const env = isPlainObject(config.env) ? config.env : {};
+  const vars = isPlainObject(env.vars) ? env.vars : {};
+  const provider = (config as BotConfig).models?.providers?.anthropic;
+  return (
+    ANTHROPIC_ENV_KEYS.some(
+      (key) => typeof env[key] === "string" || typeof vars[key] === "string",
+    ) || provider?.apiKey !== undefined
+  );
+}
+
+/**
+ * `profilesAnthropic`: some agent's imported auth profiles hold an Anthropic
+ * key. With the imported .env and config that makes the person's own key,
+ * which replaces the first-run route through the Hanzo proxy.
+ */
 function planConfig(
   p: Planning,
   state: OpenClawState,
   envKeys: Set<string>,
-  starter: { anthropic: boolean },
+  profilesAnthropic: boolean,
 ): Json {
   const { actions, items } = p;
-  const rewrite = createPathRewriter({ sourceDir: p.source, targetDir: p.target, home: p.home });
+  const rewrite = rewriterFor(p);
   const source = structuredClone(state.config);
   if (state.hookInstalls) {
     const hooks = isPlainObject(source.hooks) ? source.hooks : {};
@@ -152,6 +201,10 @@ function planConfig(
     }
   }
   const { config, report } = convertConfig({ source, rewrite, home: p.home });
+  const ownAnthropic =
+    profilesAnthropic ||
+    ANTHROPIC_ENV_KEYS.some((key) => envKeys.has(key)) ||
+    configHasAnthropicKey(config);
   const configName = state.configFile ? path.basename(state.configFile) : "openclaw.json";
   const renames: PlanItem[] = report.renamed.map(({ from, to }) => ({
     op: "rename",
@@ -173,7 +226,9 @@ function planConfig(
     const before = readJsonText(fs.readFileSync(to, "utf8"));
     const merged = structuredClone(before);
     // Values Hanzo Bot's first run wrote give way to the person's OpenClaw settings.
-    const yielded = yieldStarter(merged, hanzoCloudConfig(p.home), config, starter);
+    const yielded = yieldStarter(merged, hanzoCloudConfig(p.home), config, {
+      anthropic: ownAnthropic,
+    });
     const { added, kept } = mergeBeneath(merged, config);
     const dropped = validateMerge(merged, before, added);
     const applied = added.map(formatPath).filter((label) => !dropped.includes(label));
@@ -209,49 +264,63 @@ function planConfig(
   if (missing.length > 0) {
     items.push({ op: "note", from: configName, reason: "env-ref", names: missing });
   }
+  // A route the person changed stays; their imported key then goes there too.
+  if (ownAnthropic && routesAnthropicToHanzo(effective)) {
+    const route = String((effective as BotConfig).models?.providers?.anthropic?.baseUrl);
+    items.push({ op: "note", from: "bot.json", reason: "anthropic-route", names: [route] });
+  }
   return effective;
 }
 
 /**
  * Name each copied workspace explicitly — `workspace` for the defaults,
  * `workspace-<id>` for another agent — so it is the one used whatever the
- * runtime's own default is. A workspace outside the OpenClaw dir stays where
- * it is and both installs point at it; the importer never writes into it.
+ * runtime's own default is. A workspace that reaches into the OpenClaw dir
+ * by another name (a link to it) is the copy's. A workspace outside the
+ * OpenClaw dir stays where it is and both installs point at it; the importer
+ * never writes into it.
  */
 function setWorkspaces(p: Planning, config: Json, configName: string): PlanItem[] {
   const renames: PlanItem[] = [];
   const agents = isPlainObject(config.agents) ? config.agents : {};
   const defaults = isPlainObject(agents.defaults) ? agents.defaults : {};
-  const owners: Array<{ owner: Json; dir: string; at: string }> = [
+  // `dir` is the copy that names an agent's workspace when the config names none.
+  const owners: Array<{ owner: Json; dir?: string; at: string }> = [
     { owner: defaults, dir: "workspace", at: "agents.defaults.workspace" },
   ];
   const list = Array.isArray(agents.list) ? agents.list : [];
   list.forEach((entry, index) => {
-    if (isPlainObject(entry) && typeof entry.id === "string" && entry.id !== "main") {
+    if (isPlainObject(entry) && typeof entry.id === "string") {
       owners.push({
         owner: entry,
-        dir: `workspace-${entry.id}`,
+        dir: entry.id === "main" ? undefined : `workspace-${entry.id}`,
         at: `agents.list[${index}].workspace`,
       });
     }
   });
-  const target = homeForm(p.target, p.home);
+  const realSource = realPathOf(p.source);
   for (const { owner, dir, at } of owners) {
-    if (typeof owner.workspace !== "string" && fs.existsSync(path.join(p.source, dir))) {
+    if (dir && typeof owner.workspace !== "string" && fs.existsSync(path.join(p.source, dir))) {
       owner.workspace = homeForm(path.join(p.target, dir), p.home);
       renames.push({ op: "rename", from: `${configName}#${at}`, to: `bot.json#${at}` });
       agents.defaults = defaults;
       config.agents = agents;
     }
     const value = owner.workspace;
-    if (
-      typeof value === "string" &&
-      !value.startsWith(`${target}/`) &&
-      !value.startsWith(`${p.target}${path.sep}`)
-    ) {
-      p.items.push({ op: "note", from: value, reason: "workspace-in-place" });
-      p.sources.add(expandHome(value, p.home));
+    if (typeof value !== "string") {
+      continue;
     }
+    const abs = path.resolve(expandHome(value, p.home));
+    if (isWithin(p.target, abs)) {
+      continue;
+    }
+    const real = realPathOf(abs);
+    if (isWithin(realSource, real)) {
+      owner.workspace = homeForm(path.join(p.target, path.relative(realSource, real)), p.home);
+      continue;
+    }
+    p.items.push({ op: "note", from: value, reason: "workspace-in-place" });
+    p.sources.add(abs);
   }
   return renames;
 }
@@ -309,7 +378,7 @@ function planEnv(p: Planning): Set<string> {
   if (!fs.existsSync(from)) {
     return new Set();
   }
-  const rewrite = createPathRewriter({ sourceDir: p.source, targetDir: p.target, home: p.home });
+  const rewrite = rewriterFor(p);
   const converted = convertEnvEntries(parseEnvEntries(fs.readFileSync(from, "utf8")), rewrite);
   for (const { from: key, to } of converted.renamed) {
     items.push({ op: "rename", from: `.env#${key}`, to: `.env#${to}` });
@@ -329,7 +398,11 @@ function planEnv(p: Planning): Set<string> {
   return new Set(converted.entries.map((entry) => entry.key));
 }
 
-function planCopies(p: Planning): void {
+/**
+ * `merged`: files under credentials/ that planPairing writes, merged with the
+ * database's entries, so they are not copied as they are.
+ */
+function planCopies(p: Planning, merged: Set<string>): void {
   const { actions, items, claimed, sources: reached } = p;
   const relink = relinkInto(p.source, p.target);
   const names = fs.existsSync(p.source) ? fs.readdirSync(p.source).toSorted() : [];
@@ -339,13 +412,27 @@ function planCopies(p: Planning): void {
   ];
   for (const name of dirs) {
     const fromDir = path.join(p.source, name);
-    // A link to nothing has nothing to copy.
-    if (!fs.existsSync(fromDir) || !fs.statSync(fromDir).isDirectory()) {
+    // A link to nothing (an unmounted volume, say) has nothing to copy now.
+    if (!fs.existsSync(fromDir)) {
+      if (fs.lstatSync(fromDir).isSymbolicLink()) {
+        items.push({
+          op: "skip",
+          from: name,
+          reason: "link-missing",
+          names: [homeForm(path.resolve(p.source, fs.readlinkSync(fromDir)), p.home)],
+        });
+      }
+      continue;
+    }
+    if (!fs.statSync(fromDir).isDirectory()) {
       continue;
     }
     const toDir = path.join(p.target, name);
     const existed = fs.existsSync(toDir);
-    const skip = name === "credentials" ? (sub: string) => sub === "auth-profiles" : undefined;
+    const skip =
+      name === "credentials"
+        ? (sub: string) => sub === "auth-profiles" || merged.has(sub)
+        : undefined;
     const tally = planCopyTree({ fromDir, toDir, actions, claimed, reached, skip, relink });
     items.push({
       op: "copy",
@@ -388,14 +475,38 @@ function planWorkshopSkills(p: Planning, config: Json): void {
       continue;
     }
     const home = agentHome(p, config, agentId);
-    const toDir = home.inside
+    let toDir = home.inside
       ? path.join(home.dir, ".agents", "skills")
       : path.join(home.dir, "skills");
+    // A workspace whose .agents (or a skill dir in it) is a link into a dir
+    // OpenClaw uses, dotfiles say, is not written through; the skills wait
+    // beside the agent instead.
+    const check = guardedLanding({ targetRoot: p.target, sources: p.sources, actions });
+    const through = home.inside
+      ? fs
+          .readdirSync(workshop)
+          .map((name) => check(path.join(toDir, name, "SKILL.md")))
+          .find((hit) => hit !== undefined)
+      : undefined;
+    if (through) {
+      const dir = path.join(p.target, "agents", normalizeAgentId(agentId), "from-openclaw");
+      toDir = path.join(dir, "skills");
+      items.push({
+        op: "note",
+        from: homeForm(through.link?.at ?? home.workspace, p.home),
+        to: homeForm(toDir, p.home),
+        reason: "skills-linked",
+        names: [agentId, homeForm(through.dir, p.home)],
+      });
+    }
+    // In OpenClaw a managed or workspace skill of the same name loads first;
+    // in Hanzo Bot a project skill would, so those stay behind.
     const higher = [
       path.join(home.workspace, "skills"),
       path.join(home.workspace, ".agents", "skills"),
       path.join(p.home, ".agents", "skills"),
       path.join(p.source, "skills"),
+      path.join(p.target, "skills"),
     ];
     const shadowed: string[] = [];
     const skip = (sub: string) => {
@@ -422,14 +533,17 @@ function planWorkshopSkills(p: Planning, config: Json): void {
       skip,
       relink,
     });
-    items.push({
-      op: "copy",
-      from: rel(p.source, workshop),
-      to: rel(p.target, toDir),
-      status: copyStatus(existed, tally.created, tally.conflicts.length),
-      count: tally.created,
-      ...(tally.conflicts.length > 0 ? { names: tally.conflicts } : {}),
-    });
+    // Every skill left behind: nothing to copy.
+    if (tally.created + tally.unchanged + tally.conflicts.length > 0) {
+      items.push({
+        op: "copy",
+        from: rel(p.source, workshop),
+        to: rel(p.target, toDir),
+        status: copyStatus(existed, tally.created, tally.conflicts.length),
+        count: tally.created,
+        ...(tally.conflicts.length > 0 ? { names: tally.conflicts } : {}),
+      });
+    }
     if (shadowed.length > 0) {
       items.push({
         op: "skip",
@@ -452,39 +566,101 @@ function listDirs(dir: string): string[] {
     .toSorted();
 }
 
-function planAuth(p: Planning, state: OpenClawState, anthropicOrder: string[]): void {
+/** The profiles OpenClaw gives an agent: the shared store overlaid by the agent's own. */
+function agentAuthFile(state: OpenClawState, agentId: string) {
+  const local = state.agentAuth[agentId];
+  if (agentId !== "main" && !local) {
+    return undefined;
+  }
+  if (!state.sharedAuth && !local) {
+    return undefined;
+  }
+  return convertAuth(state.sharedAuth, local);
+}
+
+function holdsStarterProfile(file: string): boolean {
+  try {
+    const profiles = readJsonText(fs.readFileSync(file, "utf8")).profiles;
+    return isPlainObject(profiles) && Object.hasOwn(profiles, HANZO_IAM_ANTHROPIC_PROFILE);
+  } catch {
+    return false;
+  }
+}
+
+/** An auth store without the first run's IAM-token profile, nor any mention of it. */
+function withoutStarterProfile(file: Json): Json {
+  const id = HANZO_IAM_ANTHROPIC_PROFILE;
+  const out: Json = { ...file };
+  if (isPlainObject(file.profiles)) {
+    out.profiles = Object.fromEntries(Object.entries(file.profiles).filter(([key]) => key !== id));
+  }
+  if (isPlainObject(file.order)) {
+    out.order = Object.fromEntries(
+      Object.entries(file.order).map(([provider, ids]) => [
+        provider,
+        Array.isArray(ids) ? ids.filter((entry) => entry !== id) : ids,
+      ]),
+    );
+  }
+  if (isPlainObject(file.lastGood)) {
+    out.lastGood = Object.fromEntries(
+      Object.entries(file.lastGood).filter(([, value]) => value !== id),
+    );
+  }
+  if (isPlainObject(file.usageStats)) {
+    out.usageStats = Object.fromEntries(
+      Object.entries(file.usageStats).filter(([key]) => key !== id),
+    );
+  }
+  return out;
+}
+
+/**
+ * Each agent's auth profiles. `dropStarter`: bot.json does not send Anthropic
+ * through the Hanzo proxy, so the first run's IAM token, which only the proxy
+ * accepts, leaves every agent's store rather than go to Anthropic.
+ */
+function planAuth(p: Planning, state: OpenClawState, dropStarter: boolean): void {
   const { actions, items } = p;
+  const store = (agentId: string) =>
+    path.join(p.target, "agents", agentId, "agent", "auth-profiles.json");
   const agentIds = new Set(["main", ...Object.keys(state.agentAuth)]);
+  if (dropStarter) {
+    for (const agentId of listDirs(path.join(p.target, "agents"))) {
+      if (holdsStarterProfile(store(agentId))) {
+        agentIds.add(agentId);
+      }
+    }
+  }
   for (const agentId of [...agentIds].toSorted()) {
-    const local = state.agentAuth[agentId];
-    if (agentId !== "main" && !local) {
+    const file = agentAuthFile(state, agentId) ?? { version: 1, profiles: {} };
+    const imported = Object.keys(file.profiles).length > 0;
+    const to = store(agentId);
+    const strip = dropStarter && holdsStarterProfile(to);
+    if (!imported && !strip) {
       continue;
     }
-    const shared = state.sharedAuth;
-    if (!shared && !local) {
-      continue;
-    }
-    const file = convertAuth(shared, local);
-    if (Object.keys(file.profiles).length === 0) {
-      continue;
-    }
-    const to = path.join(p.target, "agents", agentId, "agent", "auth-profiles.json");
     let names = Object.keys(file.profiles).toSorted();
     const status = planWrite(actions, to, json(file), (text) => {
       const existing = readJsonText(text);
       const merged = mergeAuth(existing, file);
       names = merged.added.toSorted();
-      // bot.json no longer sends Anthropic through the Hanzo proxy, so the
-      // first run's IAM-token profile must not be offered to Anthropic.
-      const order = isPlainObject(merged.file.order) ? merged.file.order : {};
-      if (agentId === "main" && anthropicOrder.length > 0 && !Object.hasOwn(order, "anthropic")) {
-        merged.file.order = { ...order, anthropic: anthropicOrder };
-      }
-      return JSON.stringify(merged.file) === JSON.stringify(existing) ? text : json(merged.file);
+      const next = strip ? withoutStarterProfile(merged.file) : merged.file;
+      return JSON.stringify(next) === JSON.stringify(existing) ? text : json(next);
     });
     p.claimed.add(to);
-    const from = [shared?.from, local?.from].filter(Boolean).join(" + ");
+    const local = state.agentAuth[agentId];
+    const from = imported
+      ? [state.sharedAuth?.from, local?.from].filter(Boolean).join(" + ")
+      : rel(p.target, to);
     items.push({ op: "write", from, to: rel(p.target, to), status, names });
+    if (strip) {
+      items.push({
+        op: "drop",
+        from: `${rel(p.target, to)}#${HANZO_IAM_ANTHROPIC_PROFILE}`,
+        reason: "starter-token",
+      });
+    }
   }
 }
 
@@ -628,15 +804,59 @@ function planHeartbeats(p: Planning, state: OpenClawState, config: Json): void {
   }
 }
 
-function planPairing(p: Planning, state: OpenClawState): void {
+function pairingName(key: string): string {
+  const [channel = "", account = ""] = key.split("\u0000");
+  return `${safeKey(channel)}-${safeKey(account || "default")}-allowFrom.json`;
+}
+
+/** The entries of an allowFrom file, or undefined when it does not read as one. */
+function readAllowFrom(file: string): string[] | undefined {
+  try {
+    const value = readJsonText(fs.readFileSync(file, "utf8")).allowFrom;
+    return Array.isArray(value) ? value.map(String) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * The legacy credentials/<channel>-<account>-allowFrom.json files that
+ * OpenClaw left beside database entries for the same channel and account (its
+ * doctor merges them in later). planPairing writes their union.
+ */
+function pairingFilesMerged(p: MigrationParams, state: OpenClawState): Set<string> {
+  const names = new Set<string>();
+  for (const key of Object.keys(state.pairing?.lists ?? {})) {
+    const name = pairingName(key);
+    if (readAllowFrom(path.join(p.source, "credentials", name))) {
+      names.add(name);
+    }
+  }
+  return names;
+}
+
+function planPairing(p: Planning, state: OpenClawState, merged: Set<string>): void {
   const { actions, items } = p;
   if (!state.pairing) {
     return;
   }
-  for (const [key, allowFrom] of Object.entries(state.pairing.lists)) {
+  for (const [key, entries] of Object.entries(state.pairing.lists)) {
     const [channel = "", account = ""] = key.split("\u0000");
-    const name = `${safeKey(channel)}-${safeKey(account || "default")}-allowFrom.json`;
+    const name = pairingName(key);
     const to = path.join(p.target, "credentials", name);
+    let from = `${state.pairing.from}/${channel}/${account}`;
+    // A file of that name that does not read as an allowlist (copied now or before) stays.
+    if (p.claimed.has(to) || (fs.existsSync(to) && !readAllowFrom(to))) {
+      items.push({ op: "write", from, to: `credentials/${name}`, status: "conflict" });
+      continue;
+    }
+    // As OpenClaw's doctor merges them: the database's entries, then the file's.
+    let allowFrom = entries;
+    if (merged.has(name)) {
+      const legacy = readAllowFrom(path.join(p.source, "credentials", name)) ?? [];
+      allowFrom = [...new Set([...entries, ...legacy])];
+      from = `${from} + credentials/${name}`;
+    }
     p.claimed.add(to);
     let count = allowFrom.length;
     const status = planWrite(actions, to, json({ version: 1, allowFrom }), (text) => {
@@ -648,14 +868,25 @@ function planPairing(p: Planning, state: OpenClawState): void {
         ? text
         : json({ ...existing, version: 1, allowFrom: [...current, ...added] });
     });
-    items.push({
-      op: "write",
-      from: `${state.pairing.from}/${channel}/${account}`,
-      to: `credentials/${name}`,
-      status,
-      count,
-    });
+    items.push({ op: "write", from, to: `credentials/${name}`, status, count });
   }
+}
+
+/**
+ * Other names of the OpenClaw dir that a config may spell: its real path, and
+ * the Clawdbot-era dirs OpenClaw leaves as links to it.
+ */
+function sourceAliases(source: string, home: string): string[] {
+  const real = realPathOf(source);
+  const aliases = new Set([real]);
+  for (const name of [".openclaw", ".clawdbot", ".moltbot", ".moldbot"]) {
+    const dir = path.join(home, name);
+    if (fs.existsSync(dir) && realPathOf(dir) === real) {
+      aliases.add(dir);
+    }
+  }
+  aliases.delete(source);
+  return [...aliases];
 }
 
 export function planMigration(p: MigrationParams): { plan: Plan; actions: Action[] } {
@@ -684,23 +915,23 @@ export function planMigration(p: MigrationParams): { plan: Plan; actions: Action
     items: [],
     claimed: new Set(),
     sources: new Set([source]),
+    aliases: sourceAliases(source, p.home),
   };
-  const mainAuth = convertAuth(state.sharedAuth, state.agentAuth.main);
-  const anthropic = Object.entries(mainAuth.profiles)
-    .filter(([, profile]) => profile.provider === "anthropic")
-    .map(([id]) => id)
-    .toSorted();
-  const envKeys = planEnv(planning);
-  const config = planConfig(planning, state, envKeys, { anthropic: anthropic.length > 0 });
-  const yieldedAnthropic = planning.items.some(
-    (item) => item.reason === "starter" && item.names?.includes("models.providers.anthropic"),
+  const profilesAnthropic = ["main", ...Object.keys(state.agentAuth)].some((agentId) =>
+    Object.values(agentAuthFile(state, agentId)?.profiles ?? {}).some(
+      (profile) => profile.provider === "anthropic",
+    ),
   );
-  planCopies(planning);
+  const envKeys = planEnv(planning);
+  const config = planConfig(planning, state, envKeys, profilesAnthropic);
+  const pairingMerged = pairingFilesMerged(planning, state);
+  planCopies(planning, pairingMerged);
   planWorkshopSkills(planning, config);
-  planAuth(planning, state, yieldedAnthropic ? anthropic : []);
+  // Without the route to the Hanzo proxy, the first run's IAM token would go to Anthropic.
+  planAuth(planning, state, !routesAnthropicToHanzo(config));
   planSessions(planning, state);
   planCron(planning, state);
-  planPairing(planning, state);
+  planPairing(planning, state, pairingMerged);
   planHeartbeats(planning, state, config);
   planning.items.push(...planSkips(planning, state, config));
   assertUniqueTargets(planning.actions);
