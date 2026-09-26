@@ -499,6 +499,22 @@ describe("exec bound on a merge", () => {
   });
 });
 
+// Differential finding: with no named agents.list entry, Hanzo Bot runs an agent a binding
+// names unlisted, on the root; bot.json's own binding to one is held like the default agent.
+it("holds an unlisted agent bot.json's own binding names where no list entry has an id", () => {
+  const list = [{ id: "", tools: { exec: { security: "allowlist" } } }];
+  const merged = {
+    agents: { list: structuredClone(list) },
+    bindings: [{ agentId: "owner", match: { channel: "telegram" } }],
+    tools: { exec: { security: "full", ask: "off" } },
+  };
+  const fresh = { agents: { list }, tools: { exec: { security: "deny", ask: "off" } } };
+  expect(boundMergedExec(merged, fresh)).toEqual([
+    { at: "tools.exec", names: ['security="allowlist"'] },
+  ]);
+  expect(merged.tools).toEqual({ exec: { security: "allowlist", ask: "off" } });
+});
+
 describe("invalid exec values", () => {
   // RED-BOTGO-23: OpenClaw's schema rejects these, so it loaded no config and ran no exec.
   it.each([

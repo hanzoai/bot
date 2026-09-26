@@ -1050,14 +1050,16 @@ export function boundMergedExec(merged: Json, fresh: Json): Array<{ at: string; 
 }
 
 /**
- * The agents a config runs: its agents.list, else main and each agent a
- * binding names, which OpenClaw and Hanzo Bot both run unlisted (on the
- * root's settings) when there is no list.
+ * The agents a config runs: its agents.list, and, where no entry has an id
+ * (none, or all blank), each agent a binding names, which OpenClaw and Hanzo
+ * Bot both run unlisted on the root's settings (pickFirstExistingAgentId).
  */
 export function runningAgentIds(config: Json): string[] {
   const ids = listAgentIds(config as BotConfig);
   const list = child(config, "agents")?.list;
-  if (Array.isArray(list) && list.some(isPlainObject)) {
+  const named = (entry: unknown) =>
+    isPlainObject(entry) && typeof entry.id === "string" && entry.id.trim() !== "";
+  if (Array.isArray(list) && list.some(named)) {
     return ids;
   }
   return [...ids, ...bindingAgentIds(config).filter((id) => !ids.includes(id))];
