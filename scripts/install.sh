@@ -1896,7 +1896,7 @@ resolve_bot_bin() {
 
 install_bot_from_git() {
     local repo_dir="$1"
-    local repo_url="https://github.com/hanzo-bot/hanzo-bot.git"
+    local repo_url="https://github.com/hanzoai/bot.git"
 
     if [[ -d "$repo_dir/.git" ]]; then
         ui_info "Installing HanzoBot from git checkout: ${repo_dir}"

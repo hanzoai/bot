@@ -176,6 +176,14 @@ describe("installer npm package", () => {
     });
   });
 
+  it.each(INSTALLERS)("%s clones only github.com/hanzoai/bot", (file) => {
+    const urls = [...readFileSync(file, "utf8").matchAll(/https:\/\/github\.com\/[^\s"']+\.git/g)];
+    expect(urls.length).toBeGreaterThan(0);
+    expect(new Set(urls.map((match) => match[0]))).toEqual(
+      new Set(["https://github.com/hanzoai/bot.git"]),
+    );
+  });
+
   it("install.ps1 passes the scoped spec to npm quoted", () => {
     const ps1 = readFileSync("scripts/install.ps1", "utf8");
     expect(ps1).toContain('npm install -g "@hanzo/bot@$Version"');
