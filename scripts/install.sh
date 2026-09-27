@@ -480,7 +480,7 @@ cleanup_npm_bot_paths() {
     if [[ -z "$npm_root" || "$npm_root" != *node_modules* ]]; then
         return 1
     fi
-    rm -rf "$npm_root"/.hanzo-bot-* "$npm_root"/hanzo-bot 2>/dev/null || true
+    rm -rf "$npm_root"/@hanzo/.bot-* "$npm_root"/@hanzo/bot 2>/dev/null || true
 }
 
 extract_bot_conflict_path() {
@@ -516,7 +516,7 @@ cleanup_bot_bin_conflict() {
     if [[ -L "$bin_path" ]]; then
         local target=""
         target="$(readlink "$bin_path" 2>/dev/null || true)"
-        if [[ "$target" == *"/node_modules/hanzo-bot/"* ]]; then
+        if [[ "$target" == *"/node_modules/@hanzo/bot/"* ]]; then
             rm -f "$bin_path"
             ui_info "Removed stale hanzo-bot symlink at ${bin_path}"
             return 0
@@ -807,7 +807,7 @@ install_bot_npm() {
             tail -n 80 "$log" >&2 || true
         fi
 
-        if grep -q "ENOTEMPTY: directory not empty, rename .*hanzo-bot" "$log"; then
+        if grep -q "ENOTEMPTY: directory not empty, rename .*@hanzo/bot" "$log"; then
             ui_warn "npm left stale directory; cleaning and retrying"
             cleanup_npm_bot_paths
             if run_npm_global_install "$spec" "$log"; then
@@ -1195,7 +1195,7 @@ detect_bot_checkout() {
     if [[ ! -f "$dir/pnpm-workspace.yaml" ]]; then
         return 1
     fi
-    if ! grep -q '"name"[[:space:]]*:[[:space:]]*"hanzo-bot"' "$dir/package.json" 2>/dev/null; then
+    if ! grep -q '"name"[[:space:]]*:[[:space:]]*"@hanzo/bot"' "$dir/package.json" 2>/dev/null; then
         return 1
     fi
     echo "$dir"
@@ -1605,7 +1605,7 @@ fix_npm_permissions() {
 ensure_bot_bin_link() {
     local npm_root=""
     npm_root="$(npm root -g 2>/dev/null || true)"
-    if [[ -z "$npm_root" || ! -d "$npm_root/hanzo-bot" ]]; then
+    if [[ -z "$npm_root" || ! -d "$npm_root/@hanzo/bot" ]]; then
         return 1
     fi
     local npm_bin=""
@@ -1615,7 +1615,7 @@ ensure_bot_bin_link() {
     fi
     mkdir -p "$npm_bin"
     if [[ ! -x "${npm_bin}/hanzo-bot" ]]; then
-        ln -sf "$npm_root/hanzo-bot/dist/entry.js" "${npm_bin}/hanzo-bot"
+        ln -sf "$npm_root/@hanzo/bot/dist/entry.js" "${npm_bin}/hanzo-bot"
         ui_info "Created hanzo-bot bin link at ${npm_bin}/hanzo-bot"
     fi
     return 0
@@ -1947,7 +1947,7 @@ EOF
 # Install HanzoBot
 resolve_beta_version() {
     local beta=""
-    beta="$(npm view hanzo-bot dist-tags.beta 2>/dev/null || true)"
+    beta="$(npm view @hanzo/bot dist-tags.beta 2>/dev/null || true)"
     if [[ -z "$beta" || "$beta" == "undefined" || "$beta" == "null" ]]; then
         return 1
     fi
@@ -1955,14 +1955,14 @@ resolve_beta_version() {
 }
 
 install_hanzo-bot() {
-    local package_name="hanzo-bot"
+    local package_name="@hanzo/bot"
     if [[ "$USE_BETA" == "1" ]]; then
         local beta_version=""
         beta_version="$(resolve_beta_version || true)"
         if [[ -n "$beta_version" ]]; then
             BOT_VERSION="$beta_version"
             ui_info "Beta tag detected (${beta_version})"
-            package_name="hanzo-bot"
+            package_name="@hanzo/bot"
         else
             BOT_VERSION="latest"
             ui_info "No beta tag found; using latest"
@@ -1991,14 +1991,6 @@ install_hanzo-bot() {
         ui_warn "npm install failed; retrying"
         cleanup_npm_bot_paths
         install_bot_npm "${install_spec}"
-    fi
-
-    if [[ "${BOT_VERSION}" == "latest" && "${package_name}" == "hanzo-bot" ]]; then
-        if ! resolve_bot_bin &> /dev/null; then
-            ui_warn "npm install hanzo-bot@latest failed; retrying hanzo-bot@next"
-            cleanup_npm_bot_paths
-            install_bot_npm "hanzo-bot@next"
-        fi
     fi
 
     ensure_bot_bin_link || true
@@ -2097,8 +2089,8 @@ resolve_bot_version() {
     if [[ -z "$version" ]]; then
         local npm_root=""
         npm_root=$(npm root -g 2>/dev/null || true)
-        if [[ -n "$npm_root" && -f "$npm_root/hanzo-bot/package.json" ]]; then
-            version=$(node -e "console.log(require('${npm_root}/hanzo-bot/package.json').version)" 2>/dev/null || true)
+        if [[ -n "$npm_root" && -f "$npm_root/@hanzo/bot/package.json" ]]; then
+            version=$(node -e "console.log(require('${npm_root}/@hanzo/bot/package.json').version)" 2>/dev/null || true)
         fi
     fi
     echo "$version"
@@ -2238,9 +2230,9 @@ main() {
     local final_git_dir=""
     if [[ "$INSTALL_METHOD" == "git" ]]; then
         # Clean up npm global install if switching to git
-        if npm list -g hanzo-bot &>/dev/null; then
+        if npm list -g @hanzo/bot &>/dev/null; then
             ui_info "Removing npm global install (switching to git)"
-            npm uninstall -g hanzo-bot 2>/dev/null || true
+            npm uninstall -g @hanzo/bot 2>/dev/null || true
             ui_success "npm global install removed"
         fi
 

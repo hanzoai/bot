@@ -202,11 +202,11 @@ function Ensure-Git {
 function Install-HanzoBotNpm {
     param([string]$Version = "latest")
     
-    Write-Host "Installing HanzoBot (hanzo-bot@$Version)..." -Level info
+    Write-Host "Installing HanzoBot (@hanzo/bot@$Version)..." -Level info
     
     try {
         # Use -ExecutionPolicy Bypass to handle restricted execution policy
-        npm install -g hanzo-bot@$Version --no-fund --no-audit 2>&1
+        npm install -g "@hanzo/bot@$Version" --no-fund --no-audit 2>&1
         Write-Host "HanzoBot installed" -Level success
         return $true
     } catch {
