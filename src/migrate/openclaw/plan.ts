@@ -11,7 +11,15 @@ import {
 import type { BotConfig } from "../../config/config.js";
 import { SAFE_SESSION_ID_RE } from "../../config/sessions/paths.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
-import { approvalSources } from "./approvals.js";
+import {
+  approvalSources,
+  EXEC_FIELDS,
+  floorApprovals,
+  hostFloor,
+  policyFloor,
+  stricter,
+  type ApprovalsSource,
+} from "./approvals.js";
 import {
   boundMergedExec,
   convertConfig,
@@ -19,6 +27,10 @@ import {
   formatPath,
   listEnvRefs,
   mergeBeneath,
+  safeKey,
+  type Exec,
+  type HostFloors,
+  type PairingStores,
   validateMerge,
   valueAt,
   yieldStarter,
@@ -44,7 +56,7 @@ import {
 } from "./files.js";
 import { createPathRewriter, homeForm } from "./paths.js";
 import { planSkips } from "./skips.js";
-import { readOpenClawState, STATE_DB, type OpenClawState } from "./state.js";
+import { APPROVALS_FILE, readOpenClawState, STATE_DB, type OpenClawState } from "./state.js";
 
 /**
  * `hanzo-bot migrate openclaw`: plan (always) and apply (on request). The plan
@@ -87,6 +99,8 @@ type Planning = MigrationParams & {
   claimed: Set<string>;
   sources: Set<string>;
   aliases: string[];
+  /** The host floor the merge bound needs, by agent id (boundMergedExec). */
+  mergeFloor: Map<string, Exec>;
 };
 
 const PRIVATE = 0o600;
@@ -205,11 +219,12 @@ function planConfig(
       });
     }
   }
+  const policies = approvalSources(state.approvals);
   const { config, report } = convertConfig({
     source,
     rewrite,
     home: p.home,
-    approvals: approvalSources(state.approvals),
+    approvals: policies,
   });
   const ownAnthropic =
     profilesAnthropic ||
@@ -236,11 +251,29 @@ function planConfig(
   renames.push(...setWorkspaces(p, config, configName));
 
   const to = path.join(p.target, "bot.json");
+  const stores = pairingStores(p, state);
+  // The floor each install held a session's /exec to: Hanzo Bot reads its own from ~/.bot.
+  const host = path.join(path.resolve(p.home), ".bot", APPROVALS_FILE);
+  const floors: HostFloors = {
+    fresh: policyFloor(policies),
+    before: hostFloor(
+      fs.existsSync(host) && fs.statSync(host).isFile() ? fs.readFileSync(host, "utf8") : null,
+      homeForm(host, p.home),
+    ),
+  };
   let effective = config;
   if (!fs.existsSync(to)) {
-    actions.push({ kind: "write", to, content: json(config), mode: PRIVATE });
+    // Pairing entries already in the target let their senders in: the bound holds them too.
+    const written = structuredClone(config);
+    const { written: bound, floor } = boundMergedExec(written, config, {}, stores, floors);
+    p.mergeFloor = floor;
+    actions.push({ kind: "write", to, content: json(written), mode: PRIVATE });
     p.claimed.add(to);
     items.push(...renames, { op: "write", from: configName, to: "bot.json", status: "create" });
+    for (const { at, names } of bound) {
+      items.push({ op: "note", from: `bot.json#${at}`, reason: "exec-merge", names });
+    }
+    effective = written;
   } else {
     const before = readJsonText(fs.readFileSync(to, "utf8"));
     const merged = structuredClone(before);
@@ -251,8 +284,9 @@ function planConfig(
     // A copy: the bound below writes into what the merge adds, and `config` stays the import alone.
     const { added, kept } = mergeBeneath(merged, structuredClone(config));
     const dropped = validateMerge(merged, before, added);
-    // No agent runs exec looser than the import alone gives it.
-    const bound = boundMergedExec(merged, config);
+    // No sender runs exec looser than one of the two installs gave them.
+    const { written: bound, floor } = boundMergedExec(merged, config, before, stores, floors);
+    p.mergeFloor = floor;
     const applied = added.map(formatPath).filter((label) => !dropped.includes(label));
     const status: PlanStatus =
       yielded.length + applied.length + bound.length > 0 ? "update" : "unchanged";
@@ -312,6 +346,74 @@ function planConfig(
     items.push({ op: "note", from: configName, reason: "env-ref", names: missing });
   }
   return effective;
+}
+
+/**
+ * OpenClaw's exec approvals policy, also as the floor Hanzo Bot applies to
+ * host exec after a session's /exec (floorApprovals). Hanzo Bot reads that
+ * floor from ~/.bot/exec-approvals.json whatever its state dir, so the import
+ * writes it only where that is the target's own file, and stops otherwise.
+ */
+function planApprovals(p: Planning, state: OpenClawState): void {
+  const sources: ApprovalsSource[] = approvalSources(state.approvals);
+  // The merge bound's floor, as a policy of its own. An agent the file cannot
+  // name on its own ("default", which both read as main's, or "__proto__") is
+  // held through "*".
+  const held = new Map<string, Record<string, unknown>>();
+  for (const [id, exec] of p.mergeFloor) {
+    const key = id === "default" || id === "__proto__" ? "*" : id;
+    const entry = held.get(key) ?? {};
+    for (const field of EXEC_FIELDS) {
+      const value = stricter(field, entry[field], exec[field]);
+      if (value !== undefined) {
+        entry[field] = value;
+      }
+    }
+    held.set(key, entry);
+  }
+  if (held.size > 0) {
+    sources.push({ label: "bot.json", doc: { version: 1, agents: Object.fromEntries(held) } });
+  }
+  const to = path.join(p.target, APPROVALS_FILE);
+  const label = homeForm(to, p.home);
+  if (!floorApprovals(sources, null, label)) {
+    return;
+  }
+  const read = path.join(path.resolve(p.home), ".bot", APPROVALS_FILE);
+  if (read !== to) {
+    throw new Error(
+      `OpenClaw's exec approvals policy has to go to ${homeForm(read, p.home)}, where Hanzo Bot reads it whatever its state dir, but the import writes only inside ${homeForm(p.target, p.home)}; import with BOT_STATE_DIR unset; nothing was written`,
+    );
+  }
+  const present = fs.existsSync(to);
+  if (present && !fs.statSync(to).isFile()) {
+    throw new Error(
+      `${label} is not a file; move it aside, then import again; nothing was written`,
+    );
+  }
+  const floor = floorApprovals(sources, present ? fs.readFileSync(to, "utf8") : null, label);
+  if (!floor) {
+    return;
+  }
+  let status: PlanStatus = "unchanged";
+  if (!present) {
+    p.actions.push({ kind: "write", to, content: floor.text, mode: PRIVATE });
+    status = "create";
+  } else if (floor.names.length > 0) {
+    p.actions.push(
+      { kind: "backup", file: to },
+      { kind: "write", to, content: floor.text, mode: fs.statSync(to).mode & 0o777 },
+    );
+    status = "update";
+  }
+  p.claimed.add(to);
+  p.items.push({
+    op: "write",
+    from: sources.map((source) => source.label).join(" + "),
+    to: APPROVALS_FILE,
+    status,
+    names: floor.names,
+  });
 }
 
 /**
@@ -815,6 +917,33 @@ function planSessions(p: Planning, state: OpenClawState): void {
   }
 }
 
+/**
+ * The pairing stores (credentials/<channel>-<account>-allowFrom.json) with
+ * their entries: the target's before the import, and what the import brings
+ * from OpenClaw, which planPairing writes from its database (with a legacy
+ * file of the same name) and planCopies copies from its credentials dir.
+ */
+function pairingStores(p: MigrationParams, state: OpenClawState): PairingStores {
+  const read = (dir: string) => {
+    const out: Record<string, string[] | null> = {};
+    if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
+      for (const name of fs.readdirSync(dir).toSorted()) {
+        if (name.endsWith("-allowFrom.json")) {
+          out[name] = readAllowFrom(path.join(dir, name)) ?? null;
+        }
+      }
+    }
+    return out;
+  };
+  const openclaw = read(path.join(p.source, "credentials"));
+  for (const [key, entries] of Object.entries(state.pairing?.lists ?? {})) {
+    const name = pairingName(key);
+    const legacy = Object.hasOwn(openclaw, name) ? openclaw[name] : [];
+    openclaw[name] = legacy === null ? null : [...new Set([...entries, ...(legacy ?? [])])];
+  }
+  return { before: read(path.join(p.target, "credentials")), openclaw };
+}
+
 function planCron(p: Planning, state: OpenClawState): void {
   const { actions, items } = p;
   if (!state.cron) {
@@ -843,15 +972,6 @@ function planCron(p: Planning, state: OpenClawState): void {
     return added.length === 0 ? text : json({ ...existing, jobs: [...current, ...added] });
   });
   items.push({ op: "write", from: state.cron.from, to: "cron/jobs.json", status, names });
-}
-
-/** Hanzo Bot's pairing-store filename rule for a channel or account id. */
-function safeKey(raw: string): string {
-  return raw
-    .trim()
-    .toLowerCase()
-    .replace(/[\\/:*?"<>|]/g, "_")
-    .replace(/\.\./g, "_");
 }
 
 /**
@@ -1004,6 +1124,7 @@ export function planMigration(p: MigrationParams): { plan: Plan; actions: Action
     claimed: new Set(),
     sources: new Set([source]),
     aliases: sourceAliases(source, p.home),
+    mergeFloor: new Map(),
   };
   const profilesAnthropic = ["main", ...Object.keys(state.agentAuth)].some((agentId) =>
     Object.values(agentAuthFile(state, agentId)?.profiles ?? {}).some(
@@ -1012,6 +1133,7 @@ export function planMigration(p: MigrationParams): { plan: Plan; actions: Action
   );
   const envKeys = planEnv(planning);
   const config = planConfig(planning, state, envKeys, profilesAnthropic);
+  planApprovals(planning, state);
   const pairingMerged = pairingFilesMerged(planning, state);
   planCopies(planning, pairingMerged);
   planWorkshopSkills(planning, config);

@@ -206,8 +206,18 @@ OpenClaw ran no exec with a policy it could not read, or with an `exec-approvals
 into its database. For either, the import sets `security` to `deny` and says so under
 **Do by hand**. Approved commands are not carried; approve them again when asked.
 
+OpenClaw applies that policy after a session's `/exec`, so no `/exec` lifts it. A `/exec`
+in Hanzo Bot replaces `tools.exec`, so the import also writes the policy into
+`~/.bot/exec-approvals.json`, which Hanzo Bot applies to gateway and node exec after `/exec`,
+exactly where OpenClaw applies its own. Each agent there gets the stricter of what that file
+already held it to and what the policy holds it to; nothing else in the file changes, and the
+old file is kept as `exec-approvals.json.bak`. Hanzo Bot reads that file from `~/.bot` whatever
+its state dir, so with `BOT_STATE_DIR` set elsewhere the import stops rather than leave the
+policy behind: import with it unset.
+
 Elevated exec (`/elevated full`) never raises `tools.exec.security`: as in OpenClaw, it skips
 approvals only where the policy is already `full` with `ask: "off"`, and `deny` stays `deny`.
+An agent with no `security` on the default host is denied with elevated as without.
 
 ### An existing bot.json
 
@@ -216,11 +226,19 @@ kept as `bot.json.bak`:
 
 - A value you set wins. The plan names each key where your value differs from OpenClaw's,
   under **Do by hand**, instead of listing it as moved.
-- Except where it would let OpenClaw's senders run more: OpenClaw's channels and bindings are
-  added, so each agent's `tools.exec` `security` and `ask` are held to no looser than the import
-  alone gives that agent. Where your `agents.list`, bindings or default agent send messages
-  elsewhere than OpenClaw did, the default agent and the agents your bindings name are held to
-  the strictest agent OpenClaw ran. **Do by hand** names each `tools.exec` this changed.
+- Except where it would let a sender run exec that neither install gave them. OpenClaw's
+  channels and bindings are added to yours, so each agent's `tools.exec` `security` and `ask`
+  are held to no looser than the import alone gives that agent. Where your `agents.list`,
+  bindings or default agent send messages elsewhere than OpenClaw did, the default agent and
+  the agents your bindings name are held to the strictest agent OpenClaw ran. And for each
+  channel (with its pairing allowlists) and your hooks: senders it lets in exactly as OpenClaw
+  did keep OpenClaw's exec, senders it lets in exactly as your `bot.json` did keep yours, and
+  a channel that now lets in senders neither did (your open Telegram beside OpenClaw's
+  owner-only exec, say) denies exec to every agent it reaches, in `bot.json` and in
+  `~/.bot/exec-approvals.json`, so a `/exec` cannot lift it either. An agent either install ran
+  with `host: "sandbox"` gave its senders no exec on the host, so where the merge moves it to
+  another host its exec is denied. **Do by hand** names each `tools.exec` this changed; loosen
+  it by hand if you mean to.
 - Values Hanzo Bot's first run wrote (from running `hanzo-bot` before the import) give way to
   OpenClaw's: the workspace, the gateway mode and bind, and, when the import brings your own
   Anthropic key (in any agent's auth profiles, in `.env`, or in the config), the route that sent
@@ -371,7 +389,10 @@ agent`**: fix the named setting in `openclaw.json` (`openclaw doctor --fix` repa
   would drop or cannot route. Fix it in `openclaw.json`, then run again.
 - **Exec denied after the move**: with no sandbox configured, Hanzo Bot runs exec on the host
   only as `tools.exec.security` allows, and denies it when that is unset. Set it to
-  `"allowlist"` or `"full"`; `hanzo-bot doctor` names each agent.
+  `"allowlist"` or `"full"`; `hanzo-bot doctor` names each agent. OpenClaw's exec approvals
+  policy also holds in `~/.bot/exec-approvals.json`: loosen it there too if you mean to.
+- **`OpenClaw's exec approvals policy has to go to ~/.bot/exec-approvals.json`**: `BOT_STATE_DIR`
+  points elsewhere. Run the import with it unset.
 - **`bot.json would not load after the merge`**: your existing `bot.json` and OpenClaw's config
   clash in a way no single imported key explains. Move `bot.json` aside, import, then copy your
   settings back.

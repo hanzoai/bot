@@ -41,7 +41,8 @@ const REASONS: Record<string, string> = {
   target: "session target Hanzo Bot does not run",
   backup: "backup",
   devices: "device pairing; pair again",
-  approvals: "exec approvals; approve again when asked",
+  approvals:
+    "exec approvals: the policy carries over (bot.json, exec-approvals.json), approved commands do not; approve again when asked",
   index: "search index; rebuilt on first use",
   encrypted: "encrypted with OpenClaw's key; sign in again",
   runtime: "runtime state",
@@ -85,11 +86,11 @@ function noteText(item: PlanItem): string {
     case "exec-invalid":
       return `${item.from}: not a value OpenClaw accepts (OpenClaw would not load this config), so exec is denied. Set tools.exec.security in bot.json to allow it.`;
     case "exec-merge":
-      return `${item.from} is now ${item.names?.join(", ")}: with OpenClaw's channels and bindings added, bot.json's value would let senders run exec OpenClaw denied them. Loosen it by hand if you mean to.`;
+      return `${item.from} is now ${item.names?.join(", ")}: after the merge, bot.json's value would let a sender run exec that neither OpenClaw nor your bot.json gave them. Loosen it by hand if you mean to.`;
     case "exec-unset":
       return `OpenClaw ran exec for ${item.names?.join(", ")} with no tools.exec.security (its default is full); Hanzo Bot denies host exec without one. Set tools.exec.security in bot.json to allow it.`;
     case "exec-approvals-closed":
-      return `${item.from}: OpenClaw could not use this exec policy (unreadable, or waiting for openclaw doctor --fix), so it ran no exec; exec is denied here too. Set tools.exec.security in bot.json to allow it.`;
+      return `${item.from}: OpenClaw could not use this exec policy (unreadable, or waiting for openclaw doctor --fix), so it ran no exec; exec is denied here too, in bot.json and exec-approvals.json. Change both to allow it.`;
     case "kept":
       return `bot.json already sets ${item.names?.join(", ")}, so OpenClaw's values for them were not applied. Change them by hand to use OpenClaw's.`;
     default:

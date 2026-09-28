@@ -43,6 +43,7 @@ const RANK: Record<ExecField, Map<unknown, number>> = {
   ]),
 };
 const LOOSEST = 2;
+const LOOSEST_VALUE: Record<ExecField, string> = { security: "full", ask: "off" };
 
 /** What OpenClaw runs with a document it cannot use: fail closed. */
 const CLOSED: Json = { version: 1, defaults: { security: "deny", ask: "off" } };
@@ -279,6 +280,158 @@ export function foldApprovals(config: Json, sources: ApprovalsSource[]): Approva
     });
   }
   return report;
+}
+
+/**
+ * OpenClaw applies its approvals policy after a session's /exec, as a floor on
+ * the gateway and node hosts (resolveExecDefaults: minSecurity and maxAsk
+ * after the config and session layers), so no /exec lifts it. Hanzo Bot
+ * applies its own exec-approvals.json at that same point
+ * (resolveExecHostApprovalContext), while a /exec replaces bot.json's
+ * tools.exec, so the policy goes into that file too. `existing` is the file's
+ * text now (null: none). Each agent is held to the stricter of what the file
+ * gave it and what the policies give it: "*" for agents neither names, then
+ * each agent either names. Nothing else in the file changes. Returns the text
+ * and the settings written; null when the policies hold no agent to anything.
+ */
+export function floorApprovals(
+  sources: ApprovalsSource[],
+  existing: string | null,
+  label: string,
+): { text: string; names: string[] } | null {
+  const docs = sources.map((source) => source.doc ?? CLOSED);
+  const imported = (agentId: string | undefined, field: ExecField) =>
+    importedValue(docs, agentId, field);
+  const keys: string[] = [];
+  const addKeys = (doc: Json) => {
+    for (const key of Object.keys(child(doc, "agents") ?? {})) {
+      // Both read a legacy "default" entry as main's; no agent's id is "".
+      const id = key === "default" ? "main" : key;
+      if (id !== "*" && id !== "" && !keys.includes(id)) {
+        keys.push(id);
+      }
+    }
+  };
+  docs.forEach(addKeys);
+  const holds = [undefined, ...keys].some((agentId) =>
+    EXEC_FIELDS.some((field) => rank(field, imported(agentId, field)) < LOOSEST),
+  );
+  if (!holds) {
+    return null;
+  }
+  const file = hostFile(existing, label);
+  const before = structuredClone(file);
+  addKeys(before);
+  const names: string[] = [];
+  for (const key of ["*", ...keys]) {
+    const agentId = key === "*" ? undefined : key;
+    for (const field of EXEC_FIELDS) {
+      const target = stricter(field, hostValue(before, agentId, field), imported(agentId, field));
+      if (rank(field, target) === rank(field, hostValue(file, agentId, field))) {
+        continue;
+      }
+      // No floor, where "*" now holds this agent to one, is the loosest value.
+      const value = target ?? LOOSEST_VALUE[field];
+      const agents = child(file, "agents") ?? {};
+      file.agents = agents;
+      const entry = child(agents, key) ?? {};
+      agents[key] = entry;
+      entry[field] = value;
+      names.push(`agents.${key}.${field}=${JSON.stringify(value)}`);
+    }
+  }
+  // Already held there: the file stays as it is, byte for byte.
+  const text =
+    names.length === 0 && existing !== null ? existing : `${JSON.stringify(file, null, 2)}\n`;
+  return { text, names };
+}
+
+/** The stricter of each policy's value of one field for one agent (unset: none holds it). */
+function importedValue(docs: Json[], agentId: string | undefined, field: ExecField): unknown {
+  let value: unknown;
+  for (const doc of docs) {
+    value = stricter(field, value, policyField(doc, agentId, field)?.value);
+  }
+  return value;
+}
+
+/** OpenClaw's floor under a session's /exec, by agent id: what its policies hold the agent to. */
+export function policyFloor(
+  sources: ApprovalsSource[],
+): (id: string) => { security: unknown; ask: unknown } {
+  const docs = sources.map((source) => source.doc ?? CLOSED);
+  return (id) => ({
+    security: importedValue(docs, id, "security"),
+    ask: importedValue(docs, id, "ask"),
+  });
+}
+
+/**
+ * Hanzo Bot's floor under a session's /exec, by agent id: what its
+ * exec-approvals.json (`text`, null: none) holds the agent to. The file is
+ * read only when asked.
+ */
+export function hostFloor(
+  text: string | null,
+  label: string,
+): (id: string) => { security: unknown; ask: unknown } {
+  let file: Json | undefined;
+  return (id) => {
+    file ??= hostFile(text, label);
+    return { security: hostValue(file, id, "security"), ask: hostValue(file, id, "ask") };
+  };
+}
+
+/**
+ * The exec approvals file as Hanzo Bot reads it (loadExecApprovals): JSON
+ * with version 1, else no policy at all. One whose defaults, agents or an
+ * agent entry is not an object is refused rather than merged into.
+ */
+function hostFile(text: string | null, label: string): Json {
+  let doc: unknown;
+  try {
+    doc = text === null ? undefined : JSON.parse(text);
+  } catch {
+    doc = undefined;
+  }
+  if (!isPlainObject(doc) || doc.version !== 1) {
+    return { version: 1 };
+  }
+  const agents = doc.agents;
+  const shaped =
+    optional(doc, "defaults", isPlainObject) &&
+    optional(
+      doc,
+      "agents",
+      (value) => isPlainObject(value) && Object.values(value).every(isPlainObject),
+    );
+  if (!shaped || (isPlainObject(agents) && Object.hasOwn(agents, "__proto__"))) {
+    throw new Error(
+      `${label} is not an exec policy the import can add OpenClaw's to (defaults, agents or an agent entry is not an object); fix or remove it, then import again; nothing was written`,
+    );
+  }
+  return doc;
+}
+
+/**
+ * The security or ask Hanzo Bot's exec approvals file holds one agent to
+ * (resolveExecApprovalsFromFile): its entry (main's merged with a legacy
+ * "default"), else "*", else defaults; a value it does not accept falls to
+ * defaults. undefined: no floor.
+ */
+function hostValue(file: Json, agentId: string | undefined, field: ExecField): unknown {
+  const valid = (value: unknown) => (RANK[field].has(value) ? value : undefined);
+  const defaults = child(file, "defaults")?.[field];
+  const agents = child(file, "agents") ?? {};
+  const entry = (key: string) => (Object.hasOwn(agents, key) ? child(agents, key) : undefined);
+  let own: unknown;
+  if (agentId !== undefined && agentId !== "default") {
+    own = entry(agentId)?.[field];
+    if (agentId === "main") {
+      own ??= entry("default")?.[field];
+    }
+  }
+  return valid(own ?? entry("*")?.[field] ?? defaults) ?? valid(defaults);
 }
 
 /** The agent ids bindings name, normalized, once each, in order; a blank one routes to the default agent. */

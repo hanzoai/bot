@@ -192,7 +192,7 @@ describe("hanzo-bot migrate openclaw", () => {
       const { status, output } = cli(dir, ["migrate", "openclaw", "--apply"]);
       expect(status, output).toBe(0);
       expect(output).toContain(
-        'bot.json#agents.list[1].tools.exec is now security="deny": with OpenClaw\'s channels and bindings added',
+        'bot.json#agents.list[1].tools.exec is now security="deny": after the merge, bot.json\'s value would let a sender run exec that neither OpenClaw nor your bot.json gave them',
       );
       const config = JSON.parse(fs.readFileSync(path.join(dir, ".bot", "bot.json"), "utf8")) as {
         tools: unknown;

@@ -968,7 +968,7 @@ function agentEntryIndex(config: Json, agentId: string): number {
 }
 
 /** The security or ask Hanzo Bot runs an agent with (resolveExecConfig): the agent's own, else the root's. */
-export function execValue(config: Json, agentId: string, field: ExecField): unknown {
+export function execValue(config: Json, agentId: string, field: ExecField | "host"): unknown {
   const list = child(config, "agents")?.list;
   const index = agentEntryIndex(config, agentId);
   const entry = Array.isArray(list) && index >= 0 ? (list[index] as Json) : {};
@@ -980,23 +980,260 @@ function bindingsOf(config: Json): unknown[] {
   return Array.isArray(config.bindings) ? config.bindings : [];
 }
 
+/** Hanzo Bot's pairing-store filename rule for a channel or account id. */
+export function safeKey(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/[\\/:*?"<>|]/g, "_")
+    .replace(/\.\./g, "_");
+}
+
 /**
- * A merge keeps bot.json's own values, its agents.list and exec settings
- * included, and adds OpenClaw's channels and bindings, so OpenClaw's senders
- * reach agents whose exec OpenClaw never gave them. Each agent the merged file
- * runs is held, field by field, to no looser than:
+ * Pairing stores (credentials/<channel>-<account>-allowFrom.json), each file
+ * name with its entries (null: they do not read): the target's before the
+ * import, and what the import brings from OpenClaw into each.
+ */
+export type PairingStores = {
+  before: Record<string, string[] | null>;
+  openclaw: Record<string, string[] | null>;
+};
+
+/** Whether `from`'s store `name` lets in a sender `against`'s does not. */
+function storeAdds(
+  from: Record<string, string[] | null>,
+  against: Record<string, string[] | null>,
+  name: string,
+): boolean {
+  if (!Object.hasOwn(from, name)) {
+    return false;
+  }
+  const entries = from[name] ?? null;
+  const other = Object.hasOwn(against, name) ? (against[name] ?? null) : [];
+  return entries === null || other === null || entries.some((entry) => !other.includes(entry));
+}
+
+export type Exec = { security: unknown; ask: unknown };
+
+/**
+ * The floor each install applies to host exec after a session's /exec, by
+ * agent id: OpenClaw's approvals policy (`fresh`), and the existing
+ * exec-approvals.json (`before`). Unset holds to nothing.
+ */
+export type HostFloors = { fresh: (id: string) => Exec; before: (id: string) => Exec };
+
+/** What the merge bound wrote into bot.json, and the host floor it needs per agent id. */
+export type MergeBound = {
+  written: Array<{ at: string; names: string[] }>;
+  floor: Map<string, Exec>;
+};
+
+/** Keys under channels that are not channels. */
+const NOT_CHANNELS = new Set(["defaults", "modelByChannel"]);
+
+/**
+ * One way senders reach agents in the merged file: the agents it can reach,
+ * and whether it admits exactly the senders the import alone (`fresh`) or the
+ * existing file (`before`) admits.
+ */
+type Audience = { reach: string[]; fresh: boolean; before: boolean };
+
+function hooksOf(config: Json): Json | undefined {
+  const hooks = child(config, "hooks");
+  if (!hooks) {
+    return undefined;
+  }
+  const { internal: _internal, ...rest } = hooks;
+  return Object.keys(rest).length > 0 ? rest : undefined;
+}
+
+/**
+ * The merged file's audiences: each channel it configures, with
+ * channels.defaults and the pairing entries for it; the pairing entries of a
+ * channel it does not configure (one a token in the environment turns on);
+ * and its hooks (hooks.internal is code, not senders). A channel it turns
+ * off (enabled: false) admits no one. A channel admits as a
+ * file does where the merge left its settings as that file has them and
+ * brought no pairing entries from the other side. A channel reaches the
+ * default agent, every agent a binding for it or for no configured channel
+ * names, and every agent broadcast names; the others reach all of those.
+ */
+function audiencesOf(merged: Json, fresh: Json, before: Json, stores: PairingStores): Audience[] {
+  const ids = runningAgentIds(merged);
+  const defaultId = resolveDefaultAgentId(merged as BotConfig);
+  const resolve = (raw: unknown) => {
+    const trimmed = typeof raw === "string" ? raw.trim() : "";
+    const id = normalizeAgentId(trimmed);
+    return trimmed !== "" && ids.includes(id) ? id : defaultId;
+  };
+  const channels = child(merged, "channels") ?? {};
+  const configured = Object.keys(channels).filter((key) => !NOT_CHANNELS.has(key));
+  const lower = new Set(configured.map((key) => key.trim().toLowerCase()));
+  const broadcast = Object.entries(child(merged, "broadcast") ?? {}).flatMap(([key, value]) =>
+    key !== "strategy" && Array.isArray(value) ? value : [],
+  );
+  const reachOf = (channel: string | undefined): string[] => {
+    const reach = [defaultId];
+    const add = (raw: unknown) => {
+      const id = resolve(raw);
+      if (!reach.includes(id)) {
+        reach.push(id);
+      }
+    };
+    for (const binding of bindingsOf(merged)) {
+      if (!isPlainObject(binding)) {
+        continue;
+      }
+      const on = child(binding, "match")?.channel;
+      const name = typeof on === "string" ? on.trim().toLowerCase() : "";
+      if (channel === undefined || name === channel || !lower.has(name)) {
+        add(binding.agentId);
+      }
+    }
+    broadcast.forEach(add);
+    return reach;
+  };
+  const sameDefaults = (other: Json) =>
+    isDeepStrictEqual(channels.defaults, child(other, "channels")?.defaults);
+  const names = [...new Set([...Object.keys(stores.before), ...Object.keys(stores.openclaw)])];
+  // The store's senders are the import's alone, or the existing file's alone.
+  const freshStore = (name: string) => !storeAdds(stores.before, stores.openclaw, name);
+  const beforeStore = (name: string) => !storeAdds(stores.openclaw, stores.before, name);
+  const out: Audience[] = [];
+  for (const key of configured) {
+    // A channel the merged file turns off lets no one in.
+    if (child(channels, key)?.enabled === false) {
+      continue;
+    }
+    const same = (other: Json) =>
+      isDeepStrictEqual(channels[key], child(other, "channels")?.[key]) && sameDefaults(other);
+    const own = names.filter((name) => name.startsWith(`${safeKey(key)}-`));
+    out.push({
+      reach: reachOf(key.trim().toLowerCase()),
+      fresh: same(fresh) && own.every(freshStore),
+      before: same(before) && own.every(beforeStore),
+    });
+  }
+  const orphans = names
+    .filter((name) => !configured.some((key) => name.startsWith(`${safeKey(key)}-`)))
+    .toSorted();
+  for (const name of orphans) {
+    out.push({
+      reach: reachOf(undefined),
+      fresh: sameDefaults(fresh) && freshStore(name),
+      before: sameDefaults(before) && beforeStore(name),
+    });
+  }
+  const hooks = hooksOf(merged);
+  if (hooks) {
+    out.push({
+      reach: reachOf(undefined),
+      fresh: isDeepStrictEqual(hooks, hooksOf(fresh)),
+      before: isDeepStrictEqual(hooks, hooksOf(before)),
+    });
+  }
+  return out;
+}
+
+/** Whether the merged file routes every sender to the agent `other` does. */
+function routesAs(merged: Json, other: Json): boolean {
+  const ids = runningAgentIds(merged);
+  const otherIds = runningAgentIds(other);
+  return (
+    isDeepStrictEqual(bindingsOf(merged), bindingsOf(other)) &&
+    isDeepStrictEqual(merged.broadcast, other.broadcast) &&
+    resolveDefaultAgentId(merged as BotConfig) === resolveDefaultAgentId(other as BotConfig) &&
+    ids.length === otherIds.length &&
+    ids.every((id) => otherIds.includes(id))
+  );
+}
+
+/**
+ * Whether an install (`config`) ran `src` in a sandbox (host "sandbox",
+ * which runs no host exec) while the merged file runs `dst` on another host.
+ */
+function movedToHost(config: Json, merged: Json, src: string, dst: string): boolean {
+  return (
+    execValue(config, src, "host") === "sandbox" && execValue(merged, dst, "host") !== "sandbox"
+  );
+}
+
+/**
+ * What OpenClaw ran an agent of the import (`src`) with, for senders the
+ * merged file sends to `dst`: unset is its default, full/off. An agent
+ * OpenClaw ran in a sandbox (host "sandbox") ran no host exec, so where the
+ * merged file runs `dst` on another host, that is deny.
+ */
+function freshExec(fresh: Json, merged: Json, src: string, dst: string): Exec {
+  return {
+    security: movedToHost(fresh, merged, src, dst) ? "deny" : execValue(fresh, src, "security"),
+    ask: execValue(fresh, src, "ask"),
+  };
+}
+
+/**
+ * What the existing file ran an agent (`src`) with, for senders the merged
+ * file sends to `dst`: unset is Hanzo Bot's default, deny/on-miss. An agent
+ * it ran in a sandbox (host "sandbox") ran no host exec, so where the merged
+ * file runs `dst` on another host, that is deny.
+ */
+function beforeExec(before: Json, merged: Json, src: string, dst: string): Exec {
+  return {
+    security: movedToHost(before, merged, src, dst)
+      ? "deny"
+      : (execValue(before, src, "security") ?? "deny"),
+    ask: execValue(before, src, "ask") ?? "on-miss",
+  };
+}
+
+function strictestOf(execs: Exec[]): Exec {
+  let out: Exec = { security: undefined, ask: undefined };
+  for (const exec of execs) {
+    out = {
+      security: stricter("security", out.security, exec.security),
+      ask: stricter("ask", out.ask, exec.ask),
+    };
+  }
+  return out;
+}
+
+/**
+ * A merge keeps bot.json's own values, its agents.list, exec settings and
+ * channels included, and adds OpenClaw's, so a sender can reach an agent with
+ * exec neither install gave them. Each agent the merged file runs is held,
+ * field by field, to no looser than:
  *   - what the import alone (`fresh`) gives the same agent id, where the
  *     import runs that agent;
  *   - where the merged file routes otherwise than the import (other bindings,
  *     another default agent, or an agent of the import it does not list) and
- *     the agent is the merged default or one a binding the import lacks names:
- *     the strictest any agent of the import runs.
+ *     the agent is the merged default or one a binding the import lacks
+ *     names: the strictest any agent of the import runs;
+ *   - for each audience that reaches it (audiencesOf), what one install
+ *     gave every sender of it: the import's own value for the agent where
+ *     the audience admits and routes as the import does, the existing file's
+ *     (`before`) where it admits and routes as that file does, the strictest
+ *     agent of that install where it only admits as it does, and deny where
+ *     it admits as neither. Of several, the loosest; a deny sets no ask.
  * Unset is loosest. A looser value is replaced on the agent's first
- * agents.list entry, or on the root where there is none. Returns what it
- * wrote, one entry per tools.exec it changed.
+ * agents.list entry, or on the root where there is none; `written` has one
+ * entry per tools.exec it changed.
+ *
+ * A session's /exec replaces tools.exec in Hanzo Bot, so a sender allowed
+ * commands runs what the host floor (exec-approvals.json) lets them, as in
+ * OpenClaw. An audience that admits and routes as one install keeps that
+ * install's floor, which the written floor never exceeds; one that only admits
+ * as an install is held to its strictest floor, and one that admits as
+ * neither to deny. `floor` has each agent that needs a floor for that.
  */
-export function boundMergedExec(merged: Json, fresh: Json): Array<{ at: string; names: string[] }> {
+export function boundMergedExec(
+  merged: Json,
+  fresh: Json,
+  before: Json,
+  stores: PairingStores,
+  floors: HostFloors,
+): MergeBound {
   const freshIds = runningAgentIds(fresh);
+  const beforeIds = runningAgentIds(before);
   const mergedIds = runningAgentIds(merged);
   const defaultId = resolveDefaultAgentId(merged as BotConfig);
   const freshBindings = bindingsOf(fresh);
@@ -1015,19 +1252,74 @@ export function boundMergedExec(merged: Json, fresh: Json): Array<{ at: string; 
       foreign.add(normalizeAgentId(binding.agentId));
     }
   }
+  const audiences = audiencesOf(merged, fresh, before, stores);
+  const routesFresh = routesAs(merged, fresh);
+  const routesBefore = routesAs(merged, before);
+  const none: Exec = { security: undefined, ask: undefined };
+  const denied: Exec = { security: "deny", ask: undefined };
+  // The floor an install held `src`'s senders to under /exec, on the host the
+  // merged file runs `dst` on: none on the host where it ran `src` in a sandbox.
+  const floorOf = (config: Json, of: (id: string) => Exec) => (src: string, dst: string) =>
+    movedToHost(config, merged, src, dst) ? denied : of(src);
+  const freshFloor = floorOf(fresh, floors.fresh);
+  const beforeFloor = floorOf(before, floors.before);
   const written: Array<{ at: string; names: string[] }> = [];
+  const floor = new Map<string, Exec>();
   for (const id of mergedIds) {
     const index = agentEntryIndex(merged, id);
     const list = child(merged, "agents")?.list;
     const scope = Array.isArray(list) && index >= 0 ? (list[index] as Json) : merged;
     const at = index >= 0 ? `agents.list[${index}].tools.exec` : "tools.exec";
+    const bounds: Exec[] = [];
+    const floorBounds: Exec[] = [];
+    for (const audience of audiences.filter((each) => each.reach.includes(id))) {
+      const options: Exec[] = [];
+      const floorOptions: Exec[] = [];
+      if (audience.fresh) {
+        options.push(
+          routesFresh
+            ? freshExec(fresh, merged, id, id)
+            : strictestOf(freshIds.map((other) => freshExec(fresh, merged, other, id))),
+        );
+        floorOptions.push(
+          routesFresh
+            ? movedToHost(fresh, merged, id, id)
+              ? denied
+              : none
+            : strictestOf(freshIds.map((other) => freshFloor(other, id))),
+        );
+      }
+      if (audience.before) {
+        options.push(
+          routesBefore
+            ? beforeExec(before, merged, id, id)
+            : strictestOf(beforeIds.map((other) => beforeExec(before, merged, other, id))),
+        );
+        floorOptions.push(
+          routesBefore
+            ? movedToHost(before, merged, id, id)
+              ? denied
+              : none
+            : strictestOf(beforeIds.map((other) => beforeFloor(other, id))),
+        );
+      }
+      bounds.push(loosestOf(options.length > 0 ? options : [denied]));
+      floorBounds.push(loosestOf(floorOptions.length > 0 ? floorOptions : [denied]));
+    }
+    const held = strictestOf(floorBounds);
+    if (held.security !== undefined || held.ask !== undefined) {
+      floor.set(id, held);
+    }
     const names: string[] = [];
     for (const field of EXEC_FIELDS) {
-      let target = freshIds.includes(id) ? execValue(fresh, id, field) : undefined;
+      let target = freshIds.includes(id) ? freshExec(fresh, merged, id, id)[field] : undefined;
       if (rerouted && (id === defaultId || foreign.has(id))) {
         for (const other of freshIds) {
-          target = stricter(field, target, execValue(fresh, other, field));
+          target = stricter(field, target, freshExec(fresh, merged, other, id)[field]);
         }
+      }
+      for (const bound of bounds) {
+        target = stricter(field, target, bound[field]);
       }
       if (target === undefined || !looser(field, execValue(merged, id, field), target)) {
         continue;
@@ -1046,7 +1338,28 @@ export function boundMergedExec(merged: Json, fresh: Json): Array<{ at: string; 
       written.push({ at, names });
     }
   }
-  return written;
+  return { written, floor };
+}
+
+/**
+ * The loosest of several bounds, each of which alone keeps every sender of an
+ * audience within what one install gave them: by security, then ask, then
+ * the first. Under a deny, ask bounds nothing.
+ */
+function loosestOf(options: Exec[]): Exec {
+  const bounds = options.map((option) =>
+    option.security === "deny" ? { security: "deny", ask: undefined } : option,
+  );
+  let best = bounds[0] ?? { security: "deny", ask: undefined };
+  for (const option of bounds.slice(1)) {
+    if (
+      looser("security", option.security, best.security) ||
+      (!looser("security", best.security, option.security) && looser("ask", option.ask, best.ask))
+    ) {
+      best = option;
+    }
+  }
+  return best;
 }
 
 /**

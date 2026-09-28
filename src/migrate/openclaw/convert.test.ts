@@ -476,6 +476,10 @@ describe("tools.exec.mode", () => {
   });
 });
 
+const NO_STORES = { before: {}, openclaw: {} };
+const NONE = () => ({ security: undefined, ask: undefined });
+const NO_FLOORS = { fresh: NONE, before: NONE };
+
 describe("exec bound on a merge", () => {
   // Differential finding: the import's binding sends a stranger to "ghost", which the merged
   // agents.list lacks, so Hanzo Bot routes it to the default agent: held to the strictest
@@ -489,7 +493,11 @@ describe("exec bound on a merge", () => {
       tools: { exec: { security: "allowlist", ask: "on-miss" } },
     };
     const fresh = { tools: { exec: { security: "allowlist", ask: "always" } }, bindings };
-    expect(boundMergedExec(merged, fresh)).toEqual([
+    const before = {
+      agents: { list: [{ id: "guard", tools: { exec: { security: "allowlist" } } }] },
+      tools: { exec: { security: "allowlist", ask: "on-miss" } },
+    };
+    expect(boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS).written).toEqual([
       { at: "agents.list[0].tools.exec", names: ['ask="always"'] },
     ]);
     expect(merged.agents.list[0]).toEqual({
@@ -497,6 +505,149 @@ describe("exec bound on a merge", () => {
       tools: { exec: { security: "allowlist", ask: "always" } },
     });
   });
+});
+
+// RED-EXECPARITY-1: a merge never gives exec to a sender neither install gave it to.
+describe("exec bound on the senders a merge admits", () => {
+  const ownerOnly = { botToken: "1:x", dmPolicy: "allowlist", allowFrom: ["111"] };
+  const openTelegram = { botToken: "1:x", dmPolicy: "open", allowFrom: ["*"] };
+  const fresh = {
+    tools: { exec: { security: "full", ask: "off" } },
+    channels: { telegram: ownerOnly },
+  };
+  const merge = (before: Record<string, unknown>) => {
+    const merged = structuredClone(before);
+    mergeBeneath(merged, structuredClone(fresh));
+    return merged;
+  };
+
+  it("denies exec where bot.json keeps its open Telegram", () => {
+    const before = { channels: { telegram: openTelegram } };
+    const merged = merge(before);
+    const bound = boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS);
+    expect(bound.written).toEqual([{ at: "tools.exec", names: ['security="deny"'] }]);
+    // Its senders reach main as before, so a /exec runs what bot.json's own floor let it.
+    expect(bound.floor.size).toBe(0);
+    expect(merged.tools).toEqual({ exec: { security: "deny", ask: "off" } });
+  });
+
+  it("denies exec where bot.json has a channel OpenClaw never had", () => {
+    const before = {
+      channels: { discord: { token: "d", dm: { policy: "open", allowFrom: ["*"] } } },
+    };
+    const merged = merge(before);
+    expect(boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS).written).toEqual([
+      { at: "tools.exec", names: ['security="deny"'] },
+    ]);
+  });
+
+  it("keeps OpenClaw's exec where bot.json admits no one of its own", () => {
+    const before = { gateway: { mode: "local", bind: "loopback" } };
+    const merged = merge(before);
+    expect(boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS).written).toEqual([]);
+    expect(merged.tools).toEqual(fresh.tools);
+  });
+
+  it("keeps bot.json's own exec for its own senders where it routes them as before", () => {
+    const before = {
+      tools: { exec: { security: "allowlist", ask: "on-miss" } },
+      channels: { telegram: openTelegram },
+    };
+    const merged = merge(before);
+    expect(boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS).written).toEqual([]);
+    expect(merged.tools).toEqual(before.tools);
+  });
+
+  it("denies exec to senders whose pairing only bot.json approved", () => {
+    const merged = merge({});
+    const stores = {
+      before: { "telegram-default-allowFrom.json": ["222"] },
+      openclaw: { "telegram-default-allowFrom.json": ["111"] },
+    };
+    const bound = boundMergedExec(merged, fresh, {}, stores, NO_FLOORS);
+    expect(bound.written).toEqual([{ at: "tools.exec", names: ['security="deny"'] }]);
+    // A session's /exec replaces tools.exec: the host floor holds main too.
+    expect([...bound.floor]).toEqual([["main", { security: "deny", ask: undefined }]]);
+    // The same senders in both (a second import): nothing changes.
+    const again = merge({});
+    const same = { before: stores.openclaw, openclaw: stores.openclaw };
+    expect(boundMergedExec(again, fresh, {}, same, NO_FLOORS).written).toEqual([]);
+  });
+
+  it("holds bot.json's senders to its strictest agent where the import reroutes them", () => {
+    // bot.json: an open Telegram answered by pub (no exec); ops has full exec for the owner's use.
+    const before = {
+      agents: {
+        list: [
+          { id: "pub", default: true },
+          { id: "ops", tools: { exec: { security: "full" } } },
+        ],
+      },
+      channels: { telegram: openTelegram },
+    };
+    // OpenClaw sends its owner's Telegram to ops.
+    const imported = {
+      agents: { list: [{ id: "pub", default: true }, { id: "ops" }] },
+      bindings: [
+        { agentId: "ops", match: { channel: "telegram", peer: { kind: "direct", id: "111" } } },
+      ],
+      tools: { exec: { security: "full", ask: "off" } },
+      channels: { telegram: ownerOnly },
+    };
+    const merged = structuredClone(before);
+    mergeBeneath(merged, structuredClone(imported));
+    expect(boundMergedExec(merged, imported, before, NO_STORES, NO_FLOORS).written).toEqual([
+      { at: "agents.list[0].tools.exec", names: ['security="deny"'] },
+      { at: "agents.list[1].tools.exec", names: ['security="deny"'] },
+    ]);
+    // Under /exec they are held to bot.json's strictest floor: its own file holds ops to allowlist.
+    const floors = {
+      fresh: NONE,
+      before: (id: string) => ({
+        security: id === "ops" ? "allowlist" : undefined,
+        ask: undefined,
+      }),
+    };
+    const again = structuredClone(before);
+    mergeBeneath(again, structuredClone(imported));
+    expect([...boundMergedExec(again, imported, before, NO_STORES, floors).floor]).toEqual([
+      ["pub", { security: "allowlist", ask: undefined }],
+      ["ops", { security: "allowlist", ask: undefined }],
+    ]);
+  });
+});
+
+// Differential finding: OpenClaw ran main in a sandbox (no host exec); bot.json's own
+// host gateway, kept, would run OpenClaw's senders' exec on the host.
+it("holds an agent OpenClaw ran in a sandbox to deny where the merge moves it to the host", () => {
+  const fresh = { tools: { exec: { host: "sandbox", ask: "always" } } };
+  const before = { tools: { exec: { host: "gateway", security: "allowlist" } } };
+  const merged = structuredClone(before);
+  mergeBeneath(merged, structuredClone(fresh));
+  expect(boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS).written).toEqual([
+    { at: "tools.exec", names: ['security="deny"'] },
+  ]);
+  // Where the merge keeps it in the sandbox, OpenClaw's own values stand.
+  const kept = structuredClone(fresh);
+  expect(boundMergedExec(kept, fresh, {}, NO_STORES, NO_FLOORS).written).toEqual([]);
+});
+
+// The same for bot.json's own senders: it ran main in a sandbox, the import moves main to the host.
+it("holds an agent bot.json ran in a sandbox to deny where the merge moves it to the host", () => {
+  const before = {
+    tools: { exec: { host: "sandbox", security: "full" } },
+    channels: { telegram: { botToken: "1:x", dmPolicy: "open", allowFrom: ["*"] } },
+  };
+  const fresh = {
+    agents: { list: [{ id: "main", tools: { exec: { host: "gateway" } } }] },
+    tools: { exec: { security: "full", ask: "off" } },
+  };
+  const merged = structuredClone(before);
+  mergeBeneath(merged, structuredClone(fresh));
+  const bound = boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS);
+  expect(bound.written).toEqual([{ at: "agents.list[0].tools.exec", names: ['security="deny"'] }]);
+  // Its senders ran nothing on the host under /exec either: the host floor holds main.
+  expect([...bound.floor]).toEqual([["main", { security: "deny", ask: undefined }]]);
 });
 
 // Differential finding: with no named agents.list entry, Hanzo Bot runs an agent a binding
@@ -509,7 +660,11 @@ it("holds an unlisted agent bot.json's own binding names where no list entry has
     tools: { exec: { security: "full", ask: "off" } },
   };
   const fresh = { agents: { list }, tools: { exec: { security: "deny", ask: "off" } } };
-  expect(boundMergedExec(merged, fresh)).toEqual([
+  const before = {
+    bindings: [{ agentId: "owner", match: { channel: "telegram" } }],
+    tools: { exec: { security: "full", ask: "off" } },
+  };
+  expect(boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS).written).toEqual([
     { at: "tools.exec", names: ['security="allowlist"'] },
   ]);
   expect(merged.tools).toEqual({ exec: { security: "allowlist", ask: "off" } });
