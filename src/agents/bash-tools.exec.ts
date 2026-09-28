@@ -340,9 +340,12 @@ export function createExecTool(
         host = "gateway";
       }
 
+      // An unset security follows the configured host, before elevated moves
+      // exec to the gateway: on the default (sandbox) host it is deny, so
+      // elevated never turns a denied agent into one that asks.
       const explicitSecurity = defaults?.security;
       const configuredSecurity =
-        explicitSecurity ?? (host === "sandbox" || unsandboxed ? "deny" : "allowlist");
+        explicitSecurity ?? (configuredHost === "sandbox" ? "deny" : "allowlist");
       const requestedSecurity = normalizeExecSecurity(params.security);
       const security = minSecurity(configuredSecurity, requestedSecurity ?? configuredSecurity);
       const configuredAsk = defaults?.ask ?? "on-miss";

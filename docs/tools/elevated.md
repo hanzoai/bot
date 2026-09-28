@@ -25,7 +25,8 @@ title: "Elevated Mode"
 - **Inline directive**: `/elevated on|ask|full` inside a message applies to that message only.
 - **Groups**: In group chats, elevated directives are only honored when the agent is mentioned. Command-only messages that bypass mention requirements are treated as mentioned.
 - **Host execution**: elevated forces `exec` onto the gateway host. It never raises
-  `tools.exec.security`: `deny` still refuses exec, and `allowlist` still checks the allowlist.
+  `tools.exec.security`: `deny` still refuses exec, an unset security on the default host is
+  `deny` as it is without elevated, and `allowlist` still checks the allowlist.
 - **Approvals**: `full` skips exec approvals only under a `full`/`off` policy; `on`/`ask` honor
   them when allowlist/ask rules require.
 - **Unsandboxed agents**: no-op for location; only affects gating, logging, and status.

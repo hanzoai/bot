@@ -98,6 +98,30 @@ describe("elevated exec", () => {
     await expect(run(tool)).rejects.toThrow("exec denied: host=gateway security=deny");
   });
 
+  // RED-EXECPARITY-3: unset security on the default host is deny, elevated or not.
+  it("is denied where tools.exec.security is unset on the default host", async () => {
+    for (const level of ["on", "full"] as const) {
+      const tool = createExecTool({
+        cwd: dir,
+        elevated: { enabled: true, allowed: true, defaultLevel: level },
+      });
+      await expect(run(tool, { elevated: true })).rejects.toThrow(
+        "exec denied: host=gateway security=deny",
+      );
+    }
+  });
+
+  it("is denied where tools.exec.security is unset, from a real sandbox too", async () => {
+    const tool = createExecTool({
+      host: "sandbox",
+      elevated,
+      sandbox: { containerName: "bot-test", workspaceDir: dir, containerWorkdir: "/workspace" },
+    });
+    await expect(run(tool, { elevated: true })).rejects.toThrow(
+      "exec denied: host=gateway security=deny",
+    );
+  });
+
   it("does not raise an allowlist to full", async () => {
     const tool = createExecTool({ cwd: dir, security: "allowlist", ask: "off", elevated });
     await expect(run(tool, { command: "id" })).rejects.toThrow("exec denied: allowlist miss");
