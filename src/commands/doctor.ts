@@ -30,6 +30,7 @@ import {
 import { noteBootstrapFileSize } from "./doctor-bootstrap-size.js";
 import { doctorShellCompletion } from "./doctor-completion.js";
 import { loadAndMaybeMigrateDoctorConfig } from "./doctor-config-flow.js";
+import { noteExecWithoutSandbox } from "./doctor-exec.js";
 import { maybeRepairGatewayDaemon } from "./doctor-gateway-daemon-flow.js";
 import { checkGatewayHealth, probeGatewayMemoryStatus } from "./doctor-gateway-health.js";
 import {
@@ -213,6 +214,7 @@ export async function doctorCommand(
 
   cfg = await maybeRepairSandboxImages(cfg, runtime, prompter);
   noteSandboxScopeWarnings(cfg);
+  noteExecWithoutSandbox(cfg);
 
   await maybeScanExtraGatewayServices(options, runtime, prompter);
   await maybeRepairGatewayServiceConfig(cfg, resolveMode(cfg), runtime, prompter);

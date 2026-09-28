@@ -25,7 +25,7 @@ Background sessions are scoped per agent; `process` only sees sessions from the 
 - `security` (`deny | allowlist | full`): enforcement mode for `gateway`/`node`
 - `ask` (`off | on-miss | always`): approval prompts for `gateway`/`node`
 - `node` (string): node id/name for `host=node`
-- `elevated` (bool): request elevated mode (gateway host); `security=full` is only forced when elevated resolves to `full`
+- `elevated` (bool): request elevated mode (gateway host); it never raises `security`
 
 Notes:
 
@@ -44,6 +44,11 @@ Notes:
 - Important: sandboxing is **off by default**. If sandboxing is off and `host=sandbox` is explicitly
   configured/requested, exec now fails closed instead of silently running on the gateway host.
   Enable sandboxing or use `host=gateway` with approvals.
+- With the default host and no sandbox for the session, exec runs on the host as `host=gateway`
+  does: held to `tools.exec.security` and `ask` and to `~/.bot/exec-approvals.json`, and **denied
+  when `tools.exec.security` is unset**. Set it to `allowlist` or `full` to allow host exec;
+  `hanzo-bot doctor` names each agent it denies. Cloud agents set `full` themselves.
+- `security: "deny"` refuses exec on every host, in a sandbox too, and with `elevated`.
 - Script preflight checks (for common Python/Node shell-syntax mistakes) only inspect files inside the
   effective `workdir` boundary. If a script path resolves outside `workdir`, preflight is skipped for
   that file.
@@ -53,7 +58,7 @@ Notes:
 - `tools.exec.notifyOnExit` (default: true): when true, backgrounded exec sessions enqueue a system event and request a heartbeat on exit.
 - `tools.exec.approvalRunningNoticeMs` (default: 10000): emit a single “running” notice when an approval-gated exec runs longer than this (0 disables).
 - `tools.exec.host` (default: `sandbox`)
-- `tools.exec.security` (default: `deny` for sandbox, `allowlist` for gateway + node when unset)
+- `tools.exec.security` (default when unset: `deny` for the default host, sandboxed or not; `allowlist` for an explicit `gateway` or `node` host)
 - `tools.exec.ask` (default: `on-miss`)
 - `tools.exec.node` (default: unset)
 - `tools.exec.pathPrepend`: list of directories to prepend to `PATH` for exec runs (gateway + sandbox only).

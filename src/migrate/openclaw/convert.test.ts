@@ -3,7 +3,9 @@ import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { hanzoCloudConfig } from "../../commands/hanzo-cloud-config.js";
+import { approvalSources, parseApprovals } from "./approvals.js";
 import {
+  boundMergedExec,
   convertConfig,
   formatPath,
   listEnvRefs,
@@ -16,6 +18,8 @@ import { convertCronJob, mergeAuth, resetArchiveName } from "./convert.js";
 import { convertEnvEntries, mergeEnvText, parseEnvEntries } from "./env.js";
 import { createPathRewriter, homeForm } from "./paths.js";
 import { resolveOpenClawStateDir } from "./state.js";
+
+type Json = Record<string, unknown>;
 
 const HOME = "/home/ada";
 const rewrite = createPathRewriter({
@@ -308,6 +312,861 @@ describe("config", () => {
       channels: { telegram: { allowFrom: ["123456789"] } },
       tools: { web: { search: { enabled: true } } },
     });
+  });
+});
+
+describe("tools.exec.mode", () => {
+  // OpenClaw's doctor resolveConfiguredExecPolicy; its runtime resolveExecPolicyForMode agrees.
+  type Policy = { security: string; ask: string };
+  const POLICY: Array<[string, Policy]> = [
+    ["deny", { security: "deny", ask: "off" }],
+    ["allowlist", { security: "allowlist", ask: "off" }],
+    ["ask", { security: "allowlist", ask: "on-miss" }],
+    ["auto", { security: "allowlist", ask: "on-miss" }],
+    ["full", { security: "full", ask: "off" }],
+  ];
+
+  function renames(at: string, mode: string, policy: Policy) {
+    return [
+      { from: `${at}.mode="${mode}"`, to: `${at}.security="${policy.security}"` },
+      { from: `${at}.mode="${mode}"`, to: `${at}.ask="${policy.ask}"` },
+    ];
+  }
+
+  it.each(POLICY)(
+    "reads mode %s as the security and ask OpenClaw ran, at the root",
+    (mode, policy) => {
+      const { config, report } = convert({ tools: { exec: { mode, backgroundMs: 5000 } } });
+      expect(config).toEqual({ tools: { exec: { ...policy, backgroundMs: 5000 } } });
+      expect(report.renamed).toEqual(renames("tools.exec", mode, policy));
+      expect(report.dropped).toEqual([]);
+    },
+  );
+
+  it.each(POLICY)(
+    "reads mode %s as the security and ask OpenClaw ran, in an agent",
+    (mode, policy) => {
+      const { config, report } = convert({
+        agents: { list: [{ id: "main" }, { id: "ops", tools: { exec: { mode } } }] },
+      });
+      expect(config).toEqual({
+        agents: { list: [{ id: "main" }, { id: "ops", tools: { exec: policy } }] },
+      });
+      expect(report.renamed).toEqual(renames("agents.list[1].tools.exec", mode, policy));
+      expect(report.dropped).toEqual([]);
+    },
+  );
+
+  // OpenClaw's runtime (applyExecPolicyLayer) and doctor (migrateExecMode) let mode win.
+  const BOTH: Array<[string, Record<string, string>, Policy]> = [
+    ["deny", { security: "full" }, { security: "deny", ask: "off" }],
+    ["deny", { security: "full", ask: "off" }, { security: "deny", ask: "off" }],
+    ["deny", { ask: "always" }, { security: "deny", ask: "off" }],
+    ["allowlist", { security: "full", ask: "on-miss" }, { security: "allowlist", ask: "off" }],
+    ["ask", { ask: "off" }, { security: "allowlist", ask: "on-miss" }],
+    ["auto", { security: "full" }, { security: "allowlist", ask: "on-miss" }],
+    ["full", { security: "deny", ask: "always" }, { security: "full", ask: "off" }],
+  ];
+
+  it.each(BOTH)(
+    "lets mode %s win over %o beside it, at the root and in an agent",
+    (mode, beside, policy) => {
+      const { config, report } = convert({
+        tools: { exec: { mode, ...beside } },
+        agents: { list: [{ id: "ops", tools: { exec: { mode, ...beside } } }] },
+      });
+      expect(config).toEqual({
+        tools: { exec: policy },
+        agents: { list: [{ id: "ops", tools: { exec: policy } }] },
+      });
+      const superseded = (at: string) =>
+        Object.keys(beside).map((key) => ({ path: `${at}.${key}`, reason: "exec-mode" }));
+      expect(report.dropped).toEqual([
+        ...superseded("tools.exec"),
+        ...superseded("agents.list[0].tools.exec"),
+      ]);
+      expect(report.renamed).toEqual([
+        ...renames("tools.exec", mode, policy),
+        ...renames("agents.list[0].tools.exec", mode, policy),
+      ]);
+    },
+  );
+
+  it("leaves security and ask alone where no mode is set, as the agent inherits the root", () => {
+    // OpenClaw layers the agent's security over the root's mode; Hanzo Bot reads
+    // agent ?? root per field, so the agent runs full/off in both.
+    const { config, report } = convert({
+      tools: { exec: { mode: "deny" } },
+      agents: { list: [{ id: "ops", tools: { exec: { security: "full" } } }, { id: "main" }] },
+    });
+    expect(config).toEqual({
+      tools: { exec: { security: "deny", ask: "off" } },
+      agents: { list: [{ id: "ops", tools: { exec: { security: "full" } } }, { id: "main" }] },
+    });
+    expect(report.dropped).toEqual([]);
+    expect(report.renamed).toEqual(renames("tools.exec", "deny", { security: "deny", ask: "off" }));
+  });
+
+  it("reads the mode in an agents.entries agent under its agents.list place", () => {
+    const { config, report } = convert({
+      agents: { entries: { ops: { tools: { exec: { mode: "ask", security: "full" } } } } },
+    });
+    expect(config).toEqual({
+      agents: {
+        list: [{ id: "ops", tools: { exec: { security: "allowlist", ask: "on-miss" } } }],
+      },
+    });
+    expect(report.dropped).toEqual([
+      { path: "agents.list[0].tools.exec.security", reason: "exec-mode" },
+    ]);
+  });
+
+  // OpenClaw does not load a config whose mode its enum rejects, so that install ran no exec.
+  it.each([
+    ["yolo", '"yolo"'],
+    ["constructor", '"constructor"'],
+    ["__proto__", '"__proto__"'],
+    ["Full", '"Full"'],
+    [" full", '" full"'],
+    [1, "1"],
+    [null, "null"],
+  ])(
+    "imports a mode OpenClaw's schema rejects (%o) as deny, whatever is beside it",
+    (mode, shown) => {
+      const { config, report } = convert({
+        tools: { exec: { mode, security: "full", ask: "off" } },
+        agents: { list: [{ id: "ops", tools: { exec: { mode } } }] },
+      });
+      expect(config).toEqual({
+        tools: { exec: { security: "deny", ask: "off" } },
+        agents: { list: [{ id: "ops", tools: { exec: { security: "deny", ask: "off" } } }] },
+      });
+      expect(report.dropped).toEqual([
+        { path: "tools.exec.security", reason: "exec-mode" },
+        { path: "tools.exec.ask", reason: "exec-mode" },
+      ]);
+      expect(report.renamed).toEqual([
+        { from: `tools.exec.mode=${shown}`, to: 'tools.exec.security="deny"' },
+        { from: `tools.exec.mode=${shown}`, to: 'tools.exec.ask="off"' },
+        {
+          from: `agents.list[0].tools.exec.mode=${shown}`,
+          to: 'agents.list[0].tools.exec.security="deny"',
+        },
+        {
+          from: `agents.list[0].tools.exec.mode=${shown}`,
+          to: 'agents.list[0].tools.exec.ask="off"',
+        },
+      ]);
+      expect(report.notes).toEqual([
+        { path: "tools.exec.mode", reason: "exec-mode-unknown" },
+        { path: "agents.list[0].tools.exec.mode", reason: "exec-mode-unknown" },
+      ]);
+    },
+  );
+
+  it("writes security then ask after the other exec settings, as the Go importer does", () => {
+    const { config } = convert({
+      tools: { exec: { ask: "always", mode: "ask", backgroundMs: 5000, security: "full" } },
+    });
+    expect(Object.keys((config.tools as { exec: object }).exec)).toEqual([
+      "backgroundMs",
+      "security",
+      "ask",
+    ]);
+  });
+});
+
+const NO_STORES = { before: {}, openclaw: {} };
+const NONE = () => ({ security: undefined, ask: undefined });
+const NO_FLOORS = { fresh: NONE, before: NONE };
+
+describe("exec bound on a merge", () => {
+  // Differential finding: the import's binding sends a stranger to "ghost", which the merged
+  // agents.list lacks, so Hanzo Bot routes it to the default agent: held to the strictest
+  // agent the import runs, "ghost" (an unlisted agent on the root) included.
+  it("holds the merged default to an unlisted agent the import's binding runs", () => {
+    const bindings = [{ agentId: "ghost", match: { channel: "telegram" } }];
+    // bot.json's own root ask on-miss is kept; the import's root (main and ghost) asks always.
+    const merged = {
+      agents: { list: [{ id: "guard", tools: { exec: { security: "allowlist" } } }] },
+      bindings: structuredClone(bindings),
+      tools: { exec: { security: "allowlist", ask: "on-miss" } },
+    };
+    const fresh = { tools: { exec: { security: "allowlist", ask: "always" } }, bindings };
+    const before = {
+      agents: { list: [{ id: "guard", tools: { exec: { security: "allowlist" } } }] },
+      tools: { exec: { security: "allowlist", ask: "on-miss" } },
+    };
+    expect(boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS).written).toEqual([
+      { at: "agents.list[0].tools.exec", names: ['ask="always"'] },
+    ]);
+    expect(merged.agents.list[0]).toEqual({
+      id: "guard",
+      tools: { exec: { security: "allowlist", ask: "always" } },
+    });
+  });
+});
+
+// RED-EXECPARITY-1: a merge never gives exec to a sender neither install gave it to.
+describe("exec bound on the senders a merge admits", () => {
+  const ownerOnly = { botToken: "1:x", dmPolicy: "allowlist", allowFrom: ["111"] };
+  const openTelegram = { botToken: "1:x", dmPolicy: "open", allowFrom: ["*"] };
+  const fresh = {
+    tools: { exec: { security: "full", ask: "off" } },
+    channels: { telegram: ownerOnly },
+  };
+  const merge = (before: Record<string, unknown>) => {
+    const merged = structuredClone(before);
+    mergeBeneath(merged, structuredClone(fresh));
+    return merged;
+  };
+
+  it("denies exec where bot.json keeps its open Telegram", () => {
+    const before = { channels: { telegram: openTelegram } };
+    const merged = merge(before);
+    const bound = boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS);
+    expect(bound.written).toEqual([{ at: "tools.exec", names: ['security="deny"'] }]);
+    // Its senders reach main as before, so a /exec runs what bot.json's own floor let it.
+    expect(bound.floor.size).toBe(0);
+    expect(merged.tools).toEqual({ exec: { security: "deny", ask: "off" } });
+  });
+
+  it("denies exec where bot.json has a channel OpenClaw never had", () => {
+    const before = {
+      channels: { discord: { token: "d", dm: { policy: "open", allowFrom: ["*"] } } },
+    };
+    const merged = merge(before);
+    expect(boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS).written).toEqual([
+      { at: "tools.exec", names: ['security="deny"'] },
+    ]);
+  });
+
+  it("keeps OpenClaw's exec where bot.json admits no one of its own", () => {
+    const before = { gateway: { mode: "local", bind: "loopback" } };
+    const merged = merge(before);
+    expect(boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS).written).toEqual([]);
+    expect(merged.tools).toEqual(fresh.tools);
+  });
+
+  it("keeps bot.json's own exec for its own senders where it routes them as before", () => {
+    const before = {
+      tools: { exec: { security: "allowlist", ask: "on-miss" } },
+      channels: { telegram: openTelegram },
+    };
+    const merged = merge(before);
+    expect(boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS).written).toEqual([]);
+    expect(merged.tools).toEqual(before.tools);
+  });
+
+  it("denies exec to senders whose pairing only bot.json approved", () => {
+    const merged = merge({});
+    const stores = {
+      before: { "telegram-default-allowFrom.json": ["222"] },
+      openclaw: { "telegram-default-allowFrom.json": ["111"] },
+    };
+    const bound = boundMergedExec(merged, fresh, {}, stores, NO_FLOORS);
+    expect(bound.written).toEqual([{ at: "tools.exec", names: ['security="deny"'] }]);
+    // A session's /exec replaces tools.exec: the host floor holds main too.
+    expect([...bound.floor]).toEqual([["main", { security: "deny", ask: undefined }]]);
+    // The same senders in both (a second import): nothing changes.
+    const again = merge({});
+    const same = { before: stores.openclaw, openclaw: stores.openclaw };
+    expect(boundMergedExec(again, fresh, {}, same, NO_FLOORS).written).toEqual([]);
+  });
+
+  it("holds bot.json's senders to its strictest agent where the import reroutes them", () => {
+    // bot.json: an open Telegram answered by pub (no exec); ops has full exec for the owner's use.
+    const before = {
+      agents: {
+        list: [
+          { id: "pub", default: true },
+          { id: "ops", tools: { exec: { security: "full" } } },
+        ],
+      },
+      channels: { telegram: openTelegram },
+    };
+    // OpenClaw sends its owner's Telegram to ops.
+    const imported = {
+      agents: { list: [{ id: "pub", default: true }, { id: "ops" }] },
+      bindings: [
+        { agentId: "ops", match: { channel: "telegram", peer: { kind: "direct", id: "111" } } },
+      ],
+      tools: { exec: { security: "full", ask: "off" } },
+      channels: { telegram: ownerOnly },
+    };
+    const merged = structuredClone(before);
+    mergeBeneath(merged, structuredClone(imported));
+    expect(boundMergedExec(merged, imported, before, NO_STORES, NO_FLOORS).written).toEqual([
+      { at: "agents.list[0].tools.exec", names: ['security="deny"'] },
+      { at: "agents.list[1].tools.exec", names: ['security="deny"'] },
+    ]);
+    // Under /exec they are held to bot.json's strictest floor: its own file holds ops to allowlist.
+    const floors = {
+      fresh: NONE,
+      before: (id: string) => ({
+        security: id === "ops" ? "allowlist" : undefined,
+        ask: undefined,
+      }),
+    };
+    const again = structuredClone(before);
+    mergeBeneath(again, structuredClone(imported));
+    expect([...boundMergedExec(again, imported, before, NO_STORES, floors).floor]).toEqual([
+      ["pub", { security: "allowlist", ask: undefined }],
+      ["ops", { security: "allowlist", ask: undefined }],
+    ]);
+  });
+});
+
+// Differential finding: OpenClaw ran main in a sandbox (no host exec); bot.json's own
+// host gateway, kept, would run OpenClaw's senders' exec on the host.
+it("holds an agent OpenClaw ran in a sandbox to deny where the merge moves it to the host", () => {
+  const fresh = { tools: { exec: { host: "sandbox", ask: "always" } } };
+  const before = { tools: { exec: { host: "gateway", security: "allowlist" } } };
+  const merged = structuredClone(before);
+  mergeBeneath(merged, structuredClone(fresh));
+  expect(boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS).written).toEqual([
+    { at: "tools.exec", names: ['security="deny"'] },
+  ]);
+  // Where the merge keeps it in the sandbox, OpenClaw's own values stand.
+  const kept = structuredClone(fresh);
+  expect(boundMergedExec(kept, fresh, {}, NO_STORES, NO_FLOORS).written).toEqual([]);
+});
+
+// The same for bot.json's own senders: it ran main in a sandbox, the import moves main to the host.
+it("holds an agent bot.json ran in a sandbox to deny where the merge moves it to the host", () => {
+  const before = {
+    tools: { exec: { host: "sandbox", security: "full" } },
+    channels: { telegram: { botToken: "1:x", dmPolicy: "open", allowFrom: ["*"] } },
+  };
+  const fresh = {
+    agents: { list: [{ id: "main", tools: { exec: { host: "gateway" } } }] },
+    tools: { exec: { security: "full", ask: "off" } },
+  };
+  const merged = structuredClone(before);
+  mergeBeneath(merged, structuredClone(fresh));
+  const bound = boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS);
+  expect(bound.written).toEqual([{ at: "agents.list[0].tools.exec", names: ['security="deny"'] }]);
+  // Its senders ran nothing on the host under /exec either: the host floor holds main.
+  expect([...bound.floor]).toEqual([["main", { security: "deny", ask: undefined }]]);
+});
+
+// Differential finding: with no named agents.list entry, Hanzo Bot runs an agent a binding
+// names unlisted, on the root; bot.json's own binding to one is held like the default agent.
+it("holds an unlisted agent bot.json's own binding names where no list entry has an id", () => {
+  const list = [{ id: "", tools: { exec: { security: "allowlist" } } }];
+  const merged = {
+    agents: { list: structuredClone(list) },
+    bindings: [{ agentId: "owner", match: { channel: "telegram" } }],
+    tools: { exec: { security: "full", ask: "off" } },
+  };
+  const fresh = { agents: { list }, tools: { exec: { security: "deny", ask: "off" } } };
+  const before = {
+    bindings: [{ agentId: "owner", match: { channel: "telegram" } }],
+    tools: { exec: { security: "full", ask: "off" } },
+  };
+  expect(boundMergedExec(merged, fresh, before, NO_STORES, NO_FLOORS).written).toEqual([
+    { at: "tools.exec", names: ['security="allowlist"'] },
+  ]);
+  expect(merged.tools).toEqual({ exec: { security: "allowlist", ask: "off" } });
+});
+
+describe("invalid exec values", () => {
+  // RED-BOTGO-23: OpenClaw's schema rejects these, so it loaded no config and ran no exec.
+  it.each([
+    ["security", "Deny", '"Deny"'],
+    ["security", null, "null"],
+    ["ask", "never", '"never"'],
+    ["host", "cloud", '"cloud"'],
+  ])(
+    "imports an agent whose %s OpenClaw rejects (%o) as deny, not the root's full",
+    (key, value, shown) => {
+      const { config, report } = convert({
+        tools: { exec: { mode: "full" } },
+        agents: { list: [{ id: "main" }, { id: "ops", tools: { exec: { [key]: value } } }] },
+      });
+      expect((config.agents as { list: Json[] }).list[1]).toEqual({
+        id: "ops",
+        tools: { exec: { security: "deny", ask: "off" } },
+      });
+      expect(report.notes).toEqual([
+        { path: `agents.list[1].tools.exec.${key}`, reason: "exec-invalid" },
+      ]);
+      expect(report.renamed.slice(-2)).toEqual([
+        {
+          from: `agents.list[1].tools.exec.${key}=${shown}`,
+          to: 'agents.list[1].tools.exec.security="deny"',
+        },
+        {
+          from: `agents.list[1].tools.exec.${key}=${shown}`,
+          to: 'agents.list[1].tools.exec.ask="off"',
+        },
+      ]);
+    },
+  );
+
+  it("drops a valid security beside an invalid ask as replaced", () => {
+    const { config, report } = convert({ tools: { exec: { security: "full", ask: "Off" } } });
+    expect(config).toEqual({ tools: { exec: { security: "deny", ask: "off" } } });
+    expect(report.dropped).toEqual([{ path: "tools.exec.security", reason: "exec-invalid" }]);
+    expect(report.notes).toEqual([{ path: "tools.exec.ask", reason: "exec-invalid" }]);
+  });
+
+  it("lets a mode win over an invalid security beside it, but not over an invalid host", () => {
+    const { config, report } = convert({
+      tools: { exec: { mode: "full", security: "bogus" } },
+      agents: { list: [{ id: "ops", tools: { exec: { mode: "full", host: "remote" } } }] },
+    });
+    expect(config).toEqual({
+      tools: { exec: { security: "full", ask: "off" } },
+      agents: { list: [{ id: "ops", tools: { exec: { security: "deny", ask: "off" } } }] },
+    });
+    expect(report.notes).toEqual([
+      { path: "agents.list[0].tools.exec.host", reason: "exec-invalid" },
+    ]);
+  });
+
+  it.each([
+    [{ tools: "full" }, "tools", 'tools="full"'],
+    [{ tools: { exec: ["full"] } }, "tools.exec", 'tools.exec=["full"]'],
+  ])("denies exec where tools or tools.exec is not an object: %o", (source, at, from) => {
+    const { config, report } = convert(source);
+    expect(config).toEqual({ tools: { exec: { security: "deny", ask: "off" } } });
+    expect(report.notes).toEqual([{ path: at, reason: "exec-invalid" }]);
+    expect(report.renamed).toEqual([
+      { from, to: 'tools.exec.security="deny"' },
+      { from, to: 'tools.exec.ask="off"' },
+    ]);
+  });
+
+  it("leaves host auto, which OpenClaw accepts, to validation", () => {
+    const { config, report } = convert({ tools: { exec: { host: "auto", security: "full" } } });
+    expect(config).toEqual({ tools: { exec: { security: "full" } } });
+    expect(report.notes).toEqual([]);
+    expect(report.dropped).toEqual([{ path: "tools.exec.host", reason: "invalid" }]);
+  });
+});
+
+describe("agent roster", () => {
+  const list = (config: Json) => (config.agents as { list: Json[] }).list;
+
+  // RED-BOTGO-20: with ownership "explicit", OpenClaw routes unbound messages to systemAgent.
+  it("makes the explicit roster's system agent the default agent", () => {
+    const { config, report } = convert({
+      agents: {
+        ownership: "explicit",
+        defaults: { systemAgent: { agentId: "guard" } },
+        entries: {
+          owner: { tools: { exec: { mode: "full" } } },
+          guard: { tools: { exec: { mode: "deny" } } },
+        },
+      },
+      bindings: [
+        { agentId: "owner", match: { channel: "telegram", peer: { kind: "direct", id: "111" } } },
+      ],
+    });
+    expect(list(config)).toEqual([
+      { id: "owner", tools: { exec: { security: "full", ask: "off" } } },
+      { id: "guard", tools: { exec: { security: "deny", ask: "off" } }, default: true },
+    ]);
+    expect(report.renamed.slice(0, 2)).toEqual([
+      { from: "agents.entries", to: "agents.list" },
+      { from: "agents.defaults.systemAgent.agentId", to: "agents.list[1].default" },
+    ]);
+    expect(report.dropped).toContainEqual({ path: "agents.ownership", reason: "openclaw-only" });
+  });
+
+  // RED-BOTEXEC-7: each entry is {...entry, id: key}.
+  it("names each agents.entries agent by its key", () => {
+    const { config } = convert({
+      agents: { entries: { work: { name: "Work", default: true }, ops: {} } },
+    });
+    expect(list(config)).toEqual([{ id: "work", name: "Work", default: true }, { id: "ops" }]);
+  });
+
+  it("reads a legacy agents.list as every OpenClaw before 2026.9 did: the first entry answers", () => {
+    const { config } = convert({ agents: { list: [{ id: "main" }, { id: "work" }] } });
+    expect(list(config)).toEqual([{ id: "main" }, { id: "work" }]);
+  });
+
+  it.each([
+    [
+      "several agents and none default",
+      { agents: { entries: { a: {}, b: {} } } },
+      /answers a message no binding matches with no agent \(several agents, and none is default\)/,
+    ],
+    [
+      "explicit with no system agent",
+      { agents: { ownership: "explicit", entries: { a: {}, b: {} } } },
+      /with no agent \(agents.ownership is "explicit" and agents.defaults.systemAgent names no agent\)/,
+    ],
+    [
+      "entries beside a list",
+      {
+        agents: {
+          entries: { work: { tools: { exec: { mode: "deny" } } } },
+          list: [{ id: "work" }],
+        },
+      },
+      /OpenClaw would not load agents.list: beside agents.entries/,
+    ],
+    [
+      "an id inside an entry",
+      { agents: { entries: { work: { id: "main", default: true } } } },
+      /OpenClaw would not load agents.entries.work.id: inside agents.entries/,
+    ],
+    [
+      "a marker beside explicit ownership",
+      { agents: { ownership: "explicit", entries: { a: { default: true } } } },
+      /agents.entries.a.default: beside agents.ownership "explicit"/,
+    ],
+    [
+      "two markers",
+      { agents: { entries: { a: { default: true }, b: { default: true } } } },
+      /agents.entries.b.default: a second default agent/,
+    ],
+    [
+      "a system agent the roster lacks",
+      {
+        agents: {
+          ownership: "explicit",
+          defaults: { systemAgent: { agentId: "x" } },
+          entries: { a: {} },
+        },
+      },
+      /agents.defaults.systemAgent.agentId: not an agent in the roster/,
+    ],
+    [
+      "a binding to an agent the roster lacks",
+      {
+        agents: { entries: { a: { default: true }, b: {} } },
+        bindings: [{ agentId: "c", match: { channel: "telegram" } }],
+      },
+      /bindings\[0\].agentId: not an agent in the roster/,
+    ],
+    [
+      "an entry key OpenClaw rejects",
+      { agents: { entries: { "My Agent": { default: true } } } },
+      /agents.entries.My Agent: not an agent id/,
+    ],
+    [
+      "ownership other than explicit beside agents.entries",
+      { agents: { ownership: "implicit", entries: { a: {} } } },
+      /agents.ownership: not "explicit"/,
+    ],
+  ])("refuses a roster OpenClaw would route otherwise or not load: %s", (_what, source, error) => {
+    expect(() => convert(source)).toThrow(error);
+  });
+
+  it("refuses a binding validation would drop, as its messages would go to the default agent", () => {
+    expect(() =>
+      convert({
+        agents: { list: [{ id: "main" }, { id: "ops" }] },
+        bindings: [
+          { agentId: "ops", match: { channel: "telegram", peer: { kind: "person", id: "1" } } },
+        ],
+      }),
+    ).toThrow(/send messages to other agents than OpenClaw did \(bindings\[0\]\S* was dropped\)/);
+  });
+});
+
+describe("exec approvals", () => {
+  function fold(source: Record<string, unknown>, ...docs: unknown[]) {
+    return convertConfig({
+      source,
+      rewrite,
+      home: HOME,
+      approvals: docs.map((doc, index) => ({
+        label: index === 0 ? "exec-approvals.json" : "state/openclaw.sqlite#exec_approvals_config",
+        doc: parseApprovals(typeof doc === "string" ? doc : JSON.stringify(doc)),
+      })),
+    });
+  }
+
+  it("imports mode full under a policy whose defaults deny as deny", () => {
+    const { config, report } = fold(
+      { tools: { exec: { mode: "full" } } },
+      { version: 1, defaults: { security: "deny" } },
+    );
+    expect(config).toEqual({ tools: { exec: { security: "deny", ask: "off" } } });
+    expect(report.approvals).toEqual({
+      tightened: [
+        {
+          from: "exec-approvals.json#defaults.security",
+          to: 'tools.exec.security="deny"',
+          reason: "exec-approvals",
+        },
+      ],
+      closed: [],
+    });
+  });
+
+  it("tightens only the agent the policy names, by its normalized id", () => {
+    const { config, report } = fold(
+      {
+        tools: { exec: { security: "full", ask: "off" } },
+        agents: { list: [{ id: "main" }, { id: "Ops" }] },
+      },
+      { version: 1, agents: { ops: { security: "allowlist" } } },
+    );
+    expect(config).toEqual({
+      tools: { exec: { security: "full", ask: "off" } },
+      agents: {
+        list: [{ id: "main" }, { id: "Ops", tools: { exec: { security: "allowlist" } } }],
+      },
+    });
+    expect(report.approvals.tightened).toEqual([
+      {
+        from: "exec-approvals.json#agents.ops.security",
+        to: 'agents.list[1].tools.exec.security="allowlist"',
+        reason: "exec-approvals",
+      },
+    ]);
+  });
+
+  it("changes nothing where the policy is looser than the config", () => {
+    const source = {
+      tools: { exec: { security: "allowlist", ask: "always" } },
+      agents: { list: [{ id: "ops", tools: { exec: { security: "deny" } } }] },
+    };
+    const { config, report } = fold(source, {
+      version: 1,
+      defaults: { security: "full", ask: "on-miss" },
+      agents: { ops: { security: "allowlist", ask: "off" }, "*": { security: "full" } },
+    });
+    expect(config).toEqual(source);
+    expect(report.approvals).toEqual({ tightened: [], closed: [] });
+  });
+
+  it("writes nothing for a policy that sets nothing", () => {
+    const { config, report } = fold(
+      { agents: { list: [{ id: "main" }] } },
+      { version: 1, defaults: {}, agents: { main: { allowlist: ["/usr/bin/git"] } } },
+    );
+    expect(config).toEqual({ agents: { list: [{ id: "main" }] } });
+    expect(report.approvals.tightened).toEqual([]);
+  });
+
+  it("creates tools.exec where the policy tightens a scope that has none", () => {
+    const { config, report } = fold({}, { version: 1, defaults: { ask: "always" } });
+    expect(config).toEqual({ tools: { exec: { ask: "always" } } });
+    expect(report.approvals.tightened).toEqual([
+      {
+        from: "exec-approvals.json#defaults.ask",
+        to: 'tools.exec.ask="always"',
+        reason: "exec-approvals",
+      },
+    ]);
+  });
+
+  it("reads main's policy, legacy default entry included, for the root when there is no agents.list", () => {
+    const { config, report } = fold(
+      { tools: { exec: { security: "full" } } },
+      {
+        version: 1,
+        agents: { default: { security: "allowlist" }, "*": { security: "deny", ask: "on-miss" } },
+      },
+    );
+    expect(config).toEqual({ tools: { exec: { security: "allowlist", ask: "on-miss" } } });
+    expect(report.approvals.tightened.map((entry) => entry.from)).toEqual([
+      "exec-approvals.json#agents.default.security",
+      "exec-approvals.json#agents.*.ask",
+    ]);
+  });
+
+  it("gives the root the * entry when there is a list, and each agent its own entry over it", () => {
+    const { config } = fold(
+      { agents: { list: [{ id: "ops" }, { id: "dev" }, { id: "default" }] } },
+      {
+        version: 1,
+        defaults: { security: "full" },
+        agents: {
+          "*": { security: "allowlist" },
+          dev: { security: "deny" },
+          // OpenClaw moves this entry into main's; the agent named "default" never reads it.
+          default: { security: "deny" },
+        },
+      },
+    );
+    expect(config).toEqual({
+      tools: { exec: { security: "allowlist" } },
+      agents: {
+        list: [
+          { id: "ops" },
+          { id: "dev", tools: { exec: { security: "deny" } } },
+          { id: "default" },
+        ],
+      },
+    });
+  });
+
+  // RED-BOTEXEC-5 / RED-BOTGO-22: OpenClaw runs each agent at min(config, policy(agent)); the
+  // root tightened by "*"/defaults for the others must not hold a listed agent below that.
+  it("keeps a listed agent at what OpenClaw ran it with where the root is tightened for others", () => {
+    const { config, report } = fold(
+      {
+        tools: { exec: { security: "full", ask: "off" } },
+        agents: { list: [{ id: "main" }, { id: "ops" }] },
+      },
+      {
+        version: 1,
+        defaults: { security: "deny" },
+        agents: { main: { security: "full" }, "*": { ask: "always" }, ops: { ask: "off" } },
+      },
+    );
+    expect(config).toEqual({
+      tools: { exec: { security: "deny", ask: "always" } },
+      agents: {
+        list: [
+          // main's ask comes from "*" in OpenClaw too: max(off, always).
+          { id: "main", tools: { exec: { security: "full" } } },
+          { id: "ops", tools: { exec: { ask: "off" } } },
+        ],
+      },
+    });
+    expect(report.approvals.tightened).toEqual([
+      {
+        from: "exec-approvals.json#defaults.security",
+        to: 'tools.exec.security="deny"',
+        reason: "exec-approvals",
+      },
+      {
+        from: "exec-approvals.json#agents.*.ask",
+        to: 'tools.exec.ask="always"',
+        reason: "exec-approvals",
+      },
+      {
+        from: "exec-approvals.json#agents.main.security",
+        to: 'agents.list[0].tools.exec.security="full"',
+        reason: "exec-approvals-agent",
+      },
+      {
+        from: "exec-approvals.json#agents.ops.ask",
+        to: 'agents.list[1].tools.exec.ask="off"',
+        reason: "exec-approvals-agent",
+      },
+    ]);
+  });
+
+  // Differential finding: with no agents.list, OpenClaw and Hanzo Bot both run an agent a
+  // binding names on the root's settings, and OpenClaw gives it "*"/defaults, not main's entry.
+  it("tightens the root for an unlisted agent a binding names, not only for main", () => {
+    const { config, report } = fold(
+      {
+        tools: { exec: { mode: "full" } },
+        bindings: [{ agentId: "ghost", match: { channel: "telegram" } }],
+      },
+      { version: 1, agents: { "*": { security: "deny" }, main: { security: "allowlist" } } },
+    );
+    expect(config.tools).toEqual({ exec: { security: "deny", ask: "off" } });
+    expect(report.approvals.tightened).toEqual([
+      {
+        from: "exec-approvals.json#agents.*.security",
+        to: 'tools.exec.security="deny"',
+        reason: "exec-approvals",
+      },
+    ]);
+  });
+
+  it("pins a listed agent to the stricter of its config and its own policy entry", () => {
+    // OpenClaw ran work at min(allowlist, full) = allowlist and ops at min(allowlist, deny).
+    const { config, report } = fold(
+      {
+        tools: { exec: { security: "allowlist" } },
+        agents: { list: [{ id: "work" }, { id: "ops" }] },
+      },
+      { version: 1, defaults: { security: "deny" }, agents: { work: { security: "full" } } },
+    );
+    expect(config).toEqual({
+      tools: { exec: { security: "deny" } },
+      agents: {
+        list: [{ id: "work", tools: { exec: { security: "allowlist" } } }, { id: "ops" }],
+      },
+    });
+    expect(report.approvals.tightened.map((entry) => entry.reason)).toEqual([
+      "exec-approvals",
+      "exec-approvals-agent",
+    ]);
+  });
+
+  it("folds each policy in turn, never loosening what an earlier one tightened", () => {
+    const { config, report } = fold(
+      {},
+      { version: 1, defaults: { security: "allowlist" } },
+      { version: 1, defaults: { security: "full", ask: "always" } },
+    );
+    expect(config).toEqual({ tools: { exec: { security: "allowlist", ask: "always" } } });
+    expect(report.approvals.tightened.map((entry) => entry.from)).toEqual([
+      "exec-approvals.json#defaults.security",
+      "state/openclaw.sqlite#exec_approvals_config/defaults.ask",
+    ]);
+  });
+
+  it.each([
+    ["text that is not JSON", "{"],
+    ["another version", { version: 2 }],
+    ["a security OpenClaw does not have", { version: 1, defaults: { security: "Deny" } }],
+    ["a null ask", { version: 1, agents: { ops: { ask: null } } }],
+    ["a __proto__ agent", '{"version":1,"agents":{"__proto__":{}}}'],
+    ["a blank allowlist entry", { version: 1, agents: { main: { allowlist: [" "] } } }],
+    [
+      "an MCP grant OpenClaw did not make",
+      { version: 1, agents: { main: { mcpTools: [{ server: "s", tool: "t", addedAt: 1 }] } } },
+    ],
+    ["a socket path that is not text", { version: 1, socket: { path: 1 } }],
+  ])("denies exec where OpenClaw could not use the policy: %s", (_what, doc) => {
+    const { config, report } = fold(
+      { tools: { exec: { security: "full", ask: "off" } }, agents: { list: [{ id: "ops" }] } },
+      doc,
+    );
+    expect(config).toEqual({
+      tools: { exec: { security: "deny", ask: "off" } },
+      agents: { list: [{ id: "ops" }] },
+    });
+    expect(report.approvals).toEqual({
+      tightened: [
+        { from: "exec-approvals.json", to: 'tools.exec.security="deny"', reason: "exec-approvals" },
+      ],
+      closed: ["exec-approvals.json"],
+    });
+  });
+
+  it("reads a policy OpenClaw accepts, whatever else it holds", () => {
+    expect(
+      parseApprovals(
+        JSON.stringify({
+          version: 1,
+          socket: { path: "~/.openclaw/exec-approvals.sock", token: "t" },
+          defaults: { security: "allowlist", ask: "on-miss", askFallback: "deny" },
+          agents: {
+            main: {
+              autoAllowSkills: true,
+              allowlist: ["git", { pattern: "/bin/ls", lastUsedAt: 5, source: "manual" }],
+              mcpTools: [{ server: "s", tool: "t", source: "allow-always", addedAt: 0 }],
+              extra: 1,
+            },
+          },
+          extra: true,
+        }),
+      ),
+    ).not.toBeNull();
+  });
+
+  it("counts a leftover exec-approvals.json as closed where the database keeps the policy", () => {
+    const valid = JSON.stringify({ version: 1 });
+    const empty = { file: null, present: false, claim: false, table: false, row: null };
+    expect(approvalSources({ ...empty, file: valid, present: true })).toEqual([
+      { label: "exec-approvals.json", doc: { version: 1 } },
+    ]);
+    expect(
+      approvalSources({ ...empty, file: valid, present: true, table: true, row: valid }),
+    ).toEqual([
+      { label: "exec-approvals.json", doc: null },
+      { label: "state/openclaw.sqlite#exec_approvals_config", doc: { version: 1 } },
+    ]);
+    expect(approvalSources({ ...empty, claim: true, table: true })).toEqual([
+      { label: "exec-approvals.json", doc: null },
+    ]);
+    expect(approvalSources({ ...empty, table: true })).toEqual([]);
   });
 });
 

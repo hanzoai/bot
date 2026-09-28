@@ -51,7 +51,24 @@ export type OpenClawState = {
   pairedDevices: number;
   /** An agent's heartbeat checklist, by agent id: OpenClaw moved HEARTBEAT.md into cron_job_scratch. */
   heartbeats: Record<string, string>;
+  /** OpenClaw's exec approvals policy, where each layout keeps it. */
+  approvals: ApprovalsState;
 };
+
+export type ApprovalsState = {
+  /** exec-approvals.json's text, where it is a file that reads. */
+  file: string | null;
+  /** exec-approvals.json is there, as anything (a dangling link included). */
+  present: boolean;
+  /** `openclaw doctor --fix` was importing exec-approvals.json into the database: its claim file is there, as anything. */
+  claim: boolean;
+  /** state/openclaw.sqlite keeps the policy (table exec_approvals_config). */
+  table: boolean;
+  /** That table's policy document. */
+  row: string | null;
+};
+
+export const APPROVALS_FILE = "exec-approvals.json";
 
 export const CONFIG_FILENAMES = ["openclaw.json", "clawdbot.json"] as const;
 
@@ -179,6 +196,13 @@ function readStateDb(dir: string, state: OpenClawState): void {
     if (db.hasTable("device_pairing_paired")) {
       const rows = db.all<{ n: number }>("SELECT count(*) AS n FROM device_pairing_paired");
       state.pairedDevices += rows[0]?.n ?? 0;
+    }
+    if (db.hasTable("exec_approvals_config")) {
+      state.approvals.table = true;
+      const rows = db.all<{ raw_json: string | null }>(
+        "SELECT raw_json FROM exec_approvals_config WHERE config_key = 'current'",
+      );
+      state.approvals.row = rows[0]?.raw_json ?? null;
     }
   });
 }
@@ -308,6 +332,33 @@ function readFileLayout(dir: string, state: OpenClawState): void {
   if (paired) {
     state.pairedDevices += Object.keys(paired).length;
   }
+  const approvals = path.join(dir, APPROVALS_FILE);
+  state.approvals.present = mayExist(approvals);
+  state.approvals.file = readFileText(approvals);
+  state.approvals.claim = mayExist(`${approvals}.doctor-importing`);
+}
+
+/**
+ * Whether anything is at `file`, as OpenClaw's pathMayExistSync decides it:
+ * lstat finds an entry, or fails for any reason other than ENOENT. A dangling
+ * link is there.
+ */
+function mayExist(file: string): boolean {
+  try {
+    fs.lstatSync(file);
+    return true;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code !== "ENOENT";
+  }
+}
+
+/** A regular file's text (through links), or null for anything else or a file that does not read. */
+function readFileText(file: string): string | null {
+  try {
+    return fs.statSync(file).isFile() ? fs.readFileSync(file, "utf8") : null;
+  } catch {
+    return null;
+  }
 }
 
 export function listAgentIds(dir: string): string[] {
@@ -337,6 +388,7 @@ export function readOpenClawState(dir: string): OpenClawState {
     pluginInstalls: [],
     pairedDevices: 0,
     heartbeats: {},
+    approvals: { file: null, present: false, claim: false, table: false, row: null },
   };
   readStateDb(dir, state);
   for (const agentId of listAgentIds(dir)) {

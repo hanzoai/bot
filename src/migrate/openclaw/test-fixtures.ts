@@ -197,7 +197,22 @@ CREATE TABLE device_pairing_paired (
   device_id TEXT NOT NULL PRIMARY KEY, public_key TEXT NOT NULL,
   created_at_ms INTEGER NOT NULL, approved_at_ms INTEGER NOT NULL
 ) STRICT;
+CREATE TABLE exec_approvals_config (
+  config_key TEXT NOT NULL PRIMARY KEY, raw_json TEXT NOT NULL, updated_at_ms INTEGER NOT NULL
+) STRICT;
 `;
+
+/** Replace the exec approvals policy row of a database layout's state/openclaw.sqlite. */
+export function writeApprovalsRow(dir: string, doc: unknown): void {
+  const db = openDb(path.join(dir, "state", "openclaw.sqlite"));
+  try {
+    db.prepare(
+      "INSERT OR REPLACE INTO exec_approvals_config (config_key, raw_json, updated_at_ms) VALUES ('current', ?, 0)",
+    ).run(typeof doc === "string" ? doc : JSON.stringify(doc));
+  } finally {
+    db.close();
+  }
+}
 
 const AGENT_SCHEMA = `
 CREATE TABLE auth_profile_store (
@@ -279,6 +294,18 @@ export function writeDbLayout(dir: string): () => void {
 
   const state = openDb(path.join(dir, "state", "openclaw.sqlite"));
   state.exec(STATE_SCHEMA);
+  // A policy that only lists approved commands: nothing for the import to tighten.
+  state
+    .prepare(
+      "INSERT INTO exec_approvals_config (config_key, raw_json, updated_at_ms) VALUES ('current', ?, 0)",
+    )
+    .run(
+      JSON.stringify({
+        version: 1,
+        defaults: {},
+        agents: { main: { allowlist: [{ pattern: "/usr/bin/git", source: "allow-always" }] } },
+      }),
+    );
   const machine = state.prepare(
     "INSERT INTO config_machine_state (state_key, value_json, updated_at_ms) VALUES (?, ?, 0)",
   );

@@ -93,7 +93,7 @@ The plan lists each of these under **Not carried**, with the reason.
 | `credentials/auth-profiles/`                                                               | Encrypted with OpenClaw's key.                                                       | Sign in again: `hanzo-bot models auth` or `hanzo-bot configure`.                             |
 | Cron jobs OpenClaw created itself (heartbeat, memory dreaming, skill review)               | They carry a `declarationKey`; Hanzo Bot schedules its own heartbeat.                | Nothing.                                                                                     |
 | Paired devices and nodes (`devices/`, `identity/`, `nodes/`)                               | Pairing is per gateway.                                                              | `hanzo-bot qr`, then pair again.                                                             |
-| Exec approvals                                                                             | Per gateway.                                                                         | Approve again when asked.                                                                    |
+| Approved commands and the approvals socket (`exec-approvals.json`)                         | Per gateway. The policy in it moves: see [Exec policy](#exec-policy).                | Approve again when asked.                                                                    |
 | Search indexes (`memory/`, `qmd/`), caches, media, logs, `tmp/`, backups                   | Rebuilt or runtime-only.                                                             | Nothing.                                                                                     |
 | Config keys Hanzo Bot does not have                                                        | Listed one by one.                                                                   | See [what OpenClaw has that Hanzo Bot does not](#what-openclaw-has-that-hanzo-bot-does-not). |
 
@@ -128,7 +128,7 @@ OpenClaw moved after Hanzo Bot forked from it go back to where Hanzo Bot reads t
 
 | `openclaw.json`                                                     | `bot.json`                                                                          |
 | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `agents.entries.<id>`                                               | `agents.list[]` with `id: "<id>"`                                                   |
+| `agents.entries.<id>`                                               | `agents.list[]` with `id: "<id>"`: see [Agents](#agents)                            |
 | `agents.defaults.modelPolicy.allow`                                 | `agents.defaults.models` (the allowlist), keeping each model's alias and params     |
 | `agents.defaults.models` with no `modelPolicy.allow`                | dropped: in OpenClaw it is a catalog, in Hanzo Bot a non-empty map restricts models |
 | `agents.defaults.embeddedAgent`, `agents.list[].embeddedAgent`      | `…embeddedPi`                                                                       |
@@ -140,6 +140,7 @@ OpenClaw moved after Hanzo Bot forked from it go back to where Hanzo Bot reads t
 | `plugins.entries.brave.config.webSearch.apiKey`                     | `tools.web.search.apiKey`                                                           |
 | `plugins.entries.{perplexity,google,xai,moonshot}.config.webSearch` | `tools.web.search.{perplexity,gemini,grok,kimi}`                                    |
 | `browser.profiles.<name>.driver: "openclaw"`                        | `driver: "clawd"`; a profile with no `color` gets one from Hanzo Bot's palette      |
+| `tools.exec.mode`, `agents.list[].tools.exec.mode`                  | `tools.exec.security` and `.ask`: see [Exec policy](#exec-policy)                   |
 | `"${OPENCLAW_X}"` anywhere in a value                               | `"${BOT_X}"`                                                                        |
 | `~/.openclaw/...` anywhere in a value                               | `~/.bot/...`                                                                        |
 | `meta`                                                              | dropped (OpenClaw's write stamp)                                                    |
@@ -149,6 +150,75 @@ not have are dropped and listed. The result is checked with Hanzo Bot's own vali
 (schema and plugin checks) before it is written, so `bot.json` always loads; a value it
 rejects is dropped and listed rather than written.
 
+### Agents
+
+A message no binding matches goes to one agent. The import keeps it the agent OpenClaw gave
+it:
+
+- A legacy `agents.list` (no `agents.entries`, no `agents.ownership: "explicit"`) is read as
+  every OpenClaw before 2026.9 read it, and as Hanzo Bot reads it: the first `default: true`
+  agent, else the first agent.
+- With `agents.entries`, each agent is the entry under its key; an `agents.list` beside it is
+  not read. With `agents.ownership: "explicit"`, the agent `agents.defaults.systemAgent.agentId`
+  names gets `default: true`, else a sole agent answers. Otherwise the one `default: true`
+  entry, else a sole agent.
+- OpenClaw 2026.9 gives no agent at all to such a message when several agents are configured
+  and none is named, and it does not load a roster its schema rejects (an `id` inside an entry,
+  `agents.list` beside `agents.entries`, two `default: true` entries, a system agent or binding
+  naming an agent the roster lacks). Hanzo Bot always has a default agent, so the import stops,
+  writes nothing, and names the setting to fix.
+- The import also stops when a binding would be dropped, or would name an agent `bot.json`
+  lacks, since its messages would then go to the default agent.
+
+### Exec policy
+
+Hanzo Bot has no `tools.exec.mode`. The import writes the `security` and `ask` each mode
+stands for in OpenClaw, at the root and in each agent:
+
+| `tools.exec.mode` | `tools.exec.security` | `tools.exec.ask` |
+| ----------------- | --------------------- | ---------------- |
+| `deny`            | `deny`                | `off`            |
+| `allowlist`       | `allowlist`           | `off`            |
+| `ask`, `auto`     | `allowlist`           | `on-miss`        |
+| `full`            | `full`                | `off`            |
+
+- As in OpenClaw, a mode wins over a `security` or `ask` set beside it. Those are dropped and
+  listed.
+- Hanzo Bot has no model reviewer, so a command `auto` would have sent to one asks you instead.
+- A mode OpenClaw does not accept (OpenClaw would not load that config) imports as `deny`.
+  **Do by hand** names it. So does a `security`, `ask` or `host` it does not accept (with no
+  mode), and a `tools` or `tools.exec` that is not an object: that agent, or the root, imports
+  as `deny`.
+- OpenClaw runs exec with no `security` set as `full`; Hanzo Bot denies host exec with none. The
+  plan names each agent this leaves without exec under **Do by hand**; set
+  `tools.exec.security` to allow it. `hanzo-bot doctor` names them too.
+
+OpenClaw also bounds exec with the policy in its exec approvals: `exec-approvals.json`, or
+the `exec_approvals_config` table of `state/openclaw.sqlite` in newer versions. The import
+folds that policy's `security` and `ask` (its `defaults`, its `"*"` entry, and each agent's
+own entry) into `tools.exec`, the way OpenClaw applies it to commands run on the gateway
+or a node: each agent gets the stricter of its config and the policy's value for it. It
+never loosens a setting, and **Renamed** lists each change. Where the root is tightened for
+the agents the policy's `"*"` and `defaults` govern, an agent whose own entry OpenClaw let run
+more keeps that value on its own entry.
+OpenClaw ran no exec with a policy it could not read, or with an `exec-approvals.json` (or
+`openclaw doctor --fix`'s claim on it, even a link to nothing) that doctor had not yet moved
+into its database. For either, the import sets `security` to `deny` and says so under
+**Do by hand**. Approved commands are not carried; approve them again when asked.
+
+OpenClaw applies that policy after a session's `/exec`, so no `/exec` lifts it. A `/exec`
+in Hanzo Bot replaces `tools.exec`, so the import also writes the policy into
+`~/.bot/exec-approvals.json`, which Hanzo Bot applies to gateway and node exec after `/exec`,
+exactly where OpenClaw applies its own. Each agent there gets the stricter of what that file
+already held it to and what the policy holds it to; nothing else in the file changes, and the
+old file is kept as `exec-approvals.json.bak`. Hanzo Bot reads that file from `~/.bot` whatever
+its state dir, so with `BOT_STATE_DIR` set elsewhere the import stops rather than leave the
+policy behind: import with it unset.
+
+Elevated exec (`/elevated full`) never raises `tools.exec.security`: as in OpenClaw, it skips
+approvals only where the policy is already `full` with `ask: "off"`, and `deny` stays `deny`.
+An agent with no `security` on the default host is denied with elevated as without.
+
 ### An existing bot.json
 
 When `~/.bot/bot.json` exists, the converted config is merged beneath it and the old file is
@@ -156,6 +226,19 @@ kept as `bot.json.bak`:
 
 - A value you set wins. The plan names each key where your value differs from OpenClaw's,
   under **Do by hand**, instead of listing it as moved.
+- Except where it would let a sender run exec that neither install gave them. OpenClaw's
+  channels and bindings are added to yours, so each agent's `tools.exec` `security` and `ask`
+  are held to no looser than the import alone gives that agent. Where your `agents.list`,
+  bindings or default agent send messages elsewhere than OpenClaw did, the default agent and
+  the agents your bindings name are held to the strictest agent OpenClaw ran. And for each
+  channel (with its pairing allowlists) and your hooks: senders it lets in exactly as OpenClaw
+  did keep OpenClaw's exec, senders it lets in exactly as your `bot.json` did keep yours, and
+  a channel that now lets in senders neither did (your open Telegram beside OpenClaw's
+  owner-only exec, say) denies exec to every agent it reaches, in `bot.json` and in
+  `~/.bot/exec-approvals.json`, so a `/exec` cannot lift it either. An agent either install ran
+  with `host: "sandbox"` gave its senders no exec on the host, so where the merge moves it to
+  another host its exec is denied. **Do by hand** names each `tools.exec` this changed; loosen
+  it by hand if you mean to.
 - Values Hanzo Bot's first run wrote (from running `hanzo-bot` before the import) give way to
   OpenClaw's: the workspace, the gateway mode and bind, and, when the import brings your own
   Anthropic key (in any agent's auth profiles, in `.env`, or in the config), the route that sent
@@ -299,6 +382,17 @@ To remove the import, delete `~/.bot` (or only what the plan created).
   into `~/.openclaw` or another dir OpenClaw uses (a shared workspace, say), so the import would
   change OpenClaw's files. The message names the link: replace it with a plain dir (a copy of
   what it points at), then run again.
+- **`OpenClaw would not load …`** or **`OpenClaw answers a message no binding matches with no
+agent`**: fix the named setting in `openclaw.json` (`openclaw doctor --fix` repairs most, or
+  mark the agent that should answer with `default: true`), then run again. Nothing was written.
+- **`the import would send messages to other agents than OpenClaw did`**: a binding Hanzo Bot
+  would drop or cannot route. Fix it in `openclaw.json`, then run again.
+- **Exec denied after the move**: with no sandbox configured, Hanzo Bot runs exec on the host
+  only as `tools.exec.security` allows, and denies it when that is unset. Set it to
+  `"allowlist"` or `"full"`; `hanzo-bot doctor` names each agent. OpenClaw's exec approvals
+  policy also holds in `~/.bot/exec-approvals.json`: loosen it there too if you mean to.
+- **`OpenClaw's exec approvals policy has to go to ~/.bot/exec-approvals.json`**: `BOT_STATE_DIR`
+  points elsewhere. Run the import with it unset.
 - **`bot.json would not load after the merge`**: your existing `bot.json` and OpenClaw's config
   clash in a way no single imported key explains. Move `bot.json` aside, import, then copy your
   settings back.

@@ -636,7 +636,9 @@ describe("Agent-specific tool filtering", () => {
     expect(resultDetails?.status).toBe("completed");
   });
 
-  it("keeps sandbox as the implicit exec host default without forcing gateway approvals", async () => {
+  // With no sandbox the implicit sandbox host is host exec, held to tools.exec.security:
+  // unset is DEFAULT_SECURITY deny (RED-BOTEXEC-3, the owner's rule).
+  it("denies host exec where no sandbox is configured and tools.exec.security is unset", async () => {
     const tools = createBotCodingTools({
       config: {},
       sessionKey: "agent:main:main",
@@ -646,11 +648,9 @@ describe("Agent-specific tool filtering", () => {
     const execTool = tools.find((tool) => tool.name === "exec");
     expect(execTool).toBeDefined();
 
-    const result = await execTool!.execute("call-implicit-sandbox-default", {
-      command: "echo done",
-    });
-    const details = result?.details as { status?: string } | undefined;
-    expect(details?.status).toBe("completed");
+    await expect(
+      execTool!.execute("call-implicit-sandbox-default", { command: "echo done" }),
+    ).rejects.toThrow("exec denied: host=gateway security=deny");
 
     await expect(
       execTool!.execute("call-implicit-sandbox-gateway", {
@@ -658,6 +658,18 @@ describe("Agent-specific tool filtering", () => {
         host: "gateway",
       }),
     ).rejects.toThrow("exec host not allowed");
+  });
+
+  it("runs host exec with no sandbox where tools.exec.security allows it", async () => {
+    const tools = createBotCodingTools({
+      config: { tools: { exec: { security: "full", ask: "off" } } },
+      sessionKey: "agent:main:main",
+      workspaceDir: "/tmp/test-main-implicit-sandbox-full",
+      agentDir: "/tmp/agent-main-implicit-sandbox-full",
+    });
+    const execTool = tools.find((tool) => tool.name === "exec");
+    const result = await execTool!.execute("call-implicit-sandbox-full", { command: "echo done" });
+    expect((result?.details as { status?: string } | undefined)?.status).toBe("completed");
   });
 
   it("fails closed when exec host=sandbox is requested without sandbox runtime", async () => {
