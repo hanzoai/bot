@@ -4,16 +4,21 @@ packages:
   - packages/*
   - extensions/*
 
-onlyBuiltDependencies:
-  - "@lydell/node-pty"
-  - "@matrix-org/matrix-sdk-crypto-nodejs"
-  - "@napi-rs/canvas"
-  - "@whiskeysockets/baileys"
-  - authenticate-pam
-  - esbuild
-  - node-llama-cpp
-  - protobufjs
-  - sharp
+allowBuilds:
+  '@lydell/node-pty': true
+  '@matrix-org/matrix-sdk-crypto-nodejs': true
+  '@napi-rs/canvas': true
+  '@tloncorp/api@https://codeload.github.com/tloncorp/api-beta/tar.gz/7eede1c1a756977b09f96aa14a92e2b06318ae87': true
+  '@whiskeysockets/baileys': true
+  authenticate-pam: true
+  esbuild: true
+  node-llama-cpp: true
+  protobufjs: true
+  sharp: true
+  '@discordjs/opus': false
+  '@tloncorp/tlon-skill': false
+  core-js: false
+  koffi: false
 
 catalog:
   '@agentclientprotocol/sdk': '^1.4.0'
@@ -123,8 +128,7 @@ catalog:
   'zca-js': '^2.1.2'
   'zod': '^4.5.2'
 
-minimumReleaseAge:
-  2880
+minimumReleaseAge: 2880
 
 auditConfig:
   ignoreGhsas:
