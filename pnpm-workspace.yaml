@@ -17,8 +17,10 @@ allowBuilds:
   sharp: true
   '@discordjs/opus': false
   '@tloncorp/tlon-skill': false
+  better-sqlite3: false
   core-js: false
   koffi: false
+  onnxruntime-node: false
 
 catalog:
   '@agentclientprotocol/sdk': '^1.4.0'
