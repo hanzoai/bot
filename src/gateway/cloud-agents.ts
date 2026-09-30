@@ -29,7 +29,7 @@
 
 import type { GatewayAgentRow } from "../shared/session-types.js";
 
-const DEFAULT_CLOUD_API_URL = "https://api.cloud.hanzo.ai";
+const DEFAULT_CLOUD_API_URL = "https://api.hanzo.ai";
 const FETCH_TIMEOUT_MS = 3_000;
 const CACHE_TTL_MS = 30_000;
 

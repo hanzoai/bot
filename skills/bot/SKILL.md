@@ -1,6 +1,6 @@
 ---
 name: skills-hub
-description: Use the Hanzo Skills Hub CLI to search, install, update, and publish agent skills from skills.hanzo.bot. Use when you need to fetch new skills on the fly, sync installed skills to latest or a specific version, or publish new/updated skill folders with the npm-installed skills-hub CLI.
+description: Use the Hanzo Skills Hub CLI to search, install, update, and publish agent skills from the Hanzo skills hub (hub.hanzo.bot, API at api.hanzo.ai/v1/skills). Use when you need to fetch new skills on the fly, sync installed skills to latest or a specific version, or publish new/updated skill folders with the npm-installed skills-hub CLI.
 metadata:
   {
     "bot":
@@ -72,6 +72,6 @@ skills-hub publish ./my-skill --slug my-skill --name "My Skill" --version 1.2.0 
 
 Notes
 
-- Default registry: https://skills.hanzo.bot (override with SKILLS_HUB_REGISTRY or --registry)
+- Default registry: https://api.hanzo.ai, every route under /v1/skills (override with SKILLS_HUB_REGISTRY or --registry)
 - Default workdir: cwd (falls back to Hanzo Bot workspace); install dir: ./skills (override with --workdir / --dir / SKILLS_HUB_WORKDIR)
 - Update command hashes local files, resolves matching version, and upgrades to latest unless --version is set

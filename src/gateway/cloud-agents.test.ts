@@ -77,7 +77,7 @@ describe("fetchCloudAgentRows (per-viewer)", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
-    expect(url).toBe("https://api.cloud.hanzo.ai/v1/agents");
+    expect(url).toBe("https://api.hanzo.ai/v1/agents");
     expect(authOf(init)).toBe("Bearer hanzo-viewer-jwt");
     // Org is resolved server-side from the JWT owner claim; we send no X-Org-Id.
     expect((init.headers as Record<string, string>)["X-Org-Id"]).toBeUndefined();
