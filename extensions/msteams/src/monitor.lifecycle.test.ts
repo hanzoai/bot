@@ -1,5 +1,5 @@
-import type { BotConfig, RuntimeEnv } from "@hanzo/bot/plugin-sdk/msteams";
 import { EventEmitter } from "node:events";
+import type { BotConfig, RuntimeEnv } from "@hanzo/bot/plugin-sdk/msteams";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { MSTeamsConversationStore } from "./conversation-store.js";
 import type { MSTeamsPollStore } from "./polls.js";
@@ -144,7 +144,7 @@ function createConfig(port: number): BotConfig {
         tenantId: "tenant-id",
         webhook: {
           port,
-          path: "/api/messages",
+          path: "/v1/messages",
         },
       },
     },

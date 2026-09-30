@@ -1,7 +1,7 @@
-import type { Server } from "node:http";
-import express from "express";
 import { once } from "node:events";
+import type { Server } from "node:http";
 import { createConnection, type AddressInfo } from "node:net";
+import express from "express";
 import { describe, expect, it } from "vitest";
 import { applyMSTeamsWebhookTimeouts } from "./monitor.js";
 
@@ -15,7 +15,7 @@ async function waitForSlowBodySocketClose(port: number, timeoutMs: number): Prom
   return new Promise<number>((resolve, reject) => {
     const startedAt = Date.now();
     const socket = createConnection({ host: "127.0.0.1", port }, () => {
-      socket.write("POST /api/messages HTTP/1.1\r\n");
+      socket.write("POST /v1/messages HTTP/1.1\r\n");
       socket.write("Host: localhost\r\n");
       socket.write("Content-Type: application/json\r\n");
       socket.write("Content-Length: 1048576\r\n");
@@ -62,7 +62,7 @@ describe("msteams monitor webhook hardening", () => {
     app.use((_req, res, _next) => {
       res.status(401).end("unauthorized");
     });
-    app.post("/api/messages", (_req, res) => {
+    app.post("/v1/messages", (_req, res) => {
       res.end("ok");
     });
 

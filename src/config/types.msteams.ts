@@ -12,7 +12,7 @@ import type { GroupToolPolicyBySenderConfig, GroupToolPolicyConfig } from "./typ
 export type MSTeamsWebhookConfig = {
   /** Port for the webhook server. Default: 3978. */
   port?: number;
-  /** Path for the messages endpoint. Default: /api/messages. */
+  /** Path for the messages endpoint. Default: /v1/messages. */
   path?: string;
 };
 

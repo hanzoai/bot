@@ -358,10 +358,10 @@ describe("handleControlUiHttpRequest", () => {
     });
   });
 
-  it("does not handle /api paths when basePath is empty", async () => {
+  it("does not handle /v1 paths when basePath is empty", async () => {
     await withControlUiRoot({
       fn: async (tmp) => {
-        for (const apiPath of ["/api", "/api/sessions", "/api/channels/nostr"]) {
+        for (const apiPath of ["/v1", "/v1/sessions", "/v1/channels/nostr"]) {
           const { handled } = runControlUiRequest({
             url: apiPath,
             method: "GET",

@@ -67,9 +67,9 @@ the Mattermost API and receives callback POSTs on the gateway HTTP server.
       commands: {
         native: true,
         nativeSkills: true,
-        callbackPath: "/api/channels/mattermost/command",
+        callbackPath: "/v1/channels/mattermost/command",
         // Use when Mattermost cannot reach the gateway directly (reverse proxy/public URL).
-        callbackUrl: "https://gateway.example.com/api/channels/mattermost/command",
+        callbackUrl: "https://gateway.example.com/v1/channels/mattermost/command",
       },
     },
   },
@@ -85,8 +85,8 @@ Notes:
 - Command callbacks are validated with per-command tokens and fail closed when token checks fail.
 - Reachability requirement: the callback endpoint must be reachable from the Mattermost server.
   - Do not set `callbackUrl` to `localhost` unless Mattermost runs on the same host/network namespace as HanzoBot.
-  - Do not set `callbackUrl` to your Mattermost base URL unless that URL reverse-proxies `/api/channels/mattermost/command` to HanzoBot.
-  - A quick check is `curl https://<gateway-host>/api/channels/mattermost/command`; a GET should return `405 Method Not Allowed` from HanzoBot, not `404`.
+  - Do not set `callbackUrl` to your Mattermost base URL unless that URL reverse-proxies `/v1/channels/mattermost/command` to HanzoBot.
+  - A quick check is `curl https://<gateway-host>/v1/channels/mattermost/command`; a GET should return `405 Method Not Allowed` from HanzoBot, not `404`.
 - Mattermost egress allowlist requirement:
   - If your callback targets private/tailnet/internal addresses, set Mattermost
     `ServiceSettings.AllowedUntrustedInternalConnections` to include the callback host/domain.

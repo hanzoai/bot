@@ -10,7 +10,7 @@ import {
   createMessagesProxyHandler,
 } from "./src/routes.js";
 
-const ROUTE_PREFIX = "/api/channels/team";
+const ROUTE_PREFIX = "/v1/channels/team";
 
 const plugin = {
   id: "team",
@@ -18,49 +18,49 @@ const plugin = {
   description: "Hanzo Team workspace AI bot channel extension",
   configSchema: emptyPluginConfigSchema(),
   register(api: BotPluginApi) {
-    // Health check — GET /api/channels/team/health
+    // Health check — GET /v1/channels/team/health
     api.registerHttpRoute({
       path: `${ROUTE_PREFIX}/health`,
       handler: createHealthHandler(),
       auth: "plugin",
     });
 
-    // Workspace connection — POST /api/channels/team/connect
+    // Workspace connection — POST /v1/channels/team/connect
     api.registerHttpRoute({
       path: `${ROUTE_PREFIX}/connect`,
       handler: createConnectHandler(),
       auth: "plugin",
     });
 
-    // Event processing — POST /api/channels/team/events
+    // Event processing — POST /v1/channels/team/events
     api.registerHttpRoute({
       path: `${ROUTE_PREFIX}/events`,
       handler: createEventsHandler(),
       auth: "plugin",
     });
 
-    // Translation — POST /api/channels/team/translate
+    // Translation — POST /v1/channels/team/translate
     api.registerHttpRoute({
       path: `${ROUTE_PREFIX}/translate`,
       handler: createTranslateHandler(api),
       auth: "plugin",
     });
 
-    // Summarization — POST /api/channels/team/summarize
+    // Summarization — POST /v1/channels/team/summarize
     api.registerHttpRoute({
       path: `${ROUTE_PREFIX}/summarize`,
       handler: createSummarizeHandler(api),
       auth: "plugin",
     });
 
-    // OpenAI-compatible proxy — POST /api/channels/team/v1/chat/completions
+    // OpenAI-compatible proxy — POST /v1/channels/team/v1/chat/completions
     api.registerHttpRoute({
       path: `${ROUTE_PREFIX}/v1/chat/completions`,
       handler: createChatCompletionsProxyHandler(api),
       auth: "plugin",
     });
 
-    // Anthropic-compatible proxy — POST /api/channels/team/v1/messages
+    // Anthropic-compatible proxy — POST /v1/channels/team/v1/messages
     api.registerHttpRoute({
       path: `${ROUTE_PREFIX}/v1/messages`,
       handler: createMessagesProxyHandler(api),

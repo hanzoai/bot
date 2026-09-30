@@ -33,7 +33,7 @@ daemon (`tailscale whois`) and matching it to the header before accepting it.
 HanzoBot only treats a request as Serve when it arrives from loopback with
 Tailscale’s `x-forwarded-for`, `x-forwarded-proto`, and `x-forwarded-host`
 headers.
-HTTP API endpoints (for example `/v1/*`, `/tools/invoke`, and `/api/channels/*`)
+HTTP API endpoints (for example `/v1/*`, `/tools/invoke`, and `/v1/channels/*`)
 still require token/password auth.
 This tokenless flow assumes the gateway host is trusted. If untrusted local code
 may run on the same host, disable `gateway.auth.allowTailscale` and require

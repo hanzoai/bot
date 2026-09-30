@@ -50,7 +50,7 @@ HanzoBot 将自动提供本地安装路径。
 1. 安装 Microsoft Teams 插件。
 2. 创建一个 **Azure Bot**（App ID + 客户端密钥 + 租户 ID）。
 3. 使用这些凭证配置 HanzoBot。
-4. 通过公共 URL 或隧道暴露 `/api/messages`（默认端口 3978）。
+4. 通过公共 URL 或隧道暴露 `/v1/messages`（默认端口 3978）。
 5. 安装 Teams 应用包并启动 Gateway 网关。
 
 最小配置：
@@ -63,7 +63,7 @@ HanzoBot 将自动提供本地安装路径。
       appId: "<APP_ID>",
       appPassword: "<APP_PASSWORD>",
       tenantId: "<TENANT_ID>",
-      webhook: { port: 3978, path: "/api/messages" },
+      webhook: { port: 3978, path: "/v1/messages" },
     },
   },
 }
@@ -151,7 +151,7 @@ HanzoBot 将自动提供本地安装路径。
 3. 构建一个引用机器人并包含以下 RSC 权限的 **Teams 应用包**。
 4. 将 Teams 应用上传/安装到团队中（或用于私信的个人范围）。
 5. 在 `~/.bot/bot.json`（或环境变量）中配置 `msteams` 并启动 Gateway 网关。
-6. Gateway 网关默认在 `/api/messages` 上监听 Bot Framework webhook 流量。
+6. Gateway 网关默认在 `/v1/messages` 上监听 Bot Framework webhook 流量。
 
 ## Azure Bot 设置（前提条件）
 
@@ -187,7 +187,7 @@ HanzoBot 将自动提供本地安装路径。
 
 1. 在 Azure Bot → **Configuration**
 2. 将 **Messaging endpoint** 设置为你的 webhook URL：
-   - 生产环境：`https://your-domain.com/api/messages`
+   - 生产环境：`https://your-domain.com/v1/messages`
    - 本地开发：使用隧道（见下方[本地开发](#local-development-tunneling)）
 
 ### 步骤 4：启用 Teams 渠道
@@ -205,7 +205,7 @@ Teams 无法访问 `localhost`。本地开发请使用隧道：
 ```bash
 ngrok http 3978
 # 复制 https URL，例如 https://abc123.ngrok.io
-# 将消息端点设置为：https://abc123.ngrok.io/api/messages
+# 将消息端点设置为：https://abc123.ngrok.io/v1/messages
 ```
 
 **选项 B：Tailscale Funnel**
@@ -272,7 +272,7 @@ tailscale funnel 3978
        "appId": "<APP_ID>",
        "appPassword": "<APP_PASSWORD>",
        "tenantId": "<TENANT_ID>",
-       "webhook": { "port": 3978, "path": "/api/messages" }
+       "webhook": { "port": 3978, "path": "/v1/messages" }
      }
    }
    ```
@@ -284,7 +284,7 @@ tailscale funnel 3978
 
 5. **机器人端点**
    - 将 Azure Bot Messaging Endpoint 设置为：
-     - `https://<host>:3978/api/messages`（或你选择的路径/端口）。
+     - `https://<host>:3978/v1/messages`（或你选择的路径/端口）。
 
 6. **运行 Gateway 网关**
    - 当插件已安装且 `msteams` 配置存在并有凭证时，Teams 渠道会自动启动。
@@ -457,7 +457,7 @@ Teams markdown 比 Slack 或 Discord 更有限：
 - `channels.msteams.enabled`：启用/禁用渠道。
 - `channels.msteams.appId`、`channels.msteams.appPassword`、`channels.msteams.tenantId`：机器人凭证。
 - `channels.msteams.webhook.port`（默认 `3978`）
-- `channels.msteams.webhook.path`（默认 `/api/messages`）
+- `channels.msteams.webhook.path`（默认 `/v1/messages`）
 - `channels.msteams.dmPolicy`：`pairing | allowlist | open | disabled`（默认：pairing）
 - `channels.msteams.allowFrom`：私信允许列表（AAD 对象 ID、UPN 或显示名称）。当 Graph 访问可用时，向导在设置期间将名称解析为 ID。
 - `channels.msteams.textChunkLimit`：出站文本分块大小。

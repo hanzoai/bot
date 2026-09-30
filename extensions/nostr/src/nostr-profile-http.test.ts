@@ -146,7 +146,7 @@ describe("nostr-profile-http", () => {
     it("returns false for non-nostr paths", async () => {
       const ctx = createMockContext();
       const handler = createNostrProfileHttpHandler(ctx);
-      const req = createMockRequest("GET", "/api/channels/telegram/profile");
+      const req = createMockRequest("GET", "/v1/channels/telegram/profile");
       const res = createMockResponse();
 
       const result = await handler(req, res);
@@ -157,7 +157,7 @@ describe("nostr-profile-http", () => {
     it("returns false for paths without accountId", async () => {
       const ctx = createMockContext();
       const handler = createNostrProfileHttpHandler(ctx);
-      const req = createMockRequest("GET", "/api/channels/nostr/");
+      const req = createMockRequest("GET", "/v1/channels/nostr/");
       const res = createMockResponse();
 
       const result = await handler(req, res);
@@ -165,10 +165,10 @@ describe("nostr-profile-http", () => {
       expect(result).toBe(false);
     });
 
-    it("handles /api/channels/nostr/:accountId/profile", async () => {
+    it("handles /v1/channels/nostr/:accountId/profile", async () => {
       const ctx = createMockContext();
       const handler = createNostrProfileHttpHandler(ctx);
-      const req = createMockRequest("GET", "/api/channels/nostr/default/profile");
+      const req = createMockRequest("GET", "/v1/channels/nostr/default/profile");
       const res = createMockResponse();
 
       vi.mocked(getNostrProfileState).mockResolvedValue(null);
@@ -179,7 +179,7 @@ describe("nostr-profile-http", () => {
     });
   });
 
-  describe("GET /api/channels/nostr/:accountId/profile", () => {
+  describe("GET /v1/channels/nostr/:accountId/profile", () => {
     it("returns profile and publish state", async () => {
       const ctx = createMockContext({
         getConfigProfile: vi.fn().mockReturnValue({
@@ -188,7 +188,7 @@ describe("nostr-profile-http", () => {
         }),
       });
       const handler = createNostrProfileHttpHandler(ctx);
-      const req = createMockRequest("GET", "/api/channels/nostr/default/profile");
+      const req = createMockRequest("GET", "/v1/channels/nostr/default/profile");
       const res = createMockResponse();
 
       vi.mocked(getNostrProfileState).mockResolvedValue({
@@ -207,11 +207,11 @@ describe("nostr-profile-http", () => {
     });
   });
 
-  describe("PUT /api/channels/nostr/:accountId/profile", () => {
+  describe("PUT /v1/channels/nostr/:accountId/profile", () => {
     async function expectPrivatePictureRejected(pictureUrl: string) {
       const ctx = createMockContext();
       const handler = createNostrProfileHttpHandler(ctx);
-      const req = createMockRequest("PUT", "/api/channels/nostr/default/profile", {
+      const req = createMockRequest("PUT", "/v1/channels/nostr/default/profile", {
         name: "hacker",
         picture: pictureUrl,
       });
@@ -228,7 +228,7 @@ describe("nostr-profile-http", () => {
     it("validates profile and publishes", async () => {
       const ctx = createMockContext();
       const handler = createNostrProfileHttpHandler(ctx);
-      const req = createMockRequest("PUT", "/api/channels/nostr/default/profile", {
+      const req = createMockRequest("PUT", "/v1/channels/nostr/default/profile", {
         name: "satoshi",
         displayName: "Satoshi Nakamoto",
         about: "Creator of Bitcoin",
@@ -258,7 +258,7 @@ describe("nostr-profile-http", () => {
       const handler = createNostrProfileHttpHandler(ctx);
       const req = createMockRequest(
         "PUT",
-        "/api/channels/nostr/default/profile",
+        "/v1/channels/nostr/default/profile",
         { name: "attacker" },
         { remoteAddress: "198.51.100.10" },
       );
@@ -273,7 +273,7 @@ describe("nostr-profile-http", () => {
       const handler = createNostrProfileHttpHandler(ctx);
       const req = createMockRequest(
         "PUT",
-        "/api/channels/nostr/default/profile",
+        "/v1/channels/nostr/default/profile",
         { name: "attacker" },
         { headers: { origin: "https://evil.example" } },
       );
@@ -294,7 +294,7 @@ describe("nostr-profile-http", () => {
     it("rejects non-https URLs", async () => {
       const ctx = createMockContext();
       const handler = createNostrProfileHttpHandler(ctx);
-      const req = createMockRequest("PUT", "/api/channels/nostr/default/profile", {
+      const req = createMockRequest("PUT", "/v1/channels/nostr/default/profile", {
         name: "test",
         picture: "http://example.com/pic.jpg",
       });
@@ -314,7 +314,7 @@ describe("nostr-profile-http", () => {
     it("does not persist if all relays fail", async () => {
       const ctx = createMockContext();
       const handler = createNostrProfileHttpHandler(ctx);
-      const req = createMockRequest("PUT", "/api/channels/nostr/default/profile", {
+      const req = createMockRequest("PUT", "/v1/channels/nostr/default/profile", {
         name: "test",
       });
       const res = createMockResponse();
@@ -347,7 +347,7 @@ describe("nostr-profile-http", () => {
 
       // Make 6 requests (limit is 5/min)
       for (let i = 0; i < 6; i++) {
-        const req = createMockRequest("PUT", "/api/channels/nostr/rate-test/profile", {
+        const req = createMockRequest("PUT", "/v1/channels/nostr/rate-test/profile", {
           name: `user${i}`,
         });
         const res = createMockResponse();
@@ -383,11 +383,11 @@ describe("nostr-profile-http", () => {
     });
   });
 
-  describe("POST /api/channels/nostr/:accountId/profile/import", () => {
+  describe("POST /v1/channels/nostr/:accountId/profile/import", () => {
     it("imports profile from relays", async () => {
       const ctx = createMockContext();
       const handler = createNostrProfileHttpHandler(ctx);
-      const req = createMockRequest("POST", "/api/channels/nostr/default/profile/import", {});
+      const req = createMockRequest("POST", "/v1/channels/nostr/default/profile/import", {});
       const res = createMockResponse();
 
       mockSuccessfulProfileImport();
@@ -406,7 +406,7 @@ describe("nostr-profile-http", () => {
       const handler = createNostrProfileHttpHandler(ctx);
       const req = createMockRequest(
         "POST",
-        "/api/channels/nostr/default/profile/import",
+        "/v1/channels/nostr/default/profile/import",
         {},
         { remoteAddress: "203.0.113.10" },
       );
@@ -421,7 +421,7 @@ describe("nostr-profile-http", () => {
       const handler = createNostrProfileHttpHandler(ctx);
       const req = createMockRequest(
         "POST",
-        "/api/channels/nostr/default/profile/import",
+        "/v1/channels/nostr/default/profile/import",
         {},
         { headers: { origin: "https://evil.example" } },
       );
@@ -436,7 +436,7 @@ describe("nostr-profile-http", () => {
         getConfigProfile: vi.fn().mockReturnValue({ about: "local bio" }),
       });
       const handler = createNostrProfileHttpHandler(ctx);
-      const req = createMockRequest("POST", "/api/channels/nostr/default/profile/import", {
+      const req = createMockRequest("POST", "/v1/channels/nostr/default/profile/import", {
         autoMerge: true,
       });
       const res = createMockResponse();
@@ -456,7 +456,7 @@ describe("nostr-profile-http", () => {
         getAccountInfo: vi.fn().mockReturnValue(null),
       });
       const handler = createNostrProfileHttpHandler(ctx);
-      const req = createMockRequest("POST", "/api/channels/nostr/unknown/profile/import", {});
+      const req = createMockRequest("POST", "/v1/channels/nostr/unknown/profile/import", {});
       const res = createMockResponse();
 
       await handler(req, res);

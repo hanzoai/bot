@@ -782,13 +782,13 @@ UI/WebSocket authentication. HanzoBot verifies the identity by resolving the
 and matching it to the header. This only triggers for requests that hit loopback
 and include `x-forwarded-for`, `x-forwarded-proto`, and `x-forwarded-host` as
 injected by Tailscale.
-HTTP API endpoints (for example `/v1/*`, `/tools/invoke`, and `/api/channels/*`)
+HTTP API endpoints (for example `/v1/*`, `/tools/invoke`, and `/v1/channels/*`)
 still require token/password auth.
 
 Important boundary note:
 
 - Gateway HTTP bearer auth is effectively all-or-nothing operator access.
-- Treat credentials that can call `/v1/chat/completions`, `/v1/responses`, `/tools/invoke`, or `/api/channels/*` as full-access operator secrets for that gateway.
+- Treat credentials that can call `/v1/chat/completions`, `/v1/responses`, `/tools/invoke`, or `/v1/channels/*` as full-access operator secrets for that gateway.
 - Do not share these credentials with untrusted callers; prefer separate gateways per trust boundary.
 
 **Trust assumption:** tokenless Serve auth assumes the gateway host is trusted.

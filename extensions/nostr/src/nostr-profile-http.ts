@@ -2,9 +2,9 @@
  * Nostr Profile HTTP Handler
  *
  * Handles HTTP requests for profile management:
- * - PUT /api/channels/nostr/:accountId/profile - Update and publish profile
- * - POST /api/channels/nostr/:accountId/profile/import - Import from relays
- * - GET /api/channels/nostr/:accountId/profile - Get current profile state
+ * - PUT /v1/channels/nostr/:accountId/profile - Update and publish profile
+ * - POST /v1/channels/nostr/:accountId/profile/import - Import from relays
+ * - GET /v1/channels/nostr/:accountId/profile - Get current profile state
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
@@ -183,8 +183,8 @@ async function readJsonBody(
 }
 
 function parseAccountIdFromPath(pathname: string): string | null {
-  // Match: /api/channels/nostr/:accountId/profile
-  const match = pathname.match(/^\/api\/channels\/nostr\/([^/]+)\/profile/);
+  // Match: /v1/channels/nostr/:accountId/profile
+  const match = pathname.match(/^\/v1\/channels\/nostr\/([^/]+)\/profile/);
   return match?.[1] ?? null;
 }
 
@@ -265,8 +265,8 @@ export function createNostrProfileHttpHandler(
   return async (req, res) => {
     const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
 
-    // Only handle /api/channels/nostr/:accountId/profile paths
-    if (!url.pathname.startsWith("/api/channels/nostr/")) {
+    // Only handle /v1/channels/nostr/:accountId/profile paths
+    if (!url.pathname.startsWith("/v1/channels/nostr/")) {
       return false;
     }
 
@@ -308,7 +308,7 @@ export function createNostrProfileHttpHandler(
 }
 
 // ============================================================================
-// GET /api/channels/nostr/:accountId/profile
+// GET /v1/channels/nostr/:accountId/profile
 // ============================================================================
 
 async function handleGetProfile(
@@ -328,7 +328,7 @@ async function handleGetProfile(
 }
 
 // ============================================================================
-// PUT /api/channels/nostr/:accountId/profile
+// PUT /v1/channels/nostr/:accountId/profile
 // ============================================================================
 
 async function handleUpdateProfile(
@@ -431,7 +431,7 @@ async function handleUpdateProfile(
 }
 
 // ============================================================================
-// POST /api/channels/nostr/:accountId/profile/import
+// POST /v1/channels/nostr/:accountId/profile/import
 // ============================================================================
 
 async function handleImportProfile(
