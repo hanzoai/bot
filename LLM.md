@@ -88,6 +88,14 @@ type ChannelPlugin = {
 - `origin` = `ssh://github.com/hanzoai/bot` (a mirror; refs are carried onward)
 - `upstream` = the upstream MIT project this forks (see NOTICE for provenance and attribution)
 
+## What is live
+
+`main` does not build: tsdown fails with TS2527 and the catalog majors are untested. The
+running gateway is an orphan lineage, tag `v2026.7.22`. Releases from it are tag-only:
+`v2026.7.23` is `v2026.7.22` plus the `/v1` route move (`Serve every gateway route under
+/v1` and its guard test), built by the build door from the tag as
+`ghcr.io/hanzoai/bot:2026.7.23`. Universe pins that digest. The chat bridge is `POST /v1/chat`.
+
 ## How this ships
 
 One way, and it runs on our own stack:
