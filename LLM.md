@@ -15,7 +15,8 @@ Multi-channel AI messaging gateway (TypeScript ESM). Routes messages between 50+
 ## Gateway Server (`src/gateway/`)
 
 - `server.impl.ts` — Main initialization and lifecycle
-- `server-http.ts` — HTTP handler chain: /health → /auth → hooks → tools → Slack → plugins → /v1/responses → /v1/marketplace → /v1/chat/completions → canvas → control-ui → 404
+- `server-http.ts` — HTTP handler chain: /health → /auth → hooks → tools → /v1/chat (chat bridge) → Slack → plugins (/v1/channels/*) → /v1/responses → /v1/marketplace → /v1/chat/completions → canvas → control-ui → 404
+- Every route is under `/v1`; `/api/*` is a 404. `v1-prefix.guard.test.ts` fails on any first-party `/api` path literal in `src/`, `extensions/` or `ui/src/` (third-party APIs are listed there by file).
 - `server-ws.ts` — WebSocket connection mgmt for nodes/clients
 - `server-methods.ts` — RPC method implementations
 - `billing/billing-gate.ts` — Pre-request billing check (fail-closed in production)
@@ -79,8 +80,8 @@ type ChannelPlugin = {
 
 1. Pre-request: `checkBillingAllowance()` → Commerce API balance check (cached 60s)
 2. Request: Route to LLM provider
-3. Post-request: `reportUsage()` → async queue → Commerce `/api/v1/billing/usage`
-4. Commerce API: `COMMERCE_API_URL` (default: `commerce.hanzo.svc.cluster.local:8001`)
+3. Post-request: `reportUsage()` → async queue → cloud `POST /v1/billing/usage`
+4. Commerce API: `COMMERCE_API_URL` (cloud, `http://cloud.hanzo.svc:8000` in the cluster)
 
 ## Git Remotes
 

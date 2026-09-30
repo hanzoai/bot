@@ -43,7 +43,7 @@ Details: [Plugins](/tools/plugin)
 1. Install the Microsoft Teams plugin.
 2. Create an **Azure Bot** (App ID + client secret + tenant ID).
 3. Configure HanzoBot with those credentials.
-4. Expose `/api/messages` (port 3978 by default) via a public URL or tunnel.
+4. Expose `/v1/messages` (port 3978 by default) via a public URL or tunnel.
 5. Install the Teams app package and start the gateway.
 
 Minimal config:
@@ -56,7 +56,7 @@ Minimal config:
       appId: "<APP_ID>",
       appPassword: "<APP_PASSWORD>",
       tenantId: "<TENANT_ID>",
-      webhook: { port: 3978, path: "/api/messages" },
+      webhook: { port: 3978, path: "/v1/messages" },
     },
   },
 }
@@ -146,7 +146,7 @@ Example:
 3. Build a **Teams app package** that references the bot and includes the RSC permissions below.
 4. Upload/install the Teams app into a team (or personal scope for DMs).
 5. Configure `msteams` in `~/.hanzo-bot/hanzo-bot.json` (or env vars) and start the gateway.
-6. The gateway listens for Bot Framework webhook traffic on `/api/messages` by default.
+6. The gateway listens for Bot Framework webhook traffic on `/v1/messages` by default.
 
 ## Azure Bot Setup (Prerequisites)
 
@@ -182,7 +182,7 @@ Before configuring HanzoBot, you need to create an Azure Bot resource.
 
 1. In Azure Bot → **Configuration**
 2. Set **Messaging endpoint** to your webhook URL:
-   - Production: `https://your-domain.com/api/messages`
+   - Production: `https://your-domain.com/v1/messages`
    - Local dev: Use a tunnel (see [Local Development](#local-development-tunneling) below)
 
 ### Step 4: Enable Teams Channel
@@ -200,7 +200,7 @@ Teams can't reach `localhost`. Use a tunnel for local development:
 ```bash
 ngrok http 3978
 # Copy the https URL, e.g., https://abc123.ngrok.io
-# Set messaging endpoint to: https://abc123.ngrok.io/api/messages
+# Set messaging endpoint to: https://abc123.ngrok.io/v1/messages
 ```
 
 **Option B: Tailscale Funnel**
@@ -267,7 +267,7 @@ This is often easier than hand-editing JSON manifests.
        "appId": "<APP_ID>",
        "appPassword": "<APP_PASSWORD>",
        "tenantId": "<TENANT_ID>",
-       "webhook": { "port": 3978, "path": "/api/messages" }
+       "webhook": { "port": 3978, "path": "/v1/messages" }
      }
    }
    ```
@@ -279,7 +279,7 @@ This is often easier than hand-editing JSON manifests.
 
 5. **Bot endpoint**
    - Set the Azure Bot Messaging Endpoint to:
-     - `https://<host>:3978/api/messages` (or your chosen path/port).
+     - `https://<host>:3978/v1/messages` (or your chosen path/port).
 
 6. **Run the gateway**
    - The Teams channel starts automatically when the plugin is installed and `msteams` config exists with credentials.
@@ -454,7 +454,7 @@ Key settings (see `/gateway/configuration` for shared channel patterns):
 - `channels.msteams.enabled`: enable/disable the channel.
 - `channels.msteams.appId`, `channels.msteams.appPassword`, `channels.msteams.tenantId`: bot credentials.
 - `channels.msteams.webhook.port` (default `3978`)
-- `channels.msteams.webhook.path` (default `/api/messages`)
+- `channels.msteams.webhook.path` (default `/v1/messages`)
 - `channels.msteams.dmPolicy`: `pairing | allowlist | open | disabled` (default: pairing)
 - `channels.msteams.allowFrom`: DM allowlist (AAD object IDs recommended). The wizard resolves names to IDs during setup when Graph access is available.
 - `channels.msteams.dangerouslyAllowNameMatching`: break-glass toggle to re-enable mutable UPN/display-name matching.

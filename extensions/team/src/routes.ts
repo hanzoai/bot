@@ -263,7 +263,7 @@ export function createSummarizeHandler(api: BotPluginApi): RouteHandler {
 }
 
 // ---------------------------------------------------------------------------
-// OpenAI-compatible proxy: POST /api/channels/team/v1/chat/completions
+// OpenAI-compatible proxy: POST /v1/channels/team/v1/chat/completions
 // ---------------------------------------------------------------------------
 
 export function createChatCompletionsProxyHandler(api: BotPluginApi): RouteHandler {
@@ -328,7 +328,7 @@ export function createChatCompletionsProxyHandler(api: BotPluginApi): RouteHandl
 }
 
 // ---------------------------------------------------------------------------
-// Anthropic-compatible proxy: POST /api/channels/team/v1/messages
+// Anthropic-compatible proxy: POST /v1/channels/team/v1/messages
 // ---------------------------------------------------------------------------
 
 export function createMessagesProxyHandler(api: BotPluginApi): RouteHandler {

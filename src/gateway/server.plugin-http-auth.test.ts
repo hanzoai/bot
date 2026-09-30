@@ -161,13 +161,13 @@ describe("gateway plugin HTTP auth boundary", () => {
   test("requires gateway auth for protected plugin route space and allows authenticated pass-through", async () => {
     const handlePluginRequest = vi.fn(async (req: IncomingMessage, res: ServerResponse) => {
       const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
-      if (pathname === "/api/channels") {
+      if (pathname === "/v1/channels") {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json; charset=utf-8");
         res.end(JSON.stringify({ ok: true, route: "channel-root" }));
         return true;
       }
-      if (pathname === "/api/channels/nostr/default/profile") {
+      if (pathname === "/v1/channels/nostr/default/profile") {
         res.statusCode = 200;
         res.setHeader("Content-Type", "application/json; charset=utf-8");
         res.end(JSON.stringify({ ok: true, route: "channel" }));
@@ -193,17 +193,17 @@ describe("gateway plugin HTTP auth boundary", () => {
       },
       run: async (server) => {
         const unauthenticated = await sendRequest(server, {
-          path: "/api/channels/nostr/default/profile",
+          path: "/v1/channels/nostr/default/profile",
         });
         expectUnauthorizedResponse(unauthenticated);
         expect(handlePluginRequest).not.toHaveBeenCalled();
 
-        const unauthenticatedRoot = await sendRequest(server, { path: "/api/channels" });
+        const unauthenticatedRoot = await sendRequest(server, { path: "/v1/channels" });
         expectUnauthorizedResponse(unauthenticatedRoot);
         expect(handlePluginRequest).not.toHaveBeenCalled();
 
         const authenticated = await sendRequest(server, {
-          path: "/api/channels/nostr/default/profile",
+          path: "/v1/channels/nostr/default/profile",
           authorization: "Bearer test-token",
         });
         expect(authenticated.res.statusCode).toBe(200);
@@ -220,12 +220,12 @@ describe("gateway plugin HTTP auth boundary", () => {
   test("allows unauthenticated Mattermost slash callback routes while keeping other channel routes protected", async () => {
     const handlePluginRequest = vi.fn(async (req: IncomingMessage, res: ServerResponse) => {
       const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
-      if (pathname === "/api/channels/mattermost/command") {
+      if (pathname === "/v1/channels/mattermost/command") {
         res.statusCode = 200;
         res.end("ok:mm-callback");
         return true;
       }
-      if (pathname === "/api/channels/nostr/default/profile") {
+      if (pathname === "/v1/channels/nostr/default/profile") {
         res.statusCode = 200;
         res.end("ok:nostr");
         return true;
@@ -238,7 +238,7 @@ describe("gateway plugin HTTP auth boundary", () => {
         gateway: { trustedProxies: [] },
         channels: {
           mattermost: {
-            commands: { callbackPath: "/api/channels/mattermost/command" },
+            commands: { callbackPath: "/v1/channels/mattermost/command" },
           },
         },
       },
@@ -250,14 +250,14 @@ describe("gateway plugin HTTP auth boundary", () => {
         });
 
         const slashCallback = await sendRequest(server, {
-          path: "/api/channels/mattermost/command",
+          path: "/v1/channels/mattermost/command",
           method: "POST",
         });
         expect(slashCallback.res.statusCode).toBe(200);
         expect(slashCallback.getBody()).toBe("ok:mm-callback");
 
         const otherChannelUnauthed = await sendRequest(server, {
-          path: "/api/channels/nostr/default/profile",
+          path: "/v1/channels/nostr/default/profile",
         });
         expect(otherChannelUnauthed.res.statusCode).toBe(401);
         expect(otherChannelUnauthed.getBody()).toContain("Unauthorized");
@@ -268,7 +268,7 @@ describe("gateway plugin HTTP auth boundary", () => {
   test("does not bypass auth when mattermost callbackPath points to non-mattermost channel routes", async () => {
     const handlePluginRequest = vi.fn(async (req: IncomingMessage, res: ServerResponse) => {
       const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
-      if (pathname === "/api/channels/nostr/default/profile") {
+      if (pathname === "/v1/channels/nostr/default/profile") {
         res.statusCode = 200;
         res.end("ok:nostr");
         return true;
@@ -281,7 +281,7 @@ describe("gateway plugin HTTP auth boundary", () => {
         gateway: { trustedProxies: [] },
         channels: {
           mattermost: {
-            commands: { callbackPath: "/api/channels/nostr/default/profile" },
+            commands: { callbackPath: "/v1/channels/nostr/default/profile" },
           },
         },
       },
@@ -293,7 +293,7 @@ describe("gateway plugin HTTP auth boundary", () => {
         });
 
         const unauthenticated = await sendRequest(server, {
-          path: "/api/channels/nostr/default/profile",
+          path: "/v1/channels/nostr/default/profile",
           method: "POST",
         });
 
@@ -322,7 +322,7 @@ describe("gateway plugin HTTP auth boundary", () => {
       overrides: {
         handlePluginRequest,
         shouldEnforcePluginGatewayAuth: (pathContext) =>
-          pathContext.pathname.startsWith("/api/channels") ||
+          pathContext.pathname.startsWith("/v1/channels") ||
           pathContext.pathname === "/plugin/routed",
       },
       run: async (server) => {
@@ -343,10 +343,10 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
   });
 
-  test("uses /api/channels auth by default while keeping wildcard handlers ungated with no predicate", async () => {
+  test("uses /v1/channels auth by default while keeping wildcard handlers ungated with no predicate", async () => {
     const handlePluginRequest = vi.fn(async (req: IncomingMessage, res: ServerResponse) => {
       const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
-      if (canonicalizePluginPath(pathname) === "/api/channels/nostr/default/profile") {
+      if (canonicalizePluginPath(pathname) === "/v1/channels/nostr/default/profile") {
         return respondJsonRoute(res, "channel-default");
       }
       if (pathname === "/googlechat") {
@@ -365,12 +365,12 @@ describe("gateway plugin HTTP auth boundary", () => {
         expect(unauthenticated.getBody()).toContain('"route":"wildcard-default"');
 
         const unauthenticatedChannel = await sendRequest(server, {
-          path: "/api/channels/nostr/default/profile",
+          path: "/v1/channels/nostr/default/profile",
         });
         expectUnauthorizedResponse(unauthenticatedChannel);
 
         const unauthenticatedDeepEncodedChannel = await sendRequest(server, {
-          path: "/api%2525252fchannels%2525252fnostr%2525252fdefault%2525252fprofile",
+          path: "/v1%2525252fchannels%2525252fnostr%2525252fdefault%2525252fprofile",
         });
         expectUnauthorizedResponse(unauthenticatedDeepEncodedChannel);
 
@@ -382,14 +382,14 @@ describe("gateway plugin HTTP auth boundary", () => {
         expect(authenticated.getBody()).toContain('"route":"wildcard-default"');
 
         const authenticatedChannel = await sendRequest(server, {
-          path: "/api/channels/nostr/default/profile",
+          path: "/v1/channels/nostr/default/profile",
           authorization: "Bearer test-token",
         });
         expect(authenticatedChannel.res.statusCode).toBe(200);
         expect(authenticatedChannel.getBody()).toContain('"route":"channel-default"');
 
         const authenticatedDeepEncodedChannel = await sendRequest(server, {
-          path: "/api%2525252fchannels%2525252fnostr%2525252fdefault%2525252fprofile",
+          path: "/v1%2525252fchannels%2525252fnostr%2525252fdefault%2525252fprofile",
           authorization: "Bearer test-token",
         });
         expect(authenticatedDeepEncodedChannel.res.statusCode).toBe(200);
@@ -494,7 +494,7 @@ describe("gateway plugin HTTP auth boundary", () => {
     });
   });
 
-  test("requires gateway auth for canonicalized /api/channels variants", async () => {
+  test("requires gateway auth for canonicalized /v1/channels variants", async () => {
     const handlePluginRequest = createCanonicalizedChannelPluginHandler();
 
     await withPluginGatewayServer({

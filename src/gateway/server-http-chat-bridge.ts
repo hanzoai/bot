@@ -1,7 +1,7 @@
 /**
  * HTTP Chat Bridge — REST endpoint for sending chat messages to bots.
  *
- * POST /api/v1/chat
+ * POST /v1/chat
  * { "sessionKey": "cloud-xxx:main", "message": "Hello", "timeoutMs": 60000 }
  *
  * Returns: { "ok": true, "response": "Hi!" }
@@ -36,7 +36,7 @@ export async function handleChatBridgeHttpRequest(
 ): Promise<boolean> {
   const url = new URL(req.url ?? "/", "http://localhost");
 
-  if (url.pathname !== "/api/v1/chat" || req.method !== "POST") {
+  if (url.pathname !== "/v1/chat" || req.method !== "POST") {
     return false;
   }
 

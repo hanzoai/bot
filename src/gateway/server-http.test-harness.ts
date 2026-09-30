@@ -146,7 +146,7 @@ export function createCanonicalizedChannelPluginHandler() {
   return vi.fn(async (req: IncomingMessage, res: ServerResponse) => {
     const pathname = new URL(req.url ?? "/", "http://localhost").pathname;
     const canonicalPath = canonicalizePathVariant(pathname);
-    if (canonicalPath !== "/api/channels/nostr/default/profile") {
+    if (canonicalPath !== "/v1/channels/nostr/default/profile") {
       return false;
     }
     res.statusCode = 200;
@@ -178,62 +178,62 @@ export type RouteVariant = {
 };
 
 export const CANONICAL_UNAUTH_VARIANTS: RouteVariant[] = [
-  { label: "case-variant", path: "/API/channels/nostr/default/profile" },
-  { label: "encoded-slash", path: "/api/channels%2Fnostr%2Fdefault%2Fprofile" },
+  { label: "case-variant", path: "/V1/channels/nostr/default/profile" },
+  { label: "encoded-slash", path: "/v1/channels%2Fnostr%2Fdefault%2Fprofile" },
   {
     label: "encoded-slash-4x",
-    path: "/api%2525252fchannels%2525252fnostr%2525252fdefault%2525252fprofile",
+    path: "/v1%2525252fchannels%2525252fnostr%2525252fdefault%2525252fprofile",
   },
-  { label: "encoded-segment", path: "/api/%63hannels/nostr/default/profile" },
-  { label: "dot-traversal-encoded-slash", path: "/api/foo/..%2fchannels/nostr/default/profile" },
+  { label: "encoded-segment", path: "/v1/%63hannels/nostr/default/profile" },
+  { label: "dot-traversal-encoded-slash", path: "/v1/foo/..%2fchannels/nostr/default/profile" },
   {
     label: "dot-traversal-encoded-dotdot-slash",
-    path: "/api/foo/%2e%2e%2fchannels/nostr/default/profile",
+    path: "/v1/foo/%2e%2e%2fchannels/nostr/default/profile",
   },
   {
     label: "dot-traversal-double-encoded",
-    path: "/api/foo/%252e%252e%252fchannels/nostr/default/profile",
+    path: "/v1/foo/%252e%252e%252fchannels/nostr/default/profile",
   },
-  { label: "duplicate-slashes", path: "/api/channels//nostr/default/profile" },
-  { label: "trailing-slash", path: "/api/channels/nostr/default/profile/" },
-  { label: "malformed-short-percent", path: "/api/channels%2" },
-  { label: "malformed-double-slash-short-percent", path: "/api//channels%2" },
+  { label: "duplicate-slashes", path: "/v1/channels//nostr/default/profile" },
+  { label: "trailing-slash", path: "/v1/channels/nostr/default/profile/" },
+  { label: "malformed-short-percent", path: "/v1/channels%2" },
+  { label: "malformed-double-slash-short-percent", path: "/v1//channels%2" },
 ];
 
 export const CANONICAL_AUTH_VARIANTS: RouteVariant[] = [
-  { label: "auth-case-variant", path: "/API/channels/nostr/default/profile" },
+  { label: "auth-case-variant", path: "/V1/channels/nostr/default/profile" },
   {
     label: "auth-encoded-slash-4x",
-    path: "/api%2525252fchannels%2525252fnostr%2525252fdefault%2525252fprofile",
+    path: "/v1%2525252fchannels%2525252fnostr%2525252fdefault%2525252fprofile",
   },
-  { label: "auth-encoded-segment", path: "/api/%63hannels/nostr/default/profile" },
-  { label: "auth-duplicate-trailing-slash", path: "/api/channels//nostr/default/profile/" },
+  { label: "auth-encoded-segment", path: "/v1/%63hannels/nostr/default/profile" },
+  { label: "auth-duplicate-trailing-slash", path: "/v1/channels//nostr/default/profile/" },
   {
     label: "auth-dot-traversal-encoded-slash",
-    path: "/api/foo/..%2fchannels/nostr/default/profile",
+    path: "/v1/foo/..%2fchannels/nostr/default/profile",
   },
   {
     label: "auth-dot-traversal-double-encoded",
-    path: "/api/foo/%252e%252e%252fchannels/nostr/default/profile",
+    path: "/v1/foo/%252e%252e%252fchannels/nostr/default/profile",
   },
 ];
 
 export function buildChannelPathFuzzCorpus(): RouteVariant[] {
   const variants = [
-    "/api/channels/nostr/default/profile",
-    "/API/channels/nostr/default/profile",
-    "/api/foo/..%2fchannels/nostr/default/profile",
-    "/api/foo/%2e%2e%2fchannels/nostr/default/profile",
-    "/api/foo/%252e%252e%252fchannels/nostr/default/profile",
-    "/api/channels//nostr/default/profile/",
-    "/api/channels%2Fnostr%2Fdefault%2Fprofile",
-    "/api/channels%252Fnostr%252Fdefault%252Fprofile",
-    "/api%2525252fchannels%2525252fnostr%2525252fdefault%2525252fprofile",
-    "/api//channels/nostr/default/profile",
-    "/api/channels%2",
-    "/api/channels%zz",
-    "/api//channels%2",
-    "/api//channels%zz",
+    "/v1/channels/nostr/default/profile",
+    "/V1/channels/nostr/default/profile",
+    "/v1/foo/..%2fchannels/nostr/default/profile",
+    "/v1/foo/%2e%2e%2fchannels/nostr/default/profile",
+    "/v1/foo/%252e%252e%252fchannels/nostr/default/profile",
+    "/v1/channels//nostr/default/profile/",
+    "/v1/channels%2Fnostr%2Fdefault%2Fprofile",
+    "/v1/channels%252Fnostr%252Fdefault%252Fprofile",
+    "/v1%2525252fchannels%2525252fnostr%2525252fdefault%2525252fprofile",
+    "/v1//channels/nostr/default/profile",
+    "/v1/channels%2",
+    "/v1/channels%zz",
+    "/v1//channels%2",
+    "/v1//channels%zz",
   ];
   return variants.map((path) => ({ label: `fuzz:${path}`, path }));
 }

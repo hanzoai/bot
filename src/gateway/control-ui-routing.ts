@@ -22,7 +22,7 @@ export function classifyControlUiRequest(params: {
     if (pathname === "/plugins" || pathname.startsWith("/plugins/")) {
       return { kind: "not-control-ui" };
     }
-    if (pathname === "/api" || pathname.startsWith("/api/")) {
+    if (pathname === "/v1" || pathname.startsWith("/v1/")) {
       return { kind: "not-control-ui" };
     }
     if (!isReadHttpMethod(method)) {

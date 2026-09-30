@@ -1,4 +1,3 @@
-import type { Request, Response } from "express";
 import type { Server } from "node:http";
 import {
   DEFAULT_WEBHOOK_MAX_BODY_BYTES,
@@ -8,10 +7,11 @@ import {
   type BotConfig,
   type RuntimeEnv,
 } from "@hanzo/bot/plugin-sdk/msteams";
-import type { MSTeamsConversationStore } from "./conversation-store.js";
-import type { MSTeamsAdapter } from "./messenger.js";
+import type { Request, Response } from "express";
 import { createMSTeamsConversationStoreFs } from "./conversation-store-fs.js";
+import type { MSTeamsConversationStore } from "./conversation-store.js";
 import { formatUnknownError } from "./errors.js";
+import type { MSTeamsAdapter } from "./messenger.js";
 import { registerMSTeamsHandlers, type MSTeamsActivityHandler } from "./monitor-handler.js";
 import { createMSTeamsPollStoreFs, type MSTeamsPollStore } from "./polls.js";
 import {
@@ -279,8 +279,8 @@ export async function monitorMSTeamsProvider(
   });
   expressApp.use(authorizeJWT(authConfig));
 
-  // Set up the messages endpoint - use configured path and /api/messages as fallback
-  const configuredPath = msteamsCfg.webhook?.path ?? "/api/messages";
+  // Set up the messages endpoint - use configured path and /v1/messages as fallback
+  const configuredPath = msteamsCfg.webhook?.path ?? "/v1/messages";
   const messageHandler = (req: Request, res: Response) => {
     void adapter
       .process(req, res, (context: unknown) => handler.run!(context))
@@ -289,15 +289,15 @@ export async function monitorMSTeamsProvider(
       });
   };
 
-  // Listen on configured path and /api/messages (standard Bot Framework path)
+  // Listen on configured path and the default /v1/messages
   expressApp.post(configuredPath, messageHandler);
-  if (configuredPath !== "/api/messages") {
-    expressApp.post("/api/messages", messageHandler);
+  if (configuredPath !== "/v1/messages") {
+    expressApp.post("/v1/messages", messageHandler);
   }
 
   log.debug?.("listening on paths", {
     primary: configuredPath,
-    fallback: "/api/messages",
+    fallback: "/v1/messages",
   });
 
   // Start listening and fail fast if bind/listen fails.

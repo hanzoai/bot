@@ -493,7 +493,7 @@ export function resolveCommandText(
 
 // ─── Config resolution ───────────────────────────────────────────────────────
 
-const DEFAULT_CALLBACK_PATH = "/api/channels/mattermost/command";
+const DEFAULT_CALLBACK_PATH = "/v1/channels/mattermost/command";
 
 /**
  * Ensure the callback path starts with a leading `/` to prevent

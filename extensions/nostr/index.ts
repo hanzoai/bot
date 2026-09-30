@@ -1,7 +1,7 @@
 import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/nostr";
 import { emptyPluginConfigSchema } from "@hanzo/bot/plugin-sdk/nostr";
-import type { NostrProfile } from "./src/config-schema.js";
 import { nostrPlugin } from "./src/channel.js";
+import type { NostrProfile } from "./src/config-schema.js";
 import { createNostrProfileHttpHandler } from "./src/nostr-profile-http.js";
 import { setNostrRuntime, getNostrRuntime } from "./src/runtime.js";
 import { resolveNostrAccount } from "./src/types.js";
@@ -62,7 +62,7 @@ const plugin = {
     });
 
     api.registerHttpRoute({
-      path: "/api/channels/nostr",
+      path: "/v1/channels/nostr",
       auth: "gateway",
       match: "prefix",
       handler: httpHandler,

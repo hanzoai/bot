@@ -59,18 +59,18 @@ describe("slash-commands", () => {
   });
 
   it("normalizes callback path in slash config", () => {
-    const config = resolveSlashCommandConfig({ callbackPath: "api/channels/mattermost/command" });
-    expect(config.callbackPath).toBe("/api/channels/mattermost/command");
+    const config = resolveSlashCommandConfig({ callbackPath: "v1/channels/mattermost/command" });
+    expect(config.callbackPath).toBe("/v1/channels/mattermost/command");
   });
 
   it("falls back to localhost callback URL for wildcard bind hosts", () => {
-    const config = resolveSlashCommandConfig({ callbackPath: "/api/channels/mattermost/command" });
+    const config = resolveSlashCommandConfig({ callbackPath: "/v1/channels/mattermost/command" });
     const callbackUrl = resolveCallbackUrl({
       config,
       gatewayPort: 18789,
       gatewayHost: "0.0.0.0",
     });
-    expect(callbackUrl).toBe("http://localhost:18789/api/channels/mattermost/command");
+    expect(callbackUrl).toBe("http://localhost:18789/v1/channels/mattermost/command");
   });
 
   it("reuses existing command when trigger already points to callback URL", async () => {

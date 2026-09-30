@@ -97,14 +97,14 @@ const GATEWAY_PROBE_STATUS_BY_PATH = new Map<string, "live" | "ready" | "running
   ["/readyz", "ready"],
   ["/status", "running"],
 ]);
-const MATTERMOST_SLASH_CALLBACK_PATH = "/api/channels/mattermost/command";
+const MATTERMOST_SLASH_CALLBACK_PATH = "/v1/channels/mattermost/command";
 
 function resolveMattermostSlashCallbackPaths(
   configSnapshot: ReturnType<typeof loadConfig>,
 ): Set<string> {
   const callbackPaths = new Set<string>([MATTERMOST_SLASH_CALLBACK_PATH]);
   const isMattermostCommandCallbackPath = (path: string): boolean =>
-    path === MATTERMOST_SLASH_CALLBACK_PATH || path.startsWith("/api/channels/mattermost/");
+    path === MATTERMOST_SLASH_CALLBACK_PATH || path.startsWith("/v1/channels/mattermost/");
 
   const normalizeCallbackPath = (value: unknown): string => {
     const trimmed = typeof value === "string" ? value.trim() : "";
@@ -567,7 +567,7 @@ export function createGatewayHttpServer(opts: {
     });
 
     // Don't interfere with WebSocket upgrades; ws handles the 'upgrade' event.
-    if (String(req.headers.upgrade ?? "").toLowerCase() === "websocket") {
+    if ((req.headers.upgrade ?? "").toLowerCase() === "websocket") {
       return;
     }
 
