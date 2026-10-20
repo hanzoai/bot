@@ -38,6 +38,10 @@
 # `hanzoai/box`: the daemon design that owned that name was deleted from cloud
 # along with cmd/boxd. One artifact, one path, named by the thing that fetches it.
 #
+# It is PUBLISHED to ghcr.io/hanzoai/sandbox and PULLED as oci.hanzo.ai/hanzoai/sandbox:
+# oci.hanzo.ai reads through to ghcr.io, so the two names are one image, digest
+# for digest, and nothing pushes to oci.hanzo.ai.
+#
 # `repo:` NAMES THE REGISTRY DIRECTLY rather than ghcr.io. Every other repo in
 # the fleet pushes to ghcr and lets the lane's crane step mirror across, but that
 # mirror rewrites the org — ghcr.io/hanzoai/x lands at <registry>/hanzo/x — and
@@ -99,7 +103,7 @@ images:
   - name: sandbox-exec
     context: .
     dockerfile: Dockerfile.sandbox
-    repo: oci.hanzo.ai/hanzoai/sandbox
+    repo: ghcr.io/hanzoai/sandbox
     tag-suffix: exec
     platforms: [linux/amd64, linux/arm64]
     args: { STAGE: exec }
@@ -107,7 +111,7 @@ images:
   - name: sandbox-dev
     context: .
     dockerfile: Dockerfile.sandbox
-    repo: oci.hanzo.ai/hanzoai/sandbox
+    repo: ghcr.io/hanzoai/sandbox
     tag-suffix: dev
     platforms: [linux/amd64, linux/arm64]
     args: { STAGE: dev }
@@ -115,7 +119,7 @@ images:
   - name: sandbox-desktop
     context: .
     dockerfile: Dockerfile.sandbox
-    repo: oci.hanzo.ai/hanzoai/sandbox
+    repo: ghcr.io/hanzoai/sandbox
     tag-suffix: desktop
     platforms: [linux/amd64, linux/arm64]
     args: { STAGE: desktop }
@@ -126,7 +130,7 @@ images:
   - name: sandbox-android
     context: .
     dockerfile: Dockerfile.sandbox
-    repo: oci.hanzo.ai/hanzoai/sandbox
+    repo: ghcr.io/hanzoai/sandbox
     tag-suffix: android
     platforms: [linux/amd64]
     args: { STAGE: android }
@@ -145,13 +149,13 @@ images:
   - name: boundary
     context: .
     dockerfile: Dockerfile.boundary
-    repo: oci.hanzo.ai/hanzoai/boundary
+    repo: ghcr.io/hanzoai/boundary
     platforms: [linux/amd64, linux/arm64]
 
   - name: sandbox-admin
     context: .
     dockerfile: Dockerfile.sandbox
-    repo: oci.hanzo.ai/hanzoai/sandbox
+    repo: ghcr.io/hanzoai/sandbox
     tag-suffix: admin
     platforms: [linux/amd64, linux/arm64]
     args: { STAGE: admin }
