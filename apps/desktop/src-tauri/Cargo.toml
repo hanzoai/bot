@@ -1,0 +1,25 @@
+[package]
+name = "hanzo-bot-desktop"
+version = "2026.6.7"
+description = "Hanzo Bot desktop application"
+authors = ["Hanzo AI, Inc. <dev@hanzo.ai>"]
+license = "MIT"
+repository = "https://github.com/hanzoai/bot"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2.6", features = [] }
+
+[dependencies]
+tauri = { version = "2.11", features = ["tray-icon", "image-png", "devtools"] }
+tauri-plugin-shell = "2.3"
+tauri-plugin-dialog = "2.7"
+tauri-plugin-fs = "2.5"
+tauri-plugin-opener = "2.5"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.36", features = ["macros", "rt-multi-thread", "sync", "io-util"] }
+reqwest = { version = "0.11", features = ["json"] }
+dirs = "5.0"
+uuid = { version = "1.10", features = ["v4"] }
+keyring = { version = "3.6", features = ["apple-native", "windows-native", "sync-secret-service", "crypto-rust"] }
