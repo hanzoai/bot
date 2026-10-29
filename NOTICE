@@ -5,18 +5,20 @@ This product includes software from OpenClaw, formerly Warelay / Clawdbot / Molt
 
     Copyright (c) 2026 OpenClaw Foundation
 
---- Fork provenance ---
+--- Historical source provenance ---
 
-Forked from https://github.com/openclaw/openclaw — OpenClaw, the personal AI
-assistant published by the OpenClaw Foundation (upstream sites openclaw.ai and
-docs.openclaw.ai). Hanzo Bot tracks the TypeScript reference implementation of
-that project. This repository's root commit is the OpenClaw initial import
-(matching the upstream repository's own initial commit), and earlier upstream
-names — Moltbot, Clawdbot, Warelay — are recorded in CHANGELOG.md.
+The initial codebase was derived from https://github.com/openclaw/openclaw —
+OpenClaw, published by the OpenClaw Foundation (upstream sites openclaw.ai and
+docs.openclaw.ai). Hanzo Bot is now a separately maintained, Hanzo-native
+project; historical attribution does not imply ongoing upstream tracking,
+affiliation, or endorsement. This repository's root commit records the
+OpenClaw initial import (matching the upstream repository's initial commit),
+and earlier upstream names — Moltbot, Clawdbot, Warelay — are recorded in
+CHANGELOG.md.
 
---- DEVIATIONS ---
+--- Hanzo-maintained changes ---
 
-Changes made by Hanzo AI, Inc. on top of the OpenClaw MIT baseline:
+Selected changes introduced by Hanzo AI, Inc. since the original MIT code import:
 
 - Rebranded product-facing surfaces to "Hanzo Bot": CLI binaries `hanzo-bot` and
   `bot`, npm package `@hanzo/bot`, README, and documentation pointing to hanzo.ai
