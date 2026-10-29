@@ -9,10 +9,11 @@ title: "Migrate from OpenClaw"
 
 # Migrate from OpenClaw
 
-Hanzo Bot is a fork of [OpenClaw](https://github.com/openclaw/openclaw) (formerly Warelay,
-Clawdbot and Moltbot; MIT). If you run OpenClaw today, one command copies your config,
-credentials, workspace, sessions, skills and cron jobs into Hanzo Bot. OpenClaw's own
-files are never changed, so you can go back at any time.
+Hanzo Bot is an independent, Hanzo-maintained AI agent platform. If you run
+[OpenClaw](https://github.com/openclaw/openclaw) today, one command copies your
+config, credentials, workspace, sessions, skills and cron jobs into Hanzo Bot.
+OpenClaw's own files are never changed, so you can go back at any time.
+Historical OpenClaw-derived code and MIT attribution are documented in [NOTICE](../../NOTICE).
 
 This page was checked against **OpenClaw 2026.9.6** (commit `eb377ac`, npm `openclaw@2026.9.6`),
 a real install made with `openclaw onboard`, and the [Hanzo Bot source](https://github.com/hanzoai/bot).
@@ -124,7 +125,7 @@ These OpenClaw commands have no Hanzo Bot counterpart: `attach`, `audit`, `backu
 ## Config keys
 
 Most of `openclaw.json` means the same thing in `bot.json` and is copied as it is. Settings
-OpenClaw moved after Hanzo Bot forked from it go back to where Hanzo Bot reads them:
+OpenClaw moved after Hanzo Bot's initial code import go back to where Hanzo Bot reads them:
 
 | `openclaw.json`                                                     | `bot.json`                                                                          |
 | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
