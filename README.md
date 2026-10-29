@@ -2,7 +2,7 @@
 
 # Hanzo Bot
 
-Hanzo Bot is a personal AI assistant you run on your own machine. It sits behind a local
+Hanzo Bot is an independent, Hanzo-maintained AI agent platform you run on your own machine. It sits behind a local
 gateway process and answers you on the chat apps you already use — WhatsApp, Telegram,
 Slack, Discord, Signal, iMessage, Matrix, IRC, Teams and about a dozen more — so the
 assistant is reachable from your phone without anything of yours leaving your machine.
@@ -29,11 +29,12 @@ skills, and installs the gateway as a launchd/systemd user service so it stays u
 hanzo-bot onboard --install-daemon
 ```
 
-## Coming from OpenClaw?
+## Migrating from OpenClaw?
 
-Hanzo Bot is a fork of [OpenClaw](https://github.com/openclaw/openclaw). One command moves an
-OpenClaw install over: config, credentials, workspace, sessions, skills and cron jobs. It shows
-what it will do first, and it never changes `~/.openclaw`:
+Hanzo Bot is maintained independently by Hanzo AI. If you're moving from
+[OpenClaw](https://github.com/openclaw/openclaw), one command imports your
+config, credentials, workspace, sessions, skills and cron jobs. It shows what
+it will do first, and it never changes `~/.openclaw`:
 
 ```bash
 hanzo-bot migrate openclaw           # what would move; writes nothing
@@ -95,5 +96,5 @@ Stable releases are tagged `vYYYY.M.D` and published to npm as `latest`. Prerele
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Hanzo Bot includes OpenClaw (MIT); its attribution is in
-[NOTICE](NOTICE).
+MIT — see [LICENSE](LICENSE). Historical third-party code provenance and
+required OpenClaw MIT attribution are preserved in [NOTICE](NOTICE).
