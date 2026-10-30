@@ -55,7 +55,7 @@ HanzoBot is a **self-hosted gateway** that connects your favorite chat apps — 
 - **Self-hosted**: runs on your hardware, your rules
 - **Multi-channel**: one Gateway serves WhatsApp, Telegram, Discord, and more simultaneously
 - **Agent-native**: built for coding agents with tool use, sessions, memory, and multi-agent routing
-- **Open source**: MIT licensed, community-driven
+- **Open source**: Apache-2.0 for Hanzo-authored code, with retained MIT notices for earlier third-party portions
 
 **What do you need?** Node 22+, an API key from your chosen provider, and 5 minutes. For best quality and security, use the strongest latest-generation model available.
 
