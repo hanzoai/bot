@@ -3,7 +3,7 @@ name = "hanzo-bot-desktop"
 version = "2026.6.7"
 description = "Hanzo Bot desktop application"
 authors = ["Hanzo AI, Inc. <dev@hanzo.ai>"]
-license = "MIT"
+license = "Apache-2.0"
 repository = "https://github.com/hanzoai/bot"
 edition = "2021"
 
