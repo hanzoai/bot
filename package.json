@@ -7,7 +7,7 @@
   "bugs": {
     "url": "https://github.com/hanzoai/bot/issues"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "author": "",
   "repository": {
     "type": "git",
@@ -24,6 +24,8 @@
   "files": [
     "CHANGELOG.md",
     "LICENSE",
+    "LICENSES/",
+    "NOTICE",
     "hanzo-bot.mjs",
     "README-header.png",
     "README.md",
