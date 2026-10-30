@@ -10,7 +10,7 @@ assistant is reachable from your phone without anything of yours leaving your ma
 <p align="center">
   <a href="https://github.com/hanzoai/bot/actions/workflows/ci.yml?branch=main"><img src="https://img.shields.io/github/actions/workflow/status/hanzoai/bot/ci.yml?branch=main&style=for-the-badge" alt="CI status"></a>
   <a href="https://github.com/hanzoai/bot/releases"><img src="https://img.shields.io/github/v/release/hanzoai/bot?include_prereleases&style=for-the-badge" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge" alt="MIT License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache--2.0-blue.svg?style=for-the-badge" alt="Apache License 2.0"></a>
 </p>
 
 ## Install
@@ -96,5 +96,7 @@ Stable releases are tagged `vYYYY.M.D` and published to npm as `latest`. Prerele
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Historical third-party code provenance and
-required OpenClaw MIT attribution are preserved in [NOTICE](NOTICE).
+Hanzo Bot is distributed under the [Apache License 2.0](LICENSE) for Hanzo-authored
+work. Portions originating from earlier MIT-licensed code remain subject to
+those MIT terms; see [LICENSES/MIT.txt](LICENSES/MIT.txt) and [NOTICE](NOTICE)
+for required attribution and historical source provenance.
