@@ -9,7 +9,7 @@ LABEL org.opencontainers.image.base.name="docker.io/library/node:22-bookworm" \
   org.opencontainers.image.source="https://github.com/hanzo-bot/hanzo-bot" \
   org.opencontainers.image.url="https://hanzo-bot.ai" \
   org.opencontainers.image.documentation="https://docs.hanzo-bot.ai/install/docker" \
-  org.opencontainers.image.licenses="MIT" \
+  org.opencontainers.image.licenses="Apache-2.0" \
   org.opencontainers.image.title="HanzoBot" \
   org.opencontainers.image.description="HanzoBot gateway and CLI runtime container image"
 
