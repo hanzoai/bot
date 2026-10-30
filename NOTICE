@@ -1,6 +1,11 @@
 bot
 Copyright (c) 2026 Hanzo AI Inc.
 
+Hanzo-authored work is distributed under the Apache License, Version 2.0.
+Original MIT-licensed material remains under its existing MIT terms;
+see LICENSES/MIT.txt. The Apache license does not replace the original
+license or copyright notices for third-party material.
+
 This product includes software from OpenClaw, formerly Warelay / Clawdbot / Moltbot (https://github.com/openclaw/openclaw), licensed under MIT:
 
     Copyright (c) 2026 OpenClaw Foundation
