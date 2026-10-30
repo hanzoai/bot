@@ -22,6 +22,8 @@ Hanzo Bot is Hanzo AI's multi-channel personal assistant — one bot across ever
 
 ## License
 
-MIT - Free and open source.
+Hanzo-authored work: Apache License 2.0 ([LICENSE](../../LICENSE)).
+Historical third-party code retains its original MIT license and notices
+([LICENSES/MIT.txt](../../LICENSES/MIT.txt), [NOTICE](../../NOTICE)).
 
 > "We are all just playing with our own prompts." (An AI, probably high on tokens)
