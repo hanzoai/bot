@@ -77,10 +77,14 @@ struct AboutSettings: View {
                 }
             }
 
-            Text("© 2025 Peter Steinberger — MIT License.")
+            Text("© 2026 Hanzo AI Inc. — Apache License 2.0.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .padding(.top, 4)
+
+            Text("Historical portions © 2025 Peter Steinberger — MIT License.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
 
             Spacer()
         }
