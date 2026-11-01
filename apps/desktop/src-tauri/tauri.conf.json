@@ -5,10 +5,7 @@
   "identifier": "com.hanzo.bot",
   "mainBinaryName": "hanzo-bot",
   "build": {
-    "beforeDevCommand": "pnpm dev",
-    "beforeBuildCommand": "pnpm build",
-    "frontendDist": "../dist",
-    "devUrl": "http://localhost:1420"
+    "frontendDist": "../dist"
   },
   "bundle": {
     "active": true,
@@ -33,13 +30,14 @@
       {
         "label": "main",
         "title": "Hanzo Bot",
-        "width": 1180,
-        "height": 780,
-        "minWidth": 760,
-        "minHeight": 560,
+        "url": "http://127.0.0.1:5173",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 900,
+        "minHeight": 650,
         "resizable": true,
-        "transparent": true,
-        "decorations": false,
+        "transparent": false,
+        "decorations": true,
         "shadow": true,
         "center": true
       }

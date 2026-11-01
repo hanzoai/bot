@@ -85,10 +85,10 @@ export function Face({
     );
   }
 
-  // The Iconic Hanzo Bot Face: white disc with two vertical pill eyes
-  const eyeHeight = size * 0.28;
-  const eyeWidth = size * 0.11;
-  const eyeSpacing = size * 0.16;
+  // The Iconic Hanzo Bot Face: white disc with two horizontal capsule eyes
+  const eyeWidth = size * 0.26;
+  const eyeHeight = size * 0.12;
+  const eyeSpacing = size * 0.11;
 
   const isBlinkingNow = blink || status === 'blinking';
 

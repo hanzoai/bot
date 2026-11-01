@@ -4,9 +4,25 @@
 mod commands;
 
 use commands::*;
+use tauri::Manager;
 
 fn main() {
+    std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+
     tauri::Builder::default()
+        .setup(|app| {
+            if let Some(window) = app.get_webview_window("main") {
+                if let Ok(url_str) = std::env::var("HANZO_BOT_URL") {
+                    if let Ok(parsed) = url_str.parse() {
+                        let _ = window.navigate(parsed);
+                    }
+                }
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+            Ok(())
+        })
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
