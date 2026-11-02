@@ -12,9 +12,10 @@
 # name the fleet pulls it by, and the registry path is the one that has to
 # match a consumer.
 #
-# ONE recipe, four published tags, one chain that forks once:
+# ONE recipe, published tags, one chain that forks once:
 #
-#   exec  ──▶  dev  ──┬──▶  desktop
+#   exec  ──▶  dev  ──┬──▶  desktop  ──┬──▶  browser
+#                     │                └──▶  android
 #                     └──▶  admin
 #
 # Three of them are a CLASS in apps/sandbox/runtime.go's imageFor() — the word a
@@ -1059,6 +1060,25 @@ WORKDIR /work
 # does still happens exactly once.
 CMD ["sandbox-desktop", "avd"]
 
+# ─────────────────────────────────────────────────────────────────────────────
+# browser — the desktop with Chromium as its program.
+#
+# Chromium full screen on the desktop's display, DevTools on 127.0.0.1:9222.
+# The person watches it through the screen; an agent drives the same browser
+# with Playwright's connectOverCDP through the sandbox's exec. Nothing is
+# installed here: the desktop already has Chromium (exec stage, playwright) and
+# the X stack. The stage is the program, the way android's is the phone.
+FROM desktop AS browser
+
+USER root
+COPY scripts/browser.sh /usr/local/bin/browser
+RUN chmod 0755 /usr/local/bin/browser && command -v browser chromium
+
+USER sandbox
+WORKDIR /work
+
+# The screen, then the browser on it.
+CMD ["sandbox-desktop", "browser"]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # admin — the operator's box. dev, plus the two clients that talk to the fleet

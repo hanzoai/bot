@@ -1,19 +1,20 @@
 # Canonical CI/CD config for hanzoai/bot — the one file both the hanzoai/ci
 # reusable (.hanzo/workflows/cicd.yml) and platform.hanzo.ai read.
 
-# ONE Dockerfile, FOUR tags, one chain that forks once:
+# ONE Dockerfile, one chain that forks once:
 #
-#   exec -> dev -> desktop
+#   exec -> dev -> desktop -> browser
+#                  desktop -> android
 #           dev -> admin
 #
-# Three of the four are a sandbox CLASS a caller can ask for. `admin` is not:
+# All but `admin` are a sandbox CLASS a caller can ask for. `admin` is not:
 # hanzoai/cloud hands it to a SuperAdmin's `dev` sandbox and nobody else's, so
 # it is a tag with no word in the request. It is built and published exactly
 # like its siblings — same file, same repo, one more `tag-suffix` — because
 # which identity receives an image is a decision for the consumer, not for a
 # build lane.
 #
-# THESE FOUR, AND ONLY THESE FOUR. The npm package has release.yml. The bot and
+# THESE, AND ONLY THESE. The npm package has release.yml. The bot and
 # bot-cloud images have no lane: their buildx lanes (deploy.yml, cloud.yml) are
 # gone, and the bot Dockerfile needs dist/control-ui assembled before it builds,
 # which the build door does not do. The box recipes are the ones with no lane at
@@ -123,6 +124,16 @@ images:
     tag-suffix: desktop
     platforms: [linux/amd64, linux/arm64]
     args: { STAGE: desktop }
+
+  # The desktop with Chromium as its program: the browser class. A layer of one
+  # script over desktop, so it costs a node nothing it has not already pulled.
+  - name: sandbox-browser
+    context: .
+    dockerfile: Dockerfile.sandbox
+    repo: ghcr.io/hanzoai/sandbox
+    tag-suffix: browser
+    platforms: [linux/amd64, linux/arm64]
+    args: { STAGE: browser }
 
   # android is the one entry whose `platforms:` is the IMAGE's limit rather than
   # the fleet's — Google publishes no linux-aarch64 emulator, so this stage could
