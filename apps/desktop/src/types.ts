@@ -34,6 +34,16 @@ export interface Message {
   choiceCard?: ChoiceCard;
   isStreaming?: boolean;
   localFilesChanged?: string[];
+  steps?: Step[];
+}
+
+/** A command an agent ran in its sandbox, as it ran. */
+export interface Step {
+  id: string;
+  command: string;
+  output: string;
+  exitCode: number | null;
+  status: 'in_progress' | 'completed' | 'failed' | 'declined';
 }
 
 export interface LocalWorkspace {

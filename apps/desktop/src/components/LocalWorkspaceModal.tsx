@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, FolderOpen, FolderGit2, FileText, Play } from 'lucide-react';
-import { openFolderDialog, listLocalWorkspace, runLocalDev } from '../lib/tauri';
+import { openFolderDialog, listLocalWorkspace } from '../lib/tauri';
 import type { LocalWorkspace } from '../types';
 
 interface LocalWorkspaceModalProps {
@@ -8,6 +8,9 @@ interface LocalWorkspaceModalProps {
   onClose: () => void;
   currentWorkspace: LocalWorkspace | null;
   onSetWorkspace: (ws: LocalWorkspace) => void;
+  /** Starts Hanzo Dev on the linked folder; the run plays out in the chat. */
+  onRunDev: (prompt: string) => void;
+  running: boolean;
 }
 
 export function LocalWorkspaceModal({
@@ -15,11 +18,11 @@ export function LocalWorkspaceModal({
   onClose,
   currentWorkspace,
   onSetWorkspace,
+  onRunDev,
+  running,
 }: LocalWorkspaceModalProps) {
   const [loading, setLoading] = useState(false);
   const [devPrompt, setDevPrompt] = useState('');
-  const [devRunning, setDevRunning] = useState(false);
-  const [devOutput, setDevOutput] = useState<string | null>(null);
 
   if (!isOpen) {return null;}
 
@@ -46,21 +49,10 @@ export function LocalWorkspaceModal({
     }
   };
 
-  const handleRunDev = async () => {
-    if (!currentWorkspace || !devPrompt.trim() || devRunning) {return;}
-    try {
-      setDevRunning(true);
-      setDevOutput('Invoking hanzoai/dev on local machine...');
-      const res = await runLocalDev(currentWorkspace.path, devPrompt.trim());
-      setDevOutput(res.output || (res.success ? 'Completed successfully!' : 'Completed with warnings.'));
-      // refresh workspace files
-      const updatedFiles = await listLocalWorkspace(currentWorkspace.path);
-      onSetWorkspace({ ...currentWorkspace, files: updatedFiles });
-    } catch (err: unknown) {
-      setDevOutput(`Error: ${err instanceof Error ? err.message : String(err)}`);
-    } finally {
-      setDevRunning(false);
-    }
+  const handleRunDev = () => {
+    if (!currentWorkspace || !devPrompt.trim() || running) {return;}
+    onRunDev(devPrompt.trim());
+    setDevPrompt('');
   };
 
   return (
@@ -138,18 +130,13 @@ export function LocalWorkspaceModal({
                 />
                 <button
                   onClick={handleRunDev}
-                  disabled={devRunning || !devPrompt.trim()}
+                  disabled={running || !devPrompt.trim()}
                   className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold transition-colors"
                 >
-                  {devRunning ? 'Running...' : 'Run'}
+                  {running ? 'Running...' : 'Run'}
                 </button>
               </div>
 
-              {devOutput && (
-                <pre className="bg-[#0e0e0e] border border-[#242424] rounded-xl p-2.5 text-[10px] text-gray-300 font-mono max-h-28 overflow-y-auto whitespace-pre-wrap">
-                  {devOutput}
-                </pre>
-              )}
             </div>
           )}
         </div>

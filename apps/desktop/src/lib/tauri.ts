@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import type { GatewayStatus, LocalEntry } from '../types';
 
 export const isTauri = () => {
@@ -72,11 +73,42 @@ export async function writeLocalFile(filePath: string, content: string): Promise
   }
 }
 
-export async function runLocalDev(workspacePath: string, promptText: string): Promise<{ session_id: string; output: string; success: boolean }> {
-  if (isTauri()) {
-    return invoke('local_workspace_run_dev', { workspacePath, prompt: promptText });
+/** One event of `dev exec --json` (thread.started, item.started, item.completed, turn.completed, ...). */
+export type DevEvent = { type: string; item?: Record<string, unknown>; [key: string]: unknown };
+
+export interface DevRunResult {
+  session_id: string;
+  output: string;
+  success: boolean;
+}
+
+/**
+ * Runs Hanzo Dev on a local folder in its workspace-write sandbox. `onEvent`
+ * receives every event while the agent works; the promise resolves with its
+ * last message when it finishes or is stopped (`cancelLocalDev(run)`).
+ */
+export async function runLocalDev(
+  run: string,
+  workspacePath: string,
+  promptText: string,
+  onEvent: (event: DevEvent) => void,
+): Promise<DevRunResult> {
+  if (!isTauri()) {
+    throw new Error('Hanzo Dev runs on this machine, so it needs the desktop app.');
   }
-  return { session_id: 'web_mock', output: 'Simulated local dev execution', success: true };
+  const unlisten = await listen<{ run: string; event: DevEvent }>('dev-run', (e) => {
+    if (e.payload.run === run) {onEvent(e.payload.event);}
+  });
+  try {
+    return await invoke<DevRunResult>('local_workspace_run_dev', { run, workspacePath, prompt: promptText });
+  } finally {
+    unlisten();
+  }
+}
+
+/** Stops a run started by `runLocalDev`. */
+export async function cancelLocalDev(run: string): Promise<boolean> {
+  return isTauri() ? invoke<boolean>('local_workspace_cancel_dev', { run }) : false;
 }
 
 // Keyring / Secure storage

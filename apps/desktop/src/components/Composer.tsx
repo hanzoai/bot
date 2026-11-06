@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Plus, Mic, AudioWaveform, ArrowUp } from 'lucide-react';
+import { Plus, Mic, AudioWaveform, ArrowUp, Square } from 'lucide-react';
 
 interface ComposerProps {
   onSendMessage: (text: string) => void;
@@ -7,6 +7,9 @@ interface ComposerProps {
   onStartVoiceMode: () => void;
   placeholder?: string;
   disabled?: boolean;
+  /** An agent run is in flight: the send button becomes Stop. */
+  running?: boolean;
+  onStop?: () => void;
 }
 
 export function Composer({
@@ -15,6 +18,8 @@ export function Composer({
   onStartVoiceMode,
   placeholder = 'Type your answer, or talk about something else',
   disabled = false,
+  running = false,
+  onStop,
 }: ComposerProps) {
   const [input, setInput] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -87,8 +92,18 @@ export function Composer({
           <Mic className="w-4 h-4" />
         </button>
 
-        {/* Voice waveform / Talk mode button OR Send button if text typed */}
-        {input.trim() ? (
+        {/* Stop while an agent runs; else Send if text typed, else voice mode */}
+        {running ? (
+          <button
+            type="button"
+            onClick={onStop}
+            className="w-8 h-8 rounded-full bg-white hover:bg-gray-200 text-black flex items-center justify-center transition-colors shrink-0 shadow-sm"
+            title="Stop"
+            aria-label="Stop"
+          >
+            <Square className="w-3.5 h-3.5 fill-current" />
+          </button>
+        ) : input.trim() ? (
           <button
             type="submit"
             disabled={disabled}

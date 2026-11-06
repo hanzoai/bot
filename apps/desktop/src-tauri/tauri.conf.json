@@ -5,6 +5,9 @@
   "identifier": "com.hanzo.bot",
   "mainBinaryName": "hanzo-bot",
   "build": {
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "pnpm build",
+    "devUrl": "http://localhost:1420",
     "frontendDist": "../dist"
   },
   "bundle": {
@@ -30,7 +33,6 @@
       {
         "label": "main",
         "title": "Hanzo Bot",
-        "url": "http://127.0.0.1:5173",
         "width": 1400,
         "height": 900,
         "minWidth": 900,

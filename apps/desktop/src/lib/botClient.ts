@@ -17,12 +17,14 @@ export class BotClient {
     userText: string,
     history: Message[],
     workspacePath?: string
-  ): Promise<{ text: string; filesChanged?: string[] }> {
+  ): Promise<{ text: string }> {
     const targetUrl =
       bot.endpoint === 'local' ? this.localBaseUrl : this.cloudBaseUrl;
 
+    const url = `${targetUrl}/v1/chat/completions`;
+    let response: Response;
     try {
-      const response = await fetch(`${targetUrl}/v1/chat/completions`, {
+      response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,38 +42,19 @@ export class BotClient {
           workspace: workspacePath,
         }),
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        const text =
-          data.choices?.[0]?.message?.content ||
-          data.text ||
-          'Done.';
-        return { text };
-      }
-    } catch {
-      // Local daemon or cloud endpoint not responding; fallback to intelligent built-in assistant responses
+    } catch (err) {
+      throw new Error(`Could not reach ${url}: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
     }
-
-    // Interactive fallback responses matching personal assistant persona
-    const lower = userText.toLowerCase();
-
-    if (lower.includes('call you') || lower.includes('drew') || lower.includes('nori')) {
-      return {
-        text: `Got it! You can call me that. I'm ready to help manage your schedule, connect to your workspace apps, or run local dev tasks. What would you like to tackle next?`,
-      };
+    if (!response.ok) {
+      const detail = (await response.text().catch(() => '')).slice(0, 300);
+      throw new Error(`${url} answered ${response.status}${detail ? `: ${detail}` : ''}`);
     }
-
-    if (lower.includes('code') || lower.includes('refactor') || lower.includes('file')) {
-      return {
-        text: `I've analyzed the files in your local workspace. I can run automated refactoring or updates with hanzoai/dev directly on your machine.`,
-        filesChanged: workspacePath ? ['src/index.ts', 'package.json'] : undefined,
-      };
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content ?? data.text;
+    if (typeof text !== 'string' || !text) {
+      throw new Error(`${url} answered without a message`);
     }
-
-    return {
-      text: `I'm on it! I can help coordinate your connected apps, organize tasks, or run code commands in your local workspace.`,
-    };
+    return { text };
   }
 }
 
