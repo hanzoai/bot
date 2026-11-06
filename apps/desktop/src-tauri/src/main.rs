@@ -11,6 +11,7 @@ fn main() {
     std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
 
     tauri::Builder::default()
+        .manage(DevRuns::default())
         .setup(|app| {
             if let Some(window) = app.get_webview_window("main") {
                 if let Ok(url_str) = std::env::var("HANZO_BOT_URL") {
@@ -42,6 +43,7 @@ fn main() {
             local_workspace_create_dir,
             local_workspace_delete,
             local_workspace_run_dev,
+            local_workspace_cancel_dev,
             keychain_get,
             keychain_set,
             keychain_delete,

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Face } from './Face';
-import { FileCode, Check } from 'lucide-react';
+import { FileCode, Check, Terminal } from 'lucide-react';
 import type { Message, Bot } from '../types';
 
 interface ChatStreamProps {
@@ -52,6 +52,44 @@ export function ChatStream({
                 <div className="flex items-center gap-2 text-xs text-gray-400 pl-1">
                   <Face size={18} status="idle" />
                   <span>{msg.statusText}</span>
+                </div>
+              )}
+
+              {/* Commands the agent ran in its sandbox, live */}
+              {msg.steps && msg.steps.length > 0 && (
+                <div className="flex flex-col gap-2 max-w-xl" data-slot="agent-steps">
+                  {msg.steps.map((step) => (
+                    <div
+                      key={step.id}
+                      data-status={step.status}
+                      className="bg-[#101010] border border-[#242424] rounded-xl p-2.5 text-[11px] font-mono text-gray-300"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Terminal className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+                        <span className="truncate flex-1">{step.command}</span>
+                        <span
+                          className={
+                            step.status === 'in_progress' && msg.isStreaming
+                              ? 'text-blue-400 animate-pulse'
+                              : step.exitCode === 0
+                                ? 'text-emerald-400'
+                                : 'text-red-400'
+                          }
+                        >
+                          {step.status !== 'in_progress'
+                            ? `exit ${step.exitCode ?? '?'}`
+                            : msg.isStreaming
+                              ? 'running'
+                              : 'ended with the run'}
+                        </span>
+                      </div>
+                      {step.output && (
+                        <pre className="mt-1.5 max-h-32 overflow-y-auto whitespace-pre-wrap text-gray-400">
+                          {step.output.slice(-2000)}
+                        </pre>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
 
