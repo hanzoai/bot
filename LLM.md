@@ -362,14 +362,14 @@ from the realpath of `/proc/self/exe`; the build proves it with `chromium
 
 ### Three products, three binaries
 
-`hanzo`, `dev` and `hanzo-mcp` are **native Rust binaries** fetched from GitHub
-release assets, not npm packages:
+`hanzo` and `dev` are **native Rust binaries** fetched from GitHub release
+assets, not npm packages; `hanzo-mcp` is the canonical npm server:
 
-| binary      | from                       | what it is                                          |
-| ----------- | -------------------------- | --------------------------------------------------- |
-| `hanzo`     | `hanzoai/cli` v1.9.37      | the cloud CLI — auth, billing, every product        |
-| `dev`       | `hanzoai/dev` v0.6.91      | the coding agent; `dev exec …` is what TOOLS spells |
-| `hanzo-mcp` | `hanzoai/mcp` rust-v1.1.15 | the MCP server, 13 HIP-0300 tools over JSON-RPC     |
+| binary      | from                   | what it is                                          |
+| ----------- | ---------------------- | --------------------------------------------------- |
+| `hanzo`     | `hanzoai/cli` v8.5.913 | the cloud CLI — auth, billing, every product        |
+| `dev`       | `hanzoai/dev` v0.7.9   | the coding agent; `dev exec …` is what TOOLS spells |
+| `hanzo-mcp` | npm `@hanzo/mcp` 2.4.4 | the MCP server, 13 HIP-0300 tools over JSON-RPC     |
 
 What this replaced was `npm install -g @hanzo/dev`, and it was wrong three ways
 at once. It put a **Node shim** at `/usr/local/bin/dev` that spawns a native
@@ -388,13 +388,6 @@ sha256)` and a fourth binary costs one line. Checksums are **literals**, read
 from the publisher, not the `.sha256` beside the asset — a digest fetched from
 the same host proves the transport, not the bytes we agreed to ship, and a
 release asset can be replaced under a tag that never moves.
-
-**`hanzo` is pinned at 1.9.37, not at latest, and that is a gap.**
-`hanzoai/cli`'s newest release is v1.9.40 and its release matrix declares a
-`linux-amd64` target, but v1.9.40 published only darwin-amd64, darwin-arm64,
-linux-arm64 and windows-amd64. There is no linux-amd64 asset to fetch and this
-image is linux-amd64; 1.9.37 is the newest release that has one. When that
-matrix publishes linux-amd64 again this is one version and one checksum.
 
 ### The version is the image's own
 

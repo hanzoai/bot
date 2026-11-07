@@ -479,34 +479,21 @@ RUN mkdir -p /work /home/sandbox/go /home/sandbox/.cargo \
 # under a tag that does not move. These were read from the publisher on
 # 2026-08-06 and are what makes two builds of this commit the same image.
 #
-# THE CLI IS PINNED AT 1.9.37, NOT AT LATEST, AND THAT IS A GAP NOT A CHOICE.
-# hanzoai/cli's newest release is v1.9.40, and its release matrix declares a
-# linux-amd64 target — but v1.9.40 published only darwin-amd64, darwin-arm64,
-# linux-arm64 and windows-amd64. There is no linux-amd64 asset to fetch, and
-# this image is linux-amd64. 1.9.37 is the newest release that has one. When the
-# matrix publishes linux-amd64 again, this is one version + one checksum.
-ARG HANZO_CLI_VERSION=1.9.45
-ARG HANZO_CLI_SHA256_AMD64=4e04dfd99eb551215c8c484e87c704b67180b4d2c420558e30e26a251a1200d2
-ARG HANZO_CLI_SHA256_ARM64=63523a2c015ba5490caf1909a5b927cc1944638fa368f70d07604647135e9f56
-# 0.6.94 IS THE RELEASE THE OLD PIN WAS WAITING FOR.
-#
-# The note this replaces held dev at 0.6.91 and said: bump to the first release
-# that contains create_hanzo_provider's alt_env_keys (HANZO_API_KEY,
-# HANZO_MACHINE_TOKEN, tried before the human session), 0.6.94 or later, and not
-# before. 0.6.94 is that release — bc20e6af40 is an ancestor of v0.6.94 and NOT
-# of v0.6.93, so the condition is met exactly, not approximately.
-#
-# Why it mattered: 0.6.92 and 0.6.93 read HANZO_USER_KEY and nothing else, and no
-# pod holds a human's login. A sandbox agent on either would have gone out
-# silently unauthenticated. That is also why cloud minting a per-lease inference
-# grant is only half the fix — the grant arrives on the machine variables, and
-# 0.6.91 was pinned precisely because it happened to read one of them.
+# The CLI is hanzoai/cli's newest release. The install below asserts the version
+# each binary reports, so a pin and the bytes it fetched cannot disagree.
+ARG HANZO_CLI_VERSION=8.5.913
+ARG HANZO_CLI_SHA256_AMD64=53ef1d48c00cadd675439940484497c778563ea33f94f21df6abb7658506f231
+ARG HANZO_CLI_SHA256_ARM64=a43ed0f2817bc19dea67c6a5f48064bac1fdb7174fabaad34f93bf251ce0ee18
+# dev 0.7.9 (Dev on hanzoai/codex fafb93553d). Its credential is `dev token`,
+# which reads HANZO_API_KEY first: the grant cloud hands a lease on its env, and
+# no pod holds a human's login. cloud stopped passing --include-plan-tool for it
+# (hanzo-inc/cloud apps/coding devExec): 0.7 refuses the flag, exit 2.
 #
 # Checksums verified against the bytes, not the .sha256 beside them: downloaded
 # both tarballs and sha256sum'd them, and they agree with the published files.
-ARG HANZO_DEV_VERSION=0.6.94
-ARG HANZO_DEV_SHA256_AMD64=35f1539bd8a04e753fa213f9552f7bcc2a44350f2db0e32cdfb5b780fc0bb8f4
-ARG HANZO_DEV_SHA256_ARM64=d2db0c22596f4d50270f65dd83a623d7c7677acab501d0bdac189152aabaa645
+ARG HANZO_DEV_VERSION=0.7.9
+ARG HANZO_DEV_SHA256_AMD64=4fe37b1439a562d114fa86bc31b3475e79231f92d77a5f3822064f1fa9641887
+ARG HANZO_DEV_SHA256_ARM64=40a25d282c848228bcc25978e7c7bd8c71f36dfbe44acadfc2a1f46717e144e0
 # hanzo-mcp comes from npm `@hanzo/mcp`, which is the canonical server. It ships
 # bins `hanzo-mcp` and `mcp` from one package, so the name `dev` launches
 # (mcp_servers.hanzo.command) resolves to it with no shim.
@@ -538,7 +525,11 @@ RUN set -eux; \
       rm -f /tmp/h.tar.gz "/tmp/${bin}"; \
     done; \
     npm install -g "@hanzo/mcp@${HANZO_MCP_VERSION}"; \
-    hanzo --version; dev --version; hanzo-mcp --version
+    hanzo --version 2>/dev/null | grep -qx "hanzo ${HANZO_CLI_VERSION}" \
+      || { echo "hanzo is not ${HANZO_CLI_VERSION}:" >&2; hanzo --version >&2; exit 1; }; \
+    dev --version | grep -qx "dev ${HANZO_DEV_VERSION}" \
+      || { echo "dev is not ${HANZO_DEV_VERSION}:" >&2; dev --version >&2; exit 1; }; \
+    hanzo-mcp --version
 
 # THE IMAGE SAYS ITS OWN VERSION, and it is the SAME file the tag comes from.
 # docker/sandbox.version is read twice — by hanzoai/ci's imgver, which turns it
@@ -763,64 +754,36 @@ RUN set -eux; \
       || { echo "dev does not see hanzo-mcp after adding it" >&2; exit 1; }
 
 # ---- The box asks OUR gateway ----------------------------------------------
-# Out of the box `dev` reports `provider: openai, model: gpt-5.3-codex`: a
-# sandbox we ship, running our agent, sending our customers' code to somebody
-# else's endpoint by default. api.hanzo.ai is the one door, so the box names it.
+# api.hanzo.ai is the one door, so both agents that think through a gateway name
+# it, and neither is ever handed a credential here: an image is a public
+# artifact, and a secret in a layer is published, not configured.
 #
-# NO CREDENTIAL IS BAKED, and none can be. What is written here is the NAME of
-# the variable to read — `env_key` — so the key arrives at run time on the
-# process env and never exists in a layer. An image is a public artifact; a
-# secret in one is published, not configured.
+# DEV NAMES IT ITSELF. Since 0.7, `dev mcp add` writes dev's whole default store
+# (`~/.hanzo/dev/config.toml`): `model_provider = "hanzo"` at api.hanzo.ai, an
+# Enso model, and the credential through `dev token`, which takes HANZO_API_KEY
+# first — the key cloud hands a run on its environment. The block that used to
+# prepend `model_provider` and `model` to that file now makes a DUPLICATE key,
+# and dev refuses to load a config with one: every run would die at startup. So
+# nothing is written; dev's own report is asserted. Cloud names the model on
+# every run (`-m`); the default asserted here is what a bare `dev` in a shell
+# uses.
 #
-# `dev mcp add` wrote the MCP entry to this same store, so this appends rather
-# than replaces: the file is dev's and both facts belong in it.
-# The store is found by its CONTENT, not by a path spelled out here. `dev mcp
-# add` has just written the `[mcp_servers.hanzo]` block, so the file holding it
-# is dev's real config wherever dev decided that is — the CLI advertises
-# `~/.code/config.toml` in its help and writes `~/.hanzo/dev/config.toml`, and a
-# path pinned here would survive exactly until one of those changed and then
-# append to a file nothing reads.
-#
-# ORDER IS LOAD-BEARING, and getting it wrong is silent. `model_provider` and
-# `model` are TOP-LEVEL keys; in TOML a bare key written after a `[table]`
-# header belongs to THAT TABLE. Appending them to the end of a file that already
-# contains `[mcp_servers.hanzo]` makes them `mcp_servers.hanzo.model_provider`,
-# which nothing reads — the file looks exactly right and `dev` still reports
-# `provider: openai`. So the bare keys go first and every table after them.
-#
-# The assertion is dev's OWN report, not a grep of the file we just wrote:
-# reading back your own write proves the disk works, not that the program
-# agrees with you.
+# The assertion is dev's OWN report, not a grep of a file: reading back a write
+# proves the disk works, not that the program agrees.
 #
 # `--skip-git-repo-check`, AND WITHOUT IT THIS PROBE TESTS NOTHING. `dev exec`
 # refuses to run outside a git repo — "Not inside a trusted directory" — and
 # exits before it prints a banner or starts a single MCP server. WORKDIR here is
 # /work, which is empty. A probe that only greps for a FAILURE string therefore
-# passes on that refusal, having tested nothing at all; that is the same shape of
-# can't-fail check as the hand-written handshake this replaced. So the provider
-# line is asserted POSITIVELY first: if dev did not get far enough to name a
-# provider, nothing after it was exercised and the build says so.
+# passes on that refusal, having tested nothing at all. So the provider line is
+# asserted POSITIVELY first: if dev did not get far enough to name a provider,
+# nothing after it was exercised and the build says so.
 RUN set -eux; \
-    cfg="$(grep -rl '^\[mcp_servers\.hanzo\]' "${HOME}" --include=config.toml 2>/dev/null | head -1)"; \
-    [ -n "$cfg" ] || { echo "cannot find the config dev mcp add just wrote" >&2; exit 1; }; \
-    tmp="$(mktemp)"; \
-    { \
-      echo 'model_provider = "hanzo"'; \
-      echo 'model = "zen5-coder"'; \
-      echo ''; \
-      cat "$cfg"; \
-      echo ''; \
-      echo '[model_providers.hanzo]'; \
-      echo 'name = "Hanzo"'; \
-      echo 'base_url = "https://api.hanzo.ai/v1"'; \
-      echo 'env_key = "HANZO_API_KEY"'; \
-    } > "$tmp"; \
-    mv "$tmp" "$cfg"; \
-    timeout 120 dev exec --skip-git-repo-check "say ok" > /tmp/probe.out 2>&1 || true; \
-    grep -q '^provider: hanzo' /tmp/probe.out \
+    timeout 120 dev exec --skip-git-repo-check "say ok" </dev/null > /tmp/probe.out 2>&1 || true; \
+    grep -q '^provider: hanzo$' /tmp/probe.out \
       || { echo "dev did not get far enough to name a provider, so nothing below was tested:" >&2; \
            head -20 /tmp/probe.out >&2; exit 1; }; \
-    grep -q '^model: zen5-coder' /tmp/probe.out \
+    grep -q '^model: enso-' /tmp/probe.out \
       || { echo "dev names a model that is not ours:" >&2; grep '^model:' /tmp/probe.out >&2; exit 1; }; \
     if grep -q 'MCP server .*failed to start' /tmp/probe.out; then \
       echo "dev cannot start hanzo-mcp — the agent and the server disagree:" >&2; \

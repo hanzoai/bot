@@ -234,7 +234,6 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v7
         with:
-          cache: false
           python-version: "3.12"
 
       - name: Install Python tooling
@@ -266,7 +265,6 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v7
         with:
-          cache: false
           python-version: "3.12"
 
       - name: Install pre-commit
