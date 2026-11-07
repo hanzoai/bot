@@ -480,10 +480,13 @@ RUN mkdir -p /work /home/sandbox/go /home/sandbox/.cargo \
 # 2026-08-06 and are what makes two builds of this commit the same image.
 #
 # The CLI is hanzoai/cli's newest release. The install below asserts the version
-# each binary reports, so a pin and the bytes it fetched cannot disagree.
-ARG HANZO_CLI_VERSION=8.5.913
-ARG HANZO_CLI_SHA256_AMD64=53ef1d48c00cadd675439940484497c778563ea33f94f21df6abb7658506f231
-ARG HANZO_CLI_SHA256_ARM64=a43ed0f2817bc19dea67c6a5f48064bac1fdb7174fabaad34f93bf251ce0ee18
+# each binary reports, so a pin and the bytes it fetched cannot disagree. 8.5.914
+# reads HANZO_API_KEY as every cloud command's bearer: a box leased with an API
+# key holds no CLI session, so before it `hanzo agent sessions get` answered
+# `not signed in`, or 404 when signed in as anyone but the key that opened them.
+ARG HANZO_CLI_VERSION=8.5.914
+ARG HANZO_CLI_SHA256_AMD64=d461bc7912775419246686d95adb93948176e47bdde385534e1d75bcf4e5bd1a
+ARG HANZO_CLI_SHA256_ARM64=cd845eb3851348c18b502e509c70f923d61bbb520608772d3c64e9fcd0e67ed9
 # dev 0.7.9 (Dev on hanzoai/codex fafb93553d). Its credential is `dev token`,
 # which reads HANZO_API_KEY first: the grant cloud hands a lease on its env, and
 # no pod holds a human's login. cloud stopped passing --include-plan-tool for it
