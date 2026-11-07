@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# The browser class's program: Chromium, full screen, on the display the desktop
-# already started. Run as `sandbox-desktop browser`, so the X server, the window
+# The browser class's program: Chromium, maximized with its own toolbar, on the
+# display the desktop already started. Run as `sandbox-desktop browser`, so the X server, the window
 # manager and the VNC pair are that script's business and this one only draws
 # into them.
 #
@@ -15,9 +15,15 @@
 # holds, cookies included, so it is bound to 127.0.0.1 and reached through exec
 # like the VNC server is, never through the pod network.
 #
-# IT COMES BACK. A browser that crashes or is closed (a kiosk window has no close
-# button, but `pkill chromium` does) is started again on the same profile, so the
-# pane and the agent never face a display with nothing on it.
+# THE PERSON SEES A BROWSER AND CAN TAKE IT OVER. It runs as an ordinary window,
+# maximized, with its tabs and address bar: a kiosk window showed one page and no
+# way to go anywhere else, so a person watching an agent could see a page but not
+# a browser, and could not type a URL into it. The screen pane passes the mouse
+# and keyboard through (apps/sandbox/screen viewOnly false), so taking over is
+# clicking into it.
+#
+# IT COMES BACK. A browser that crashes or is closed is started again on the same
+# profile, so the pane and the agent never face a display with nothing on it.
 set -euo pipefail
 
 PORT="${SANDBOX_CDP_PORT:-9222}"
@@ -45,7 +51,7 @@ while :; do
     --noerrdialogs \
     --hide-crash-restore-bubble \
     --disable-features=Translate \
-    --kiosk \
+    --start-maximized \
     --window-position=0,0 \
     --window-size="${WIDTH},${HEIGHT}" \
     --remote-debugging-address=127.0.0.1 \
