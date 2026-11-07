@@ -829,6 +829,29 @@ RUN set -eux; \
     fi; \
     rm -f /tmp/probe.out
 
+# CODEX IS TOLD TOO, because it knows only its vendor. Unconfigured it sent every
+# `tool: codex` run to api.openai.com with no key (measured in 1.3.7: five
+# reconnects, then `401 Missing bearer`). Its provider is the gateway and its key
+# the same HANZO_API_KEY, by name (`env_key`), over the Responses wire both
+# speak; measured in a 1.3.7 pod with these keys as `-c` overrides, codex
+# answered through api.hanzo.ai. Asserted positively, as dev's is: a codex that
+# did not get far enough to name a provider tested nothing.
+RUN set -eux; \
+    mkdir -p "${HOME}/.codex"; \
+    { \
+      echo 'model_provider = "hanzo"'; \
+      echo ''; \
+      echo '[model_providers.hanzo]'; \
+      echo 'name = "Hanzo"'; \
+      echo 'base_url = "https://api.hanzo.ai/v1"'; \
+      echo 'env_key = "HANZO_API_KEY"'; \
+      echo 'wire_api = "responses"'; \
+    } > "${HOME}/.codex/config.toml"; \
+    timeout 120 codex exec --skip-git-repo-check "say ok" </dev/null > /tmp/probe.out 2>&1 || true; \
+    grep -q '^provider: hanzo' /tmp/probe.out \
+      || { echo "codex did not name our gateway as its provider:" >&2; head -20 /tmp/probe.out >&2; exit 1; }; \
+    rm -f /tmp/probe.out
+
 WORKDIR /work
 
 
