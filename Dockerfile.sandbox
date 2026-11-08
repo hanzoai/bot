@@ -484,19 +484,20 @@ RUN mkdir -p /work /home/sandbox/go /home/sandbox/.cargo \
 # reads HANZO_API_KEY as every cloud command's bearer: a box leased with an API
 # key holds no CLI session, so before it `hanzo agent sessions get` answered
 # `not signed in`, or 404 when signed in as anyone but the key that opened them.
-ARG HANZO_CLI_VERSION=8.5.914
-ARG HANZO_CLI_SHA256_AMD64=d461bc7912775419246686d95adb93948176e47bdde385534e1d75bcf4e5bd1a
-ARG HANZO_CLI_SHA256_ARM64=cd845eb3851348c18b502e509c70f923d61bbb520608772d3c64e9fcd0e67ed9
-# dev 0.7.9 (Dev on hanzoai/codex fafb93553d). Its credential is `dev token`,
+ARG HANZO_CLI_VERSION=8.5.915
+ARG HANZO_CLI_SHA256_AMD64=06e3845edaab116f0f834dec498cfda5ceed5bf63681eb288dbfb8de7f396a97
+ARG HANZO_CLI_SHA256_ARM64=f99dcc22e8636d7cf71447d0dbcb674fc37a551755c6084c407f45c540751753
+# dev 0.7.10 (Dev on hanzoai/codex 310d9c0276): effort defaults to auto, and it
+# paces on the gateway's x-ratelimit headers and waits out a 429 instead of failing. Its credential is `dev token`,
 # which reads HANZO_API_KEY first: the grant cloud hands a lease on its env, and
 # no pod holds a human's login. cloud stopped passing --include-plan-tool for it
 # (hanzo-inc/cloud apps/coding devExec): 0.7 refuses the flag, exit 2.
 #
 # Checksums verified against the bytes, not the .sha256 beside them: downloaded
 # both tarballs and sha256sum'd them, and they agree with the published files.
-ARG HANZO_DEV_VERSION=0.7.9
-ARG HANZO_DEV_SHA256_AMD64=4fe37b1439a562d114fa86bc31b3475e79231f92d77a5f3822064f1fa9641887
-ARG HANZO_DEV_SHA256_ARM64=40a25d282c848228bcc25978e7c7bd8c71f36dfbe44acadfc2a1f46717e144e0
+ARG HANZO_DEV_VERSION=0.7.10
+ARG HANZO_DEV_SHA256_AMD64=8c4d78d61ee6ff359da56699efe1f92066ce6e803c79d1caf1642cfacd431d76
+ARG HANZO_DEV_SHA256_ARM64=e8d7759ceae99b271b877402c0640ef3481ee5221555dbb4124ead8b60597cc9
 # hanzo-mcp comes from npm `@hanzo/mcp`, which is the canonical server. It ships
 # bins `hanzo-mcp` and `mcp` from one package, so the name `dev` launches
 # (mcp_servers.hanzo.command) resolves to it with no shim.
@@ -506,7 +507,7 @@ ARG HANZO_DEV_SHA256_ARM64=40a25d282c848228bcc25978e7c7bd8c71f36dfbe44acadfc2a1f
 # was several majors behind the server everything else speaks. npm verifies the
 # tarball against the registry integrity hash, which is the same guarantee the
 # sha256sum below gives the other two.
-ARG HANZO_MCP_VERSION=2.4.4
+ARG HANZO_MCP_VERSION=2.4.22
 RUN set -eux; \
     case "${TARGETARCH}" in \
       amd64) csha="${HANZO_CLI_SHA256_AMD64}"; dsha="${HANZO_DEV_SHA256_AMD64}" ;; \
