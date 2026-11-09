@@ -184,9 +184,9 @@ RUN set -eux; \
 COPY --from=uvsrc /uv /uvx /usr/local/bin/
 
 # ---- Go --------------------------------------------------------------------
-ARG GO_VERSION=1.26.8
-ARG GO_SHA256_AMD64=d0f743b33e8d8945e6b1f432edd15785c70507121d6e2a723b21285eddf8b57b
-ARG GO_SHA256_ARM64=211ffced9dcb9633a55eac6364816ec0ddd951389a740e88fa8b3337971bdda0
+ARG GO_VERSION=1.27.3
+ARG GO_SHA256_AMD64=65efbc80fdc1fa2cd2631cad5b481777a68e8725f34e89f50fc6ac714e379b40
+ARG GO_SHA256_ARM64=a06e99309dbcbdca1a8ccd2282c3ee146e55930886e26b4f1193269587165f49
 RUN set -eux; \
     case "${TARGETARCH}" in \
       amd64) gsha="${GO_SHA256_AMD64}" ;; \
@@ -589,6 +589,12 @@ USER sandbox
 # The asserts are: one link per package, and a completion dump that only exists
 # if an interactive shell actually READ the rc — which also builds the dump into
 # this layer, so the first prompt in a pod does not pay to compile one.
+#
+# A LOGIN SHELL MUST BE ABLE TO MAKE A TEMPORARY FILE. Every harness runs its
+# commands as `zsh -lc`, which reads ~/.zshenv, and a TMPDIR naming a directory
+# this image does not have fails `go test`, `mktemp` and every build after it.
+# dot-zsh once exported its author's /home/z/.cache/tmp; the mktemp below is
+# what would have refused that image.
 RUN set -eux; \
     ln -s /usr/local/cargo/env "${HOME}/.cargo/env"; \
     [ -f "${HOME}/.cargo/env" ]; \
@@ -600,7 +606,8 @@ RUN set -eux; \
     [ -f "${HOME}/.vimrc" ]; \
     [ -f "${HOME}/.tmux.conf" ]; \
     zsh -ic true; \
-    [ -s "${HOME}/.zsh/cache/zcompdump" ]
+    [ -s "${HOME}/.zsh/cache/zcompdump" ]; \
+    zsh -lc 'f=$(mktemp) && rm "$f"'
 
 # The agent is on PATH for the user that will actually run it, and `hanzo` is
 # not `dev`. Checked HERE, in the default class, because this is the class a
