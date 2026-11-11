@@ -1239,8 +1239,16 @@ export async function runEmbeddedAttempt(
           activeSession.agent.streamFn = streamSimple;
         }
       } else {
-        // Force a stable streamFn reference so vitest can reliably mock @mariozechner/pi-ai.
-        activeSession.agent.streamFn = streamSimple;
+        // Force a stable streamSimple call path so vitest can reliably mock @mariozechner/pi-ai,
+        // while forwarding runtime/configured provider API keys into pi-ai >= 0.73.
+        const resolvedApiKey = await params.authStorage?.getApiKey?.(params.provider);
+        activeSession.agent.streamFn = resolvedApiKey
+          ? (model, context, options) =>
+              streamSimple(model, context, {
+                ...options,
+                apiKey: options?.apiKey ?? resolvedApiKey,
+              })
+          : streamSimple;
       }
 
       // Ollama with OpenAI-compatible API needs num_ctx in payload.options.
@@ -1294,7 +1302,7 @@ export async function runEmbeddedAttempt(
           if (!Array.isArray(messages)) {
             return inner(model, context, options);
           }
-          const sanitized = dropThinkingBlocks(messages as unknown as AgentMessage[]) as unknown;
+          const sanitized = dropThinkingBlocks(messages) as unknown;
           if (sanitized === messages) {
             return inner(model, context, options);
           }
