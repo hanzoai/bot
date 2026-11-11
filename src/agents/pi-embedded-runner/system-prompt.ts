@@ -93,12 +93,22 @@ export function createSystemPromptOverride(
   return (_defaultPrompt?: string) => override;
 }
 
+export { replaceAgentMessagesCompat } from "./agent-state-compat.js";
+
 export function applySystemPromptOverrideToSession(
   session: AgentSession,
   override: string | ((defaultPrompt?: string) => string),
 ) {
   const prompt = typeof override === "function" ? override() : override.trim();
-  session.agent.setSystemPrompt(prompt);
+  const compatAgent = session.agent as unknown as {
+    setSystemPrompt?: (next: string) => void;
+    state?: { systemPrompt: string };
+  };
+  if (typeof compatAgent.setSystemPrompt === "function") {
+    compatAgent.setSystemPrompt(prompt);
+  } else if (compatAgent.state) {
+    compatAgent.state.systemPrompt = prompt;
+  }
   const mutableSession = session as unknown as {
     _baseSystemPrompt?: string;
     _rebuildSystemPrompt?: (toolNames: string[]) => string;

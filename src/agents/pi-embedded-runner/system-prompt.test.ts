@@ -48,4 +48,13 @@ describe("applySystemPromptOverrideToSession", () => {
     };
     expect(mutable._rebuildSystemPrompt?.(["tool1"])).toBe("rebuild test");
   });
+
+  it("updates agent.state.systemPrompt on pi-agent-core >= 0.65 sessions without setSystemPrompt", () => {
+    const state = { systemPrompt: "initial" };
+    const session = { agent: { state } } as unknown as AgentSession;
+
+    applySystemPromptOverrideToSession(session, "  state-based override  ");
+
+    expect(state.systemPrompt).toBe("state-based override");
+  });
 });

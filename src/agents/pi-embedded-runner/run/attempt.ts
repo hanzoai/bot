@@ -111,6 +111,7 @@ import { buildEmbeddedSandboxInfo } from "../sandbox-info.js";
 import { prewarmSessionFile, trackSessionManagerAccess } from "../session-manager-cache.js";
 import { prepareSessionManagerForRun } from "../session-manager-init.js";
 import { resolveEmbeddedRunSkillEntries } from "../skills-runtime.js";
+import { replaceAgentMessagesCompat } from "../agent-state-compat.js";
 import {
   applySystemPromptOverrideToSession,
   buildEmbeddedSystemPrompt,
@@ -1405,7 +1406,7 @@ export async function runEmbeddedAttempt(
           : truncated;
         cacheTrace?.recordStage("session:limited", { messages: limited });
         if (limited.length > 0) {
-          activeSession.agent.replaceMessages(limited);
+          replaceAgentMessagesCompat(activeSession.agent, limited);
         }
 
         if (params.contextEngine) {
@@ -1416,7 +1417,7 @@ export async function runEmbeddedAttempt(
               tokenBudget: params.contextTokenBudget,
             });
             if (assembled.messages !== activeSession.messages) {
-              activeSession.agent.replaceMessages(assembled.messages);
+              replaceAgentMessagesCompat(activeSession.agent, assembled.messages);
             }
             if (assembled.systemPromptAddition) {
               systemPromptText = prependSystemPromptAddition({
@@ -1681,7 +1682,7 @@ export async function runEmbeddedAttempt(
             sessionManager.resetLeaf();
           }
           const sessionContext = sessionManager.buildSessionContext();
-          activeSession.agent.replaceMessages(sessionContext.messages);
+          replaceAgentMessagesCompat(activeSession.agent, sessionContext.messages);
           log.warn(
             `Removed orphaned user message to prevent consecutive user turns. ` +
               `runId=${params.runId} sessionId=${params.sessionId}`,
@@ -1693,7 +1694,7 @@ export async function runEmbeddedAttempt(
           // Called each run; only mutates already-answered user turns that still carry image blocks.
           const didPruneImages = pruneProcessedHistoryImages(activeSession.messages);
           if (didPruneImages) {
-            activeSession.agent.replaceMessages(activeSession.messages);
+            replaceAgentMessagesCompat(activeSession.agent, activeSession.messages);
           }
 
           // Detect and load images referenced in the prompt for vision-capable models.
