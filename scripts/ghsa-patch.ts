@@ -5,11 +5,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-function usage() {
+function usage(): void {
   console.error(
     [
       "Usage:",
-      "  node scripts/ghsa-patch.mjs --ghsa <GHSA-id-or-url> [--repo owner/name]",
+      "  node --import tsx scripts/ghsa-patch.ts --ghsa <GHSA-id-or-url> [--repo owner/name]",
       "    --summary <text> --severity <low|medium|high|critical>",
       "    --description-file <path>",
       "    --vulnerable-version-range <range>",
@@ -19,13 +19,13 @@ function usage() {
   );
 }
 
-function fail(message) {
+function fail(message: string): never {
   console.error(message);
   process.exit(1);
 }
 
-function parseArgs(argv) {
-  const out = {};
+function parseArgs(argv: string[]): Record<string, string> {
+  const out: Record<string, string> = {};
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (!arg.startsWith("--")) {
@@ -42,7 +42,7 @@ function parseArgs(argv) {
   return out;
 }
 
-function runGh(args) {
+function runGh(args: string[]): string {
   const proc = spawnSync("gh", args, { encoding: "utf8" });
   if (proc.status !== 0) {
     fail(proc.stderr.trim() || proc.stdout.trim() || `gh ${args.join(" ")} failed`);
@@ -50,7 +50,7 @@ function runGh(args) {
   return proc.stdout;
 }
 
-function deriveRepoFromOrigin() {
+function deriveRepoFromOrigin(): string {
   const remote = execFileSync("git", ["remote", "get-url", "origin"], { encoding: "utf8" }).trim();
   const httpsMatch = remote.match(/github\.com[/:]([^/]+)\/([^/.]+)(?:\.git)?$/);
   if (!httpsMatch) {
@@ -59,7 +59,7 @@ function deriveRepoFromOrigin() {
   return `${httpsMatch[1]}/${httpsMatch[2]}`;
 }
 
-function parseGhsaId(value) {
+function parseGhsaId(value: string): string {
   const match = value.match(/GHSA-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}/i);
   if (!match) {
     fail(`Could not parse GHSA id from: ${value}`);
@@ -67,7 +67,7 @@ function parseGhsaId(value) {
   return match[0];
 }
 
-function writeTempJson(data) {
+function writeTempJson(data: unknown): string {
   const file = path.join(os.tmpdir(), `ghsa-patch-${crypto.randomUUID()}.json`);
   fs.writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`);
   return file;
@@ -88,7 +88,19 @@ if (!fs.existsSync(descriptionPath)) {
   fail(`Description file does not exist: ${descriptionPath}`);
 }
 
-const current = JSON.parse(runGh(["api", "-H", "X-GitHub-Api-Version: 2022-11-28", advisoryPath]));
+type GhsaAdvisory = {
+  html_url?: string;
+  state?: string;
+  severity?: string;
+  summary?: string;
+  vulnerabilities?: unknown[];
+  cvss?: { vector_string?: string | null };
+  updated_at?: string;
+};
+
+const current = JSON.parse(
+  runGh(["api", "-H", "X-GitHub-Api-Version: 2022-11-28", advisoryPath]),
+) as GhsaAdvisory;
 const restoredCvss = args.cvss || current?.cvss?.vector_string || null;
 
 const ecosystem = args.ecosystem || "npm";
@@ -150,7 +162,7 @@ if (restoredCvss) {
 
 const refreshed = JSON.parse(
   runGh(["api", "-H", "X-GitHub-Api-Version: 2022-11-28", advisoryPath]),
-);
+) as GhsaAdvisory;
 console.log(
   JSON.stringify(
     {

@@ -1,7 +1,7 @@
 import Foundation
 
 enum HostEnvSanitizer {
-    /// Generated from src/infra/host-env-security-policy.json via scripts/generate-host-env-security-policy-swift.mjs.
+    /// Generated from src/infra/host-env-security-policy.json via scripts/generate-host-env-security-policy-swift.ts.
     /// Parity is validated by src/infra/host-env-security.policy-parity.test.ts.
     private static let blockedKeys = HostEnvSecurityPolicy.blockedKeys
     private static let blockedPrefixes = HostEnvSecurityPolicy.blockedPrefixes

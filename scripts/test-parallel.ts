@@ -1,10 +1,15 @@
-import { spawn } from "node:child_process";
+import { type ChildProcess, spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 
 // On Windows, `.cmd` launchers can fail with `spawn EINVAL` when invoked without a shell
 // (especially under GitHub Actions + Git Bash). Use `shell: true` and let the shell resolve pnpm.
 const pnpm = "pnpm";
+
+type RunEntry = {
+  name: string;
+  args: string[];
+};
 
 const unitIsolatedFilesRaw = [
   "src/plugins/loader.test.ts",
@@ -89,7 +94,7 @@ const unitIsolatedFilesRaw = [
 ];
 const unitIsolatedFiles = unitIsolatedFilesRaw.filter((file) => fs.existsSync(file));
 
-const children = new Set();
+const children = new Set<ChildProcess>();
 const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
 const isMacOS = process.platform === "darwin" || process.env.RUNNER_OS === "macOS";
 const isWindows = process.platform === "win32" || process.env.RUNNER_OS === "Windows";
@@ -111,7 +116,7 @@ const useVmForks =
 const disableIsolation = process.env.BOT_TEST_NO_ISOLATE === "1";
 const includeGatewaySuite = process.env.BOT_TEST_INCLUDE_GATEWAY === "1";
 const includeExtensionsSuite = process.env.BOT_TEST_INCLUDE_EXTENSIONS === "1";
-const runs = [
+const runs: RunEntry[] = [
   ...(useVmForks
     ? [
         {
@@ -285,7 +290,7 @@ const defaultWorkerBudget =
 
 // Keep worker counts predictable for local runs; trim macOS CI workers to avoid worker crashes/OOM.
 // In CI on linux/windows, prefer Vitest defaults to avoid cross-test interference from lower worker counts.
-const maxWorkersForRun = (name) => {
+const maxWorkersForRun = (name: string): number | null => {
   if (resolvedOverride) {
     return resolvedOverride;
   }
@@ -328,8 +333,8 @@ const maxOldSpaceSizeMb = (() => {
   return null;
 })();
 
-const runOnce = (entry, extraArgs = []) =>
-  new Promise((resolve) => {
+const runOnce = (entry: RunEntry, extraArgs: string[] = []): Promise<number> =>
+  new Promise<number>((resolve) => {
     const maxWorkers = maxWorkersForRun(entry.name);
     // vmForks with a single worker has shown cross-file leakage in extension suites.
     // Fall back to process forks when we intentionally clamp that lane to one worker.
@@ -359,7 +364,7 @@ const runOnce = (entry, extraArgs = []) =>
     const resolvedNodeOptions = heapFlag
       ? `${nextNodeOptions} ${heapFlag}`.trim()
       : nextNodeOptions;
-    let child;
+    let child: ChildProcess;
     try {
       child = spawn(pnpm, args, {
         stdio: "inherit",
@@ -381,7 +386,7 @@ const runOnce = (entry, extraArgs = []) =>
     });
   });
 
-const run = async (entry) => {
+const run = async (entry: RunEntry): Promise<number> => {
   if (shardCount <= 1) {
     return runOnce(entry);
   }
@@ -389,7 +394,6 @@ const run = async (entry) => {
     return runOnce(entry, ["--shard", `${shardIndexOverride}/${shardCount}`]);
   }
   for (let shardIndex = 1; shardIndex <= shardCount; shardIndex += 1) {
-    // eslint-disable-next-line no-await-in-loop
     const code = await runOnce(entry, ["--shard", `${shardIndex}/${shardCount}`]);
     if (code !== 0) {
       return code;
@@ -398,7 +402,7 @@ const run = async (entry) => {
   return 0;
 };
 
-const shutdown = (signal) => {
+const shutdown = (signal: NodeJS.Signals): void => {
   for (const child of children) {
     child.kill(signal);
   }
@@ -425,8 +429,8 @@ if (passthroughArgs.length > 0) {
     (acc, flag) => (acc.includes(flag) ? acc : `${acc} ${flag}`.trim()),
     nodeOptions,
   );
-  const code = await new Promise((resolve) => {
-    let child;
+  const code = await new Promise<number>((resolve) => {
+    let child: ChildProcess;
     try {
       child = spawn(pnpm, args, {
         stdio: "inherit",
@@ -447,7 +451,7 @@ if (passthroughArgs.length > 0) {
       resolve(exitCode ?? (signal ? 1 : 0));
     });
   });
-  process.exit(Number(code) || 0);
+  process.exit(code || 0);
 }
 
 const parallelCodes = await Promise.all(parallelRuns.map(run));
@@ -457,7 +461,6 @@ if (failedParallel !== undefined) {
 }
 
 for (const entry of serialRuns) {
-  // eslint-disable-next-line no-await-in-loop
   const code = await run(entry);
   if (code !== 0) {
     process.exit(code);

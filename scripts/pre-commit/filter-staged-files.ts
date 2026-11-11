@@ -5,8 +5,8 @@ import path from "node:path";
  * Prints selected files as NUL-delimited tokens to stdout.
  *
  * Usage:
- *   node scripts/pre-commit/filter-staged-files.mjs lint -- <files...>
- *   node scripts/pre-commit/filter-staged-files.mjs format -- <files...>
+ *   node --experimental-strip-types scripts/pre-commit/filter-staged-files.ts lint -- <files...>
+ *   node --experimental-strip-types scripts/pre-commit/filter-staged-files.ts format -- <files...>
  *
  * Keep this dependency-free: the pre-commit hook runs in many environments.
  */
@@ -16,14 +16,14 @@ const rawArgs = process.argv.slice(3);
 const files = rawArgs[0] === "--" ? rawArgs.slice(1) : rawArgs;
 
 if (mode !== "lint" && mode !== "format") {
-  process.stderr.write("usage: filter-staged-files.mjs <lint|format> -- <files...>\n");
+  process.stderr.write("usage: filter-staged-files.ts <lint|format> -- <files...>\n");
   process.exit(2);
 }
 
 const lintExts = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]);
 const formatExts = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json", ".md", ".mdx"]);
 
-const shouldSelect = (filePath) => {
+const shouldSelect = (filePath: string): boolean => {
   const ext = path.extname(filePath).toLowerCase();
   if (mode === "lint") {
     return lintExts.has(ext);

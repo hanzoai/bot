@@ -2,19 +2,42 @@
 import { spawn } from "node:child_process";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
-import { runNodeWatchedPaths } from "./run-node.mjs";
+import { runNodeWatchedPaths } from "./run-node.ts";
 
-const WATCH_NODE_RUNNER = "scripts/run-node.mjs";
+const WATCH_NODE_RUNNER = "scripts/run-node.ts";
 
-const buildWatchArgs = (args) => [
+type WatchChildProcess = {
+  kill?: (signal?: NodeJS.Signals) => unknown;
+  on: (event: "exit", cb: (code: number | null, signal: string | null) => void) => unknown;
+};
+
+type WatchSpawnFn = (
+  cmd: string,
+  args: string[],
+  options: Record<string, unknown>,
+) => WatchChildProcess;
+
+export type RunWatchMainParams = {
+  spawn?: WatchSpawnFn;
+  process?: NodeJS.Process;
+  cwd?: string;
+  args?: string[];
+  env?: NodeJS.ProcessEnv;
+  now?: () => number;
+};
+
+const buildWatchArgs = (args: string[]) => [
   ...runNodeWatchedPaths.flatMap((watchPath) => ["--watch-path", watchPath]),
   "--watch-preserve-output",
+  "--experimental-strip-types",
   WATCH_NODE_RUNNER,
   ...args,
 ];
 
-export async function runWatchMain(params = {}) {
-  const deps = {
+type WatchDeps = Required<RunWatchMainParams>;
+
+export async function runWatchMain(params: RunWatchMainParams = {}): Promise<number> {
+  const deps: WatchDeps = {
     spawn: params.spawn ?? spawn,
     process: params.process ?? process,
     cwd: params.cwd ?? process.cwd(),
@@ -23,7 +46,7 @@ export async function runWatchMain(params = {}) {
     now: params.now ?? Date.now,
   };
 
-  const childEnv = { ...deps.env };
+  const childEnv: NodeJS.ProcessEnv = { ...deps.env };
   const watchSession = `${deps.now()}-${deps.process.pid}`;
   childEnv.BOT_WATCH_MODE = "1";
   childEnv.BOT_WATCH_SESSION = watchSession;
@@ -38,10 +61,10 @@ export async function runWatchMain(params = {}) {
   });
 
   let settled = false;
-  let onSigInt;
-  let onSigTerm;
+  let onSigInt: (() => void) | undefined;
+  let onSigTerm: (() => void) | undefined;
 
-  const settle = (resolve, code) => {
+  const settle = (resolve: (code: number) => void, code: number): void => {
     if (settled) {
       return;
     }
@@ -55,7 +78,7 @@ export async function runWatchMain(params = {}) {
     resolve(code);
   };
 
-  return await new Promise((resolve) => {
+  return await new Promise<number>((resolve) => {
     onSigInt = () => {
       if (typeof watchProcess.kill === "function") {
         watchProcess.kill("SIGTERM");
@@ -85,7 +108,7 @@ export async function runWatchMain(params = {}) {
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   void runWatchMain()
     .then((code) => process.exit(code))
-    .catch((err) => {
+    .catch((err: unknown) => {
       console.error(err);
       process.exit(1);
     });

@@ -39,7 +39,7 @@ describe("git-hooks/pre-commit (integration)", () => {
       },
     );
     writeFileSync(
-      path.join(dir, "scripts", "pre-commit", "filter-staged-files.mjs"),
+      path.join(dir, "scripts", "pre-commit", "filter-staged-files.ts"),
       "process.exit(0);\n",
       "utf8",
     );

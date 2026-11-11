@@ -20,18 +20,24 @@ const outputPath = path.join(
   "apps",
   "macos",
   "Sources",
-  "HanzoBot",
+  "Bot",
   "HostEnvSecurityPolicy.generated.swift",
 );
 
-/** @type {{blockedKeys: string[]; blockedOverrideKeys?: string[]; blockedPrefixes: string[]}} */
-const policy = JSON.parse(fs.readFileSync(policyPath, "utf8"));
+type HostEnvSecurityPolicy = {
+  blockedKeys: string[];
+  blockedOverrideKeys?: string[];
+  blockedPrefixes: string[];
+};
 
-const renderSwiftStringArray = (items) => items.map((item) => `        "${item}"`).join(",\n");
+const policy = JSON.parse(fs.readFileSync(policyPath, "utf8")) as HostEnvSecurityPolicy;
+
+const renderSwiftStringArray = (items: string[]): string =>
+  items.map((item) => `        "${item}"`).join(",\n");
 
 const generated = `// Generated file. Do not edit directly.
 // Source: src/infra/host-env-security-policy.json
-// Regenerate: node scripts/generate-host-env-security-policy-swift.mjs --write
+// Regenerate: node --import tsx scripts/generate-host-env-security-policy-swift.ts --write
 
 import Foundation
 
@@ -60,7 +66,7 @@ if (checkOnly) {
   console.error(
     [
       `Out of date ${path.relative(repoRoot, outputPath)}.`,
-      "Run: node scripts/generate-host-env-security-policy-swift.mjs --write",
+      "Run: node --import tsx scripts/generate-host-env-security-policy-swift.ts --write",
     ].join("\n"),
   );
   process.exit(1);

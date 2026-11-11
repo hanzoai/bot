@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import ts from "typescript";
-import { runCallsiteGuard } from "./lib/callsite-guard.mjs";
-import { runAsScript, toLine, unwrapExpression } from "./lib/ts-guard-utils.mjs";
+import { runCallsiteGuard } from "./lib/callsite-guard.ts";
+import { runAsScript, toLine, unwrapExpression } from "./lib/ts-guard-utils.ts";
 
 const sourceRoots = [
   "src/telegram",
@@ -64,12 +64,12 @@ const allowedRawFetchCallsites = new Set([
   "src/slack/monitor/media.ts:108",
 ]);
 
-function isRawFetchCall(expression) {
+function isRawFetchCall(expression: ts.Expression): boolean {
   const callee = unwrapExpression(expression);
   if (ts.isIdentifier(callee)) {
     return callee.text === "fetch";
   }
-  if (ts.isPropertyAccessExpression(callee)) {
+  if (ts.isPropertyAccessExpression(callee) && ts.isIdentifier(callee.name)) {
     return (
       ts.isIdentifier(callee.expression) &&
       callee.expression.text === "globalThis" &&
@@ -79,10 +79,10 @@ function isRawFetchCall(expression) {
   return false;
 }
 
-export function findRawFetchCallLines(content, fileName = "source.ts") {
+export function findRawFetchCallLines(content: string, fileName = "source.ts"): number[] {
   const sourceFile = ts.createSourceFile(fileName, content, ts.ScriptTarget.Latest, true);
-  const lines = [];
-  const visit = (node) => {
+  const lines: number[] = [];
+  const visit = (node: ts.Node): void => {
     if (ts.isCallExpression(node) && isRawFetchCall(node.expression)) {
       lines.push(toLine(sourceFile, node.expression));
     }
@@ -92,7 +92,7 @@ export function findRawFetchCallLines(content, fileName = "source.ts") {
   return lines;
 }
 
-export async function main() {
+export async function main(): Promise<void> {
   await runCallsiteGuard({
     importMetaUrl: import.meta.url,
     sourceRoots,

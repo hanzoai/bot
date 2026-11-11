@@ -2,8 +2,8 @@
 
 import path from "node:path";
 import ts from "typescript";
-import { runCallsiteGuard } from "./lib/callsite-guard.mjs";
-import { runAsScript, toLine, unwrapExpression } from "./lib/ts-guard-utils.mjs";
+import { runCallsiteGuard } from "./lib/callsite-guard.ts";
+import { runAsScript, toLine, unwrapExpression } from "./lib/ts-guard-utils.ts";
 
 const sourceRoots = ["extensions"];
 const enforcedFiles = new Set([
@@ -13,21 +13,21 @@ const enforcedFiles = new Set([
 ]);
 const blockedCallees = new Set(["readJsonBodyWithLimit", "readRequestBodyWithLimit"]);
 
-function getCalleeName(expression) {
+function getCalleeName(expression: ts.Expression): string | null {
   const callee = unwrapExpression(expression);
   if (ts.isIdentifier(callee)) {
     return callee.text;
   }
-  if (ts.isPropertyAccessExpression(callee)) {
+  if (ts.isPropertyAccessExpression(callee) && ts.isIdentifier(callee.name)) {
     return callee.name.text;
   }
   return null;
 }
 
-export function findBlockedWebhookBodyReadLines(content, fileName = "source.ts") {
+export function findBlockedWebhookBodyReadLines(content: string, fileName = "source.ts"): number[] {
   const sourceFile = ts.createSourceFile(fileName, content, ts.ScriptTarget.Latest, true);
-  const lines = [];
-  const visit = (node) => {
+  const lines: number[] = [];
+  const visit = (node: ts.Node): void => {
     if (ts.isCallExpression(node)) {
       const calleeName = getCalleeName(node.expression);
       if (calleeName && blockedCallees.has(calleeName)) {
@@ -40,7 +40,7 @@ export function findBlockedWebhookBodyReadLines(content, fileName = "source.ts")
   return lines;
 }
 
-export async function main() {
+export async function main(): Promise<void> {
   await runCallsiteGuard({
     importMetaUrl: import.meta.url,
     sourceRoots,

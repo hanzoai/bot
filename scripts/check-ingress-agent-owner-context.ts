@@ -2,8 +2,8 @@
 
 import path from "node:path";
 import ts from "typescript";
-import { runCallsiteGuard } from "./lib/callsite-guard.mjs";
-import { runAsScript, toLine, unwrapExpression } from "./lib/ts-guard-utils.mjs";
+import { runCallsiteGuard } from "./lib/callsite-guard.ts";
+import { runAsScript, toLine, unwrapExpression } from "./lib/ts-guard-utils.ts";
 
 const sourceRoots = ["src/gateway", "src/discord/voice"];
 const enforcedFiles = new Set([
@@ -14,10 +14,10 @@ const enforcedFiles = new Set([
   "src/gateway/server-node-events.ts",
 ]);
 
-export function findLegacyAgentCommandCallLines(content, fileName = "source.ts") {
+export function findLegacyAgentCommandCallLines(content: string, fileName = "source.ts"): number[] {
   const sourceFile = ts.createSourceFile(fileName, content, ts.ScriptTarget.Latest, true);
-  const lines = [];
-  const visit = (node) => {
+  const lines: number[] = [];
+  const visit = (node: ts.Node): void => {
     if (ts.isCallExpression(node)) {
       const callee = unwrapExpression(node.expression);
       if (ts.isIdentifier(callee) && callee.text === "agentCommand") {
@@ -30,7 +30,7 @@ export function findLegacyAgentCommandCallLines(content, fileName = "source.ts")
   return lines;
 }
 
-export async function main() {
+export async function main(): Promise<void> {
   await runCallsiteGuard({
     importMetaUrl: import.meta.url,
     sourceRoots,

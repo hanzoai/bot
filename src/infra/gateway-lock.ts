@@ -67,7 +67,7 @@ function isGatewayArgv(args: string[]): boolean {
     "dist/index.js",
     "dist/entry.js",
     "bot.mjs",
-    "scripts/run-node.mjs",
+    "scripts/run-node.ts",
     "src/index.ts",
   ];
   if (normalized.some((arg) => entryCandidates.some((entry) => arg.endsWith(entry)))) {

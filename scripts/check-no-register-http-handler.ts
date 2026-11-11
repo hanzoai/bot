@@ -1,20 +1,27 @@
 #!/usr/bin/env node
 
 import ts from "typescript";
-import { runCallsiteGuard } from "./lib/callsite-guard.mjs";
-import { runAsScript, toLine, unwrapExpression } from "./lib/ts-guard-utils.mjs";
+import { runCallsiteGuard } from "./lib/callsite-guard.ts";
+import { runAsScript, toLine, unwrapExpression } from "./lib/ts-guard-utils.ts";
 
 const sourceRoots = ["src", "extensions"];
 
-function isDeprecatedRegisterHttpHandlerCall(expression) {
+function isDeprecatedRegisterHttpHandlerCall(expression: ts.Expression): boolean {
   const callee = unwrapExpression(expression);
-  return ts.isPropertyAccessExpression(callee) && callee.name.text === "registerHttpHandler";
+  return (
+    ts.isPropertyAccessExpression(callee) &&
+    ts.isIdentifier(callee.name) &&
+    callee.name.text === "registerHttpHandler"
+  );
 }
 
-export function findDeprecatedRegisterHttpHandlerLines(content, fileName = "source.ts") {
+export function findDeprecatedRegisterHttpHandlerLines(
+  content: string,
+  fileName = "source.ts",
+): number[] {
   const sourceFile = ts.createSourceFile(fileName, content, ts.ScriptTarget.Latest, true);
-  const lines = [];
-  const visit = (node) => {
+  const lines: number[] = [];
+  const visit = (node: ts.Node): void => {
     if (ts.isCallExpression(node) && isDeprecatedRegisterHttpHandlerCall(node.expression)) {
       lines.push(toLine(sourceFile, node.expression));
     }
@@ -24,7 +31,7 @@ export function findDeprecatedRegisterHttpHandlerLines(content, fileName = "sour
   return lines;
 }
 
-export async function main() {
+export async function main(): Promise<void> {
   await runCallsiteGuard({
     importMetaUrl: import.meta.url,
     sourceRoots,

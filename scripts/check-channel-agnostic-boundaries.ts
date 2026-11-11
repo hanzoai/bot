@@ -5,11 +5,12 @@ import path from "node:path";
 import ts from "typescript";
 import {
   collectTypeScriptFiles,
+  type FileViolation,
   getPropertyNameText,
   resolveRepoRoot,
   runAsScript,
   toLine,
-} from "./lib/ts-guard-utils.mjs";
+} from "./lib/ts-guard-utils.ts";
 
 const repoRoot = resolveRepoRoot(import.meta.url);
 
@@ -54,16 +55,16 @@ const channelIds = [
 
 const channelIdSet = new Set(channelIds);
 const channelSegmentRe = new RegExp(`(^|[._/-])(?:${channelIds.join("|")})([._/-]|$)`);
-const comparisonOperators = new Set([
+const comparisonOperators = new Set<ts.SyntaxKind>([
   ts.SyntaxKind.EqualsEqualsEqualsToken,
   ts.SyntaxKind.ExclamationEqualsEqualsToken,
   ts.SyntaxKind.EqualsEqualsToken,
   ts.SyntaxKind.ExclamationEqualsToken,
 ]);
 
-const allowedViolations = new Set([]);
+const allowedViolations = new Set<string>([]);
 
-function isChannelsPropertyAccess(node) {
+function isChannelsPropertyAccess(node: ts.Node): boolean {
   if (ts.isPropertyAccessExpression(node)) {
     return node.name.text === "channels";
   }
@@ -73,7 +74,7 @@ function isChannelsPropertyAccess(node) {
   return false;
 }
 
-function readStringLiteral(node) {
+function readStringLiteral(node: ts.Node): string | null {
   if (ts.isStringLiteral(node)) {
     return node.text;
   }
@@ -83,12 +84,12 @@ function readStringLiteral(node) {
   return null;
 }
 
-function isChannelLiteralNode(node) {
+function isChannelLiteralNode(node: ts.Node): boolean {
   const text = readStringLiteral(node);
   return text ? channelIdSet.has(text) : false;
 }
 
-function matchesChannelModuleSpecifier(specifier) {
+function matchesChannelModuleSpecifier(specifier: string): boolean {
   return channelSegmentRe.test(specifier.replaceAll("\\", "/"));
 }
 
@@ -96,8 +97,11 @@ const userFacingChannelNameRe =
   /\b(?:discord|telegram|slack|signal|imessage|whatsapp|google\s*chat|irc|line|zalo|matrix|msteams|bluebubbles)\b/i;
 const systemMarkLiteral = "⚙️";
 
-function isModuleSpecifierStringNode(node) {
+function isModuleSpecifierStringNode(node: ts.Node): boolean {
   const parent = node.parent;
+  if (!parent) {
+    return false;
+  }
   if (ts.isImportDeclaration(parent) || ts.isExportDeclaration(parent)) {
     return true;
   }
@@ -108,11 +112,19 @@ function isModuleSpecifierStringNode(node) {
   );
 }
 
+export type BoundaryViolationOptions = {
+  checkModuleSpecifiers?: boolean;
+  checkConfigPaths?: boolean;
+  checkChannelComparisons?: boolean;
+  checkChannelAssignments?: boolean;
+  moduleSpecifierMatcher?: (specifier: string) => boolean;
+};
+
 export function findChannelAgnosticBoundaryViolations(
-  content,
+  content: string,
   fileName = "source.ts",
-  options = {},
-) {
+  options: BoundaryViolationOptions = {},
+): FileViolation[] {
   const checkModuleSpecifiers = options.checkModuleSpecifiers ?? true;
   const checkConfigPaths = options.checkConfigPaths ?? true;
   const checkChannelComparisons = options.checkChannelComparisons ?? true;
@@ -120,9 +132,9 @@ export function findChannelAgnosticBoundaryViolations(
   const moduleSpecifierMatcher = options.moduleSpecifierMatcher ?? matchesChannelModuleSpecifier;
 
   const sourceFile = ts.createSourceFile(fileName, content, ts.ScriptTarget.Latest, true);
-  const violations = [];
+  const violations: FileViolation[] = [];
 
-  const visit = (node) => {
+  const visit = (node: ts.Node): void => {
     if (
       checkModuleSpecifiers &&
       ts.isImportDeclaration(node) &&
@@ -171,6 +183,7 @@ export function findChannelAgnosticBoundaryViolations(
     if (
       checkConfigPaths &&
       ts.isPropertyAccessExpression(node) &&
+      ts.isIdentifier(node.name) &&
       channelIdSet.has(node.name.text)
     ) {
       if (isChannelsPropertyAccess(node.expression)) {
@@ -227,7 +240,10 @@ export function findChannelAgnosticBoundaryViolations(
   return violations;
 }
 
-export function findChannelCoreReverseDependencyViolations(content, fileName = "source.ts") {
+export function findChannelCoreReverseDependencyViolations(
+  content: string,
+  fileName = "source.ts",
+): FileViolation[] {
   return findChannelAgnosticBoundaryViolations(content, fileName, {
     checkModuleSpecifiers: true,
     checkConfigPaths: false,
@@ -237,11 +253,14 @@ export function findChannelCoreReverseDependencyViolations(content, fileName = "
   });
 }
 
-export function findAcpUserFacingChannelNameViolations(content, fileName = "source.ts") {
+export function findAcpUserFacingChannelNameViolations(
+  content: string,
+  fileName = "source.ts",
+): FileViolation[] {
   const sourceFile = ts.createSourceFile(fileName, content, ts.ScriptTarget.Latest, true);
-  const violations = [];
+  const violations: FileViolation[] = [];
 
-  const visit = (node) => {
+  const visit = (node: ts.Node): void => {
     const text = readStringLiteral(node);
     if (text && userFacingChannelNameRe.test(text) && !isModuleSpecifierStringNode(node)) {
       violations.push({
@@ -256,11 +275,14 @@ export function findAcpUserFacingChannelNameViolations(content, fileName = "sour
   return violations;
 }
 
-export function findSystemMarkLiteralViolations(content, fileName = "source.ts") {
+export function findSystemMarkLiteralViolations(
+  content: string,
+  fileName = "source.ts",
+): FileViolation[] {
   const sourceFile = ts.createSourceFile(fileName, content, ts.ScriptTarget.Latest, true);
-  const violations = [];
+  const violations: FileViolation[] = [];
 
-  const visit = (node) => {
+  const visit = (node: ts.Node): void => {
     const text = readStringLiteral(node);
     if (text && text.includes(systemMarkLiteral) && !isModuleSpecifierStringNode(node)) {
       violations.push({
@@ -275,7 +297,11 @@ export function findSystemMarkLiteralViolations(content, fileName = "source.ts")
   return violations;
 }
 
-const boundaryRuleSets = [
+const boundaryRuleSets: Array<{
+  id: string;
+  sources: string[];
+  scan: (content: string, fileName: string) => FileViolation[];
+}> = [
   {
     id: "acp-core",
     sources: acpCoreProtectedSources,
@@ -298,8 +324,8 @@ const boundaryRuleSets = [
   },
 ];
 
-export async function main() {
-  const violations = [];
+export async function main(): Promise<void> {
+  const violations: string[] = [];
   for (const ruleSet of boundaryRuleSets) {
     const files = (
       await Promise.all(

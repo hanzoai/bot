@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findRawWindowOpenLines } from "../../scripts/check-no-raw-window-open.mjs";
+import { findRawWindowOpenLines } from "../../scripts/check-no-raw-window-open.ts";
 
 describe("check-no-raw-window-open", () => {
   it("finds direct window.open calls", () => {

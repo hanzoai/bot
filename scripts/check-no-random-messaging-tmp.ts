@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import ts from "typescript";
-import { runCallsiteGuard } from "./lib/callsite-guard.mjs";
-import { runAsScript, toLine, unwrapExpression } from "./lib/ts-guard-utils.mjs";
+import { runCallsiteGuard } from "./lib/callsite-guard.ts";
+import { runAsScript, toLine, unwrapExpression } from "./lib/ts-guard-utils.ts";
 
 const sourceRoots = [
   "src/channels",
@@ -13,10 +13,10 @@ const sourceRoots = [
 ];
 const allowedRelativePaths = new Set(["extensions/feishu/src/dedup.ts"]);
 
-function collectOsTmpdirImports(sourceFile) {
+function collectOsTmpdirImports(sourceFile: ts.SourceFile) {
   const osModuleSpecifiers = new Set(["node:os", "os"]);
-  const osNamespaceOrDefault = new Set();
-  const namedTmpdir = new Set();
+  const osNamespaceOrDefault = new Set<string>();
+  const namedTmpdir = new Set<string>();
   for (const statement of sourceFile.statements) {
     if (!ts.isImportDeclaration(statement)) {
       continue;
@@ -47,16 +47,17 @@ function collectOsTmpdirImports(sourceFile) {
   return { osNamespaceOrDefault, namedTmpdir };
 }
 
-export function findMessagingTmpdirCallLines(content, fileName = "source.ts") {
+export function findMessagingTmpdirCallLines(content: string, fileName = "source.ts"): number[] {
   const sourceFile = ts.createSourceFile(fileName, content, ts.ScriptTarget.Latest, true);
   const { osNamespaceOrDefault, namedTmpdir } = collectOsTmpdirImports(sourceFile);
-  const lines = [];
+  const lines: number[] = [];
 
-  const visit = (node) => {
+  const visit = (node: ts.Node): void => {
     if (ts.isCallExpression(node)) {
       const callee = unwrapExpression(node.expression);
       if (
         ts.isPropertyAccessExpression(callee) &&
+        ts.isIdentifier(callee.name) &&
         callee.name.text === "tmpdir" &&
         ts.isIdentifier(callee.expression) &&
         osNamespaceOrDefault.has(callee.expression.text)
@@ -73,7 +74,7 @@ export function findMessagingTmpdirCallLines(content, fileName = "source.ts") {
   return lines;
 }
 
-export async function main() {
+export async function main(): Promise<void> {
   await runCallsiteGuard({
     importMetaUrl: import.meta.url,
     sourceRoots,

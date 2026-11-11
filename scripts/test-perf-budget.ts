@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-function readEnvNumber(name) {
+function readEnvNumber(name: string): number | null {
   const raw = process.env[name]?.trim();
   if (!raw) {
     return null;
@@ -12,8 +12,15 @@ function readEnvNumber(name) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function parseArgs(argv) {
-  const args = {
+type PerfBudgetArgs = {
+  config: string;
+  maxWallMs: number | null;
+  baselineWallMs: number | null;
+  maxRegressionPct: number;
+};
+
+function parseArgs(argv: string[]): PerfBudgetArgs {
+  const args: PerfBudgetArgs = {
     config: "vitest.unit.config.ts",
     maxWallMs: readEnvNumber("BOT_TEST_PERF_MAX_WALL_MS"),
     baselineWallMs: readEnvNumber("BOT_TEST_PERF_BASELINE_WALL_MS"),
@@ -54,7 +61,7 @@ function parseArgs(argv) {
   return args;
 }
 
-function formatMs(ms) {
+function formatMs(ms: number): string {
   return `${ms.toFixed(1)}ms`;
 }
 
@@ -70,21 +77,28 @@ const cmd = [
   reportPath,
 ];
 
-const startedAt = process.hrtime.bigint();
+const startedAt = performance.now();
 const run = spawnSync("pnpm", cmd, {
   stdio: "inherit",
   env: process.env,
 });
-const elapsedMs = Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+const elapsedMs = performance.now() - startedAt;
 
 if (run.status !== 0) {
   process.exit(run.status ?? 1);
 }
 
+type VitestPerfReport = {
+  testResults?: Array<{
+    startTime?: number;
+    endTime?: number;
+  }>;
+};
+
 let totalFileDurationMs = 0;
 let fileCount = 0;
 try {
-  const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+  const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as VitestPerfReport;
   for (const result of report.testResults ?? []) {
     if (typeof result.startTime === "number" && typeof result.endTime === "number") {
       totalFileDurationMs += Math.max(0, result.endTime - result.startTime);

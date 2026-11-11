@@ -9,13 +9,13 @@ import {
   runAsScript,
   toLine,
   unwrapExpression,
-} from "./lib/ts-guard-utils.mjs";
+} from "./lib/ts-guard-utils.ts";
 
 const repoRoot = resolveRepoRoot(import.meta.url);
 const uiSourceDir = path.join(repoRoot, "ui", "src", "ui");
 const allowedCallsites = new Set([path.join(uiSourceDir, "open-external-url.ts")]);
 
-function asPropertyAccess(expression) {
+function asPropertyAccess(expression: ts.Expression) {
   if (ts.isPropertyAccessExpression(expression)) {
     return expression;
   }
@@ -25,9 +25,13 @@ function asPropertyAccess(expression) {
   return null;
 }
 
-function isRawWindowOpenCall(expression) {
+function isRawWindowOpenCall(expression: ts.Expression): boolean {
   const propertyAccess = asPropertyAccess(unwrapExpression(expression));
-  if (!propertyAccess || propertyAccess.name.text !== "open") {
+  if (
+    !propertyAccess ||
+    !ts.isIdentifier(propertyAccess.name) ||
+    propertyAccess.name.text !== "open"
+  ) {
     return false;
   }
 
@@ -37,11 +41,11 @@ function isRawWindowOpenCall(expression) {
   );
 }
 
-export function findRawWindowOpenLines(content, fileName = "source.ts") {
+export function findRawWindowOpenLines(content: string, fileName = "source.ts"): number[] {
   const sourceFile = ts.createSourceFile(fileName, content, ts.ScriptTarget.Latest, true);
-  const lines = [];
+  const lines: number[] = [];
 
-  const visit = (node) => {
+  const visit = (node: ts.Node): void => {
     if (ts.isCallExpression(node) && isRawWindowOpenCall(node.expression)) {
       lines.push(toLine(sourceFile, node.expression));
     }
@@ -52,12 +56,12 @@ export function findRawWindowOpenLines(content, fileName = "source.ts") {
   return lines;
 }
 
-export async function main() {
+export async function main(): Promise<void> {
   const files = await collectTypeScriptFiles(uiSourceDir, {
     extraTestSuffixes: [".browser.test.ts", ".node.test.ts"],
     ignoreMissing: true,
   });
-  const violations = [];
+  const violations: string[] = [];
 
   for (const filePath of files) {
     if (allowedCallsites.has(filePath)) {

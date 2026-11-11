@@ -10,7 +10,62 @@ const compilerArgs = ["exec", compiler, "--no-clean"];
 
 export const runNodeWatchedPaths = ["src", "tsconfig.json", "package.json"];
 
-const statMtime = (filePath, fsImpl = fs) => {
+type SpawnProcessLike = {
+  on: (event: "exit", cb: (code: number | null, signal: string | null) => void) => unknown;
+};
+
+type SpawnFn = (cmd: string, args: string[], options: Record<string, unknown>) => SpawnProcessLike;
+
+type SpawnSyncResultLike = {
+  status: number | null;
+  stdout?: string | null;
+};
+
+type SpawnSyncFn = (
+  cmd: string,
+  args: string[],
+  options: {
+    cwd?: string;
+    encoding: BufferEncoding;
+    stdio?: ["ignore", "pipe", "ignore"];
+  },
+) => SpawnSyncResultLike;
+
+type FsLike = Pick<
+  typeof fs,
+  "statSync" | "readdirSync" | "readFileSync" | "mkdirSync" | "writeFileSync"
+>;
+
+type RunNodeDeps = {
+  spawn: SpawnFn;
+  spawnSync: SpawnSyncFn;
+  fs: FsLike;
+  stderr: { write: (value: string) => unknown };
+  execPath: string;
+  cwd: string;
+  args: string[];
+  env: NodeJS.ProcessEnv;
+  platform: NodeJS.Platform;
+  distRoot: string;
+  distEntry: string;
+  buildStampPath: string;
+  srcRoot: string;
+  configFiles: string[];
+};
+
+export type RunNodeMainParams = {
+  spawn?: SpawnFn;
+  spawnSync?: SpawnSyncFn;
+  fs?: FsLike;
+  stderr?: { write: (value: string) => unknown };
+  execPath?: string;
+  cwd?: string;
+  args?: string[];
+  env?: NodeJS.ProcessEnv;
+  platform?: NodeJS.Platform;
+};
+
+const statMtime = (filePath: string, fsImpl: FsLike = fs): number | null => {
   try {
     return fsImpl.statSync(filePath).mtimeMs;
   } catch {
@@ -18,7 +73,7 @@ const statMtime = (filePath, fsImpl = fs) => {
   }
 };
 
-const isExcludedSource = (filePath, srcRoot) => {
+const isExcludedSource = (filePath: string, srcRoot: string): boolean => {
   const relativePath = path.relative(srcRoot, filePath);
   if (relativePath.startsWith("..")) {
     return false;
@@ -26,19 +81,23 @@ const isExcludedSource = (filePath, srcRoot) => {
   return (
     relativePath.endsWith(".test.ts") ||
     relativePath.endsWith(".test.tsx") ||
-    relativePath.endsWith(`test-helpers.ts`)
+    relativePath.endsWith("test-helpers.ts")
   );
 };
 
-const findLatestMtime = (dirPath, shouldSkip, deps) => {
-  let latest = null;
+const findLatestMtime = (
+  dirPath: string,
+  shouldSkip: ((candidate: string) => boolean) | undefined,
+  deps: RunNodeDeps,
+): number | null => {
+  let latest: number | null = null;
   const queue = [dirPath];
   while (queue.length > 0) {
     const current = queue.pop();
     if (!current) {
       continue;
     }
-    let entries = [];
+    let entries: fs.Dirent[] = [];
     try {
       entries = deps.fs.readdirSync(current, { withFileTypes: true });
     } catch {
@@ -68,7 +127,7 @@ const findLatestMtime = (dirPath, shouldSkip, deps) => {
   return latest;
 };
 
-const runGit = (gitArgs, deps) => {
+const runGit = (gitArgs: string[], deps: RunNodeDeps): string | null => {
   try {
     const result = deps.spawnSync("git", gitArgs, {
       cwd: deps.cwd,
@@ -84,12 +143,12 @@ const runGit = (gitArgs, deps) => {
   }
 };
 
-const resolveGitHead = (deps) => {
+const resolveGitHead = (deps: RunNodeDeps): string | null => {
   const head = runGit(["rev-parse", "HEAD"], deps);
   return head || null;
 };
 
-const hasDirtySourceTree = (deps) => {
+const hasDirtySourceTree = (deps: RunNodeDeps): boolean | null => {
   const output = runGit(
     ["status", "--porcelain", "--untracked-files=normal", "--", ...runNodeWatchedPaths],
     deps,
@@ -100,7 +159,7 @@ const hasDirtySourceTree = (deps) => {
   return output.length > 0;
 };
 
-const readBuildStamp = (deps) => {
+const readBuildStamp = (deps: RunNodeDeps): { mtime: number | null; head: string | null } => {
   const mtime = statMtime(deps.buildStampPath, deps.fs);
   if (mtime == null) {
     return { mtime: null, head: null };
@@ -110,7 +169,7 @@ const readBuildStamp = (deps) => {
     if (!raw.startsWith("{")) {
       return { mtime, head: null };
     }
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw) as { head?: unknown };
     const head = typeof parsed?.head === "string" && parsed.head.trim() ? parsed.head.trim() : null;
     return { mtime, head };
   } catch {
@@ -118,7 +177,7 @@ const readBuildStamp = (deps) => {
   }
 };
 
-const hasSourceMtimeChanged = (stampMtime, deps) => {
+const hasSourceMtimeChanged = (stampMtime: number, deps: RunNodeDeps): boolean => {
   const srcMtime = findLatestMtime(
     deps.srcRoot,
     (candidate) => isExcludedSource(candidate, deps.srcRoot),
@@ -127,7 +186,7 @@ const hasSourceMtimeChanged = (stampMtime, deps) => {
   return srcMtime != null && srcMtime > stampMtime;
 };
 
-const shouldBuild = (deps) => {
+const shouldBuild = (deps: RunNodeDeps): boolean => {
   if (deps.env.BOT_FORCE_BUILD === "1") {
     return true;
   }
@@ -169,31 +228,33 @@ const shouldBuild = (deps) => {
   return false;
 };
 
-const logRunner = (message, deps) => {
+const logRunner = (message: string, deps: RunNodeDeps): void => {
   if (deps.env.BOT_RUNNER_LOG === "0") {
     return;
   }
   deps.stderr.write(`[bot] ${message}\n`);
 };
 
-const runHanzoBot = async (deps) => {
+const runHanzoBot = async (deps: RunNodeDeps): Promise<number> => {
   const nodeProcess = deps.spawn(deps.execPath, ["bot.mjs", ...deps.args], {
     cwd: deps.cwd,
     env: deps.env,
     stdio: "inherit",
   });
-  const res = await new Promise((resolve) => {
-    nodeProcess.on("exit", (exitCode, exitSignal) => {
-      resolve({ exitCode, exitSignal });
-    });
-  });
+  const res = await new Promise<{ exitCode: number | null; exitSignal: string | null }>(
+    (resolve) => {
+      nodeProcess.on("exit", (exitCode, exitSignal) => {
+        resolve({ exitCode, exitSignal });
+      });
+    },
+  );
   if (res.exitSignal) {
     return 1;
   }
   return res.exitCode ?? 1;
 };
 
-const writeBuildStamp = (deps) => {
+const writeBuildStamp = (deps: RunNodeDeps): void => {
   try {
     deps.fs.mkdirSync(deps.distRoot, { recursive: true });
     const stamp = {
@@ -203,28 +264,30 @@ const writeBuildStamp = (deps) => {
     deps.fs.writeFileSync(deps.buildStampPath, `${JSON.stringify(stamp)}\n`);
   } catch (error) {
     // Best-effort stamp; still allow the runner to start.
-    logRunner(`Failed to write build stamp: ${error?.message ?? "unknown error"}`, deps);
+    const message = error instanceof Error ? error.message : "unknown error";
+    logRunner(`Failed to write build stamp: ${message}`, deps);
   }
 };
 
-export async function runNodeMain(params = {}) {
-  const deps = {
+export async function runNodeMain(params: RunNodeMainParams = {}): Promise<number> {
+  const cwd = params.cwd ?? process.cwd();
+  const distRoot = path.join(cwd, "dist");
+  const deps: RunNodeDeps = {
     spawn: params.spawn ?? spawn,
     spawnSync: params.spawnSync ?? spawnSync,
     fs: params.fs ?? fs,
     stderr: params.stderr ?? process.stderr,
     execPath: params.execPath ?? process.execPath,
-    cwd: params.cwd ?? process.cwd(),
+    cwd,
     args: params.args ?? process.argv.slice(2),
     env: params.env ? { ...params.env } : { ...process.env },
     platform: params.platform ?? process.platform,
+    distRoot,
+    distEntry: path.join(distRoot, "/entry.js"),
+    buildStampPath: path.join(distRoot, ".buildstamp"),
+    srcRoot: path.join(cwd, "src"),
+    configFiles: [path.join(cwd, "tsconfig.json"), path.join(cwd, "package.json")],
   };
-
-  deps.distRoot = path.join(deps.cwd, "dist");
-  deps.distEntry = path.join(deps.distRoot, "/entry.js");
-  deps.buildStampPath = path.join(deps.distRoot, ".buildstamp");
-  deps.srcRoot = path.join(deps.cwd, "src");
-  deps.configFiles = [path.join(deps.cwd, "tsconfig.json"), path.join(deps.cwd, "package.json")];
 
   if (!shouldBuild(deps)) {
     return await runHanzoBot(deps);
@@ -240,9 +303,11 @@ export async function runNodeMain(params = {}) {
     stdio: "inherit",
   });
 
-  const buildRes = await new Promise((resolve) => {
-    build.on("exit", (exitCode, exitSignal) => resolve({ exitCode, exitSignal }));
-  });
+  const buildRes = await new Promise<{ exitCode: number | null; exitSignal: string | null }>(
+    (resolve) => {
+      build.on("exit", (exitCode, exitSignal) => resolve({ exitCode, exitSignal }));
+    },
+  );
   if (buildRes.exitSignal) {
     return 1;
   }
@@ -256,7 +321,7 @@ export async function runNodeMain(params = {}) {
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   void runNodeMain()
     .then((code) => process.exit(code))
-    .catch((err) => {
+    .catch((err: unknown) => {
       console.error(err);
       process.exit(1);
     });

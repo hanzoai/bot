@@ -1,7 +1,12 @@
 import { execFileSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
 
-/** @typedef {{ runNode: boolean; runMacos: boolean; runAndroid: boolean; runWindows: boolean }} ChangedScope */
+export type ChangedScope = {
+  runNode: boolean;
+  runMacos: boolean;
+  runAndroid: boolean;
+  runWindows: boolean;
+};
 
 const DOCS_PATH_RE = /^(docs\/|.*\.mdx?$)/;
 const MACOS_PROTOCOL_GEN_RE =
@@ -9,17 +14,13 @@ const MACOS_PROTOCOL_GEN_RE =
 const MACOS_NATIVE_RE = /^(apps\/macos\/|apps\/ios\/|apps\/shared\/|Swabble\/)/;
 const ANDROID_NATIVE_RE = /^(apps\/android\/|apps\/shared\/)/;
 const NODE_SCOPE_RE =
-  /^(src\/|test\/|extensions\/|packages\/|scripts\/|ui\/|\.github\/|bot\.mjs$|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|tsconfig.*\.json$|vitest.*\.ts$|tsdown\.config\.ts$|\.oxlintrc\.json$|\.oxfmtrc\.jsonc$)/;
+  /^(src\/|test\/|extensions\/|packages\/|scripts\/|ui\/|\.github\/|bot\.mjs$|hanzo-bot\.mjs$|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|tsconfig.*\.json$|vitest.*\.ts$|tsdown\.config\.ts$|\.oxlintrc\.json$|\.oxfmtrc\.jsonc$)/;
 const WINDOWS_SCOPE_RE =
-  /^(src\/|test\/|extensions\/|packages\/|scripts\/|ui\/|bot\.mjs$|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|tsconfig.*\.json$|vitest.*\.ts$|tsdown\.config\.ts$|\.github\/workflows\/ci\.yml$|\.github\/actions\/setup-node-env\/action\.yml$|\.github\/actions\/setup-pnpm-store-cache\/action\.yml$)/;
+  /^(src\/|test\/|extensions\/|packages\/|scripts\/|ui\/|bot\.mjs$|hanzo-bot\.mjs$|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|tsconfig.*\.json$|vitest.*\.ts$|tsdown\.config\.ts$|\.github\/workflows\/ci\.yml$|\.github\/actions\/setup-node-env\/action\.yml$|\.github\/actions\/setup-pnpm-store-cache\/action\.yml$)/;
 const NATIVE_ONLY_RE =
   /^(apps\/android\/|apps\/ios\/|apps\/macos\/|apps\/shared\/|Swabble\/|appcast\.xml$)/;
 
-/**
- * @param {string[]} changedPaths
- * @returns {ChangedScope}
- */
-export function detectChangedScope(changedPaths) {
+export function detectChangedScope(changedPaths: string[]): ChangedScope {
   if (!Array.isArray(changedPaths) || changedPaths.length === 0) {
     return { runNode: true, runMacos: true, runAndroid: true, runWindows: true };
   }
@@ -32,7 +33,7 @@ export function detectChangedScope(changedPaths) {
   let hasNonNativeNonDocs = false;
 
   for (const rawPath of changedPaths) {
-    const path = String(rawPath).trim();
+    const path = rawPath.trim();
     if (!path) {
       continue;
     }
@@ -71,12 +72,7 @@ export function detectChangedScope(changedPaths) {
   return { runNode, runMacos, runAndroid, runWindows };
 }
 
-/**
- * @param {string} base
- * @param {string} [head]
- * @returns {string[]}
- */
-export function listChangedPaths(base, head = "HEAD") {
+export function listChangedPaths(base: string, head = "HEAD"): string[] {
   if (!base) {
     return [];
   }
@@ -90,11 +86,10 @@ export function listChangedPaths(base, head = "HEAD") {
     .filter((line) => line.length > 0);
 }
 
-/**
- * @param {ChangedScope} scope
- * @param {string} [outputPath]
- */
-export function writeGitHubOutput(scope, outputPath = process.env.GITHUB_OUTPUT) {
+export function writeGitHubOutput(
+  scope: ChangedScope,
+  outputPath = process.env.GITHUB_OUTPUT,
+): void {
   if (!outputPath) {
     throw new Error("GITHUB_OUTPUT is required");
   }
@@ -104,13 +99,12 @@ export function writeGitHubOutput(scope, outputPath = process.env.GITHUB_OUTPUT)
   appendFileSync(outputPath, `run_windows=${scope.runWindows}\n`, "utf8");
 }
 
-function isDirectRun() {
+function isDirectRun(): boolean {
   const direct = process.argv[1];
   return Boolean(direct && import.meta.url.endsWith(direct));
 }
 
-/** @param {string[]} argv */
-function parseArgs(argv) {
+function parseArgs(argv: string[]): { base: string; head: string } {
   const args = { base: "", head: "HEAD" };
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === "--base") {

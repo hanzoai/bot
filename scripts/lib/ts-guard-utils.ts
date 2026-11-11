@@ -5,20 +5,42 @@ import ts from "typescript";
 
 const baseTestSuffixes = [".test.ts", ".test-utils.ts", ".test-harness.ts", ".e2e-harness.ts"];
 
-export function resolveRepoRoot(importMetaUrl) {
+export type CollectTypeScriptFilesOptions = {
+  includeTests?: boolean;
+  extraTestSuffixes?: string[];
+  skipNodeModules?: boolean;
+  ignoreMissing?: boolean;
+};
+
+export type FileViolation = {
+  line: number;
+  reason: string;
+};
+
+export type PathFileViolation = FileViolation & {
+  path: string;
+};
+
+export function resolveRepoRoot(importMetaUrl: string): string {
   return path.resolve(path.dirname(fileURLToPath(importMetaUrl)), "..", "..");
 }
 
-export function resolveSourceRoots(repoRoot, relativeRoots) {
+export function resolveSourceRoots(repoRoot: string, relativeRoots: string[]): string[] {
   return relativeRoots.map((root) => path.join(repoRoot, ...root.split("/").filter(Boolean)));
 }
 
-export function isTestLikeTypeScriptFile(filePath, options = {}) {
+export function isTestLikeTypeScriptFile(
+  filePath: string,
+  options: { extraTestSuffixes?: string[] } = {},
+): boolean {
   const extraTestSuffixes = options.extraTestSuffixes ?? [];
   return [...baseTestSuffixes, ...extraTestSuffixes].some((suffix) => filePath.endsWith(suffix));
 }
 
-export async function collectTypeScriptFiles(targetPath, options = {}) {
+export async function collectTypeScriptFiles(
+  targetPath: string,
+  options: CollectTypeScriptFilesOptions = {},
+): Promise<string[]> {
   const includeTests = options.includeTests ?? false;
   const extraTestSuffixes = options.extraTestSuffixes ?? [];
   const skipNodeModules = options.skipNodeModules ?? true;
@@ -51,7 +73,7 @@ export async function collectTypeScriptFiles(targetPath, options = {}) {
   }
 
   const entries = await fs.readdir(targetPath, { withFileTypes: true });
-  const out = [];
+  const out: string[] = [];
   for (const entry of entries) {
     const entryPath = path.join(targetPath, entry.name);
     if (entry.isDirectory()) {
@@ -72,7 +94,10 @@ export async function collectTypeScriptFiles(targetPath, options = {}) {
   return out;
 }
 
-export async function collectTypeScriptFilesFromRoots(sourceRoots, options = {}) {
+export async function collectTypeScriptFilesFromRoots(
+  sourceRoots: string[],
+  options: CollectTypeScriptFilesOptions = {},
+): Promise<string[]> {
   return (
     await Promise.all(
       sourceRoots.map(
@@ -86,12 +111,18 @@ export async function collectTypeScriptFilesFromRoots(sourceRoots, options = {})
   ).flat();
 }
 
-export async function collectFileViolations(params) {
+export async function collectFileViolations(params: {
+  sourceRoots: string[];
+  repoRoot: string;
+  extraTestSuffixes?: string[];
+  skipFile?: (filePath: string) => boolean;
+  findViolations: (content: string, filePath: string) => FileViolation[];
+}): Promise<PathFileViolation[]> {
   const files = await collectTypeScriptFilesFromRoots(params.sourceRoots, {
     extraTestSuffixes: params.extraTestSuffixes,
   });
 
-  const violations = [];
+  const violations: PathFileViolation[] = [];
   for (const filePath of files) {
     if (params.skipFile?.(filePath)) {
       continue;
@@ -108,18 +139,18 @@ export async function collectFileViolations(params) {
   return violations;
 }
 
-export function toLine(sourceFile, node) {
+export function toLine(sourceFile: ts.SourceFile, node: ts.Node): number {
   return sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
 }
 
-export function getPropertyNameText(name) {
+export function getPropertyNameText(name: ts.PropertyName): string | null {
   if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) {
     return name.text;
   }
   return null;
 }
 
-export function unwrapExpression(expression) {
+export function unwrapExpression(expression: ts.Expression): ts.Expression {
   let current = expression;
   while (true) {
     if (ts.isParenthesizedExpression(current)) {
@@ -138,7 +169,7 @@ export function unwrapExpression(expression) {
   }
 }
 
-export function isDirectExecution(importMetaUrl) {
+export function isDirectExecution(importMetaUrl: string): boolean {
   const entry = process.argv[1];
   if (!entry) {
     return false;
@@ -146,11 +177,11 @@ export function isDirectExecution(importMetaUrl) {
   return path.resolve(entry) === fileURLToPath(importMetaUrl);
 }
 
-export function runAsScript(importMetaUrl, main) {
+export function runAsScript(importMetaUrl: string, main: () => Promise<void>): void {
   if (!isDirectExecution(importMetaUrl)) {
     return;
   }
-  main().catch((error) => {
+  main().catch((error: unknown) => {
     console.error(error);
     process.exit(1);
   });

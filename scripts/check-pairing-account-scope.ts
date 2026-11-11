@@ -1,24 +1,25 @@
 #!/usr/bin/env node
 
 import ts from "typescript";
-import { createPairingGuardContext } from "./lib/pairing-guard-context.mjs";
+import { createPairingGuardContext } from "./lib/pairing-guard-context.ts";
 import {
   collectFileViolations,
+  type FileViolation,
   getPropertyNameText,
   runAsScript,
   toLine,
-} from "./lib/ts-guard-utils.mjs";
+} from "./lib/ts-guard-utils.ts";
 
 const { repoRoot, sourceRoots } = createPairingGuardContext(import.meta.url);
 
-function isUndefinedLikeExpression(node) {
+function isUndefinedLikeExpression(node: ts.Node): boolean {
   if (ts.isIdentifier(node) && node.text === "undefined") {
     return true;
   }
   return node.kind === ts.SyntaxKind.NullKeyword;
 }
 
-function hasRequiredAccountIdProperty(node) {
+function hasRequiredAccountIdProperty(node: ts.Node): boolean {
   if (!ts.isObjectLiteralExpression(node)) {
     return false;
   }
@@ -40,11 +41,11 @@ function hasRequiredAccountIdProperty(node) {
   return false;
 }
 
-function findViolations(content, filePath) {
+function findViolations(content: string, filePath: string): FileViolation[] {
   const sourceFile = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
-  const violations = [];
+  const violations: FileViolation[] = [];
 
-  const visit = (node) => {
+  const visit = (node: ts.Node): void => {
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
       const callName = node.expression.text;
       if (callName === "readChannelAllowFromStore") {
@@ -79,7 +80,7 @@ function findViolations(content, filePath) {
   return violations;
 }
 
-async function main() {
+async function main(): Promise<void> {
   const violations = await collectFileViolations({
     sourceRoots,
     repoRoot,

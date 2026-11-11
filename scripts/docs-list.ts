@@ -3,7 +3,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
-process.stdout.on("error", (error) => {
+process.stdout.on("error", (error: NodeJS.ErrnoException) => {
   if (error?.code === "EPIPE") {
     process.exit(0);
   }
@@ -22,12 +22,8 @@ if (!statSync(DOCS_DIR).isDirectory()) {
 
 const EXCLUDED_DIRS = new Set(["archive", "research"]);
 
-/**
- * @param {unknown[]} values
- * @returns {string[]}
- */
-function compactStrings(values) {
-  const result = [];
+function compactStrings(values: unknown[]): string[] {
+  const result: string[] = [];
   for (const value of values) {
     if (value === null || value === undefined) {
       continue;
@@ -39,21 +35,16 @@ function compactStrings(values) {
           ? String(value).trim()
           : null;
 
-    if (normalized?.length > 0) {
+    if (normalized && normalized.length > 0) {
       result.push(normalized);
     }
   }
   return result;
 }
 
-/**
- * @param {string} dir
- * @param {string} base
- * @returns {string[]}
- */
-function walkMarkdownFiles(dir, base = dir) {
+function walkMarkdownFiles(dir: string, base = dir): string[] {
   const entries = readdirSync(dir, { withFileTypes: true });
-  const files = [];
+  const files: string[] = [];
   for (const entry of entries) {
     if (entry.name.startsWith(".")) {
       continue;
@@ -71,11 +62,11 @@ function walkMarkdownFiles(dir, base = dir) {
   return files.toSorted((a, b) => a.localeCompare(b));
 }
 
-/**
- * @param {string} fullPath
- * @returns {{ summary: string | null; readWhen: string[]; error?: string }}
- */
-function extractMetadata(fullPath) {
+function extractMetadata(fullPath: string): {
+  summary: string | null;
+  readWhen: string[];
+  error?: string;
+} {
   const content = readFileSync(fullPath, "utf8");
 
   if (!content.startsWith("---")) {
@@ -90,9 +81,9 @@ function extractMetadata(fullPath) {
   const frontMatter = content.slice(3, endIndex).trim();
   const lines = frontMatter.split("\n");
 
-  let summaryLine = null;
-  const readWhen = [];
-  let collectingField = null;
+  let summaryLine: string | null = null;
+  const readWhen: string[] = [];
+  let collectingField: "read_when" | null = null;
 
   for (const rawLine of lines) {
     const line = rawLine.trim();
@@ -108,7 +99,7 @@ function extractMetadata(fullPath) {
       const inline = line.slice("read_when:".length).trim();
       if (inline.startsWith("[") && inline.endsWith("]")) {
         try {
-          const parsed = JSON.parse(inline.replace(/'/g, '"'));
+          const parsed: unknown = JSON.parse(inline.replace(/'/g, '"'));
           if (Array.isArray(parsed)) {
             readWhen.push(...compactStrings(parsed));
           }

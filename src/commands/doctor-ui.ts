@@ -56,12 +56,15 @@ export async function maybeRepairUiProtocolFreshness(
 
       if (shouldRepair) {
         note("Building Control UI assets... (this may take a moment)", "UI");
-        const uiScriptPath = path.join(root, "scripts/ui.js");
-        const buildResult = await runCommandWithTimeout([process.execPath, uiScriptPath, "build"], {
-          cwd: root,
-          timeoutMs: 120_000,
-          env: { ...process.env, FORCE_COLOR: "1" },
-        });
+        const uiScriptPath = path.join(root, "scripts/ui.ts");
+        const buildResult = await runCommandWithTimeout(
+          [process.execPath, "--experimental-strip-types", uiScriptPath, "build"],
+          {
+            cwd: root,
+            timeoutMs: 120_000,
+            env: { ...process.env, FORCE_COLOR: "1" },
+          },
+        );
         if (buildResult.code === 0) {
           note("UI build complete.", "UI");
         } else {
@@ -121,11 +124,11 @@ export async function maybeRepairUiProtocolFreshness(
           }
 
           note("Rebuilding stale UI assets... (this may take a moment)", "UI");
-          // Use scripts/ui.js to build, assuming node is available as we are running in it.
+          // Use scripts/ui.ts to build, assuming node is available as we are running in it.
           // We use the same node executable to run the script.
-          const uiScriptPath = path.join(root, "scripts/ui.js");
+          const uiScriptPath = path.join(root, "scripts/ui.ts");
           const buildResult = await runCommandWithTimeout(
-            [process.execPath, uiScriptPath, "build"],
+            [process.execPath, "--experimental-strip-types", uiScriptPath, "build"],
             {
               cwd: root,
               timeoutMs: 120_000,

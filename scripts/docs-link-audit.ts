@@ -17,10 +17,8 @@ if (!fs.existsSync(DOCS_JSON_PATH)) {
   process.exit(1);
 }
 
-/** @param {string} dir */
-function walk(dir) {
-  /** @type {string[]} */
-  const out = [];
+function walk(dir: string): string[] {
+  const out: string[] = [];
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     if (entry.name.startsWith(".")) {
@@ -36,27 +34,28 @@ function walk(dir) {
   return out;
 }
 
-/** @param {string} p */
-function normalizeSlashes(p) {
+function normalizeSlashes(p: string): string {
   return p.replace(/\\/g, "/");
 }
 
-/** @param {string} p */
-function normalizeRoute(p) {
+function normalizeRoute(p: string): string {
   const stripped = p.replace(/^\/+|\/+$/g, "");
   return stripped ? `/${stripped}` : "/";
 }
 
-/** @param {string} text */
-function stripInlineCode(text) {
+function stripInlineCode(text: string): string {
   return text.replace(/`[^`]+`/g, "");
 }
 
-const docsConfig = JSON.parse(fs.readFileSync(DOCS_JSON_PATH, "utf8"));
-const redirects = new Map();
+type DocsConfig = {
+  redirects?: Array<{ source?: string; destination?: string }>;
+};
+
+const docsConfig = JSON.parse(fs.readFileSync(DOCS_JSON_PATH, "utf8")) as DocsConfig;
+const redirects = new Map<string, string>();
 for (const item of docsConfig.redirects || []) {
-  const source = normalizeRoute(String(item.source || ""));
-  const destination = normalizeRoute(String(item.destination || ""));
+  const source = normalizeRoute(item.source || "");
+  const destination = normalizeRoute(item.destination || "");
   redirects.set(source, destination);
 }
 
@@ -64,7 +63,7 @@ const allFiles = walk(DOCS_DIR);
 const relAllFiles = new Set(allFiles.map((abs) => normalizeSlashes(path.relative(DOCS_DIR, abs))));
 
 const markdownFiles = allFiles.filter((abs) => /\.(md|mdx)$/i.test(abs));
-const routes = new Set();
+const routes = new Set<string>();
 
 for (const abs of markdownFiles) {
   const rel = normalizeSlashes(path.relative(DOCS_DIR, abs));
@@ -89,14 +88,11 @@ for (const abs of markdownFiles) {
   if (!match) {
     continue;
   }
-  const permalink = String(match[1])
-    .trim()
-    .replace(/^['"]|['"]$/g, "");
+  const permalink = match[1].trim().replace(/^['"]|['"]$/g, "");
   routes.add(normalizeRoute(permalink));
 }
 
-/** @param {string} route */
-function resolveRoute(route) {
+function resolveRoute(route: string): { ok: boolean; terminal: string; loop?: boolean } {
   let current = normalizeRoute(route);
   if (current === "/") {
     return { ok: true, terminal: "/" };
@@ -104,7 +100,11 @@ function resolveRoute(route) {
 
   const seen = new Set([current]);
   while (redirects.has(current)) {
-    current = redirects.get(current);
+    const next = redirects.get(current);
+    if (!next) {
+      break;
+    }
+    current = next;
     if (seen.has(current)) {
       return { ok: false, terminal: current, loop: true };
     }
@@ -115,8 +115,7 @@ function resolveRoute(route) {
 
 const markdownLinkRegex = /!?\[[^\]]*\]\(([^)]+)\)/g;
 
-/** @type {{file: string; line: number; link: string; reason: string}[]} */
-const broken = [];
+const broken: Array<{ file: string; line: number; link: string; reason: string }> = [];
 let checked = 0;
 
 for (const abs of markdownFiles) {

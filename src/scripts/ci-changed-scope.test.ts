@@ -2,17 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-
-const { detectChangedScope, listChangedPaths } =
-  (await import("../../scripts/ci-changed-scope.mjs")) as unknown as {
-    detectChangedScope: (paths: string[]) => {
-      runNode: boolean;
-      runMacos: boolean;
-      runAndroid: boolean;
-      runWindows: boolean;
-    };
-    listChangedPaths: (base: string, head?: string) => string[];
-  };
+import { detectChangedScope, listChangedPaths } from "../../scripts/ci-changed-scope.ts";
 
 const markerPaths: string[] = [];
 

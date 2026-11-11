@@ -1,7 +1,7 @@
 import { EventEmitter } from "node:events";
 import { describe, expect, it, vi } from "vitest";
-import { runNodeWatchedPaths } from "../../scripts/run-node.mjs";
-import { runWatchMain } from "../../scripts/watch-node.mjs";
+import { runNodeWatchedPaths } from "../../scripts/run-node.ts";
+import { runWatchMain } from "../../scripts/watch-node.ts";
 
 const createFakeProcess = () =>
   Object.assign(new EventEmitter(), {
@@ -41,7 +41,8 @@ describe("watch-node script", () => {
       [
         ...runNodeWatchedPaths.flatMap((watchPath) => ["--watch-path", watchPath]),
         "--watch-preserve-output",
-        "scripts/run-node.mjs",
+        "--experimental-strip-types",
+        "scripts/run-node.ts",
         "gateway",
         "--force",
       ],

@@ -260,7 +260,7 @@ export async function ensureControlUiAssetsBuilt(
     return { ok: true, built: false };
   }
 
-  const uiScript = path.join(repoRoot, "scripts", "ui.js");
+  const uiScript = path.join(repoRoot, "scripts", "ui.ts");
   if (!fs.existsSync(uiScript)) {
     return {
       ok: false,
@@ -271,10 +271,13 @@ export async function ensureControlUiAssetsBuilt(
 
   runtime.log("Control UI assets missing; building (ui:build, auto-installs UI deps)…");
 
-  const build = await runCommandWithTimeout([process.execPath, uiScript, "build"], {
-    cwd: repoRoot,
-    timeoutMs: opts?.timeoutMs ?? 10 * 60_000,
-  });
+  const build = await runCommandWithTimeout(
+    [process.execPath, "--experimental-strip-types", uiScript, "build"],
+    {
+      cwd: repoRoot,
+      timeoutMs: opts?.timeoutMs ?? 10 * 60_000,
+    },
+  );
   if (build.code !== 0) {
     return {
       ok: false,

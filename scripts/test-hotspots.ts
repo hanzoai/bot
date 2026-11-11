@@ -3,8 +3,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-function parseArgs(argv) {
-  const args = {
+type HotspotsArgs = {
+  config: string;
+  limit: number;
+  reportPath: string;
+};
+
+function parseArgs(argv: string[]): HotspotsArgs {
+  const args: HotspotsArgs = {
     config: "vitest.unit.config.ts",
     limit: 20,
     reportPath: "",
@@ -33,7 +39,7 @@ function parseArgs(argv) {
   return args;
 }
 
-function formatMs(value) {
+function formatMs(value: number): string {
   return `${value.toFixed(1)}ms`;
 }
 
@@ -56,7 +62,16 @@ if (!(opts.reportPath && fs.existsSync(reportPath))) {
   }
 }
 
-const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+type VitestJsonReport = {
+  testResults?: Array<{
+    name?: string;
+    startTime?: number;
+    endTime?: number;
+    assertionResults?: unknown[];
+  }>;
+};
+
+const report = JSON.parse(fs.readFileSync(reportPath, "utf8")) as VitestJsonReport;
 const fileResults = (report.testResults ?? [])
   .map((result) => {
     const start = typeof result.startTime === "number" ? result.startTime : 0;

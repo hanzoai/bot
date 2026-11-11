@@ -4,15 +4,27 @@ import {
   collectTypeScriptFilesFromRoots,
   resolveRepoRoot,
   resolveSourceRoots,
-} from "./ts-guard-utils.mjs";
+} from "./ts-guard-utils.ts";
 
-export async function runCallsiteGuard(params) {
+export type RunCallsiteGuardParams = {
+  importMetaUrl: string;
+  sourceRoots: string[];
+  extraTestSuffixes?: string[];
+  skipRelativePath?: (relPath: string) => boolean;
+  findCallLines: (content: string, filePath: string) => number[];
+  allowCallsite?: (callsite: string) => boolean;
+  header: string;
+  footer?: string;
+  sortViolations?: boolean;
+};
+
+export async function runCallsiteGuard(params: RunCallsiteGuardParams): Promise<void> {
   const repoRoot = resolveRepoRoot(params.importMetaUrl);
   const sourceRoots = resolveSourceRoots(repoRoot, params.sourceRoots);
   const files = await collectTypeScriptFilesFromRoots(sourceRoots, {
     extraTestSuffixes: params.extraTestSuffixes,
   });
-  const violations = [];
+  const violations: string[] = [];
 
   for (const filePath of files) {
     const relPath = path.relative(repoRoot, filePath).replaceAll(path.sep, "/");

@@ -74,7 +74,7 @@ jobs:
             BASE="${{ github.event.pull_request.base.sha }}"
           fi
 
-          node scripts/ci-changed-scope.mjs --base "$BASE" --head HEAD
+          node --experimental-strip-types scripts/ci-changed-scope.ts --base "$BASE" --head HEAD
 
   # Build dist once for Node-relevant changes and share it with downstream jobs.
   build-artifacts:
@@ -167,7 +167,7 @@ jobs:
       - name: Configure Node test resources
         if: (github.event_name != 'push' || matrix.runtime != 'bun') && matrix.task == 'test' && matrix.runtime == 'node'
         run: |
-          # `pnpm test` runs `scripts/test-parallel.mjs`, which spawns multiple Node processes.
+          # `pnpm test` runs `scripts/test-parallel.ts`, which spawns multiple Node processes.
           # Default heap limits have been too low on Linux CI (V8 OOM near 4GB).
           echo "HANZO_BOT_TEST_WORKERS=2" >> "$GITHUB_ENV"
           echo "HANZO_BOT_TEST_MAX_OLD_SPACE_SIZE_MB=6144" >> "$GITHUB_ENV"

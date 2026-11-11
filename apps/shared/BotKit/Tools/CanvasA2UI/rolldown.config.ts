@@ -4,7 +4,7 @@ import { defineConfig } from "rolldown";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../../../../..");
-const fromHere = (p) => path.resolve(here, p);
+const fromHere = (p: string) => path.resolve(here, p);
 const outputFile = path.resolve(
   here,
   "../../../../..",

@@ -45,7 +45,7 @@ describe("run-node script", () => {
           };
         };
 
-        const { runNodeMain } = await import("../../scripts/run-node.mjs");
+        const { runNodeMain } = await import("../../scripts/run-node.ts");
         const exitCode = await runNodeMain({
           cwd: tmp,
           args: ["--version"],

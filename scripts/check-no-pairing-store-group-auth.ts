@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
 import ts from "typescript";
-import { createPairingGuardContext } from "./lib/pairing-guard-context.mjs";
+import { createPairingGuardContext } from "./lib/pairing-guard-context.ts";
 import {
   collectFileViolations,
+  type FileViolation,
   getPropertyNameText,
   runAsScript,
   toLine,
-} from "./lib/ts-guard-utils.mjs";
+} from "./lib/ts-guard-utils.ts";
 
 const { repoRoot, sourceRoots, resolveFromRepo } = createPairingGuardContext(import.meta.url);
 
@@ -34,7 +35,7 @@ const allowedResolverCallNames = new Set([
   "resolveIrcEffectiveAllowlists",
 ]);
 
-function getDeclarationNameText(name) {
+function getDeclarationNameText(name: ts.BindingName): string | null {
   if (ts.isIdentifier(name)) {
     return name.text;
   }
@@ -44,9 +45,22 @@ function getDeclarationNameText(name) {
   return null;
 }
 
-function containsPairingStoreSource(node) {
+function getCallName(node: ts.Node): string | null {
+  if (!ts.isCallExpression(node)) {
+    return null;
+  }
+  if (ts.isIdentifier(node.expression)) {
+    return node.expression.text;
+  }
+  if (ts.isPropertyAccessExpression(node.expression) && ts.isIdentifier(node.expression.name)) {
+    return node.expression.name.text;
+  }
+  return null;
+}
+
+function containsPairingStoreSource(node: ts.Node): boolean {
   let found = false;
-  const visit = (current) => {
+  const visit = (current: ts.Node): void => {
     if (found) {
       return;
     }
@@ -67,20 +81,7 @@ function containsPairingStoreSource(node) {
   return found;
 }
 
-function getCallName(node) {
-  if (!ts.isCallExpression(node)) {
-    return null;
-  }
-  if (ts.isIdentifier(node.expression)) {
-    return node.expression.text;
-  }
-  if (ts.isPropertyAccessExpression(node.expression)) {
-    return node.expression.name.text;
-  }
-  return null;
-}
-
-function isSuspiciousNormalizeWithStoreCall(node) {
+function isSuspiciousNormalizeWithStoreCall(node: ts.Node): boolean {
   if (!ts.isCallExpression(node)) {
     return false;
   }
@@ -111,11 +112,11 @@ function isSuspiciousNormalizeWithStoreCall(node) {
   return hasStoreProp && hasGroupAllowProp;
 }
 
-function findViolations(content, filePath) {
+function findViolations(content: string, filePath: string): FileViolation[] {
   const sourceFile = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
-  const violations = [];
+  const violations: FileViolation[] = [];
 
-  const visit = (node) => {
+  const visit = (node: ts.Node): void => {
     if (ts.isVariableDeclaration(node) && node.initializer) {
       const name = getDeclarationNameText(node.name);
       if (name && groupNameRe.test(name) && containsPairingStoreSource(node.initializer)) {
@@ -155,7 +156,7 @@ function findViolations(content, filePath) {
   return violations;
 }
 
-async function main() {
+async function main(): Promise<void> {
   const violations = await collectFileViolations({
     sourceRoots,
     repoRoot,

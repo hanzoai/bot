@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
-import { load, getLoadablePath } from "sqlite-vec";
+import { getLoadablePath, load } from "sqlite-vec";
 
-function vec(values) {
+function vec(values: number[]): Buffer {
   return Buffer.from(new Float32Array(values).buffer);
 }
 
