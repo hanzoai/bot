@@ -255,7 +255,7 @@ overrides:
   postcss: '^8.5.26'
   'postcss>nanoid': '^3.3.18'
   'node-llama-cpp>nanoid': '^5.1.16'
-  linkify-it: '^5.0.2'
+  linkify-it: '^6.0.0'
   undici: '^8.10.0'
   ws: '^8.21.3'
   simple-git: '>=3.36.0'
