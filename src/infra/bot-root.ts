@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const CORE_PACKAGE_NAMES = new Set(["bot"]);
+const CORE_PACKAGE_NAMES = new Set(["@hanzo/bot", "bot"]);
 
 async function readPackageName(dir: string): Promise<string | null> {
   try {
@@ -78,6 +78,7 @@ function candidateDirsFromArgv1(argv1: string): string[] {
     const binName = path.basename(normalized);
     const nodeModulesDir = parts.slice(0, binIndex).join(path.sep);
     candidates.push(path.join(nodeModulesDir, binName));
+    candidates.push(path.join(nodeModulesDir, "@hanzo", "bot"));
   }
   return candidates;
 }

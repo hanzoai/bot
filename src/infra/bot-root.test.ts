@@ -33,7 +33,7 @@ vi.mock("node:fs", async (importOriginal) => {
     readFileSync: (p: string, encoding?: unknown) => {
       if (!isFixturePath(p)) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return actual.readFileSync(p as any, encoding as any) as unknown;
+        return actual.readFileSync(p, encoding as any) as unknown;
       }
       const entry = state.entries.get(abs(p));
       if (!entry || entry.kind !== "file") {
@@ -44,7 +44,7 @@ vi.mock("node:fs", async (importOriginal) => {
     statSync: (p: string) => {
       if (!isFixturePath(p)) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return actual.statSync(p as any) as unknown;
+        return actual.statSync(p) as unknown;
       }
       const entry = state.entries.get(abs(p));
       if (!entry) {
@@ -68,7 +68,7 @@ vi.mock("node:fs/promises", async (importOriginal) => {
     readFile: async (p: string, encoding?: unknown) => {
       if (!isFixturePath(p)) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return (await actual.readFile(p as any, encoding as any)) as unknown;
+        return (await actual.readFile(p, encoding as any)) as unknown;
       }
       const entry = state.entries.get(abs(p));
       if (!entry || entry.kind !== "file") {
@@ -134,6 +134,18 @@ describe("resolveBotPackageRoot", () => {
     const pkgRoot = fx("async");
     setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "bot" }));
 
+    await expect(resolveBotPackageRoot({ cwd: pkgRoot })).resolves.toBe(pkgRoot);
+  });
+
+  it("recognizes scoped @hanzo/bot package root", async () => {
+    const { resolveBotPackageRoot, resolveBotPackageRootSync } = await import("./bot-root.js");
+
+    const project = fx("scoped-hanzo-bot");
+    const argv1 = path.join(project, "node_modules", ".bin", "hanzo-bot");
+    const pkgRoot = path.join(project, "node_modules", "@hanzo", "bot");
+    setFile(path.join(pkgRoot, "package.json"), JSON.stringify({ name: "@hanzo/bot" }));
+
+    expect(resolveBotPackageRootSync({ argv1 })).toBe(pkgRoot);
     await expect(resolveBotPackageRoot({ cwd: pkgRoot })).resolves.toBe(pkgRoot);
   });
 });

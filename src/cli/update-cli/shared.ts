@@ -56,7 +56,7 @@ const BOT_REPO_URL = "https://github.com/bot/bot.git";
 const MAX_LOG_CHARS = 8000;
 
 export const DEFAULT_PACKAGE_NAME = "bot";
-const CORE_PACKAGE_NAMES = new Set([DEFAULT_PACKAGE_NAME]);
+const CORE_PACKAGE_NAMES = new Set(["@hanzo/bot", DEFAULT_PACKAGE_NAME]);
 
 export function normalizeTag(value?: string | null): string | null {
   return normalizePackageTagInput(value, ["bot", DEFAULT_PACKAGE_NAME]);
@@ -263,7 +263,7 @@ export async function tryWriteCompletionCache(root: string, jsonMode: boolean): 
   }
 
   if (result.status !== 0 && !jsonMode) {
-    const stderr = (result.stderr ?? "").toString().trim();
+    const stderr = (result.stderr ?? "").trim();
     const detail = stderr ? ` (${stderr})` : "";
     defaultRuntime.log(theme.warn(`Completion cache update failed${detail}.`));
   }
