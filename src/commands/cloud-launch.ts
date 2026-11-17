@@ -18,7 +18,10 @@ import { writeConfigFile } from "../config/io.js";
 const PLAYGROUND_API_BASE = "https://api.hanzo.bot/v1";
 const PLAYGROUND_NODES_URL = "https://app.hanzo.bot/nodes";
 const CLOUD_GATEWAY_URL = "wss://gw.hanzo.bot";
-const BILLING_URL = "https://billing.hanzo.ai";
+// hanzo.ai/pay is the one checkout every Hanzo site sends a buyer to; billing.hanzo.ai
+// only redirects there now. Credits are added at its amount step.
+const BILLING_URL = "https://hanzo.ai/pay";
+const ADD_CREDITS_URL = `${BILLING_URL}/amount/card`;
 
 // Mirrors ProvisionRequest from playground/control-plane/internal/cloud/provisioner.go
 interface CloudProvisionRequest {
@@ -79,8 +82,8 @@ async function provisionNode(
     const text = await res.text().catch(() => "");
     throw new Error(
       `Insufficient credits or billing not configured.\n` +
-        `  Add a payment method or claim your $5 signup credit at:\n` +
-        `  ${BILLING_URL}\n` +
+        `  Add credits at:\n` +
+        `  ${ADD_CREDITS_URL}\n` +
         (text ? `  (${text})` : ""),
     );
   }
