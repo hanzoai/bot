@@ -49,6 +49,13 @@ export type GatewayIamAuthResult =
 // Config adapter
 // ---------------------------------------------------------------------------
 
+// The audience is not a gate here. A person reaches this gateway with whatever
+// hanzo.id sign-in they hold: cloud relays the caller's own token to /v1/bots, and
+// the hanzo CLI signs in as "hanzo-cli", not as this gateway's client. Pinning `aud`
+// to clientId refused every such token with iam_audience_invalid, which cloud
+// surfaced as a 502 on GET /v1/bot/runs (hanzo-inc/cloud#780). The issuer (from
+// discovery), the signature against its JWKS, and expiry still gate, as in cloud
+// and in hanzoai/bot main (eb5f4f7d5).
 function toIamConfig(config: GatewayIamConfig): IamConfig {
   return {
     serverUrl: config.serverUrl,
@@ -56,6 +63,7 @@ function toIamConfig(config: GatewayIamConfig): IamConfig {
     clientSecret: config.clientSecret,
     orgName: config.orgName,
     appName: config.appName,
+    allowMissingAudience: true,
   };
 }
 
