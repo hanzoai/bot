@@ -38,7 +38,17 @@ export type GuardedFetchOptions = {
    */
   dangerouslyAllowEnvProxyWithoutPinnedDns?: boolean;
   auditContext?: string;
+  /**
+   * Headers for one hop, asked once per hop with the URL it goes to, after the
+   * SSRF policy admitted that host. Web Bot Auth uses it: a signature binds one
+   * host, so every redirect hop asks again and carries only its own. A hook that
+   * answers null, or throws, leaves the hop unsigned; it never fails the fetch.
+   */
+  signHop?: HopSigner;
 };
+
+/** Answers the headers that sign one request to url, or null to send it as is. */
+export type HopSigner = (url: URL) => Promise<Record<string, string> | null>;
 
 export type GuardedFetchResult = {
   response: Response;
@@ -128,6 +138,24 @@ function buildAbortSignal(params: { timeoutMs?: number; signal?: AbortSignal }):
   return { signal: controller.signal, cleanup };
 }
 
+/** The hook's headers for this hop; a hook that fails signs nothing. */
+async function hopHeaders(sign: HopSigner, url: URL): Promise<Record<string, string> | null> {
+  try {
+    return await sign(url);
+  } catch {
+    return null;
+  }
+}
+
+/** base with extra set over it, as a new Headers: the caller's init is never changed. */
+function withHeaders(base: HeadersInit | undefined, extra: Record<string, string>): Headers {
+  const headers = new Headers(base);
+  for (const [name, value] of Object.entries(extra)) {
+    headers.set(name, value);
+  }
+  return headers;
+}
+
 export async function fetchWithSsrFGuard(params: GuardedFetchOptions): Promise<GuardedFetchResult> {
   const fetcher: FetchLike | undefined = params.fetchImpl ?? globalThis.fetch;
   if (!fetcher) {
@@ -187,8 +215,10 @@ export async function fetchWithSsrFGuard(params: GuardedFetchOptions): Promise<G
         dispatcher = createPinnedDispatcher(pinned);
       }
 
+      const signed = params.signHop ? await hopHeaders(params.signHop, parsedUrl) : null;
       const init: RequestInit & { dispatcher?: Dispatcher } = {
         ...(currentInit ? { ...currentInit } : {}),
+        ...(signed ? { headers: withHeaders(currentInit?.headers, signed) } : {}),
         redirect: "manual",
         ...(dispatcher ? { dispatcher } : {}),
         ...(signal ? { signal } : {}),
