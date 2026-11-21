@@ -55,8 +55,8 @@ describe("checkBillingAllowance", () => {
     expect(result.allowed).toBe(true);
   });
 
-  it("refuses a caller whose balance is spent", async () => {
-    mockTier({ cents: 0 });
+  it("refuses a paid plan whose balance is spent", async () => {
+    mockTier({ cents: 0, tier: "pro" });
 
     const result = await checkBillingAllowance({
       iamConfig: IAM_CONFIG,
@@ -67,6 +67,21 @@ describe("checkBillingAllowance", () => {
     expect(result).toMatchObject({ allowed: false, code: "payment_required" });
   });
 
+  it("serves the free plan's own models at zero balance", async () => {
+    mockTier({ cents: 0, tier: "free", allowedModels: ["enso", "enso-auto"] });
+
+    const result = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: TENANT,
+      token: TOKEN,
+      model: "hanzo/enso-auto",
+      named: true,
+    });
+
+    expect(result).toMatchObject({ allowed: true });
+    expect(result).not.toHaveProperty("model");
+  });
+
   it("refuses a model the plan does not name, and says which", async () => {
     mockTier({ cents: 500, allowedModels: ["zen-free"] });
 
@@ -75,6 +90,7 @@ describe("checkBillingAllowance", () => {
       tenant: TENANT,
       token: TOKEN,
       model: "hanzo/zen6",
+      named: true,
     });
 
     expect(result).toMatchObject({
@@ -82,6 +98,38 @@ describe("checkBillingAllowance", () => {
       code: "model_not_in_plan",
       model: "hanzo/zen6",
     });
+  });
+
+  it("refuses a paid model to a free account at zero balance, as outside the plan", async () => {
+    mockTier({ cents: 0, tier: "free", allowedModels: ["enso", "enso-auto"] });
+
+    const result = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: TENANT,
+      token: TOKEN,
+      model: "hanzo/zen6",
+      named: true,
+    });
+
+    expect(result).toMatchObject({
+      allowed: false,
+      code: "model_not_in_plan",
+      model: "hanzo/zen6",
+    });
+  });
+
+  it("runs the plan's own model when the agent's default is outside it and none was named", async () => {
+    mockTier({ cents: 0, tier: "free", allowedModels: ["enso", "enso-auto"] });
+
+    const result = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: TENANT,
+      token: TOKEN,
+      model: "hanzo/zen6",
+      named: false,
+    });
+
+    expect(result).toMatchObject({ allowed: true, model: "enso" });
   });
 
   it("allows a model the plan names, with or without the provider prefix", async () => {
@@ -117,7 +165,7 @@ describe("checkBillingAllowance", () => {
     });
     expect(admin).toMatchObject({ allowed: true, tier: "enterprise" });
 
-    mockTier({ cents: 0 });
+    mockTier({ cents: 0, tier: "pro" });
     const lookalike = await checkBillingAllowance({
       iamConfig: IAM_CONFIG,
       tenant: { ...TENANT, userName: "z@hanzo.ai", owner: "evil-org" },

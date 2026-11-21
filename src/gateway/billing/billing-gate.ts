@@ -20,8 +20,16 @@ import { getTier, getWalletBalance } from "./iam-billing-client.js";
 export type BillingRefusalCode = "payment_required" | "model_not_in_plan" | "billing_unavailable";
 
 export type BillingGateResult =
-  | { allowed: true; tier?: PlanTier }
+  | {
+      allowed: true;
+      tier?: PlanTier;
+      /** The model to run instead of the one asked for, when the plan has none better to say. */
+      model?: string;
+    }
   | { allowed: false; reason: string; code: BillingRefusalCode; model?: string };
+
+/** The tier cloud names the plan every account starts on. Its own models cost nothing. */
+const FREE_TIER = "free";
 
 /** Whether a plan's model list names the model, with or without the provider prefix. */
 function modelAllowed(allowed: string[], model: string): boolean {
@@ -81,6 +89,11 @@ export async function checkBillingAllowance(params: {
   botId?: string;
   /** The model the request will run, which the caller's plan must allow. */
   model?: string;
+  /**
+   * The caller named `model`. When it did not (the agent's default is running) and the
+   * plan lacks it, the plan's own model runs instead of a refusal.
+   */
+  named?: boolean;
 }): Promise<BillingGateResult> {
   // Non-IAM mode — billing not enforced.
   if (!params.iamConfig || !params.tenant) {
@@ -143,23 +156,33 @@ export async function checkBillingAllowance(params: {
       throw new Error("no bearer token to bill");
     }
     const plan = await getTier(params.token);
+    const planModels = plan.tier.allowedModels;
+    let substitute: string | undefined;
+    if (params.model && !modelAllowed(planModels, params.model)) {
+      substitute = planModels.find((m) => m !== "*");
+      if (params.named || !substitute) {
+        return {
+          allowed: false,
+          reason: `${params.model} is not in your ${plan.tier.name} plan — upgrade to use it`,
+          code: "model_not_in_plan",
+          model: params.model,
+        };
+      }
+    }
+    // Paid usage needs a balance; the free plan's own models are served without one.
     const available = plan.balance.effectiveAvailable;
-    if (available <= 0) {
+    if (available <= 0 && plan.tier.name !== FREE_TIER) {
       return {
         allowed: false,
         reason: `Insufficient funds — add credits or upgrade your plan to continue. Balance: $${(available / 100).toFixed(2)}`,
         code: "payment_required",
       };
     }
-    if (params.model && !modelAllowed(plan.tier.allowedModels, params.model)) {
-      return {
-        allowed: false,
-        reason: `${params.model} is not in your ${plan.tier.name} plan — upgrade to use it`,
-        code: "model_not_in_plan",
-        model: params.model,
-      };
-    }
-    return { allowed: true, tier: resolvePlanTier(plan.tier.name) };
+    return {
+      allowed: true,
+      tier: resolvePlanTier(plan.tier.name),
+      ...(substitute ? { model: substitute } : {}),
+    };
   } catch (err) {
     console.error(
       `[billing-gate] Failed to check billing for "${params.tenant.orgId}": ${err instanceof Error ? err.message : String(err)}`,

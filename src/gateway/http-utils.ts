@@ -60,6 +60,18 @@ export function resolveAgentIdFromModel(model: string | undefined): string | und
   return normalizeAgentId(agentId);
 }
 
+/**
+ * The model a request names, or undefined when its `model` field only selects an
+ * agent (`bot`, `bot:<agent>`, `agent:<agent>`) and the agent's own default runs.
+ */
+export function resolveNamedModel(model: string | undefined): string | undefined {
+  const raw = model?.trim();
+  if (!raw || raw.toLowerCase() === "bot" || resolveAgentIdFromModel(raw)) {
+    return undefined;
+  }
+  return raw;
+}
+
 export function resolveAgentIdForRequest(params: {
   req: IncomingMessage;
   model: string | undefined;

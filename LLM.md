@@ -86,13 +86,16 @@ type ChannelPlugin = {
 ## Billing Flow
 
 1. Pre-request: every paid HTTP path (`/v1/chat/completions`, `/v1/responses`, marketplace) calls
-   `refuseUnbilled()` (`billing/billing-http.ts`) before the platform key is used. It reads the
-   caller's own tier from cloud `GET /v1/billing/tier` with the caller's token (cached 60s): a spent
-   balance is 402 `payment_required`, a model outside the plan is 402 `model_not_in_plan`, both as
+   `billRequest()` (`billing/billing-http.ts`) before the platform key is used. The request's `model`
+   is an agent selector (`bot`, `bot:<agent>`, `agent:<agent>`: the agent's default runs) or a model
+   (`enso-auto`, `hanzo/zen6`: it runs for that call only). The gate reads the caller's own tier from
+   cloud `GET /v1/billing/tier` with the caller's token (cached 60s). A model outside the plan is 402
+   `model_not_in_plan`; a free account is served the plan's own models at zero balance, and when it
+   names no model and the agent's default is outside its plan the plan's first model runs instead; a
+   paid plan with a spent balance is 402 `payment_required`. Both bodies are
    `{error:{message,type:"billing_error",code,billingUrl}}` with `billingUrl` from `BILLING_URL`; an
-   unreadable plan is 503 `billing_unavailable`. The model checked is the one the request's agent
-   runs. SuperAdmin is the token's `owner == "admin"`. Only IAM-mode gateways bill; the shared
-   gateway token is an operator's own node and is not billed.
+   unreadable plan is 503 `billing_unavailable`. SuperAdmin is the token's home org `admin`. Only
+   IAM-mode gateways bill; the shared gateway token is an operator's own node and is not billed.
 2. Request: Route to LLM provider
 3. Post-request: `reportUsage()` → async queue → cloud `POST /v1/billing/usage`
 4. Commerce API: `COMMERCE_API_URL` (cloud, `http://cloud.hanzo.svc:8000` in the cluster)

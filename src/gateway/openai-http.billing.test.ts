@@ -55,16 +55,24 @@ function tier(cents: number, name: string, allowedModels: string[]) {
   });
 }
 
-async function chat(port: number, token: string, path = "/v1/chat/completions") {
+async function chat(port: number, token: string, path = "/v1/chat/completions", model = "bot") {
   const body =
     path === "/v1/responses"
-      ? { model: "bot", input: "hi" }
-      : { model: "bot", messages: [{ role: "user", content: "hi" }] };
+      ? { model, input: "hi" }
+      : { model, messages: [{ role: "user", content: "hi" }] };
   return await fetch(`http://127.0.0.1:${port}${path}`, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
     body: JSON.stringify(body),
   });
+}
+
+/** The model the last agent run was told to use; undefined means the agent's default. */
+function modelRun(): string | undefined {
+  const opts = (agentCommand.mock.calls.at(-1) as unknown[] | undefined)?.[0] as
+    | { model?: string }
+    | undefined;
+  return opts?.model;
 }
 
 async function inIamGateway(run: (port: number) => Promise<void>) {
@@ -86,17 +94,45 @@ async function inIamGateway(run: (port: number) => Promise<void>) {
 }
 
 describe("paid HTTP paths bill the caller before the platform key is used", () => {
-  it("refuses a zero-balance token with the typed 402 and runs no agent", async () => {
-    agentCommand.mockClear();
-    tier(0, "free", ["zen-free"]);
+  it("serves a free account at zero balance on the free plan's models", async () => {
+    tier(0, "free", ["enso", "enso-auto"]);
     await inIamGateway(async (port) => {
       for (const path of ["/v1/chat/completions", "/v1/responses"]) {
-        const res = await chat(port, "free", path);
+        agentCommand.mockClear();
+        agentCommand.mockResolvedValueOnce({ payloads: [{ text: "hello" }] } as never);
+        const res = await chat(port, "free", path, "enso-auto");
+        expect(res.status).toBe(200);
+        await res.text();
+        expect(agentCommand).toHaveBeenCalledTimes(1);
+        expect(modelRun()).toBe("enso-auto");
+      }
+    });
+  });
+
+  it("runs the plan's own model when none is named and the agent's default is outside it", async () => {
+    agentCommand.mockClear();
+    agentCommand.mockResolvedValueOnce({ payloads: [{ text: "hello" }] } as never);
+    tier(0, "free", ["plan-only-model"]);
+    await inIamGateway(async (port) => {
+      const res = await chat(port, "free");
+      expect(res.status).toBe(200);
+      await res.text();
+    });
+    expect(modelRun()).toBe("plan-only-model");
+  });
+
+  it("refuses a model outside the plan with the typed 402, even at zero balance", async () => {
+    agentCommand.mockClear();
+    tier(0, "free", ["enso", "enso-auto"]);
+    await inIamGateway(async (port) => {
+      for (const path of ["/v1/chat/completions", "/v1/responses"]) {
+        const res = await chat(port, "free", path, "zen6");
         expect(res.status).toBe(402);
         expect(await res.json()).toMatchObject({
           error: {
             type: "billing_error",
-            code: "payment_required",
+            code: "model_not_in_plan",
+            model: "zen6",
             billingUrl: "https://pay.example/credit",
           },
         });
@@ -105,15 +141,15 @@ describe("paid HTTP paths bill the caller before the platform key is used", () =
     expect(agentCommand).not.toHaveBeenCalled();
   });
 
-  it("refuses a model the plan does not allow, naming it", async () => {
+  it("refuses a paid plan whose balance is spent, with the typed 402", async () => {
     agentCommand.mockClear();
-    tier(500, "free", ["zen-free"]);
+    tier(0, "pro", ["*"]);
     await inIamGateway(async (port) => {
-      const res = await chat(port, "free");
+      const res = await chat(port, "paid");
       expect(res.status).toBe(402);
-      const body = (await res.json()) as { error: { code: string; model: string } };
-      expect(body.error.code).toBe("model_not_in_plan");
-      expect(body.error.model).toMatch(/\//);
+      expect(await res.json()).toMatchObject({
+        error: { code: "payment_required", billingUrl: "https://pay.example/credit" },
+      });
     });
     expect(agentCommand).not.toHaveBeenCalled();
   });
@@ -128,6 +164,7 @@ describe("paid HTTP paths bill the caller before the platform key is used", () =
       await res.text();
     });
     expect(agentCommand).toHaveBeenCalledTimes(1);
+    expect(modelRun()).toBeUndefined();
   });
 
   it("lets a SuperAdmin through without reading a plan", async () => {

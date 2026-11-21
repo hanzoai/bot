@@ -456,6 +456,36 @@ describe("agentCommand", () => {
     });
   });
 
+  it("runs the model a call names instead of the agent's default, for that run only", async () => {
+    await withTempHome(async (home) => {
+      const store = path.join(home, "sessions.json");
+      mockConfig(home, store, { model: { primary: "openai/gpt-4.1-mini" }, models: {} });
+
+      await agentCommand({ message: "hi", to: "+1555", model: "enso-auto" }, runtime);
+      expectLastRunProviderModel("openai", "enso-auto");
+
+      await agentCommand({ message: "hi", to: "+1555", model: "hanzo/enso" }, runtime);
+      expectLastRunProviderModel("hanzo", "enso");
+
+      await agentCommand({ message: "hi", to: "+1555" }, runtime);
+      expectLastRunProviderModel("openai", "gpt-4.1-mini");
+    });
+  });
+
+  it("refuses a named model outside the agent's models allowlist", async () => {
+    await withTempHome(async (home) => {
+      const store = path.join(home, "sessions.json");
+      mockConfig(home, store, {
+        model: { primary: "openai/gpt-4.1-mini" },
+        models: { "openai/gpt-4.1-mini": {} },
+      });
+
+      await expect(
+        agentCommand({ message: "hi", to: "+1555", model: "hanzo/enso" }, runtime),
+      ).rejects.toThrow(/not allowed/);
+    });
+  });
+
   it("uses default fallback list for session model overrides", async () => {
     await withTempHome(async (home) => {
       const store = path.join(home, "sessions.json");
