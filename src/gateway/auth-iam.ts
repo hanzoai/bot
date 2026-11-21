@@ -102,8 +102,8 @@ const APPLICATION = "application";
 
 /**
  * Validate a hanzo.id JWT: its signature against IAM's JWKS (config.jwksUrl, the
- * in-cluster address, or the issuer's own), its issuer against config.serverUrl
- * — pinned, one brand per gateway — and its expiry.
+ * in-cluster address, or the issuer's own), its issuer against config.serverUrl and
+ * config.issuers — pinned, one brand per gateway, each exact — and its expiry.
  *
  * The audience is not a gate, as in cloud (TestValidate_AudienceIsNotAGate): IAM
  * stamps `aud` with the app that minted the token, and a request cloud relays as
@@ -131,7 +131,8 @@ export async function validateIamToken(
       token,
       keySetFor(config.jwksUrl ?? `${issuer}${IAM_JWKS_PATH}`),
       {
-        issuer,
+        // serverUrl, and any further issuer the config names: each matched exactly.
+        issuer: [issuer, ...(config.issuers ?? []).map((i) => i.replace(/\/+$/, ""))],
         clockTolerance: 30,
       },
     );
