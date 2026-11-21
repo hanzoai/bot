@@ -603,7 +603,7 @@ describe("OpenAI-compatible HTTP API (e2e)", () => {
           model: "bot",
           messages: [{ role: "user", content: "hi" }],
         });
-        expect(res.status).toBe(502);
+        expect(res.status).toBe(500);
         const failed = (await res.json()) as { error?: { message?: string; type?: string } };
         expect(failed.error?.type).toBe("upstream_error");
         expect(failed.error?.message).toBe("401 status code (no body)");
@@ -620,7 +620,7 @@ describe("OpenAI-compatible HTTP API (e2e)", () => {
           model: "bot",
           messages: [{ role: "user", content: "hi" }],
         });
-        expect(res.status).toBe(502);
+        expect(res.status).toBe(500);
         const failed = (await res.json()) as { error?: { message?: string; type?: string } };
         expect(failed.error?.type).toBe("upstream_error");
         expect(failed.error?.message).toBe("401 status code (no body)");

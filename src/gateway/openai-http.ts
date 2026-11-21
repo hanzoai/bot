@@ -516,7 +516,9 @@ export async function handleOpenAiHttpRequest(
       const failure = resolveAgentFailure(result);
       if (failure) {
         logWarn(`openai-compat: chat completion failed upstream: ${failure}`);
-        sendJson(res, 502, { error: { message: failure, type: "upstream_error" } });
+        // 500, not 502: the edge replaces a 502 or 504 with its own page, and the body is
+        // what tells the caller why the call failed.
+        sendJson(res, 500, { error: { message: failure, type: "upstream_error" } });
         return true;
       }
 
