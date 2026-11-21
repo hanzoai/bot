@@ -62,7 +62,7 @@ describe("checkBillingAllowance — free tier with starter credit", () => {
 
     const result = await checkBillingAllowance({ iamConfig: IAM_CONFIG, tenant: TENANT });
 
-    expect(result.allowed).toBe(false);
+    expect(result).toMatchObject({ allowed: false, code: "payment_required" });
     expect((result as { reason: string }).reason).toMatch(/insufficient funds/i);
   });
 
@@ -102,18 +102,66 @@ describe("checkBillingAllowance — free tier with starter credit", () => {
     expect((result as { reason: string }).reason).toMatch(/not authorized/i);
   });
 
-  it("super admins bypass all checks", async () => {
-    const superAdminTenant = { ...TENANT, userName: "z@hanzo.ai" };
+  it("SuperAdmin is the admin org's token, never a name", async () => {
+    const admin = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: { ...TENANT, owner: "admin" },
+    });
+    expect(admin).toMatchObject({ allowed: true, tier: "enterprise" });
+
+    mockBalance(0);
+    mockSubscription(false);
+    const lookalike = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: { ...TENANT, userName: "z@hanzo.ai", owner: "evil-org" },
+    });
+    expect(lookalike).toMatchObject({ allowed: false, code: "payment_required" });
+  });
+
+  it("refuses a model the plan does not name, and says which", async () => {
+    mockBalance(500);
+    vi.spyOn(client, "getTier").mockResolvedValue({ name: "free", allowedModels: ["enso"] });
 
     const result = await checkBillingAllowance({
       iamConfig: IAM_CONFIG,
-      tenant: superAdminTenant,
+      tenant: TENANT,
+      token: "user-jwt",
+      model: "hanzo/zen6",
+    });
+
+    expect(result).toMatchObject({
+      allowed: false,
+      code: "model_not_in_plan",
+      model: "hanzo/zen6",
+    });
+  });
+
+  it("allows a model the plan names, with or without the provider prefix", async () => {
+    mockBalance(500);
+    vi.spyOn(client, "getTier").mockResolvedValue({ name: "pro", allowedModels: ["zen6"] });
+
+    const result = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: TENANT,
+      token: "user-jwt",
+      model: "hanzo/zen6",
     });
 
     expect(result.allowed).toBe(true);
-    if (result.allowed) {
-      expect(result.tier).toBe("enterprise");
-    }
+  });
+
+  it("an unreadable plan is billing_unavailable, never a paywall", async () => {
+    mockBalance(500);
+    vi.spyOn(client, "getTier").mockRejectedValue(new Error("network error"));
+
+    const result = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: TENANT,
+      token: "user-jwt",
+      model: "hanzo/zen6",
+    });
+
+    expect(result).toMatchObject({ allowed: false, code: "billing_unavailable" });
   });
 
   it("no IAM config means no billing enforced (self-hosted)", async () => {

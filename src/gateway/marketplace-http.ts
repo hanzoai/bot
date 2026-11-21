@@ -16,6 +16,7 @@ import type { AuthRateLimiter } from "./auth-rate-limit.js";
 import type { GatewayAuthResult, ResolvedGatewayAuth } from "./auth.js";
 import { authorizeHttpGatewayConnect } from "./auth.js";
 import { checkBillingAllowance } from "./billing/billing-gate.js";
+import { sendBillingRefusal } from "./billing/billing-http.js";
 import { reportUsage } from "./billing/usage-reporter.js";
 import {
   sendJson,
@@ -162,12 +163,7 @@ export async function handleMarketplaceHttpRequest(
     token: userToken,
   });
   if (!billingResult.allowed) {
-    sendJson(res, 402, {
-      error: {
-        message: billingResult.reason ?? "insufficient balance",
-        type: "billing_error",
-      },
-    });
+    sendBillingRefusal(res, billingResult);
     return true;
   }
 

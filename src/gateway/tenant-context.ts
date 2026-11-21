@@ -22,6 +22,8 @@ export type TenantContext = {
   userName?: string;
   /** Environment tag (e.g. "production", "staging"). */
   env?: string;
+  /** The token's home org, from IAM's signed membership: `admin` marks a SuperAdmin. */
+  owner?: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -60,6 +62,7 @@ export function resolveTenantContext(params: {
     userId: iamResult.userId,
     userName: iamResult.name ?? iamResult.email,
     env: requestedTenant?.env,
+    owner: iamResult.owner,
   };
 }
 

@@ -654,7 +654,6 @@ export const BotSchema = z
                 appName: z.string().optional(),
                 scopes: z.array(z.string()).optional(),
                 jwksUrl: z.string().optional(),
-                superAdmins: z.array(z.string()).optional(),
               })
               .strict()
               .optional(),

@@ -18,6 +18,7 @@ const CACHE_TTL_MS = 60_000; // 1 minute
 
 const subscriptionCache = new Map<string, CacheEntry<SubscriptionStatus>>();
 const balanceCache = new Map<string, CacheEntry<number>>();
+const tierCache = new Map<string, CacheEntry<Tier>>();
 
 function cached<T>(map: Map<string, CacheEntry<T>>, key: string): T | undefined {
   const entry = map.get(key);
@@ -57,6 +58,9 @@ export type CommerceSubscription = {
   status?: string;
   plan?: CommercePlan;
 };
+
+/** What cloud answers to GET /v1/billing/tier: the plan's name and the models it allows. */
+export type Tier = { name: string; allowedModels: string[] };
 
 export type SubscriptionStatus = {
   active: boolean;
@@ -118,6 +122,7 @@ async function commerceRead(
 export function resetBillingClient(): void {
   subscriptionCache.clear();
   balanceCache.clear();
+  tierCache.clear();
   walletCache.clear();
 }
 
@@ -153,6 +158,27 @@ export async function getBalance(
   }
   setCached(balanceCache, cacheKey, data.available);
   return data.available;
+}
+
+/**
+ * The caller's own plan: its name and the models it allows. Cached 60 seconds.
+ * It is the caller's read, so it needs the caller's bearer.
+ */
+export async function getTier(cfg: GatewayIamConfig, orgId: string, token: string): Promise<Tier> {
+  const hit = cached(tierCache, token);
+  if (hit) {
+    return hit;
+  }
+  const data = (await commerceRead(cfg, "/v1/billing/tier", orgId, token)) as {
+    tier?: { name?: unknown; allowedModels?: unknown };
+  } | null;
+  const { name, allowedModels } = data?.tier ?? {};
+  if (typeof name !== "string" || !Array.isArray(allowedModels)) {
+    throw new Error("commerce tier carries no plan");
+  }
+  const tier = { name, allowedModels: allowedModels.filter((m) => typeof m === "string") };
+  setCached(tierCache, token, tier);
+  return tier;
 }
 
 /**

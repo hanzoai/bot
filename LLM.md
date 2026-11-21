@@ -85,7 +85,14 @@ type ChannelPlugin = {
 
 ## Billing Flow
 
-1. Pre-request: `checkBillingAllowance()` → Commerce API balance check (cached 60s)
+1. Pre-request: every paid HTTP path (`/v1/chat/completions`, `/v1/responses`, marketplace) refuses
+   before the platform key is used (`billing/billing-http.ts` `refuseUnbilled()`): a spent balance with
+   no subscription is 402 `payment_required`, a model outside the caller's plan (cloud
+   `GET /v1/billing/tier`) is 402 `model_not_in_plan`, both as
+   `{error:{message,type:"billing_error",code,billingUrl}}` with `billingUrl` from `BILLING_URL`; an
+   unreadable plan is 503 `billing_unavailable`. The model checked is the one the request's agent runs.
+   SuperAdmin is the token's home org `admin`. Only IAM-mode gateways bill; the shared gateway token is
+   an operator's own node and is not billed.
 2. Request: Route to LLM provider
 3. Post-request: `reportUsage()` → async queue → cloud `POST /v1/billing/usage`
 4. Commerce API: `COMMERCE_API_URL` (cloud, `http://cloud.hanzo.svc:8000` in the cluster)
