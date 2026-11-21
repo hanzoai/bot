@@ -124,11 +124,10 @@ function withJwksRewrite<T>(
  * When `config.jwksUrl` is set, rewrites the JWKS fetch URL to bypass
  * Cloudflare/WAF blocking. Otherwise uses the @hanzo/iam SDK directly.
  *
- * If the SDK rejects the token due to an issuer mismatch (e.g. the OIDC
- * discovery endpoint advertises issuer "https://hanzo.id" but the IAM server
- * stamps JWTs with iss "https://iam.hanzo.ai"), retries verification using
- * jose directly — bypassing SDK OIDC discovery (which would try to reach
- * the unreachable issuer) while using the reachable JWKS endpoint.
+ * The issuer is pinned: config.serverUrl, and any further issuer config.issuers
+ * names (the platform's own, https://hanzo.id and https://hanzo.ai), each matched
+ * exactly. A token signed by IAM's key under any other issuer string, an
+ * organization's own https://hanzo.ai/<org> among them, is refused.
  */
 export async function validateIamToken(
   token: string,
@@ -141,10 +140,9 @@ export async function validateIamToken(
     ? await withJwksRewrite(config.jwksUrl, config.serverUrl, validate)
     : await validate();
 
-  // When the SDK returns iam_signature_invalid, it may be due to an
-  // issuer or audience mismatch (jose groups these under the same error).
-  // Retry using jose directly — bypassing the SDK's OIDC discovery which
-  // would try to reach the token's issuer (potentially unreachable).
+  // The SDK checks the issuer against OIDC discovery, which names serverUrl only.
+  // A token under one of config.issuers is verified here with jose against the
+  // same JWKS, its issuer pinned to that exact entry.
   if (!sdkResult.ok && sdkResult.reason === "iam_signature_invalid") {
     try {
       const parts = token.split(".");
@@ -152,29 +150,14 @@ export async function validateIamToken(
         const payload = JSON.parse(Buffer.from(parts[1], "base64url").toString());
         const tokenIssuer = typeof payload.iss === "string" ? payload.iss : null;
         const configIssuer = config.serverUrl.replace(/\/+$/, "");
+        const accepted = (config.issuers ?? []).map((i) => i.replace(/\/+$/, ""));
 
-        if (tokenIssuer && tokenIssuer !== configIssuer) {
-          // The token's issuer differs from the configured server URL.
-          // Use jose directly with the reachable JWKS endpoint (from config)
-          // but accept the token's actual issuer claim.
+        if (tokenIssuer && tokenIssuer !== configIssuer && accepted.includes(tokenIssuer)) {
           const jwksUrl = config.jwksUrl ?? `${configIssuer}/.well-known/jwks`;
-          const keySet = createRemoteJWKSet(new URL(jwksUrl));
-
-          // Try with audience check first, then without
-          let verified;
-          try {
-            verified = await jwtVerify(token, keySet, {
-              issuer: tokenIssuer,
-              audience: config.clientId,
-              clockTolerance: 30,
-            });
-          } catch {
-            // Audience may not match — retry without audience check
-            verified = await jwtVerify(token, keySet, {
-              issuer: tokenIssuer,
-              clockTolerance: 30,
-            });
-          }
+          const verified = await jwtVerify(token, createRemoteJWKSet(new URL(jwksUrl)), {
+            issuer: tokenIssuer,
+            clockTolerance: 30,
+          });
 
           const claims = verified.payload as unknown as IamJwtClaims;
           const sub =

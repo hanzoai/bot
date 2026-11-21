@@ -25,7 +25,12 @@ beforeAll(async () => {
   const published = await generateKeyPair("RS256", { extractable: true });
   signingKey = published.privateKey;
   strangerKey = (await generateKeyPair("RS256")).privateKey;
-  const jwk: JWK = { ...(await exportJWK(published.publicKey)), kid: KID, alg: "RS256", use: "sig" };
+  const jwk: JWK = {
+    ...(await exportJWK(published.publicKey)),
+    kid: KID,
+    alg: "RS256",
+    use: "sig",
+  };
 
   server = createServer((req, res) => {
     res.setHeader("Content-Type", "application/json");
@@ -55,12 +60,12 @@ function config() {
 
 async function tokenFor(
   audience: string,
-  opts: { key?: CryptoKey; expiresIn?: string | number } = {},
+  opts: { key?: CryptoKey; expiresIn?: string | number; iss?: string } = {},
 ): Promise<string> {
   return new SignJWT({ owner: "acme", name: "alice", email: "alice@acme.test" })
     .setProtectedHeader({ alg: "RS256", kid: KID })
     .setSubject("acme/alice")
-    .setIssuer(issuer)
+    .setIssuer(opts.iss ?? issuer)
     .setAudience(audience)
     .setIssuedAt()
     .setExpirationTime(opts.expiresIn ?? "5m")
@@ -100,5 +105,41 @@ describe("validateIamToken", () => {
       config(),
     );
     expect(result).toEqual({ ok: false, reason: "iam_token_expired" });
+  });
+
+  it("accepts exactly the issuers the config names, and no other string", async () => {
+    const both = { ...config(), issuers: ["https://hanzo.ai"] };
+    const named = await validateIamToken(
+      await tokenFor("hanzo-cli", { iss: "https://hanzo.ai" }),
+      both,
+    );
+    expect(named).toMatchObject({ ok: true, userId: "acme/alice" });
+
+    for (const iss of [
+      "https://hanzo.ai/acme",
+      "https://hanzo.ai/",
+      "https://hanzo.ai.evil.test",
+      "http://hanzo.ai",
+      "https://iam.hanzo.ai",
+    ]) {
+      const refused = await validateIamToken(await tokenFor("hanzo-cli", { iss }), both);
+      expect(refused.ok, iss).toBe(false);
+    }
+  });
+
+  it("refuses a second platform issuer the config does not name", async () => {
+    const result = await validateIamToken(
+      await tokenFor("hanzo-cli", { iss: "https://hanzo.ai" }),
+      config(),
+    );
+    expect(result.ok).toBe(false);
+  });
+
+  it("a named issuer still needs a key hanzo.id publishes", async () => {
+    const result = await validateIamToken(
+      await tokenFor("hanzo-cli", { iss: "https://hanzo.ai", key: strangerKey }),
+      { ...config(), issuers: ["https://hanzo.ai"] },
+    );
+    expect(result.ok).toBe(false);
   });
 });

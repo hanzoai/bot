@@ -97,6 +97,12 @@ type ChannelPlugin = {
 3. Post-request: `reportUsage()` → async queue → cloud `POST /v1/billing/usage`
 4. Commerce API: `COMMERCE_API_URL` (cloud, `http://cloud.hanzo.svc:8000` in the cluster)
 
+## IAM issuers
+
+`gateway.auth.iam.serverUrl` is the pinned issuer; `issuers` names further ones, each matched
+exactly (the platform's two: `https://hanzo.id`, `https://hanzo.ai`). A token signed by IAM's key
+under any other issuer string, an organization's `https://hanzo.ai/<org>` among them, is refused.
+
 ## Git Remotes
 
 - `origin` = `ssh://github.com/hanzoai/bot` (canonical, PRs here)
