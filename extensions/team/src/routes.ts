@@ -277,7 +277,7 @@ export function createChatCompletionsProxyHandler(api: BotPluginApi): RouteHandl
     try {
       const body = (await readJsonBody(req)) as Record<string, unknown>;
       const messagesRaw = Array.isArray(body.messages) ? body.messages : [];
-      const model = typeof body.model === "string" ? body.model : "claude-sonnet-4-6";
+      const model = typeof body.model === "string" ? body.model : "zen6";
 
       // Flatten messages into a single prompt for the embedded agent
       const userMessages = messagesRaw
@@ -342,7 +342,7 @@ export function createMessagesProxyHandler(api: BotPluginApi): RouteHandler {
     try {
       const body = (await readJsonBody(req)) as Record<string, unknown>;
       const messagesRaw = Array.isArray(body.messages) ? body.messages : [];
-      const model = typeof body.model === "string" ? body.model : "claude-sonnet-4-6";
+      const model = typeof body.model === "string" ? body.model : "zen6";
       const systemRaw =
         typeof body.system === "string" ? body.system : "You are a helpful assistant.";
 
