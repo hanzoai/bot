@@ -22,6 +22,8 @@ export type TenantContext = {
   userName?: string;
   /** Environment tag (e.g. "production", "staging"). */
   env?: string;
+  /** The org that owns the user, from the IAM token: `admin` marks a SuperAdmin. */
+  owner?: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -35,6 +37,7 @@ export type TenantContext = {
  *   1. Explicit `tenant.orgId` from connect params
  *   2. IAM auth result's `currentOrgId`
  *   3. First org in IAM auth result's `orgIds`
+ *   4. The token's `owner`, which cloud scopes every call by
  *
  * Returns null if no org can be determined (personal/self-hosted mode).
  */
@@ -48,7 +51,8 @@ export function resolveTenantContext(params: {
 }): TenantContext | null {
   const { iamResult, requestedTenant } = params;
 
-  const orgId = requestedTenant?.orgId ?? iamResult.currentOrgId ?? iamResult.orgIds[0];
+  const orgId =
+    requestedTenant?.orgId ?? iamResult.currentOrgId ?? iamResult.orgIds[0] ?? iamResult.owner;
 
   if (!orgId) {
     return null;
@@ -60,6 +64,7 @@ export function resolveTenantContext(params: {
     userId: iamResult.userId,
     userName: iamResult.name ?? iamResult.email,
     env: requestedTenant?.env,
+    owner: iamResult.owner,
   };
 }
 

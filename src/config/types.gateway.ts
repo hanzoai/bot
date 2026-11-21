@@ -128,11 +128,6 @@ export type GatewayIamConfig = {
    * Example: "http://iam.hanzo.svc.cluster.local/.well-known/jwks"
    */
   jwksUrl?: string;
-  /**
-   * Email addresses with super-admin privileges.
-   * Super admins bypass billing checks and can credit their own account for testing.
-   */
-  superAdmins?: string[];
 };
 
 /**

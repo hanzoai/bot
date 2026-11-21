@@ -15,16 +15,19 @@ import type { PlanTier } from "../../commerce/tier-model.js";
 import type { GatewayIamConfig } from "../../config/config.js";
 import type { NodeBillingMode } from "../../config/types.gateway.js";
 import type { TenantContext } from "../tenant-context.js";
-import {
-  getSubscriptionStatus,
-  getBalance,
-  getWalletBalance,
-  type SubscriptionStatus,
-} from "./iam-billing-client.js";
+import { getTier, getWalletBalance } from "./iam-billing-client.js";
+
+export type BillingRefusalCode = "payment_required" | "model_not_in_plan" | "billing_unavailable";
 
 export type BillingGateResult =
   | { allowed: true; tier?: PlanTier }
-  | { allowed: false; reason: string; status: SubscriptionStatus };
+  | { allowed: false; reason: string; code: BillingRefusalCode; model?: string };
+
+/** Whether a plan's model list names the model, with or without the provider prefix. */
+function modelAllowed(allowed: string[], model: string): boolean {
+  const bare = model.slice(model.lastIndexOf("/") + 1);
+  return allowed.some((m) => m === "*" || m === model || m === bare);
+}
 
 /** Map a Commerce plan slug to a PlanTier for model routing. */
 function resolvePlanTier(slug: string | null | undefined): PlanTier {
@@ -44,28 +47,9 @@ function resolvePlanTier(slug: string | null | undefined): PlanTier {
   return "developer";
 }
 
-/** Built-in super admin emails that always bypass billing. */
-const BUILTIN_SUPER_ADMINS = new Set(["a@hanzo.ai", "z@hanzo.ai", "z@zeekay.io"]);
-
-/**
- * Check whether the user is a super admin (bypasses billing, can self-credit).
- * Combines the built-in list with any configured `superAdmins` in IAM config.
- */
-export function isSuperAdmin(
-  iamConfig: GatewayIamConfig | null | undefined,
-  tenant: TenantContext | null | undefined,
-): boolean {
-  if (!tenant?.userName) {
-    return false;
-  }
-  const email = tenant.userName.toLowerCase().trim();
-  if (BUILTIN_SUPER_ADMINS.has(email)) {
-    return true;
-  }
-  if (iamConfig?.superAdmins) {
-    return iamConfig.superAdmins.some((a) => a.toLowerCase().trim() === email);
-  }
-  return false;
+/** SuperAdmin is the reserved `admin` org: the token's owner, which IAM signs, and nothing a user can name. */
+export function isSuperAdmin(tenant: TenantContext | null | undefined): boolean {
+  return tenant?.owner === "admin";
 }
 
 /**
@@ -95,6 +79,8 @@ export async function checkBillingAllowance(params: {
   nodeSpentCents?: number;
   /** Bot/agent ID for wallet balance check. */
   botId?: string;
+  /** The model the request will run, which the caller's plan must allow. */
+  model?: string;
 }): Promise<BillingGateResult> {
   // Non-IAM mode — billing not enforced.
   if (!params.iamConfig || !params.tenant) {
@@ -111,7 +97,7 @@ export async function checkBillingAllowance(params: {
         return {
           allowed: false,
           reason: "Bot wallet has insufficient funds. Fund your bot wallet to continue.",
-          status: { active: false, subscription: null, plan: null },
+          code: "payment_required",
         };
       }
     } catch {
@@ -120,7 +106,7 @@ export async function checkBillingAllowance(params: {
   }
 
   // Super admins bypass billing checks — enterprise tier.
-  if (isSuperAdmin(params.iamConfig, params.tenant)) {
+  if (isSuperAdmin(params.tenant)) {
     return { allowed: true, tier: "enterprise" as PlanTier };
   }
 
@@ -139,7 +125,7 @@ export async function checkBillingAllowance(params: {
     return {
       allowed: false,
       reason: `Node budget exhausted — $${(spent / 100).toFixed(2)} of $${(budget / 100).toFixed(2)} used`,
-      status: { active: false, subscription: null, plan: null },
+      code: "payment_required",
     };
   }
 
@@ -153,28 +139,27 @@ export async function checkBillingAllowance(params: {
   }
 
   try {
-    // Check prepaid balance — primary billing gate
-    const userId = params.tenant.userId || params.tenant.orgId;
-    const available = await getBalance(params.iamConfig, userId, params.token);
-
-    // Resolve subscription status (needed for tier even when balance is positive)
-    const status = await getSubscriptionStatus(params.iamConfig, params.tenant, params.token);
-    const tier = resolvePlanTier(status.plan?.slug);
-
-    if (available > 0) {
-      return { allowed: true, tier };
+    if (!params.token) {
+      throw new Error("no bearer token to bill");
     }
-
-    // No balance — check subscription as fallback (some plans may not require prepaid)
-    if (status.active) {
-      return { allowed: true, tier };
+    const plan = await getTier(params.token);
+    const available = plan.balance.effectiveAvailable;
+    if (available <= 0) {
+      return {
+        allowed: false,
+        reason: `Insufficient funds — add credits or upgrade your plan to continue. Balance: $${(available / 100).toFixed(2)}`,
+        code: "payment_required",
+      };
     }
-
-    return {
-      allowed: false,
-      reason: `Insufficient funds — add credits or upgrade your plan to continue. Balance: $${(available / 100).toFixed(2)}`,
-      status,
-    };
+    if (params.model && !modelAllowed(plan.tier.allowedModels, params.model)) {
+      return {
+        allowed: false,
+        reason: `${params.model} is not in your ${plan.tier.name} plan — upgrade to use it`,
+        code: "model_not_in_plan",
+        model: params.model,
+      };
+    }
+    return { allowed: true, tier: resolvePlanTier(plan.tier.name) };
   } catch (err) {
     console.error(
       `[billing-gate] Failed to check billing for "${params.tenant.orgId}": ${err instanceof Error ? err.message : String(err)}`,
@@ -190,7 +175,7 @@ export async function checkBillingAllowance(params: {
     return {
       allowed: false,
       reason: "Billing service unavailable — please try again",
-      status: { active: false, subscription: null, plan: null },
+      code: "billing_unavailable",
     };
   }
 }
