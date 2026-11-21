@@ -14,6 +14,7 @@
 import type { PlanTier } from "../../commerce/tier-model.js";
 import type { GatewayIamConfig } from "../../config/config.js";
 import type { NodeBillingMode } from "../../config/types.gateway.js";
+import { createSubsystemLogger } from "../../logging/subsystem.js";
 import type { TenantContext } from "../tenant-context.js";
 import {
   getSubscriptionStatus,
@@ -22,6 +23,8 @@ import {
   getWalletBalance,
   OrgNotGrantedError,
 } from "./iam-billing-client.js";
+
+const log = createSubsystemLogger("billing");
 
 export type BillingRefusalCode = "payment_required" | "model_not_in_plan" | "billing_unavailable";
 
@@ -43,28 +46,7 @@ function modelAllowed(allowed: string[], model: string): boolean {
   return allowed.some((m) => m === "*" || m === model || m === bare);
 }
 
-/** SuperAdmin is the reserved `admin` org: the token's home org, which IAM signs, and nothing a user can name. */
-export function isSuperAdmin(tenant: TenantContext | null | undefined): boolean {
-  return tenant?.owner === "admin";
-}
-
-/**
- * Check whether the tenant is allowed to make an LLM request.
- *
- * Returns `{ allowed: true }` when:
- * - No IAM config (personal / self-hosted mode)
- * - No tenant context (personal / self-hosted mode)
- * - Tenant is a super admin
- * - Node billing mode is "local" (node uses local API keys)
- * - Node billing mode is "dedicated" and budget not exhausted
- * - Tenant has prepaid credit balance > 0
- *
- * Returns `{ allowed: false, reason }` when balance is zero and no
- * subscription is active, when the gateway is not granted the tenant's org
- * (in every mode that checks), or when the billing service is unreachable
- * (fail-closed unless BILLING_GATE_MODE=warn).
- */
-export async function checkBillingAllowance(params: {
+type BillingCheck = {
   iamConfig?: GatewayIamConfig | null;
   tenant?: TenantContext | null;
   /**
@@ -87,14 +69,42 @@ export async function checkBillingAllowance(params: {
    * plan lacks it, the plan's own model runs instead of a refusal.
    */
   named?: boolean;
-}): Promise<BillingGateResult> {
+};
+
+/**
+ * Check whether the tenant is allowed to make an LLM request.
+ *
+ * Returns `{ allowed: true }` when:
+ * - No IAM config (personal / self-hosted mode)
+ * - No tenant context (personal / self-hosted mode)
+ * - Node billing mode is "local" (node uses local API keys)
+ * - Node billing mode is "dedicated" and budget not exhausted
+ * - Tenant has prepaid credit balance > 0
+ *
+ * Returns `{ allowed: false, reason }` when balance is zero and no
+ * subscription is active, when the gateway is not granted the tenant's org
+ * (in every mode that checks), or when the billing service is unreachable
+ * (fail-closed unless BILLING_GATE_MODE=warn).
+ */
+export async function checkBillingAllowance(params: BillingCheck): Promise<BillingGateResult> {
+  const verdict = await decide(params);
+  if (params.tenant) {
+    log.info(
+      `org=${params.tenant.orgId} user=${params.tenant.userId} model=${params.model ?? "-"} ` +
+        (verdict.allowed ? "allowed" : `refused ${verdict.code}`),
+    );
+  }
+  return verdict;
+}
+
+async function decide(params: BillingCheck): Promise<BillingGateResult> {
   // Non-IAM mode — billing not enforced.
   if (!params.iamConfig || !params.tenant) {
     return { allowed: true };
   }
 
   // Bot wallet check — if the bot has an enabled wallet, enforce it.
-  // This runs BEFORE super-admin bypass so wallet is always the source of truth.
+  // The wallet is the source of truth, ahead of any plan read.
   if (params.botId) {
     try {
       const walletBalance = await getWalletBalance(params.botId);
@@ -109,11 +119,6 @@ export async function checkBillingAllowance(params: {
     } catch {
       // Wallet check failed — don't gate (fail-open)
     }
-  }
-
-  // Super admins bypass billing checks — enterprise tier.
-  if (isSuperAdmin(params.tenant)) {
-    return { allowed: true, tier: "enterprise" as PlanTier };
   }
 
   // Local mode — node uses local API keys, no billing enforced.

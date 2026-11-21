@@ -102,20 +102,30 @@ describe("checkBillingAllowance — free tier with starter credit", () => {
     expect((result as { reason: string }).reason).toMatch(/not authorized/i);
   });
 
-  it("SuperAdmin is the admin org's token, never a name", async () => {
-    const admin = await checkBillingAllowance({
+  it("no role passes without a plan read: an admin's org is metered like any other", async () => {
+    const admin = { ...TENANT, orgId: "admin", userName: "z@hanzo.ai" };
+    vi.spyOn(client, "getTier").mockResolvedValue({ name: "pro", allowedModels: ["*"] });
+
+    mockBalance(5000);
+    const funded = await checkBillingAllowance({
       iamConfig: IAM_CONFIG,
-      tenant: { ...TENANT, owner: "admin" },
+      tenant: admin,
+      token: "user-jwt",
+      model: "hanzo/zen6",
+      named: true,
     });
-    expect(admin).toMatchObject({ allowed: true, tier: "enterprise" });
+    expect(funded).toMatchObject({ allowed: true });
 
     mockBalance(0);
     mockSubscription(false);
-    const lookalike = await checkBillingAllowance({
+    const empty = await checkBillingAllowance({
       iamConfig: IAM_CONFIG,
-      tenant: { ...TENANT, userName: "z@hanzo.ai", owner: "evil-org" },
+      tenant: admin,
+      token: "user-jwt",
+      model: "hanzo/zen6",
+      named: true,
     });
-    expect(lookalike).toMatchObject({ allowed: false, code: "payment_required" });
+    expect(empty).toMatchObject({ allowed: false, code: "payment_required" });
   });
 
   it("refuses a model the plan does not name, and says which", async () => {

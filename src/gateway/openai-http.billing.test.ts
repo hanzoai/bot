@@ -29,7 +29,8 @@ installGatewayTestHooks({ scope: "suite" });
 const tokens: Record<string, { userId: string; owner?: string }> = {
   free: { userId: "free-user", owner: "free-org" },
   paid: { userId: "paid-user", owner: "paid-org" },
-  admin: { userId: "z", owner: "admin" },
+  adminhanzo: { userId: "z", owner: "hanzo" },
+  adminbare: { userId: "z", owner: "admin" },
   noorg: { userId: "orphan" },
 };
 
@@ -172,16 +173,28 @@ describe("paid HTTP paths bill the caller before the platform key is used", () =
     expect(modelRun()).toBeUndefined();
   });
 
-  it("lets a SuperAdmin through without reading a plan", async () => {
+  it("meters an admin like anyone: a funded hanzo org is served, an org with no balance is refused", async () => {
     agentCommand.mockClear();
     agentCommand.mockResolvedValueOnce({ payloads: [{ text: "hello" }] } as never);
-    vi.mocked(getBalance).mockClear();
-    await inIamGateway(async (port) => {
-      const res = await chat(port, "admin");
-      expect(res.status).toBe(200);
-      await res.text();
+    vi.mocked(getTier).mockResolvedValue({ name: "pro", allowedModels: ["*"] });
+    vi.mocked(getSubscriptionStatus).mockResolvedValue({
+      active: false,
+      subscription: null,
+      plan: null,
     });
-    expect(getBalance).not.toHaveBeenCalled();
+    vi.mocked(getBalance).mockImplementation(async (_cfg, _org, token) =>
+      token === "adminhanzo" ? 49_264 : 0,
+    );
+    await inIamGateway(async (port) => {
+      const served = await chat(port, "adminhanzo");
+      expect(served.status).toBe(200);
+      await served.text();
+
+      const refused = await chat(port, "adminbare");
+      expect(refused.status).toBe(402);
+      expect(await refused.json()).toMatchObject({ error: { code: "payment_required" } });
+    });
+    expect(agentCommand).toHaveBeenCalledTimes(1);
   });
 
   it("answers 503, not a paywall, when billing cannot be read", async () => {
