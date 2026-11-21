@@ -40,7 +40,7 @@ const INITIAL_BOTS: Bot[] = [
     role: 'Web Grounding & Synthesis',
     description: 'Researches documents, papers, and web information',
     emoji: '🔍',
-    model: 'claude-3-7-sonnet',
+    model: 'zen6',
     endpoint: 'cloud',
     systemPrompt: 'You are a meticulous research and intelligence agent.',
   },
