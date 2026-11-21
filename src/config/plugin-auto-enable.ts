@@ -1,4 +1,3 @@
-import type { BotConfig } from "./config.js";
 import { normalizeProviderId } from "../agents/model-selection.js";
 import {
   getChannelPluginCatalogEntry,
@@ -15,6 +14,7 @@ import {
 } from "../plugins/manifest-registry.js";
 import { isRecord } from "../utils.js";
 import { hasAnyWhatsAppAuth } from "../web/accounts.js";
+import type { BotConfig } from "./config.js";
 import { ensurePluginAllowlisted } from "./plugins-allowlist.js";
 
 type PluginEnableChange = {
@@ -337,6 +337,11 @@ function resolveConfiguredPlugins(
   // Build reverse map: channel ID → plugin ID from installed plugin manifests.
   const channelToPluginId = buildChannelToPluginIdMap(registry);
   for (const channelId of collectCandidateChannelIds(cfg)) {
+    // A channel switched off by its own `enabled: false` is never switched on here,
+    // whether its plugin is a built-in channel or an installed one.
+    if (resolveChannelConfig(cfg, channelId)?.enabled === false) {
+      continue;
+    }
     const pluginId = resolvePluginIdForChannel(channelId, channelToPluginId);
     if (isChannelConfigured(cfg, channelId, env)) {
       changes.push({ pluginId, reason: `${channelId} configured` });

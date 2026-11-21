@@ -1,0 +1,8 @@
+{
+  "id": "memory",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": true,
+    "properties": {}
+  }
+}

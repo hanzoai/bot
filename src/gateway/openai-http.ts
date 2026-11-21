@@ -409,6 +409,30 @@ function resolveAgentResponseText(result: unknown): string {
   return content || "No response from HanzoBot.";
 }
 
+/**
+ * The message of a run that ended in an error and said nothing else, so a caller
+ * is told the run failed and never handed its error text as the assistant's reply.
+ */
+function resolveAgentFailure(result: unknown): string | undefined {
+  const payloads = (result as { payloads?: Array<{ text?: string; isError?: boolean }> } | null)
+    ?.payloads;
+  if (!Array.isArray(payloads) || payloads.length === 0) {
+    return undefined;
+  }
+  if (!payloads.every((p) => p.isError === true)) {
+    return undefined;
+  }
+  const message = payloads
+    .map((p) => (typeof p.text === "string" ? p.text.trim() : ""))
+    .filter(Boolean)
+    .join("\n\n");
+  return message || "The model call failed.";
+}
+
+function writeUpstreamError(res: ServerResponse, message: string) {
+  writeSse(res, { error: { message, type: "upstream_error" } });
+}
+
 export async function handleOpenAiHttpRequest(
   req: IncomingMessage,
   res: ServerResponse,
@@ -486,6 +510,13 @@ export async function handleOpenAiHttpRequest(
     try {
       const result = await agentCommandFromIngress(commandInput, defaultRuntime, deps);
 
+      const failure = resolveAgentFailure(result);
+      if (failure) {
+        logWarn(`openai-compat: chat completion failed upstream: ${failure}`);
+        sendJson(res, 502, { error: { message: failure, type: "upstream_error" } });
+        return true;
+      }
+
       const content = resolveAgentResponseText(result);
 
       sendJson(res, 200, {
@@ -549,6 +580,13 @@ export async function handleOpenAiHttpRequest(
     if (evt.stream === "lifecycle") {
       const phase = evt.data?.phase;
       if (phase === "end" || phase === "error") {
+        if (phase === "error" && !sawAssistantDelta) {
+          const reason = evt.data?.error;
+          writeUpstreamError(
+            res,
+            typeof reason === "string" && reason.trim() ? reason.trim() : "The model call failed.",
+          );
+        }
         closed = true;
         unsubscribe();
         writeDone(res);
@@ -570,7 +608,11 @@ export async function handleOpenAiHttpRequest(
         return;
       }
 
-      if (!sawAssistantDelta) {
+      const failure = sawAssistantDelta ? undefined : resolveAgentFailure(result);
+      if (failure) {
+        logWarn(`openai-compat: streaming chat completion failed upstream: ${failure}`);
+        writeUpstreamError(res, failure);
+      } else if (!sawAssistantDelta) {
         if (!wroteRole) {
           wroteRole = true;
           writeAssistantRoleChunk(res, { runId, model });

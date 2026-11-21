@@ -246,6 +246,17 @@ describe("applyPluginAutoEnable", () => {
       expect(result.changes).toEqual([]);
     });
 
+    it("leaves an installed channel plugin off when its channel says enabled: false", () => {
+      const result = applyPluginAutoEnable({
+        config: { channels: { apn: { enabled: false, someKey: "value" } } },
+        env: {},
+        manifestRegistry: makeRegistry([{ id: "apn-channel", channels: ["apn"] }]),
+      });
+
+      expect(result.config.plugins?.entries?.["apn-channel"]).toBeUndefined();
+      expect(result.changes).toEqual([]);
+    });
+
     it("falls back to channel key as plugin id when no installed manifest declares the channel", () => {
       // Without a matching manifest entry, behavior is unchanged (backward compat).
       const result = applyPluginAutoEnable({

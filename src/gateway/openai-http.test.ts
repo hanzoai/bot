@@ -595,6 +595,21 @@ describe("OpenAI-compatible HTTP API (e2e)", () => {
       }
 
       {
+        agentCommand.mockClear();
+        agentCommand.mockResolvedValueOnce({
+          payloads: [{ text: "401 status code (no body)", isError: true }],
+        } as never);
+        const res = await postChatCompletions(port, {
+          model: "bot",
+          messages: [{ role: "user", content: "hi" }],
+        });
+        expect(res.status).toBe(502);
+        const failed = (await res.json()) as { error?: { message?: string; type?: string } };
+        expect(failed.error?.type).toBe("upstream_error");
+        expect(failed.error?.message).toBe("401 status code (no body)");
+      }
+
+      {
         const res = await postChatCompletions(port, {
           model: "bot",
           messages: [{ role: "system", content: "yo" }],
@@ -717,6 +732,52 @@ describe("OpenAI-compatible HTTP API (e2e)", () => {
           .filter((v): v is string => typeof v === "string")
           .join("");
         expect(repeatedContent).toBe("hihi");
+      }
+
+      {
+        agentCommand.mockClear();
+        agentCommand.mockResolvedValueOnce({
+          payloads: [{ text: "401 status code (no body)", isError: true }],
+        } as never);
+
+        const failedRes = await postChatCompletions(port, {
+          stream: true,
+          model: "bot",
+          messages: [{ role: "user", content: "hi" }],
+        });
+        expect(failedRes.status).toBe(200);
+        const failedData = parseSseDataLines(await failedRes.text());
+        expect(failedData[failedData.length - 1]).toBe("[DONE]");
+        const failedChunks = failedData
+          .filter((d) => d !== "[DONE]")
+          .map((d) => JSON.parse(d) as Record<string, unknown>);
+        expect(failedChunks).toEqual([
+          { error: { message: "401 status code (no body)", type: "upstream_error" } },
+        ]);
+      }
+
+      {
+        agentCommand.mockClear();
+        agentCommand.mockImplementationOnce((async (opts: unknown) => {
+          emitAgentEvent({
+            runId: (opts as { runId: string }).runId,
+            stream: "lifecycle",
+            data: { phase: "error", error: "401 status code (no body)" },
+          });
+          return { payloads: [{ text: "401 status code (no body)", isError: true }] };
+        }) as never);
+
+        const endedRes = await postChatCompletions(port, {
+          stream: true,
+          model: "bot",
+          messages: [{ role: "user", content: "hi" }],
+        });
+        expect(endedRes.status).toBe(200);
+        const endedData = parseSseDataLines(await endedRes.text());
+        expect(endedData[endedData.length - 1]).toBe("[DONE]");
+        expect(endedData.filter((d) => d !== "[DONE]").map((d) => JSON.parse(d))).toEqual([
+          { error: { message: "401 status code (no body)", type: "upstream_error" } },
+        ]);
       }
 
       {

@@ -308,9 +308,10 @@ function deriveIdHint(params: {
   }
 
   // Prefer the unscoped name so config keys stay stable even when the npm
-  // package is scoped (example: @hanzo/bot-voice-call -> voice-call).
+  // package is scoped (example: @hanzo/bot-voice-call -> voice-call). The scope's
+  // own `bot-` prefix is part of the package name, not of the plugin id.
   const unscoped = rawPackageName.includes("/")
-    ? (rawPackageName.split("/").pop() ?? rawPackageName)
+    ? (rawPackageName.split("/").pop() ?? rawPackageName).replace(/^bot-/, "")
     : rawPackageName;
 
   if (!params.hasMultipleExtensions) {
