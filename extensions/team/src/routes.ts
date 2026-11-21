@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import type { BotPluginApi } from "@hanzo/bot/plugin-sdk/team";
-import { resolvePreferredBotTmpDir } from "@hanzo/bot/plugin-sdk/team";
+import { DEFAULT_MODEL, resolvePreferredBotTmpDir } from "@hanzo/bot/plugin-sdk/team";
 import { connectWorkspace, getWorkspace, listWorkspaces } from "./workspace.js";
 
 // ---------------------------------------------------------------------------
@@ -277,7 +277,7 @@ export function createChatCompletionsProxyHandler(api: BotPluginApi): RouteHandl
     try {
       const body = (await readJsonBody(req)) as Record<string, unknown>;
       const messagesRaw = Array.isArray(body.messages) ? body.messages : [];
-      const model = typeof body.model === "string" ? body.model : "zen6";
+      const model = typeof body.model === "string" ? body.model : DEFAULT_MODEL;
 
       // Flatten messages into a single prompt for the embedded agent
       const userMessages = messagesRaw
@@ -342,7 +342,7 @@ export function createMessagesProxyHandler(api: BotPluginApi): RouteHandler {
     try {
       const body = (await readJsonBody(req)) as Record<string, unknown>;
       const messagesRaw = Array.isArray(body.messages) ? body.messages : [];
-      const model = typeof body.model === "string" ? body.model : "zen6";
+      const model = typeof body.model === "string" ? body.model : DEFAULT_MODEL;
       const systemRaw =
         typeof body.system === "string" ? body.system : "You are a helpful assistant.";
 
