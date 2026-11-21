@@ -412,14 +412,17 @@ function resolveAgentResponseText(result: unknown): string {
 /**
  * The message of a run that ended in an error and said nothing else, so a caller
  * is told the run failed and never handed its error text as the assistant's reply.
+ * A run's payloads reach here without their error flag (the JSON form drops it), so
+ * the run's own stop reason is what says the model call failed.
  */
 function resolveAgentFailure(result: unknown): string | undefined {
-  const payloads = (result as { payloads?: Array<{ text?: string; isError?: boolean }> } | null)
-    ?.payloads;
-  if (!Array.isArray(payloads) || payloads.length === 0) {
-    return undefined;
-  }
-  if (!payloads.every((p) => p.isError === true)) {
+  const run = result as {
+    payloads?: Array<{ text?: string; isError?: boolean }>;
+    meta?: { stopReason?: string };
+  } | null;
+  const payloads = Array.isArray(run?.payloads) ? run.payloads : [];
+  const stopped = run?.meta?.stopReason === "error";
+  if (payloads.length === 0 ? !stopped : !stopped && !payloads.every((p) => p.isError === true)) {
     return undefined;
   }
   const message = payloads

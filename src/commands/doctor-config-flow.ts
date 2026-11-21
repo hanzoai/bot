@@ -1430,6 +1430,10 @@ function detectEmptyAllowlistPolicy(cfg: BotConfig): string[] {
     if (!channelConfig || typeof channelConfig !== "object") {
       continue;
     }
+    // A channel that is switched off drops no message, so its policy is not warned about.
+    if (channelConfig.enabled === false) {
+      continue;
+    }
     checkAccount(channelConfig, `channels.${channelName}`, undefined, channelName);
 
     const accounts = channelConfig.accounts;
@@ -1437,7 +1441,7 @@ function detectEmptyAllowlistPolicy(cfg: BotConfig): string[] {
       for (const [accountId, account] of Object.entries(
         accounts as Record<string, Record<string, unknown>>,
       )) {
-        if (!account || typeof account !== "object") {
+        if (!account || typeof account !== "object" || account.enabled === false) {
           continue;
         }
         checkAccount(
