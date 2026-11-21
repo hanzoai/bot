@@ -516,7 +516,7 @@ RUN set -eux; \
     esac; \
     for spec in \
       "hanzoai/cli:v${HANZO_CLI_VERSION}:hanzo:${csha}" \
-      "hanzoai/dev:v${HANZO_DEV_VERSION}:dev:${dsha}" \
+      "hanzoai/dev-v1:v${HANZO_DEV_VERSION}:dev:${dsha}" \
     ; do \
       repo="${spec%%:*}"; rest="${spec#*:}"; \
       tag="${rest%%:*}"; rest="${rest#*:}"; \
