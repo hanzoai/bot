@@ -24,8 +24,8 @@ import argparse
 import json
 import os
 import sys
-import urllib.request
 import urllib.error
+import urllib.request
 
 
 def build_request_body(args: argparse.Namespace) -> dict:

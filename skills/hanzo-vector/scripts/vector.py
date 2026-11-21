@@ -26,8 +26,8 @@ import argparse
 import json
 import os
 import sys
-import urllib.request
 import urllib.error
+import urllib.request
 
 
 def resolve_base_url(args: argparse.Namespace) -> str:
