@@ -460,6 +460,7 @@ export async function runEmbeddedPiAgent(
       let thinkLevel = initialThinkLevel;
       const attemptedThinking = new Set<ThinkLevel>();
       let apiKeyInfo: ApiKeyInfo | null = null;
+      let credentialSource = "none";
       let lastProfileId: string | undefined;
       const copilotTokenState: CopilotTokenState | null =
         model.provider === "github-copilot" ? { githubToken: "", expiresAt: 0 } : null;
@@ -623,6 +624,7 @@ export async function runEmbeddedPiAgent(
 
       const applyApiKeyInfo = async (candidate?: string): Promise<void> => {
         apiKeyInfo = await resolveApiKeyForCandidate(candidate);
+        credentialSource = apiKeyInfo.source;
         const resolvedProfileId = apiKeyInfo.profileId ?? candidate;
         if (!apiKeyInfo.apiKey) {
           if (apiKeyInfo.mode !== "aws-sdk") {
@@ -1257,7 +1259,7 @@ export async function runEmbeddedPiAgent(
             // Names where the call went and which credential it carried, never the credential.
             log.warn(
               `model call unauthorized: provider=${provider} model=${modelId} ` +
-                `upstream=${describeUpstream(model.baseUrl)} credential=${apiKeyInfo?.source ?? "none"} ` +
+                `upstream=${describeUpstream(model.baseUrl)} credential=${credentialSource} ` +
                 `profile=${lastProfileId ?? "none"}`,
             );
           }
