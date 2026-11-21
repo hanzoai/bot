@@ -17,6 +17,13 @@ Multi-channel AI messaging gateway (TypeScript ESM). Routes messages between 50+
 - `server.impl.ts` — Main initialization and lifecycle
 - `server-http.ts` — HTTP handler chain: /health → /auth → hooks → tools → /v1/chat (chat bridge) → Slack → plugins (/v1/channels/*) → /v1/responses → /v1/marketplace → /v1/chat/completions → canvas → control-ui → 404
 - Every route is under `/v1`; `/api/*` is a 404. `v1-prefix.guard.test.ts` fails on any first-party `/api` path literal in `src/`, `extensions/` or `ui/src/` (third-party APIs are listed there by file).
+- `/v1/chat/completions`: a run whose model call failed answers **500** `{error:{type:"upstream_error"}}` (a stream
+  carries that object before `[DONE]`), never a 200 whose reply is the error text; the edge replaces a 502 or 504
+  with its own page, so neither is used. An unauthorized model call logs `upstream=<base URL> credential=<source>`.
+- Plugin auto-enable never switches on a channel with `enabled: false`; a scoped `@hanzo/bot-<id>` package hints the
+  plugin id `<id>`. The doctor skips disabled channels and accounts.
+- The production image is built `REQUIRE_ADMIN_UI=0` (the admin SPA is private), so prod config sets
+  `gateway.controlUi.enabled: false` and `/__bot__/` answers the gateway's 404.
 - `server-ws.ts` — WebSocket connection mgmt for nodes/clients
 - `server-methods.ts` — RPC method implementations
 - `billing/billing-gate.ts` — Pre-request billing check (fail-closed in production)
