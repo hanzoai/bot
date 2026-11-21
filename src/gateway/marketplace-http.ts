@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import type { IncomingMessage, ServerResponse } from "node:http";
 /**
  * Marketplace HTTP endpoint — buyer-facing API.
  *
@@ -7,8 +9,7 @@
  * in the P2P marketplace. Follows the same auth + billing pattern as the
  * existing /v1/chat/completions endpoint.
  */
-import { randomUUID } from "node:crypto";
-import type { IncomingMessage, ServerResponse } from "node:http";
+import { DEFAULT_MODEL } from "../agents/defaults.js";
 import type { GatewayIamConfig, MarketplaceConfig } from "../config/types.gateway.js";
 import { validateIamToken } from "./auth-iam.js";
 import type { AuthRateLimiter } from "./auth-rate-limit.js";
@@ -172,8 +173,7 @@ export async function handleMarketplaceHttpRequest(
 
   const parsedBody =
     typeof body === "object" && body !== null ? (body as Record<string, unknown>) : {};
-  const model =
-    typeof parsedBody.model === "string" ? parsedBody.model : "zen6";
+  const model = typeof parsedBody.model === "string" ? parsedBody.model : DEFAULT_MODEL;
   const stream = parsedBody.stream === true;
   const requestId = randomUUID();
 

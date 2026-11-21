@@ -5,4 +5,5 @@ export type { BotPluginApi, BotPluginHttpRouteHandler } from "../plugins/types.j
 export type { BotConfig } from "../config/config.js";
 
 export { emptyPluginConfigSchema } from "../plugins/config-schema.js";
+export { DEFAULT_MODEL } from "../agents/defaults.js";
 export { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";

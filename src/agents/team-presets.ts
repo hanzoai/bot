@@ -8,6 +8,8 @@
  * Safe smart-contract wallet for secure fund management and multisig ops.
  */
 
+import { DEFAULT_MODEL } from "./defaults.js";
+
 /** Chain IDs for Hanzo ecosystem networks (from hanzo-did crate). */
 export const CHAIN_IDS = {
   hanzo: 36963,
@@ -91,7 +93,7 @@ Technical principles:
 - Performance matters only where it's measured
 - Security by default - validate inputs, escape outputs`,
     skills: ["coding-agent", "github"],
-    model: "zen6",
+    model: DEFAULT_MODEL,
   },
   {
     id: "des",

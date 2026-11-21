@@ -409,27 +409,21 @@ function resolveAgentResponseText(result: unknown): string {
   return content || "No response from HanzoBot.";
 }
 
-/**
- * The message of a run that ended in an error and said nothing else, so a caller
- * is told the run failed and never handed its error text as the assistant's reply.
- * A run's payloads reach here without their error flag (the JSON form drops it), so
- * the run's own stop reason is what says the model call failed.
- */
+/** The message of a run whose model call failed, which its stop reason says. */
 function resolveAgentFailure(result: unknown): string | undefined {
   const run = result as {
-    payloads?: Array<{ text?: string; isError?: boolean }>;
+    payloads?: Array<{ text?: string }>;
     meta?: { stopReason?: string };
   } | null;
-  const payloads = Array.isArray(run?.payloads) ? run.payloads : [];
-  const stopped = run?.meta?.stopReason === "error";
-  if (payloads.length === 0 ? !stopped : !stopped && !payloads.every((p) => p.isError === true)) {
+  if (run?.meta?.stopReason !== "error") {
     return undefined;
   }
-  const message = payloads
-    .map((p) => (typeof p.text === "string" ? p.text.trim() : ""))
-    .filter(Boolean)
-    .join("\n\n");
-  return message || "The model call failed.";
+  return (
+    run.payloads
+      ?.map((p) => p.text?.trim())
+      .filter(Boolean)
+      .join("\n\n") || "The model call failed."
+  );
 }
 
 function writeUpstreamError(res: ServerResponse, message: string) {
@@ -516,8 +510,7 @@ export async function handleOpenAiHttpRequest(
       const failure = resolveAgentFailure(result);
       if (failure) {
         logWarn(`openai-compat: chat completion failed upstream: ${failure}`);
-        // 500, not 502: the edge replaces a 502 or 504 with its own page, and the body is
-        // what tells the caller why the call failed.
+        // Not 502 or 504: the edge replaces those with its own page.
         sendJson(res, 500, { error: { message: failure, type: "upstream_error" } });
         return true;
       }
@@ -613,11 +606,7 @@ export async function handleOpenAiHttpRequest(
         return;
       }
 
-      const failure = sawAssistantDelta ? undefined : resolveAgentFailure(result);
-      if (failure) {
-        logWarn(`openai-compat: streaming chat completion failed upstream: ${failure}`);
-        writeUpstreamError(res, failure);
-      } else if (!sawAssistantDelta) {
+      if (!sawAssistantDelta) {
         if (!wroteRole) {
           wroteRole = true;
           writeAssistantRoleChunk(res, { runId, model });
