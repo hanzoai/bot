@@ -610,6 +610,23 @@ describe("OpenAI-compatible HTTP API (e2e)", () => {
       }
 
       {
+        // The JSON form of a run's payloads has no error flag: its stop reason says so.
+        agentCommand.mockClear();
+        agentCommand.mockResolvedValueOnce({
+          payloads: [{ text: "401 status code (no body)" }],
+          meta: { stopReason: "error" },
+        } as never);
+        const res = await postChatCompletions(port, {
+          model: "bot",
+          messages: [{ role: "user", content: "hi" }],
+        });
+        expect(res.status).toBe(502);
+        const failed = (await res.json()) as { error?: { message?: string; type?: string } };
+        expect(failed.error?.type).toBe("upstream_error");
+        expect(failed.error?.message).toBe("401 status code (no body)");
+      }
+
+      {
         const res = await postChatCompletions(port, {
           model: "bot",
           messages: [{ role: "system", content: "yo" }],

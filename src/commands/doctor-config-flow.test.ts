@@ -107,6 +107,24 @@ describe("doctor config flow", () => {
     ).toBe(false);
   });
 
+  it("does not warn about the group allowlist of a channel or account that is off", async () => {
+    const doctorWarnings = await collectDoctorWarnings({
+      channels: {
+        irc: { enabled: false, groupPolicy: "allowlist" },
+        imessage: {
+          groupPolicy: "allowlist",
+          allowFrom: ["+15551234567"],
+          accounts: { spare: { enabled: false, groupPolicy: "allowlist" } },
+        },
+      },
+    });
+
+    expect(doctorWarnings.some((line) => line.includes("channels.irc"))).toBe(false);
+    expect(doctorWarnings.some((line) => line.includes("channels.imessage.accounts.spare"))).toBe(
+      false,
+    );
+  });
+
   it("warns when imessage group allowlist is empty even if allowFrom is set", async () => {
     const doctorWarnings = await collectDoctorWarnings({
       channels: {
