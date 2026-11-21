@@ -2,6 +2,8 @@
 
 # Hanzo Bot
 
+[![Open in Hanzo](https://hanzo.app/badges/open-in-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/bot&ref=main&action=open) [![Edit with Hanzo](https://hanzo.app/badges/edit-with-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/bot&ref=main&action=edit) [![Deploy with Hanzo](https://hanzo.app/badges/deploy-with-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/bot&ref=main&action=deploy)
+
 Hanzo Bot is an independent, Hanzo-maintained AI agent platform you run on your own machine. It sits behind a local
 gateway process and answers you on the chat apps you already use — WhatsApp, Telegram,
 Slack, Discord, Signal, iMessage, Matrix, IRC, Teams and about a dozen more — so the
