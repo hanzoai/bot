@@ -127,6 +127,7 @@ describe("checkBillingAllowance — free tier with starter credit", () => {
       tenant: TENANT,
       token: "user-jwt",
       model: "hanzo/zen6",
+      named: true,
     });
 
     expect(result).toMatchObject({
@@ -134,6 +135,84 @@ describe("checkBillingAllowance — free tier with starter credit", () => {
       code: "model_not_in_plan",
       model: "hanzo/zen6",
     });
+  });
+
+  it("serves the free plan's own models at zero balance", async () => {
+    mockBalance(0);
+    mockSubscription(false);
+    vi.spyOn(client, "getTier").mockResolvedValue({
+      name: "free",
+      allowedModels: ["enso", "enso-auto"],
+    });
+
+    const result = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: TENANT,
+      token: "user-jwt",
+      model: "hanzo/enso-auto",
+      named: true,
+    });
+
+    expect(result).toMatchObject({ allowed: true });
+    expect(result).not.toHaveProperty("model");
+  });
+
+  it("refuses a paid model to a free account at zero balance, as outside the plan", async () => {
+    mockBalance(0);
+    mockSubscription(false);
+    vi.spyOn(client, "getTier").mockResolvedValue({
+      name: "free",
+      allowedModels: ["enso", "enso-auto"],
+    });
+
+    const result = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: TENANT,
+      token: "user-jwt",
+      model: "hanzo/zen6",
+      named: true,
+    });
+
+    expect(result).toMatchObject({
+      allowed: false,
+      code: "model_not_in_plan",
+      model: "hanzo/zen6",
+    });
+  });
+
+  it("runs the plan's own model when the agent's default is outside it and none was named", async () => {
+    mockBalance(0);
+    mockSubscription(false);
+    vi.spyOn(client, "getTier").mockResolvedValue({
+      name: "free",
+      allowedModels: ["enso", "enso-auto"],
+    });
+
+    const result = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: TENANT,
+      token: "user-jwt",
+      model: "hanzo/zen6",
+      named: false,
+    });
+
+    expect(result).toMatchObject({ allowed: true, model: "enso" });
+  });
+
+  it("refuses a paid plan whose balance is spent", async () => {
+    mockBalance(0);
+    mockSubscription(false);
+    vi.spyOn(client, "getTier").mockResolvedValue({ name: "pro", allowedModels: ["*"] });
+
+    const result = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: TENANT,
+      token: "user-jwt",
+      model: "hanzo/zen6",
+      named: true,
+    });
+
+    expect(result).toMatchObject({ allowed: false, code: "payment_required" });
   });
 
   it("allows a model the plan names, with or without the provider prefix", async () => {

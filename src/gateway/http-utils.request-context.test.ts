@@ -1,6 +1,6 @@
 import type { IncomingMessage } from "node:http";
 import { describe, expect, it } from "vitest";
-import { resolveGatewayRequestContext } from "./http-utils.js";
+import { resolveGatewayRequestContext, resolveNamedModel } from "./http-utils.js";
 
 function createReq(headers: Record<string, string> = {}): IncomingMessage {
   return { headers } as IncomingMessage;
@@ -41,5 +41,18 @@ describe("resolveGatewayRequestContext", () => {
     });
 
     expect(result.sessionKey).toContain("openresponses-user:alice");
+  });
+});
+
+describe("resolveNamedModel", () => {
+  it("is undefined when the field only selects an agent", () => {
+    for (const model of ["bot", "BOT", "bot:main", "bot/ops", "agent:main", "", "  ", undefined]) {
+      expect(resolveNamedModel(model), String(model)).toBeUndefined();
+    }
+  });
+
+  it("is the model a request names", () => {
+    expect(resolveNamedModel("enso-auto")).toBe("enso-auto");
+    expect(resolveNamedModel(" hanzo/zen6 ")).toBe("hanzo/zen6");
   });
 });

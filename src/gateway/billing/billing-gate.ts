@@ -26,8 +26,16 @@ import {
 export type BillingRefusalCode = "payment_required" | "model_not_in_plan" | "billing_unavailable";
 
 export type BillingGateResult =
-  | { allowed: true; tier?: PlanTier }
+  | {
+      allowed: true;
+      tier?: PlanTier;
+      /** The model to run instead of the one asked for, when the plan has none better to say. */
+      model?: string;
+    }
   | { allowed: false; reason: string; code: BillingRefusalCode; model?: string };
+
+/** The tier cloud names the plan every account starts on. Its own models cost nothing. */
+const FREE_TIER = "free";
 
 /** Whether a plan's model list names the model, with or without the provider prefix. */
 function modelAllowed(allowed: string[], model: string): boolean {
@@ -74,6 +82,11 @@ export async function checkBillingAllowance(params: {
   botId?: string;
   /** The model the request will run, which the caller's plan must allow. */
   model?: string;
+  /**
+   * The caller named `model`. When it did not (the agent's default is running) and the
+   * plan lacks it, the plan's own model runs instead of a refusal.
+   */
+  named?: boolean;
 }): Promise<BillingGateResult> {
   // Non-IAM mode — billing not enforced.
   if (!params.iamConfig || !params.tenant) {
@@ -132,35 +145,45 @@ export async function checkBillingAllowance(params: {
   }
 
   try {
-    // Prepaid balance is the primary gate; with none, an active subscription still admits.
-    const available = await getBalance(params.iamConfig, params.tenant.orgId, params.token);
-    if (available <= 0) {
-      const status = await getSubscriptionStatus(params.iamConfig, params.tenant, params.token);
-      if (!status.active) {
-        return {
-          allowed: false,
-          reason: `Insufficient funds — add credits or upgrade your plan to continue. Balance: $${(available / 100).toFixed(2)}`,
-          code: "payment_required",
-        };
-      }
-    }
-
-    // The plan must name the model. Its read is the caller's own, so it needs the caller's bearer.
+    // A request names the model it runs, and the caller's plan must allow it. The read
+    // is the caller's own, so it needs the caller's bearer.
+    let substitute: string | undefined;
+    let free = false;
     if (params.model) {
       if (!params.token) {
         throw new Error("no bearer token to read the plan with");
       }
       const plan = await getTier(params.iamConfig, params.tenant.orgId, params.token);
       if (!modelAllowed(plan.allowedModels, params.model)) {
-        return {
-          allowed: false,
-          reason: `${params.model} is not in your ${plan.name} plan — upgrade to use it`,
-          code: "model_not_in_plan",
-          model: params.model,
-        };
+        substitute = plan.allowedModels.find((m) => m !== "*");
+        if (params.named || !substitute) {
+          return {
+            allowed: false,
+            reason: `${params.model} is not in your ${plan.name} plan — upgrade to use it`,
+            code: "model_not_in_plan",
+            model: params.model,
+          };
+        }
+      }
+      free = plan.name === FREE_TIER;
+    }
+
+    // Paid usage needs a balance, or an active subscription; the free plan's own
+    // models are served without one.
+    if (!free) {
+      const available = await getBalance(params.iamConfig, params.tenant.orgId, params.token);
+      if (available <= 0) {
+        const status = await getSubscriptionStatus(params.iamConfig, params.tenant, params.token);
+        if (!status.active) {
+          return {
+            allowed: false,
+            reason: `Insufficient funds — add credits or upgrade your plan to continue. Balance: $${(available / 100).toFixed(2)}`,
+            code: "payment_required",
+          };
+        }
       }
     }
-    return { allowed: true };
+    return { allowed: true, ...(substitute ? { model: substitute } : {}) };
   } catch (err) {
     // Not granted the org is an answer, not an outage: refused in warn mode too.
     if (err instanceof OrgNotGrantedError) {

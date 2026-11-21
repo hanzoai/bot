@@ -28,6 +28,7 @@ import {
   isCliProvider,
   modelKey,
   normalizeModelRef,
+  parseModelRef,
   normalizeProviderId,
   resolveConfiguredModelRef,
   resolveDefaultModelForAgent,
@@ -732,6 +733,24 @@ async function agentCommandInternal(
         model = normalizedStored.model;
       }
     }
+    if (opts.model) {
+      const requested = parseModelRef(opts.model, defaultProvider);
+      if (!requested) {
+        throw new Error(`Invalid model "${opts.model}".`);
+      }
+      const key = modelKey(requested.provider, requested.model);
+      if (
+        hasAllowlist &&
+        !isCliProvider(requested.provider, cfg) &&
+        !allowAnyModel &&
+        !allowedModelKeys.has(key)
+      ) {
+        throw new Error(`Model "${key}" is not allowed.`);
+      }
+      provider = requested.provider;
+      model = requested.model;
+    }
+
     if (sessionEntry) {
       const authProfileId = sessionEntry.authProfileOverride;
       if (authProfileId) {

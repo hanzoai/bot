@@ -9,7 +9,7 @@ import { loadConfig } from "../../config/config.js";
 import { validateIamToken } from "../auth-iam.js";
 import type { ResolvedGatewayAuth } from "../auth.js";
 import { sendJson } from "../http-common.js";
-import { getBearerToken, resolveAgentIdForRequest } from "../http-utils.js";
+import { getBearerToken, resolveAgentIdForRequest, resolveNamedModel } from "../http-utils.js";
 import { resolveTenantContext } from "../tenant-context.js";
 import { checkBillingAllowance, type BillingGateResult } from "./billing-gate.js";
 
@@ -39,28 +39,30 @@ export function sendBillingRefusal(res: ServerResponse, refusal: Refusal): void 
 }
 
 /**
- * Gate a paid request on the caller's plan and balance. True when it was
- * refused and the answer is already sent. A gateway that is not in IAM mode
- * serves its own operator and bills no one.
+ * Gate a paid request on the caller's plan and balance. Undefined when it was
+ * refused and the answer is already sent; otherwise the model to run, which is
+ * the one the request names, the plan's own when the plan lacks the agent's
+ * default, or undefined for the agent's default. A gateway that is not in IAM
+ * mode serves its own operator and bills no one.
  *
- * `requested` is the request's `model` field, which names the agent; the plan
- * is checked against the model that agent runs.
+ * `requested` is the request's `model` field: an agent selector, or a model.
  */
-export async function refuseUnbilled(
+export async function billRequest(
   req: IncomingMessage,
   res: ServerResponse,
   params: { auth: ResolvedGatewayAuth; requested: string | undefined },
-): Promise<boolean> {
+): Promise<{ model?: string } | undefined> {
   const { auth } = params;
+  const named = resolveNamedModel(params.requested);
   if (auth.mode !== "iam" || !auth.iam) {
-    return false;
+    return { model: named };
   }
   const token = getBearerToken(req);
   const iamResult = token ? await validateIamToken(token, auth.iam) : undefined;
   if (!iamResult?.ok) {
     // Authorized yet not an IAM token: the shared gateway token of an operator's
     // own node, which no account pays for.
-    return false;
+    return { model: named };
   }
   const tenant = resolveTenantContext({ iamResult });
   if (!tenant) {
@@ -69,7 +71,7 @@ export async function refuseUnbilled(
       reason: "No billing account for this token",
       code: "payment_required",
     });
-    return true;
+    return undefined;
   }
   const agentId = resolveAgentIdForRequest({ req, model: params.requested });
   const ref = resolveDefaultModelForAgent({ cfg: loadConfig(), agentId });
@@ -77,11 +79,12 @@ export async function refuseUnbilled(
     iamConfig: auth.iam,
     tenant,
     token,
-    model: `${ref.provider}/${ref.model}`,
+    model: named ?? `${ref.provider}/${ref.model}`,
+    named: named !== undefined,
   });
-  if (verdict.allowed) {
-    return false;
+  if (!verdict.allowed) {
+    sendBillingRefusal(res, verdict);
+    return undefined;
   }
-  sendBillingRefusal(res, verdict);
-  return true;
+  return { model: verdict.model ?? named };
 }

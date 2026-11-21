@@ -32,7 +32,7 @@ import { defaultRuntime } from "../runtime.js";
 import { resolveAssistantStreamDeltaText } from "./agent-event-assistant-text.js";
 import type { AuthRateLimiter } from "./auth-rate-limit.js";
 import type { ResolvedGatewayAuth } from "./auth.js";
-import { refuseUnbilled } from "./billing/billing-http.js";
+import { billRequest } from "./billing/billing-http.js";
 import { sendJson, setSseHeaders, writeDone } from "./http-common.js";
 import { handleGatewayPostJsonEndpoint } from "./http-endpoint-helpers.js";
 import { resolveGatewayRequestContext } from "./http-utils.js";
@@ -248,11 +248,13 @@ async function runResponsesAgentCommand(params: {
   sessionKey: string;
   runId: string;
   messageChannel: string;
+  model: string | undefined;
   deps: ReturnType<typeof createDefaultDeps>;
 }) {
   return agentCommandFromIngress(
     {
       message: params.message,
+      model: params.model,
       images: params.images.length > 0 ? params.images : undefined,
       clientTools: params.clientTools.length > 0 ? params.clientTools : undefined,
       extraSystemPrompt: params.extraSystemPrompt || undefined,
@@ -311,7 +313,8 @@ export async function handleOpenResponsesHttpRequest(
   const stream = Boolean(payload.stream);
   const model = payload.model;
   const user = payload.user;
-  if (await refuseUnbilled(req, res, { auth: opts.auth, requested: model })) {
+  const billed = await billRequest(req, res, { auth: opts.auth, requested: model });
+  if (!billed) {
     return true;
   }
 
@@ -491,6 +494,7 @@ export async function handleOpenResponsesHttpRequest(
         sessionKey,
         runId: responseId,
         messageChannel,
+        model: billed.model,
         deps,
       });
 
@@ -718,6 +722,7 @@ export async function handleOpenResponsesHttpRequest(
         sessionKey,
         runId: responseId,
         messageChannel,
+        model: billed.model,
         deps,
       });
 

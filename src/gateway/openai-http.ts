@@ -25,7 +25,7 @@ import {
 } from "./agent-prompt.js";
 import type { AuthRateLimiter } from "./auth-rate-limit.js";
 import type { ResolvedGatewayAuth } from "./auth.js";
-import { refuseUnbilled } from "./billing/billing-http.js";
+import { billRequest } from "./billing/billing-http.js";
 import { sendJson, setSseHeaders, writeDone } from "./http-common.js";
 import { handleGatewayPostJsonEndpoint } from "./http-endpoint-helpers.js";
 import { resolveGatewayRequestContext } from "./http-utils.js";
@@ -113,9 +113,11 @@ function buildAgentCommandInput(params: {
   sessionKey: string;
   runId: string;
   messageChannel: string;
+  model?: string;
 }) {
   return {
     message: params.prompt.message,
+    model: params.model,
     extraSystemPrompt: params.prompt.extraSystemPrompt,
     images: params.prompt.images,
     sessionKey: params.sessionKey,
@@ -455,7 +457,8 @@ export async function handleOpenAiHttpRequest(
   const payload = coerceRequest(handled.body);
   const stream = Boolean(payload.stream);
   const model = typeof payload.model === "string" ? payload.model : "bot";
-  if (await refuseUnbilled(req, res, { auth: opts.auth, requested: model })) {
+  const billed = await billRequest(req, res, { auth: opts.auth, requested: model });
+  if (!billed) {
     return true;
   }
   const user = typeof payload.user === "string" ? payload.user : undefined;
@@ -505,6 +508,7 @@ export async function handleOpenAiHttpRequest(
     sessionKey,
     runId,
     messageChannel,
+    model: billed.model,
   });
 
   if (!stream) {
