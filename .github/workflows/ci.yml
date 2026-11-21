@@ -362,6 +362,7 @@ jobs:
           submodules: false
 
       - name: Try to exclude workspace from Windows Defender (best-effort)
+        if: runner.os == 'Windows'
         shell: pwsh
         run: |
           $cmd = Get-Command Add-MpPreference -ErrorAction SilentlyContinue
