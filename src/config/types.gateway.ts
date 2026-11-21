@@ -129,6 +129,12 @@ export type GatewayIamConfig = {
    */
   jwksUrl?: string;
   /**
+   * Further issuers whose tokens are accepted beside `serverUrl`, each matched exactly
+   * (the platform names both of its own while it moves from https://hanzo.id to
+   * https://hanzo.ai). An organization's own issuer, https://hanzo.ai/<org>, is never one.
+   */
+  issuers?: string[];
+  /**
    * Email addresses with super-admin privileges.
    * Super admins bypass billing checks and can credit their own account for testing.
    */
