@@ -240,6 +240,18 @@ function buildErrorAgentMeta(params: {
   };
 }
 
+function describeUpstream(baseUrl: string | undefined): string {
+  if (!baseUrl) {
+    return "unset";
+  }
+  try {
+    const url = new URL(baseUrl);
+    return `${url.origin}${url.pathname.replace(/\/+$/, "")}`;
+  } catch {
+    return "invalid";
+  }
+}
+
 export async function runEmbeddedPiAgent(
   params: RunEmbeddedPiAgentParams,
 ): Promise<EmbeddedPiRunResult> {
@@ -1241,6 +1253,14 @@ export async function runEmbeddedPiAgent(
           }
 
           const authFailure = isAuthAssistantError(lastAssistant);
+          if (authFailure) {
+            // Names where the call went and which credential it carried, never the credential.
+            log.warn(
+              `model call unauthorized: provider=${provider} model=${modelId} ` +
+                `upstream=${describeUpstream(model.baseUrl)} credential=${apiKeyInfo?.source ?? "none"} ` +
+                `profile=${lastProfileId ?? "none"}`,
+            );
+          }
           const rateLimitFailure = isRateLimitAssistantError(lastAssistant);
           const billingFailure = isBillingAssistantError(lastAssistant);
           const failoverFailure = isFailoverAssistantError(lastAssistant);
