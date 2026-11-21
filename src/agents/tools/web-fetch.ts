@@ -1,12 +1,14 @@
 import { Type } from "@sinclair/typebox";
 import type { BotConfig } from "../../config/config.js";
-import type { AnyAgentTool } from "./common.js";
+import type { HopSigner } from "../../infra/net/fetch-guard.js";
 import { SsrFBlockedError } from "../../infra/net/ssrf.js";
 import { logDebug } from "../../logger.js";
 import { wrapExternalContent, wrapWebContent } from "../../security/external-content.js";
 import { normalizeSecretInput } from "../../utils/normalize-secret-input.js";
 import { stringEnum } from "../schema/typebox.js";
+import type { AnyAgentTool } from "./common.js";
 import { jsonResult, readNumberParam, readStringParam } from "./common.js";
+import { sharedWebBotAuthSigner } from "./web-bot-auth.js";
 import {
   extractReadableContent,
   htmlToMarkdown,
@@ -437,6 +439,8 @@ type FirecrawlRuntimeParams = {
 };
 
 type WebFetchRuntimeParams = FirecrawlRuntimeParams & {
+  /** Signs each hop with Web Bot Auth (web-bot-auth.ts); absent, pages are read unsigned. */
+  signHop?: HopSigner;
   url: string;
   extractMode: ExtractMode;
   maxChars: number;
@@ -527,6 +531,7 @@ async function runWebFetch(params: WebFetchRuntimeParams): Promise<Record<string
       url: params.url,
       maxRedirects: params.maxRedirects,
       timeoutSeconds: params.timeoutSeconds,
+      signHop: params.signHop,
       init: {
         headers: {
           Accept: "text/markdown, text/html;q=0.9, */*;q=0.1",
@@ -732,6 +737,7 @@ export function createWebFetchTool(options?: {
     (fetch && "userAgent" in fetch && typeof fetch.userAgent === "string" && fetch.userAgent) ||
     DEFAULT_FETCH_USER_AGENT;
   const maxResponseBytes = resolveFetchMaxResponseBytes(fetch);
+  const signHop = sharedWebBotAuthSigner(options?.config?.gateway?.auth?.iam);
   return {
     label: "Web Fetch",
     name: "web_fetch",
@@ -745,6 +751,7 @@ export function createWebFetchTool(options?: {
       const maxChars = readNumberParam(params, "maxChars", { integer: true });
       const maxCharsCap = resolveFetchMaxCharsCap(fetch);
       const result = await runWebFetch({
+        signHop,
         url,
         extractMode,
         maxChars: resolveMaxChars(
