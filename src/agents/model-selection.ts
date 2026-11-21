@@ -287,7 +287,7 @@ export function resolveConfiguredModelRef(params: {
   defaultProvider: string;
   defaultModel: string;
 }): ModelRef {
-  // Allow env override: HANZO_MODEL="hanzo/claude-sonnet-4-6" (or BOT_DEFAULT_MODEL_REF) takes priority
+  // Allow env override: HANZO_MODEL="hanzo/zen6" (or BOT_DEFAULT_MODEL_REF) takes priority
   const envModelRef =
     typeof process !== "undefined"
       ? (process.env.HANZO_MODEL ?? process.env.BOT_DEFAULT_MODEL_REF)

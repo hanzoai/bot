@@ -91,7 +91,7 @@ Technical principles:
 - Performance matters only where it's measured
 - Security by default - validate inputs, escape outputs`,
     skills: ["coding-agent", "github"],
-    model: "claude-sonnet-4-5-20250929",
+    model: "zen6",
   },
   {
     id: "des",

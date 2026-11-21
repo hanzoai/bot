@@ -170,7 +170,7 @@ export async function handleMarketplaceHttpRequest(
   const parsedBody =
     typeof body === "object" && body !== null ? (body as Record<string, unknown>) : {};
   const model =
-    typeof parsedBody.model === "string" ? parsedBody.model : "claude-sonnet-4-20250514";
+    typeof parsedBody.model === "string" ? parsedBody.model : "zen6";
   const stream = parsedBody.stream === true;
   const requestId = randomUUID();
 
