@@ -10,11 +10,11 @@
  * Auth: BOT_GATEWAY_TOKEN (same as gateway auth).
  */
 
-import type { IncomingMessage, ServerResponse } from "node:http";
 import { timingSafeEqual } from "node:crypto";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { loadConfig, writeConfigFile } from "../config/config.js";
 import type { AgentConfig } from "../config/types.agents.js";
 import type { BotConfig } from "../config/types.js";
-import { loadConfig, writeConfigFile } from "../config/config.js";
 import { getBearerToken } from "./http-utils.js";
 
 const ADMIN_PATH_PREFIX = "/v1/admin";

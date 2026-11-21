@@ -1,145 +1,152 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { exportJWK, generateKeyPair, SignJWT, type CryptoKey, type JWK } from "jose";
+import { exportJWK, generateKeyPair, SignJWT } from "jose";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { clearJwksCache, validateIamToken } from "./auth-iam.js";
 
-// A stand-in for hanzo.id: OIDC discovery plus the JWKS it publishes, served on a
-// loopback port so validateIamToken runs its real path (SDK discovery, JWKS fetch,
-// jose verification) with nothing mocked.
-//
-// The gateway's IAM client is "hanzo-bot", but a person reaches it with whatever
-// hanzo.id sign-in they hold: cloud relays the caller's own token to /v1/bots, and
-// the hanzo CLI signs in as "hanzo-cli". Those tokens must pass the gate (#780);
-// what the gate still holds is WHO signed them and that they are current.
-
-const GATEWAY_CLIENT = "hanzo-bot";
-const KID = "hanzo-id-test";
+// validateIamToken against a JWKS this test serves and tokens shaped the way
+// hanzoai/iam mints them: `owner` is the org of the APP signed in through, the
+// person's tenancy is `orgs` (home first), and a client_credentials token carries
+// type "application" and no membership.
 
 let server: Server;
-let issuer: string;
-let signingKey: CryptoKey;
-let strangerKey: CryptoKey;
+let issuer = "";
+let key: CryptoKey;
 
 beforeAll(async () => {
-  const published = await generateKeyPair("RS256", { extractable: true });
-  signingKey = published.privateKey;
-  strangerKey = (await generateKeyPair("RS256")).privateKey;
-  const jwk: JWK = {
-    ...(await exportJWK(published.publicKey)),
-    kid: KID,
-    alg: "RS256",
-    use: "sig",
-  };
-
+  const pair = await generateKeyPair("RS256");
+  key = pair.privateKey;
+  const jwk = { ...(await exportJWK(pair.publicKey)), kid: "k1", alg: "RS256", use: "sig" };
   server = createServer((req, res) => {
     res.setHeader("Content-Type", "application/json");
-    if (req.url === "/.well-known/openid-configuration") {
-      res.end(JSON.stringify({ issuer, jwks_uri: `${issuer}/.well-known/jwks` }));
-      return;
-    }
-    if (req.url === "/.well-known/jwks" || req.url === "/internal/jwks") {
-      res.end(JSON.stringify({ keys: [jwk] }));
-      return;
-    }
-    res.statusCode = 404;
-    res.end("{}");
+    res.end(JSON.stringify(req.url === "/v1/iam/.well-known/jwks" ? { keys: [jwk] } : {}));
   });
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
   issuer = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
-});
-
-afterAll(async () => {
   clearJwksCache();
-  await new Promise<void>((resolve) => server.close(() => resolve()));
 });
 
-function config() {
-  return { serverUrl: issuer, clientId: GATEWAY_CLIENT };
-}
+afterAll(() => new Promise<void>((r) => server.close(() => r())));
 
-async function tokenFor(
-  audience: string,
-  opts: { key?: CryptoKey; expiresIn?: string | number; iss?: string } = {},
-): Promise<string> {
-  return new SignJWT({ owner: "acme", name: "alice", email: "alice@acme.test" })
-    .setProtectedHeader({ alg: "RS256", kid: KID })
-    .setSubject("acme/alice")
+const config = () => ({ serverUrl: `${issuer}/`, clientId: "hanzo-bot", orgName: "hanzo" });
+
+function sign(
+  claims: Record<string, unknown>,
+  opts: { iss?: string; aud?: string; exp?: string | number } = {},
+) {
+  return new SignJWT(claims)
+    .setProtectedHeader({ alg: "RS256", kid: "k1" })
     .setIssuer(opts.iss ?? issuer)
-    .setAudience(audience)
+    .setAudience(opts.aud ?? "hanzo-bot")
     .setIssuedAt()
-    .setExpirationTime(opts.expiresIn ?? "5m")
-    .sign(opts.key ?? signingKey);
+    .setExpirationTime(opts.exp ?? "5m")
+    .sign(key);
 }
 
 describe("validateIamToken", () => {
-  it("accepts a hanzo.id token issued to the gateway's own client", async () => {
-    const result = await validateIamToken(await tokenFor(GATEWAY_CLIENT), config());
-    expect(result).toMatchObject({ ok: true, userId: "acme/alice", owner: "acme" });
-  });
-
-  it("accepts a hanzo.id token issued to another hanzo client, such as the CLI", async () => {
-    const result = await validateIamToken(await tokenFor("hanzo-cli"), config());
-    expect(result).toMatchObject({ ok: true, userId: "acme/alice", owner: "acme" });
-  });
-
-  it("accepts the CLI's token with an in-cluster jwksUrl set, as production runs", async () => {
-    const result = await validateIamToken(await tokenFor("hanzo-cli"), {
-      ...config(),
-      jwksUrl: `${issuer}/internal/jwks`,
+  it("a person acts in their home org and may name any org of their membership", async () => {
+    const r = await validateIamToken(
+      await sign({
+        sub: "0b5e-uuid",
+        owner: "hanzo",
+        orgs: [{ org: "acme", role: "owner" }, { org: "globex" }],
+      }),
+      config(),
+    );
+    expect(r).toMatchObject({
+      ok: true,
+      userId: "0b5e-uuid",
+      owner: "acme",
+      orgIds: ["acme", "globex"],
     });
-    expect(result).toMatchObject({ ok: true, userId: "acme/alice", owner: "acme" });
   });
 
-  it("still refuses a token signed by a key hanzo.id does not publish", async () => {
-    const result = await validateIamToken(
-      await tokenFor("hanzo-cli", { key: strangerKey }),
+  it("a person whose token states no membership acts in no org — never the app's, never orgName", async () => {
+    const r = await validateIamToken(await sign({ sub: "u-1", owner: "hanzo" }), config());
+    expect(r.ok).toBe(true);
+    expect(r.ok && r.owner).toBeUndefined();
+    expect(r.ok && r.orgIds).toEqual([]);
+  });
+
+  it("an application token acts in its own org", async () => {
+    const r = await validateIamToken(
+      await sign({ owner: "acme", name: "acme-ci", type: "application" }),
       config(),
     );
-    expect(result.ok).toBe(false);
+    expect(r).toMatchObject({ ok: true, userId: "acme/acme-ci", owner: "acme", orgIds: ["acme"] });
   });
 
-  it("still refuses an expired token", async () => {
-    const result = await validateIamToken(
-      await tokenFor("hanzo-cli", { expiresIn: Math.floor(Date.now() / 1000) - 600 }),
+  it("the org of the app a person signed in through is not theirs, even when it is admin", async () => {
+    const r = await validateIamToken(
+      await sign({ sub: "u-2", owner: "admin", orgs: [{ org: "acme" }] }),
       config(),
     );
-    expect(result).toEqual({ ok: false, reason: "iam_token_expired" });
+    expect(r.ok && r.owner).toBe("acme");
+    expect(r.ok && r.orgIds).not.toContain("admin");
   });
 
-  it("accepts exactly the issuers the config names, and no other string", async () => {
-    const both = { ...config(), issuers: ["https://hanzo.ai"] };
-    const named = await validateIamToken(
-      await tokenFor("hanzo-cli", { iss: "https://hanzo.ai" }),
-      both,
+  it("the issuer is pinned: another brand's token on the same keys is refused", async () => {
+    const r = await validateIamToken(
+      await sign({ sub: "u-3", orgs: [{ org: "acme" }] }, { iss: "https://lux.id" }),
+      config(),
     );
-    expect(named).toMatchObject({ ok: true, userId: "acme/alice" });
+    expect(r).toEqual({ ok: false, reason: "iam_signature_invalid" });
+  });
 
+  it("the platform's issuers, when the config names both, pass; an organization's issuer never does", async () => {
+    const both = {
+      ...config(),
+      serverUrl: "https://hanzo.id",
+      issuers: ["https://hanzo.ai"],
+      jwksUrl: `${issuer}/v1/iam/.well-known/jwks`,
+    };
+    for (const iss of ["https://hanzo.id", "https://hanzo.ai"]) {
+      const r = await validateIamToken(
+        await sign({ sub: "u-5", orgs: [{ org: "acme" }] }, { iss }),
+        both,
+      );
+      expect(r.ok && r.owner).toBe("acme");
+    }
     for (const iss of [
       "https://hanzo.ai/acme",
       "https://hanzo.ai/",
       "https://hanzo.ai.evil.test",
       "http://hanzo.ai",
-      "https://iam.hanzo.ai",
     ]) {
-      const refused = await validateIamToken(await tokenFor("hanzo-cli", { iss }), both);
-      expect(refused.ok, iss).toBe(false);
+      const r = await validateIamToken(
+        await sign({ sub: "u-5", orgs: [{ org: "acme" }] }, { iss }),
+        both,
+      );
+      expect(r).toEqual({ ok: false, reason: "iam_signature_invalid" });
     }
+    const one = { ...both, issuers: undefined };
+    expect(
+      await validateIamToken(
+        await sign({ sub: "u-6", orgs: [{ org: "acme" }] }, { iss: "https://hanzo.ai" }),
+        one,
+      ),
+    ).toEqual({ ok: false, reason: "iam_signature_invalid" });
   });
 
-  it("refuses a second platform issuer the config does not name", async () => {
-    const result = await validateIamToken(
-      await tokenFor("hanzo-cli", { iss: "https://hanzo.ai" }),
+  it("the audience is the minting app's and not a gate — a token cloud relays still validates", async () => {
+    const r = await validateIamToken(
+      await sign({ sub: "u-4", orgs: [{ org: "acme" }] }, { aud: "hanzo-console" }),
       config(),
     );
-    expect(result.ok).toBe(false);
+    expect(r.ok && r.owner).toBe("acme");
   });
 
-  it("a named issuer still needs a key hanzo.id publishes", async () => {
-    const result = await validateIamToken(
-      await tokenFor("hanzo-cli", { iss: "https://hanzo.ai", key: strangerKey }),
-      { ...config(), issuers: ["https://hanzo.ai"] },
-    );
-    expect(result.ok).toBe(false);
+  it("an expired token, a foreign signature and a non-token are refused", async () => {
+    expect(
+      await validateIamToken(await sign({ sub: "u", orgs: [{ org: "a" }] }, { exp: 1 }), config()),
+    ).toEqual({ ok: false, reason: "iam_token_expired" });
+    const other = await generateKeyPair("RS256");
+    const forged = await new SignJWT({ sub: "u", orgs: [{ org: "a" }] })
+      .setProtectedHeader({ alg: "RS256", kid: "k1" })
+      .setIssuer(issuer)
+      .setExpirationTime("5m")
+      .sign(other.privateKey);
+    expect((await validateIamToken(forged, config())).ok).toBe(false);
+    expect((await validateIamToken("not-a-jwt", config())).ok).toBe(false);
   });
 });

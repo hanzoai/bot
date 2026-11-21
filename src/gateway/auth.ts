@@ -49,6 +49,15 @@ export type GatewayAuthResult = {
    */
   orgId?: string;
   /**
+   * The org an IAM login acts in by default — a person's home org, an
+   * application token's own org (auth-iam.ts validateIamToken). Never IAM's
+   * `owner` claim for a person, which names the org of the app they signed in
+   * through. Present only for `method: "iam"`, and only when the token names one.
+   */
+  owner?: string;
+  /** Every org the IAM login may act in (its signed membership, home first). */
+  orgs?: string[];
+  /**
    * The raw bearer JWT the viewer presented at handshake. Present only for
    * `method: "iam"`. cloud resolves the org server-side from its `owner` claim;
    * we never present a pod-fixed credential.
@@ -449,7 +458,7 @@ export async function authorizeGatewayConnect(
   }
 
   // IAM (OIDC JWT) authentication — validate the provided token as a JWT
-  // issued by the configured IAM provider (e.g. hanzo.id / Casdoor).
+  // issued by the configured IAM provider (e.g. hanzo.id).
   // Falls back to shared gateway-token comparison so cloud-provisioned pods
   // that authenticate with BOT_GATEWAY_TOKEN still work alongside IAM users.
   if (auth.mode === "iam") {
@@ -469,19 +478,27 @@ export async function authorizeGatewayConnect(
             token: string,
             config: GatewayIamConfig,
           ) => Promise<
-            | { ok: true; userId: string; currentOrgId?: string; owner?: string }
+            | { ok: true; userId: string; owner?: string; orgIds: string[] }
             | { ok: false; reason: string }
           >;
         };
         const iamResult = await validateIamToken(connectAuth.token, auth.iam);
         if (iamResult.ok) {
           limiter?.reset(ip, rateLimitScope);
-          // Retain the viewer's org + raw bearer so the per-viewer cloud
-          // read-through can scope to THIS org only. `owner` is exactly cloud's
-          // server-side scoping key; fall back to it when currentOrgId is absent.
-          const orgId = iamResult.currentOrgId ?? iamResult.owner;
+          // Retain the login's org, its membership and its raw bearer, so every
+          // per-viewer read (the cloud read-through, a run, a screen) scopes to
+          // an org this token was issued for and to no other.
+          const orgId = iamResult.owner;
           return orgId
-            ? { ok: true, method: "iam", user: iamResult.userId, orgId, bearer: connectAuth.token }
+            ? {
+                ok: true,
+                method: "iam",
+                user: iamResult.userId,
+                orgId,
+                owner: orgId,
+                orgs: iamResult.orgIds,
+                bearer: connectAuth.token,
+              }
             : { ok: true, method: "iam", user: iamResult.userId };
         }
       } catch {

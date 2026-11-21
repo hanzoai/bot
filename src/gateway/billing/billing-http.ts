@@ -1,29 +1,19 @@
 /**
- * The HTTP face of the billing gate: one tenant lookup and one refusal body for
- * every paid request the gateway serves, so no path answers a money refusal its
- * own way.
+ * The HTTP face of the billing gate: one refusal body for every paid request the
+ * gateway serves, so no path answers a money refusal its own way.
  */
 
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { resolveDefaultModelForAgent } from "../../agents/model-selection.js";
-import { loadConfig, type GatewayIamConfig } from "../../config/config.js";
+import { loadConfig } from "../../config/config.js";
 import { validateIamToken } from "../auth-iam.js";
 import type { ResolvedGatewayAuth } from "../auth.js";
 import { sendJson } from "../http-common.js";
 import { getBearerToken, resolveAgentIdForRequest } from "../http-utils.js";
-import { resolveTenantContext, type TenantContext } from "../tenant-context.js";
+import { resolveTenantContext } from "../tenant-context.js";
 import { checkBillingAllowance, type BillingGateResult } from "./billing-gate.js";
 
 type Refusal = Extract<BillingGateResult, { allowed: false }>;
-
-/** The tenant an IAM bearer token belongs to, or undefined when it is not one. */
-export async function resolveIamTenant(
-  iamConfig: GatewayIamConfig,
-  token: string,
-): Promise<TenantContext | undefined> {
-  const iamResult = await validateIamToken(token, iamConfig);
-  return iamResult.ok ? (resolveTenantContext({ iamResult }) ?? undefined) : undefined;
-}
 
 /**
  * Answer a refused paid request: 402 with the page that clears it, or 503 when
@@ -65,17 +55,30 @@ export async function refuseUnbilled(
   if (auth.mode !== "iam" || !auth.iam) {
     return false;
   }
-  const agentId = resolveAgentIdForRequest({ req, model: params.requested });
-  const ref = resolveDefaultModelForAgent({ cfg: loadConfig(), agentId });
-  const model = `${ref.provider}/${ref.model}`;
   const token = getBearerToken(req);
-  const tenant = token ? await resolveIamTenant(auth.iam, token) : undefined;
-  if (!tenant) {
+  const iamResult = token ? await validateIamToken(token, auth.iam) : undefined;
+  if (!iamResult?.ok) {
     // Authorized yet not an IAM token: the shared gateway token of an operator's
     // own node, which no account pays for.
     return false;
   }
-  const verdict = await checkBillingAllowance({ iamConfig: auth.iam, tenant, token, model });
+  const tenant = resolveTenantContext({ iamResult });
+  if (!tenant) {
+    sendBillingRefusal(res, {
+      allowed: false,
+      reason: "No billing account for this token",
+      code: "payment_required",
+    });
+    return true;
+  }
+  const agentId = resolveAgentIdForRequest({ req, model: params.requested });
+  const ref = resolveDefaultModelForAgent({ cfg: loadConfig(), agentId });
+  const verdict = await checkBillingAllowance({
+    iamConfig: auth.iam,
+    tenant,
+    token,
+    model: `${ref.provider}/${ref.model}`,
+  });
   if (verdict.allowed) {
     return false;
   }

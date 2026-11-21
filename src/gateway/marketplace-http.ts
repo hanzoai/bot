@@ -11,11 +11,12 @@ import type { IncomingMessage, ServerResponse } from "node:http";
  */
 import { DEFAULT_MODEL } from "../agents/defaults.js";
 import type { GatewayIamConfig, MarketplaceConfig } from "../config/types.gateway.js";
+import { validateIamToken } from "./auth-iam.js";
 import type { AuthRateLimiter } from "./auth-rate-limit.js";
 import type { GatewayAuthResult, ResolvedGatewayAuth } from "./auth.js";
 import { authorizeHttpGatewayConnect } from "./auth.js";
 import { checkBillingAllowance } from "./billing/billing-gate.js";
-import { resolveIamTenant, sendBillingRefusal } from "./billing/billing-http.js";
+import { sendBillingRefusal } from "./billing/billing-http.js";
 import { reportUsage } from "./billing/usage-reporter.js";
 import {
   sendJson,
@@ -31,6 +32,7 @@ import { marketplaceEventBus, type MarketplaceProxyEvent } from "./marketplace/e
 import type { MarketplaceProxyDonePayload } from "./marketplace/events.js";
 import type { MarketplaceScheduler } from "./marketplace/scheduler.js";
 import type { NodeRegistry } from "./node-registry.js";
+import { resolveTenantContext } from "./tenant-context.js";
 
 const MARKETPLACE_PATH = "/v1/marketplace/completions";
 const MARKETPLACE_STATUS_PATH = "/v1/marketplace/status";
@@ -128,8 +130,16 @@ export async function handleMarketplaceHttpRequest(
 
   // Resolve tenant context for billing.
   // If IAM config is present and we have a bearer token, validate it to get IAM claims.
-  let tenant =
-    opts.iamConfig && rawToken ? await resolveIamTenant(opts.iamConfig, rawToken) : undefined;
+  // Only a validated IAM bearer is forwarded to billing, never a gateway token.
+  let tenant: import("./tenant-context.js").TenantContext | undefined;
+  let userToken: string | undefined;
+  if (opts.iamConfig && rawToken) {
+    const iamResult = await validateIamToken(rawToken, opts.iamConfig);
+    if (iamResult.ok) {
+      tenant = resolveTenantContext({ iamResult }) ?? undefined;
+      userToken = tenant ? rawToken : undefined;
+    }
+  }
 
   // Token-auth fallback: when auth succeeded via gateway token (not IAM JWT)
   // and billing gate is in warn/open mode, allow requests with a service tenant.
@@ -150,7 +160,7 @@ export async function handleMarketplaceHttpRequest(
   const billingResult = await checkBillingAllowance({
     iamConfig: opts.iamConfig,
     tenant,
-    token: rawToken,
+    token: userToken,
   });
   if (!billingResult.allowed) {
     sendBillingRefusal(res, billingResult);

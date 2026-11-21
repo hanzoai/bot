@@ -1,3 +1,6 @@
+import { loadConfig } from "../../config/config.js";
+import { getTransactionLog, fetchTransactionsFromCommerce } from "../marketplace-http.js";
+import { processPayouts, type PayoutRequest } from "../marketplace/payouts.js";
 import type { MarketplaceScheduler } from "../marketplace/scheduler.js";
 /**
  * Marketplace WebSocket method handlers for the Control UI.
@@ -12,9 +15,6 @@ import type { MarketplaceScheduler } from "../marketplace/scheduler.js";
  *   marketplace.transactions     — list recent marketplace transactions
  */
 import type { GatewayRequestHandlers } from "./types.js";
-import { loadConfig } from "../../config/config.js";
-import { getTransactionLog, fetchTransactionsFromCommerce } from "../marketplace-http.js";
-import { processPayouts, type PayoutRequest } from "../marketplace/payouts.js";
 
 let schedulerRef: MarketplaceScheduler | null = null;
 

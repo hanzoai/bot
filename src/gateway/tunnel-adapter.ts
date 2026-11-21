@@ -14,11 +14,11 @@
  * work with tunnel-connected nodes out of the box.
  */
 
-import type { WebSocket } from "ws";
 import { randomUUID } from "node:crypto";
+import type { WebSocket } from "ws";
+import { createSubsystemLogger } from "../logging/subsystem.js";
 import type { NodeRegistry } from "./node-registry.js";
 import type { GatewayWsClient } from "./server/ws-types.js";
-import { createSubsystemLogger } from "../logging/subsystem.js";
 
 const log = createSubsystemLogger("tunnel-adapter");
 

@@ -24,10 +24,11 @@ vi.mock("./billing/iam-billing-client.js", async (orig) => ({
 
 installGatewayTestHooks({ scope: "suite" });
 
-const tokens: Record<string, { userId: string; owner: string }> = {
+const tokens: Record<string, { userId: string; owner?: string }> = {
   free: { userId: "free-user", owner: "free-org" },
   paid: { userId: "paid-user", owner: "paid-org" },
   admin: { userId: "z", owner: "admin" },
+  noorg: { userId: "orphan" },
 };
 
 const IAM = {
@@ -149,6 +150,16 @@ describe("paid HTTP paths bill the caller before the platform key is used", () =
       expect(res.status).toBe(503);
       expect(res.headers.get("retry-after")).toBe("5");
       expect(await res.json()).toMatchObject({ error: { code: "billing_unavailable" } });
+    });
+    expect(agentCommand).not.toHaveBeenCalled();
+  });
+
+  it("refuses an IAM token that names no org, never waves it through", async () => {
+    agentCommand.mockClear();
+    await inIamGateway(async (port) => {
+      const res = await chat(port, "noorg");
+      expect(res.status).toBe(402);
+      expect(await res.json()).toMatchObject({ error: { code: "payment_required" } });
     });
     expect(agentCommand).not.toHaveBeenCalled();
   });

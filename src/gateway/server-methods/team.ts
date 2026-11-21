@@ -1,6 +1,5 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { GatewayRequestHandlers } from "./types.js";
 import { resolveAgentDir } from "../../agents/agent-scope.js";
 import {
   TEAM_PRESETS,
@@ -24,6 +23,7 @@ import { resolveSessionTranscriptsDirForAgent } from "../../config/sessions/path
 import { normalizeAgentId, DEFAULT_AGENT_ID } from "../../routing/session-key.js";
 import { resolveUserPath } from "../../utils.js";
 import { ErrorCodes, errorShape } from "../protocol/index.js";
+import type { GatewayRequestHandlers } from "./types.js";
 
 export const teamHandlers: GatewayRequestHandlers = {
   /**
