@@ -94,7 +94,8 @@ type ChannelPlugin = {
    names no model and the agent's default is outside its plan the plan's first model runs instead; a
    paid plan with a spent balance is 402 `payment_required`. Both bodies are
    `{error:{message,type:"billing_error",code,billingUrl}}` with `billingUrl` from `BILLING_URL`; an
-   unreadable plan is 503 `billing_unavailable`. SuperAdmin is the token's home org `admin`. Only
+   unreadable plan is 503 `billing_unavailable`. No role passes without a plan read: an admin's org is read and
+   metered like any other, and every decision is logged (`org`, `user`, `model`, verdict). Only
    IAM-mode gateways bill; the shared gateway token is an operator's own node and is not billed.
 2. Request: Route to LLM provider
 3. Post-request: `reportUsage()` → async queue → cloud `POST /v1/billing/usage`

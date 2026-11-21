@@ -158,20 +158,28 @@ describe("checkBillingAllowance", () => {
     expect(result.allowed).toBe(true);
   });
 
-  it("SuperAdmin is the admin org's token, never a name", async () => {
-    const admin = await checkBillingAllowance({
-      iamConfig: IAM_CONFIG,
-      tenant: { ...TENANT, owner: "admin" },
-    });
-    expect(admin).toMatchObject({ allowed: true, tier: "enterprise" });
+  it("no role passes without a plan read: an admin's org is metered like any other", async () => {
+    const admin = { ...TENANT, orgId: "admin", userName: "z@hanzo.ai" };
 
-    mockTier({ cents: 0, tier: "pro" });
-    const lookalike = await checkBillingAllowance({
+    mockTier({ cents: 5000, tier: "pro", allowedModels: ["*"] });
+    const funded = await checkBillingAllowance({
       iamConfig: IAM_CONFIG,
-      tenant: { ...TENANT, userName: "z@hanzo.ai", owner: "evil-org" },
+      tenant: admin,
       token: TOKEN,
+      model: "hanzo/zen6",
+      named: true,
     });
-    expect(lookalike).toMatchObject({ allowed: false, code: "payment_required" });
+    expect(funded).toMatchObject({ allowed: true });
+
+    mockTier({ cents: 0, tier: "pro", allowedModels: ["*"] });
+    const empty = await checkBillingAllowance({
+      iamConfig: IAM_CONFIG,
+      tenant: admin,
+      token: TOKEN,
+      model: "hanzo/zen6",
+      named: true,
+    });
+    expect(empty).toMatchObject({ allowed: false, code: "payment_required" });
   });
 
   it("no IAM config means no billing enforced (self-hosted)", async () => {
