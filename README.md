@@ -9,6 +9,8 @@ gateway process and answers you on the chat apps you already use — WhatsApp, T
 Slack, Discord, Signal, iMessage, Matrix, IRC, Teams and about a dozen more — so the
 assistant is reachable from your phone without anything of yours leaving your machine.
 
+> **Repository scope (OSS SDK vs. Proprietary Apps):** This public repository (`hanzoai/bot`, Apache-2.0) contains the open-source **`@hanzo/bot`** SDK, CLI, channel extensions, skills, templates, and examples. The proprietary Hanzo Bot applications (Desktop, Web, and Mobile) are maintained privately in `hanzo-inc/bot` and distributed at [hanzo.bot](https://hanzo.bot).
+
 <p align="center">
   <a href="https://github.com/hanzoai/bot/actions/workflows/ci.yml?branch=main"><img src="https://img.shields.io/github/actions/workflow/status/hanzoai/bot/ci.yml?branch=main&style=for-the-badge" alt="CI status"></a>
   <a href="https://github.com/hanzoai/bot/releases"><img src="https://img.shields.io/github/v/release/hanzoai/bot?include_prereleases&style=for-the-badge" alt="Release"></a>
