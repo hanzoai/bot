@@ -681,6 +681,44 @@ RUN set -eux; \
     rm -rf /tmp/gh.tar.gz "/tmp/gh_${GH_VERSION}_linux_${TARGETARCH}"; \
     gh --version | head -1
 
+# ---- hanzo-dev: the Dev server a cloud cell runs ---------------------------
+# hanzo-inc/cloud's POST /v1/dev/sessions leases a `dev` cell and starts
+#   HANZO_DEV_ZAP_SOCKET=/tmp/hanzo-dev/zap.sock HANZO_DEV_ZAP_PRINCIPAL=<owner>/<name> \
+#     hanzo-dev serve --host 127.0.0.1 --port 3773 --no-browser
+# in it. Without this layer every such session answered 503 "hanzo-dev is not
+# installed in this cell" (hanzo-inc/cloud#907, hanzoai/dev#55).
+#
+# IT IS NOT THE `dev` ABOVE. `dev` is the v1 terminal agent (hanzoai/dev-v1);
+# hanzo-dev is the Dev app's server (hanzoai/dev apps/server), the one a browser's
+# ZAP stream reaches. Its release (release-hanzo-dev.yml) ships a DIRECTORY, not
+# one file: the Node single-executable resolves node-pty and its other native
+# packages from the node_modules beside it and carries libatomic, the resource
+# monitor and the web client. So it is unpacked whole under /opt and only the
+# name is put on PATH, which is why it is not one more line of exec's fetch
+# loop. The executable finds its node_modules beside its REAL path, so the link
+# reaches the same tree.
+#
+# In `dev` and not `exec`: the cell cloud leases is the `dev` class, and the
+# desktop, browser and admin classes are built on it; exec stays the lean default.
+# Checksums are literals, read from the release's .sha256 files, as above.
+ARG HANZO_DEV_SERVER_VERSION=0.1.10
+ARG HANZO_DEV_SERVER_SHA256_AMD64=c71bc2039a086d0ef26c6398dbb1d463ee5c3f77ec68ba200a97c3d0d6f53bdb
+ARG HANZO_DEV_SERVER_SHA256_ARM64=958931efbd7e4e27f9ae02d4ea54d5f28e5e09850a2c5ce39ddafc9d93470eb2
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      amd64) sha="${HANZO_DEV_SERVER_SHA256_AMD64}" ;; \
+      arm64) sha="${HANZO_DEV_SERVER_SHA256_ARM64}" ;; \
+      *) echo "unsupported TARGETARCH=${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSLo /tmp/hanzo-dev.tar.gz \
+      "https://github.com/hanzoai/dev/releases/download/hanzo-dev-v${HANZO_DEV_SERVER_VERSION}/hanzo-dev-linux-${TARGETARCH}.tar.gz"; \
+    echo "${sha}  /tmp/hanzo-dev.tar.gz" | sha256sum -c -; \
+    tar -xzf /tmp/hanzo-dev.tar.gz -C /opt; \
+    rm -f /tmp/hanzo-dev.tar.gz; \
+    test -x /opt/hanzo-dev/hanzo; \
+    ln -sf /opt/hanzo-dev/hanzo-dev /usr/local/bin/hanzo-dev; \
+    hanzo-dev --version | grep -F "${HANZO_DEV_SERVER_VERSION}"
+
 USER sandbox
 
 # THEY BELONG TO THE USER THAT RUNS THEM, and that is what makes them
@@ -717,7 +755,10 @@ RUN set -eux; \
     chromium --version; \
     node -e 'require("playwright")' && echo "playwright: resolvable as sandbox"; \
     [ "$(readlink -f "$(command -v hanzo)")" != "$(readlink -f "$(command -v dev)")" ] \
-      || { echo "hanzo and dev are the same file again" >&2; exit 1; }
+      || { echo "hanzo and dev are the same file again" >&2; exit 1; }; \
+    hanzo-dev --version; \
+    [ "$(readlink -f "$(command -v hanzo-dev)")" = /opt/hanzo-dev/hanzo ] \
+      || { echo "hanzo-dev is not the Dev server at /opt/hanzo-dev" >&2; exit 1; }
 
 # ---- The agent gets tools, not a shell and a hope --------------------------
 # Both binaries were already here and neither knew about the other. `dev` ran
