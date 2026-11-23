@@ -19,6 +19,16 @@ import { ensureBinary } from "./infra/binaries.js";
 import { loadDotEnv } from "./infra/dotenv.js";
 import { normalizeEnv } from "./infra/env.js";
 import { formatUncaughtError } from "./infra/errors.js";
+import {
+  botCheckGateway,
+  ensureHanzodRunning,
+  HanzodBotClient,
+  hanzodClusterDown,
+  hanzodClusterUp,
+  hanzodStatus,
+  hanzodWorkerStatus,
+  localWorkspaceRunDev,
+} from "./infra/hanzod.js";
 import { isMainModule } from "./infra/is-main.js";
 import { ensureBotCliOnPath } from "./infra/path-env.js";
 import {
@@ -50,15 +60,23 @@ const program = buildProgram();
 export {
   assertWebChannel,
   applyTemplate,
+  botCheckGateway,
   createDefaultDeps,
   deriveSessionKey,
   describePortOwner,
   ensureBinary,
+  ensureHanzodRunning,
   ensurePortAvailable,
   getReplyFromConfig,
   handlePortError,
+  HanzodBotClient,
+  hanzodClusterDown,
+  hanzodClusterUp,
+  hanzodStatus,
+  hanzodWorkerStatus,
   loadConfig,
   loadSessionStore,
+  localWorkspaceRunDev,
   monitorWebChannel,
   normalizeE164,
   PortInUseError,
