@@ -56,6 +56,15 @@ const entries: SubCliEntry[] = [
     },
   },
   {
+    name: "hanzod",
+    description: "Unified local hanzod (127.0.0.1:3690) status, worker, bot, and k3s orchestration",
+    hasSubcommands: true,
+    register: async (program) => {
+      const mod = await import("../hanzod-cli.js");
+      mod.registerHanzodCli(program);
+    },
+  },
+  {
     name: "daemon",
     description: "Gateway service (legacy alias)",
     hasSubcommands: true,

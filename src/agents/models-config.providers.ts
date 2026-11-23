@@ -206,16 +206,33 @@ const NVIDIA_DEFAULT_COST = {
  * The gateway accepts model IDs like "claude-sonnet-4-6" or with a provider
  * prefix "anthropic/claude-sonnet-4-6" — both forms work.
  */
-export const HANZO_BASE_URL =
-  process.env.LLM_BASE_URL?.trim() ||
-  process.env.HANZO_LLM_URL?.trim() ||
-  // Cloud agent pods receive HANZO_API_BASE from the provisioner; derive
-  // the /v1 LLM endpoint from it so calls route through the internal
-  // cloud-api service instead of the public api.hanzo.ai.
-  (process.env.HANZO_API_BASE?.trim()
-    ? process.env.HANZO_API_BASE.trim().replace(/\/+$/, "") + "/v1"
-    : undefined) ||
-  "https://api.hanzo.ai/v1";
+export function resolveHanzoGatewayBaseUrl(env: NodeJS.ProcessEnv = process.env): string {
+  const direct = env.LLM_BASE_URL?.trim() || env.HANZO_LLM_URL?.trim();
+  if (direct) {
+    return direct.replace(/\/+$/, "");
+  }
+  const apiBase = env.HANZO_API_BASE?.trim();
+  if (apiBase) {
+    return `${apiBase.replace(/\/+$/, "")}/v1`;
+  }
+  const hanzodUrl = env.HANZOD_URL?.trim();
+  if (hanzodUrl) {
+    const clean = hanzodUrl.replace(/\/+$/, "");
+    try {
+      const parsed = new URL(clean);
+      return parsed.pathname.replace(/\/+$/, "") === "" ? `${parsed.origin}/v1` : clean;
+    } catch {
+      return clean;
+    }
+  }
+  if (env.HANZO_BACKEND?.trim().toLowerCase() === "hanzod") {
+    return "http://127.0.0.1:3690/v1";
+  }
+  return "https://api.hanzo.ai/v1";
+}
+
+export const HANZO_BASE_URL = resolveHanzoGatewayBaseUrl();
+export const HANZOD_ENGINE_BASE_URL = "http://127.0.0.1:3690/v1/engine";
 const HANZO_DEFAULT_CONTEXT_WINDOW = 200_000;
 const HANZO_DEFAULT_MAX_TOKENS = 8192;
 
@@ -932,9 +949,9 @@ export function buildNvidiaProvider(): ProviderConfig {
  * as-is (e.g. "claude-sonnet-4-6", "gpt-5.4").  No static model catalog is
  * needed because the gateway routes any supported model.
  */
-export function buildHanzoProvider(): ProviderConfig {
+export function buildHanzoProvider(baseUrl = resolveHanzoGatewayBaseUrl()): ProviderConfig {
   return {
-    baseUrl: HANZO_BASE_URL,
+    baseUrl,
     api: "openai-completions",
     models: [
       // Zen models (Hanzo's own frontier models)
@@ -1211,16 +1228,32 @@ export async function resolveImplicitProviders(params: {
     providers.kilocode = { ...buildKilocodeProvider(), apiKey: kilocodeKey };
   }
 
-  // Hanzo LLM Gateway — routes ALL model calls through api.hanzo.ai for
-  // centralized billing, observability and rate-limiting.
+  // Hanzo LLM Gateway — routes model calls through api.hanzo.ai or unified local hanzod (127.0.0.1:3690).
+  const hanzoBase = resolveHanzoGatewayBaseUrl(env);
+  const isLocalHanzod =
+    Boolean(env.HANZOD_URL?.trim()) || env.HANZO_BACKEND?.trim().toLowerCase() === "hanzod";
   const hanzoKey =
     resolveEnvApiKeyVarName("hanzo") ??
-    resolveApiKeyFromProfiles({ provider: "hanzo", store: authStore });
+    resolveApiKeyFromProfiles({ provider: "hanzo", store: authStore }) ??
+    (isLocalHanzod ? "hanzod-local" : undefined);
   if (hanzoKey) {
-    const hanzoProvider = { ...buildHanzoProvider(), apiKey: hanzoKey };
+    const hanzoProvider = { ...buildHanzoProvider(hanzoBase), apiKey: hanzoKey };
     providers.hanzo = hanzoProvider;
     // zen/* is an alias for hanzo/* — Zen models route through the same gateway
     providers.zen = hanzoProvider;
+  }
+  if (isLocalHanzod) {
+    const hanzodOrigin = (() => {
+      try {
+        return new URL(hanzoBase).origin;
+      } catch {
+        return "http://127.0.0.1:3690";
+      }
+    })();
+    providers.hanzod = {
+      ...buildHanzoProvider(`${hanzodOrigin}/v1/engine`),
+      apiKey: hanzoKey ?? "hanzod-local",
+    };
   }
 
   return providers;
