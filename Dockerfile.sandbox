@@ -487,17 +487,18 @@ RUN mkdir -p /work /home/sandbox/go /home/sandbox/.cargo \
 ARG HANZO_CLI_VERSION=8.5.915
 ARG HANZO_CLI_SHA256_AMD64=06e3845edaab116f0f834dec498cfda5ceed5bf63681eb288dbfb8de7f396a97
 ARG HANZO_CLI_SHA256_ARM64=f99dcc22e8636d7cf71447d0dbcb674fc37a551755c6084c407f45c540751753
-# dev 0.7.10 (Dev on hanzoai/codex 310d9c0276): effort defaults to auto, and it
-# paces on the gateway's x-ratelimit headers and waits out a 429 instead of failing. Its credential is `dev token`,
-# which reads HANZO_API_KEY first: the grant cloud hands a lease on its env, and
-# no pod holds a human's login. cloud stopped passing --include-plan-tool for it
-# (hanzo-inc/cloud apps/coding devExec): 0.7 refuses the flag, exit 2.
+# dev 0.7.23 (Dev on hanzoai/codex 28623535): includes upstream codex fixes
+# through 0.171-era thread-store/writer-lock hardening (#51420, #54369, #57360,
+# #58166, #59969) plus Hanzo fixes #7-#11 (service_tier 400, doctor superseded
+# rollouts, read_mcp_resource server inference, announced-turn continuation, and
+# apply_patch model info). Its credential is `dev token`, which reads
+# HANZO_API_KEY first.
 #
 # Checksums verified against the bytes, not the .sha256 beside them: downloaded
 # both tarballs and sha256sum'd them, and they agree with the published files.
-ARG HANZO_DEV_VERSION=0.7.10
-ARG HANZO_DEV_SHA256_AMD64=8c4d78d61ee6ff359da56699efe1f92066ce6e803c79d1caf1642cfacd431d76
-ARG HANZO_DEV_SHA256_ARM64=e8d7759ceae99b271b877402c0640ef3481ee5221555dbb4124ead8b60597cc9
+ARG HANZO_DEV_VERSION=0.7.23
+ARG HANZO_DEV_SHA256_AMD64=0065f83819de5a5a371ac3dcf71a3f3dd0e2cba1be081139058b77a0b9459a3d
+ARG HANZO_DEV_SHA256_ARM64=2190e04519f9edb36c30ab36ea65d5902fc19d8815ff40fc102909d42f2d0a81
 # hanzo-mcp comes from npm `@hanzo/mcp`, which is the canonical server. It ships
 # bins `hanzo-mcp` and `mcp` from one package, so the name `dev` launches
 # (mcp_servers.hanzo.command) resolves to it with no shim.
@@ -670,7 +671,10 @@ ARG GH_VERSION=2.97.0
 # offering them: the caller gets a run that starts, burns its timeout and
 # produces nothing. These two are npm products; ours are not.
 ARG CLAUDE_VERSION=2.1.223
-ARG CODEX_VERSION=0.146.1
+# @openai/codex 0.171.0 (latest stable; replaces 0.146.1 from 2026-08-06,
+# bringing upstream thread-unload/writer-lock/SQLite-busy/rollout-recording
+# fixes #51420, #54369, #57360, #58166, #59969).
+ARG CODEX_VERSION=0.171.0
 
 # gh, for the forge and for GitHub. `git` alone cannot open a PR, and an agent
 # that can commit but not propose is half a workflow.
