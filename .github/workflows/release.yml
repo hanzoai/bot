@@ -17,7 +17,9 @@ permissions:
 
 jobs:
   release:
-    runs-on: [linux-amd64]
+    runs-on: [heavy-linux-amd64]
+    env:
+      NODE_OPTIONS: "--max-old-space-size=6144"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,11 +32,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 22
           registry-url: "https://registry.npmjs.org"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --child-concurrency=2 || pnpm install --frozen-lockfile --child-concurrency=1
 
       - name: Sync plugin versions and build
         run: |
