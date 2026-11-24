@@ -1,14 +1,4 @@
 # Publishes the npm package @hanzo/bot and cuts the GitHub release.
-#
-# Restored from .github/workflows/release.yml, which was deleted without a
-# replacement. It is the sole publisher of @hanzo/bot, and the gap is already
-# visible: npm has 2026.6.5 while package.json says 2026.6.7, so two versions
-# were cut and never published. Nothing was red — there was simply nothing left
-# to run.
-#
-# Moved unchanged, runs-on included: the forge's git-runner advertises
-# linux-amd64. NPM_TOKEN must exist as a forge secret or the publish
-# step fails; that is the loud version of the same problem.
 name: Release
 
 on:
@@ -18,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to release (e.g. v2026.2.10)"
+        description: "Tag to release (e.g. v2026.6.8)"
         required: false
 
 permissions:
@@ -27,40 +17,74 @@ permissions:
 
 jobs:
   release:
-    runs-on: linux-amd64
+    runs-on: [linux-amd64]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
         with:
-          cache: false
-          node-version: 22
-          registry-url: "https://registry.npmjs.org"
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      - name: Sync plugin versions and build
+        run: |
+          set -euo pipefail
+          pnpm plugins:sync
+          pnpm build
+          pnpm release:check
 
-      - name: Run release checks
-        run: pnpm release:check
+      - name: Read the npm token from KMS
+        id: npm
+        env:
+          FALLBACK_NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+          KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+          KMS_ENDPOINT: ${{ vars.KMS_ENDPOINT || 'https://kms.hanzo.ai' }}
+          KMS_SECRET_ENV: ${{ vars.KMS_SECRET_ENV || 'prod' }}
+        run: |
+          set -uo pipefail
+          if [ -n "${FALLBACK_NPM_TOKEN:-}" ]; then
+            echo "::add-mask::${FALLBACK_NPM_TOKEN}"
+            echo "token=${FALLBACK_NPM_TOKEN}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          body="{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}"
+          out=$(curl -sS -w '\n%{http_code}' "${KMS_ENDPOINT}/v1/kms/auth/login" -H 'Content-Type: application/json' --data-binary "$body")
+          code=${out##*$'\n'}; resp=${out%$'\n'*}
+          [ "$code" = "200" ] || { echo "::error::KMS login answered HTTP $code"; exit 1; }
+          token=$(printf '%s' "$resp" | jq -r '.accessToken // empty')
+          [ -n "$token" ] || { echo "::error::KMS login carried no accessToken"; exit 1; }
+          for attempt in 1 2 3 4 5; do
+            out=$(curl -sS -w '\n%{http_code}' "${KMS_ENDPOINT}/v1/kms/secrets/NPM_TOKEN?env=${KMS_SECRET_ENV}" -H "Authorization: Bearer ${token}")
+            code=${out##*$'\n'}; resp=${out%$'\n'*}
+            case "$code" in 200) break ;; 5*) sleep 15 ;; *) break ;; esac
+          done
+          [ "$code" = "200" ] || { echo "::error::KMS secret read answered HTTP $code"; exit 1; }
+          npm_token=$(printf '%s' "$resp" | jq -r '.value // empty')
+          [ -n "$npm_token" ] || { echo "::error::No NPM_TOKEN in KMS"; exit 1; }
+          echo "::add-mask::${npm_token}"
+          echo "token=${npm_token}" >> "$GITHUB_OUTPUT"
 
       - name: Publish to npm
         run: pnpm publish --access public --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ steps.npm.outputs.token }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
-          name: ${{ github.event.inputs.tag || github.ref_name }}
+          name: Hanzo Bot ${{ github.event.inputs.tag || github.ref_name }}
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
