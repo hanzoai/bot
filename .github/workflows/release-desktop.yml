@@ -196,7 +196,7 @@ jobs:
             -c.mac.notarize=false \
             -c.mac.icon=assets/icon.icns
 
-          APP_PATH="apps/desktop/out/mac-universal/Hanzo Bot.app"
+          APP_PATH="$PWD/apps/desktop/out/mac-universal/Hanzo Bot.app"
           codesign --force --deep --sign - --entitlements apps/desktop/assets/entitlements.mac.plist "$APP_PATH"
           codesign --verify --deep --strict "$APP_PATH"
 
