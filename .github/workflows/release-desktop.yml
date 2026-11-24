@@ -7,9 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag (e.g. v2026.6.8)"
+        description: "Release tag (e.g. v2026.6.9)"
         required: false
-        default: "v2026.6.8"
+        default: "v2026.6.9"
+      source_ref:
+        description: "Private hanzo-inc/bot git ref to build"
+        required: false
+        default: "main"
 
 permissions:
   contents: write
@@ -19,257 +23,266 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-macos:
-    name: Build macOS Universal (.dmg)
-    runs-on: macos-15
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Resolve version
-        id: ver
-        env:
-          INPUT_TAG: ${{ inputs.tag }}
-          REF_NAME: ${{ github.ref_name }}
-        run: |
-          TAG="${INPUT_TAG:-$REF_NAME}"
-          case "$TAG" in
-            v*) VER="${TAG#v}" ;;
-            *) TAG="v2026.6.8"; VER="2026.6.8" ;;
-          esac
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-          echo "version=${VER}" >> "$GITHUB_OUTPUT"
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-apple-darwin,x86_64-apple-darwin
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: apps/desktop-native -> target
-
-      - name: Build universal macOS app & DMG
-        working-directory: apps/desktop-native
-        env:
-          APPLE_SIGNING_IDENTITY: "-"
-          DESKTOP_VERSION: ${{ steps.ver.outputs.version }}
-        run: |
-          set -euo pipefail
-          CFG=$(jq -cn --arg v "$DESKTOP_VERSION" '{version: $v}')
-          npx --yes @tauri-apps/cli@2 build --target universal-apple-darwin --bundles app,dmg --config "$CFG" || \
-            npx --yes @tauri-apps/cli@2 build --target universal-apple-darwin --bundles app --config "$CFG"
-
-          APP_PATH="target/universal-apple-darwin/release/bundle/macos/Hanzo Bot.app"
-          codesign --force --deep --sign - "$APP_PATH"
-
-          mkdir -p ../../dist-release
-          DMG_FOUND=$(find target/universal-apple-darwin/release/bundle/dmg -maxdepth 1 -name "*.dmg" | head -n 1 || true)
-          if [ -n "$DMG_FOUND" ] && [ -f "$DMG_FOUND" ]; then
-            cp "$DMG_FOUND" "../../dist-release/Hanzo_Bot_${DESKTOP_VERSION}_universal.dmg"
-          else
-            STAGE_DIR=$(mktemp -d)
-            cp -R "$APP_PATH" "$STAGE_DIR/"
-            ln -s /Applications "$STAGE_DIR/Applications"
-            hdiutil create -volname "Hanzo Bot" -srcfolder "$STAGE_DIR" -ov -format UDZO "../../dist-release/Hanzo_Bot_${DESKTOP_VERSION}_universal.dmg"
-            rm -rf "$STAGE_DIR"
-          fi
-          cp "../../dist-release/Hanzo_Bot_${DESKTOP_VERSION}_universal.dmg" "../../dist-release/hanzo-bot-macos.dmg"
-          ls -lh ../../dist-release/
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: desktop-macos
-          path: dist-release/*
-          if-no-files-found: error
-
-  build-windows:
-    name: Build Windows x64 (.exe)
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Resolve version
-        id: ver
-        shell: bash
-        env:
-          INPUT_TAG: ${{ inputs.tag }}
-          REF_NAME: ${{ github.ref_name }}
-        run: |
-          TAG="${INPUT_TAG:-$REF_NAME}"
-          case "$TAG" in
-            v*) VER="${TAG#v}" ;;
-            *) TAG="v2026.6.8"; VER="2026.6.8" ;;
-          esac
-          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-          echo "version=${VER}" >> "$GITHUB_OUTPUT"
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: x86_64-pc-windows-msvc
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: apps/desktop-native -> target
-
-      - name: Build Windows NSIS installer
-        working-directory: apps/desktop-native
-        shell: bash
-        env:
-          DESKTOP_VERSION: ${{ steps.ver.outputs.version }}
-        run: |
-          set -euo pipefail
-          CFG=$(jq -cn --arg v "$DESKTOP_VERSION" '{version: $v}')
-          npx --yes @tauri-apps/cli@2 build --bundles nsis --config "$CFG"
-
-          mkdir -p ../../dist-release
-          EXE_FOUND=$(find target/release/bundle/nsis -maxdepth 1 -name "*-setup.exe" | head -n 1)
-          cp "$EXE_FOUND" "../../dist-release/hanzo-bot-windows-x64-setup.exe"
-          cp "$EXE_FOUND" "../../dist-release/Hanzo_Bot_${DESKTOP_VERSION}_x64-setup.exe"
-          cp "$EXE_FOUND" "../../dist-release/Hanzo.Bot_${DESKTOP_VERSION}_x64-setup.exe"
-          ls -lh ../../dist-release/
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: desktop-windows
-          path: dist-release/*
-          if-no-files-found: error
-
-  build-linux:
-    name: Build Linux (${{ matrix.arch_label }})
-    runs-on: ${{ matrix.runner }}
+  build-desktop:
+    name: Build ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         include:
-          - runner: ubuntu-24.04
-            arch_label: amd64
-            appimage_arch: x86_64
-          - runner: ubuntu-24.04-arm
-            arch_label: arm64
-            appimage_arch: aarch64
+          - label: macOS Universal (.dmg)
+            os: macos-15
+            platform: macos
+          - label: Windows x64 (.exe)
+            os: windows-latest
+            platform: windows
+          - label: Linux x64 (.AppImage + .deb)
+            os: ubuntu-24.04
+            platform: linux
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
-      - name: Resolve version
+      - name: Resolve release version
         id: ver
+        shell: bash
         env:
           INPUT_TAG: ${{ inputs.tag }}
+          INPUT_REF: ${{ inputs.source_ref }}
           REF_NAME: ${{ github.ref_name }}
         run: |
+          set -euo pipefail
           TAG="${INPUT_TAG:-$REF_NAME}"
           case "$TAG" in
             v*) VER="${TAG#v}" ;;
-            *) TAG="v2026.6.8"; VER="2026.6.8" ;;
+            *) TAG="v2026.6.9"; VER="2026.6.9" ;;
           esac
+          SRC_REF="${INPUT_REF:-main}"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "version=${VER}" >> "$GITHUB_OUTPUT"
+          echo "source_ref=${SRC_REF}" >> "$GITHUB_OUTPUT"
 
-      - name: Install Linux system dependencies
+      - name: Install Linux packaging dependencies
+        if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            build-essential \
-            curl \
-            wget \
-            file \
-            libxdo-dev \
-            libssl-dev \
-            libayatana-appindicator3-dev \
-            librsvg2-dev \
-            patchelf \
-            squashfs-tools \
-            libfuse2t64 || sudo apt-get install -y libfuse2
+          sudo apt-get install -y rpm squashfs-tools desktop-file-utils libfuse2t64 || sudo apt-get install -y rpm squashfs-tools desktop-file-utils libfuse2
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
 
-      - uses: dtolnay/rust-toolchain@stable
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: apps/desktop-native -> target
-
-      - name: Build Linux deb & AppImage
-        working-directory: apps/desktop-native
+      - name: Clone private @hanzo/bot-desktop source via Hanzo KMS
+        shell: bash
         env:
-          APPIMAGE_EXTRACT_AND_RUN: "1"
-          NO_STRIP: "true"
+          KMS_CLIENT_ID: ${{ secrets.KMS_CLIENT_ID }}
+          KMS_CLIENT_SECRET: ${{ secrets.KMS_CLIENT_SECRET }}
+          FALLBACK_GH_PAT: ${{ secrets.GH_PAT }}
+          FALLBACK_HANZO_GIT_TOKEN: ${{ secrets.HANZO_GIT_TOKEN }}
+          FALLBACK_GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+          SOURCE_REF: ${{ steps.ver.outputs.source_ref }}
+        run: |
+          set -uo pipefail
+          field() { sed -n 's/.*"'"$1"'"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1; }
+          tok=""
+
+          if [ -n "${KMS_CLIENT_ID:-}" ] && [ -n "${KMS_CLIENT_SECRET:-}" ]; then
+            for endpoint in "https://kms.hanzo.ai" "https://api.hanzo.ai"; do
+              kms_json="$(mktemp)"
+              code="$(curl -sS -o "$kms_json" -w '%{http_code}' "${endpoint}/v1/kms/auth/login" \
+                -H 'Content-Type: application/json' \
+                -d "{\"clientId\":\"${KMS_CLIENT_ID}\",\"clientSecret\":\"${KMS_CLIENT_SECRET}\"}" || echo 000)"
+              if [ "$code" = "200" ]; then
+                access_tok="$(field accessToken < "$kms_json")"
+                rm -f "$kms_json"
+                if [ -n "$access_tok" ]; then
+                  echo "::add-mask::${access_tok}"
+                  for path in "secrets/deploy/GITHUB_TOKEN" "secrets/GITHUB_TOKEN" "orgs/hanzo/secrets/GITHUB_TOKEN"; do
+                    sec_json="$(mktemp)"
+                    sc="$(curl -sS -o "$sec_json" -w '%{http_code}' "${endpoint}/v1/kms/${path}?env=prod" \
+                      -H "Authorization: Bearer ${access_tok}" || echo 000)"
+                    if [ "$sc" = "200" ]; then
+                      cand="$(field value < "$sec_json")"
+                      rm -f "$sec_json"
+                      if [ -n "$cand" ]; then
+                        echo "::add-mask::${cand}"
+                        check_code="$(curl -sS -o /dev/null -w '%{http_code}' -H "Authorization: Bearer ${cand}" https://api.github.com/repos/hanzo-inc/bot || echo 000)"
+                        if [ "$check_code" = "200" ]; then
+                          tok="$cand"
+                          echo "Authenticated private source access via KMS (${path})"
+                          break 2
+                        fi
+                      fi
+                    else
+                      rm -f "$sec_json"
+                    fi
+                  done
+                fi
+              else
+                rm -f "$kms_json"
+              fi
+            done
+          fi
+
+          if [ -z "$tok" ]; then
+            for cand in "${FALLBACK_GH_PAT:-}" "${FALLBACK_HANZO_GIT_TOKEN:-}" "${FALLBACK_GIT_TOKEN:-}"; do
+              if [ -n "$cand" ]; then
+                echo "::add-mask::${cand}"
+                check_code="$(curl -sS -o /dev/null -w '%{http_code}' -H "Authorization: Bearer ${cand}" https://api.github.com/repos/hanzo-inc/bot || echo 000)"
+                if [ "$check_code" = "200" ]; then
+                  tok="$cand"
+                  echo "Authenticated private source access via organization token"
+                  break
+                fi
+              fi
+            done
+          fi
+
+          if [ -z "$tok" ]; then
+            echo "::error::Unable to obtain a token with read access to private hanzo-inc/bot"
+            exit 1
+          fi
+
+          echo "::add-mask::${tok}"
+          auth_b64="$(printf 'x-access-token:%s' "$tok" | base64 | tr -d '\r\n')"
+          echo "::add-mask::${auth_b64}"
+
+          rm -rf "$RUNNER_TEMP/bot-src"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic ${auth_b64}" \
+            clone --depth 1 --branch "$SOURCE_REF" https://github.com/hanzo-inc/bot.git "$RUNNER_TEMP/bot-src"
+          git -C "$RUNNER_TEMP/bot-src" log -1 --oneline
+
+      - name: Stamp version & build @hanzo/bot-desktop renderer + main
+        shell: bash
+        env:
           DESKTOP_VERSION: ${{ steps.ver.outputs.version }}
-          ARCH_LABEL: ${{ matrix.arch_label }}
-          APPIMAGE_ARCH: ${{ matrix.appimage_arch }}
+          DATABASE_URL: postgres://hanzo_bot:hanzo_bot@127.0.0.1:5433/hanzo_bot
+          HANZO_BOT_ALLOW_DEV_SECRETS: "1"
+          NODE_OPTIONS: --max-old-space-size=8192
         run: |
           set -euo pipefail
-          CFG=$(jq -cn --arg v "$DESKTOP_VERSION" '{version: $v}')
-          npx --yes @tauri-apps/cli@2 build --bundles deb --config "$CFG"
-          npx --yes @tauri-apps/cli@2 build --bundles appimage --config "$CFG" || true
+          cd "$RUNNER_TEMP/bot-src"
+          node -e '
+            const fs = require("node:fs");
+            const p = "apps/desktop/package.json";
+            const pkg = JSON.parse(fs.readFileSync(p, "utf8"));
+            pkg.version = process.env.DESKTOP_VERSION;
+            pkg.homepage = pkg.homepage || "https://hanzo.bot";
+            pkg.author = { name: "Hanzo AI, Inc.", email: "dev@hanzo.ai" };
+            if (pkg.build && Array.isArray(pkg.build.publish) && pkg.build.publish[0]) {
+              pkg.build.publish[0].owner = "hanzoai";
+              pkg.build.publish[0].repo = "bot";
+            }
+            fs.writeFileSync(p, JSON.stringify(pkg, null, 2) + "\n");
+          '
+          pnpm install --frozen-lockfile
+          pnpm db:generate
+          pnpm --filter @hanzo/bot-web build
+          pnpm --filter @hanzo/bot-desktop build
 
-          mkdir -p ../../dist-release
-          DEB_FOUND=$(find target/release/bundle/deb -maxdepth 1 -name "*.deb" | head -n 1)
-          cp "$DEB_FOUND" "../../dist-release/hanzo-bot-linux-${ARCH_LABEL}.deb"
-          cp "$DEB_FOUND" "../../dist-release/Hanzo_Bot_${DESKTOP_VERSION}_${ARCH_LABEL}.deb"
+      - name: Package macOS Universal (.dmg & .zip)
+        if: matrix.platform == 'macos'
+        shell: bash
+        env:
+          DESKTOP_VERSION: ${{ steps.ver.outputs.version }}
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/bot-src"
+          pnpm --filter @hanzo/bot-desktop exec electron-builder \
+            --mac dir --universal --publish never \
+            -c.mac.notarize=false \
+            -c.mac.icon=assets/icon.icns
 
-          APPIMG_FOUND=$(find target/release/bundle/appimage -maxdepth 1 -name "*.AppImage" | head -n 1 || true)
-          if [ -z "$APPIMG_FOUND" ] || [ ! -f "$APPIMG_FOUND" ]; then
-            APPDIR=$(mktemp -d)/HanzoBot.AppDir
-            mkdir -p "$APPDIR"
-            dpkg-deb -x "$DEB_FOUND" "$APPDIR"
-            cat > "$APPDIR/AppRun" <<'APPRUN'
-          #!/bin/sh
-          HERE="$(dirname "$(readlink -f "$0")")"
-          export PATH="$HERE/usr/bin:$PATH"
-          export LD_LIBRARY_PATH="$HERE/usr/lib:$HERE/usr/lib/x86_64-linux-gnu:$HERE/usr/lib/aarch64-linux-gnu:${LD_LIBRARY_PATH:-}"
-          exec "$HERE/usr/bin/hanzo-bot" "$@"
-          APPRUN
-            sed -i 's/^          //' "$APPDIR/AppRun"
-            chmod +x "$APPDIR/AppRun"
-            DESKTOP_FILE=$(find "$APPDIR/usr/share/applications" -name "*.desktop" | head -n 1)
-            cp "$DESKTOP_FILE" "$APPDIR/"
-            cp icons/icon.png "$APPDIR/hanzo-bot.png"
-            cp icons/icon.png "$APPDIR/.DirIcon"
-            curl -fsSL -o /tmp/appimagetool "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-${APPIMAGE_ARCH}.AppImage"
-            chmod +x /tmp/appimagetool
-            ARCH="$APPIMAGE_ARCH" APPIMAGE_EXTRACT_AND_RUN=1 /tmp/appimagetool "$APPDIR" "../../dist-release/hanzo-bot-linux-${ARCH_LABEL}.AppImage"
-          else
-            cp "$APPIMG_FOUND" "../../dist-release/hanzo-bot-linux-${ARCH_LABEL}.AppImage"
+          APP_PATH="apps/desktop/out/mac-universal/Hanzo Bot.app"
+          codesign --force --deep --sign - --entitlements apps/desktop/assets/entitlements.mac.plist "$APP_PATH"
+          codesign --verify --deep --strict "$APP_PATH"
+
+          pnpm --filter @hanzo/bot-desktop exec electron-builder \
+            --prepackaged "$APP_PATH" \
+            --mac dmg zip --universal --publish never \
+            -c.mac.notarize=false \
+            -c.mac.icon=assets/icon.icns
+
+          mkdir -p "$GITHUB_WORKSPACE/dist-release"
+          DMG_FOUND="$(find apps/desktop/out -maxdepth 1 -name "*.dmg" | head -n 1)"
+          ZIP_FOUND="$(find apps/desktop/out -maxdepth 1 -name "*.zip" | head -n 1 || true)"
+          cp "$DMG_FOUND" "$GITHUB_WORKSPACE/dist-release/Hanzo_Bot_${DESKTOP_VERSION}_universal.dmg"
+          cp "$DMG_FOUND" "$GITHUB_WORKSPACE/dist-release/hanzo-bot-macos.dmg"
+          if [ -n "$ZIP_FOUND" ] && [ -f "$ZIP_FOUND" ]; then
+            cp "$ZIP_FOUND" "$GITHUB_WORKSPACE/dist-release/Hanzo_Bot_${DESKTOP_VERSION}_universal-mac.zip"
           fi
-          chmod +x "../../dist-release/hanzo-bot-linux-${ARCH_LABEL}.AppImage"
-          cp "../../dist-release/hanzo-bot-linux-${ARCH_LABEL}.AppImage" "../../dist-release/Hanzo_Bot_${DESKTOP_VERSION}_${ARCH_LABEL}.AppImage"
-          ls -lh ../../dist-release/
+          if [ -f apps/desktop/out/latest-mac.yml ]; then
+            cp apps/desktop/out/latest-mac.yml "$GITHUB_WORKSPACE/dist-release/latest-mac.yml"
+          fi
+          ls -lh "$GITHUB_WORKSPACE/dist-release/"
+
+      - name: Package Windows x64 NSIS (.exe)
+        if: matrix.platform == 'windows'
+        shell: bash
+        env:
+          DESKTOP_VERSION: ${{ steps.ver.outputs.version }}
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/bot-src"
+          pnpm --filter @hanzo/bot-desktop exec electron-builder \
+            --win nsis --x64 --publish never \
+            -c.win.verifyUpdateCodeSignature=false
+
+          mkdir -p "$GITHUB_WORKSPACE/dist-release"
+          EXE_FOUND="$(find apps/desktop/out -maxdepth 1 -name "*.exe" ! -name "__uninstaller*" | head -n 1)"
+          cp "$EXE_FOUND" "$GITHUB_WORKSPACE/dist-release/hanzo-bot-windows-x64-setup.exe"
+          cp "$EXE_FOUND" "$GITHUB_WORKSPACE/dist-release/Hanzo_Bot_${DESKTOP_VERSION}_x64-setup.exe"
+          cp "$EXE_FOUND" "$GITHUB_WORKSPACE/dist-release/Hanzo.Bot_${DESKTOP_VERSION}_x64-setup.exe"
+          if [ -f apps/desktop/out/latest.yml ]; then
+            cp apps/desktop/out/latest.yml "$GITHUB_WORKSPACE/dist-release/latest.yml"
+          fi
+          ls -lh "$GITHUB_WORKSPACE/dist-release/"
+
+      - name: Package Linux x64 (.AppImage & .deb)
+        if: matrix.platform == 'linux'
+        shell: bash
+        env:
+          DESKTOP_VERSION: ${{ steps.ver.outputs.version }}
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/bot-src"
+          pnpm --filter @hanzo/bot-desktop exec electron-builder \
+            --linux AppImage deb --x64 --publish never
+
+          mkdir -p "$GITHUB_WORKSPACE/dist-release"
+          APPIMG_FOUND="$(find apps/desktop/out -maxdepth 1 -name "*.AppImage" | head -n 1)"
+          DEB_FOUND="$(find apps/desktop/out -maxdepth 1 -name "*.deb" | head -n 1)"
+          chmod +x "$APPIMG_FOUND"
+          cp "$APPIMG_FOUND" "$GITHUB_WORKSPACE/dist-release/Hanzo_Bot_${DESKTOP_VERSION}_amd64.AppImage"
+          cp "$APPIMG_FOUND" "$GITHUB_WORKSPACE/dist-release/hanzo-bot-linux-x86_64.AppImage"
+          cp "$DEB_FOUND" "$GITHUB_WORKSPACE/dist-release/Hanzo_Bot_${DESKTOP_VERSION}_amd64.deb"
+          cp "$DEB_FOUND" "$GITHUB_WORKSPACE/dist-release/hanzo-bot-linux-amd64.deb"
+          if [ -f apps/desktop/out/latest-linux.yml ]; then
+            cp apps/desktop/out/latest-linux.yml "$GITHUB_WORKSPACE/dist-release/latest-linux.yml"
+          fi
+          ls -lh "$GITHUB_WORKSPACE/dist-release/"
+
+      - name: Purge temporary private checkout
+        if: always()
+        shell: bash
+        run: rm -rf "$RUNNER_TEMP/bot-src"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: desktop-linux-${{ matrix.arch_label }}
+          name: desktop-${{ matrix.platform }}
           path: dist-release/*
           if-no-files-found: error
 
   publish-release:
-    name: Publish GitHub Release
-    needs: [build-macos, build-windows, build-linux]
+    name: Publish Binary Release
+    needs: [build-desktop]
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-
       - name: Resolve tag
         id: ver
         env:
@@ -279,7 +292,7 @@ jobs:
           TAG="${INPUT_TAG:-$REF_NAME}"
           case "$TAG" in
             v*) ;;
-            *) TAG="v2026.6.8" ;;
+            *) TAG="v2026.6.9" ;;
           esac
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
@@ -288,15 +301,21 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: Upload assets and mark Latest Release
+      - name: Compute SHA256SUMS and publish binary-only release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           TAG: ${{ steps.ver.outputs.tag }}
         run: |
           set -euo pipefail
+          (
+            cd artifacts
+            find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%P\0' |
+              sort -z |
+              xargs -0 sha256sum > SHA256SUMS
+          )
           ls -lh artifacts/
-          NOTES="Hanzo Bot ${TAG} native desktop release for macOS (Universal Apple Silicon + Intel DMG), Windows x64 (NSIS .exe), and Linux amd64/arm64 (.AppImage & .deb) with canonical 836/1024 Apple-HIG Dock visor squircle icon."
+          NOTES="Hanzo Bot ${TAG} native desktop binary release (@hanzo/bot-desktop) for macOS Universal (.dmg), Windows x64 (.exe), and Linux x64 (.AppImage & .deb) with embedded Hanzo IAM login, local hanzod integration, and canonical 836/1024 Apple-HIG Dock visor icon."
           if gh release view "$TAG" -R "$REPO" >/dev/null 2>&1; then
             gh release upload "$TAG" artifacts/* --clobber -R "$REPO"
             gh release edit "$TAG" --title "Hanzo Bot ${TAG}" --notes "$NOTES" --latest -R "$REPO"
