@@ -481,12 +481,15 @@ RUN mkdir -p /work /home/sandbox/go /home/sandbox/.cargo \
 #
 # The CLI is hanzoai/cli's newest release. The install below asserts the version
 # each binary reports, so a pin and the bytes it fetched cannot disagree. 8.5.914
-# reads HANZO_API_KEY as every cloud command's bearer: a box leased with an API
-# key holds no CLI session, so before it `hanzo agent sessions get` answered
-# `not signed in`, or 404 when signed in as anyone but the key that opened them.
-ARG HANZO_CLI_VERSION=8.5.915
-ARG HANZO_CLI_SHA256_AMD64=06e3845edaab116f0f834dec498cfda5ceed5bf63681eb288dbfb8de7f396a97
-ARG HANZO_CLI_SHA256_ARM64=f99dcc22e8636d7cf71447d0dbcb674fc37a551755c6084c407f45c540751753
+# reads HANZO_API_KEY as every cloud command's bearer, and 8.5.1331+ accepts
+# https://hanzo.ai alongside https://hanzo.id as its IAM issuer — required when
+# apps/sandbox/cred.go hands the owner's RFC 8693 token to `hanzo auth login`
+# inside a sandbox pod (hanzo-inc/cloud#907).
+#
+# Checksums verified against the bytes (downloaded both tarballs and sha256sum'd).
+ARG HANZO_CLI_VERSION=8.5.1341
+ARG HANZO_CLI_SHA256_AMD64=edd63316b29befa859d4ebe2d926a93903818ce365e18a260df75271e10c5677
+ARG HANZO_CLI_SHA256_ARM64=d579c9f12dc60427ec30f8b7f6e402fb6ee3435c1a14fc3638ff693e006b075e
 # dev 0.7.23 (Dev on hanzoai/codex 28623535): includes upstream codex fixes
 # through 0.171-era thread-store/writer-lock hardening (#51420, #54369, #57360,
 # #58166, #59969) plus Hanzo fixes #7-#11 (service_tier 400, doctor superseded
