@@ -490,18 +490,16 @@ RUN mkdir -p /work /home/sandbox/go /home/sandbox/.cargo \
 ARG HANZO_CLI_VERSION=8.5.1341
 ARG HANZO_CLI_SHA256_AMD64=edd63316b29befa859d4ebe2d926a93903818ce365e18a260df75271e10c5677
 ARG HANZO_CLI_SHA256_ARM64=d579c9f12dc60427ec30f8b7f6e402fb6ee3435c1a14fc3638ff693e006b075e
-# dev 0.7.23 (Dev on hanzoai/codex 28623535): includes upstream codex fixes
-# through 0.171-era thread-store/writer-lock hardening (#51420, #54369, #57360,
-# #58166, #59969) plus Hanzo fixes #7-#11 (service_tier 400, doctor superseded
-# rollouts, read_mcp_resource server inference, announced-turn continuation, and
-# apply_patch model info). Its credential is `dev token`, which reads
-# HANZO_API_KEY first.
-#
-# Checksums verified against the bytes, not the .sha256 beside them: downloaded
-# both tarballs and sha256sum'd them, and they agree with the published files.
-ARG HANZO_DEV_VERSION=0.7.23
-ARG HANZO_DEV_SHA256_AMD64=0065f83819de5a5a371ac3dcf71a3f3dd0e2cba1be081139058b77a0b9459a3d
-ARG HANZO_DEV_SHA256_ARM64=2190e04519f9edb36c30ab36ea65d5902fc19d8815ff40fc102909d42f2d0a81
+# dev 0.7.26 (hanzoai/dev-v1): includes upstream codex fixes through 0.171-era
+# thread-store/writer-lock hardening plus Hanzo fixes #7-#13 (rollout tail drain,
+# LiveThread/RolloutRecorder shutdown, arg0 sandbox dispatch before home init,
+# full HIP-0300 MCP). Fetched from the public npm platform package tarballs
+# (@hanzo/dev-linux-{x64,arm64}-musl) rather than GitHub Releases because
+# hanzoai/dev-v1 is private; we extract the static musl binary directly (no Node
+# shim) and verify the tarball sha256 against literals read directly from bytes.
+ARG HANZO_DEV_VERSION=0.7.26
+ARG HANZO_DEV_SHA256_AMD64=d2a94e3979c8037fab4479fc0d7fbe92d6f2984a1b64f0477827d29dbce0a4f8
+ARG HANZO_DEV_SHA256_ARM64=a4608ccf2a3da4adb577bc6346843e88162cff22096c18e86b06cf6e34b5520d
 # hanzo-mcp comes from npm `@hanzo/mcp`, which is the canonical server. It ships
 # bins `hanzo-mcp` and `mcp` from one package, so the name `dev` launches
 # (mcp_servers.hanzo.command) resolves to it with no shim.
@@ -514,24 +512,22 @@ ARG HANZO_DEV_SHA256_ARM64=2190e04519f9edb36c30ab36ea65d5902fc19d8815ff40fc10290
 ARG HANZO_MCP_VERSION=2.4.22
 RUN set -eux; \
     case "${TARGETARCH}" in \
-      amd64) csha="${HANZO_CLI_SHA256_AMD64}"; dsha="${HANZO_DEV_SHA256_AMD64}" ;; \
-      arm64) csha="${HANZO_CLI_SHA256_ARM64}"; dsha="${HANZO_DEV_SHA256_ARM64}" ;; \
+      amd64) csha="${HANZO_CLI_SHA256_AMD64}"; dsha="${HANZO_DEV_SHA256_AMD64}"; dnpm="x64"; drust="x86_64" ;; \
+      arm64) csha="${HANZO_CLI_SHA256_ARM64}"; dsha="${HANZO_DEV_SHA256_ARM64}"; dnpm="arm64"; drust="aarch64" ;; \
       *) echo "unsupported TARGETARCH=${TARGETARCH}" >&2; exit 1 ;; \
     esac; \
-    for spec in \
-      "hanzoai/cli:v${HANZO_CLI_VERSION}:hanzo:${csha}" \
-      "hanzoai/dev-v1:v${HANZO_DEV_VERSION}:dev:${dsha}" \
-    ; do \
-      repo="${spec%%:*}"; rest="${spec#*:}"; \
-      tag="${rest%%:*}"; rest="${rest#*:}"; \
-      bin="${rest%%:*}"; sha="${rest#*:}"; \
-      curl -fsSLo /tmp/h.tar.gz \
-        "https://github.com/${repo}/releases/download/${tag}/${bin}-linux-${TARGETARCH}.tar.gz"; \
-      echo "${sha}  /tmp/h.tar.gz" | sha256sum -c -; \
-      tar -xzf /tmp/h.tar.gz -C /tmp "${bin}"; \
-      install -m 0755 "/tmp/${bin}" "/usr/local/bin/${bin}"; \
-      rm -f /tmp/h.tar.gz "/tmp/${bin}"; \
-    done; \
+    curl -fsSLo /tmp/h.tar.gz \
+      "https://github.com/hanzoai/cli/releases/download/v${HANZO_CLI_VERSION}/hanzo-linux-${TARGETARCH}.tar.gz"; \
+    echo "${csha}  /tmp/h.tar.gz" | sha256sum -c -; \
+    tar -xzf /tmp/h.tar.gz -C /tmp hanzo; \
+    install -m 0755 /tmp/hanzo /usr/local/bin/hanzo; \
+    rm -f /tmp/h.tar.gz /tmp/hanzo; \
+    curl -fsSLo /tmp/d.tgz \
+      "https://registry.npmjs.org/@hanzo/dev-linux-${dnpm}-musl/-/dev-linux-${dnpm}-musl-${HANZO_DEV_VERSION}.tgz"; \
+    echo "${dsha}  /tmp/d.tgz" | sha256sum -c -; \
+    tar -xzf /tmp/d.tgz -C /tmp "package/bin/dev-${drust}-unknown-linux-musl"; \
+    install -m 0755 "/tmp/package/bin/dev-${drust}-unknown-linux-musl" /usr/local/bin/dev; \
+    rm -rf /tmp/d.tgz /tmp/package; \
     npm install -g "@hanzo/mcp@${HANZO_MCP_VERSION}"; \
     hanzo --version 2>/dev/null | grep -qx "hanzo ${HANZO_CLI_VERSION}" \
       || { echo "hanzo is not ${HANZO_CLI_VERSION}:" >&2; hanzo --version >&2; exit 1; }; \
