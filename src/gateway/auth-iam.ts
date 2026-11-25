@@ -25,6 +25,7 @@ const IAM_JWKS_PATH = "/v1/iam/.well-known/jwks";
 // ---------------------------------------------------------------------------
 
 export type { IamAuthResult, IamJwtClaims };
+export { deriveIamOperatorScopes, isIamSuperAdmin, resolveIamBoundedScopes } from "./iam-scopes.js";
 
 /** Gateway-specific auth result that extends the SDK result with org/role info. */
 export type GatewayIamAuthResult =
@@ -103,11 +104,12 @@ const APPLICATION = "application";
 /**
  * Validate a hanzo.id JWT: its signature against IAM's JWKS (config.jwksUrl, the
  * in-cluster address, or the issuer's own), its issuer against config.serverUrl and
- * config.issuers — pinned, one brand per gateway, each exact — and its expiry.
+ * config.issuers — pinned, one brand per gateway, each exact — its audience against
+ * `config.audienceAllowList` when explicitly configured, and its expiry.
  *
- * The audience is not a gate, as in cloud (TestValidate_AudienceIsNotAGate): IAM
- * stamps `aud` with the app that minted the token, and a request cloud relays as
- * its caller carries the console's token, not this gateway's.
+ * When `config.audienceAllowList` is omitted/empty, audience is not a gate (PR #77 /
+ * cloud TestValidate_AudienceIsNotAGate): IAM stamps `aud` with the minting app, and
+ * a request cloud relays as its caller carries the console's token, not this gateway's.
  *
  * WHICH ORG. IAM's `owner` claim is the org of the APPLICATION a person signed in
  * through, not the person's; the person's tenancy is the signed `orgs` membership,
@@ -115,7 +117,7 @@ const APPLICATION = "application";
  * orgs[0], or any org of `orgs` it names; an application token (type
  * "application", no membership) acts in its own org, `owner`; a token that states
  * neither acts in no org. Nothing is inferred from `sub` and nothing falls back to
- * config.orgName.
+ * config.orgName. Non-application tokens without `sub` are always rejected.
  */
 export async function validateIamToken(
   token: string,
@@ -125,6 +127,9 @@ export async function validateIamToken(
     return { ok: false, reason: "iam_token_missing" };
   }
   const issuer = config.serverUrl.replace(/\/+$/, "");
+  const allowedAudiences = (config.audienceAllowList ?? [])
+    .map((aud) => aud.trim())
+    .filter(Boolean);
   let claims: IamJwtClaims & Record<string, unknown>;
   try {
     const verified = await jwtVerify(
@@ -133,6 +138,7 @@ export async function validateIamToken(
       {
         // serverUrl, and any further issuer the config names: each matched exactly.
         issuer: [issuer, ...(config.issuers ?? []).map((i) => i.replace(/\/+$/, ""))],
+        ...(allowedAudiences.length > 0 ? { audience: allowedAudiences } : {}),
         clockTolerance: 30,
       },
     );

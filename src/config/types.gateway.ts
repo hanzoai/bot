@@ -134,6 +134,12 @@ export type GatewayIamConfig = {
    * https://hanzo.ai). An organization's own issuer, https://hanzo.ai/<org>, is never one.
    */
   issuers?: string[];
+  /**
+   * Explicit audience allow-list for JWT validation.
+   * When configured (non-empty), the token's `aud` claim must match one of these values.
+   * When omitted, tokens minted by other platform apps on the same pinned issuer remain accepted.
+   */
+  audienceAllowList?: string[];
 };
 
 /**

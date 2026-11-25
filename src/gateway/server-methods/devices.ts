@@ -1,4 +1,3 @@
-import type { GatewayRequestHandlers } from "./types.js";
 import {
   approveDevicePairing,
   listDevicePairing,
@@ -9,6 +8,7 @@ import {
   rotateDeviceToken,
   summarizeDeviceTokens,
 } from "../../infra/device-pairing.js";
+import { roleScopesAllow } from "../../shared/operator-scope-compat.js";
 import {
   ErrorCodes,
   errorShape,
@@ -20,6 +20,7 @@ import {
   validateDeviceTokenRevokeParams,
   validateDeviceTokenRotateParams,
 } from "../protocol/index.js";
+import type { GatewayClient, GatewayRequestHandlers } from "./types.js";
 
 function redactPairedDevice(
   device: { tokens?: Record<string, DeviceAuthToken> } & Record<string, unknown>,
@@ -29,6 +30,41 @@ function redactPairedDevice(
     ...rest,
     tokens: summarizeDeviceTokens(tokens),
   };
+}
+
+function getCallerScopes(client: GatewayClient | null): string[] {
+  if (!client?.connect?.scopes) {
+    return [];
+  }
+  return client.connect.scopes.map((s) => s.trim()).filter(Boolean);
+}
+
+/**
+ * Platform admin predicate for device management methods:
+ * - For IAM-authenticated clients: SuperAdmin iff verified IAM `owner === "admin"` (`identity.isSuperAdmin === true`).
+ * - For non-IAM callers (shared gateway token / paired operator device): holds `operator.admin`.
+ */
+function isPlatformAdmin(client: GatewayClient | null, callerScopes: string[]): boolean {
+  if (client?.identity?.method === "iam") {
+    return client.identity.isSuperAdmin === true;
+  }
+  return callerScopes.includes("operator.admin");
+}
+
+function callerCoversScopes(params: {
+  role: string;
+  targetScopes: readonly string[];
+  callerScopes: readonly string[];
+}): boolean {
+  const normalizedTarget = params.targetScopes.map((s) => s.trim()).filter(Boolean);
+  if (normalizedTarget.length === 0) {
+    return true;
+  }
+  return roleScopesAllow({
+    role: params.role,
+    requestedScopes: normalizedTarget,
+    allowedScopes: params.callerScopes,
+  });
 }
 
 export const deviceHandlers: GatewayRequestHandlers = {
@@ -56,7 +92,7 @@ export const deviceHandlers: GatewayRequestHandlers = {
       undefined,
     );
   },
-  "device.pair.approve": async ({ params, respond, context }) => {
+  "device.pair.approve": async ({ params, respond, context, client }) => {
     if (!validateDevicePairApproveParams(params)) {
       respond(
         false,
@@ -71,7 +107,42 @@ export const deviceHandlers: GatewayRequestHandlers = {
       return;
     }
     const { requestId } = params as { requestId: string };
-    const approved = await approveDevicePairing(requestId);
+    // Caller-scope enforcement: when a client is present, non-admin callers can only
+    // approve scopes they hold themselves (including rejecting empty callerScopes) and
+    // cannot self-approve their own device request.
+    if (client) {
+      const callerScopes = getCallerScopes(client);
+      const callerIsAdmin = isPlatformAdmin(client, callerScopes);
+      const pending = await listDevicePairing().then((l) =>
+        l.pending.find((p) => p.requestId === requestId),
+      );
+      if (pending && !callerIsAdmin) {
+        const callerDeviceId = client.connect?.device?.id?.trim();
+        if (callerDeviceId && callerDeviceId === pending.deviceId) {
+          respond(
+            false,
+            undefined,
+            errorShape(ErrorCodes.INVALID_REQUEST, "cannot self-approve device pairing request"),
+          );
+          return;
+        }
+        const canApprove = callerCoversScopes({
+          role: pending.role ?? "operator",
+          targetScopes: pending.scopes ?? [],
+          callerScopes,
+        });
+        if (!canApprove) {
+          respond(
+            false,
+            undefined,
+            errorShape(ErrorCodes.INVALID_REQUEST, "cannot approve scopes you do not hold"),
+          );
+          return;
+        }
+      }
+    }
+    const approverSub = client?.identity?.userId;
+    const approved = await approveDevicePairing(requestId, undefined, approverSub);
     if (!approved) {
       respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "unknown requestId"));
       return;
@@ -123,7 +194,7 @@ export const deviceHandlers: GatewayRequestHandlers = {
     );
     respond(true, rejected, undefined);
   },
-  "device.pair.remove": async ({ params, respond, context }) => {
+  "device.pair.remove": async ({ params, respond, context, client }) => {
     if (!validateDevicePairRemoveParams(params)) {
       respond(
         false,
@@ -138,6 +209,31 @@ export const deviceHandlers: GatewayRequestHandlers = {
       return;
     }
     const { deviceId } = params as { deviceId: string };
+    if (client) {
+      const callerScopes = getCallerScopes(client);
+      const callerIsAdmin = isPlatformAdmin(client, callerScopes);
+      const paired = await listDevicePairing().then((l) =>
+        l.paired.find((d) => d.deviceId === deviceId),
+      );
+      if (paired && !callerIsAdmin) {
+        const canRemove = callerCoversScopes({
+          role: paired.role ?? "operator",
+          targetScopes: paired.scopes ?? paired.approvedScopes ?? [],
+          callerScopes,
+        });
+        if (!canRemove) {
+          respond(
+            false,
+            undefined,
+            errorShape(
+              ErrorCodes.INVALID_REQUEST,
+              "cannot remove device with scopes you do not hold",
+            ),
+          );
+          return;
+        }
+      }
+    }
     const removed = await removePairedDevice(deviceId);
     if (!removed) {
       respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "unknown deviceId"));
@@ -146,7 +242,7 @@ export const deviceHandlers: GatewayRequestHandlers = {
     context.logGateway.info(`device pairing removed device=${removed.deviceId}`);
     respond(true, removed, undefined);
   },
-  "device.token.rotate": async ({ params, respond, context }) => {
+  "device.token.rotate": async ({ params, respond, context, client }) => {
     if (!validateDeviceTokenRotateParams(params)) {
       respond(
         false,
@@ -165,9 +261,21 @@ export const deviceHandlers: GatewayRequestHandlers = {
       role: string;
       scopes?: string[];
     };
-    const entry = await rotateDeviceToken({ deviceId, role, scopes });
+    const callerScopes = client ? getCallerScopes(client) : undefined;
+    const callerIsAdmin = client ? isPlatformAdmin(client, callerScopes ?? []) : true;
+    const entry = await rotateDeviceToken({
+      deviceId,
+      role,
+      scopes,
+      callerScopes,
+      callerIsPlatformAdmin: callerIsAdmin,
+    });
     if (!entry) {
-      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "unknown deviceId/role"));
+      respond(
+        false,
+        undefined,
+        errorShape(ErrorCodes.INVALID_REQUEST, "unknown deviceId/role or scope not allowed"),
+      );
       return;
     }
     context.logGateway.info(
@@ -185,7 +293,7 @@ export const deviceHandlers: GatewayRequestHandlers = {
       undefined,
     );
   },
-  "device.token.revoke": async ({ params, respond, context }) => {
+  "device.token.revoke": async ({ params, respond, context, client }) => {
     if (!validateDeviceTokenRevokeParams(params)) {
       respond(
         false,
@@ -200,9 +308,20 @@ export const deviceHandlers: GatewayRequestHandlers = {
       return;
     }
     const { deviceId, role } = params as { deviceId: string; role: string };
-    const entry = await revokeDeviceToken({ deviceId, role });
+    const callerScopes = client ? getCallerScopes(client) : undefined;
+    const callerIsAdmin = client ? isPlatformAdmin(client, callerScopes ?? []) : true;
+    const entry = await revokeDeviceToken({
+      deviceId,
+      role,
+      callerScopes,
+      callerIsPlatformAdmin: callerIsAdmin,
+    });
     if (!entry) {
-      respond(false, undefined, errorShape(ErrorCodes.INVALID_REQUEST, "unknown deviceId/role"));
+      respond(
+        false,
+        undefined,
+        errorShape(ErrorCodes.INVALID_REQUEST, "unknown deviceId/role or scope not allowed"),
+      );
       return;
     }
     context.logGateway.info(`device token revoked device=${deviceId} role=${entry.role}`);

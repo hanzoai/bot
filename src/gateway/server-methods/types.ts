@@ -27,7 +27,13 @@ export type GatewayClient = {
    * per-viewer cloud read-through so this shared gateway scopes cloud agents to
    * the viewer's own org.
    */
-  identity?: { orgId: string; bearer: string; method: "iam" };
+  identity?: {
+    orgId: string;
+    bearer: string;
+    method: "iam";
+    userId?: string;
+    isSuperAdmin?: boolean;
+  };
 };
 
 export type RespondFn = (

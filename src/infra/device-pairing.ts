@@ -37,6 +37,8 @@ export type DeviceAuthToken = {
   rotatedAtMs?: number;
   revokedAtMs?: number;
   lastUsedAtMs?: number;
+  /** The IAM subject (`sub`) that approved this token (for IAM-mode gateways). */
+  approverSub?: string;
 };
 
 export type DeviceAuthTokenSummary = {
@@ -240,6 +242,7 @@ function buildDeviceAuthToken(params: {
   existing?: DeviceAuthToken;
   now: number;
   rotatedAtMs?: number;
+  approverSub?: string;
 }): DeviceAuthToken {
   return {
     token: newToken(),
@@ -249,6 +252,7 @@ function buildDeviceAuthToken(params: {
     rotatedAtMs: params.rotatedAtMs,
     revokedAtMs: undefined,
     lastUsedAtMs: params.existing?.lastUsedAtMs,
+    approverSub: params.approverSub ?? params.existing?.approverSub,
   };
 }
 
@@ -320,6 +324,7 @@ export async function requestDevicePairing(
 export async function approveDevicePairing(
   requestId: string,
   baseDir?: string,
+  approverSub?: string,
 ): Promise<{ requestId: string; device: PairedDevice } | null> {
   return await withLock(async () => {
     const state = await loadState(baseDir);
@@ -357,6 +362,7 @@ export async function approveDevicePairing(
         rotatedAtMs: existingToken ? now : undefined,
         revokedAtMs: undefined,
         lastUsedAtMs: existingToken?.lastUsedAtMs,
+        approverSub: approverSub ?? existingToken?.approverSub,
       };
     }
     const device: PairedDevice = {
@@ -574,6 +580,8 @@ export async function rotateDeviceToken(params: {
   role: string;
   scopes?: string[];
   baseDir?: string;
+  callerScopes?: string[];
+  callerIsPlatformAdmin?: boolean;
 }): Promise<DeviceAuthToken | null> {
   return await withLock(async () => {
     const state = await loadState(params.baseDir);
@@ -595,6 +603,18 @@ export async function rotateDeviceToken(params: {
     if (!scopesAllowWithImplications(requestedScopes, approvedScopes)) {
       return null;
     }
+    // Caller-scope enforcement: when callerScopes is provided (even empty []),
+    // non-admin callers may only mint tokens for scopes they hold themselves.
+    if (!params.callerIsPlatformAdmin && params.callerScopes !== undefined) {
+      const callerAllowed = roleScopesAllow({
+        role,
+        requestedScopes,
+        allowedScopes: params.callerScopes,
+      });
+      if (!callerAllowed) {
+        return null;
+      }
+    }
     const now = Date.now();
     const next = buildDeviceAuthToken({
       role,
@@ -615,6 +635,8 @@ export async function revokeDeviceToken(params: {
   deviceId: string;
   role: string;
   baseDir?: string;
+  callerScopes?: string[];
+  callerIsPlatformAdmin?: boolean;
 }): Promise<DeviceAuthToken | null> {
   return await withLock(async () => {
     const state = await loadState(params.baseDir);
@@ -628,6 +650,18 @@ export async function revokeDeviceToken(params: {
     }
     if (!device.tokens?.[role]) {
       return null;
+    }
+    // Caller must hold the target token's scopes or be platform admin.
+    if (!params.callerIsPlatformAdmin && params.callerScopes !== undefined) {
+      const deviceToken = device.tokens[role];
+      const callerHoldsScopes = roleScopesAllow({
+        role,
+        requestedScopes: deviceToken.scopes,
+        allowedScopes: params.callerScopes,
+      });
+      if (!callerHoldsScopes) {
+        return null;
+      }
     }
     const tokens = { ...device.tokens };
     const entry = { ...tokens[role], revokedAtMs: Date.now() };

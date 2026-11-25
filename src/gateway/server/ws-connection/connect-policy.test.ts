@@ -7,7 +7,7 @@ import {
 } from "./connect-policy.js";
 
 describe("ws connect policy", () => {
-  test("resolves control-ui auth policy", () => {
+  test("resolves control-ui auth policy with allowBypass always false", () => {
     const bypass = resolveControlUiAuthPolicy({
       isControlUi: true,
       controlUiConfig: { dangerouslyDisableDeviceAuth: true },
@@ -19,8 +19,8 @@ describe("ws connect policy", () => {
         nonce: "nonce-1",
       },
     });
-    expect(bypass.allowBypass).toBe(true);
-    expect(bypass.device).toBeNull();
+    expect(bypass.allowBypass).toBe(false);
+    expect(bypass.device?.id).toBe("dev-1");
 
     const regular = resolveControlUiAuthPolicy({
       isControlUi: false,
@@ -141,6 +141,7 @@ describe("ws connect policy", () => {
       }).kind,
     ).toBe("reject-unauthorized");
 
+    // Node with shared auth -> allow (cloud-provisioned K8s node pods).
     expect(
       evaluateMissingDeviceIdentity({
         hasDeviceIdentity: false,
@@ -151,6 +152,21 @@ describe("ws connect policy", () => {
         sharedAuthOk: true,
         authOk: true,
         hasSharedAuth: true,
+        isLocalClient: false,
+      }).kind,
+    ).toBe("allow");
+
+    // Node without shared auth -> reject-device-required.
+    expect(
+      evaluateMissingDeviceIdentity({
+        hasDeviceIdentity: false,
+        role: "node",
+        isControlUi: false,
+        controlUiAuthPolicy: policy,
+        trustedProxyAuthOk: false,
+        sharedAuthOk: false,
+        authOk: true,
+        hasSharedAuth: false,
         isLocalClient: false,
       }).kind,
     ).toBe("reject-device-required");
@@ -171,7 +187,7 @@ describe("ws connect policy", () => {
     ).toBe("allow");
   });
 
-  test("pairing bypass requires control-ui bypass + shared auth (or trusted-proxy auth)", () => {
+  test("pairing bypass is never skipped via allowBypass (only trusted-proxy)", () => {
     const bypass = resolveControlUiAuthPolicy({
       isControlUi: true,
       controlUiConfig: { dangerouslyDisableDeviceAuth: true },
@@ -182,7 +198,7 @@ describe("ws connect policy", () => {
       controlUiConfig: undefined,
       deviceRaw: null,
     });
-    expect(shouldSkipControlUiPairing(bypass, true, false)).toBe(true);
+    expect(shouldSkipControlUiPairing(bypass, true, false)).toBe(false);
     expect(shouldSkipControlUiPairing(bypass, false, false)).toBe(false);
     expect(shouldSkipControlUiPairing(strict, true, false)).toBe(false);
     expect(shouldSkipControlUiPairing(strict, false, true)).toBe(true);

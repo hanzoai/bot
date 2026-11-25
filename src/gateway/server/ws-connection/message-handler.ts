@@ -37,6 +37,7 @@ import {
   buildDeviceAuthPayloadV3,
   normalizeDeviceMetadataForAuth,
 } from "../../device-auth.js";
+import { isIamSuperAdmin, resolveIamBoundedScopes } from "../../iam-scopes.js";
 import {
   isLocalishHost,
   isLoopbackAddress,
@@ -558,20 +559,21 @@ export function attachGatewayWsMessageHandler(params: {
           resolvedAuth,
           connectAuth: connectParams.auth,
           hasDeviceIdentity: Boolean(device),
+          role,
           req: upgradeReq,
           trustedProxies,
           allowRealIpFallback,
           rateLimiter: authRateLimiter,
           clientIp: browserRateLimitClientIp,
         });
-        // When dangerouslyDisableDeviceAuth is set for control UI, also allow
-        // unauthenticated control-UI connections. The flag signals a relaxed
-        // security environment (staging/dev) where the gateway is accessed by
-        // an external frontend that may not yet have an IAM token.
-        if (isControlUi && controlUiAuthPolicy.allowBypass && !authOk) {
-          authOk = true;
-          authMethod = "control-ui-bypass";
-          sharedAuthOk = false;
+        // Derive and bound operator scopes strictly from verified IAM claims.
+        // Client-declared connectParams.scopes may narrow permissions, never escalate.
+        if (authOk && authMethod === "iam" && role === "operator") {
+          scopes = resolveIamBoundedScopes({
+            requestedScopes: scopes,
+            iam: authResult,
+          });
+          connectParams.scopes = scopes;
         }
         const rejectUnauthorized = (failedAuth: GatewayAuthResult) => {
           markHandshakeFailure("unauthorized", {
@@ -607,7 +609,7 @@ export function attachGatewayWsMessageHandler(params: {
           close(1008, truncateCloseReason(authMessage));
         };
         const clearUnboundScopes = () => {
-          if (scopes.length > 0 && !controlUiAuthPolicy.allowBypass && !sharedAuthOk) {
+          if (scopes.length > 0 && !sharedAuthOk && authMethod !== "iam") {
             scopes = [];
             connectParams.scopes = scopes;
           }
@@ -1076,7 +1078,13 @@ export function attachGatewayWsMessageHandler(params: {
         // and therefore local-only — never a pod-fixed cloud credential.
         const identity =
           authOk && authMethod === "iam" && authResult.orgId && authResult.bearer
-            ? { orgId: authResult.orgId, bearer: authResult.bearer, method: "iam" as const }
+            ? {
+                orgId: authResult.orgId,
+                bearer: authResult.bearer,
+                method: "iam" as const,
+                userId: authResult.user,
+                isSuperAdmin: isIamSuperAdmin(authResult),
+              }
             : undefined;
         const nextClient: GatewayWsClient = {
           socket,

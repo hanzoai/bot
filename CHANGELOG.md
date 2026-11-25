@@ -2,6 +2,16 @@
 
 Docs: https://docs.hanzo-bot.ai
 
+## 2026.7.24
+
+### Changes
+
+- Gateway/auth: derive and bound operator scopes from verified IAM claims only; remove unauthenticated Control UI bypass
+- Gateway/auth: support explicit IAM `audienceAllowList` while preserving relayed tokens when unset; reject human tokens without `sub`
+- Gateway/auth: restrict shared gateway token in IAM mode away from WS operators (node pods & internal operator HTTP preserved)
+- Gateway/device: enforce caller scopes on `device.pair.approve`, `device.pair.remove`, `device.token.rotate`, and `device.token.revoke` (including empty-scope callers and self-approval)
+- Gateway/device: bind approved device tokens to the approver's IAM subject (`approverSub`)
+
 ## 2026.3.3
 
 ### Changes

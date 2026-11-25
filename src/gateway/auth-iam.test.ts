@@ -2,7 +2,13 @@ import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { exportJWK, generateKeyPair, SignJWT } from "jose";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { clearJwksCache, validateIamToken } from "./auth-iam.js";
+import {
+  clearJwksCache,
+  deriveIamOperatorScopes,
+  isIamSuperAdmin,
+  resolveIamBoundedScopes,
+  validateIamToken,
+} from "./auth-iam.js";
 
 // validateIamToken against a JWKS this test serves and tokens shaped the way
 // hanzoai/iam mints them: `owner` is the org of the APP signed in through, the
@@ -148,5 +154,67 @@ describe("validateIamToken", () => {
       .sign(other.privateKey);
     expect((await validateIamToken(forged, config())).ok).toBe(false);
     expect((await validateIamToken("not-a-jwt", config())).ok).toBe(false);
+  });
+
+  it("enforces audienceAllowList when explicitly configured", async () => {
+    const restricted = { ...config(), audienceAllowList: ["hanzo-bot", "hanzo-bot-client"] };
+    const allowed = await validateIamToken(
+      await sign({ sub: "u-aud-ok", orgs: [{ org: "acme" }] }, { aud: "hanzo-bot-client" }),
+      restricted,
+    );
+    expect(allowed).toMatchObject({ ok: true, userId: "u-aud-ok", owner: "acme" });
+
+    const denied = await validateIamToken(
+      await sign({ sub: "u-aud-bad", orgs: [{ org: "acme" }] }, { aud: "other-app" }),
+      restricted,
+    );
+    expect(denied).toEqual({ ok: false, reason: "iam_signature_invalid" });
+  });
+
+  it("rejects non-application tokens without sub even when owner and name are present", async () => {
+    const r = await validateIamToken(
+      await sign({ owner: "acme", name: "alice", orgs: [{ org: "acme" }] }),
+      config(),
+    );
+    expect(r).toEqual({ ok: false, reason: "iam_subject_missing" });
+  });
+
+  it("derives operator scopes from verified IAM claims only (org admin is never SuperAdmin)", () => {
+    // Non-SuperAdmin with org admin role cannot escalate to operator.admin
+    expect(isIamSuperAdmin({ owner: "acme" })).toBe(false);
+    expect(
+      resolveIamBoundedScopes({
+        requestedScopes: ["operator.admin", "operator.read", "operator.write"],
+        iam: { owner: "acme", roles: ["admin", "owner"] },
+      }),
+    ).toEqual(["operator.read", "operator.write"]);
+
+    // Non-SuperAdmin requesting only operator.admin gets empty scopes
+    expect(
+      resolveIamBoundedScopes({
+        requestedScopes: ["operator.admin"],
+        iam: { owner: "acme", roles: [] },
+      }),
+    ).toEqual([]);
+
+    // Non-SuperAdmin with signed pairing role receives operator.pairing
+    expect(deriveIamOperatorScopes({ owner: "acme", roles: ["operator.pairing"] })).toContain(
+      "operator.pairing",
+    );
+    expect(
+      resolveIamBoundedScopes({
+        requestedScopes: ["operator.pairing", "operator.admin"],
+        iam: { owner: "acme", roles: ["operator.pairing"] },
+      }),
+    ).toEqual(["operator.pairing"]);
+
+    // Canonical SuperAdmin (verified home org === "admin") receives operator.admin
+    expect(isIamSuperAdmin({ owner: "admin" })).toBe(true);
+    expect(
+      resolveIamBoundedScopes({
+        requestedScopes: ["operator.admin"],
+        iam: { owner: "admin", roles: [] },
+      }),
+    ).toEqual(["operator.admin"]);
   });
 });
