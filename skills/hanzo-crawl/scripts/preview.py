@@ -17,8 +17,8 @@ import argparse
 import json
 import os
 import sys
-import urllib.request
 import urllib.error
+import urllib.request
 
 
 def preview(args: argparse.Namespace) -> dict:

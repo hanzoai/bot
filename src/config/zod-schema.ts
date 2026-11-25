@@ -480,7 +480,7 @@ export const BotSchema = z
       .superRefine((val, ctx) => {
         if (val.sessionRetention !== undefined && val.sessionRetention !== false) {
           try {
-            parseDurationMs(String(val.sessionRetention).trim(), { defaultUnit: "h" });
+            parseDurationMs(val.sessionRetention.trim(), { defaultUnit: "h" });
           } catch {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
@@ -654,6 +654,7 @@ export const BotSchema = z
                 appName: z.string().optional(),
                 scopes: z.array(z.string()).optional(),
                 jwksUrl: z.string().optional(),
+                issuers: z.array(z.string()).optional(),
               })
               .strict()
               .optional(),

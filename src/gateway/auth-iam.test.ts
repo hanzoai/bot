@@ -93,6 +93,41 @@ describe("validateIamToken", () => {
     expect(r).toEqual({ ok: false, reason: "iam_signature_invalid" });
   });
 
+  it("the platform's issuers, when the config names both, pass; an organization's issuer never does", async () => {
+    const both = {
+      ...config(),
+      serverUrl: "https://hanzo.id",
+      issuers: ["https://hanzo.ai"],
+      jwksUrl: `${issuer}/v1/iam/.well-known/jwks`,
+    };
+    for (const iss of ["https://hanzo.id", "https://hanzo.ai"]) {
+      const r = await validateIamToken(
+        await sign({ sub: "u-5", orgs: [{ org: "acme" }] }, { iss }),
+        both,
+      );
+      expect(r.ok && r.owner).toBe("acme");
+    }
+    for (const iss of [
+      "https://hanzo.ai/acme",
+      "https://hanzo.ai/",
+      "https://hanzo.ai.evil.test",
+      "http://hanzo.ai",
+    ]) {
+      const r = await validateIamToken(
+        await sign({ sub: "u-5", orgs: [{ org: "acme" }] }, { iss }),
+        both,
+      );
+      expect(r).toEqual({ ok: false, reason: "iam_signature_invalid" });
+    }
+    const one = { ...both, issuers: undefined };
+    expect(
+      await validateIamToken(
+        await sign({ sub: "u-6", orgs: [{ org: "acme" }] }, { iss: "https://hanzo.ai" }),
+        one,
+      ),
+    ).toEqual({ ok: false, reason: "iam_signature_invalid" });
+  });
+
   it("the audience is the minting app's and not a gate — a token cloud relays still validates", async () => {
     const r = await validateIamToken(
       await sign({ sub: "u-4", orgs: [{ org: "acme" }] }, { aud: "hanzo-console" }),
