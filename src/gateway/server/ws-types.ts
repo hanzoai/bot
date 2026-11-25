@@ -10,6 +10,10 @@ export type GatewayClientIdentity = {
   orgId: string;
   bearer: string;
   method: "iam";
+  /** Verified IAM subject (`sub`) of the authenticated viewer. */
+  userId?: string;
+  /** True iff the verified IAM home org (`owner`) is the reserved `"admin"` org. */
+  isSuperAdmin?: boolean;
 };
 
 export type GatewayWsClient = {

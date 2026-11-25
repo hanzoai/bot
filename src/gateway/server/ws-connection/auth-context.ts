@@ -74,6 +74,7 @@ export async function resolveConnectAuthState(params: {
   resolvedAuth: ResolvedGatewayAuth;
   connectAuth: HandshakeConnectAuth | null | undefined;
   hasDeviceIdentity: boolean;
+  role?: "operator" | "node";
   req: IncomingMessage;
   trustedProxies: string[];
   allowRealIpFallback: boolean;
@@ -89,6 +90,7 @@ export async function resolveConnectAuthState(params: {
   let authResult: GatewayAuthResult = await authorizeWsControlUiGatewayConnect({
     auth: params.resolvedAuth,
     connectAuth: sharedConnectAuth,
+    role: params.role,
     req: params.req,
     trustedProxies: params.trustedProxies,
     allowRealIpFallback: params.allowRealIpFallback,
@@ -124,6 +126,7 @@ export async function resolveConnectAuthState(params: {
     (await authorizeHttpGatewayConnect({
       auth: { ...params.resolvedAuth, allowTailscale: false },
       connectAuth: sharedConnectAuth,
+      role: params.role,
       req: params.req,
       trustedProxies: params.trustedProxies,
       allowRealIpFallback: params.allowRealIpFallback,

@@ -1086,7 +1086,7 @@ describe("gateway server auth/connect", () => {
     }
   });
 
-  test("allows control ui with stale device identity when device auth is disabled", async () => {
+  test("rejects control ui with stale device identity even when dangerouslyDisableDeviceAuth is set", async () => {
     testState.gatewayControlUi = { dangerouslyDisableDeviceAuth: true };
     testState.gatewayAuth = { mode: "token", token: "secret" };
     const prevToken = process.env.BOT_GATEWAY_TOKEN;
@@ -1112,10 +1112,8 @@ describe("gateway server auth/connect", () => {
             ...CONTROL_UI_CLIENT,
           },
         });
-        expect(res.ok).toBe(true);
-        expect((res.payload as { auth?: unknown } | undefined)?.auth).toBeUndefined();
-        const health = await rpcReq(ws, "health");
-        expect(health.ok).toBe(true);
+        expect(res.ok).toBe(false);
+        expect(res.error?.message ?? "").toContain("device signature expired");
         ws.close();
       });
     } finally {

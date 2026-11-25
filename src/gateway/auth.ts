@@ -57,6 +57,10 @@ export type GatewayAuthResult = {
   owner?: string;
   /** Every org the IAM login may act in (its signed membership, home first). */
   orgs?: string[];
+  /** Signed IAM roles carried by the verified JWT. Present only for `method: "iam"`. */
+  roles?: string[];
+  /** True iff the verified IAM home org (`owner`) is the reserved `"admin"` org. */
+  isSuperAdmin?: boolean;
   /**
    * The raw bearer JWT the viewer presented at handshake. Present only for
    * `method: "iam"`. cloud resolves the org server-side from its `owner` claim;
@@ -90,6 +94,12 @@ export type AuthorizeGatewayConnectParams = {
   rateLimitScope?: string;
   /** Trust X-Real-IP only when explicitly enabled. */
   allowRealIpFallback?: boolean;
+  /**
+   * Requested gateway role when known (e.g. WebSocket connect handshake).
+   * In `mode: "iam"`, shared gateway-token fallback is restricted to `node` pods
+   * (and internal operator HTTP paths where no WS role applies), never WS operators.
+   */
+  role?: "operator" | "node";
 };
 
 type TailscaleUser = {
@@ -459,8 +469,8 @@ export async function authorizeGatewayConnect(
 
   // IAM (OIDC JWT) authentication — validate the provided token as a JWT
   // issued by the configured IAM provider (e.g. hanzo.id).
-  // Falls back to shared gateway-token comparison so cloud-provisioned pods
-  // that authenticate with BOT_GATEWAY_TOKEN still work alongside IAM users.
+  // In IAM mode, shared gateway-token fallback is restricted to cloud-provisioned
+  // `node` pods and internal operator HTTP callers (no WS operator / Control UI bypass).
   if (auth.mode === "iam") {
     if (!connectAuth?.token) {
       limiter?.recordFailure(ip, rateLimitScope);
@@ -478,17 +488,17 @@ export async function authorizeGatewayConnect(
             token: string,
             config: GatewayIamConfig,
           ) => Promise<
-            | { ok: true; userId: string; owner?: string; orgIds: string[] }
+            | { ok: true; userId: string; owner?: string; orgIds: string[]; roles: string[] }
             | { ok: false; reason: string }
           >;
         };
         const iamResult = await validateIamToken(connectAuth.token, auth.iam);
         if (iamResult.ok) {
           limiter?.reset(ip, rateLimitScope);
-          // Retain the login's org, its membership and its raw bearer, so every
-          // per-viewer read (the cloud read-through, a run, a screen) scopes to
-          // an org this token was issued for and to no other.
+          // Retain the login's org, its membership, verified roles, and its raw bearer,
+          // so every per-viewer read and WS operator scope check is bound to signed IAM claims.
           const orgId = iamResult.owner;
+          const isSuperAdmin = orgId === "admin";
           return orgId
             ? {
                 ok: true,
@@ -497,18 +507,29 @@ export async function authorizeGatewayConnect(
                 orgId,
                 owner: orgId,
                 orgs: iamResult.orgIds,
+                roles: iamResult.roles,
+                isSuperAdmin,
                 bearer: connectAuth.token,
               }
-            : { ok: true, method: "iam", user: iamResult.userId };
+            : {
+                ok: true,
+                method: "iam",
+                user: iamResult.userId,
+                roles: iamResult.roles,
+                isSuperAdmin: false,
+              };
         }
       } catch {
         // IAM validation threw (network error, JWKS unreachable, etc.)
-        // — fall through to shared-token check below.
       }
     }
-    // Fallback: accept a matching shared gateway token so cloud-provisioned
-    // nodes (which carry BOT_GATEWAY_TOKEN, not an IAM JWT) can connect.
-    if (auth.token && safeEqualSecret(connectAuth.token, auth.token)) {
+    // Restricted fallback: allow matching shared gateway token ONLY for
+    // cloud-provisioned `node` role pods (BOT_GATEWAY_TOKEN) or internal HTTP
+    // callers with no operator role override. WS operators / Control UI in IAM
+    // mode MUST authenticate with a verified IAM JWT.
+    const allowSharedTokenInIamMode =
+      params.role === "node" || (authSurface === "http" && params.role === undefined);
+    if (allowSharedTokenInIamMode && auth.token && safeEqualSecret(connectAuth.token, auth.token)) {
       limiter?.reset(ip, rateLimitScope);
       return { ok: true, method: "token" };
     }

@@ -26,21 +26,22 @@ export function resolveControlUiAuthPolicy(params: {
   return {
     allowInsecureAuthConfigured,
     dangerouslyDisableDeviceAuth,
-    // `allowInsecureAuth` must not bypass secure-context/device-auth requirements.
-    allowBypass: dangerouslyDisableDeviceAuth,
-    device: dangerouslyDisableDeviceAuth ? null : params.deviceRaw,
+    // Control UI auth bypass is permanently disabled; never strip device identity
+    // or skip authentication even when `dangerouslyDisableDeviceAuth` is configured.
+    allowBypass: false,
+    device: params.deviceRaw,
   };
 }
 
 export function shouldSkipControlUiPairing(
-  policy: ControlUiAuthPolicy,
-  sharedAuthOk: boolean,
+  _policy: ControlUiAuthPolicy,
+  _sharedAuthOk: boolean,
   trustedProxyAuthOk = false,
 ): boolean {
   if (trustedProxyAuthOk) {
     return true;
   }
-  return policy.allowBypass && sharedAuthOk;
+  return false;
 }
 
 export function isTrustedProxyControlUiOperatorAuth(params: {
@@ -83,23 +84,23 @@ export function evaluateMissingDeviceIdentity(params: {
   if (params.isControlUi && params.trustedProxyAuthOk) {
     return { kind: "allow" };
   }
-  if (params.isControlUi && params.controlUiAuthPolicy.allowBypass) {
-    // dangerouslyDisableDeviceAuth is set — allow control UI without device identity.
+  // IAM-authenticated connections (any role, including Control UI) can skip
+  // device pairing — the OIDC JWT already provides verified identity through
+  // the IAM provider.
+  if (params.authOk && params.authMethod === "iam") {
     return { kind: "allow" };
   }
   if (params.isControlUi) {
-    // Allow localhost Control UI connections when allowInsecureAuth is configured.
-    // Localhost has no network interception risk, and browser SubtleCrypto
-    // (needed for device identity) is unavailable in insecure HTTP contexts.
-    // Remote connections are still rejected to preserve the MitM protection
-    // that the security fix (#20684) intended.
+    // Allow localhost Control UI connections when allowInsecureAuth is configured
+    // AND authentication succeeded. Localhost has no network interception risk,
+    // and browser SubtleCrypto (needed for device identity) is unavailable in
+    // insecure HTTP contexts. Remote connections are always rejected.
     if (!params.controlUiAuthPolicy.allowInsecureAuthConfigured || !params.isLocalClient) {
       return { kind: "reject-control-ui-insecure-auth" };
     }
-  }
-  // IAM-authenticated connections (any role) can skip device pairing — the
-  // OIDC JWT already provides verified identity through the IAM provider.
-  if (params.authOk && params.authMethod === "iam") {
+    if (!params.authOk) {
+      return { kind: "reject-unauthorized" };
+    }
     return { kind: "allow" };
   }
   // Node role with shared-token auth can skip device identity. Cloud-

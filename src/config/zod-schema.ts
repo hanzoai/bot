@@ -655,6 +655,7 @@ export const BotSchema = z
                 scopes: z.array(z.string()).optional(),
                 jwksUrl: z.string().optional(),
                 issuers: z.array(z.string()).optional(),
+                audienceAllowList: z.array(z.string()).optional(),
               })
               .strict()
               .optional(),
