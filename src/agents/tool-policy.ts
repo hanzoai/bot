@@ -1,18 +1,18 @@
-import type { AnyAgentTool } from "./tools/common.js";
 import {
   expandToolGroups,
   normalizeToolList,
   normalizeToolName,
   resolveToolProfilePolicy,
-  TOOL_GROUPS,
+  TOOL_GROUPS as _TOOL_GROUPS,
 } from "./tool-policy-shared.js";
+import type { AnyAgentTool } from "./tools/common.js";
 export {
   expandToolGroups,
   normalizeToolList,
   normalizeToolName,
   resolveToolProfilePolicy,
-  TOOL_GROUPS,
 } from "./tool-policy-shared.js";
+export const TOOL_GROUPS: Record<string, string[]> = _TOOL_GROUPS;
 export type { ToolProfileId } from "./tool-policy-shared.js";
 
 // Keep tool-policy browser-safe: do not import tools/common at runtime.
