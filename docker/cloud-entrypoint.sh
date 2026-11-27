@@ -283,7 +283,7 @@ BOTCONFIG
 # - Browser control (Playwright on the desktop's browser)
 # - VNC tunnel (proxies VNC to gateway)
 # Gateway URL from env (read by bot's runner.ts)
-export BOT_NODE_GATEWAY_URL="${BOT_NODE_GATEWAY_URL:-${BOT_GATEWAY_URL:-ws://bot-gateway.hanzo.svc:80}}"
+export BOT_NODE_GATEWAY_URL="${BOT_NODE_GATEWAY_URL:-${BOT_GATEWAY_URL:-wss://api.hanzo.ai}}"
 
 # Node ID: prefer AGENT_NODE_ID (set by playground provisioner)
 NODE_ID="${AGENT_NODE_ID:-${HANZO_NODE_ID:-cloud-unknown}}"

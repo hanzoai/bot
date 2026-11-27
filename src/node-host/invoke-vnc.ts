@@ -28,9 +28,9 @@ export type VncTunnelParams = {
  * Rewrite the tunnel URL host/protocol to match the node's own gateway URL.
  *
  * The gateway constructs the tunnelUrl from the browser's Host header
- * (e.g. wss://gw.hanzo.bot/vnc-tunnel?tunnelId=...).  Cloud nodes connect
+ * (e.g. wss://api.hanzo.ai/vnc-tunnel?tunnelId=...).  Cloud nodes connect
  * to the gateway via an internal K8s service URL (e.g.
- * ws://bot-gateway.hanzo.svc:18789).  Trying to connect back through the
+ * ws://gateway.hanzo.svc:18789).  Trying to connect back through the
  * public URL would hairpin through Cloudflare/Traefik and often fails.
  *
  * This rewrites the tunnelUrl to use the same host the node already uses

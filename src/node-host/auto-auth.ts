@@ -20,7 +20,7 @@ const HANZO_SCOPES = "openid profile email";
 const OAUTH_TIMEOUT_MS = 3 * 60 * 1000;
 
 /** Default cloud gateway WebSocket URL. */
-export const CLOUD_GATEWAY_URL = "wss://gw.hanzo.bot";
+export const CLOUD_GATEWAY_URL = "wss://api.hanzo.ai";
 
 /**
  * Ensure valid Hanzo IAM credentials exist.

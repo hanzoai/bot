@@ -16,7 +16,7 @@ vi.mock("../config/config.js", () => ({
 const { createVncProxy, vncHandlers, vncViewerHtml } = await import("./server-methods/vnc.js");
 const { mayWatch, mintVncTicket, redeemVncTicket } = await import("./vnc-tickets.js");
 
-const ALLOWED = "https://gw.hanzo.bot";
+const ALLOWED = "https://api.hanzo.ai";
 
 type Invoke = { nodeId: string; command: string; params: { tunnelId: string; tunnelUrl: string } };
 
@@ -166,7 +166,7 @@ describe("/vnc upgrade", () => {
     await until(() => invokes.length === 1);
     expect(invokes[0]).toMatchObject({ nodeId: "acme-mac", command: "vnc.tunnel.open" });
     // The node calls back to the allowed origin, never to a Host the viewer wrote.
-    expect(invokes[0].params.tunnelUrl).toMatch(/^wss:\/\/gw\.hanzo\.bot\/vnc-tunnel\?tunnelId=/);
+    expect(invokes[0].params.tunnelUrl).toMatch(/^wss:\/\/api\.hanzo\.ai\/vnc-tunnel\?tunnelId=/);
     first.ws!.close();
     // Replayed: refused.
     expect((await open(`?ticket=${encodeURIComponent(minted.payload!.ticket)}`)).status).toBe(401);
@@ -278,8 +278,8 @@ describe("/vnc-tunnel", () => {
 
 describe("vnc-viewer page", () => {
   it("embeds the ticket as data, so a crafted one cannot break out of the script", () => {
-    const html = vncViewerHtml("https://gw.hanzo.bot", '"</script><script>alert(1)</script>');
+    const html = vncViewerHtml("https://api.hanzo.ai", '"</script><script>alert(1)</script>');
     expect(html).not.toContain("</script><script>alert(1)");
-    expect(html).toContain("wss://gw.hanzo.bot/vnc?ticket=");
+    expect(html).toContain("wss://api.hanzo.ai/vnc?ticket=");
   });
 });
