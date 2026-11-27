@@ -34,6 +34,12 @@ struct BotApp: App {
     init() {
         BotLogging.bootstrapIfNeeded()
 
+        if !ProcessInfo.processInfo.isRunningTests, !AppSingleInstanceLock.acquire() {
+            AppSingleInstanceLock.activateExistingInstance()
+            Self.logger.info("duplicate HanzoBot instance detected; exiting before MenuBarExtra init")
+            Darwin.exit(0)
+        }
+
         Self.applyAttachOnlyOverrideIfNeeded()
         _state = State(initialValue: AppStateStore.shared)
     }
@@ -318,9 +324,74 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func isDuplicateInstance() -> Bool {
-        guard let bundleID = Bundle.main.bundleIdentifier else { return false }
-        let running = NSWorkspace.shared.runningApplications.filter { $0.bundleIdentifier == bundleID }
-        return running.count > 1
+        let currentPID = ProcessInfo.processInfo.processIdentifier
+        let candidateIDs = Set([
+            Bundle.main.bundleIdentifier,
+            launchdLabel,
+            "\(launchdLabel).debug",
+        ].compactMap { $0 })
+        guard !candidateIDs.isEmpty else { return false }
+        let currentLaunchDate = NSRunningApplication.current.launchDate ?? .distantFuture
+        let others = NSWorkspace.shared.runningApplications.filter { app in
+            guard app.processIdentifier != currentPID,
+                  let id = app.bundleIdentifier,
+                  candidateIDs.contains(id)
+            else {
+                return false
+            }
+            let otherDate = app.launchDate ?? .distantPast
+            return otherDate < currentLaunchDate || (otherDate == currentLaunchDate && app.processIdentifier < currentPID)
+        }
+        return !others.isEmpty
+    }
+}
+
+@MainActor
+private enum AppSingleInstanceLock {
+    private static var heldFD: Int32 = -1
+
+    static func acquire() -> Bool {
+        if self.heldFD >= 0 {
+            return true
+        }
+        let dir = BotPaths.stateDirURL
+        try? FileManager().createDirectory(at: dir, withIntermediateDirectories: true)
+        let lockPath = dir.appendingPathComponent("macos-app.instance.lock").path
+        let fd = Darwin.open(lockPath, O_CREAT | O_RDWR | O_CLOEXEC, S_IRUSR | S_IWUSR)
+        guard fd >= 0 else {
+            return true
+        }
+        if Darwin.flock(fd, LOCK_EX | LOCK_NB) == 0 {
+            self.heldFD = fd
+            _ = Darwin.ftruncate(fd, 0)
+            let pidLine = "\(ProcessInfo.processInfo.processIdentifier)\n"
+            pidLine.withCString { ptr in
+                _ = Darwin.pwrite(fd, ptr, strlen(ptr), 0)
+            }
+            return true
+        }
+        let err = errno
+        Darwin.close(fd)
+        return err != EWOULDBLOCK && err != EAGAIN
+    }
+
+    static func activateExistingInstance() {
+        let currentPID = ProcessInfo.processInfo.processIdentifier
+        let candidateIDs = Set([
+            Bundle.main.bundleIdentifier,
+            launchdLabel,
+            "\(launchdLabel).debug",
+        ].compactMap { $0 })
+        for app in NSWorkspace.shared.runningApplications {
+            guard app.processIdentifier != currentPID,
+                  let id = app.bundleIdentifier,
+                  candidateIDs.contains(id)
+            else {
+                continue
+            }
+            app.activate(options: [.activateAllWindows])
+            break
+        }
     }
 }
 
