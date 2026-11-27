@@ -21,6 +21,7 @@ export async function registerLocalBot(params: {
   };
 
   // Register with the control plane
+  let authFailed = false;
   try {
     const res = await fetch(`${PLAYGROUND_API}/v1/nodes/register`, {
       method: "POST",
@@ -41,6 +42,11 @@ export async function registerLocalBot(params: {
     });
     if (res.ok) {
       console.log(`[bot] Registered with Hanzo Cloud as ${nodeId}`);
+    } else if (res.status === 401 || res.status === 403) {
+      authFailed = true;
+      console.warn(
+        `[bot] Cloud registration rejected (${res.status}); stopping heartbeats until re-authenticated`,
+      );
     } else {
       console.warn(`[bot] Cloud registration returned ${res.status}`);
     }
@@ -51,14 +57,25 @@ export async function registerLocalBot(params: {
     );
   }
 
-  // Heartbeat every 30s
+  if (authFailed) {
+    return () => {};
+  }
+
+  // Heartbeat every 30s; stop immediately on 401/403 so expired credentials do
+  // not generate an infinite unauthorized heartbeat storm against api.hanzo.bot.
   const interval = setInterval(async () => {
     try {
-      await fetch(`${PLAYGROUND_API}/v1/nodes/${nodeId}/heartbeat`, {
+      const res = await fetch(`${PLAYGROUND_API}/v1/nodes/${nodeId}/heartbeat`, {
         method: "POST",
         headers,
         body: JSON.stringify({ status: "active" }),
       });
+      if (res.status === 401 || res.status === 403) {
+        clearInterval(interval);
+        console.warn(
+          `[bot] Cloud heartbeat rejected (${res.status}) for ${nodeId}; stopping heartbeats until re-authenticated`,
+        );
+      }
     } catch {
       // Heartbeat failures are silent
     }
