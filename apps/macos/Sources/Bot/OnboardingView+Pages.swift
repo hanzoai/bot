@@ -743,9 +743,6 @@ extension OnboardingView {
                 }
                 self.skillsOverview
                 Toggle("Launch at login", isOn: self.$state.launchAtLogin)
-                    .onChange(of: self.state.launchAtLogin) { _, newValue in
-                        AppStateStore.updateLaunchAtLogin(enabled: newValue)
-                    }
             }
         }
         .task { await self.maybeLoadOnboardingSkills() }

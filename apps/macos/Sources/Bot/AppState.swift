@@ -10,6 +10,7 @@ final class AppState {
     private let isPreview: Bool
     private var isInitializing = true
     private var configWatcher: ConfigFileWatcher?
+    private var suppressLaunchAtLoginSync = false
     private var suppressVoiceWakeGlobalSync = false
     private var voiceWakeGlobalSyncTask: Task<Void, Never>?
 
@@ -35,7 +36,7 @@ final class AppState {
 
     var launchAtLogin: Bool {
         didSet {
-            guard !self.isInitializing else { return }
+            guard !self.isInitializing, !self.suppressLaunchAtLoginSync, self.launchAtLogin != oldValue else { return }
             self.ifNotPreview { Task { AppStateStore.updateLaunchAtLogin(enabled: self.launchAtLogin) } }
         }
     }
@@ -308,7 +309,12 @@ final class AppState {
         if !self.isPreview {
             Task.detached(priority: .utility) { [weak self] in
                 let current = await LaunchAgentManager.status()
-                await MainActor.run { [weak self] in self?.launchAtLogin = current }
+                await MainActor.run { [weak self] in
+                    guard let self else { return }
+                    self.suppressLaunchAtLoginSync = true
+                    self.launchAtLogin = current
+                    self.suppressLaunchAtLoginSync = false
+                }
             }
         }
 

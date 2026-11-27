@@ -174,10 +174,17 @@ enum DebugActions {
     @MainActor
     static func restartApp() {
         let url = Bundle.main.bundleURL
+        let pid = ProcessInfo.processInfo.processIdentifier
         let task = Process()
-        // Relaunch shortly after this instance exits so we get a true restart even in debug.
+        // Wait for this process to finish exiting (releasing its single-instance lock) before relaunching.
         task.launchPath = "/bin/sh"
-        task.arguments = ["-c", "sleep 0.2; open -n \"$1\"", "_", url.path]
+        task.arguments = [
+            "-c",
+            "pid=\"$1\"; app=\"$2\"; i=0; while kill -0 \"$pid\" 2>/dev/null && [ \"$i\" -lt 100 ]; do sleep 0.05; i=$((i+1)); done; open \"$app\"",
+            "_",
+            "\(pid)",
+            url.path,
+        ]
         try? task.run()
         NSApp.terminate(nil)
     }
