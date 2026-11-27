@@ -1,6 +1,6 @@
 /**
  * Cloud launch — provisions a cloud VM via the Hanzo Playground control plane
- * and monitors it until it's running. The VM connects to gw.hanzo.bot
+ * and monitors it until it's running. The VM connects to api.hanzo.ai
  * so it appears in the Playground.
  *
  * Flow:
@@ -17,7 +17,7 @@ import { writeConfigFile } from "../config/io.js";
 
 const PLAYGROUND_API_BASE = "https://api.hanzo.bot/v1";
 const PLAYGROUND_NODES_URL = "https://app.hanzo.bot/nodes";
-const CLOUD_GATEWAY_URL = "wss://gw.hanzo.bot";
+const CLOUD_GATEWAY_URL = "wss://api.hanzo.ai";
 // hanzo.ai/pay is the one checkout every Hanzo site sends a buyer to; billing.hanzo.ai
 // only redirects there now. Credits are added at its amount step.
 const BILLING_URL = "https://hanzo.ai/pay";
@@ -161,7 +161,9 @@ export async function launchCloudNode(params: { accessToken: string }): Promise<
     if (node?.status === "failed") {
       s.stop("Node provisioning failed", 1);
       // eslint-disable-next-line no-console
-      console.error("  The cloud node failed to start. Check the Playground dashboard for details.\n");
+      console.error(
+        "  The cloud node failed to start. Check the Playground dashboard for details.\n",
+      );
       return;
     }
   }
@@ -201,7 +203,7 @@ export async function launchCloudNode(params: { accessToken: string }): Promise<
     gateway: {
       mode: "remote" as const,
       remote: {
-        url: CLOUD_GATEWAY_URL,
+        url: process.env.BOT_GATEWAY_URL?.trim() || CLOUD_GATEWAY_URL,
         token: accessToken,
       },
       auth: { mode: "token" as const },
@@ -212,7 +214,7 @@ export async function launchCloudNode(params: { accessToken: string }): Promise<
       },
     },
   };
-  await writeConfigFile(config as Parameters<typeof writeConfigFile>[0]);
+  await writeConfigFile(config);
 
   // eslint-disable-next-line no-console
   console.log("  Press Ctrl+C to disconnect (the cloud node will keep running).\n");
@@ -244,31 +246,28 @@ export async function launchCloudNode(params: { accessToken: string }): Promise<
       const readline = await import("node:readline");
       const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
-      rl.question(
-        "  Stop and remove the cloud node? (y/N): ",
-        async (answer) => {
-          rl.close();
-          if (answer.trim().toLowerCase() === "y") {
+      rl.question("  Stop and remove the cloud node? (y/N): ", async (answer) => {
+        rl.close();
+        if (answer.trim().toLowerCase() === "y") {
+          // eslint-disable-next-line no-console
+          console.log("  Deprovisioning node...");
+          const ok = await deprovisionNode(accessToken, nodeId);
+          if (ok) {
             // eslint-disable-next-line no-console
-            console.log("  Deprovisioning node...");
-            const ok = await deprovisionNode(accessToken, nodeId);
-            if (ok) {
-              // eslint-disable-next-line no-console
-              console.log("  Node removed.\n");
-            } else {
-              // eslint-disable-next-line no-console
-              console.error("  Failed to remove node. Remove it from the Playground dashboard.\n");
-            }
+            console.log("  Node removed.\n");
           } else {
             // eslint-disable-next-line no-console
-            console.log(`  Node ${nodeId} is still running in the cloud.`);
-            // eslint-disable-next-line no-console
-            console.log(`  Manage it at: ${PLAYGROUND_NODES_URL}/${nodeId}\n`);
+            console.error("  Failed to remove node. Remove it from the Playground dashboard.\n");
           }
-          cleanup();
-          process.exit(0);
-        },
-      );
+        } else {
+          // eslint-disable-next-line no-console
+          console.log(`  Node ${nodeId} is still running in the cloud.`);
+          // eslint-disable-next-line no-console
+          console.log(`  Manage it at: ${PLAYGROUND_NODES_URL}/${nodeId}\n`);
+        }
+        cleanup();
+        process.exit(0);
+      });
     });
 
     process.on("SIGTERM", () => {

@@ -173,7 +173,7 @@ export async function createGatewayRuntimeState(params: {
       return false;
     }
     const host =
-      (req.headers["x-forwarded-host"] as string | undefined) ?? req.headers.host ?? "gw.hanzo.bot";
+      (req.headers["x-forwarded-host"] as string | undefined) ?? req.headers.host ?? "api.hanzo.ai";
     const proto = (req.headers["x-forwarded-proto"] as string | undefined) ?? "https";
     const html = vncViewerHtml(`${proto}://${host}`, url.searchParams.get("ticket") ?? undefined);
     res.statusCode = 200;

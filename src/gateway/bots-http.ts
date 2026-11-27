@@ -7,7 +7,7 @@
  *   POST /v1/bots/:runId/stop   stop one of the caller org's runs
  *
  * AUTH: the pod-boundary gate (authorizeHttpGatewayConnect) runs FIRST — this
- * server is reachable off-gateway (in-cluster, SSRF, and gw.hanzo.bot in public),
+ * server is reachable off-gateway (in-cluster, SSRF, and api.hanzo.ai in public),
  * so no header is trusted until the gate has said who is asking.
  *
  * WHICH ORG is decided by WHAT the gate proved (callerOrg), and nothing else:
