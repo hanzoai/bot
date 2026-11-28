@@ -615,6 +615,25 @@ describe("onboard (non-interactive): provider auth", () => {
     });
   });
 
+  it.each([
+    ["local-engine", "http://127.0.0.1:1234/v1"],
+    ["local-cloud", "http://127.0.0.1:8080/v1"],
+  ])("configures %s without a hosted provider key", async (providerId, baseUrl) => {
+    await withOnboardEnv("bot-onboard-loopback-provider-", async (env) => {
+      const cfg = await runOnboardingAndReadConfig(env, {
+        authChoice: "custom-api-key",
+        customBaseUrl: baseUrl,
+        customModelId: CUSTOM_LOCAL_MODEL_ID,
+        customProviderId: providerId,
+      });
+
+      const provider = cfg.models?.providers?.[providerId];
+      expect(provider).toMatchObject({ baseUrl, api: "openai-completions" });
+      expect(provider?.apiKey).toBeUndefined();
+      expect(cfg.agents?.defaults?.model?.primary).toBe(`${providerId}/${CUSTOM_LOCAL_MODEL_ID}`);
+    });
+  });
+
   it("uses CUSTOM_API_KEY env fallback for non-interactive custom provider auth", async () => {
     await withOnboardEnv(
       "bot-onboard-custom-provider-env-fallback-",
